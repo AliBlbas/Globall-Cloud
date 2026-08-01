@@ -1,5 +1,4 @@
 # Globall-Cloud
-
 Professional Logistics App
 
 Short description
