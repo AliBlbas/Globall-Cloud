@@ -1,38 +1,38 @@
 ---
-name: Bug report
-about: Create a report to help us improve
+name: راپۆرتی هەڵە (Bug report)
+about: راپۆرتێک دروست بکە بۆ یارمەتیدان بۆ باشترکردنی پرۆژە
 title: ''
-labels: ''
+labels: bug
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**پێناسەی هەڵە**
+وەسفێکی کورت و ڕوون لەسەر هەڵەکە.
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**چۆن دەتوانرێت هەڵەکە تکرار بکرێت**
+گامەکان بۆ تکرارکردن:
+1. بڕۆ بۆ '...'
+2. کرتە لە '...'
+3. '...' لەسڕە
+4. هەڵەیەک بینە
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+**ووتارە هەڵبژاردە (Expected behavior)**
+وەسفێکی کورت لەوەی کە پێشبینی کراوە.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**وێنەکان (Screenshots)**
+ئەگەر دەتوانیت، وێنە زیاد بکە بۆ ڕوونکردنەوە.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+**دسکتۆپ (زانیاری تەواو):**
+ - پلاتفۆرم: [وەک: iOS, Android, Windows]
+ - براوزەر: [وەک: Chrome, Safari]
+ - وەشان: [وەک: 1.2.3]
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+**مۆبایل (زانیاری تەواو):**
+ - ئامێر: [وەک: iPhone6]
+ - سیستەم: [وەک: iOS 8.1]
+ - براوزەر: [وەک: Safari]
+ - وەشان: [وەک: 22]
 
-**Additional context**
-Add any other context about the problem here.
+**زانیاری زیاتر**
+هەر ووردەکارییەکی تر لێرە زیاد بکە.
