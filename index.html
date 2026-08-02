@@ -2741,6 +2741,9 @@ function renderAdminMainHTML(shipments){
       <button class="admin-tab" id="adminMainTab-directory" onclick="setAdminMainTab('directory')">
         <svg class="icon-sm" style="margin-inline-end:5px;"><use href="#i-search"></use></svg>کۆگای موشتەریان
       </button>
+      <button class="admin-tab" id="adminMainTab-activity" onclick="setAdminMainTab('activity')">
+        <svg class="icon-sm" style="margin-inline-end:5px;"><use href="#i-clock"></use></svg>چالاکی ستاف
+      </button>
     </div>
     <button class="btn btn-primary" style="padding:10px 18px;" onclick="toggleNewShipmentForm()">
       <svg class="icon-sm"><use href="#i-box"></use></svg> بارکردنی نوێ
@@ -2809,7 +2812,12 @@ function renderAdminMainHTML(shipments){
     <div id="directoryPager" style="display:flex; gap:10px; justify-content:center; margin-top:16px;"></div>
   </div>`;
 
-  return tabBar + newShipmentForm + opsPanel + financePanel + customersPanel + directoryPanel;
+  const activityPanel = `<div id="adminPanel-activity" style="display:none;">
+    <div class="admin-section-title"><svg><use href="#i-clock"></use></svg><span>چالاکی ستاف — دوایین ١٠٠ کردار</span></div>
+    <div id="activityListWrap">${skeletonRows(6)}</div>
+  </div>`;
+
+  return tabBar + newShipmentForm + opsPanel + financePanel + customersPanel + directoryPanel + activityPanel;
 }
 
 function setAdminMainTab(tab){
@@ -2817,12 +2825,49 @@ function setAdminMainTab(tab){
   document.getElementById('adminMainTab-finance').classList.toggle('active', tab==='finance');
   document.getElementById('adminMainTab-customers').classList.toggle('active', tab==='customers');
   document.getElementById('adminMainTab-directory').classList.toggle('active', tab==='directory');
+  document.getElementById('adminMainTab-activity').classList.toggle('active', tab==='activity');
   document.getElementById('adminPanel-ops').style.display = tab==='ops' ? 'block' : 'none';
   document.getElementById('adminPanel-finance').style.display = tab==='finance' ? 'block' : 'none';
   document.getElementById('adminPanel-customers').style.display = tab==='customers' ? 'block' : 'none';
   document.getElementById('adminPanel-directory').style.display = tab==='directory' ? 'block' : 'none';
+  document.getElementById('adminPanel-activity').style.display = tab==='activity' ? 'block' : 'none';
   if(tab==='customers') loadCustomersList();
   if(tab==='directory') loadDirectory();
+  if(tab==='activity') loadActivityLog();
+}
+
+const ACTIVITY_ACTION_LABELS = {
+  create_shipment: 'دروستکردنی بارکردنی نوێ',
+  update_status: 'گۆڕینی دۆخی بار',
+  update_finance: 'دەستکاریکردنی دارایی',
+  delete_customer: 'سڕینەوەی کڕیار',
+  delete_directory_entry: 'سڕینەوەی موشتەری لە کۆگا'
+};
+function timeAgoKu(iso){
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diffMs/60000);
+  if(mins < 1) return 'ئێستا';
+  if(mins < 60) return mins+' خولەک لەمەوبەر';
+  const hrs = Math.floor(mins/60);
+  if(hrs < 24) return hrs+' کاتژمێر لەمەوبەر';
+  const days = Math.floor(hrs/24);
+  return days+' ڕۆژ لەمەوبەر';
+}
+async function loadActivityLog(){
+  const wrap = document.getElementById('activityListWrap');
+  const {data, error} = await sb.from('staff_activity_log').select('*').order('created_at', {ascending:false}).limit(100);
+  if(error){ wrap.innerHTML = '<p class="hint">هەڵەیەک ڕوویدا لە هێنانی چالاکییەکان.</p>'; return; }
+  if(!data || data.length===0){ wrap.innerHTML = `<div class="admin-empty"><svg><use href="#i-clock"></use></svg><p>هێشتا هیچ چالاکییەک تۆمار نەکراوە.</p></div>`; return; }
+  wrap.innerHTML = '<div class="admin-list">' + data.map(row=>`
+    <div class="admin-row">
+      <div class="admin-row-main">
+        <b>${escapeHtml(ACTIVITY_ACTION_LABELS[row.action] || row.action)}</b>
+        <span>${escapeHtml(row.staff_name || 'ستاف')}${row.target_id ? ' · '+escapeHtml(row.target_id) : ''}</span>
+        ${row.details ? `<span class="hint" style="text-align:start; margin-top:0;">${escapeHtml(row.details)}</span>` : ''}
+      </div>
+      <span class="hint" style="white-space:nowrap;">${timeAgoKu(row.created_at)}</span>
+    </div>
+  `).join('') + '</div>';
 }
 
 let directoryCache = [];
@@ -3026,6 +3071,7 @@ async function doDeleteDirectoryEntry(){
   if(!pendingDeleteDirectoryId) return;
   const {error} = await sb.from('customer_directory').delete().eq('id', pendingDeleteDirectoryId);
   document.getElementById('deleteDirectoryModal').style.display = 'none';
+  if(!error) logActivity('delete_directory_entry', pendingDeleteDirectoryId, null);
   pendingDeleteDirectoryId = null;
   if(error){ showToast('هەڵەیەک ڕوویدا لە سڕینەوەدا.', 'error'); return; }
   showToast('موشتەری سڕایەوە.', 'success');
@@ -3091,10 +3137,32 @@ function showToast(message, type){
     setTimeout(()=>el.remove(), 250);
   }, 3800);
 }
+/* ================= STAFF ACTIVITY LOG =================
+   Records who did what, when — visible to staff in a dedicated admin tab.
+   Best-effort: a logging failure never blocks the actual action. */
+let currentStaffName = null;
+async function logActivity(action, targetId, details){
+  try{
+    const { data: userData } = await sb.auth.getUser();
+    const uid = userData?.user?.id;
+    if(!uid) return;
+    let staffName = currentStaffName;
+    if(!staffName){
+      const { data: staffRow } = await sb.from('staff').select('full_name').eq('id', uid).maybeSingle();
+      staffName = staffRow?.full_name || '';
+      currentStaffName = staffName;
+    }
+    await sb.from('staff_activity_log').insert({
+      staff_id: uid, staff_name: staffName, action, target_id: targetId || null, details: details || null
+    });
+  }catch(e){ /* logging is best-effort */ }
+}
+
 async function doDeleteCustomer(){
   if(!pendingDeleteCustomerId) return;
   const {error} = await sb.rpc('admin_delete_customer', {target_id: pendingDeleteCustomerId});
   document.getElementById('deleteCustomerModal').style.display = 'none';
+  if(!error) logActivity('delete_customer', pendingDeleteCustomerId, null);
   pendingDeleteCustomerId = null;
   if(error){ showToast('هەڵەیەک ڕوویدا لە سڕینەوەدا.', 'error'); return; }
   showToast('کڕیارەکە سڕایەوە.', 'success');
@@ -3137,6 +3205,7 @@ async function submitNewShipment(){
     msgEl.style.display = 'block';
     return;
   }
+  logActivity('create_shipment', newShipment.id, name+' — $'+newShipment.totalAmount);
   showToast('بارکردنی نوێ زیادکرا.', 'success');
   toggleNewShipmentForm();
   const shipments = await getAllShipments();
@@ -3238,6 +3307,7 @@ async function updateShipmentStep(id, stepIndex){
   if(!s.stepDates[STEP_KEYS[stepIndex]]) s.stepDates[STEP_KEYS[stepIndex]] = new Date().toISOString();
   const {error} = await saveShipment(s);
   if(error){ showToast('هەڵەیەک ڕوویدا، دۆخی بار پاشەکەوت نەکرا.', 'error'); return; }
+  logActivity('update_status', id, 'status → '+(STEP_LABELS_KU[stepIndex]||stepIndex));
   const idx = currentShipmentsCache.findIndex(x=>x.id===id);
   if(idx>-1) currentShipmentsCache[idx] = s;
   showToast('دۆخی بار نوێکرایەوە.', 'success');
@@ -3276,6 +3346,7 @@ async function updateShipmentFinance(id){
   s.paidAmount = Number(document.getElementById('paid-'+id).value) || 0;
   const {error} = await saveShipment(s);
   if(error){ showToast('هەڵەیەک ڕوویدا، دارایی پاشەکەوت نەکرا.', 'error'); return; }
+  logActivity('update_finance', id, 'total=$'+s.totalAmount+' paid=$'+s.paidAmount);
   const idx = currentShipmentsCache.findIndex(x=>x.id===id);
   if(idx>-1) currentShipmentsCache[idx] = s;
   showToast('گۆڕانکارییەکانی دارایی پاشەکەوت کران.', 'success');
