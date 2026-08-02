@@ -34,6 +34,7 @@
 <link rel="canonical" href="https://globall-cloud.netlify.app/">
 <link rel="icon" type="image/png" href="logo-icon.png">
 <link rel="apple-touch-icon" href="logo-icon.png">
+<link rel="manifest" href="manifest.json">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -555,6 +556,16 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
 .admin-topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px 22px; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); margin-bottom:20px;}
 
 .admin-stats{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:26px;}
+#printLabelArea{display:none;}
+@media print{
+  body *{ visibility:hidden; }
+  #printLabelArea, #printLabelArea *{ visibility:visible; }
+  #printLabelArea{ display:block; position:fixed; inset:0; padding:28px; }
+}
+.admin-charts-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:26px;}
+.admin-chart-card{background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); padding:16px;}
+.admin-chart-card b{display:block; margin-bottom:10px; font-size:14px;}
+@media(max-width:720px){ .admin-charts-grid{grid-template-columns:1fr;} }
 .admin-stat-card{position:relative; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); padding:18px 16px; text-align:center; overflow:hidden;}
 .admin-stat-card::before{content:''; position:absolute; top:0; inset-inline:0; height:2px; background:var(--accent-c,var(--teal));}
 .admin-stat-card b{display:block; font-size:clamp(20px,2.6vw,26px); font-weight:800; font-family:var(--mono); color:var(--text); margin-bottom:4px;}
@@ -860,6 +871,43 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
     <p data-i18n="services.sub"></p>
   </div>
   <div class="container" style="padding-bottom:60px;" id="servicesDetailWrap"></div>
+
+  <div class="section container">
+    <div class="section-head reveal">
+      <span class="eyebrow">تەخمینی نرخ</span>
+      <h2>حساباتی نرخی گەیاندن</h2>
+    </div>
+    <div class="quote-card" style="max-width:640px; margin:0 auto;">
+      <div class="form-row">
+        <label class="field-label">جۆری گەیاندن</label>
+        <select class="field" id="quoteType">
+          <option value="air">ئاسمانی (Air)</option>
+          <option value="sea">دەریایی (Sea)</option>
+          <option value="land">وشکانی (Land)</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="field-label">کێش (کیلۆگرام)</label>
+        <input class="field" type="number" id="quoteWeight" min="1" placeholder="بۆ نموونە 50">
+      </div>
+      <div class="form-row">
+        <label class="field-label">شاری مەبەست لە عێراق</label>
+        <select class="field" id="quoteDest">
+          <option value="hawler">هەولێر</option>
+          <option value="slimani">سلێمانی</option>
+          <option value="duhok">دهۆک</option>
+          <option value="bakhdad">بەغدا</option>
+          <option value="kerkuk">کەرکووک</option>
+          <option value="mosul">موسڵ</option>
+          <option value="basra">بەسرە</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="calcQuote()">حسابکردنی تەخمین</button>
+      <div id="quoteResult"></div>
+      <p class="hint" style="text-align:start; margin-top:10px;">* ئەمە تەنها تەخمینێکی گشتییە — نرخی کۆتایی دوای پشکنینی وردی بار لەلایەن ستافمانەوە دیاری دەکرێت.</p>
+    </div>
+  </div>
+
   <div class="section container">
     <div class="section-head reveal">
       <span class="eyebrow" data-i18n="services.faqEyebrow"></span>
@@ -1170,6 +1218,35 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
       </div>
     </div>
 
+    <div id="adminMfaView" class="admin-login-split" style="display:none;">
+      <div class="admin-login-visual">
+        <div class="admin-visual-brand">
+          <img src="logo-icon.png" alt="Globall Cloud">
+          <div><b>Globall Cloud</b><small>STAFF CONSOLE</small></div>
+        </div>
+        <div class="admin-visual-mid">
+          <div class="shield-wrap-lg"><svg><use href="#i-shield"></use></svg></div>
+          <h2>دووەم هەنگاوی پشتڕاستکردنەوە</h2>
+          <p>ئەم هەژمارە پارێزراوە بە 2FA — کۆدی ٦ ژمارەیی لە ئەپی Authenticator بنووسە.</p>
+        </div>
+      </div>
+      <div class="admin-login-form-panel">
+        <div class="admin-login-head">
+          <h1>کۆدی پشتڕاستکردنەوە</h1>
+          <p class="hint" style="text-align:start; margin-top:4px;">لە Google Authenticator یان هاوشێوەی بیخوێنەرەوە</p>
+        </div>
+        <form onsubmit="mfaVerifyChallenge(event)" autocomplete="off">
+          <div class="form-row">
+            <label class="field-label">کۆدی ٦ ژمارەیی</label>
+            <input class="field" type="text" inputmode="numeric" maxlength="6" id="mfaChallengeCode" required placeholder="000000" style="text-align:center; letter-spacing:6px; font-size:20px;">
+          </div>
+          <button class="btn btn-primary btn-block" type="submit" id="mfaChallengeBtn">پشتڕاستکردنەوە</button>
+        </form>
+        <p id="mfaChallengeError" class="admin-error" style="display:none;"></p>
+        <a class="admin-back-link" style="margin-top:16px;" onclick="handleStaffSignOut()"><svg><use href="#i-arrow"></use></svg><span>گەڕانەوە بۆ چوونەژوورەوە</span></a>
+      </div>
+    </div>
+
     <div id="adminDashView" style="display:none;">
       <div class="admin-topbar">
         <div style="display:flex; align-items:center; gap:12px;">
@@ -1179,9 +1256,20 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
             <span class="hint" id="staffEmailLabel" style="display:block; text-align:start; margin-top:2px;"></span>
           </div>
         </div>
-        <button class="btn btn-outline" onclick="handleStaffSignOut()">چوونەدەرەوە</button>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button class="btn btn-outline" onclick="openMfaSettings()">🔐 2FA</button>
+          <button class="btn btn-outline" onclick="handleStaffSignOut()">چوونەدەرەوە</button>
+        </div>
       </div>
       <div id="adminContent"></div>
+    </div>
+  </div>
+
+  <div id="mfaSettingsModal" class="confirm-modal-overlay" style="display:none;">
+    <div class="confirm-modal">
+      <div class="admin-section-title"><svg><use href="#i-shield"></use></svg><span>چوونەژوورەوەی دوو هەنگاوی (2FA)</span></div>
+      <div id="mfaSettingsBody"><p class="hint">بارکردن...</p></div>
+      <button class="btn btn-outline btn-block" style="margin-top:14px;" onclick="closeMfaSettings()">داخستن</button>
     </div>
   </div>
 
@@ -1282,6 +1370,9 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
 </a>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
@@ -1643,7 +1734,7 @@ function shipmentToRow(s){
     id:s.id, customer_name:r.name||null, customer_phone:r.phone||null, customer_email:r.email||null, notes:r.notes||null,
     origin_key:s.originKey, dest_key:s.destKey, type:s.type, weight_kg:s.weightKg, volume_cbm:s.volumeCbm,
     items_count:s.itemsCount, total_amount:s.totalAmount||0, paid_amount:s.paidAmount||0,
-    current_step_index:s.currentStepIndex||0, step_dates:s.stepDates||{}, eta:s.eta||null,
+    current_step_index:s.currentStepIndex||0, step_dates:s.stepDates||{}, step_photos:s.stepPhotos||{}, eta:s.eta||null,
     customer_user_id: s.customerUserId || null,
     directory_customer_id: s.directoryCustomerId || null
   };
@@ -1653,7 +1744,8 @@ function rowToShipment(row){
     id:row.id, originKey:row.origin_key, destKey:row.dest_key, type:row.type,
     weightKg:row.weight_kg, volumeCbm:row.volume_cbm, itemsCount:row.items_count,
     totalAmount:row.total_amount, paidAmount:row.paid_amount,
-    currentStepIndex:row.current_step_index, stepDates:row.step_dates||{}, eta:row.eta,
+    currentStepIndex:row.current_step_index, stepDates:row.step_dates||{}, stepPhotos:row.step_photos||{}, eta:row.eta,
+    createdAt: row.created_at,
     requester:{name:row.customer_name, phone:row.customer_phone, email:row.customer_email, notes:row.notes},
     customerUserId: row.customer_user_id || null,
     directoryCustomerId: row.directory_customer_id || null
@@ -1988,7 +2080,9 @@ function timelineHTML(s){
     let dateStr = '';
     if(s.stepDates && s.stepDates[key]) dateStr = formatDate(s.stepDates[key]);
     else if(key==='delivered' && s.eta) dateStr = t('track.eta')+' '+formatDate(s.eta);
-    return `<div class="tl-step ${cls}"><div class="tl-dot"></div><div class="tl-body"><b>${t('track.steps.'+key)}</b><span>${dateStr}</span></div></div>`;
+    const photoUrl = s.stepPhotos && s.stepPhotos[key];
+    const photoHTML = photoUrl ? `<a href="${photoUrl}" target="_blank" rel="noopener"><img src="${photoUrl}" alt="" style="width:56px; height:56px; object-fit:cover; border-radius:10px; margin-top:6px; border:1px solid var(--line-soft);"></a>` : '';
+    return `<div class="tl-step ${cls}"><div class="tl-dot"></div><div class="tl-body"><b>${t('track.steps.'+key)}</b><span>${dateStr}</span>${photoHTML}</div></div>`;
   }).join('');
 }
 
@@ -2517,7 +2611,15 @@ async function renderAdminGate(){
   notConfigured.style.display = 'none'; loginView.querySelector('form').style.display = 'block';
 
   const {data:{session}} = await sb.auth.getSession();
-  if(!session){ loginView.style.display = 'block'; dashView.style.display = 'none'; showLockoutMessage(); return; }
+  if(!session){ loginView.style.display = 'block'; dashView.style.display = 'none'; document.getElementById('adminMfaView').style.display='none'; showLockoutMessage(); return; }
+
+  const {data: aal} = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
+  if(aal && aal.nextLevel === 'aal2' && aal.currentLevel !== aal.nextLevel){
+    loginView.style.display = 'none'; dashView.style.display = 'none';
+    document.getElementById('adminMfaView').style.display = 'grid';
+    return;
+  }
+  document.getElementById('adminMfaView').style.display = 'none';
 
   const {data:staffRow} = await sb.from('staff').select('*').eq('id', session.user.id).maybeSingle();
   if(!staffRow){
@@ -2535,6 +2637,7 @@ async function renderAdminGate(){
   if(staffRow.role==='admin'){
     currentMessagesCache = await getRecentMessages();
     document.getElementById('adminContent').innerHTML = renderAdminMainHTML(shipments);
+    setTimeout(()=>initAdminCharts(shipments), 0);
   } else {
     document.getElementById('adminContent').innerHTML = renderAccountantOpsHTML(shipments);
   }
@@ -2627,6 +2730,71 @@ async function handleStaffSignIn(e){
 }
 async function handleStaffSignOut(){ await sb.auth.signOut(); await renderAdminGate(); }
 
+/* ================= TWO-FACTOR AUTH (2FA / TOTP) ================= */
+async function mfaVerifyChallenge(e){
+  e.preventDefault();
+  const errEl = document.getElementById('mfaChallengeError');
+  const btn = document.getElementById('mfaChallengeBtn');
+  errEl.style.display = 'none';
+  const code = document.getElementById('mfaChallengeCode').value.trim();
+  btn.disabled = true;
+  const {data: factors} = await sb.auth.mfa.listFactors();
+  const factor = (factors?.totp || [])[0];
+  if(!factor){ errEl.textContent = 'هیچ فاکتەرێکی 2FA نەدۆزرایەوە.'; errEl.style.display='block'; btn.disabled=false; return; }
+  const {data: chData, error: chErr} = await sb.auth.mfa.challenge({factorId: factor.id});
+  if(chErr){ errEl.textContent = 'هەڵەیەک ڕوویدا، دووبارە هەوڵبدە.'; errEl.style.display='block'; btn.disabled=false; return; }
+  const {error: vErr} = await sb.auth.mfa.verify({factorId: factor.id, challengeId: chData.id, code});
+  btn.disabled = false;
+  if(vErr){ errEl.textContent = 'کۆدەکە هەڵەیە یان کۆنە، دووبارە هەوڵبدە.'; errEl.style.display='block'; return; }
+  document.getElementById('mfaChallengeCode').value = '';
+  await renderAdminGate();
+}
+
+async function openMfaSettings(){
+  document.getElementById('mfaSettingsModal').style.display = 'flex';
+  const body = document.getElementById('mfaSettingsBody');
+  body.innerHTML = '<p class="hint">بارکردن...</p>';
+  const {data: factors} = await sb.auth.mfa.listFactors();
+  const verified = (factors?.totp || []).find(f => f.status === 'verified');
+  if(verified){
+    body.innerHTML = `
+      <p style="color:#2ecc71; display:flex; align-items:center; gap:6px;"><svg class="icon-sm"><use href="#i-check"></use></svg> 2FA چالاکە بۆ ئەم هەژمارە.</p>
+      <button class="btn btn-outline btn-block" style="margin-top:10px;" onclick="mfaUnenroll('${verified.id}')">لابردنی 2FA</button>`;
+    return;
+  }
+  const {data, error} = await sb.auth.mfa.enroll({factorType:'totp'});
+  if(error){ body.innerHTML = `<p class="admin-error" style="display:block;">${escapeHtml(error.message)}</p>`; return; }
+  pendingMfaFactorId = data.id;
+  body.innerHTML = `
+    <p class="hint" style="text-align:start;">١. کۆدی QR بخوێنەرەوە بە Google Authenticator (یان هاوشێوەی)</p>
+    <div style="background:#fff; padding:12px; border-radius:12px; display:flex; justify-content:center; margin:10px 0;">${data.totp.qr_code}</div>
+    <p class="hint" style="text-align:start; word-break:break-all;">یان کۆدی دەستی: ${escapeHtml(data.totp.secret)}</p>
+    <p class="hint" style="text-align:start; margin-top:10px;">٢. کۆدی ٦ ژمارەیی بنووسە بۆ چالاککردن</p>
+    <input class="field" type="text" inputmode="numeric" maxlength="6" id="mfaEnrollCode" placeholder="000000" style="text-align:center; letter-spacing:6px; font-size:20px; margin-top:6px;">
+    <button class="btn btn-primary btn-block" style="margin-top:10px;" onclick="mfaConfirmEnroll()">چالاککردن</button>
+    <p id="mfaEnrollError" class="admin-error" style="display:none;"></p>`;
+}
+let pendingMfaFactorId = null;
+async function mfaConfirmEnroll(){
+  const code = document.getElementById('mfaEnrollCode').value.trim();
+  const errEl = document.getElementById('mfaEnrollError');
+  const {data: chData, error: chErr} = await sb.auth.mfa.challenge({factorId: pendingMfaFactorId});
+  if(chErr){ errEl.textContent = 'هەڵەیەک ڕوویدا.'; errEl.style.display='block'; return; }
+  const {error: vErr} = await sb.auth.mfa.verify({factorId: pendingMfaFactorId, challengeId: chData.id, code});
+  if(vErr){ errEl.textContent = 'کۆدەکە هەڵەیە، دووبارە هەوڵبدە.'; errEl.style.display='block'; return; }
+  showToast('2FA چالاک کرا بۆ ئەم هەژمارە.', 'success');
+  logActivity('enable_2fa', null, null);
+  closeMfaSettings();
+}
+async function mfaUnenroll(factorId){
+  const {error} = await sb.auth.mfa.unenroll({factorId});
+  if(error){ showToast('هەڵەیەک ڕوویدا.', 'error'); return; }
+  showToast('2FA لابرا.', 'success');
+  logActivity('disable_2fa', null, null);
+  closeMfaSettings();
+}
+function closeMfaSettings(){ document.getElementById('mfaSettingsModal').style.display = 'none'; }
+
 let currentShipmentsCache = [];
 let currentMessagesCache = [];
 let adminFilterStatus = 'all';
@@ -2688,6 +2856,11 @@ function renderAdminShipmentList(){
         </select>
       </div>
       <div class="admin-row-actions">
+        <label class="btn btn-ghost btn-icon" aria-label="بارکردنی وێنە بۆ ئەم قۆناغە" title="بارکردنی وێنە بۆ ئەم قۆناغە" style="cursor:pointer;">
+          <svg class="icon-sm"><use href="#i-box"></use></svg>
+          <input type="file" accept="image/*" style="display:none;" onchange="uploadStepPhoto('${s.id}', this.files[0])">
+        </label>
+        <button class="btn btn-ghost btn-icon" onclick="printShipmentLabel('${s.id}')" aria-label="چاپکردنی لەیبڵ" title="چاپکردنی لەیبڵ"><svg class="icon-sm"><use href="#i-box"></use></svg></button>
         <button class="btn btn-ghost btn-icon" onclick="sendWhatsAppUpdate('${s.id}')" aria-label="ناردنی نوێکردنەوە بە واتساپ" title="ناردنی نوێکردنەوە بە واتساپ"><svg class="icon-sm"><use href="#i-whatsapp"></use></svg></button>
         <button class="btn btn-ghost btn-icon" id="invoiceBtnAdmin-${s.id}" onclick="generateInvoiceForIdAdmin('${s.id}')" aria-label="دابەزاندنی وەسڵ" title="دابەزاندنی وەسڵ"><svg class="icon-sm"><use href="#i-download"></use></svg></button>
       </div>
@@ -2748,6 +2921,9 @@ function renderAdminMainHTML(shipments){
     <button class="btn btn-primary" style="padding:10px 18px;" onclick="toggleNewShipmentForm()">
       <svg class="icon-sm"><use href="#i-box"></use></svg> بارکردنی نوێ
     </button>
+    <button class="btn btn-outline" style="padding:10px 18px;" onclick="exportShipmentsExcel()">
+      <svg class="icon-sm"><use href="#i-box"></use></svg> Export Excel
+    </button>
   </div>`;
 
   const newShipmentForm = `<div id="newShipmentFormWrap" class="admin-panel" style="display:none; margin-bottom:22px;">
@@ -2798,6 +2974,7 @@ function renderAdminMainHTML(shipments){
       <span style="display:flex; align-items:center; gap:8px;"><svg><use href="#i-search"></use></svg><span>کۆگای موشتەریانی هایپەرۆ</span></span>
       <div style="display:flex; gap:8px;">
         <button class="btn btn-outline" style="padding:10px 16px;" onclick="exportDirectoryCSV()"><svg class="icon-sm"><use href="#i-box"></use></svg> Export CSV</button>
+        <button class="btn btn-outline" style="padding:10px 16px;" onclick="exportDirectoryExcel()"><svg class="icon-sm"><use href="#i-box"></use></svg> Export Excel</button>
         <button class="btn btn-primary" style="padding:10px 16px;" onclick="openDirectoryForm()"><svg class="icon-sm"><use href="#i-user"></use></svg> زیادکردنی موشتەری</button>
       </div>
     </div>
@@ -2966,6 +3143,34 @@ function renderDirectoryRows(list, keepPage){
     <button class="btn btn-outline" style="padding:9px 16px;" ${directoryPage<=1?'disabled':''} onclick="goDirectoryPage(lastDirectoryList, ${directoryPage-1})">‹ پێشوو</button>
     <span class="hint" style="align-self:center; margin:0;">لاپەڕەی ${directoryPage} لە ${totalPages} (${list.length} ئەنجام)</span>
     <button class="btn btn-outline" style="padding:9px 16px;" ${directoryPage>=totalPages?'disabled':''} onclick="goDirectoryPage(lastDirectoryList, ${directoryPage+1})">دواتر ›</button>`;
+}
+function exportDirectoryExcel(){
+  const rows = lastDirectoryList.filter(c=>c.name);
+  if(rows.length===0){ showToast('هیچ داتایەک نییە بۆ ناردن.', 'error'); return; }
+  const header = ['کۆد','ناو','مۆبایل ١','مۆبایل ٢','شار','شوێنی ناردن','تێبینی'];
+  const aoa = [header, ...rows.map(c => [c.code,c.name,c.phone,c.phone2,c.city,c.delivery_location,c.note])];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{wch:10},{wch:22},{wch:14},{wch:14},{wch:14},{wch:18},{wch:24}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'کۆگای موشتەریان');
+  XLSX.writeFile(wb, 'customer-directory.xlsx');
+  logActivity('export_excel', null, 'customer-directory');
+}
+function exportShipmentsExcel(){
+  const rows = currentShipmentsCache || [];
+  if(rows.length===0){ showToast('هیچ داتایەک نییە بۆ ناردن.', 'error'); return; }
+  const header = ['ژمارەی شوێنکەوتن','ناوی کڕیار','شار','دۆخ','جۆر','کێش','کۆی گشتی','دراوە','ماوە','بەروار'];
+  const aoa = [header, ...rows.map(s => [
+    s.id, s.customerName||'', s.city||'', STEP_LABELS_KU[s.currentStepIndex]||'', s.type||'', s.weight||'',
+    s.totalAmount||0, s.paidAmount||0, (Number(s.totalAmount||0)-Number(s.paidAmount||0)),
+    s.createdAt ? new Date(s.createdAt).toLocaleDateString('en-GB') : ''
+  ])];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{wch:16},{wch:20},{wch:12},{wch:14},{wch:10},{wch:8},{wch:10},{wch:10},{wch:10},{wch:12}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'بارەکان');
+  XLSX.writeFile(wb, 'shipments.xlsx');
+  logActivity('export_excel', null, 'shipments');
 }
 function exportDirectoryCSV(){
   const rows = lastDirectoryList.filter(c=>c.name);
@@ -3158,6 +3363,144 @@ async function logActivity(action, targetId, details){
   }catch(e){ /* logging is best-effort */ }
 }
 
+async function uploadStepPhoto(shipmentId, file){
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ showToast('تکایە تەنها فایلی وێنە هەڵبژێرە.', 'error'); return; }
+  showToast('بارکردنی وێنە...', 'success');
+  const s = await getShipmentForStaff(shipmentId);
+  if(!s) return;
+  const stepKey = STEP_KEYS[s.currentStepIndex];
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  const path = `${shipmentId}/${stepKey}-${Date.now()}.${ext}`;
+  const {error: upErr} = await sb.storage.from('shipment-photos').upload(path, file, {upsert:true});
+  if(upErr){ showToast('هەڵەیەک ڕوویدا لە بارکردنی وێنە.', 'error'); return; }
+  const {data: pub} = sb.storage.from('shipment-photos').getPublicUrl(path);
+  s.stepPhotos = s.stepPhotos || {};
+  s.stepPhotos[stepKey] = pub.publicUrl;
+  const {error} = await saveShipment(s);
+  if(error){ showToast('وێنە بارکرا بەڵام پاشەکەوت نەکرا.', 'error'); return; }
+  logActivity('upload_photo', shipmentId, stepKey);
+  const idx = currentShipmentsCache.findIndex(x=>x.id===shipmentId);
+  if(idx>-1) currentShipmentsCache[idx] = s;
+  showToast('وێنە زیادکرا بۆ ئەم قۆناغە.', 'success');
+}
+
+let chartRevenueInstance = null, chartRoutesInstance = null;
+function initAdminCharts(shipments){
+  const revCanvas = document.getElementById('chartRevenue');
+  const routeCanvas = document.getElementById('chartRoutes');
+  if(!revCanvas || !routeCanvas || typeof Chart === 'undefined') return;
+
+  /* Revenue by month, last 6 months */
+  const months = [];
+  const now = new Date();
+  for(let i=5;i>=0;i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    months.push({key:`${d.getFullYear()}-${d.getMonth()}`, label:d.toLocaleDateString('en-GB',{month:'short',year:'2-digit'}), total:0});
+  }
+  shipments.forEach(s=>{
+    const dt = s.createdAt ? new Date(s.createdAt) : null;
+    if(!dt) return;
+    const key = `${dt.getFullYear()}-${dt.getMonth()}`;
+    const m = months.find(x=>x.key===key);
+    if(m) m.total += Number(s.totalAmount||0);
+  });
+  if(chartRevenueInstance) chartRevenueInstance.destroy();
+  chartRevenueInstance = new Chart(revCanvas, {
+    type:'bar',
+    data:{ labels: months.map(m=>m.label), datasets:[{ data: months.map(m=>m.total), backgroundColor:'#1abc9c', borderRadius:6 }] },
+    options:{ plugins:{legend:{display:false}}, scales:{ y:{ beginAtZero:true, ticks:{color:'#8aa3b8'} }, x:{ ticks:{color:'#8aa3b8'} } } }
+  });
+
+  /* Top routes by shipment count */
+  const routeCounts = {};
+  shipments.forEach(s=>{
+    const key = `${placeLabel(s.originKey)} → ${placeLabel(s.destKey)}`;
+    routeCounts[key] = (routeCounts[key]||0) + 1;
+  });
+  const topRoutes = Object.entries(routeCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  if(chartRoutesInstance) chartRoutesInstance.destroy();
+  chartRoutesInstance = new Chart(routeCanvas, {
+    type:'bar',
+    data:{ labels: topRoutes.map(r=>r[0]), datasets:[{ data: topRoutes.map(r=>r[1]), backgroundColor:'#e8b64c', borderRadius:6 }] },
+    options:{ indexAxis:'y', plugins:{legend:{display:false}}, scales:{ x:{ beginAtZero:true, ticks:{color:'#8aa3b8'} }, y:{ ticks:{color:'#8aa3b8'} } } }
+  });
+}
+
+function runGlobalSearch(query){
+  const wrap = document.getElementById('globalSearchResults');
+  const q = query.trim().toLowerCase();
+  if(q.length < 2){ wrap.innerHTML = ''; return; }
+  const shipMatches = (currentShipmentsCache||[]).filter(s =>
+    (s.id||'').toLowerCase().includes(q) ||
+    (s.requester?.name||'').toLowerCase().includes(q) ||
+    (s.requester?.phone||'').toLowerCase().includes(q)
+  ).slice(0,5);
+  if(shipMatches.length===0){ wrap.innerHTML = '<p class="hint" style="margin-top:8px;">هیچ ئەنجامێک نەدۆزرایەوە.</p>'; return; }
+  wrap.innerHTML = '<div class="admin-list" style="margin-top:8px;">' + shipMatches.map(s=>`
+    <div class="admin-row">
+      <div class="admin-row-main"><b class="mono">${escapeHtml(s.id)}</b><span>${escapeHtml(s.requester?.name||'—')} · ${escapeHtml(s.requester?.phone||'—')}</span></div>
+      <span class="admin-status-pill status-${statusGroupForStep(s.currentStepIndex)}">${STEP_LABELS_KU[s.currentStepIndex]}</span>
+    </div>`).join('') + '</div>';
+}
+
+function printShipmentLabel(shipmentId){
+  const s = (currentShipmentsCache||[]).find(x=>x.id===shipmentId);
+  if(!s){ showToast('بارکردنەکە نەدۆزرایەوە.', 'error'); return; }
+  const area = document.getElementById('printLabelArea');
+  area.innerHTML = `
+    <div style="border:2px solid #111; border-radius:10px; padding:22px; max-width:420px; font-family:sans-serif; color:#111;">
+      <div style="display:flex; align-items:center; gap:10px; border-bottom:2px solid #111; padding-bottom:12px; margin-bottom:14px;">
+        <img src="logo-icon.png" style="width:42px; height:42px;">
+        <div><b style="font-size:18px;">Globall Cloud</b><br><span style="font-size:12px;">China · UAE · Iraq Logistics</span></div>
+      </div>
+      <div style="text-align:center; margin-bottom:14px;">
+        <div id="printQrCode" style="display:inline-block;"></div>
+      </div>
+      <div style="text-align:center; font-size:20px; font-weight:bold; letter-spacing:1px; margin-bottom:14px;">${escapeHtml(s.id)}</div>
+      <table style="width:100%; font-size:13px; border-collapse:collapse;">
+        <tr><td style="padding:4px 0; color:#555;">کڕیار</td><td style="padding:4px 0; text-align:end;"><b>${escapeHtml(s.requester?.name||'—')}</b></td></tr>
+        <tr><td style="padding:4px 0; color:#555;">مۆبایل</td><td style="padding:4px 0; text-align:end;">${escapeHtml(s.requester?.phone||'—')}</td></tr>
+        <tr><td style="padding:4px 0; color:#555;">لە</td><td style="padding:4px 0; text-align:end;">${escapeHtml(placeLabel(s.originKey))}</td></tr>
+        <tr><td style="padding:4px 0; color:#555;">بۆ</td><td style="padding:4px 0; text-align:end;"><b>${escapeHtml(placeLabel(s.destKey))}</b></td></tr>
+        <tr><td style="padding:4px 0; color:#555;">جۆر</td><td style="padding:4px 0; text-align:end;">${escapeHtml(s.type||'—')}</td></tr>
+        <tr><td style="padding:4px 0; color:#555;">کێش</td><td style="padding:4px 0; text-align:end;">${s.weightKg||0} kg</td></tr>
+      </table>
+      <p style="text-align:center; font-size:11px; color:#888; margin-top:14px;">globall-cloud.pages.dev/track</p>
+    </div>`;
+  new QRCode(document.getElementById('printQrCode'), { text: s.id, width:120, height:120, correctLevel: QRCode.CorrectLevel.M });
+  setTimeout(()=>window.print(), 250);
+}
+
+/* ================= QUOTE ESTIMATOR =================
+   Configurable per-kg base rates and per-city multipliers.
+   Ali: edit QUOTE_RATES / QUOTE_CITY_FACTOR below to match real pricing. */
+const QUOTE_RATES = { air: 6.5, sea: 1.8, land: 3.2 };       // $ per kg, base rate from China/UAE
+const QUOTE_MIN_CHARGE = { air: 35, sea: 60, land: 25 };      // minimum charge per shipment ($)
+const QUOTE_CITY_FACTOR = {                                    // distance/access multiplier from Erbil hub
+  hawler:1, slimani:1.05, duhok:1.1, bakhdad:1.2, kerkuk:1.1, mosul:1.15, basra:1.35
+};
+function calcQuote(){
+  const type = document.getElementById('quoteType').value;
+  const weight = Number(document.getElementById('quoteWeight').value);
+  const dest = document.getElementById('quoteDest').value;
+  const resultEl = document.getElementById('quoteResult');
+  if(!weight || weight <= 0){
+    resultEl.innerHTML = `<p class="admin-error" style="display:block; margin-top:12px;">تکایە کێشی بار بنووسە.</p>`;
+    return;
+  }
+  const base = weight * QUOTE_RATES[type] * QUOTE_CITY_FACTOR[dest];
+  const est = Math.max(base, QUOTE_MIN_CHARGE[type]);
+  const low = Math.round(est * 0.9);
+  const high = Math.round(est * 1.15);
+  resultEl.innerHTML = `
+    <div style="margin-top:16px; padding:16px; background:var(--surface-2); border-radius:var(--radius-m); text-align:center;">
+      <span class="hint">تەخمینی نرخ</span>
+      <div style="font-size:26px; font-weight:800; color:var(--teal-l); margin:6px 0;">$${low} – $${high}</div>
+      <a class="btn btn-primary" style="margin-top:8px;" onclick="route('request')">داواکردنی نرخی وردتر</a>
+    </div>`;
+}
+
 async function doDeleteCustomer(){
   if(!pendingDeleteCustomerId) return;
   const {error} = await sb.rpc('admin_delete_customer', {target_id: pendingDeleteCustomerId});
@@ -3211,6 +3554,7 @@ async function submitNewShipment(){
   const shipments = await getAllShipments();
   currentShipmentsCache = shipments;
   document.getElementById('adminContent').innerHTML = renderAdminMainHTML(shipments);
+  setTimeout(()=>initAdminCharts(shipments), 0);
 }
 
 function financeRowsHTML(shipments){
@@ -3247,6 +3591,45 @@ function renderAdminOpsHTML(shipments){
     return placed && new Date(placed).getTime() >= weekAgo;
   }).length;
 
+  /* ---- Overdue alerts: unpaid balances and delayed shipments ---- */
+  const now = Date.now();
+  const overduePayments = shipments.filter(s => (Number(s.totalAmount||0) - Number(s.paidAmount||0)) > 0
+    && s.createdAt && (now - new Date(s.createdAt).getTime()) > 14*86400000);
+  const delayedShipments = shipments.filter(s => statusGroupForStep(s.currentStepIndex) !== 'delivered'
+    && s.createdAt && (now - new Date(s.createdAt).getTime()) > 10*86400000);
+  let alertsHTML = '';
+  if(overduePayments.length || delayedShipments.length){
+    alertsHTML = `<div class="admin-section-title" style="color:var(--amber-l);"><svg><use href="#i-clock"></use></svg><span>ئاگاداری — پێویستی چاودێری هەیە</span></div>
+    <div class="admin-list" style="margin-bottom:18px;">
+      ${overduePayments.slice(0,5).map(s=>`
+        <div class="admin-row">
+          <div class="admin-row-main"><b>پارەی دواکەوتوو — ${escapeHtml(s.id)}</b><span>${escapeHtml(s.requester?.name||'—')} · ماوە: $${(Number(s.totalAmount||0)-Number(s.paidAmount||0)).toLocaleString()}</span></div>
+          <span class="hint">${new Date(s.createdAt).toLocaleDateString('en-GB')}</span>
+        </div>`).join('')}
+      ${delayedShipments.slice(0,5).map(s=>`
+        <div class="admin-row">
+          <div class="admin-row-main"><b>دواکەوتوو لە گەیاندن — ${escapeHtml(s.id)}</b><span>${escapeHtml(s.requester?.name||'—')} · ${STEP_LABELS_KU[s.currentStepIndex]}</span></div>
+          <span class="hint">${new Date(s.createdAt).toLocaleDateString('en-GB')}</span>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  /* ---- Global search across shipments, directory customers, and messages ---- */
+  const globalSearchHTML = `<div class="form-row" style="max-width:420px; margin-bottom:18px;">
+    <div class="field-icon-wrap">
+      <svg class="icon-sm field-icon"><use href="#i-search"></use></svg>
+      <input class="field" type="text" id="globalSearchInput" placeholder="گەڕانی گشتی: ناو، مۆبایل، ژمارەی شوێنکەوتن..." oninput="runGlobalSearch(this.value)">
+    </div>
+    <div id="globalSearchResults"></div>
+  </div>`;
+
+  /* ---- Analytics charts: revenue trend + top routes ---- */
+  const analyticsHTML = `<div class="admin-section-title"><svg><use href="#i-card"></use></svg><span>ئامار</span></div>
+  <div class="admin-charts-grid">
+    <div class="admin-chart-card"><b>داهاتی مانگانە</b><canvas id="chartRevenue" height="180"></canvas></div>
+    <div class="admin-chart-card"><b>باشترین ڕووتەکان</b><canvas id="chartRoutes" height="180"></canvas></div>
+  </div>`;
+
   const stats = `<div class="admin-stats">
     <div class="admin-stat-card" style="--accent-c:var(--teal);"><svg class="icon-sm" style="color:var(--accent-c); margin-bottom:6px;"><use href="#i-box"></use></svg><b>${total}</b><span>کۆی گشتی بار</span></div>
     <div class="admin-stat-card" style="--accent-c:var(--amber-l);"><svg class="icon-sm" style="color:var(--accent-c); margin-bottom:6px;"><use href="#i-clock"></use></svg><b>${pending}</b><span>چاوەڕوان</span></div>
@@ -3281,7 +3664,7 @@ function renderAdminOpsHTML(shipments){
   adminFilterStatus = 'all';
   adminSearchQuery = '';
 
-  return stats + routePanel + msgPanel + listTitle + toolbar + `<div id="adminShipmentListWrap"></div>`;
+  return stats + alertsHTML + globalSearchHTML + analyticsHTML + routePanel + msgPanel + listTitle + toolbar + `<div id="adminShipmentListWrap"></div>`;
 }
 
 function renderAccountantOpsHTML(shipments){
@@ -3404,5 +3787,6 @@ async function init(){
 window.addEventListener('hashchange', ()=>{ if(location.hash==='#admin') route('admin'); });
 init();
 </script>
+<div id="printLabelArea"></div>
 </body>
 </html>
