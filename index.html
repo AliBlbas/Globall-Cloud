@@ -874,24 +874,24 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
 
   <div class="section container">
     <div class="section-head reveal">
-      <span class="eyebrow">تەخمینی نرخ</span>
-      <h2>حساباتی نرخی گەیاندن</h2>
+      <span class="eyebrow" data-i18n="services.quote.eyebrow"></span>
+      <h2 data-i18n="services.quote.heading"></h2>
     </div>
     <div class="quote-card" style="max-width:640px; margin:0 auto;">
       <div class="form-row">
-        <label class="field-label">جۆری گەیاندن</label>
+        <label class="field-label" data-i18n="services.quote.type"></label>
         <select class="field" id="quoteType">
-          <option value="air">ئاسمانی (Air)</option>
-          <option value="sea">دەریایی (Sea)</option>
-          <option value="land">وشکانی (Land)</option>
+          <option value="air" data-i18n="services.quote.air"></option>
+          <option value="sea" data-i18n="services.quote.sea"></option>
+          <option value="land" data-i18n="services.quote.land"></option>
         </select>
       </div>
       <div class="form-row">
-        <label class="field-label">کێش (کیلۆگرام)</label>
-        <input class="field" type="number" id="quoteWeight" min="1" placeholder="بۆ نموونە 50">
+        <label class="field-label" data-i18n="services.quote.weight"></label>
+        <input class="field" type="number" id="quoteWeight" min="1" data-i18n-ph="services.quote.weightPh">
       </div>
       <div class="form-row">
-        <label class="field-label">شاری مەبەست لە عێراق</label>
+        <label class="field-label" data-i18n="services.quote.dest"></label>
         <select class="field" id="quoteDest">
           <option value="hawler">هەولێر</option>
           <option value="slimani">سلێمانی</option>
@@ -902,9 +902,9 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
           <option value="basra">بەسرە</option>
         </select>
       </div>
-      <button class="btn btn-primary btn-block" onclick="calcQuote()">حسابکردنی تەخمین</button>
+      <button class="btn btn-primary btn-block" data-i18n="services.quote.btn" onclick="calcQuote()"></button>
       <div id="quoteResult"></div>
-      <p class="hint" style="text-align:start; margin-top:10px;">* ئەمە تەنها تەخمینێکی گشتییە — نرخی کۆتایی دوای پشکنینی وردی بار لەلایەن ستافمانەوە دیاری دەکرێت.</p>
+      <p class="hint" style="text-align:start; margin-top:10px;" data-i18n="services.quote.note"></p>
     </div>
   </div>
 
@@ -1431,6 +1431,10 @@ ku:{
   trust:{s1v:'+٥٠٠',s1l:'بار گەیەنراو مانگانە',s2v:'٢٤/٧',s2l:'پشتگیری بەردەوام',s3v:'٤٨ کاتژمێر',s3l:'مامناوەندی ئاسانکاری گومرگ',s4v:'٩٨%',s4l:'گەیاندن لەکاتی خۆیدا'},
   liveTrack:{heading:'ژمارەی شوێنکەوتنت هەیە؟',sub:'بارەکەت بە دیاریکردنی ژمارەی شوێنکەوتن بدۆزەرەوە',placeholder:'وەک GC10052341',button:'بگەڕێ'},
   services:{eyebrow:'خزمەتگوزاری',heading:'خزمەتگوزارییەکانمان',sub:'چارەسەری تەواو بۆ گەیاندنی بار لە دەرەوە بۆ ناو عێراق',learnMore:'زیاتر بزانە',
+    quote:{eyebrow:'تەخمینی نرخ',heading:'حساباتی نرخی گەیاندن',type:'جۆری گەیاندن',air:'ئاسمانی (Air)',sea:'دەریایی (Sea)',land:'وشکانی (Land)',
+      weight:'کێش (کیلۆگرام)',weightPh:'بۆ نموونە 50',dest:'شاری مەبەست لە عێراق',btn:'حسابکردنی تەخمین',
+      needWeight:'تکایە کێشی بار بنووسە.',resultLabel:'تەخمینی نرخ',cta:'داواکردنی نرخی وردتر',
+      note:'* ئەمە تەنها تەخمینێکی گشتییە — نرخی کۆتایی دوای پشکنینی وردی بار لەلایەن ستافمانەوە دیاری دەکرێت.'},
     items:{
       air:{title:'گەیاندنی ئاسمانی',desc:'خێراترین ڕێگا بۆ بارە پەلەیەکان.',features:['کاتی گەیشتن: ١-٣ ڕۆژ','گونجاو بۆ بارە بەنرخ و پەلەکان','شوێنکەوتنی ڕاستەوخۆ']},
       sea:{title:'گەیاندنی دەریایی',desc:'گونجاوترین تێچوون بۆ بارە قورس و گەورەکان.',features:['کاتی گەیشتن: ١٢-١٨ ڕۆژ','باشترین تێچوون بۆ بارە قورسەکان','گونجاو بۆ کۆنتەینەری تەواو یان بەشی کۆنتەینەر']},
@@ -1529,6 +1533,10 @@ en:{
   trust:{s1v:'500+',s1l:'Shipments delivered monthly',s2v:'24/7',s2l:'Ongoing support',s3v:'48 hrs',s3l:'Avg. customs clearance',s4v:'98%',s4l:'On-time delivery'},
   liveTrack:{heading:'Have a tracking number?',sub:'Find your shipment by entering its tracking ID',placeholder:'e.g. GC10052341',button:'Track'},
   services:{eyebrow:'SERVICES',heading:'Our Services',sub:'End-to-end solutions for moving cargo into Iraq',learnMore:'Learn more',
+    quote:{eyebrow:'Get an Estimate',heading:'Shipping Cost Calculator',type:'Shipping type',air:'Air Freight',sea:'Sea Freight',land:'Land Freight',
+      weight:'Weight (kg)',weightPh:'e.g. 50',dest:'Destination city in Iraq',btn:'Calculate estimate',
+      needWeight:'Please enter the shipment weight.',resultLabel:'Estimated price',cta:'Request a detailed quote',
+      note:'* This is a rough estimate only — final pricing is confirmed by our team after reviewing your shipment.'},
     items:{
       air:{title:'Air Freight',desc:'The fastest route for urgent cargo.',features:['Transit time: 1-3 days','Ideal for urgent, high-value cargo','Real-time flight tracking']},
       sea:{title:'Sea Freight',desc:'The most cost-effective option for heavy loads.',features:['Transit time: 12-18 days','Best cost for heavy loads','Full container or shared container options']},
@@ -1653,6 +1661,31 @@ function t(path){
 function escapeHtml(str){
   if(str===null || str===undefined) return '';
   return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+/* USD → IQD dual-currency display. Rate is staff-editable (see finance panel) and
+   saved locally so it survives reloads — no code changes needed when the market rate moves. */
+function getExchangeRate(){
+  const saved = Number(localStorage.getItem('gc_usd_iqd_rate'));
+  return saved > 0 ? saved : 1500;
+}
+function setExchangeRate(val){
+  const n = Number(val);
+  if(!n || n <= 0) return false;
+  localStorage.setItem('gc_usd_iqd_rate', String(n));
+  return true;
+}
+function saveExchangeRate(){
+  const val = document.getElementById('exchangeRateInput').value;
+  if(!setExchangeRate(val)){ showToast('ژمارەیەکی ڕاست بنووسە.', 'error'); return; }
+  showToast('نرخی دراو نوێکرایەوە.', 'success');
+  logActivity('update_exchange_rate', null, 'rate='+val);
+  const wrap = document.getElementById('adminPanel-finance');
+  if(wrap) wrap.innerHTML = financeRowsHTML(currentShipmentsCache||[]);
+}
+function fmtUSD(amount){
+  const usd = Number(amount)||0;
+  const iqd = Math.round(usd * getExchangeRate());
+  return `$${usd.toLocaleString()} <span class="hint" style="font-size:12px;">(≈ ${iqd.toLocaleString()} د.ع)</span>`;
 }
 function toArabicDigits(n){
   const map={'0':'٠','1':'١','2':'٢','3':'٣','4':'٤','5':'٥','6':'٦','7':'٧','8':'٨','9':'٩'};
@@ -2080,8 +2113,10 @@ function timelineHTML(s){
     let dateStr = '';
     if(s.stepDates && s.stepDates[key]) dateStr = formatDate(s.stepDates[key]);
     else if(key==='delivered' && s.eta) dateStr = t('track.eta')+' '+formatDate(s.eta);
-    const photoUrl = s.stepPhotos && s.stepPhotos[key];
-    const photoHTML = photoUrl ? `<a href="${photoUrl}" target="_blank" rel="noopener"><img src="${photoUrl}" alt="" style="width:56px; height:56px; object-fit:cover; border-radius:10px; margin-top:6px; border:1px solid var(--line-soft);"></a>` : '';
+    const photoUrls = s.stepPhotos && s.stepPhotos[key] ? (Array.isArray(s.stepPhotos[key]) ? s.stepPhotos[key] : [s.stepPhotos[key]]) : [];
+    const photoHTML = photoUrls.length ? `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">${photoUrls.map(url=>
+        `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" alt="" style="width:56px; height:56px; object-fit:cover; border-radius:10px; border:1px solid var(--line-soft);"></a>`
+      ).join('')}${photoUrls.length>1 ? `<span class="hint" style="align-self:center;">(${photoUrls.length} کارتۆن)</span>` : ''}</div>` : '';
     return `<div class="tl-step ${cls}"><div class="tl-dot"></div><div class="tl-body"><b>${t('track.steps.'+key)}</b><span>${dateStr}</span>${photoHTML}</div></div>`;
   }).join('');
 }
@@ -2178,6 +2213,90 @@ function invoiceDocumentHTML(s){
     </div>
   </div>`;
 }
+/* ================= COMMERCIAL / CUSTOMS INVOICE (PDF) =================
+   A separate document from the payment receipt above — used for customs
+   clearance, itemizing declared goods and value. Same html2canvas+jsPDF
+   snapshot approach so Kurdish/Arabic text renders correctly. */
+function commercialInvoiceDocumentHTML(s, goodsDesc){
+  return `<div style="width:780px; background:#ffffff; color:#101820; font-family:'Vazirmatn','Noto Sans Arabic',sans-serif; padding:48px; direction:${currentLang==='ku'?'rtl':'ltr'};" dir="${currentLang==='ku'?'rtl':'ltr'}">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #00A8BD; padding-bottom:20px; margin-bottom:28px;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <img src="logo-icon.png" style="width:46px; height:46px;" crossorigin="anonymous">
+        <div><div style="font-size:22px; font-weight:800;">Globall Cloud</div><div style="font-size:11.5px; color:#647FA3; letter-spacing:1px;">CHINA · UAE · IRAQ LOGISTICS</div></div>
+      </div>
+      <div style="text-align:end;">
+        <div style="font-size:19px; font-weight:800; color:#00838f;">COMMERCIAL INVOICE</div>
+        <div style="font-family:monospace; font-size:13.5px; margin-top:4px;">${escapeHtml(s.id)}</div>
+      </div>
+    </div>
+    <div style="display:flex; justify-content:space-between; gap:24px; margin-bottom:22px; font-size:13.5px;">
+      <div>
+        <div style="color:#8496AC; font-weight:700; margin-bottom:6px;">SHIPPER / FROM</div>
+        <div style="font-weight:700;">Globall Cloud Logistics</div>
+        <div>${escapeHtml(placeLabel(s.originKey))}</div>
+      </div>
+      <div style="text-align:end;">
+        <div style="color:#8496AC; font-weight:700; margin-bottom:6px;">CONSIGNEE / TO</div>
+        <div style="font-weight:700;">${escapeHtml(s.requester?.name||'—')}</div>
+        <div>${escapeHtml(s.requester?.phone||'')}</div>
+        <div>${escapeHtml(placeLabel(s.destKey))}, Iraq</div>
+      </div>
+    </div>
+    <table style="width:100%; border-collapse:collapse; font-size:13px; margin-bottom:20px;">
+      <thead><tr style="background:#00A8BD; color:#fff;">
+        <td style="padding:9px 12px; font-weight:700;">Description of Goods</td>
+        <td style="padding:9px 12px; font-weight:700; text-align:center;">Packages</td>
+        <td style="padding:9px 12px; font-weight:700; text-align:center;">Weight (kg)</td>
+        <td style="padding:9px 12px; font-weight:700; text-align:end;">Declared Value (USD)</td>
+      </tr></thead>
+      <tbody><tr style="background:#f1f6fa;">
+        <td style="padding:10px 12px;">${escapeHtml(goodsDesc||'General merchandise')}</td>
+        <td style="padding:10px 12px; text-align:center;">${s.itemsCount||'—'}</td>
+        <td style="padding:10px 12px; text-align:center;">${s.weightKg||0}</td>
+        <td style="padding:10px 12px; text-align:end; font-weight:700;">${formatMoney(s.totalAmount)}</td>
+      </tr></tbody>
+    </table>
+    <div style="margin-inline-start:auto; width:280px; margin-bottom:30px;">
+      <div style="display:flex; justify-content:space-between; padding:10px 0; font-size:15px; border-top:2px solid #101820;"><span style="font-weight:800;">TOTAL DECLARED VALUE</span><b>${formatMoney(s.totalAmount)}</b></div>
+    </div>
+    <div style="display:flex; justify-content:space-between; margin-top:50px; font-size:12px;">
+      <div style="width:45%; border-top:1px solid #101820; padding-top:6px;">Shipper Signature</div>
+      <div style="width:45%; border-top:1px solid #101820; padding-top:6px; text-align:end;">Authorized Signature — Globall Cloud</div>
+    </div>
+    <div style="margin-top:36px; padding-top:18px; border-top:1px solid #E3EAF3; text-align:center; font-size:12px; color:#8496AC;">
+      <div>Date: ${formatDate(new Date().toISOString())} · Tracking ID: ${escapeHtml(s.id)}</div>
+      <div>+9647507577137 · tamanblbas271@gmail.com</div>
+    </div>
+  </div>`;
+}
+async function generateCommercialInvoicePDF(shipmentId){
+  const s = (currentShipmentsCache||[]).find(x=>x.id===shipmentId) || await getShipmentForStaff(shipmentId);
+  if(!s){ showToast('بارکردنەکە نەدۆزرایەوە.', 'error'); return; }
+  const goodsDesc = window.prompt('وەسفی کاڵاکان بۆ گومرگ (بۆ نموونە: Electronics, clothing...)', '');
+  if(goodsDesc === null) return;
+  const holder = document.createElement('div');
+  holder.style.cssText = 'position:fixed; left:-9999px; top:0; pointer-events:none;';
+  try{
+    if(typeof html2canvas==='undefined' || typeof window.jspdf==='undefined'){ showToast('هەڵەیەک ڕوویدا.', 'error'); return; }
+    holder.innerHTML = commercialInvoiceDocumentHTML(s, goodsDesc);
+    document.body.appendChild(holder);
+    if(document.fonts && document.fonts.ready){ try{ await document.fonts.ready; }catch(e){} }
+    const canvas = await html2canvas(holder.firstElementChild, {scale:2, backgroundColor:'#ffffff', useCORS:true});
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'pt', 'a4');
+    const imgW = pdf.internal.pageSize.getWidth();
+    const imgH = canvas.height * (imgW / canvas.width);
+    pdf.addImage(imgData, 'JPEG', 0, 0, imgW, imgH);
+    pdf.save('Commercial-Invoice-'+s.id+'.pdf');
+    logActivity('export_commercial_invoice', s.id, goodsDesc);
+  }catch(e){
+    showToast('هەڵەیەک ڕوویدا لە دروستکردنی وەسڵی گومرگ.', 'error');
+  }finally{
+    if(holder.parentNode) holder.parentNode.removeChild(holder);
+  }
+}
+
 async function generateInvoicePDF(s){
   if(!s) return;
   const btn = document.getElementById('invoiceBtn-'+s.id);
@@ -2595,6 +2714,7 @@ function toggleTheme(){
   else document.documentElement.removeAttribute('data-theme');
   try{ localStorage.setItem('gc-theme', next); }catch(e){}
   setThemeIcon();
+  if(document.getElementById('chartRevenue') && currentShipmentsCache?.length) initAdminCharts(currentShipmentsCache);
 }
 
 /* ================= STAFF CONSOLE (admin / accountant) =================
@@ -2630,6 +2750,7 @@ async function renderAdminGate(){
     return;
   }
   loginView.style.display = 'none'; dashView.style.display = 'block';
+  startInactivityTimer();
   document.getElementById('staffRoleLabel').textContent = staffRow.role==='admin' ? 'ئەدمین' : 'محاسب';
   document.getElementById('staffEmailLabel').textContent = session.user.email;
   const shipments = await getAllShipments();
@@ -2728,7 +2849,31 @@ async function handleStaffSignIn(e){
   document.getElementById('attemptsHint').style.display = 'none';
   await renderAdminGate();
 }
-async function handleStaffSignOut(){ await sb.auth.signOut(); await renderAdminGate(); }
+async function handleStaffSignOut(){ await sb.auth.signOut(); await renderAdminGate(); stopInactivityTimer(); }
+
+/* ================= AUTO SIGN-OUT ON INACTIVITY =================
+   Security measure for shared/public computers: staff are signed out
+   automatically after 20 minutes with no clicks/keys/touches. */
+const INACTIVITY_LIMIT_MS = 20 * 60 * 1000;
+let inactivityTimer = null;
+function resetInactivityTimer(){
+  if(inactivityTimer) clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(async ()=>{
+    const {data:{session}} = await sb.auth.getSession();
+    if(session){
+      await sb.auth.signOut();
+      await renderAdminGate();
+      showToast('بەهۆی ماوەیەکی درێژی چالاک نەبوونەوە، خۆکار چوویتە دەرەوە.', 'error');
+    }
+  }, INACTIVITY_LIMIT_MS);
+}
+function startInactivityTimer(){
+  ['click','keydown','touchstart','mousemove'].forEach(evt=>document.addEventListener(evt, resetInactivityTimer, {passive:true}));
+  resetInactivityTimer();
+}
+function stopInactivityTimer(){
+  if(inactivityTimer) clearTimeout(inactivityTimer);
+}
 
 /* ================= TWO-FACTOR AUTH (2FA / TOTP) ================= */
 async function mfaVerifyChallenge(e){
@@ -2799,6 +2944,61 @@ let currentShipmentsCache = [];
 let currentMessagesCache = [];
 let adminFilterStatus = 'all';
 let adminSearchQuery = '';
+let selectedShipmentIds = new Set();
+
+function toggleBulkSelect(id, checked){
+  if(checked) selectedShipmentIds.add(id); else selectedShipmentIds.delete(id);
+  document.getElementById('bulkActionBar')?.remove();
+  const wrap = document.getElementById('adminShipmentListWrap');
+  if(wrap) wrap.insertAdjacentHTML('afterbegin', bulkActionBarHTML(filteredAdminShipments()));
+}
+function bulkActionBarHTML(list){
+  const n = selectedShipmentIds.size;
+  if(n===0) return '';
+  return `<div id="bulkActionBar" class="admin-row" style="background:var(--surface-2); margin-bottom:10px;">
+    <div class="admin-row-main"><b>${n} بار هەڵبژێردراوە</b></div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="btn btn-outline" style="padding:8px 14px;" onclick="exportSelectedExcel()">Export Excel</button>
+      <button class="btn btn-outline" style="padding:8px 14px;" onclick="bulkMarkDelivered()">نیشانکردن وەک گەیشتوو</button>
+      <button class="btn btn-ghost" style="padding:8px 14px;" onclick="clearBulkSelect()">پاکردنەوە</button>
+    </div>
+  </div>`;
+}
+function clearBulkSelect(){ selectedShipmentIds.clear(); renderAdminShipmentList(); }
+function exportSelectedExcel(){
+  const rows = (currentShipmentsCache||[]).filter(s=>selectedShipmentIds.has(s.id));
+  if(rows.length===0){ showToast('هیچ بارێک هەڵنەبژێردراوە.', 'error'); return; }
+  const header = ['ژمارەی شوێنکەوتن','ناوی کڕیار','شار','دۆخ','جۆر','کێش','کۆی گشتی','دراوە','ماوە','بەروار'];
+  const aoa = [header, ...rows.map(s => [
+    s.id, s.requester?.name||'', placeLabel(s.destKey)||'', STEP_LABELS_KU[s.currentStepIndex]||'', s.type||'', s.weightKg||'',
+    s.totalAmount||0, s.paidAmount||0, (Number(s.totalAmount||0)-Number(s.paidAmount||0)),
+    s.createdAt ? new Date(s.createdAt).toLocaleDateString('en-GB') : ''
+  ])];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{wch:16},{wch:20},{wch:12},{wch:14},{wch:10},{wch:8},{wch:10},{wch:10},{wch:10},{wch:12}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'هەڵبژێردراوەکان');
+  XLSX.writeFile(wb, 'selected-shipments.xlsx');
+  logActivity('export_excel', null, 'selected('+rows.length+')');
+}
+async function bulkMarkDelivered(){
+  const ids = Array.from(selectedShipmentIds);
+  if(ids.length===0) return;
+  if(!confirm(`دڵنیایت لە نیشانکردنی ${ids.length} بار وەک گەیشتوو؟`)) return;
+  for(const id of ids){
+    const s = await getShipmentForStaff(id);
+    if(!s) continue;
+    s.currentStepIndex = 5;
+    s.stepDates = s.stepDates || {};
+    if(!s.stepDates.delivered) s.stepDates.delivered = new Date().toISOString();
+    await saveShipment(s);
+    logActivity('update_status', id, 'status → گەیشت (bulk)');
+  }
+  showToast(`${ids.length} بار وەک گەیشتوو نیشانکرا.`, 'success');
+  selectedShipmentIds.clear();
+  currentShipmentsCache = await getAllShipments();
+  renderAdminShipmentList();
+}
 
 function statusGroupForStep(stepIndex){
   if(stepIndex >= 5) return 'delivered';
@@ -2836,11 +3036,12 @@ function renderAdminShipmentList(){
     wrap.innerHTML = `<div class="admin-empty"><svg><use href="#i-box"></use></svg><p>هیچ بارێک نەدۆزرایەوە.</p></div>`;
     return;
   }
-  wrap.innerHTML = '<div class="admin-list">' + list.map(s=>{
+  wrap.innerHTML = bulkActionBarHTML(list) + '<div class="admin-list">' + list.map(s=>{
     const grp = statusGroupForStep(s.currentStepIndex);
     const grpLabel = grp==='delivered' ? 'گەیشتوو' : grp==='transit' ? 'لە ڕێگادا' : 'چاوەڕوان';
     return `
     <div class="admin-row status-${grp}">
+      <input type="checkbox" class="bulk-select-box" value="${s.id}" onchange="toggleBulkSelect('${s.id}', this.checked)" ${selectedShipmentIds.has(s.id)?'checked':''} style="width:18px; height:18px; margin-inline-end:6px; align-self:flex-start; margin-top:4px;">
       <div class="admin-row-main">
         <div class="admin-row-top">
           <b class="mono">${s.id}</b>
@@ -2856,13 +3057,15 @@ function renderAdminShipmentList(){
         </select>
       </div>
       <div class="admin-row-actions">
-        <label class="btn btn-ghost btn-icon" aria-label="بارکردنی وێنە بۆ ئەم قۆناغە" title="بارکردنی وێنە بۆ ئەم قۆناغە" style="cursor:pointer;">
+        <label class="btn btn-ghost btn-icon" aria-label="بارکردنی وێنەی کارتۆنەکان بۆ ئەم قۆناغە (چەندین وێنە بەیەکەوە)" title="بارکردنی وێنەی کارتۆنەکان (چەندین وێنە بەیەکەوە)" style="cursor:pointer; position:relative;">
           <svg class="icon-sm"><use href="#i-box"></use></svg>
-          <input type="file" accept="image/*" style="display:none;" onchange="uploadStepPhoto('${s.id}', this.files[0])">
+          ${(()=>{ const sk=STEP_KEYS[s.currentStepIndex]; const arr=s.stepPhotos && s.stepPhotos[sk] ? (Array.isArray(s.stepPhotos[sk])?s.stepPhotos[sk]:[s.stepPhotos[sk]]) : []; return arr.length ? `<span style="position:absolute; top:-6px; inset-inline-end:-6px; background:var(--teal); color:#04262b; font-size:10px; font-weight:800; border-radius:999px; min-width:16px; height:16px; display:flex; align-items:center; justify-content:center; padding:0 3px;">${arr.length}</span>` : ''; })()}
+          <input type="file" accept="image/*" multiple style="display:none;" onchange="uploadStepPhoto('${s.id}', this.files)">
         </label>
         <button class="btn btn-ghost btn-icon" onclick="printShipmentLabel('${s.id}')" aria-label="چاپکردنی لەیبڵ" title="چاپکردنی لەیبڵ"><svg class="icon-sm"><use href="#i-box"></use></svg></button>
         <button class="btn btn-ghost btn-icon" onclick="sendWhatsAppUpdate('${s.id}')" aria-label="ناردنی نوێکردنەوە بە واتساپ" title="ناردنی نوێکردنەوە بە واتساپ"><svg class="icon-sm"><use href="#i-whatsapp"></use></svg></button>
         <button class="btn btn-ghost btn-icon" id="invoiceBtnAdmin-${s.id}" onclick="generateInvoiceForIdAdmin('${s.id}')" aria-label="دابەزاندنی وەسڵ" title="دابەزاندنی وەسڵ"><svg class="icon-sm"><use href="#i-download"></use></svg></button>
+        <button class="btn btn-ghost btn-icon" onclick="generateCommercialInvoicePDF('${s.id}')" aria-label="وەسڵی گومرگ (Commercial Invoice)" title="وەسڵی گومرگ (Commercial Invoice)"><svg class="icon-sm"><use href="#i-shield"></use></svg></button>
       </div>
     </div>`;
   }).join('') + '</div>';
@@ -3363,26 +3566,37 @@ async function logActivity(action, targetId, details){
   }catch(e){ /* logging is best-effort */ }
 }
 
-async function uploadStepPhoto(shipmentId, file){
-  if(!file) return;
-  if(!file.type.startsWith('image/')){ showToast('تکایە تەنها فایلی وێنە هەڵبژێرە.', 'error'); return; }
-  showToast('بارکردنی وێنە...', 'success');
+async function uploadStepPhoto(shipmentId, fileList){
+  const files = Array.from(fileList || []);
+  if(files.length === 0) return;
+  const bad = files.find(f => !f.type.startsWith('image/'));
+  if(bad){ showToast('تکایە تەنها فایلی وێنە هەڵبژێرە.', 'error'); return; }
+  showToast(files.length > 1 ? `بارکردنی ${files.length} وێنە...` : 'بارکردنی وێنە...', 'success');
   const s = await getShipmentForStaff(shipmentId);
   if(!s) return;
   const stepKey = STEP_KEYS[s.currentStepIndex];
-  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-  const path = `${shipmentId}/${stepKey}-${Date.now()}.${ext}`;
-  const {error: upErr} = await sb.storage.from('shipment-photos').upload(path, file, {upsert:true});
-  if(upErr){ showToast('هەڵەیەک ڕوویدا لە بارکردنی وێنە.', 'error'); return; }
-  const {data: pub} = sb.storage.from('shipment-photos').getPublicUrl(path);
   s.stepPhotos = s.stepPhotos || {};
-  s.stepPhotos[stepKey] = pub.publicUrl;
+  if(!Array.isArray(s.stepPhotos[stepKey])) s.stepPhotos[stepKey] = s.stepPhotos[stepKey] ? [s.stepPhotos[stepKey]] : [];
+
+  let uploadedCount = 0;
+  for(let i=0; i<files.length; i++){
+    const file = files[i];
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = `${shipmentId}/${stepKey}-${Date.now()}-${i}.${ext}`;
+    const {error: upErr} = await sb.storage.from('shipment-photos').upload(path, file, {upsert:true});
+    if(upErr) continue;
+    const {data: pub} = sb.storage.from('shipment-photos').getPublicUrl(path);
+    s.stepPhotos[stepKey].push(pub.publicUrl);
+    uploadedCount++;
+  }
+  if(uploadedCount === 0){ showToast('هەڵەیەک ڕوویدا لە بارکردنی وێنەکان.', 'error'); return; }
+
   const {error} = await saveShipment(s);
-  if(error){ showToast('وێنە بارکرا بەڵام پاشەکەوت نەکرا.', 'error'); return; }
-  logActivity('upload_photo', shipmentId, stepKey);
+  if(error){ showToast('وێنەکان بارکران بەڵام پاشەکەوت نەکران.', 'error'); return; }
+  logActivity('upload_photo', shipmentId, stepKey+' ('+uploadedCount+' وێنە)');
   const idx = currentShipmentsCache.findIndex(x=>x.id===shipmentId);
   if(idx>-1) currentShipmentsCache[idx] = s;
-  showToast('وێنە زیادکرا بۆ ئەم قۆناغە.', 'success');
+  showToast(`${uploadedCount} وێنە زیادکرا بۆ ئەم قۆناغە.`, 'success');
 }
 
 let chartRevenueInstance = null, chartRoutesInstance = null;
@@ -3405,11 +3619,13 @@ function initAdminCharts(shipments){
     const m = months.find(x=>x.key===key);
     if(m) m.total += Number(s.totalAmount||0);
   });
+  const isLight = currentTheme()==='light';
+  const tickColor = isLight ? '#4A5A72' : '#8aa3b8';
   if(chartRevenueInstance) chartRevenueInstance.destroy();
   chartRevenueInstance = new Chart(revCanvas, {
     type:'bar',
     data:{ labels: months.map(m=>m.label), datasets:[{ data: months.map(m=>m.total), backgroundColor:'#1abc9c', borderRadius:6 }] },
-    options:{ plugins:{legend:{display:false}}, scales:{ y:{ beginAtZero:true, ticks:{color:'#8aa3b8'} }, x:{ ticks:{color:'#8aa3b8'} } } }
+    options:{ plugins:{legend:{display:false}}, scales:{ y:{ beginAtZero:true, ticks:{color:tickColor} }, x:{ ticks:{color:tickColor} } } }
   });
 
   /* Top routes by shipment count */
@@ -3423,7 +3639,7 @@ function initAdminCharts(shipments){
   chartRoutesInstance = new Chart(routeCanvas, {
     type:'bar',
     data:{ labels: topRoutes.map(r=>r[0]), datasets:[{ data: topRoutes.map(r=>r[1]), backgroundColor:'#e8b64c', borderRadius:6 }] },
-    options:{ indexAxis:'y', plugins:{legend:{display:false}}, scales:{ x:{ beginAtZero:true, ticks:{color:'#8aa3b8'} }, y:{ ticks:{color:'#8aa3b8'} } } }
+    options:{ indexAxis:'y', plugins:{legend:{display:false}}, scales:{ x:{ beginAtZero:true, ticks:{color:tickColor} }, y:{ ticks:{color:tickColor} } } }
   });
 }
 
@@ -3486,18 +3702,21 @@ function calcQuote(){
   const dest = document.getElementById('quoteDest').value;
   const resultEl = document.getElementById('quoteResult');
   if(!weight || weight <= 0){
-    resultEl.innerHTML = `<p class="admin-error" style="display:block; margin-top:12px;">تکایە کێشی بار بنووسە.</p>`;
+    resultEl.innerHTML = `<p class="admin-error" style="display:block; margin-top:12px;">${t('services.quote.needWeight')}</p>`;
     return;
   }
   const base = weight * QUOTE_RATES[type] * QUOTE_CITY_FACTOR[dest];
   const est = Math.max(base, QUOTE_MIN_CHARGE[type]);
   const low = Math.round(est * 0.9);
   const high = Math.round(est * 1.15);
+  const lowIqd = Math.round(low * getExchangeRate());
+  const highIqd = Math.round(high * getExchangeRate());
   resultEl.innerHTML = `
     <div style="margin-top:16px; padding:16px; background:var(--surface-2); border-radius:var(--radius-m); text-align:center;">
-      <span class="hint">تەخمینی نرخ</span>
+      <span class="hint">${t('services.quote.resultLabel')}</span>
       <div style="font-size:26px; font-weight:800; color:var(--teal-l); margin:6px 0;">$${low} – $${high}</div>
-      <a class="btn btn-primary" style="margin-top:8px;" onclick="route('request')">داواکردنی نرخی وردتر</a>
+      <div class="hint">≈ ${lowIqd.toLocaleString()} – ${highIqd.toLocaleString()} د.ع</div>
+      <a class="btn btn-primary" style="margin-top:8px;" onclick="route('request')">${t('services.quote.cta')}</a>
     </div>`;
 }
 
@@ -3558,7 +3777,14 @@ async function submitNewShipment(){
 }
 
 function financeRowsHTML(shipments){
-  const listTitle = `<div class="admin-section-title"><svg><use href="#i-card"></use></svg><span>دارایی بارەکان</span></div>`;
+  const listTitle = `<div class="admin-section-title"><svg><use href="#i-card"></use></svg><span>دارایی بارەکان</span></div>
+  <div class="admin-row" style="margin-bottom:16px; background:var(--surface-2);">
+    <div class="admin-row-main"><b>نرخی دراوی دۆلار بۆ دینار</b><span class="hint">ئێستا: 1 USD = ${getExchangeRate().toLocaleString()} IQD — بەردەوام لەگۆڕاندایە، ڕۆژانە نوێی بکەرەوە</span></div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <input class="field" type="number" id="exchangeRateInput" value="${getExchangeRate()}" style="max-width:120px;" placeholder="1500">
+      <button class="btn btn-outline" style="padding:10px 16px;" onclick="saveExchangeRate()">نوێکردنەوە</button>
+    </div>
+  </div>`;
   if(shipments.length===0) return listTitle + `<div class="admin-empty"><svg><use href="#i-card"></use></svg><p>هێشتا هیچ بارکردنێک تۆمار نەکراوە.</p></div>`;
   const rows = '<div class="admin-list">' + shipments.map(s=>{
     const remaining = (Number(s.totalAmount)||0) - (Number(s.paidAmount)||0);
@@ -3567,7 +3793,7 @@ function financeRowsHTML(shipments){
       <div class="admin-row-main">
         <b class="mono">${s.id}</b>
         <span>${escapeHtml(s.requester?.name||'—')}</span>
-        <span class="admin-fin-remaining">ماوە: $${remaining.toLocaleString()}</span>
+        <span class="admin-fin-remaining">ماوە: ${fmtUSD(remaining)}</span>
       </div>
       <div class="admin-fin-inputs">
         <div class="admin-fin-field"><label>کۆی گشتی ($)</label><input class="field" type="number" id="tot-${s.id}" value="${s.totalAmount||0}" style="max-width:110px;"></div>
@@ -3603,7 +3829,7 @@ function renderAdminOpsHTML(shipments){
     <div class="admin-list" style="margin-bottom:18px;">
       ${overduePayments.slice(0,5).map(s=>`
         <div class="admin-row">
-          <div class="admin-row-main"><b>پارەی دواکەوتوو — ${escapeHtml(s.id)}</b><span>${escapeHtml(s.requester?.name||'—')} · ماوە: $${(Number(s.totalAmount||0)-Number(s.paidAmount||0)).toLocaleString()}</span></div>
+          <div class="admin-row-main"><b>پارەی دواکەوتوو — ${escapeHtml(s.id)}</b><span>${escapeHtml(s.requester?.name||'—')} · ماوە: ${fmtUSD(Number(s.totalAmount||0)-Number(s.paidAmount||0))}</span></div>
           <span class="hint">${new Date(s.createdAt).toLocaleDateString('en-GB')}</span>
         </div>`).join('')}
       ${delayedShipments.slice(0,5).map(s=>`
@@ -3735,7 +3961,7 @@ async function updateShipmentFinance(id){
   showToast('گۆڕانکارییەکانی دارایی پاشەکەوت کران.', 'success');
   const row = document.getElementById('tot-'+id)?.closest('.admin-row');
   const remainEl = row?.querySelector('.admin-fin-remaining');
-  if(remainEl) remainEl.textContent = `ماوە: $${(s.totalAmount - s.paidAmount).toLocaleString()}`;
+  if(remainEl) remainEl.innerHTML = `ماوە: ${fmtUSD(s.totalAmount - s.paidAmount)}`;
   updateFinanceStatsUI();
 }
 /* Recomputes the summary cards at the top of the finance tab from the live
