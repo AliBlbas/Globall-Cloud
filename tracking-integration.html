@@ -1,0 +1,104 @@
+<!-- Enhanced Tracking Integration Example -->
+<!-- Add this to your tracking page (page-track) -->
+
+<div class="tracking-integration-example">
+  <!-- Live Map Section -->
+  <section class="tracking-section">
+    <h2>📍 Live Route Map</h2>
+    <div id="liveMapContainer" class="live-map-container">
+      <!-- Map will be rendered here by JavaScript -->
+    </div>
+  </section>
+
+  <!-- Notification Setup -->
+  <section class="tracking-section">
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+      <h2 style="margin: 0;">🔔 Real-time Notifications</h2>
+      <button class="btn btn-small" id="enableNotificationsBtn" onclick="enableNotifications()">
+        Enable Notifications
+      </button>
+    </div>
+    <p style="color: var(--muted); font-size: 14px;">
+      Get instant updates when your shipment status changes. Enable browser notifications to stay informed.
+    </p>
+  </section>
+
+  <!-- Tracking Details -->
+  <section class="tracking-section">
+    <h2>📦 Tracking Details</h2>
+    <div id="trackingDetailsContainer">
+      <!-- Tracking details and timeline will be rendered here -->
+    </div>
+  </section>
+</div>
+
+<style>
+.tracking-integration-example {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.tracking-section {
+  margin-bottom: 40px;
+}
+
+.tracking-section h2 {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+.btn-small {
+  padding: 8px 16px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+</style>
+
+<script>
+// Integration script for enhanced tracking
+
+function enableNotifications() {
+  window.enhancedTracking.requestNotificationPermission().then(granted => {
+    if (granted) {
+      showToast('Notifications enabled! You will receive updates.', 'success');
+    } else {
+      showToast('Notifications are disabled in your browser settings.', 'error');
+    }
+  });
+}
+
+// Example: Initialize tracking when user searches
+function doTrackSearch() {
+  const shipmentId = document.getElementById('trackInput').value.trim();
+  if (!shipmentId) {
+    showToast('Please enter a shipment ID', 'error');
+    return;
+  }
+
+  window.enhancedTracking.initializeTracking(shipmentId)
+    .then(shipment => {
+      // Initialize map
+      window.enhancedTracking.initializeMap('liveMapContainer', shipmentId);
+
+      // Update tracking details
+      const container = document.getElementById('trackingDetailsContainer');
+      container.innerHTML = window.enhancedTracking.generateTrackingHTML(shipment);
+
+      showToast('Tracking initialized! Real-time updates enabled.', 'success');
+    })
+    .catch(error => {
+      console.error('Tracking error:', error);
+      showToast('Shipment not found. Please check the ID.', 'error');
+    });
+}
+
+// Cleanup when leaving page
+window.addEventListener('beforeunload', () => {
+  // Clean up subscriptions
+  for (let [shipmentId] of window.enhancedTracking.shipments) {
+    window.enhancedTracking.cleanup(shipmentId);
+  }
+});
+</script>

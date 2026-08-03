@@ -1,0 +1,294 @@
+/* Enhanced Tracking Styles */
+
+.live-map-container {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-l);
+  padding: 20px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.route-visualization {
+  width: 100%;
+  height: auto;
+  min-height: 300px;
+  margin-bottom: 16px;
+}
+
+.map-point {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.map-point:hover {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.origin-point {
+  fill: #22C55E;
+}
+
+.current-point {
+  fill: #00D4FF;
+}
+
+.dest-point {
+  fill: #E5533D;
+}
+
+.map-label {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--text);
+  pointer-events: none;
+}
+
+.route-line {
+  stroke: #1677FF;
+  stroke-width: 3;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.map-legend {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.legend-item .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* Tracking Details */
+.tracking-details {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-m);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.tracking-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.tracking-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-family: var(--mono);
+}
+
+.tracking-route {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.tracking-route strong {
+  color: var(--text);
+}
+
+.tracking-progress {
+  margin-bottom: 20px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: linear-gradient(90deg, var(--teal), var(--teal-l));
+  border-radius: 999px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 12px rgba(0, 194, 217, 0.3);
+}
+
+/* Timeline */
+.timeline {
+  position: relative;
+  padding-left: 24px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--line-soft);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -17px;
+  top: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 2px solid var(--line-soft);
+  transition: all 0.2s ease;
+}
+
+.timeline-item.completed .timeline-dot {
+  background: #22C55E;
+  border-color: #22C55E;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+}
+
+.timeline-item.current .timeline-dot {
+  background: #00D4FF;
+  border-color: #00D4FF;
+  width: 16px;
+  height: 16px;
+  left: -19px;
+  box-shadow: 0 0 12px rgba(0, 194, 217, 0.5);
+}
+
+.timeline-content {
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border-radius: 8px;
+  border-left: 3px solid var(--line-soft);
+}
+
+.timeline-item.completed .timeline-content {
+  border-left-color: #22C55E;
+}
+
+.timeline-item.current .timeline-content {
+  border-left-color: #00D4FF;
+  background: rgba(0, 194, 217, 0.08);
+}
+
+.timeline-content strong {
+  display: block;
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.timeline-content p {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 0 6px 0;
+}
+
+.timeline-date {
+  display: block;
+  font-size: 11.5px;
+  color: var(--muted-2);
+  font-family: var(--mono);
+}
+
+/* Status Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: var(--mono);
+  letter-spacing: 0.3px;
+}
+
+.badge-success {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22C55E;
+}
+
+.badge-info {
+  background: rgba(0, 194, 217, 0.12);
+  color: #00D4FF;
+}
+
+.badge-warning {
+  background: rgba(240, 168, 58, 0.12);
+  color: #F0A83A;
+}
+
+.badge-danger {
+  background: rgba(229, 83, 61, 0.12);
+  color: #E5533D;
+}
+
+/* Notifications */
+.notification-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  background: #E5533D;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(229, 83, 61, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .live-map-container {
+    padding: 16px;
+  }
+
+  .route-visualization {
+    min-height: 250px;
+  }
+
+  .tracking-details {
+    padding: 16px;
+  }
+
+  .timeline {
+    padding-left: 20px;
+  }
+
+  .timeline-dot {
+    left: -14px;
+  }
+
+  .timeline-item.current .timeline-dot {
+    left: -16px;
+  }
+
+  .badge {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+}
