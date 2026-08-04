@@ -1258,6 +1258,7 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
           <button class="btn btn-outline" onclick="openMfaSettings()">🔐 2FA</button>
+          <button class="btn btn-outline" onclick="openChangelog()">🆕 نوێترین گۆڕانکارییەکان</button>
           <button class="btn btn-outline" onclick="handleStaffSignOut()">چوونەدەرەوە</button>
         </div>
       </div>
@@ -1270,6 +1271,14 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
       <div class="admin-section-title"><svg><use href="#i-shield"></use></svg><span>چوونەژوورەوەی دوو هەنگاوی (2FA)</span></div>
       <div id="mfaSettingsBody"><p class="hint">بارکردن...</p></div>
       <button class="btn btn-outline btn-block" style="margin-top:14px;" onclick="closeMfaSettings()">داخستن</button>
+    </div>
+  </div>
+
+  <div id="changelogModal" class="confirm-modal-overlay" style="display:none;">
+    <div class="confirm-modal" style="max-height:80vh; overflow-y:auto;">
+      <div class="admin-section-title"><svg><use href="#i-clock"></use></svg><span>نوێترین گۆڕانکارییەکان</span></div>
+      <div id="changelogBody"></div>
+      <button class="btn btn-outline btn-block" style="margin-top:14px;" onclick="closeChangelog()">داخستن</button>
     </div>
   </div>
 
@@ -1768,6 +1777,7 @@ function shipmentToRow(s){
     origin_key:s.originKey, dest_key:s.destKey, type:s.type, weight_kg:s.weightKg, volume_cbm:s.volumeCbm,
     items_count:s.itemsCount, total_amount:s.totalAmount||0, paid_amount:s.paidAmount||0,
     current_step_index:s.currentStepIndex||0, step_dates:s.stepDates||{}, step_photos:s.stepPhotos||{}, eta:s.eta||null,
+    batch_code: s.batchCode || null,
     customer_user_id: s.customerUserId || null,
     directory_customer_id: s.directoryCustomerId || null
   };
@@ -1779,6 +1789,7 @@ function rowToShipment(row){
     totalAmount:row.total_amount, paidAmount:row.paid_amount,
     currentStepIndex:row.current_step_index, stepDates:row.step_dates||{}, stepPhotos:row.step_photos||{}, eta:row.eta,
     createdAt: row.created_at,
+    batchCode: row.batch_code || null,
     requester:{name:row.customer_name, phone:row.customer_phone, email:row.customer_email, notes:row.notes},
     customerUserId: row.customer_user_id || null,
     directoryCustomerId: row.directory_customer_id || null
@@ -2867,8 +2878,12 @@ function resetInactivityTimer(){
     }
   }, INACTIVITY_LIMIT_MS);
 }
+let inactivityListenersAttached = false;
 function startInactivityTimer(){
-  ['click','keydown','touchstart','mousemove'].forEach(evt=>document.addEventListener(evt, resetInactivityTimer, {passive:true}));
+  if(!inactivityListenersAttached){
+    ['click','keydown','touchstart','mousemove'].forEach(evt=>document.addEventListener(evt, resetInactivityTimer, {passive:true}));
+    inactivityListenersAttached = true;
+  }
   resetInactivityTimer();
 }
 function stopInactivityTimer(){
@@ -2939,6 +2954,40 @@ async function mfaUnenroll(factorId){
   closeMfaSettings();
 }
 function closeMfaSettings(){ document.getElementById('mfaSettingsModal').style.display = 'none'; }
+
+/* ================= WHAT'S NEW / CHANGELOG =================
+   A simple staff-facing summary of platform updates, kept newest-first.
+   Add a new entry at the top whenever a meaningful feature ships. */
+const CHANGELOG = [
+  { date:'٢٠٢٦-٠٨', items:[
+    'وێنەی چەندین کارتۆن بۆ هەر قۆناغی بار (کاتی وەرگرتن و تەسلیمکردنەوە)',
+    'حسابی نرخ بە دیناری عێراقیش، نرخی دراو ئێستا لە داشبۆردەوە دەگۆڕدرێت (پێویست بە کۆد نییە)',
+    'وەسڵی گومرگ (Commercial Invoice) بۆ هەر بارێک',
+    'کردارە کۆمەڵییەکان: هەڵبژاردنی چەند بار پێکەوە بۆ Export یان نیشانکردن وەک گەیشتوو',
+    'چارتی ئاماری داهات و باشترین ڕووتەکان لە داشبۆرد',
+    'گەڕانی گشتی و ئاگاداری خۆکاری بارە دواکەوتووەکان',
+    'لەیبڵی بار بە QR کۆد بۆ چاپکردن',
+    'حساباتی نرخی گەیاندن بۆ میوانان',
+    'خۆکار چوونەدەرەوەی ستاف دوای ٢٠ خولەک چالاک نەبوونەوە'
+  ]},
+  { date:'٢٠٢٦-٠٨', items:[
+    'چوونەژوورەوەی دوو هەنگاوی (2FA) بۆ هەژماری ستاف',
+    'دابەزاندنی Excel ڕاستەقینە بۆ کۆگای موشتەریان و بارەکان',
+    'PWA — دامەزراندنی سایتەکە وەک ئەپ لەسەر مۆبایل',
+    'لۆگی چالاکی ستاف — تۆمارکردنی هەموو کردارە گرنگەکان'
+  ]}
+];
+function openChangelog(){
+  document.getElementById('changelogModal').style.display = 'flex';
+  document.getElementById('changelogBody').innerHTML = CHANGELOG.map(group => `
+    <div style="margin-bottom:16px;">
+      <b style="color:var(--teal-l); font-size:13px;">${group.date}</b>
+      <ul style="margin:8px 0 0; padding-inline-start:20px; font-size:13.5px; line-height:1.9;">
+        ${group.items.map(i=>`<li>${escapeHtml(i)}</li>`).join('')}
+      </ul>
+    </div>`).join('');
+}
+function closeChangelog(){ document.getElementById('changelogModal').style.display = 'none'; }
 
 let currentShipmentsCache = [];
 let currentMessagesCache = [];
@@ -3049,6 +3098,9 @@ function renderAdminShipmentList(){
         </div>
         <span>${escapeHtml(s.requester?.name||'—')} · ${escapeHtml(s.requester?.phone||'—')}</span>
         <span class="hint" style="text-align:start; margin-top:0;">${placeLabel(s.originKey)} → ${placeLabel(s.destKey)} · ${s.weightKg||0}kg</span>
+        <span class="hint" style="text-align:start; margin-top:2px; cursor:pointer; text-decoration:underline dotted;" onclick="editBatchCode('${s.id}')" title="کرتە بکە بۆ گۆڕینی کۆدی باچ">
+          📦 ${s.batchCode ? escapeHtml(s.batchCode) : 'کۆدی باچ دانەنراوە — کرتە بکە بۆ زیادکردن'}
+        </span>
       </div>
       <div class="admin-select-wrap">
         <label>دۆخی بار</label>
@@ -3120,6 +3172,9 @@ function renderAdminMainHTML(shipments){
       <button class="admin-tab" id="adminMainTab-activity" onclick="setAdminMainTab('activity')">
         <svg class="icon-sm" style="margin-inline-end:5px;"><use href="#i-clock"></use></svg>چالاکی ستاف
       </button>
+      <button class="admin-tab" id="adminMainTab-warehouse" onclick="setAdminMainTab('warehouse')">
+        <svg class="icon-sm" style="margin-inline-end:5px;"><use href="#i-box"></use></svg>وەرگرتن لە عەنبەر
+      </button>
     </div>
     <button class="btn btn-primary" style="padding:10px 18px;" onclick="toggleNewShipmentForm()">
       <svg class="icon-sm"><use href="#i-box"></use></svg> بارکردنی نوێ
@@ -3149,6 +3204,7 @@ function renderAdminMainHTML(shipments){
       <div class="form-row"><label class="field-label">کۆی گشتی ($)</label><input class="field" type="number" id="newShipTotal" value="0"></div>
       <div class="form-row"><label class="field-label">پارەدراو ($)</label><input class="field" type="number" id="newShipPaid" value="0"></div>
     </div>
+    <div class="form-row"><label class="field-label">کۆدی کڕیار لە کۆگا (GC-XXX)</label><input class="field" id="newShipBatch" placeholder="بۆ نموونە GC-450" oninput="lookupBatchCode(this.value, 'newShipBatchMatch')"><span id="newShipBatchMatch" class="hint" style="text-align:start;"></span></div>
     <div style="display:flex; gap:10px;">
       <button class="btn btn-primary" onclick="submitNewShipment()">پاشەکەوتکردن</button>
       <button class="btn btn-outline" onclick="toggleNewShipmentForm()">پاشگەزبوونەوە</button>
@@ -3197,7 +3253,31 @@ function renderAdminMainHTML(shipments){
     <div id="activityListWrap">${skeletonRows(6)}</div>
   </div>`;
 
-  return tabBar + newShipmentForm + opsPanel + financePanel + customersPanel + directoryPanel + activityPanel;
+  const warehousePanel = `<div id="adminPanel-warehouse" style="display:none;">
+    <div class="admin-section-title"><svg><use href="#i-box"></use></svg><span>وەرگرتنی باچ/کیسە لە عەنبەر</span></div>
+    <div class="quote-card" style="margin-bottom:20px;">
+      <div class="form-grid">
+        <div class="form-row"><label class="field-label">کۆدی کڕیار لە کۆگا (GC-XXX)</label><input class="field" id="whBatchCode" placeholder="بۆ نموونە GC-450" oninput="lookupBatchCode(this.value, 'whBatchMatch')"><span id="whBatchMatch" class="hint" style="text-align:start;"></span></div>
+        <div class="form-row"><label class="field-label">شوێن</label>
+          <select class="field" id="whLocation">
+            <option value="Dubai">عەنبەری دوبەی</option>
+            <option value="China">عەنبەری چین</option>
+            <option value="Erbil">عەنبەری هەولێر</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row"><label class="field-label">تێبینی (ئارەزوومەندانە)</label><input class="field" id="whNotes" placeholder="بۆ نموونە: ٣ کارتۆن، باشە"></div>
+      <div class="form-row"><label class="field-label">وێنەکان (وەسڵ/بستە — دەتوانیت چەندین وێنە هەڵبژێریت)</label>
+        <input class="field" type="file" accept="image/*" multiple id="whPhotos">
+      </div>
+      <button class="btn btn-primary btn-block" onclick="submitWarehouseReceipt()">تۆمارکردن</button>
+      <p id="whMsg" class="hint" style="display:none;"></p>
+    </div>
+    <div class="admin-section-title"><span>دوایین تۆمارەکان</span></div>
+    <div id="warehouseListWrap">${skeletonRows(4)}</div>
+  </div>`;
+
+  return tabBar + newShipmentForm + opsPanel + financePanel + customersPanel + directoryPanel + activityPanel + warehousePanel;
 }
 
 function setAdminMainTab(tab){
@@ -3206,14 +3286,17 @@ function setAdminMainTab(tab){
   document.getElementById('adminMainTab-customers').classList.toggle('active', tab==='customers');
   document.getElementById('adminMainTab-directory').classList.toggle('active', tab==='directory');
   document.getElementById('adminMainTab-activity').classList.toggle('active', tab==='activity');
+  document.getElementById('adminMainTab-warehouse').classList.toggle('active', tab==='warehouse');
   document.getElementById('adminPanel-ops').style.display = tab==='ops' ? 'block' : 'none';
   document.getElementById('adminPanel-finance').style.display = tab==='finance' ? 'block' : 'none';
   document.getElementById('adminPanel-customers').style.display = tab==='customers' ? 'block' : 'none';
   document.getElementById('adminPanel-directory').style.display = tab==='directory' ? 'block' : 'none';
   document.getElementById('adminPanel-activity').style.display = tab==='activity' ? 'block' : 'none';
+  document.getElementById('adminPanel-warehouse').style.display = tab==='warehouse' ? 'block' : 'none';
   if(tab==='customers') loadCustomersList();
   if(tab==='directory') loadDirectory();
   if(tab==='activity') loadActivityLog();
+  if(tab==='warehouse') loadWarehouseReceipts();
 }
 
 const ACTIVITY_ACTION_LABELS = {
@@ -3650,7 +3733,8 @@ function runGlobalSearch(query){
   const shipMatches = (currentShipmentsCache||[]).filter(s =>
     (s.id||'').toLowerCase().includes(q) ||
     (s.requester?.name||'').toLowerCase().includes(q) ||
-    (s.requester?.phone||'').toLowerCase().includes(q)
+    (s.requester?.phone||'').toLowerCase().includes(q) ||
+    (s.batchCode||'').toLowerCase().includes(q)
   ).slice(0,5);
   if(shipMatches.length===0){ wrap.innerHTML = '<p class="hint" style="margin-top:8px;">هیچ ئەنجامێک نەدۆزرایەوە.</p>'; return; }
   wrap.innerHTML = '<div class="admin-list" style="margin-top:8px;">' + shipMatches.map(s=>`
@@ -3720,6 +3804,106 @@ function calcQuote(){
     </div>`;
 }
 
+let batchLookupTimer = null;
+function lookupBatchCode(code, resultElId){
+  clearTimeout(batchLookupTimer);
+  const el = document.getElementById(resultElId);
+  const val = (code||'').trim();
+  if(!val){ el.textContent = ''; return; }
+  el.textContent = 'گەڕان...';
+  batchLookupTimer = setTimeout(async ()=>{
+    const {data, error} = await sb.from('customer_directory').select('name,phone,city').ilike('code', val).limit(1);
+    if(error || !data || data.length===0){
+      el.innerHTML = `<span style="color:var(--amber-l);">⚠ ئەم کۆدە لە کۆگای موشتەریان نەدۆزرایەوە</span>`;
+      return;
+    }
+    const c = data[0];
+    el.innerHTML = `<span style="color:var(--mint);">✓ ${escapeHtml(c.name||'—')} · ${escapeHtml(c.phone||'')} ${c.city?'· '+escapeHtml(c.city):''}</span>`;
+  }, 400);
+}
+
+async function editBatchCode(shipmentId){
+  const s = await getShipmentForStaff(shipmentId);
+  if(!s) return;
+  const val = window.prompt('کۆدی کڕیار لە کۆگا (GC-XXX):', s.batchCode || '');
+  if(val === null) return;
+  s.batchCode = val.trim() || null;
+  const {error} = await saveShipment(s);
+  if(error){ showToast('هەڵەیەک ڕوویدا.', 'error'); return; }
+  logActivity('update_batch_code', shipmentId, s.batchCode||'(لابرا)');
+  const idx = currentShipmentsCache.findIndex(x=>x.id===shipmentId);
+  if(idx>-1) currentShipmentsCache[idx] = s;
+  showToast('کۆدی کڕیار نوێکرایەوە.', 'success');
+  renderAdminShipmentList();
+}
+
+async function submitWarehouseReceipt(){
+  const batchCode = document.getElementById('whBatchCode').value.trim();
+  const location = document.getElementById('whLocation').value;
+  const notes = document.getElementById('whNotes').value.trim();
+  const files = Array.from(document.getElementById('whPhotos').files || []);
+  const msgEl = document.getElementById('whMsg');
+  msgEl.style.display = 'none';
+  if(!batchCode){ msgEl.textContent = 'تکایە کۆدی باچ/کیسە بنووسە.'; msgEl.style.display = 'block'; return; }
+
+  const { data: userData } = await sb.auth.getUser();
+  const uid = userData?.user?.id;
+  const {data: inserted, error: insErr} = await sb.from('warehouse_receipts')
+    .insert({batch_code: batchCode, location, notes: notes||null, created_by: uid||null, created_by_name: currentStaffName})
+    .select('id').single();
+  if(insErr){ msgEl.textContent = 'هەڵەیەک ڕوویدا، تۆمار نەکرا.'; msgEl.style.display = 'block'; return; }
+
+  let photoUrls = [];
+  for(let i=0; i<files.length; i++){
+    const file = files[i];
+    if(!file.type.startsWith('image/')) continue;
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = `${inserted.id}/${Date.now()}-${i}.${ext}`;
+    const {error: upErr} = await sb.storage.from('warehouse-receipts').upload(path, file, {upsert:true});
+    if(upErr) continue;
+    const {data: pub} = sb.storage.from('warehouse-receipts').getPublicUrl(path);
+    photoUrls.push(pub.publicUrl);
+  }
+  if(photoUrls.length){
+    await sb.from('warehouse_receipts').update({photos: photoUrls}).eq('id', inserted.id);
+  }
+
+  logActivity('warehouse_receipt', batchCode, location+(photoUrls.length?' — '+photoUrls.length+' وێنە':''));
+  showToast('وەرگرتنی باچ تۆمارکرا.', 'success');
+  document.getElementById('whBatchCode').value = '';
+  document.getElementById('whNotes').value = '';
+  document.getElementById('whPhotos').value = '';
+  loadWarehouseReceipts();
+}
+
+async function loadWarehouseReceipts(){
+  const wrap = document.getElementById('warehouseListWrap');
+  const {data, error} = await sb.from('warehouse_receipts').select('*').order('received_at', {ascending:false}).limit(50);
+  if(error){ wrap.innerHTML = '<p class="hint">هەڵەیەک ڕوویدا لە هێنانی تۆمارەکان.</p>'; return; }
+  if(!data || data.length===0){ wrap.innerHTML = `<div class="admin-empty"><svg><use href="#i-box"></use></svg><p>هێشتا هیچ تۆمارێک نییە.</p></div>`; return; }
+  wrap.innerHTML = data.map(r => `
+    <div class="admin-row" style="align-items:flex-start;">
+      <div class="admin-row-main">
+        <div class="admin-row-top"><b class="mono">📦 ${escapeHtml(r.batch_code)}</b><span class="hint">${r.location==='Dubai'?'عەنبەری دوبەی':r.location==='China'?'عەنبەری چین':'عەنبەری هەولێر'}</span></div>
+        ${r.notes ? `<span>${escapeHtml(r.notes)}</span>` : ''}
+        ${(r.photos||[]).length ? `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">${r.photos.map(url=>
+          `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" alt="" style="width:64px; height:64px; object-fit:cover; border-radius:10px; border:1px solid var(--line-soft);"></a>`
+        ).join('')}</div>` : ''}
+        <span class="hint" style="text-align:start; margin-top:4px;">${escapeHtml(r.created_by_name||'ستاف')} · ${timeAgoKu(r.received_at)}</span>
+      </div>
+      <button class="btn btn-ghost btn-icon" onclick="deleteWarehouseReceipt(${r.id})" aria-label="سڕینەوە" title="سڕینەوە"><svg class="icon-sm"><use href="#i-trash"></use></svg></button>
+    </div>`).join('');
+}
+
+async function deleteWarehouseReceipt(id){
+  if(!confirm('دڵنیایت لە سڕینەوەی ئەم تۆمارە؟')) return;
+  const {error} = await sb.from('warehouse_receipts').delete().eq('id', id);
+  if(error){ showToast('هەڵەیەک ڕوویدا.', 'error'); return; }
+  logActivity('delete_warehouse_receipt', String(id), null);
+  showToast('تۆمار سڕایەوە.', 'success');
+  loadWarehouseReceipts();
+}
+
 async function doDeleteCustomer(){
   if(!pendingDeleteCustomerId) return;
   const {error} = await sb.rpc('admin_delete_customer', {target_id: pendingDeleteCustomerId});
@@ -3758,6 +3942,7 @@ async function submitNewShipment(){
     paidAmount: Number(document.getElementById('newShipPaid').value) || 0,
     currentStepIndex: 0,
     stepDates: {placed: new Date().toISOString()},
+    batchCode: document.getElementById('newShipBatch').value.trim() || null,
     requester: {name, phone, email:'', notes:''},
     directoryCustomerId: await lookupDirectoryCustomerId(phone)
   };
