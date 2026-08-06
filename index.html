@@ -20,9 +20,9 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Globall Cloud — China · UAE · Iraq Logistics">
 <meta property="og:description" content="گەیاندنی بار بە متمانەوە لە چین و ئیمارات بۆ هەموو شارەکانی عێراق. شوێنکەوتنی ڕاستەوخۆ، نرخی ڕکابەرانە.">
-<meta property="og:url" content="https://globall-cloud.netlify.app/">
+<meta property="og:url" content="https://globall-cloud.pages.dev/">
 <meta property="og:locale" content="ckb_IQ">
-<meta property="og:image" content="https://globall-cloud.netlify.app/og-image.jpg">
+<meta property="og:image" content="https://globall-cloud.pages.dev/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Globall Cloud — China · UAE · Iraq Logistics">
@@ -30,8 +30,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Globall Cloud — China · UAE · Iraq Logistics">
 <meta name="twitter:description" content="گەیاندنی بار بە متمانەوە لە چین و ئیمارات بۆ هەموو شارەکانی عێراق.">
-<meta name="twitter:image" content="https://globall-cloud.netlify.app/og-image.jpg">
-<link rel="canonical" href="https://globall-cloud.netlify.app/">
+<meta name="twitter:image" content="https://globall-cloud.pages.dev/og-image.jpg">
+<link rel="canonical" href="https://globall-cloud.pages.dev/">
 <link rel="icon" type="image/png" href="logo-icon.png">
 <link rel="apple-touch-icon" href="logo-icon.png">
 <link rel="manifest" href="manifest.json">
@@ -39,10 +39,10 @@
 {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
-  "@id": "https://globall-cloud.netlify.app/#business",
+  "@id": "https://globall-cloud.pages.dev/#business",
   "name": "Globall Cloud",
-  "image": "https://globall-cloud.netlify.app/og-image.jpg",
-  "url": "https://globall-cloud.netlify.app/",
+  "image": "https://globall-cloud.pages.dev/og-image.jpg",
+  "url": "https://globall-cloud.pages.dev/",
   "telephone": "+9647507577137",
   "email": "tamanblbas271@gmail.com",
   "priceRange": "$$",
@@ -187,6 +187,43 @@ textarea.field{resize:vertical; min-height:100px;}
 .mobile-menu.open{display:flex;}
 .mobile-menu a{padding:14px 4px; font-weight:700; color:var(--muted); border-bottom:1px solid var(--line-soft); min-height:44px; display:flex; align-items:center;}
 .mobile-menu a.active{color:var(--teal-l);}
+
+.top-announcement{position:relative; z-index:205; background:linear-gradient(90deg, rgba(0,194,217,.16), rgba(240,168,58,.12)); border-bottom:1px solid var(--line-soft); backdrop-filter:blur(10px);}
+.top-announcement-inner{max-width:var(--maxw); margin:0 auto; padding:8px 24px; display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; font-size:11.5px; font-weight:800; color:var(--text);}
+.announcement-pill,.announcement-chip{display:inline-flex; align-items:center; gap:7px; padding:7px 12px; border-radius:999px; background:rgba(7,18,32,.38); border:1px solid rgba(255,255,255,.08); box-shadow:0 10px 24px rgba(0,0,0,.12);}
+.announcement-pill svg,.announcement-chip svg{color:var(--teal-l);}
+.hero{position:relative;}
+.route-map{position:relative; isolation:isolate;}
+.route-map::before{content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(2,8,20,.08), rgba(2,8,20,.48)); z-index:1; pointer-events:none;}
+.route-map > img{position:relative; z-index:0;}
+.hero-overlay{position:absolute; inset:18px; z-index:2; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none;}
+.hero-status-card{align-self:flex-start; max-width:240px; padding:16px 16px 14px; border-radius:18px; background:rgba(6,20,40,.58); border:1px solid rgba(255,255,255,.12); backdrop-filter:blur(14px); box-shadow:0 18px 36px rgba(0,0,0,.18);}
+.hero-kicker{display:inline-flex; align-items:center; gap:6px; font-size:10.5px; letter-spacing:1.6px; font-family:var(--mono); color:var(--teal-l); font-weight:800; margin-bottom:8px; text-transform:uppercase;}
+.hero-status-card b{display:block; font-size:15px; font-weight:900; margin-bottom:5px; line-height:1.35;}
+.hero-status-card small{display:block; color:var(--muted); font-size:12px; line-height:1.7;}
+.hero-route-stack{display:grid; gap:10px; align-self:flex-end; width:min(100%, 280px);}
+.route-chip{display:flex; align-items:center; gap:10px; padding:13px 14px; border-radius:16px; background:rgba(7,18,32,.62); border:1px solid rgba(255,255,255,.10); backdrop-filter:blur(14px); box-shadow:0 14px 30px rgba(0,0,0,.18);}
+.route-chip-num{width:34px; height:34px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:11px; font-weight:900; color:#03181d; background:linear-gradient(135deg,var(--teal-l),var(--amber-l)); flex-shrink:0;}
+.route-chip b{display:block; font-size:13.5px; font-weight:800; line-height:1.2;}
+.route-chip small{display:block; color:var(--muted); font-size:11.5px; margin-top:2px;}
+@media(max-width:940px){ .hero-overlay{inset:14px;} }
+@media(max-width:640px){ .hero-overlay{position:static; margin-top:12px; padding:0; pointer-events:auto;} .route-map{padding:12px; display:flex; flex-direction:column; gap:12px;} .route-map::before{border-radius:var(--radius-l);} .route-map > img{border-radius:var(--radius-l);} .seal-badge{inset-inline-end:12px; top:12px;} .hero-status-card,.route-chip{backdrop-filter:none;} }
+.corridor-strip{background:linear-gradient(160deg, var(--surface), var(--ink-2)); border:1px solid var(--line-soft); border-radius:var(--radius-l); padding:28px 24px; box-shadow:var(--shadow);}
+.corridor-head{display:flex; justify-content:space-between; gap:18px; align-items:flex-start; margin-bottom:18px; flex-wrap:wrap;}
+.corridor-head h3{font-size:clamp(20px,3vw,28px); font-weight:900; margin-bottom:8px;}
+.corridor-head p{color:var(--muted); font-size:14px; line-height:1.8; max-width:60ch;}
+.corridor-badge{display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:999px; background:rgba(0,194,217,.10); border:1px solid rgba(0,194,217,.18); color:var(--teal-l); font-size:12px; font-weight:800; white-space:nowrap;}
+.corridor-list{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px;}
+@media(max-width:860px){ .corridor-list{grid-template-columns:1fr;} }
+.corridor-item{position:relative; padding:20px 18px; border-radius:18px; background:rgba(255,255,255,.03); border:1px solid var(--line-soft); overflow:hidden;}
+.corridor-item::after{content:''; position:absolute; inset-inline:0; top:0; height:2px; background:linear-gradient(90deg,var(--teal-l),var(--amber-l)); opacity:.9;}
+.corridor-top{display:flex; align-items:center; gap:12px; margin-bottom:12px;}
+.corridor-flag{width:40px; height:40px; border-radius:14px; display:flex; align-items:center; justify-content:center; background:rgba(0,194,217,.09); font-size:22px; flex-shrink:0;}
+.corridor-item h4{font-size:15px; font-weight:900; margin:0 0 4px;}
+.corridor-meta{font-size:11.5px; color:var(--muted-2); font-family:var(--mono); letter-spacing:.3px; text-transform:uppercase;}
+.corridor-item p{color:var(--muted); font-size:13.5px; line-height:1.75; margin:0;}
+.corridor-tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;}
+.corridor-tags span{font-size:11px; font-weight:800; color:var(--text); background:var(--surface-2); border:1px solid var(--line-soft); padding:6px 10px; border-radius:999px;}
 @media(max-width:900px){
   .nav-links, .nav-right .btn{display:none;}
   .burger{display:flex;}
@@ -246,6 +283,50 @@ textarea.field{resize:vertical; min-height:100px;}
 @media(max-width:760px){ .grid-4{grid-template-columns:1fr 1fr;} }
 @media(max-width:520px){ .grid-4{grid-template-columns:1fr;} }
 .grid-3{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px;}
+
+.business-hub-layout{display:grid; grid-template-columns:1.2fr .8fr; gap:20px; align-items:stretch;}
+.business-hub-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px;}
+@media(max-width:900px){ .business-hub-layout{grid-template-columns:1fr;} }
+@media(max-width:640px){ .business-hub-grid{grid-template-columns:1fr;} }
+.hub-card{display:flex; flex-direction:column; align-items:flex-start; gap:12px; text-align:start; padding:24px 22px; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); cursor:pointer; transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease; min-height:100%;}
+.hub-card:hover{transform:translateY(-3px); border-color:var(--teal); box-shadow:0 16px 34px rgba(0,194,217,.14);}
+.hub-card h4{font-size:15px; font-weight:800; margin:0;}
+.hub-card p{color:var(--muted); font-size:13.5px; line-height:1.75;}
+.hub-icon{width:46px; height:46px; border-radius:13px; background:var(--surface-2); display:flex; align-items:center; justify-content:center; color:var(--teal-l); flex-shrink:0;}
+.hub-icon svg{width:24px; height:24px;}
+.hub-link{display:inline-flex; align-items:center; gap:6px; margin-top:auto; color:var(--teal-l); font-size:12.5px; font-weight:800;}
+.hub-link svg{transform:scaleX(-1);}
+.preview-sub{color:var(--muted); font-size:13.8px; line-height:1.75; margin-top:4px;}
+.dash-mini-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:16px 0 18px;}
+.mini-stat{padding:14px; background:var(--surface-2); border:1px solid var(--line-soft); border-radius:14px;}
+.mini-stat b{display:block; font-family:var(--mono); font-size:18px; margin-bottom:4px;}
+.mini-stat span{font-size:11.5px; color:var(--muted);}
+.preview-actions{display:grid; gap:10px;}
+.warehouse-list{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px;}
+@media(max-width:920px){ .warehouse-list{grid-template-columns:1fr;} }
+.warehouse-card{display:flex; flex-direction:column; gap:12px; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); padding:22px;}
+.warehouse-card:hover{border-color:var(--teal);}
+.warehouse-card .tag{font-size:11px; font-weight:800; letter-spacing:1px; color:var(--teal-l); font-family:var(--mono);}
+.warehouse-card h4{font-size:15.5px; font-weight:800;}
+.warehouse-card p{color:var(--muted); font-size:13.5px; line-height:1.75;}
+.warehouse-meta{display:flex; flex-direction:column; gap:8px; font-size:12.5px; color:var(--muted);}
+.warehouse-meta span{display:flex; align-items:flex-start; gap:7px;}
+.warehouse-meta svg{width:16px; height:16px; color:var(--teal-l); flex-shrink:0; margin-top:2px;}
+
+.ops-layout{display:grid; grid-template-columns:.78fr 1.22fr; gap:20px; align-items:stretch;}
+.ops-metrics{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px;}
+.ops-metric{padding:18px; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m);}
+.ops-metric b{display:block; font-family:var(--mono); font-size:24px; margin-bottom:4px; background:linear-gradient(135deg,var(--teal-l),var(--amber-l)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;}
+.ops-metric span{color:var(--muted); font-size:12px; line-height:1.5;}
+.ops-cards{display:grid; gap:14px;}
+.ops-card{padding:20px; background:linear-gradient(160deg,var(--surface),var(--ink-2)); border:1px solid var(--line-soft); border-radius:var(--radius-m); box-shadow:0 10px 24px rgba(2,8,20,.18);}
+.ops-card-top{display:flex; align-items:flex-start; gap:12px; margin-bottom:10px;}
+.ops-card .service-icon{margin:0; flex-shrink:0;}
+.ops-card h4{font-size:15.5px; font-weight:800; margin:0 0 4px;}
+.ops-card p{color:var(--muted); font-size:13.5px; line-height:1.75; margin:0 0 12px;}
+.ops-points{display:flex; flex-wrap:wrap; gap:8px;}
+.ops-points span{font-size:11.5px; color:var(--text); background:var(--surface-2); border:1px solid var(--line-soft); border-radius:999px; padding:6px 10px;}
+@media(max-width:900px){ .ops-layout{grid-template-columns:1fr;} }
 
 .testimonial-card{position:relative; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); padding:26px 24px; display:flex; flex-direction:column; gap:14px; transition:transform .25s ease, border-color .25s ease, box-shadow .25s ease;}
 .testimonial-card:hover{transform:translateY(-3px); border-color:var(--line); box-shadow:0 16px 34px rgba(2,8,20,.35);}
@@ -683,6 +764,12 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
 </defs>
 </svg>
 
+<div class="top-announcement">
+  <div class="top-announcement-inner">
+    <span class="announcement-pill"><svg class="icon-sm"><use href="#i-truck"></use></svg><span data-i18n="topbar.note"></span></span>
+    <span class="announcement-chip"><svg class="icon-sm"><use href="#i-clock"></use></svg><span data-i18n="topbar.support"></span></span>
+  </div>
+</div>
 <nav class="nav">
   <div class="nav-inner">
     <div class="brand" onclick="route('home')">
@@ -735,8 +822,8 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
       <h1 data-i18n="hero.title"></h1>
       <p class="sub" data-i18n="hero.subtitle"></p>
       <div class="hero-ctas">
-        <button class="btn btn-primary" onclick="route('request')"><svg class="icon-sm"><use href="#i-box"></use></svg><span data-i18n="hero.ctaQuote"></span></button>
-        <button class="btn btn-outline" onclick="goTrack()"><svg class="icon-sm"><use href="#i-search"></use></svg><span data-i18n="hero.ctaTrack"></span></button>
+        <button class="btn btn-primary" onclick="goTrack()"><svg class="icon-sm"><use href="#i-search"></use></svg><span data-i18n="hero.ctaTrack"></span></button>
+        <button class="btn btn-outline" onclick="route('request')"><svg class="icon-sm"><use href="#i-box"></use></svg><span data-i18n="hero.ctaQuote"></span></button>
       </div>
     </div>
     <div class="route-map">
@@ -750,6 +837,27 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
           </text>
         </svg>
         <div class="seal-center"><svg class="icon-sm"><use href="#i-box"></use></svg></div>
+      </div>
+      <div class="hero-overlay">
+        <div class="hero-status-card">
+          <span class="hero-kicker" data-i18n="hero.badge"></span>
+          <b data-i18n="hero.liveStatus"></b>
+          <small data-i18n="hero.liveSub"></small>
+        </div>
+        <div class="hero-route-stack">
+          <div class="route-chip">
+            <span class="route-chip-num">01</span>
+            <div><b data-i18n="hero.route.a"></b><small data-i18n="hero.routeOrigin"></small></div>
+          </div>
+          <div class="route-chip">
+            <span class="route-chip-num">02</span>
+            <div><b data-i18n="hero.route.b"></b><small data-i18n="hero.routeTransit"></small></div>
+          </div>
+          <div class="route-chip">
+            <span class="route-chip-num">03</span>
+            <div><b data-i18n="hero.route.c"></b><small data-i18n="hero.routeDestination"></small></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -769,6 +877,40 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
         <input class="field" id="heroTrackInput" data-i18n-ph="liveTrack.placeholder">
         <button class="btn btn-primary" type="submit"><svg class="icon-sm"><use href="#i-search"></use></svg><span data-i18n="liveTrack.button"></span></button>
       </form>
+    </div>
+  </div>
+
+  <div class="section container">
+    <div class="corridor-strip reveal">
+      <div class="corridor-head">
+        <div>
+          <span class="eyebrow" data-i18n="corridor.eyebrow"></span>
+          <h3 data-i18n="corridor.heading"></h3>
+          <p data-i18n="corridor.sub"></p>
+        </div>
+        <div class="corridor-badge"><svg class="icon-sm"><use href="#i-plane"></use></svg><span data-i18n="corridor.badge"></span></div>
+      </div>
+      <div class="corridor-list" id="corridorStrip"></div>
+    </div>
+  </div>
+
+  <div class="section container">
+    <div class="section-head reveal">
+      <span class="eyebrow" data-i18n="business.eyebrow"></span>
+      <h2 data-i18n="business.heading"></h2>
+      <p data-i18n="business.sub"></p>
+    </div>
+    <div class="business-hub-layout">
+      <div class="business-hub-grid reveal" id="businessHubGrid"></div>
+      <div class="dashboard-preview card reveal">
+        <div class="admin-section-title"><svg><use href="#i-user"></use></svg><span data-i18n="dashboardPreview.heading"></span></div>
+        <p class="preview-sub" data-i18n="dashboardPreview.sub"></p>
+        <div class="dash-mini-grid" id="dashMiniGrid"></div>
+        <div class="preview-actions">
+          <button class="btn btn-primary btn-block" onclick="route('portal')" data-i18n="dashboardPreview.btnPortal"></button>
+          <button class="btn btn-outline btn-block" onclick="goTrack()" data-i18n="dashboardPreview.btnTrack"></button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -795,6 +937,27 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
       <h2 data-i18n="why.heading"></h2>
     </div>
     <div class="grid-4 reveal" id="whyGrid"></div>
+  </div>
+
+  <div class="section container">
+    <div class="section-head reveal">
+      <span class="eyebrow" data-i18n="warehouses.eyebrow"></span>
+      <h2 data-i18n="warehouses.heading"></h2>
+      <p data-i18n="warehouses.sub"></p>
+    </div>
+    <div class="warehouse-list reveal" id="warehouseCardsGrid"></div>
+  </div>
+
+  <div class="section container">
+    <div class="section-head reveal">
+      <span class="eyebrow" data-i18n="ops.eyebrow"></span>
+      <h2 data-i18n="ops.heading"></h2>
+      <p data-i18n="ops.sub"></p>
+    </div>
+    <div class="ops-layout reveal">
+      <div class="ops-metrics" id="opsMetrics"></div>
+      <div class="ops-cards" id="opsCards"></div>
+    </div>
   </div>
 
   <div class="section container">
@@ -1443,10 +1606,34 @@ async function notifyOwner(subject, fields){
 const I18N = {
 ku:{
   brand:{tagline:'لۆجستیک'},
+  topbar:{note:'سەرەکییەکانی چین، دوبەی و هەولێر بەبەردەوامی چالاکن',support:'پشتیوانی زیندوو ٢٤/٧'},
   nav:{home:'سەرەکی',about:'دەربارەمان',services:'خزمەتگوزارییەکان',track:'شوێنکەوتن',contact:'پەیوەندی',signIn:'چوونەژوورەوە',dashboard:'داشبۆرد',quote:'داواکردنی نرخ'},
-  hero:{eyebrow:'چین  ·  ئیمارات  ·  عێراق',title:'گەیاندنی متمانە بۆ هەموو سنوورەکان',subtitle:'Globall Cloud بارت بە سەلامەتی و خێرایی لە چین و ئیماراتی عەرەبی یەکگرتوو دەگەیەنێت بۆ هەموو شارەکانی عێراق.',ctaTrack:'شوێنکەوتنی بار',ctaQuote:'داواکردنی نرخ',route:{a:'گوانگژۆ، چین',b:'دوبەی، ئیمارات',c:'هەولێر، عێراق'}},
-  trust:{s1v:'+٥٠٠',s1l:'بار گەیەنراو مانگانە',s2v:'٢٤/٧',s2l:'پشتگیری بەردەوام',s3v:'٤٨ کاتژمێر',s3l:'مامناوەندی ئاسانکاری گومرگ',s4v:'٩٨%',s4l:'گەیاندن لەکاتی خۆیدا'},
-  liveTrack:{heading:'ژمارەی شوێنکەوتنت هەیە؟',sub:'بارەکەت بە دیاریکردنی ژمارەی شوێنکەوتن بدۆزەرەوە',placeholder:'وەک GC10052341',button:'بگەڕێ'},
+  hero:{eyebrow:'چین  ·  ئیمارات  ·  عێراق',title:'گەیاندنی بار بە متمانە، خێرایی و بێ سنوور',subtitle:'Globall Cloud بارت بە شێوەیەکی ئاسایشدار لە چین و ئیمارات بۆ هەموو شارەکانی عێراق دەگەیەنێت — بە شوێنکەوتنی ڕاستەوخۆ، ڕێکاری ڕوون و پشتیوانی ٢٤/٧.',ctaTrack:'شوێنکەوتنی بار',ctaQuote:'داواکردنی نرخ',route:{a:'گوانگژۆ، چین',b:'دوبەی، ئیمارات',c:'هەولێر، عێراق'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'بارەکەت لە نێوان چین → دوبەی → هەولێر بەردەوامە و هەر نوێکارییەک زوو دەردەکەوێت.',routeOrigin:'سەرەتا / Origin Hub',routeTransit:'ترانزیت / Transit Hub',routeDestination:'گەیاندن / Delivery Hub'},
+  trust:{s1v:'+٢٥K',s1l:'بار گەیەنراو',s2v:'١٢+',s2l:'شوێن و بازاڕ',s3v:'٢٤/٧',s3l:'پشتیوانی زیندوو',s4v:'٩٨%',s4l:'گەیاندنی لەکاتی خۆیدا'},
+  liveTrack:{heading:'شوێنکەوتنی بارەکەت لە چرکەیەکدا',sub:'ژمارەی شوێنکەوتنەکەت بنووسە و نوێترین دۆخی بارەکەت ببینە',placeholder:'وەک GC10052341',button:'شوێنکەوتن'},
+  business:{eyebrow:'پەڕەکانی بازرگانی',heading:'هەموو خزمەتگوزاری و پەڕە گرنگەکان لە یەک شوێن',sub:'بە یەک کلیک بچۆ بۆ خزمەتگوزاری، خەملاندنی نرخ، داشبۆرد، کۆگاکان و پەیوەندی.',
+    items:{
+      services:{title:'خزمەتگوزاری',desc:'گەیشتن بە Air، Sea، Land، گومرگ و Door-to-Door.',action:'بینینی خزمەتگوزاری',icon:'i-box',route:'services'},
+      quote:{title:'نرخی بار',desc:'نرخی خێرا و خەمڵێنراو بزانە پێش داواکاری.',action:'خەملاندنی نرخ',icon:'i-card',route:'services'},
+      dashboard:{title:'داشبۆردی کڕیار',desc:'بارەکان، ئاگادارییەکان و هەژمارەکانت بەڕێوەببە.',action:'کردنەوەی داشبۆرد',icon:'i-user',route:'portal'},
+      track:{title:'شوێنکەوتن',desc:'ژمارەی شوێنکەوتن داخڵ بکە و دۆخی بار ببینە.',action:'شوێنکەوتن بکە',icon:'i-search',route:'track'},
+      warehouses:{title:'کۆگاکان',desc:'هابەکانی چین، دوبەی و هەولێر لە یەک تۆڕدا.',action:'بینینی کۆگاکان',icon:'i-warehouse',route:'contact'},
+      contact:{title:'پەیوەندی',desc:'واتساپ، ئیمەیل و ڕێکخستن لە کەمترین کاتدا.',action:'پەیوەندیمان پێوە بکە',icon:'i-chat',route:'contact'}
+    }},
+  dashboardPreview:{heading:'پێشبینی داشبۆردی کڕیار',sub:'کڕیاران دەتوانن لێرە بارەکان، نرخ و ئاگادارییەکان بە شێوەی خێرا بەڕێوەببەن.',stats:[{v:'4',l:'بارە چالاکەکان'},{v:'29',l:'گەیشتوو'},{v:'2',l:'چاوەڕوان'},{v:'8',l:'فاکتۆرەکان'}],btnPortal:'کردنەوەی پرۆتال',btnTrack:'شوێنکەوتن بکە'},
+  warehouses:{eyebrow:'کۆگاکان',heading:'تۆڕی کۆگاکانمان',sub:'هابە سەرەکییەکان لە چین، دوبەی و هەولێر بۆ جوڵاندنی خێرای بار.',
+    items:{
+      guangzhou:{tag:'هاب سەرەکی چین',title:'کۆگای گوانگجو',address:'گوانگجو، چین',hours:'دووشەممە - شەممە',features:['کۆکردنەوەی بار','وێنەی QC','پاکەتکردنی خێرا']},
+      dubai:{tag:'هاب ترانزیت',title:'کۆگای دوبەی',address:'دوبەی، ئیمارات',hours:'دووشەممە - شەممە',features:['ترانزیتی خێرا','بەڕێوەبردنی هەلومەرج','ئاسایشی باش']},
+      erbil:{tag:'هابی دابەشکردن',title:'کۆگای هەولێر',address:'هەولێر، عێراق',hours:'شەممە - پێنجشەممە',features:['دابەشکردنی ناوخۆیی','پێشوازی کڕیار','گواستنەوەی خێرا']}
+    }},
+  ops:{eyebrow:'بەڕێوەبردنی ناوخۆ',heading:'کۆنسۆڵی ستاف و کارگێڕی',sub:'هەموو کارە سەرەکییەکان لە یەک دەشبووردا ببینە: بارەکان، دارایی، کۆگا و پشتگیری.',
+    metrics:[{v:'12',l:'باری چاوەڕوان'},{v:'98%',l:'ڕێژەی سەرکەوتن'},{v:'7',l:'تیکەتی کراوە'},{v:'3',l:'ژمارەی کۆگا'}],
+    cards:[
+      {icon:'i-card',title:'دارایی و وەسڵەکان',desc:'داهات، وەسڵە PDF و پارەی لەبەردەست نەماوەکان بە شێوەی ڕوون ببینە.',points:['وەسڵی PDF','ڕاپۆرتی داهات','داواکاری پارەدان']},
+      {icon:'i-warehouse',title:'وەسڵی کۆگا',desc:'ورودبوونی بار لە هەر هابێکدا تۆمار بکە و بەڵگەکەی بخەوە.',points:['وێنەی بار','تۆماری هاتن','لێدانی پارچە']},
+      {icon:'i-chat',title:'ڕیزبەندی پشتگیری',desc:'پەیامی کڕیاران بە خێرایی وەربگرە و هەموو گفتوگۆکان لە شوێنێکدا پارێزە.',points:['هەواڵی واتساپ','تێبینی دۆخ','وەڵامی ئامادە']}
+    ]},
   services:{eyebrow:'خزمەتگوزاری',heading:'خزمەتگوزارییەکانمان',sub:'چارەسەری تەواو بۆ گەیاندنی بار لە دەرەوە بۆ ناو عێراق',learnMore:'زیاتر بزانە',
     quote:{eyebrow:'تەخمینی نرخ',heading:'حساباتی نرخی گەیاندن',type:'جۆری گەیاندن',air:'ئاسمانی (Air)',sea:'دەریایی (Sea)',land:'وشکانی (Land)',
       weight:'کێش (کیلۆگرام)',weightPh:'بۆ نموونە 50',dest:'شاری مەبەست لە عێراق',btn:'حسابکردنی تەخمین',
@@ -1490,6 +1677,11 @@ ku:{
     ],
     storyTitle:'چیرۆکمان',storyBody:'Globall Cloud وەک هاوبەشێکی گەیاندنی بار دەستی کرد بۆ چارەسەرکردنی کێشەی گەیاندنی بار لەنێوان بازاڕەکانی چین و ئیمارات و شارەکانی عێراق. لە ڕێگەی کارامەیی و پابەندبوونمانەوە، بووینەتە هەڵبژاردەیەکی متمانەپێکراو بۆ کۆمپانیا و کەسانی زۆر کە پێویستیان بە گەیاندنی بارێکی ئارام و خێرایە. بەردەوامین لە پەرەپێدانی خزمەتگوزارییەکانمان بۆ باشترکردنی ئەزموونی هەر کڕیارێک.'},
   cta:{heading:'ئامادەیت بار بنێریت؟',sub:'ئەمڕۆ داواکاریەکەت بنێرە و لە کەمترین کات نرخێک وەربگرە.',b1:'داواکردنی نرخ',b2:'پەیوەندیمان پێوە بکە'},
+  corridor:{eyebrow:'ڕێڕەوی کارەکە',heading:'لە چین بۆ دوبەی بۆ هەولێر',sub:'سێ هەنگاوی سەرەکی بە ڕوونی و بە شێوازی کۆمپانیایەکی نێودەوڵەتی ببینە.',badge:'ڕێڕەوی زیندوو',items:[
+    {flag:'🇨🇳',title:'گەیاندن لە چین',meta:'Origin Hub',desc:'بارەکەت وەردەگیرێت، QC دەکرێت و بۆ ترانزیت ئامادە دەبێت.',tags:['QC','Packing','Pickup']},
+    {flag:'🇦🇪',title:'هابەی دوبەی',meta:'Transit Hub',desc:'لە دوبەیدا ڕێکخستن و بەڕێوەبردنی ڕێگەی گواستنەوە بە شێوەی خێرا.',tags:['Transit','Air Cargo','Sea Cargo']},
+    {flag:'🇮🇶',title:'گەیاندنی هەولێر',meta:'Delivery Hub',desc:'پاش گومرگ و ڕێکخستنی دوایین، بارەکەت بە سەلامەتی دەگات.',tags:['Customs','Door-to-Door','Final Mile']}
+  ]},
   footer:{blurb:'Globall Cloud — گەیاندنی بار بە متمانەوە لە چین و ئیمارات بۆ هەموو عێراق.',quick:'بەستەرە خێراکان',servicesH:'خزمەتگوزارییەکان',contactH:'پەیوەندی',address:'هەولێری نوێ، پشت مەعەد گەشە، هەولێر، عێراق',rights:'هەموو مافەکان پارێزراون.',privacy:'ڕێساکانی تایبەتێتی',terms:'مەرجی بەکارهێنان'},
   testi:{
     eyebrow:'ڕاوبۆچوونی کڕیاران',
@@ -1545,10 +1737,34 @@ ku:{
 },
 en:{
   brand:{tagline:'LOGISTICS'},
+  topbar:{note:'Active lanes across China, Dubai, and Erbil',support:'Live support 24/7'},
   nav:{home:'Home',about:'About Us',services:'Services',track:'Track',contact:'Contact',signIn:'Sign In',dashboard:'Dashboard',quote:'Get a Quote'},
-  hero:{eyebrow:'CHINA  ·  UAE  ·  IRAQ',title:'Delivering Trust Across Borders',subtitle:'Globall Cloud moves your cargo safely and quickly from China and the United Arab Emirates to every city in Iraq.',ctaTrack:'Track Shipment',ctaQuote:'Get a Quote',route:{a:'Guangzhou, China',b:'Dubai, UAE',c:'Erbil, Iraq'}},
-  trust:{s1v:'500+',s1l:'Shipments delivered monthly',s2v:'24/7',s2l:'Ongoing support',s3v:'48 hrs',s3l:'Avg. customs clearance',s4v:'98%',s4l:'On-time delivery'},
-  liveTrack:{heading:'Have a tracking number?',sub:'Find your shipment by entering its tracking ID',placeholder:'e.g. GC10052341',button:'Track'},
+  hero:{eyebrow:'CHINA  ·  UAE  ·  IRAQ',title:'Delivering Trust Across Borders',subtitle:'Globall Cloud moves your cargo safely and quickly from China and the United Arab Emirates to every city in Iraq — with live tracking, clear milestones, and 24/7 support.',ctaTrack:'Track Shipment',ctaQuote:'Get a Quote',route:{a:'Guangzhou, China',b:'Dubai, UAE',c:'Erbil, Iraq'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'Your cargo is moving through our China → Dubai → Erbil network with live updates.',routeOrigin:'Origin Hub',routeTransit:'Transit Hub',routeDestination:'Delivery Hub'},
+  trust:{s1v:'25K+',s1l:'Delivered shipments',s2v:'12+',s2l:'Connected markets',s3v:'24/7',s3l:'Live support',s4v:'98%',s4l:'On-time delivery'},
+  liveTrack:{heading:'Track in seconds',sub:'Enter your tracking number to see the latest shipment status instantly.',placeholder:'e.g. GC10052341',button:'Track Shipment'},
+  business:{eyebrow:'BUSINESS PAGES',heading:'Everything customers need is one tap away',sub:'Jump straight to services, pricing, dashboard tools, warehouses, and support.',
+    items:{
+      services:{title:'Services',desc:'Air, sea, land, customs, and door-to-door delivery.',action:'View services',icon:'i-box',route:'services'},
+      quote:{title:'Price Calculator',desc:'Estimate your shipping cost before you request a quote.',action:'Calculate price',icon:'i-card',route:'services'},
+      dashboard:{title:'Customer Dashboard',desc:'Manage shipments, notifications, and account details.',action:'Open dashboard',icon:'i-user',route:'portal'},
+      track:{title:'Tracking',desc:'Enter a tracking ID and see the latest shipment status.',action:'Track shipment',icon:'i-search',route:'track'},
+      warehouses:{title:'Warehouses',desc:'China, Dubai, and Erbil hubs that keep cargo moving.',action:'View network',icon:'i-warehouse',route:'contact'},
+      contact:{title:'Contact',desc:'WhatsApp, email, and quick support in one place.',action:'Get in touch',icon:'i-chat',route:'contact'}
+    }},
+  dashboardPreview:{heading:'Customer Dashboard Preview',sub:'A quick look at the portal customers use to manage shipments anywhere.',stats:[{v:'4',l:'Active shipments'},{v:'29',l:'Delivered'},{v:'2',l:'Pending'},{v:'8',l:'Invoices'}],btnPortal:'Open portal',btnTrack:'Track a parcel'},
+  warehouses:{eyebrow:'WAREHOUSES',heading:'Our Warehouse Network',sub:'Strategic hubs in China, Dubai, and Erbil keep cargo moving smoothly.',
+    items:{
+      guangzhou:{tag:'Origin Hub',title:'Guangzhou Warehouse',address:'Guangzhou, China',hours:'Mon - Sat',features:['Cargo consolidation','QC photo checks','Fast packing']},
+      dubai:{tag:'Transit Hub',title:'Dubai Warehouse',address:'Dubai, UAE',hours:'Mon - Sat',features:['Transit coordination','Secure handling','Status updates']},
+      erbil:{tag:'Distribution Hub',title:'Erbil Warehouse',address:'Erbil, Iraq',hours:'Sat - Thu',features:['Local delivery prep','Customer pickup','Rapid dispatch']}
+    }},
+  ops:{eyebrow:'OPERATIONS',heading:'Staff workspace and control center',sub:'A back-office hub for shipments, finance, warehouses, and support in one clean view.',
+    metrics:[{v:'12',l:'Pending loads'},{v:'98%',l:'On-time rate'},{v:'7',l:'Open tickets'},{v:'3',l:'Warehouses'}],
+    cards:[
+      {icon:'i-card',title:'Finance & invoices',desc:'Track revenue, export PDF receipts, and follow up on unpaid orders.',points:['PDF invoice export','Revenue overview','Unpaid orders']},
+      {icon:'i-warehouse',title:'Warehouse receipts',desc:'Register inbound cargo and keep proof at every hub.',points:['Inbound scans','Photo proof','Handover logs']},
+      {icon:'i-chat',title:'Support queue',desc:'Handle customer messages and resolve issues fast.',points:['WhatsApp handoff','Status notes','Saved replies']}
+    ]},
   services:{eyebrow:'SERVICES',heading:'Our Services',sub:'End-to-end solutions for moving cargo into Iraq',learnMore:'Learn more',
     quote:{eyebrow:'Get an Estimate',heading:'Shipping Cost Calculator',type:'Shipping type',air:'Air Freight',sea:'Sea Freight',land:'Land Freight',
       weight:'Weight (kg)',weightPh:'e.g. 50',dest:'Destination city in Iraq',btn:'Calculate estimate',
@@ -1592,6 +1808,11 @@ en:{
     ],
     storyTitle:'Our Story',storyBody:'Globall Cloud started as a shipping partner focused on solving cargo movement between the markets of China and the UAE and the cities of Iraq. Through efficiency and commitment, we have become a trusted choice for businesses and individuals who need reliable, fast cargo delivery. We continue to grow our services to improve the experience of every client.'},
   cta:{heading:'Ready to Ship?',sub:'Submit your request today and get a quote in minutes.',b1:'Get a Quote',b2:'Contact Us'},
+  corridor:{eyebrow:'Operational Corridor',heading:'China → Dubai → Erbil',sub:'See the three stages of the network at a glance, presented like a premium logistics brand.',badge:'Live Corridor',items:[
+    {flag:'🇨🇳',title:'China pickup',meta:'Origin Hub',desc:'Cargo is received, checked, and prepared for the next leg.',tags:['QC','Packing','Pickup']},
+    {flag:'🇦🇪',title:'Dubai transit hub',meta:'Transit Hub',desc:'Fast handling and re-routing through our UAE operations center.',tags:['Transit','Air Cargo','Sea Cargo']},
+    {flag:'🇮🇶',title:'Erbil delivery',meta:'Delivery Hub',desc:'After customs and final sorting, the shipment reaches your customer safely.',tags:['Customs','Door-to-Door','Final Mile']}
+  ]},
   footer:{blurb:'Globall Cloud — Shipping you can trust, from China and the UAE to all of Iraq.',quick:'Quick Links',servicesH:'Services',contactH:'Contact',address:'New Erbil, behind Ma\u2019ad Gasha, Erbil, Iraq',rights:'All rights reserved.',privacy:'Privacy Policy',terms:'Terms of Service'},
   testi:{
     eyebrow:'Client Reviews',
@@ -2035,6 +2256,81 @@ function renderHomeServices(){
       <span class="learn">${t('services.learnMore')} <svg class="icon-sm"><use href="#i-arrow"></use></svg></span>
     </div>`;
   }).join('');
+}
+function renderBusinessHub(){
+  const wrap = document.getElementById('businessHubGrid');
+  if(!wrap) return;
+  const order = ['services','quote','dashboard','track','warehouses','contact'];
+  wrap.innerHTML = order.map(key=>{
+    const item = t('business.items.'+key);
+    return `<div class="hub-card" role="button" tabindex="0" onclick="route('${item.route}')">
+      <div class="hub-icon"><svg class="icon-lg"><use href="#${item.icon}"></use></svg></div>
+      <h4>${item.title}</h4>
+      <p>${item.desc}</p>
+      <span class="hub-link">${item.action} <svg class="icon-sm"><use href="#i-arrow"></use></svg></span>
+    </div>`;
+  }).join('');
+}
+function renderDashboardPreview(){
+  const wrap = document.getElementById('dashMiniGrid');
+  if(!wrap) return;
+  const items = t('dashboardPreview.stats') || [];
+  wrap.innerHTML = items.map(it=>`<div class="mini-stat"><b>${it.v}</b><span>${it.l}</span></div>`).join('');
+}
+function renderCorridorStrip(){
+  const wrap = document.getElementById('corridorStrip');
+  if(!wrap) return;
+  const items = t('corridor.items') || [];
+  wrap.innerHTML = items.map(it=>`<div class="corridor-item">
+    <div class="corridor-top">
+      <div class="corridor-flag">${it.flag || '•'}</div>
+      <div>
+        <h4>${it.title}</h4>
+        <div class="corridor-meta">${it.meta || ''}</div>
+      </div>
+    </div>
+    <p>${it.desc || ''}</p>
+    <div class="corridor-tags">${(it.tags||[]).map(tag=>`<span>${tag}</span>`).join('')}</div>
+  </div>`).join('');
+}
+function renderWarehouseCards(){
+  const wrap = document.getElementById('warehouseCardsGrid');
+  if(!wrap) return;
+  const items = t('warehouses.items');
+  const order = ['guangzhou','dubai','erbil'];
+  wrap.innerHTML = order.map(key=>{
+    const item = items[key];
+    return `<div class="warehouse-card">
+      <span class="tag">${item.tag}</span>
+      <h4>${item.title}</h4>
+      <p>${item.address}</p>
+      <div class="warehouse-meta">
+        <span><svg><use href="#i-clock"></use></svg>${item.hours}</span>
+        ${item.features.map(f=>`<span><svg><use href="#i-check"></use></svg>${f}</span>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+function renderOperationsHub(){
+  const metricsWrap = document.getElementById('opsMetrics');
+  const cardsWrap = document.getElementById('opsCards');
+  if(metricsWrap){
+    const metrics = t('ops.metrics') || [];
+    metricsWrap.innerHTML = metrics.map(m=>`<div class="ops-metric"><b>${m.v}</b><span>${m.l}</span></div>`).join('');
+  }
+  if(cardsWrap){
+    const cards = t('ops.cards') || [];
+    cardsWrap.innerHTML = cards.map(card=>`<div class="ops-card">
+      <div class="ops-card-top">
+        <div class="service-icon"><svg class="icon-lg"><use href="#${card.icon}"></use></svg></div>
+        <div>
+          <h4>${card.title}</h4>
+          <p>${card.desc}</p>
+        </div>
+      </div>
+      <div class="ops-points">${(card.points||[]).map(p=>`<span>${p}</span>`).join('')}</div>
+    </div>`).join('');
+  }
 }
 function renderHow(){
   const wrap = document.getElementById('howGrid');
@@ -2688,6 +2984,11 @@ function applyI18n(){
     if(typeof val === 'string') el.setAttribute('placeholder', val);
   });
   renderHomeServices();
+  renderBusinessHub();
+  renderDashboardPreview();
+  renderCorridorStrip();
+  renderWarehouseCards();
+  renderOperationsHub();
   renderHow();
   renderWhy();
   renderAboutValues();
