@@ -1,164 +1,152 @@
 // Supabase Database Schema
-// SQL schema for Globall Cloud application
+// Live Globall Cloud schema aligned with the current project database.
 
 const supabaseSchema = `
--- Customers table
-CREATE TABLE customers (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email VARCHAR(255) UNIQUE NOT NULL,
-  phone VARCHAR(20) NOT NULL,
-  full_name VARCHAR(255),
-  company_name VARCHAR(255),
-  password_hash VARCHAR(255),
-  country VARCHAR(100),
-  city VARCHAR(100),
-  address TEXT,
-  is_verified BOOLEAN DEFAULT false,
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  last_login TIMESTAMP
+-- customer_directory
+CREATE TABLE public.customer_directory (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  code text UNIQUE,
+  name text,
+  phone text,
+  phone2 text,
+  email text,
+  city text,
+  delivery_location text,
+  note text,
+  created_at timestamptz DEFAULT now()
 );
 
--- Shipments table
-CREATE TABLE shipments (
-  id VARCHAR(50) PRIMARY KEY,
-  customer_id UUID REFERENCES customers(id),
-  origin VARCHAR(100) NOT NULL,
-  destination VARCHAR(100) NOT NULL,
-  shipment_type VARCHAR(20) NOT NULL,
-  weight DECIMAL(10,2),
-  cbm DECIMAL(10,3),
-  status VARCHAR(50) DEFAULT 'pending',
-  current_location VARCHAR(255),
-  latitude DECIMAL(10,8),
-  longitude DECIMAL(11,8),
-  estimated_delivery DATE,
-  actual_delivery DATE,
-  price DECIMAL(10,2),
-  currency VARCHAR(10),
-  tracking_code VARCHAR(50) UNIQUE,
-  notes TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  delivered_at TIMESTAMP
+-- shipments
+CREATE TABLE public.shipments (
+  id text PRIMARY KEY,
+  customer_name text,
+  customer_phone text,
+  customer_email text,
+  notes text,
+  origin_key text,
+  dest_key text,
+  type text,
+  weight_kg numeric,
+  volume_cbm numeric,
+  items_count integer,
+  total_amount numeric DEFAULT 0,
+  paid_amount numeric DEFAULT 0,
+  current_step_index integer DEFAULT 0,
+  step_dates jsonb DEFAULT '{}'::jsonb,
+  eta timestamptz,
+  created_at timestamptz DEFAULT now(),
+  customer_user_id uuid REFERENCES auth.users(id),
+  directory_customer_id uuid REFERENCES public.customer_directory(id),
+  step_photos jsonb DEFAULT '{}'::jsonb,
+  batch_code text,
+  branch text
 );
 
--- Orders table
-CREATE TABLE orders (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  customer_id UUID REFERENCES customers(id),
-  shipment_id VARCHAR(50) REFERENCES shipments(id),
-  shipment_type VARCHAR(20),
-  weight DECIMAL(10,2),
-  origin VARCHAR(100),
-  destination VARCHAR(100),
-  base_cost DECIMAL(10,2),
-  discount_percent DECIMAL(5,2) DEFAULT 0,
-  total_cost DECIMAL(10,2),
-  currency VARCHAR(10),
-  payment_status VARCHAR(50) DEFAULT 'pending',
-  payment_method VARCHAR(50),
-  transaction_id VARCHAR(255),
-  notes TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- messages
+CREATE TABLE public.messages (
+  id bigserial PRIMARY KEY,
+  name text,
+  email text,
+  message text,
+  created_at timestamptz DEFAULT now(),
+  company text,
+  request_type text
 );
 
--- Shipment events (timeline)
-CREATE TABLE shipment_events (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  shipment_id VARCHAR(50) REFERENCES shipments(id),
-  event_type VARCHAR(100),
-  status VARCHAR(50),
-  location VARCHAR(255),
-  latitude DECIMAL(10,8),
-  longitude DECIMAL(11,8),
-  description TEXT,
-  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- staff
+CREATE TABLE public.staff (
+  id uuid PRIMARY KEY REFERENCES auth.users(id),
+  full_name text,
+  role text CHECK (role = ANY (ARRAY['admin'::text, 'accountant'::text, 'super_admin'::text])),
+  created_at timestamptz DEFAULT now(),
+  branch text CHECK (branch = ANY (ARRAY['dubai'::text, 'china'::text, 'erbil'::text, 'all'::text]))
 );
 
--- Pricing rules table
-CREATE TABLE pricing_rules (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  shipment_type VARCHAR(20),
-  base_price DECIMAL(10,2),
-  per_kg_price DECIMAL(10,2),
-  per_cbm_price DECIMAL(10,2),
-  min_charge DECIMAL(10,2),
-  is_active BOOLEAN DEFAULT true,
-  effective_date TIMESTAMP,
-  end_date TIMESTAMP,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- warehouse_receipts
+CREATE TABLE public.warehouse_receipts (
+  id bigserial PRIMARY KEY,
+  batch_code text,
+  location text DEFAULT 'Dubai',
+  photos jsonb DEFAULT '[]'::jsonb,
+  notes text,
+  received_at timestamptz DEFAULT now(),
+  created_by uuid REFERENCES public.staff(id),
+  created_by_name text,
+  created_at timestamptz DEFAULT now(),
+  directory_customer_id uuid REFERENCES public.customer_directory(id),
+  consolidated boolean DEFAULT false,
+  directory_phone text
 );
 
--- Admin users table
-CREATE TABLE admin_users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email VARCHAR(255) UNIQUE NOT NULL,
-  password_hash VARCHAR(255),
-  full_name VARCHAR(255),
-  role VARCHAR(50),
-  permissions TEXT[],
-  is_active BOOLEAN DEFAULT true,
-  last_login TIMESTAMP,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- lg_orders / lg_shipments / tracking tables kept for corridor / logistics workflows
+CREATE TABLE public.lg_orders (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at timestamptz DEFAULT now(),
+  created_by uuid,
+  customer_name text,
+  status text DEFAULT 'draft',
+  notes text
 );
 
--- Support messages table
-CREATE TABLE support_messages (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  customer_id UUID REFERENCES customers(id),
-  shipment_id VARCHAR(50) REFERENCES shipments(id),
-  message TEXT NOT NULL,
-  message_type VARCHAR(50),
-  priority VARCHAR(50),
-  status VARCHAR(50) DEFAULT 'open',
-  response TEXT,
-  responded_by UUID REFERENCES admin_users(id),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  resolved_at TIMESTAMP
+CREATE TABLE public.lg_shipments (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at timestamptz DEFAULT now(),
+  created_by uuid,
+  order_id uuid REFERENCES public.lg_orders(id),
+  origin text,
+  destination text,
+  status text DEFAULT 'planned',
+  dispatched_at timestamptz,
+  delivered_at timestamptz,
+  tracking_number text UNIQUE
 );
 
--- Create indexes
-CREATE INDEX idx_customers_email ON customers(email);
-CREATE INDEX idx_customers_phone ON customers(phone);
-CREATE INDEX idx_shipments_customer_id ON shipments(customer_id);
-CREATE INDEX idx_shipments_status ON shipments(status);
-CREATE INDEX idx_shipments_origin_destination ON shipments(origin, destination);
-CREATE INDEX idx_orders_customer_id ON orders(customer_id);
-CREATE INDEX idx_orders_payment_status ON orders(payment_status);
-CREATE INDEX idx_shipment_events_shipment_id ON shipment_events(shipment_id);
-CREATE INDEX idx_support_messages_customer_id ON support_messages(customer_id);
-CREATE INDEX idx_support_messages_status ON support_messages(status);
+CREATE TABLE public.lg_routes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at timestamptz DEFAULT now(),
+  created_by uuid,
+  shipment_id uuid REFERENCES public.lg_shipments(id),
+  driver_user_id uuid,
+  vehicle_tag text,
+  starts_at timestamptz,
+  ends_at timestamptz
+);
 
--- Row Level Security (RLS) Policies
-ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
-ALTER TABLE shipments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
-ALTER TABLE support_messages ENABLE ROW LEVEL SECURITY;
+CREATE TABLE public.lg_tracking_events (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at timestamptz DEFAULT now(),
+  created_by uuid,
+  shipment_id uuid REFERENCES public.lg_shipments(id),
+  occurred_at timestamptz DEFAULT now(),
+  status text,
+  location text,
+  details jsonb DEFAULT '{}'::jsonb
+);
 
--- Customers can view their own data
-CREATE POLICY "Customers view own data" ON customers
-  FOR SELECT USING (auth.uid() = id);
+CREATE VIEW public.customer_directory_stats AS
+SELECT
+  d.id AS directory_customer_id,
+  COUNT(s.id) AS shipment_count,
+  COALESCE(SUM(s.total_amount), 0) AS total_amount,
+  COALESCE(SUM(s.paid_amount), 0) AS paid_amount,
+  COALESCE(SUM(GREATEST(COALESCE(s.total_amount, 0) - COALESCE(s.paid_amount, 0), 0)), 0) AS outstanding,
+  MAX(s.created_at) AS last_shipment_at
+FROM public.customer_directory d
+LEFT JOIN public.shipments s
+  ON s.directory_customer_id = d.id
+GROUP BY d.id;
 
--- Customers can view their own shipments
-CREATE POLICY "Customers view own shipments" ON shipments
-  FOR SELECT USING (auth.uid() = customer_id);
-
--- Customers can view their own orders
-CREATE POLICY "Customers view own orders" ON orders
-  FOR SELECT USING (auth.uid() = customer_id);
-
--- Customers can create orders
-CREATE POLICY "Customers create orders" ON orders
-  FOR INSERT WITH CHECK (auth.uid() = customer_id);
+-- Helper RPCs
+-- find_directory_customer_by_phone(p_phone text)
+-- track_shipment(p_id text)
+-- admin_list_customers_public()
+-- admin_list_shipments_public()
+-- admin_upsert_customer_public(...)
+-- admin_delete_customer_public(p_id uuid)
+-- admin_upsert_shipment_public(p_payload jsonb)
+-- admin_delete_shipment_public(p_id text)
 `;
 
-// Export schema
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { supabaseSchema };
 }
