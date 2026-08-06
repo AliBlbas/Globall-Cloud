@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="admin-dashboard.js"></script>
   <style>
     :root{--bg:#061428;--bg2:#0d1f38;--card:#102742;--card2:#173457;--line:#29496f;--text:#f5f9fd;--muted:#9bb2d0;--accent:#00c2d9;--accent2:#4fe3f0;--warn:#f0a83a;--bad:#e5533d;--good:#2ed27f;--shadow:0 18px 40px rgba(0,0,0,.26);--radius:20px;--mono:'JetBrains Mono',monospace;--font:'Vazirmatn',sans-serif;}
     *{box-sizing:border-box} html,body{margin:0;min-height:100%;background:radial-gradient(circle at 20% -10%, rgba(0,194,217,.11), transparent 35%),linear-gradient(180deg,var(--bg),#08111e 80%);color:var(--text);font-family:var(--font)} body{padding:24px} a{color:inherit} button,input,select,textarea{font:inherit;color:inherit} .wrap{max-width:1380px;margin:0 auto}
@@ -172,6 +173,19 @@
 
       <div class="tab-pane hidden" id="dashboardPane">
         <div class="notice">Use the tabs to switch between customer accounts, staff accounts, warehouse receipts, and logs.</div>
+        <div class="section-title" style="margin-top:16px">
+          <div><h2 style="font-size:16px">Analytics (last 30 days)</h2></div>
+        </div>
+        <div class="stat-row" id="analyticsStatsRow">
+          <div class="stat"><b>—</b><span>Revenue</span></div>
+          <div class="stat"><b>—</b><span>Outstanding</span></div>
+          <div class="stat"><b>—</b><span>Active shipments</span></div>
+          <div class="stat"><b>—</b><span>Delivered today</span></div>
+          <div class="stat"><b>—</b><span>New customers</span></div>
+          <div class="stat"><b>—</b><span>Avg delivery (days)</span></div>
+          <div class="stat"><b>—</b><span>Success rate</span></div>
+          <div class="stat"><b>—</b><span>Messages</span></div>
+        </div>
       </div>
     </div>
 
@@ -205,6 +219,9 @@ const API_URL = `${SUPABASE_URL}/functions/v1/account-admin`;
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
 });
+// admin-dashboard.js expects the real client, not window.supabase (which is
+// just the library namespace) — see the fix note at the top of that file.
+const adminDashboard = (typeof AdminDashboard !== 'undefined') ? new AdminDashboard(sb) : null;
 
 let currentTab = 'dashboard';
 let currentSession = null;
@@ -388,11 +405,30 @@ async function refreshAll() {
     $('whoami').textContent = `${currentSession.user.user_metadata?.full_name || currentSession.user.email.split('@')[0]} · ${currentSession.user.email}`;
     $('whoamiSub').textContent = 'Staff management is active';
     renderList();
+    renderAnalytics();
   } catch (err) {
     setMsg($('loginMsg'), err.message || 'Failed to load data');
   } finally {
     $('refreshBtn').classList.remove('loading');
   }
+}
+
+async function renderAnalytics() {
+  const row = $('analyticsStatsRow');
+  if (!row || !adminDashboard) return;
+  const metrics = await adminDashboard.calculateMetrics();
+  if (!metrics) return; // fails quietly if the signed-in role can't read these tables (RLS)
+  const g = (k) => metrics.get(k);
+  row.innerHTML = `
+    <div class="stat"><b>${money(g('totalRevenue')?.value)}</b><span>Revenue (30d)</span></div>
+    <div class="stat"><b>${money(g('outstandingBalance')?.value)}</b><span>Outstanding</span></div>
+    <div class="stat"><b>${g('activeShipments')?.value ?? 0}</b><span>Active shipments</span></div>
+    <div class="stat"><b>${g('deliveredToday')?.value ?? 0}</b><span>Delivered today</span></div>
+    <div class="stat"><b>${g('newCustomers')?.value ?? 0}</b><span>New customers (30d)</span></div>
+    <div class="stat"><b>${g('avgDeliveryTime')?.value ?? 0}</b><span>Avg delivery (days)</span></div>
+    <div class="stat"><b>${g('deliverySuccessRate')?.value ?? 0}%</b><span>Success rate</span></div>
+    <div class="stat"><b>${g('totalMessages')?.value ?? 0}</b><span>Messages (30d)</span></div>
+  `;
 }
 
 async function syncSessionUI() {

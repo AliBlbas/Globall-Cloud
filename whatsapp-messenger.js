@@ -1,293 +1,98 @@
-// WhatsApp Messaging System - Globall Cloud
-// Send notifications, updates, and customer support via WhatsApp
+// WhatsApp Messaging Helper — Globall Cloud
+// FIXED VERSION.
+//
+// The previous version of this file could never work in this project:
+//  1. It read `process.env.WHATSAPP_API_KEY`. `process` does not exist in a
+//     browser — this site is a static Cloudflare Pages site with no build
+//     step, so that line threw a ReferenceError the moment this file loaded,
+//     crashing the whole script.
+//  2. Even if a key were hardcoded, sending it from browser JS would expose a
+//     secret WhatsApp Cloud API token to every visitor — a real security bug.
+//  3. It called `https://graph.instagram.com/...` — wrong domain. The
+//     WhatsApp Cloud API lives at `https://graph.facebook.com/...`, and using
+//     it at all requires Meta Business verification and pre-approved message
+//     templates, which this project does not have configured (see index.html
+//     comment near OWNER_WHATSAPP).
+//  4. It referenced a `customers` table that doesn't exist in the real
+//     database (see database-schema.js: the real tables are
+//     customer_directory, shipments, warehouse_receipts, messages, staff).
+//
+// This rewrite instead uses the same approach already proven live on
+// index.html and accounts-console.html: open a prefilled wa.me link so staff
+// tap Send themselves. No backend, no secret key, no business verification
+// needed, and it works today.
 
 class WhatsAppMessenger {
   constructor() {
-    this.apiKey = process.env.WHATSAPP_API_KEY;
-    this.phoneNumber = '+964750757737'; // Globall Cloud business number
-    this.webhookUrl = 'https://your-domain.com/api/whatsapp/webhook';
+    // Must match the real business number used across the site
+    // (index.html / OWNER_WHATSAPP / tel: links).
+    this.businessNumber = '9647507577137';
     this.messageTemplates = this.setupTemplates();
   }
 
-  // Setup message templates
   setupTemplates() {
     return {
-      orderConfirmation: {
-        title: 'Order Confirmation',
-        body: 'Your shipment {{orderId}} has been confirmed!\n📦 Weight: {{weight}}kg\n🚚 Type: {{type}}\n💰 Cost: ${{cost}}',
-        footer: 'Track your package: {{trackingLink}}'
-      },
-      warehouseReceived: {
-        title: 'Warehouse Received',
-        body: 'Your package has been received at our warehouse!\n📍 Location: {{location}}\n⏰ Time: {{timestamp}}',
-        footer: 'Tracking ID: {{orderId}}'
-      },
-      inTransit: {
-        title: 'In Transit',
-        body: 'Your shipment is on the way!\n✈️ {{method}}\n📍 From: {{origin}}\n🎯 To: {{destination}}\n⏱️ ETA: {{eta}}',
-        footer: 'Real-time tracking available'
-      },
-      customsClearance: {
-        title: 'Customs Update',
-        body: 'Your package is in customs clearance\n🔍 Status: {{status}}\n📋 Documents: {{documents}}',
-        footer: 'Need help? Reply with your questions'
-      },
-      outForDelivery: {
-        title: 'Out for Delivery',
-        body: 'Your package is out for delivery today!\n🚗 Driver: {{driver}}\n📱 Contact: {{driverPhone}}\n🏠 Address: {{address}}',
-        footer: 'Track live location'
-      },
-      delivered: {
-        title: 'Delivered Successfully',
-        body: 'Your package has been delivered!\n✅ Delivered at: {{timestamp}}\n📍 Location: {{location}}\n👤 Recipient: {{recipient}}',
-        footer: 'Thank you for using Globall Cloud'
-      },
-      delayed: {
-        title: 'Shipment Delayed',
-        body: 'Your shipment has been delayed\n⚠️ Reason: {{reason}}\n📅 New ETA: {{newEta}}\n💬 Details: {{details}}',
-        footer: 'We apologize for the inconvenience. Support team is ready to help'
-      },
-      priceQuote: {
-        title: 'Your Price Quote',
-        body: 'Price Quote for {{type}} shipping:\n📦 Weight: {{weight}}kg\n📍 Route: {{route}}\n💰 Base Price: ${{basePrice}}\n🎁 Discount: {{discount}}%\n✨ Final Price: ${{finalPrice}}\n⏱️ Delivery: {{deliveryTime}} days',
-        footer: 'Reply YES to confirm or ask questions'
-      },
-      supportResponse: {
-        title: 'Support Team Response',
-        body: 'Hello {{name}}!\n\n{{message}}\n\nOrder: {{orderId}}',
-        footer: 'Globall Cloud Support Team'
-      }
+      orderConfirmation: (v) =>
+        `سڵاو ${v.name || ''}، داواکارییەکەت (${v.orderId}) وەرگیرا.\n📦 کێش: ${v.weight || '-'}kg\n🚚 جۆر: ${v.type || '-'}\n💰 نرخ: $${v.cost || '-'}\nشوێنکەوتن: ${v.trackingLink || ''}`,
+      warehouseReceived: (v) =>
+        `بارەکەت گەیشتە کۆگا.\n📍 شوێن: ${v.location || '-'}\n⏰ کات: ${v.timestamp || '-'}\nکۆدی بار: ${v.orderId || ''}`,
+      inTransit: (v) =>
+        `بارەکەت لە ڕێگادایە.\n📍 لە: ${v.origin || '-'}\n🎯 بۆ: ${v.destination || '-'}\n⏱️ ETA: ${v.eta || '-'}`,
+      customsClearance: (v) =>
+        `بارەکەت لە گومرکدایە.\n🔍 دۆخ: ${v.status || '-'}`,
+      outForDelivery: (v) =>
+        `بارەکەت ئەمڕۆ دەگاتە دەست.\n🏠 ناونیشان: ${v.address || '-'}`,
+      delivered: (v) =>
+        `بارەکەت گەیشت! ✅\n⏰ کات: ${v.timestamp || '-'}`,
+      delayed: (v) =>
+        `بارەکەت دواکەوت.\n⚠️ هۆکار: ${v.reason || '-'}\n📅 ETAی نوێ: ${v.newEta || '-'}`,
+      priceQuote: (v) =>
+        `نرخی ${v.type || ''}\n📦 کێش: ${v.weight || '-'}kg\n📍 ڕێگا: ${v.route || '-'}\n💰 نرخی کۆتایی: $${v.finalPrice || '-'}`,
+      supportResponse: (v) =>
+        `سڵاو ${v.name || ''}،\n${v.message || ''}\n\nGloball Cloud`,
     };
   }
 
-  // Send WhatsApp message
-  async sendMessage(recipientPhone, templateName, variables = {}) {
-    try {
-      const template = this.messageTemplates[templateName];
-      if (!template) {
-        throw new Error(`Template '${templateName}' not found`);
-      }
+  toWhatsAppDigits(phone) {
+    if (!phone) return null;
+    let d = String(phone).replace(/[^\d]/g, '');
+    if (!d) return null;
+    if (d.startsWith('00')) d = d.slice(2);
+    if (d.startsWith('0')) d = '964' + d.slice(1);
+    else if (!d.startsWith('964')) d = '964' + d;
+    return d;
+  }
 
-      // Replace variables in template
-      const body = this.replaceVariables(template.body, variables);
-      const footer = this.replaceVariables(template.footer, variables);
-
-      const payload = {
-        messaging_product: 'whatsapp',
-        to: this.formatPhoneNumber(recipientPhone),
-        type: 'template',
-        template: {
-          name: templateName,
-          language: {
-            code: 'en'
-          },
-          body: {
-            parameters: this.extractParameters(variables)
-          }
-        }
-      };
-
-      const response = await this.makeApiCall('/messages', payload);
-      console.log('WhatsApp message sent:', response);
-      return response;
-    } catch (error) {
-      console.error('Error sending WhatsApp message:', error);
-      throw error;
+  /**
+   * Opens wa.me with a prefilled message. Staff taps Send — this is the only
+   * approach that works without Meta Business API access.
+   * @returns {boolean} whether a window was opened
+   */
+  sendMessage(recipientPhone, templateName, variables = {}) {
+    const build = this.messageTemplates[templateName];
+    if (!build) {
+      console.error(`Template '${templateName}' not found`);
+      return false;
     }
-  }
-
-  // Send message with quick replies
-  async sendQuickReplyMessage(recipientPhone, message, replies) {
-    try {
-      const payload = {
-        messaging_product: 'whatsapp',
-        to: this.formatPhoneNumber(recipientPhone),
-        type: 'interactive',
-        interactive: {
-          type: 'button',
-          body: {
-            text: message
-          },
-          action: {
-            buttons: replies.map((reply, index) => ({
-              type: 'reply',
-              reply: {
-                id: `reply_${index}`,
-                title: reply
-              }
-            }))
-          }
-        }
-      };
-
-      const response = await this.makeApiCall('/messages', payload);
-      return response;
-    } catch (error) {
-      console.error('Error sending quick reply:', error);
-      throw error;
+    const digits = this.toWhatsAppDigits(recipientPhone);
+    if (!digits) {
+      console.error('Invalid recipient phone number');
+      return false;
     }
+    const text = build(variables);
+    window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank');
+    return true;
   }
 
-  // Send location message
-  async sendLocationMessage(recipientPhone, latitude, longitude, locationName) {
-    try {
-      const payload = {
-        messaging_product: 'whatsapp',
-        to: this.formatPhoneNumber(recipientPhone),
-        type: 'location',
-        location: {
-          latitude,
-          longitude,
-          name: locationName,
-          address: locationName
-        }
-      };
-
-      return await this.makeApiCall('/messages', payload);
-    } catch (error) {
-      console.error('Error sending location:', error);
-      throw error;
-    }
-  }
-
-  // Send media message (image, document)
-  async sendMediaMessage(recipientPhone, mediaType, mediaUrl, caption = '') {
-    try {
-      const payload = {
-        messaging_product: 'whatsapp',
-        to: this.formatPhoneNumber(recipientPhone),
-        type: mediaType,
-        [mediaType]: {
-          link: mediaUrl,
-          caption: caption
-        }
-      };
-
-      return await this.makeApiCall('/messages', payload);
-    } catch (error) {
-      console.error('Error sending media:', error);
-      throw error;
-    }
-  }
-
-  // Handle incoming webhook
-  handleWebhook(payload) {
-    const message = payload.entry[0].changes[0].value.messages[0];
-    const sender = payload.entry[0].changes[0].value.contacts[0].wa_id;
-
-    if (message.type === 'text') {
-      return this.handleTextMessage(sender, message.text.body);
-    } else if (message.type === 'button') {
-      return this.handleButtonReply(sender, message.button.payload);
-    }
-  }
-
-  // Handle text message from customer
-  async handleTextMessage(senderPhone, messageText) {
-    // Check for keywords
-    const text = messageText.toLowerCase();
-
-    if (text.includes('track')) {
-      return this.sendMessage(senderPhone, 'supportResponse', {
-        name: 'Customer',
-        message: 'Please provide your tracking/order ID to track your shipment',
-        orderId: 'N/A'
-      });
-    } else if (text.includes('quote') || text.includes('price')) {
-      return this.sendMessage(senderPhone, 'supportResponse', {
-        name: 'Customer',
-        message: 'Please provide details: Weight, Destination, Shipment Type',
-        orderId: 'N/A'
-      });
-    } else if (text.includes('help') || text.includes('support')) {
-      return await this.sendQuickReplyMessage(
-        senderPhone,
-        'How can we help you?',
-        ['Track Shipment', 'Get Quote', 'Report Issue', 'Contact Support']
-      );
-    }
-
-    // Default response
-    return this.sendMessage(senderPhone, 'supportResponse', {
-      name: 'Customer',
-      message: 'Thank you for contacting Globall Cloud. Our team will respond shortly.',
-      orderId: 'N/A'
-    });
-  }
-
-  // Handle button reply from customer
-  async handleButtonReply(senderPhone, payload) {
-    console.log('Button reply received:', payload);
-    // Process button response
-  }
-
-  // Make API call to WhatsApp
-  async makeApiCall(endpoint, payload) {
-    const url = `https://graph.instagram.com/v18.0/{{WHATSAPP_PHONE_NUMBER_ID}}${endpoint}`;
-    const headers = {
-      'Authorization': `Bearer ${this.apiKey}`,
-      'Content-Type': 'application/json'
-    };
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.statusText}`);
-    }
-
-    return response.json();
-  }
-
-  // Format phone number to WhatsApp format
-  formatPhoneNumber(phone) {
-    // Remove all non-digits
-    let digits = phone.replace(/\D/g, '');
-    // Add country code if missing
-    if (!digits.startsWith('964')) {
-      digits = '964' + digits.slice(-10);
-    }
-    return digits;
-  }
-
-  // Replace variables in template
-  replaceVariables(text, variables) {
-    let result = text;
-    for (const [key, value] of Object.entries(variables)) {
-      result = result.replace(`{{${key}}}`, value);
-    }
-    return result;
-  }
-
-  // Extract parameters from variables
-  extractParameters(variables) {
-    return Object.values(variables).map(v => ({
-      type: 'text',
-      text: String(v)
-    }));
-  }
-
-  // Send bulk messages to multiple customers
-  async sendBulkMessages(recipients, templateName, variables = []) {
-    const results = [];
-    for (let i = 0; i < recipients.length; i++) {
-      try {
-        const result = await this.sendMessage(
-          recipients[i],
-          templateName,
-          variables[i] || variables[0]
-        );
-        results.push({ phone: recipients[i], success: true, messageId: result.messages[0].id });
-      } catch (error) {
-        results.push({ phone: recipients[i], success: false, error: error.message });
-      }
-    }
-    return results;
+  /** Opens a WhatsApp chat to the business number itself (owner notifications). */
+  notifyOwner(text) {
+    window.open(`https://wa.me/${this.businessNumber}?text=${encodeURIComponent(text)}`, '_blank');
   }
 }
 
 // Initialize global messenger
 window.whatsappMessenger = new WhatsAppMessenger();
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { WhatsAppMessenger };
+}

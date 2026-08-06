@@ -1,8 +1,22 @@
 // Admin Dashboard Analytics Engine
 // Aligned with the live Globall Cloud Supabase schema.
+//
+// FIXED: the previous version read `window.supabase` and called
+// `.from()` directly on it. But `window.supabase` is only the raw
+// supabase-js *library* namespace (it just has `.createClient`) — neither
+// index.html nor accounts-console.html ever assigns the real client back to
+// `window.supabase`. The actual usable client in both pages is a local
+// variable called `sb`. Calling `window.supabase.from(...)` therefore threw
+// "supabase.from is not a function" every time, was swallowed by the
+// try/catch, and silently returned null — so this dashboard could never
+// have worked, wired in or not.
+//
+// Fix: accept the real client explicitly (or fall back to `window.sb` if
+// the host page exposes one), instead of assuming.
 
 class AdminDashboard {
-  constructor() {
+  constructor(client) {
+    this.client = client || window.sb || null;
     this.metrics = new Map();
     this.startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     this.endDate = new Date();
@@ -36,8 +50,11 @@ class AdminDashboard {
 
   async fetchDashboardData() {
     try {
-      const supabase = window.supabase;
-      if (!supabase) return null;
+      const supabase = this.client;
+      if (!supabase) {
+        console.error('AdminDashboard: no Supabase client available (pass one to `new AdminDashboard(sb)`)');
+        return null;
+      }
 
       const [shipmentsRes, customersRes, receiptsRes, messagesRes] = await Promise.all([
         supabase
@@ -80,21 +97,20 @@ class AdminDashboard {
 
   async calculateMetrics() {
     const data = await this.fetchDashboardData();
-    if (!data) return;
+    if (!data) return null;
 
     const { shipments, customers, receipts, messages } = data;
 
-    const totalRevenue = shipments.reduce((sum, shipment) => sum + Number(shipment.total_amount || 0), 0);
-    const totalDue = shipments.reduce((sum, shipment) => {
-      const total = Number(shipment.total_amount || 0);
-      const paid = Number(shipment.paid_amount || 0);
+    const totalRevenue = shipments.reduce((sum, s) => sum + Number(s.total_amount || 0), 0);
+    const totalDue = shipments.reduce((sum, s) => {
+      const total = Number(s.total_amount || 0);
+      const paid = Number(s.paid_amount || 0);
       return sum + Math.max(0, total - paid);
     }, 0);
 
     const deliveredToday = shipments.filter((s) => {
       if (!s.delivered_at || s.status !== 'delivered') return false;
-      const deliveredDate = new Date(s.delivered_at).toDateString();
-      return deliveredDate === new Date().toDateString();
+      return new Date(s.delivered_at).toDateString() === new Date().toDateString();
     }).length;
 
     const activeShipments = shipments.filter((s) => !['delivered', 'cancelled'].includes(String(s.status || '').toLowerCase())).length;
@@ -123,12 +139,13 @@ class AdminDashboard {
     this.metrics.set('deliverySuccessRate', { ...this.metrics.get('deliverySuccessRate'), value: Number(successRate.toFixed(1)) });
     this.metrics.set('totalReceipts', { ...this.metrics.get('totalReceipts'), value: receipts.length });
     this.metrics.set('totalMessages', { ...this.metrics.get('totalMessages'), value: messages.length });
-
     this.metrics.set('outstandingBalance', { value: Math.round(totalDue * 100) / 100, trend: 0, unit: 'USD', label: 'Outstanding Balance' });
+
+    return this.metrics;
   }
 
   async generateRevenueReport() {
-    const supabase = window.supabase;
+    const supabase = this.client;
     if (!supabase) return null;
 
     const { data: shipments, error } = await supabase
@@ -143,23 +160,16 @@ class AdminDashboard {
     const byDay = {};
     let totalRevenue = 0;
 
-    (shipments || []).forEach((shipment) => {
-      const amount = Number(shipment.total_amount || 0);
+    (shipments || []).forEach((s) => {
+      const amount = Number(s.total_amount || 0);
       totalRevenue += amount;
-
-      const route = `${shipment.origin_key || '—'} → ${shipment.dest_key || '—'}`;
+      const route = `${s.origin_key || '—'} → ${s.dest_key || '—'}`;
       byRoute[route] = (byRoute[route] || 0) + amount;
-
-      const day = new Date(shipment.created_at).toISOString().slice(0, 10);
+      const day = new Date(s.created_at).toISOString().slice(0, 10);
       byDay[day] = (byDay[day] || 0) + amount;
     });
 
-    return {
-      totalRevenue: Math.round(totalRevenue * 100) / 100,
-      byRoute,
-      byDay,
-      generatedAt: new Date().toISOString(),
-    };
+    return { totalRevenue: Math.round(totalRevenue * 100) / 100, byRoute, byDay, generatedAt: new Date().toISOString() };
   }
 
   async generatePerformanceReport() {
@@ -170,29 +180,21 @@ class AdminDashboard {
     const byStatus = {};
     const routePerformance = {};
 
-    shipments.forEach((shipment) => {
-      const status = String(shipment.status || 'unknown');
+    shipments.forEach((s) => {
+      const status = String(s.status || 'unknown');
       byStatus[status] = (byStatus[status] || 0) + 1;
-
-      const route = `${shipment.origin_key || '—'} → ${shipment.dest_key || '—'}`;
-      if (!routePerformance[route]) {
-        routePerformance[route] = { count: 0, delivered: 0, delayed: 0 };
-      }
+      const route = `${s.origin_key || '—'} → ${s.dest_key || '—'}`;
+      if (!routePerformance[route]) routePerformance[route] = { count: 0, delivered: 0, delayed: 0 };
       routePerformance[route].count += 1;
       if (status === 'delivered') routePerformance[route].delivered += 1;
       if (status === 'delayed') routePerformance[route].delayed += 1;
     });
 
-    return {
-      totalShipments: shipments.length,
-      byStatus,
-      routePerformance,
-      generatedAt: new Date().toISOString(),
-    };
+    return { totalShipments: shipments.length, byStatus, routePerformance, generatedAt: new Date().toISOString() };
   }
 
   async generateCustomerInsights() {
-    const supabase = window.supabase;
+    const supabase = this.client;
     if (!supabase) return null;
 
     const [{ data: customers, error: cErr }, { data: shipments, error: sErr }] = await Promise.all([
@@ -206,30 +208,23 @@ class AdminDashboard {
     const shipmentRows = shipments || [];
     const customerStats = {};
 
-    customers.forEach((customer) => {
-      const linked = shipmentRows.filter((s) => s.directory_customer_id === customer.id || s.customer_phone === customer.phone);
-      customerStats[customer.id] = {
-        name: customer.name,
-        phone: customer.phone,
-        email: customer.email,
-        city: customer.city,
-        deliveryLocation: customer.delivery_location,
+    customers.forEach((c) => {
+      const linked = shipmentRows.filter((s) => s.directory_customer_id === c.id || s.customer_phone === c.phone);
+      customerStats[c.id] = {
+        name: c.name,
+        phone: c.phone,
+        email: c.email,
+        city: c.city,
+        deliveryLocation: c.delivery_location,
         orderCount: linked.length,
         totalSpent: linked.reduce((sum, s) => sum + Number(s.total_amount || 0), 0),
-        joinDate: customer.created_at,
+        joinDate: c.created_at,
       };
     });
 
-    const topCustomers = Object.entries(customerStats)
-      .sort((a, b) => b[1].totalSpent - a[1].totalSpent)
-      .slice(0, 10);
+    const topCustomers = Object.entries(customerStats).sort((a, b) => b[1].totalSpent - a[1].totalSpent).slice(0, 10);
 
-    return {
-      totalCustomers: customers.length,
-      topCustomers,
-      customerStats,
-      generatedAt: new Date().toISOString(),
-    };
+    return { totalCustomers: customers.length, topCustomers, customerStats, generatedAt: new Date().toISOString() };
   }
 
   startAutoRefresh() {

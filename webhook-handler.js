@@ -1,257 +1,107 @@
-// Webhook Handler for Supabase Events
-// Process shipment updates, payments, and notifications
+// Shipment Event Helpers — Globall Cloud
+// FIXED VERSION.
+//
+// The previous version of this file was written against a database schema
+// that does not exist in this project: `customers`, `orders`,
+// `shipment_events`, `support_messages`. The real schema (see
+// database-schema.js) only has: customer_directory, shipments,
+// warehouse_receipts, messages, staff, and the lg_* corridor tables.
+//
+// It was also structured as "webhook handlers" — but this project is a
+// static Cloudflare Pages site with no server to receive inbound webhooks.
+// A real inbound webhook (e.g. from a payment provider or WhatsApp) needs a
+// server endpoint, which here means a Supabase Edge Function (the same
+// pattern already used by accounts-console.html's `account-admin` function),
+// not browser JavaScript.
+//
+// This rewrite keeps the useful part — "when X happens, notify the
+// customer" — as plain browser-callable helpers wired to the real tables and
+// the real wa.me messaging approach (see whatsapp-messenger.js). Anything
+// that must run server-side (verifying a real inbound webhook signature) is
+// left as a clearly marked TODO for a Supabase Edge Function, not faked.
 
-class WebhookHandler {
-  constructor() {
-    this.routes = new Map();
-    this.setupRoutes();
-  }
-
-  setupRoutes() {
-    this.routes.set('/webhooks/shipment-updated', this.handleShipmentUpdate.bind(this));
-    this.routes.set('/webhooks/payment-completed', this.handlePaymentCompleted.bind(this));
-    this.routes.set('/webhooks/order-created', this.handleOrderCreated.bind(this));
-    this.routes.set('/webhooks/whatsapp-reply', this.handleWhatsAppReply.bind(this));
-  }
-
-  // Handle shipment status update
-  async handleShipmentUpdate(payload) {
-    const { shipmentId, status, location, latitude, longitude, updatedBy } = payload;
-
-    try {
-      // Update shipment in database
-      const { error } = await window.supabase
-        .from('shipments')
-        .update({
-          status,
-          current_location: location,
-          latitude,
-          longitude,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', shipmentId);
-
-      if (error) throw error;
-
-      // Create shipment event
-      await window.supabase
-        .from('shipment_events')
-        .insert([{
-          shipment_id: shipmentId,
-          event_type: 'status_update',
-          status,
-          location,
-          latitude,
-          longitude,
-          description: `Shipment status updated to ${status}`
-        }]);
-
-      // Get customer and send WhatsApp notification
-      const { data: shipment } = await window.supabase
-        .from('shipments')
-        .select('customer_id')
-        .eq('id', shipmentId)
-        .single();
-
-      if (shipment) {
-        const { data: customer } = await window.supabase
-          .from('customers')
-          .select('phone')
-          .eq('id', shipment.customer_id)
-          .single();
-
-        if (customer) {
-          // Send appropriate WhatsApp message based on status
-          const templateMap = {
-            'warehouse': 'warehouseReceived',
-            'transit': 'inTransit',
-            'customs': 'customsClearance',
-            'delivery': 'outForDelivery',
-            'delivered': 'delivered',
-            'delayed': 'delayed'
-          };
-
-          const template = templateMap[status];
-          if (template) {
-            await window.whatsappMessenger.sendMessage(customer.phone, template, {
-              orderId: shipmentId,
-              location,
-              status,
-              timestamp: new Date().toLocaleString()
-            });
-          }
-        }
-      }
-
-      return { success: true, message: 'Shipment updated successfully' };
-    } catch (error) {
-      console.error('Error handling shipment update:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Handle payment completion
-  async handlePaymentCompleted(payload) {
-    const { transactionId, orderId, amount, paymentMethod } = payload;
-
-    try {
-      // Update order payment status
-      const { error } = await window.supabase
-        .from('orders')
-        .update({
-          payment_status: 'completed',
-          transaction_id: transactionId,
-          payment_method: paymentMethod,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', orderId);
-
-      if (error) throw error;
-
-      // Get customer and send confirmation
-      const { data: order } = await window.supabase
-        .from('orders')
-        .select('customer_id, shipment_id')
-        .eq('id', orderId)
-        .single();
-
-      if (order) {
-        const { data: customer } = await window.supabase
-          .from('customers')
-          .select('phone')
-          .eq('id', order.customer_id)
-          .single();
-
-        if (customer) {
-          await window.whatsappMessenger.sendMessage(customer.phone, 'orderConfirmation', {
-            orderId: order.shipment_id,
-            amount,
-            paymentMethod,
-            trackingLink: `https://globall-cloud.pages.dev/track?id=${order.shipment_id}`
-          });
-        }
-      }
-
-      return { success: true, message: 'Payment recorded successfully' };
-    } catch (error) {
-      console.error('Error handling payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Handle new order creation
-  async handleOrderCreated(payload) {
-    const { orderId, customerId, shipmentType, weight, origin, destination, cost } = payload;
-
-    try {
-      // Get customer details
-      const { data: customer } = await window.supabase
-        .from('customers')
-        .select('phone, full_name')
-        .eq('id', customerId)
-        .single();
-
-      if (customer) {
-        // Send WhatsApp confirmation
-        await window.whatsappMessenger.sendMessage(customer.phone, 'orderConfirmation', {
-          orderId,
-          weight,
-          type: shipmentType,
-          cost,
-          trackingLink: `https://globall-cloud.pages.dev/track?id=${orderId}`
-        });
-      }
-
-      return { success: true, message: 'Order created webhook processed' };
-    } catch (error) {
-      console.error('Error handling order creation:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Handle WhatsApp replies from customers
-  async handleWhatsAppReply(payload) {
-    const { senderPhone, messageText, messageId } = payload;
-
-    try {
-      // Find customer by phone
-      const { data: customer } = await window.supabase
-        .from('customers')
-        .select('id, full_name')
-        .eq('phone', senderPhone)
-        .single();
-
-      if (!customer) {
-        // Customer not found, send help message
-        await window.whatsappMessenger.sendMessage(senderPhone, 'supportResponse', {
-          name: 'New User',
-          message: 'Welcome to Globall Cloud! Please register or log in to track your shipments.',
-          orderId: 'N/A'
-        });
-        return { success: false, message: 'Customer not found' };
-      }
-
-      // Create support ticket from WhatsApp message
-      const { error } = await window.supabase
-        .from('support_messages')
-        .insert([{
-          customer_id: customer.id,
-          message: messageText,
-          message_type: 'whatsapp_inbound',
-          status: 'open',
-          priority: this.determinePriority(messageText)
-        }]);
-
-      if (error) throw error;
-
-      // Send acknowledgment
-      await window.whatsappMessenger.sendMessage(senderPhone, 'supportResponse', {
-        name: customer.full_name,
-        message: 'Thank you for your message. Our support team will respond shortly.',
-        orderId: 'N/A'
-      });
-
-      return { success: true, message: 'WhatsApp reply processed' };
-    } catch (error) {
-      console.error('Error handling WhatsApp reply:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Determine priority from message content
-  determinePriority(messageText) {
-    const text = messageText.toLowerCase();
-    if (text.includes('urgent') || text.includes('emergency') || text.includes('asap')) {
-      return 'high';
-    }
-    if (text.includes('help') || text.includes('problem') || text.includes('issue')) {
-      return 'medium';
-    }
-    return 'low';
-  }
-
-  // Process webhook request
-  async processWebhook(path, payload, signature) {
-    // Verify webhook signature
-    if (!this.verifySignature(payload, signature)) {
-      throw new Error('Invalid webhook signature');
+class ShipmentEvents {
+  /**
+   * Call this after updating a shipment's status (mirrors what
+   * updateShipmentStep() already does in index.html's admin panel).
+   */
+  async notifyStatusChange(shipmentId, statusLabel) {
+    if (!window.sb) {
+      console.error('Supabase client (window.sb) not available');
+      return { success: false, error: 'no-client' };
     }
 
-    const handler = this.routes.get(path);
-    if (!handler) {
-      throw new Error(`No handler found for path: ${path}`);
+    const { data: shipment, error } = await window.sb
+      .from('shipments')
+      .select('customer_phone, customer_name')
+      .eq('id', shipmentId)
+      .maybeSingle();
+
+    if (error) return { success: false, error: error.message };
+    if (!shipment || !shipment.customer_phone) {
+      return { success: false, error: 'no-phone-on-file' };
     }
 
-    return await handler(payload);
+    const sent = window.whatsappMessenger?.sendMessage(shipment.customer_phone, 'inTransit', {
+      status: statusLabel,
+    });
+
+    return { success: !!sent };
   }
 
-  // Verify webhook signature
-  verifySignature(payload, signature) {
-    // Implement HMAC verification here
-    // This is a placeholder - implement based on your webhook provider
-    return true;
+  /**
+   * Call this after a warehouse receipt is registered
+   * (see database-schema.js: warehouse_receipts table).
+   */
+  async notifyWarehouseReceived(receiptId) {
+    if (!window.sb) return { success: false, error: 'no-client' };
+
+    const { data: receipt, error } = await window.sb
+      .from('warehouse_receipts')
+      .select('batch_code, location, directory_phone, received_at')
+      .eq('id', receiptId)
+      .maybeSingle();
+
+    if (error) return { success: false, error: error.message };
+    if (!receipt || !receipt.directory_phone) {
+      return { success: false, error: 'no-phone-on-file' };
+    }
+
+    const sent = window.whatsappMessenger?.sendMessage(receipt.directory_phone, 'warehouseReceived', {
+      location: receipt.location,
+      timestamp: receipt.received_at ? new Date(receipt.received_at).toLocaleString() : '-',
+      orderId: receipt.batch_code,
+    });
+
+    return { success: !!sent };
   }
+
+  /**
+   * Logs a new inbound message from the public "Request a Quote" / Contact
+   * form into the real `messages` table. This already happens via
+   * FormSubmit.co in index.html; this helper exists for any additional entry
+   * point (e.g. a future WhatsApp inbound bridge) that needs to write the
+   * same row shape.
+   */
+  async logInboundMessage({ name, email, message, company, request_type }) {
+    if (!window.sb) return { success: false, error: 'no-client' };
+    const { error } = await window.sb.from('messages').insert([
+      { name, email, message, company, request_type },
+    ]);
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+  }
+
+  // TODO (server-side, not browser JS): if you later add a real inbound
+  // webhook source (e.g. a payment provider or the WhatsApp Cloud API),
+  // implement it as a Supabase Edge Function that verifies the provider's
+  // signature server-side, then calls the helpers above via the Supabase
+  // service role — never verify webhook signatures or hold secret keys in
+  // browser code.
 }
 
-// Initialize global webhook handler
-window.webhookHandler = new WebhookHandler();
+window.shipmentEvents = new ShipmentEvents();
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { ShipmentEvents };
+}

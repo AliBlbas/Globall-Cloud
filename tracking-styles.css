@@ -26,17 +26,9 @@
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
 }
 
-.origin-point {
-  fill: #22C55E;
-}
-
-.current-point {
-  fill: #00D4FF;
-}
-
-.dest-point {
-  fill: #E5533D;
-}
+.origin-point { fill: #22C55E; }
+.current-point { fill: #00D4FF; }
+.dest-point { fill: #E5533D; }
 
 .map-label {
   font-size: 12px;
@@ -74,7 +66,6 @@
   border-radius: 50%;
 }
 
-/* Tracking Details */
 .tracking-details {
   background: var(--surface);
   border: 1px solid var(--line-soft);
@@ -104,13 +95,9 @@
   margin-bottom: 16px;
 }
 
-.tracking-route strong {
-  color: var(--text);
-}
+.tracking-route strong { color: var(--text); }
 
-.tracking-progress {
-  margin-bottom: 20px;
-}
+.tracking-progress { margin-bottom: 20px; }
 
 .progress-bar {
   height: 6px;
@@ -120,11 +107,7 @@
   box-shadow: 0 0 12px rgba(0, 194, 217, 0.3);
 }
 
-/* Timeline */
-.timeline {
-  position: relative;
-  padding-left: 24px;
-}
+.timeline { position: relative; padding-left: 24px; }
 
 .timeline::before {
   content: '';
@@ -142,10 +125,7 @@
   padding-bottom: 16px;
 }
 
-.timeline-item:last-child {
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
+.timeline-item:last-child { margin-bottom: 0; padding-bottom: 0; }
 
 .timeline-dot {
   position: absolute;
@@ -181,9 +161,7 @@
   border-left: 3px solid var(--line-soft);
 }
 
-.timeline-item.completed .timeline-content {
-  border-left-color: #22C55E;
-}
+.timeline-item.completed .timeline-content { border-left-color: #22C55E; }
 
 .timeline-item.current .timeline-content {
   border-left-color: #00D4FF;
@@ -210,7 +188,6 @@
   font-family: var(--mono);
 }
 
-/* Status Badges */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -223,27 +200,11 @@
   letter-spacing: 0.3px;
 }
 
-.badge-success {
-  background: rgba(34, 197, 94, 0.12);
-  color: #22C55E;
-}
+.badge-success { background: rgba(34, 197, 94, 0.12); color: #22C55E; }
+.badge-info { background: rgba(0, 194, 217, 0.12); color: #00D4FF; }
+.badge-warning { background: rgba(240, 168, 58, 0.12); color: #F0A83A; }
+.badge-danger { background: rgba(229, 83, 61, 0.12); color: #E5533D; }
 
-.badge-info {
-  background: rgba(0, 194, 217, 0.12);
-  color: #00D4FF;
-}
-
-.badge-warning {
-  background: rgba(240, 168, 58, 0.12);
-  color: #F0A83A;
-}
-
-.badge-danger {
-  background: rgba(229, 83, 61, 0.12);
-  color: #E5533D;
-}
-
-/* Notifications */
 .notification-badge {
   position: absolute;
   top: -8px;
@@ -261,34 +222,12 @@
   box-shadow: 0 2px 8px rgba(229, 83, 61, 0.4);
 }
 
-/* Responsive */
 @media (max-width: 640px) {
-  .live-map-container {
-    padding: 16px;
-  }
-
-  .route-visualization {
-    min-height: 250px;
-  }
-
-  .tracking-details {
-    padding: 16px;
-  }
-
-  .timeline {
-    padding-left: 20px;
-  }
-
-  .timeline-dot {
-    left: -14px;
-  }
-
-  .timeline-item.current .timeline-dot {
-    left: -16px;
-  }
-
-  .badge {
-    padding: 4px 10px;
-    font-size: 11px;
-  }
+  .live-map-container { padding: 16px; }
+  .route-visualization { min-height: 250px; }
+  .tracking-details { padding: 16px; }
+  .timeline { padding-left: 20px; }
+  .timeline-dot { left: -14px; }
+  .timeline-item.current .timeline-dot { left: -16px; }
+  .badge { padding: 4px 10px; font-size: 11px; }
 }
