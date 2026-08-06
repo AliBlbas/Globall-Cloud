@@ -1,13 +1,12 @@
 // Admin Dashboard Analytics Engine
-// Real-time metrics, reports, and business intelligence
+// Aligned with the live Globall Cloud Supabase schema.
 
 class AdminDashboard {
   constructor() {
     this.metrics = new Map();
-    this.reports = new Map();
-    this.startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Last 30 days
+    this.startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     this.endDate = new Date();
-    this.refreshInterval = 300000; // 5 minutes
+    this.refreshInterval = 300000;
     this.initializeDashboard();
   }
 
@@ -17,285 +16,237 @@ class AdminDashboard {
   }
 
   setupMetrics() {
-    // Revenue metrics
-    this.metrics.set('totalRevenue', {
-      value: 0,
-      trend: 0,
-      unit: 'USD',
-      label: 'Total Revenue'
-    });
+    const defs = {
+      totalRevenue: { unit: 'USD', label: 'Total Revenue' },
+      totalShipments: { unit: 'count', label: 'Total Shipments' },
+      activeShipments: { unit: 'count', label: 'Active Shipments' },
+      deliveredToday: { unit: 'count', label: 'Delivered Today' },
+      totalCustomers: { unit: 'count', label: 'Total Customers' },
+      newCustomers: { unit: 'count', label: 'New Customers (30d)' },
+      avgDeliveryTime: { unit: 'days', label: 'Avg Delivery Time' },
+      deliverySuccessRate: { unit: '%', label: 'Success Rate' },
+      totalReceipts: { unit: 'count', label: 'Warehouse Receipts' },
+      totalMessages: { unit: 'count', label: 'Messages' },
+    };
 
-    // Shipment metrics
-    this.metrics.set('totalShipments', {
-      value: 0,
-      trend: 0,
-      unit: 'count',
-      label: 'Total Shipments'
-    });
-
-    this.metrics.set('activeShipments', {
-      value: 0,
-      trend: 0,
-      unit: 'count',
-      label: 'Active Shipments'
-    });
-
-    this.metrics.set('deliveredToday', {
-      value: 0,
-      trend: 0,
-      unit: 'count',
-      label: 'Delivered Today'
-    });
-
-    // Customer metrics
-    this.metrics.set('totalCustomers', {
-      value: 0,
-      trend: 0,
-      unit: 'count',
-      label: 'Total Customers'
-    });
-
-    this.metrics.set('newCustomers', {
-      value: 0,
-      trend: 0,
-      unit: 'count',
-      label: 'New Customers (30d)'
-    });
-
-    // Performance metrics
-    this.metrics.set('avgDeliveryTime', {
-      value: 0,
-      trend: 0,
-      unit: 'days',
-      label: 'Avg Delivery Time'
-    });
-
-    this.metrics.set('deliverySuccessRate', {
-      value: 0,
-      trend: 0,
-      unit: '%',
-      label: 'Success Rate'
+    Object.entries(defs).forEach(([key, meta]) => {
+      this.metrics.set(key, { value: 0, trend: 0, ...meta });
     });
   }
 
-  // Fetch dashboard data from Supabase
   async fetchDashboardData() {
     try {
-      const { data: shipments } = await window.supabase
-        .from('shipments')
-        .select('*')
-        .gte('created_at', this.startDate.toISOString())
-        .lte('created_at', this.endDate.toISOString());
+      const supabase = window.supabase;
+      if (!supabase) return null;
 
-      const { data: customers } = await window.supabase
-        .from('customers')
-        .select('*');
+      const [shipmentsRes, customersRes, receiptsRes, messagesRes] = await Promise.all([
+        supabase
+          .from('shipments')
+          .select('id,status,created_at,delivered_at,total_amount,paid_amount,origin_key,dest_key,branch,customer_name,customer_phone,directory_customer_id,current_step_index,eta')
+          .gte('created_at', this.startDate.toISOString())
+          .lte('created_at', this.endDate.toISOString()),
+        supabase
+          .from('customer_directory')
+          .select('id,name,phone,email,city,delivery_location,created_at')
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('warehouse_receipts')
+          .select('id,batch_code,location,created_at,received_at,directory_customer_id,created_by_name,consolidated')
+          .gte('created_at', this.startDate.toISOString())
+          .lte('created_at', this.endDate.toISOString()),
+        supabase
+          .from('messages')
+          .select('id,created_at,company,request_type')
+          .gte('created_at', this.startDate.toISOString())
+          .lte('created_at', this.endDate.toISOString()),
+      ]);
 
-      const { data: orders } = await window.supabase
-        .from('orders')
-        .select('*')
-        .gte('created_at', this.startDate.toISOString());
+      if (shipmentsRes.error) throw shipmentsRes.error;
+      if (customersRes.error) throw customersRes.error;
+      if (receiptsRes.error) throw receiptsRes.error;
+      if (messagesRes.error) throw messagesRes.error;
 
-      return { shipments, customers, orders };
+      return {
+        shipments: shipmentsRes.data || [],
+        customers: customersRes.data || [],
+        receipts: receiptsRes.data || [],
+        messages: messagesRes.data || [],
+      };
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       return null;
     }
   }
 
-  // Calculate key metrics
   async calculateMetrics() {
     const data = await this.fetchDashboardData();
     if (!data) return;
 
-    const { shipments, customers, orders } = data;
+    const { shipments, customers, receipts, messages } = data;
 
-    // Calculate revenue
-    const totalRevenue = orders.reduce((sum, order) => sum + (order.total_cost || 0), 0);
-    this.metrics.get('totalRevenue').value = Math.round(totalRevenue * 100) / 100;
+    const totalRevenue = shipments.reduce((sum, shipment) => sum + Number(shipment.total_amount || 0), 0);
+    const totalDue = shipments.reduce((sum, shipment) => {
+      const total = Number(shipment.total_amount || 0);
+      const paid = Number(shipment.paid_amount || 0);
+      return sum + Math.max(0, total - paid);
+    }, 0);
 
-    // Calculate shipment metrics
-    this.metrics.get('totalShipments').value = shipments.length;
-    this.metrics.get('activeShipments').value = shipments.filter(s => s.status !== 'delivered' && s.status !== 'cancelled').length;
-    this.metrics.get('deliveredToday').value = shipments.filter(s => {
-      const deliveredDate = new Date(s.delivered_at);
-      const today = new Date();
-      return deliveredDate.toDateString() === today.toDateString() && s.status === 'delivered';
+    const deliveredToday = shipments.filter((s) => {
+      if (!s.delivered_at || s.status !== 'delivered') return false;
+      const deliveredDate = new Date(s.delivered_at).toDateString();
+      return deliveredDate === new Date().toDateString();
     }).length;
 
-    // Calculate customer metrics
-    this.metrics.get('totalCustomers').value = customers.length;
-    const newCustomersCount = customers.filter(c => {
-      const createdDate = new Date(c.created_at);
-      return createdDate >= this.startDate;
-    }).length;
-    this.metrics.get('newCustomers').value = newCustomersCount;
+    const activeShipments = shipments.filter((s) => !['delivered', 'cancelled'].includes(String(s.status || '').toLowerCase())).length;
+    const newCustomers = customers.filter((c) => new Date(c.created_at) >= this.startDate).length;
 
-    // Calculate performance metrics
     const deliveryTimes = shipments
-      .filter(s => s.delivered_at && s.created_at)
-      .map(s => {
-        const created = new Date(s.created_at);
-        const delivered = new Date(s.delivered_at);
-        return (delivered - created) / (1000 * 60 * 60 * 24); // Convert to days
-      });
-    const avgDeliveryTime = deliveryTimes.length > 0
-      ? (deliveryTimes.reduce((a, b) => a + b, 0) / deliveryTimes.length).toFixed(1)
-      : 0;
-    this.metrics.get('avgDeliveryTime').value = avgDeliveryTime;
+      .filter((s) => s.created_at && s.delivered_at)
+      .map((s) => (new Date(s.delivered_at) - new Date(s.created_at)) / (1000 * 60 * 60 * 24))
+      .filter((n) => Number.isFinite(n) && n >= 0);
 
-    const successCount = shipments.filter(s => s.status === 'delivered').length;
-    const successRate = shipments.length > 0 ? ((successCount / shipments.length) * 100).toFixed(1) : 0;
-    this.metrics.get('deliverySuccessRate').value = successRate;
+    const avgDeliveryTime = deliveryTimes.length
+      ? deliveryTimes.reduce((a, b) => a + b, 0) / deliveryTimes.length
+      : 0;
+
+    const successRate = shipments.length
+      ? (shipments.filter((s) => s.status === 'delivered').length / shipments.length) * 100
+      : 0;
+
+    this.metrics.set('totalRevenue', { ...this.metrics.get('totalRevenue'), value: Math.round(totalRevenue * 100) / 100 });
+    this.metrics.set('totalShipments', { ...this.metrics.get('totalShipments'), value: shipments.length });
+    this.metrics.set('activeShipments', { ...this.metrics.get('activeShipments'), value: activeShipments });
+    this.metrics.set('deliveredToday', { ...this.metrics.get('deliveredToday'), value: deliveredToday });
+    this.metrics.set('totalCustomers', { ...this.metrics.get('totalCustomers'), value: customers.length });
+    this.metrics.set('newCustomers', { ...this.metrics.get('newCustomers'), value: newCustomers });
+    this.metrics.set('avgDeliveryTime', { ...this.metrics.get('avgDeliveryTime'), value: Number(avgDeliveryTime.toFixed(1)) });
+    this.metrics.set('deliverySuccessRate', { ...this.metrics.get('deliverySuccessRate'), value: Number(successRate.toFixed(1)) });
+    this.metrics.set('totalReceipts', { ...this.metrics.get('totalReceipts'), value: receipts.length });
+    this.metrics.set('totalMessages', { ...this.metrics.get('totalMessages'), value: messages.length });
+
+    this.metrics.set('outstandingBalance', { value: Math.round(totalDue * 100) / 100, trend: 0, unit: 'USD', label: 'Outstanding Balance' });
   }
 
-  // Generate revenue report
   async generateRevenueReport() {
-    const { data: orders } = await window.supabase
-      .from('orders')
-      .select('created_at, total_cost, shipment_type')
+    const supabase = window.supabase;
+    if (!supabase) return null;
+
+    const { data: shipments, error } = await supabase
+      .from('shipments')
+      .select('created_at,total_amount,origin_key,dest_key,type')
       .gte('created_at', this.startDate.toISOString())
       .lte('created_at', this.endDate.toISOString());
 
-    const revenueByType = {};
-    const revenueByDay = {};
+    if (error) throw error;
 
-    orders.forEach(order => {
-      // Group by shipment type
-      if (!revenueByType[order.shipment_type]) {
-        revenueByType[order.shipment_type] = 0;
-      }
-      revenueByType[order.shipment_type] += order.total_cost;
+    const byRoute = {};
+    const byDay = {};
+    let totalRevenue = 0;
 
-      // Group by day
-      const day = new Date(order.created_at).toLocaleDateString();
-      if (!revenueByDay[day]) {
-        revenueByDay[day] = 0;
-      }
-      revenueByDay[day] += order.total_cost;
+    (shipments || []).forEach((shipment) => {
+      const amount = Number(shipment.total_amount || 0);
+      totalRevenue += amount;
+
+      const route = `${shipment.origin_key || '—'} → ${shipment.dest_key || '—'}`;
+      byRoute[route] = (byRoute[route] || 0) + amount;
+
+      const day = new Date(shipment.created_at).toISOString().slice(0, 10);
+      byDay[day] = (byDay[day] || 0) + amount;
     });
 
     return {
-      totalRevenue: Object.values(revenueByType).reduce((a, b) => a + b, 0),
-      byType: revenueByType,
-      byDay: revenueByDay,
-      generatedAt: new Date()
+      totalRevenue: Math.round(totalRevenue * 100) / 100,
+      byRoute,
+      byDay,
+      generatedAt: new Date().toISOString(),
     };
   }
 
-  // Generate shipment performance report
   async generatePerformanceReport() {
-    const { data: shipments } = await window.supabase
-      .from('shipments')
-      .select('*')
-      .gte('created_at', this.startDate.toISOString())
-      .lte('created_at', this.endDate.toISOString());
+    const data = await this.fetchDashboardData();
+    if (!data) return null;
 
-    const statusCounts = {};
+    const { shipments } = data;
+    const byStatus = {};
     const routePerformance = {};
 
-    shipments.forEach(shipment => {
-      // Count by status
-      if (!statusCounts[shipment.status]) {
-        statusCounts[shipment.status] = 0;
-      }
-      statusCounts[shipment.status]++;
+    shipments.forEach((shipment) => {
+      const status = String(shipment.status || 'unknown');
+      byStatus[status] = (byStatus[status] || 0) + 1;
 
-      // Performance by route
-      const route = `${shipment.origin} → ${shipment.destination}`;
+      const route = `${shipment.origin_key || '—'} → ${shipment.dest_key || '—'}`;
       if (!routePerformance[route]) {
-        routePerformance[route] = {
-          count: 0,
-          delivered: 0,
-          delayed: 0
-        };
+        routePerformance[route] = { count: 0, delivered: 0, delayed: 0 };
       }
-      routePerformance[route].count++;
-      if (shipment.status === 'delivered') routePerformance[route].delivered++;
-      if (shipment.status === 'delayed') routePerformance[route].delayed++;
+      routePerformance[route].count += 1;
+      if (status === 'delivered') routePerformance[route].delivered += 1;
+      if (status === 'delayed') routePerformance[route].delayed += 1;
     });
 
     return {
       totalShipments: shipments.length,
-      byStatus: statusCounts,
-      routePerformance: routePerformance,
-      generatedAt: new Date()
+      byStatus,
+      routePerformance,
+      generatedAt: new Date().toISOString(),
     };
   }
 
-  // Generate customer insights report
   async generateCustomerInsights() {
-    const { data: customers } = await window.supabase
-      .from('customers')
-      .select('id, created_at, email, phone');
+    const supabase = window.supabase;
+    if (!supabase) return null;
 
-    const { data: orders } = await window.supabase
-      .from('orders')
-      .select('customer_id, total_cost');
+    const [{ data: customers, error: cErr }, { data: shipments, error: sErr }] = await Promise.all([
+      supabase.from('customer_directory').select('id,name,phone,email,created_at,city,delivery_location'),
+      supabase.from('shipments').select('id,customer_name,customer_phone,customer_email,total_amount,directory_customer_id,customer_user_id,created_at,status'),
+    ]);
 
+    if (cErr) throw cErr;
+    if (sErr) throw sErr;
+
+    const shipmentRows = shipments || [];
     const customerStats = {};
 
-    customers.forEach(customer => {
-      const customerOrders = orders.filter(o => o.customer_id === customer.id);
+    customers.forEach((customer) => {
+      const linked = shipmentRows.filter((s) => s.directory_customer_id === customer.id || s.customer_phone === customer.phone);
       customerStats[customer.id] = {
-        email: customer.email,
+        name: customer.name,
         phone: customer.phone,
-        orderCount: customerOrders.length,
-        totalSpent: customerOrders.reduce((sum, o) => sum + (o.total_cost || 0), 0),
-        joinDate: customer.created_at
+        email: customer.email,
+        city: customer.city,
+        deliveryLocation: customer.delivery_location,
+        orderCount: linked.length,
+        totalSpent: linked.reduce((sum, s) => sum + Number(s.total_amount || 0), 0),
+        joinDate: customer.created_at,
       };
     });
 
-    // Top customers
     const topCustomers = Object.entries(customerStats)
       .sort((a, b) => b[1].totalSpent - a[1].totalSpent)
       .slice(0, 10);
 
     return {
       totalCustomers: customers.length,
-      topCustomers: topCustomers,
-      customerStats: customerStats,
-      generatedAt: new Date()
+      topCustomers,
+      customerStats,
+      generatedAt: new Date().toISOString(),
     };
   }
 
-  // Get dashboard HTML
-  getDashboardHTML() {
-    const metricsHTML = Array.from(this.metrics.values()).map(metric => `
-      <div class="admin-stat-card">
-        <b>${metric.value.toLocaleString()} ${metric.unit}</b>
-        <span>${metric.label}</span>
-        <div class="trend-indicator" data-trend="${metric.trend > 0 ? 'up' : 'down'}"></div>
-      </div>
-    `).join('');
-
-    return `
-      <div class="admin-dashboard">
-        <h1>📊 Dashboard</h1>
-        <div class="admin-stats">
-          ${metricsHTML}
-        </div>
-        <div class="admin-charts-grid">
-          <div id="revenueChart" class="admin-chart-card">
-            <b>Revenue Trend</b>
-            <canvas id="revenueChartCanvas"></canvas>
-          </div>
-          <div id="shipmentChart" class="admin-chart-card">
-            <b>Shipment Status</b>
-            <canvas id="shipmentChartCanvas"></canvas>
-          </div>
-        </div>
-      </div>
-    `;
+  startAutoRefresh() {
+    if (this._refreshTimer) clearInterval(this._refreshTimer);
+    this._refreshTimer = setInterval(() => this.calculateMetrics(), this.refreshInterval);
   }
 
-  // Start auto refresh
-  startAutoRefresh() {
-    setInterval(() => {
-      this.calculateMetrics();
-    }, this.refreshInterval);
+  stopAutoRefresh() {
+    if (this._refreshTimer) clearInterval(this._refreshTimer);
+    this._refreshTimer = null;
   }
 }
 
-// Initialize global dashboard
-window.adminDashboard = new AdminDashboard();
+if (typeof window !== 'undefined') {
+  window.AdminDashboard = AdminDashboard;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { AdminDashboard };
+}
