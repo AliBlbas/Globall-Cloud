@@ -12,7 +12,7 @@
   <script src="admin-dashboard.js"></script>
   <style>
     :root{--bg:#061428;--bg2:#0d1f38;--card:#102742;--card2:#173457;--line:#29496f;--text:#f5f9fd;--muted:#9bb2d0;--accent:#00c2d9;--accent2:#4fe3f0;--warn:#f0a83a;--bad:#e5533d;--good:#2ed27f;--shadow:0 18px 40px rgba(0,0,0,.26);--radius:20px;--mono:'JetBrains Mono',monospace;--font:'Vazirmatn',sans-serif;}
-    *{box-sizing:border-box} html,body{margin:0;min-height:100%;background:radial-gradient(circle at 20% -10%, rgba(0,194,217,.11), transparent 35%),linear-gradient(180deg,var(--bg),#08111e 80%);color:var(--text);font-family:var(--font)} body{padding:24px} a{color:inherit} button,input,select,textarea{font:inherit;color:inherit} .wrap{max-width:1380px;margin:0 auto}
+    *{box-sizing:border-box} html,body{margin:0;min-height:100%;background:radial-gradient(circle at 20% -10%, rgba(0,194,217,.11), transparent 35%),linear-gradient(180deg,var(--bg),#08111e 80%);color:var(--text);font-family:var(--font)} body{padding:24px} a{color:inherit;text-decoration:none} button,input,select,textarea{font:inherit;color:inherit} .wrap{max-width:1380px;margin:0 auto}
     .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap}.brand{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--accent2),var(--accent));display:grid;place-items:center;color:#03181d;font-weight:900}.subtitle{color:var(--muted);font-size:14px;margin-top:4px}
     .hero{background:linear-gradient(160deg, rgba(16,39,66,.96), rgba(11,25,44,.98));border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:22px;box-shadow:var(--shadow)} .hero-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:18px;align-items:stretch} @media(max-width:980px){.hero-grid{grid-template-columns:1fr}}
     .panel{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:18px;box-shadow:var(--shadow)} .stat-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}@media(max-width:980px){.stat-row{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.stat-row{grid-template-columns:1fr}}
@@ -24,9 +24,12 @@
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.grid{grid-template-columns:1fr}}
     .table-wrap{overflow:auto;border-radius:18px;border:1px solid rgba(255,255,255,.08)} table{width:100%;border-collapse:collapse;min-width:980px;background:rgba(8,16,29,.55)} th,td{padding:14px 12px;border-bottom:1px solid rgba(255,255,255,.08);text-align:start;vertical-align:top} th{font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:#cfe4ff;background:rgba(255,255,255,.03)} td{font-size:14px;color:var(--text)} tr:hover td{background:rgba(255,255,255,.02)} .mono{font-family:var(--mono)} .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800}.ok{background:rgba(46,210,127,.14);color:#8ef0b6}.warn{background:rgba(240,168,58,.16);color:#ffd182}.bad{background:rgba(229,83,61,.15);color:#ffaf9f}.muted{color:var(--muted)}
     .section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}.section-title h2{margin:0;font-size:20px}.section-title p{margin:4px 0 0;color:var(--muted);font-size:14px}
-    .split{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:760px){.split{grid-template-columns:1fr}}
     .hidden{display:none !important} .loading{opacity:.7;pointer-events:none} .notice{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--muted)}
     .receipt-files{display:flex;gap:10px;flex-wrap:wrap}.receipt-files img{width:78px;height:78px;object-fit:cover;border-radius:14px;border:1px solid rgba(255,255,255,.12)}
+    .role-badge{display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);font-weight:800}
+    .role-super{background:rgba(46,210,127,.14);color:#8ef0b6;border-color:rgba(46,210,127,.4)}
+    .role-admin{background:rgba(0,194,217,.14);color:#9feef8;border-color:rgba(0,194,217,.4)}
+    .role-accountant{background:rgba(240,168,58,.14);color:#ffd182;border-color:rgba(240,168,58,.35)}
   </style>
 </head>
 <body>
@@ -49,7 +52,8 @@
     <div class="hero-grid">
       <div>
         <div class="notice">
-          Staff-only console. Customers do not see this page. Customer sign-up should stay disabled in Supabase Auth so accounts are created only by management.
+          Staff-only console. Customer sign-up stays disabled in Supabase Auth; management creates and edits accounts here.
+          <div id="roleBadge" class="role-badge role-admin hidden">—</div>
         </div>
         <div class="tabs">
           <button class="tab active" data-tab="dashboard">Dashboard</button>
@@ -75,6 +79,7 @@
           </form>
         </div>
       </div>
+
       <div class="panel">
         <div class="section-title">
           <div>
@@ -162,30 +167,17 @@
           <div class="form-row"><label class="label">Customer phone</label><input class="field" id="receiptCustomerPhone"></div>
         </div>
         <div class="form-row"><label class="label">Notes</label><textarea class="field" id="receiptNotes" placeholder="Received goods from Dubai / Erbil..."></textarea></div>
-        <div class="form-row"><label class="label">Photos</label><input class="field" id="receiptPhotos" type="file" accept="image/*" multiple></div>
-        <div id="receiptPreview" class="receipt-files"></div>
-        <div class="toolbar">
-          <button class="btn btn-primary" type="submit">Save warehouse receipt</button>
+        <div class="form-row"><label class="label">Receipt photos</label><input class="field" type="file" id="receiptPhotos" multiple accept="image/*"></div>
+        <div class="receipt-files" id="receiptPreview"></div>
+        <div class="toolbar" style="margin-top:12px">
+          <button class="btn btn-primary" type="submit">Save receipt</button>
           <button class="btn btn-outline" type="button" id="receiptClearBtn">Clear</button>
         </div>
         <p id="receiptMsg" class="small"></p>
       </form>
 
-      <div class="tab-pane hidden" id="dashboardPane">
-        <div class="notice">Use the tabs to switch between customer accounts, staff accounts, warehouse receipts, and logs.</div>
-        <div class="section-title" style="margin-top:16px">
-          <div><h2 style="font-size:16px">Analytics (last 30 days)</h2></div>
-        </div>
-        <div class="stat-row" id="analyticsStatsRow">
-          <div class="stat"><b>—</b><span>Revenue</span></div>
-          <div class="stat"><b>—</b><span>Outstanding</span></div>
-          <div class="stat"><b>—</b><span>Active shipments</span></div>
-          <div class="stat"><b>—</b><span>Delivered today</span></div>
-          <div class="stat"><b>—</b><span>New customers</span></div>
-          <div class="stat"><b>—</b><span>Avg delivery (days)</span></div>
-          <div class="stat"><b>—</b><span>Success rate</span></div>
-          <div class="stat"><b>—</b><span>Messages</span></div>
-        </div>
+      <div id="dashboardPane" class="tab-pane">
+        <div class="notice">This console keeps the public site clean and makes all administrative work happen from one controlled staff portal.</div>
       </div>
     </div>
 
@@ -195,17 +187,17 @@
           <h2 id="listTitle">Overview</h2>
           <p id="listSubtitle">Latest accounts and records</p>
         </div>
-        <div class="toolbar">
-          <input class="field" style="min-width:260px" id="searchBox" placeholder="Search...">
-          <button class="btn btn-outline" id="reloadListBtn">Reload</button>
+        <div class="toolbar" style="min-width:220px;justify-content:flex-end">
+          <input class="field" id="searchBox" placeholder="Search records..." style="min-width:220px">
         </div>
       </div>
+
+      <div class="stat-row" id="analyticsStatsRow" style="margin-bottom:14px"></div>
+
       <div class="table-wrap">
         <table>
           <thead id="tableHead"></thead>
-          <tbody id="tableBody">
-            <tr><td>Sign in to load data.</td></tr>
-          </tbody>
+          <tbody id="tableBody"></tbody>
         </table>
       </div>
     </div>
@@ -219,24 +211,40 @@ const API_URL = `${SUPABASE_URL}/functions/v1/account-admin`;
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
 });
-// admin-dashboard.js expects the real client, not window.supabase (which is
-// just the library namespace) — see the fix note at the top of that file.
 const adminDashboard = (typeof AdminDashboard !== 'undefined') ? new AdminDashboard(sb) : null;
 
 let currentTab = 'dashboard';
 let currentSession = null;
+let currentRole = 'guest';
 let customers = [];
 let staff = [];
 let receipts = [];
 let logs = [];
 
 const $ = (id) => document.getElementById(id);
-const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const money = (v) => `$${Number(v || 0).toLocaleString(undefined,{maximumFractionDigits:2})}`;
+const badge = (active) => `<span class="badge ${active ? 'ok' : 'warn'}">${active ? 'ACTIVE' : 'INACTIVE'}</span>`;
+const initials = (name) => String(name || '?').split(' ').slice(0,2).map(s => s[0] || '').join('').toUpperCase();
+const roleLabelMap = { super_admin: 'Super Admin', admin: 'Admin', accountant: 'Accountant' };
 
-function setMsg(el, text, ok = false) { el.textContent = text || ''; el.style.color = ok ? 'var(--good)' : 'var(--muted)'; }
-function money(v){ const n = Number(v || 0); return `$${n.toLocaleString(undefined,{maximumFractionDigits:2})}`; }
-function badge(active){ return `<span class="badge ${active ? 'ok' : 'warn'}">${active ? 'ACTIVE' : 'INACTIVE'}</span>`; }
-function initials(name){ return String(name || '?').split(' ').slice(0,2).map(s => s[0] || '').join('').toUpperCase(); }
+function setMsg(el, text, ok = false) {
+  el.textContent = text || '';
+  el.style.color = ok ? 'var(--good)' : 'var(--muted)';
+}
+
+function roleToClass(role) {
+  if (role === 'super_admin') return 'role-super';
+  if (role === 'accountant') return 'role-accountant';
+  return 'role-admin';
+}
+
+function showRole(role) {
+  const badgeEl = $('roleBadge');
+  badgeEl.className = `role-badge ${roleToClass(role)}`;
+  badgeEl.textContent = `${roleLabelMap[role] || role || 'Guest'} access`;
+  badgeEl.classList.remove('hidden');
+}
 
 async function authFetch(path, opts = {}) {
   const { data: { session } } = await sb.auth.getSession();
@@ -255,7 +263,6 @@ async function authFetch(path, opts = {}) {
 function setActiveTab(tab) {
   currentTab = tab;
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
   $('dashboardPane').classList.toggle('hidden', tab !== 'dashboard');
   $('customerForm').classList.toggle('hidden', tab !== 'customers');
   $('staffForm').classList.toggle('hidden', tab !== 'staff');
@@ -381,6 +388,24 @@ function renderList() {
   }
 }
 
+async function refreshAnalytics() {
+  const row = $('analyticsStatsRow');
+  if (!row || !adminDashboard) return;
+  const metrics = await adminDashboard.calculateMetrics();
+  if (!metrics) return;
+  const g = (k) => metrics.get(k);
+  row.innerHTML = `
+    <div class="stat"><b>${money(g('totalRevenue')?.value)}</b><span>Revenue (30d)</span></div>
+    <div class="stat"><b>${money(g('outstandingBalance')?.value)}</b><span>Outstanding</span></div>
+    <div class="stat"><b>${g('activeShipments')?.value ?? 0}</b><span>Active shipments</span></div>
+    <div class="stat"><b>${g('deliveredToday')?.value ?? 0}</b><span>Delivered today</span></div>
+    <div class="stat"><b>${g('newCustomers')?.value ?? 0}</b><span>New customers (30d)</span></div>
+    <div class="stat"><b>${g('avgDeliveryTime')?.value ?? 0}</b><span>Avg delivery (days)</span></div>
+    <div class="stat"><b>${g('deliverySuccessRate')?.value ?? 0}%</b><span>Success rate</span></div>
+    <div class="stat"><b>${g('totalMessages')?.value ?? 0}</b><span>Messages (30d)</span></div>
+  `;
+}
+
 async function refreshAll() {
   if (!currentSession) return;
   $('refreshBtn').classList.add('loading');
@@ -403,61 +428,50 @@ async function refreshAll() {
       <div class="stat"><b>${logs.length}</b><span>Logs</span></div>
     `;
     $('whoami').textContent = `${currentSession.user.user_metadata?.full_name || currentSession.user.email.split('@')[0]} · ${currentSession.user.email}`;
-    $('whoamiSub').textContent = 'Staff management is active';
+    $('whoamiSub').textContent = `${roleLabelMap[currentRole] || currentRole} access active`;
     renderList();
-    renderAnalytics();
+    refreshAnalytics();
   } catch (err) {
-    // Re-throw so syncSessionUI() can tell a genuine load failure apart
-    // from "not signed in" and recover the UI instead of getting stuck.
     throw err;
   } finally {
     $('refreshBtn').classList.remove('loading');
   }
 }
 
-async function renderAnalytics() {
-  const row = $('analyticsStatsRow');
-  if (!row || !adminDashboard) return;
-  const metrics = await adminDashboard.calculateMetrics();
-  if (!metrics) return; // fails quietly if the signed-in role can't read these tables (RLS)
-  const g = (k) => metrics.get(k);
-  row.innerHTML = `
-    <div class="stat"><b>${money(g('totalRevenue')?.value)}</b><span>Revenue (30d)</span></div>
-    <div class="stat"><b>${money(g('outstandingBalance')?.value)}</b><span>Outstanding</span></div>
-    <div class="stat"><b>${g('activeShipments')?.value ?? 0}</b><span>Active shipments</span></div>
-    <div class="stat"><b>${g('deliveredToday')?.value ?? 0}</b><span>Delivered today</span></div>
-    <div class="stat"><b>${g('newCustomers')?.value ?? 0}</b><span>New customers (30d)</span></div>
-    <div class="stat"><b>${g('avgDeliveryTime')?.value ?? 0}</b><span>Avg delivery (days)</span></div>
-    <div class="stat"><b>${g('deliverySuccessRate')?.value ?? 0}%</b><span>Success rate</span></div>
-    <div class="stat"><b>${g('totalMessages')?.value ?? 0}</b><span>Messages (30d)</span></div>
-  `;
+async function resolveCurrentRole(user) {
+  const freshUser = user || (await sb.auth.getUser()).data.user;
+  let role = freshUser?.app_metadata?.role || freshUser?.user_metadata?.role || 'guest';
+  try {
+    const staffRes = await authFetch('/?kind=staff');
+    const row = (staffRes.items || []).find((s) => s.id === freshUser?.id);
+    if (row?.role) role = row.role;
+  } catch (e) {
+    // Keep metadata-derived role if staff listing is not available yet.
+  }
+  currentRole = role;
+  showRole(role);
+  return role;
 }
 
 async function syncSessionUI() {
+  await sb.auth.refreshSession().catch(() => null);
   const { data: { session } } = await sb.auth.getSession();
   currentSession = session;
   if (session) {
-    // FIX: a session cached in the browser (localStorage) can be expired or
-    // revoked on the server even though getSession() still returns it. The
-    // old code hid the login form and showed "Sign out" immediately, then
-    // called refreshAll() — if that failed (expired token → 401 from the
-    // edge function), the error message was written into #loginMsg, which
-    // was already hidden inside the now-hidden #authGate. Result: no login
-    // form, no visible error, just a stuck "Not signed in" heading contradicting
-    // a visible Sign out button. This is exactly the state in the screenshot.
-    //
-    // Fix: only hide the login form / show "Sign out" AFTER a successful
-    // refresh. On failure, sign out cleanly and show the login form again
-    // with a clear, visible message.
     $('logoutBtn').classList.remove('hidden');
     try {
+      const { data: { user } } = await sb.auth.getUser();
+      if (user) currentSession = { ...session, user };
+      await resolveCurrentRole(user);
       await refreshAll();
       $('authGate').classList.add('hidden');
     } catch (err) {
       await sb.auth.signOut();
       currentSession = null;
+      currentRole = 'guest';
       $('authGate').classList.remove('hidden');
       $('logoutBtn').classList.add('hidden');
+      $('roleBadge').classList.add('hidden');
       $('whoami').textContent = 'Not signed in';
       $('whoamiSub').textContent = 'Waiting for staff authentication';
       setMsg($('loginMsg'), 'Your session expired — please sign in again.');
@@ -465,6 +479,7 @@ async function syncSessionUI() {
   } else {
     $('authGate').classList.remove('hidden');
     $('logoutBtn').classList.add('hidden');
+    $('roleBadge').classList.add('hidden');
     $('whoami').textContent = 'Not signed in';
     $('whoamiSub').textContent = 'Waiting for staff authentication';
   }
@@ -487,11 +502,8 @@ $('staffLoginForm').addEventListener('submit', async (e) => {
 
 $('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); await syncSessionUI(); });
 $('refreshBtn').addEventListener('click', refreshAll);
-$('reloadListBtn').addEventListener('click', renderList);
 $('searchBox').addEventListener('input', renderList);
-
 document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
-
 $('customerClearBtn').addEventListener('click', resetCustomerForm);
 $('staffClearBtn').addEventListener('click', resetStaffForm);
 $('receiptClearBtn').addEventListener('click', resetReceiptForm);
@@ -516,7 +528,7 @@ $('customerForm').addEventListener('submit', async (e) => {
     };
     const action = $('customerId').value ? 'update' : 'create';
     const res = await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'customer', action, data: payload }) });
-    setMsg($('customerMsg'), action === 'create' ? `Customer saved (${res.status})` : 'Customer updated', true);
+    setMsg($('customerMsg'), action === 'create' ? `Customer saved${res.warning ? ' · ' + res.warning : ''}` : 'Customer updated', true);
     resetCustomerForm();
     await refreshAll();
     setActiveTab('customers');
@@ -538,7 +550,7 @@ $('staffForm').addEventListener('submit', async (e) => {
     };
     const action = $('staffId').value ? 'update' : 'create';
     const res = await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'staff', action, data: payload }) });
-    setMsg($('staffMsg'), action === 'create' ? `Staff saved (${res.status})` : 'Staff updated', true);
+    setMsg($('staffMsg'), action === 'create' ? `Staff saved${res.warning ? ' · ' + res.warning : ''}` : 'Staff updated', true);
     resetStaffForm();
     await refreshAll();
     setActiveTab('staff');
@@ -564,7 +576,7 @@ $('receiptForm').addEventListener('submit', async (e) => {
     formData.append('notes', $('receiptNotes').value.trim());
     for (const file of Array.from($('receiptPhotos').files || [])) formData.append('photos', file);
     const res = await authFetch('/', { method: 'POST', body: formData });
-    setMsg($('receiptMsg'), `Receipt saved: ${res.receipt.batch_code}`, true);
+    setMsg($('receiptMsg'), `Receipt saved: ${res.receipt.batch_code}${res.customer ? ' · linked to customer' : ''}`, true);
     resetReceiptForm();
     await refreshAll();
     setActiveTab('receipts');
@@ -611,8 +623,8 @@ window.archiveStaffAccount = async (id) => {
 };
 
 sb.auth.onAuthStateChange(() => syncSessionUI());
-syncSessionUI();
 setActiveTab('dashboard');
+syncSessionUI();
 setInterval(() => { if (currentSession) refreshAll(); }, 60000);
 </script>
 </body>
