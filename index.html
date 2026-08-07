@@ -4185,7 +4185,7 @@ async function submitWarehouseReceipt(){
   msgEl.style.display = 'none';
   if(!batchCode){ msgEl.textContent = 'تکایە کۆدی کڕیار بنووسە.'; msgEl.style.display = 'block'; return; }
 
-  const {data: dirMatch} = await sb.from('customer_directory').select('id,name').ilike('code', batchCode).limit(1);
+  const {data: dirMatch} = await sb.from('customer_directory').select('id,name,phone').ilike('code', batchCode).limit(1);
   const directoryCustomerId = dirMatch && dirMatch[0] ? dirMatch[0].id : null;
   if(!directoryCustomerId && !window.confirm('ئەم کۆدە لە کۆگای موشتەریان نەدۆزرایەوە. دەتەوێت بەبێ بەستنەوە بە کڕیارێک تۆماری بکەیت؟')){
     return;
@@ -4215,6 +4215,21 @@ async function submitWarehouseReceipt(){
 
   logActivity('warehouse_receipt', batchCode, location+(photoUrls.length?' — '+photoUrls.length+' وێنە':''));
   showToast('وەرگرتنی باچ تۆمارکرا.', 'success');
+
+  /* NEW: notify the customer their goods reached the warehouse. Same
+     proven wa.me pattern as sendWhatsAppUpdate() elsewhere in this file —
+     no API keys, staff just taps Send. Silently skipped if the batch code
+     wasn't linked to a directory customer, or that customer has no phone
+     on file, so it never blocks the receipt from saving. */
+  if(directoryCustomerId && dirMatch[0]?.phone){
+    const custPhone = toWhatsAppDigits(dirMatch[0].phone);
+    if(custPhone){
+      const custName = dirMatch[0].name ? ('سڵاو '+dirMatch[0].name+'، ') : 'سڵاو، ';
+      const whMsg = custName+'بارەکەت گەیشتە کۆگای '+location+' و تۆمارکرا. (کۆد: '+batchCode+')\nبەم زووانە بۆ گواستنەوە ئامادە دەکرێت. — Globall Cloud';
+      window.open('https://wa.me/'+custPhone+'?text='+encodeURIComponent(whMsg), '_blank');
+    }
+  }
+
   document.getElementById('whBatchCode').value = '';
   document.getElementById('whNotes').value = '';
   document.getElementById('whPhotos').value = '';
