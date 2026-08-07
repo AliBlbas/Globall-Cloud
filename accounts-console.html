@@ -407,7 +407,9 @@ async function refreshAll() {
     renderList();
     renderAnalytics();
   } catch (err) {
-    setMsg($('loginMsg'), err.message || 'Failed to load data');
+    // Re-throw so syncSessionUI() can tell a genuine load failure apart
+    // from "not signed in" and recover the UI instead of getting stuck.
+    throw err;
   } finally {
     $('refreshBtn').classList.remove('loading');
   }
@@ -435,9 +437,31 @@ async function syncSessionUI() {
   const { data: { session } } = await sb.auth.getSession();
   currentSession = session;
   if (session) {
-    $('authGate').classList.add('hidden');
+    // FIX: a session cached in the browser (localStorage) can be expired or
+    // revoked on the server even though getSession() still returns it. The
+    // old code hid the login form and showed "Sign out" immediately, then
+    // called refreshAll() — if that failed (expired token → 401 from the
+    // edge function), the error message was written into #loginMsg, which
+    // was already hidden inside the now-hidden #authGate. Result: no login
+    // form, no visible error, just a stuck "Not signed in" heading contradicting
+    // a visible Sign out button. This is exactly the state in the screenshot.
+    //
+    // Fix: only hide the login form / show "Sign out" AFTER a successful
+    // refresh. On failure, sign out cleanly and show the login form again
+    // with a clear, visible message.
     $('logoutBtn').classList.remove('hidden');
-    await refreshAll();
+    try {
+      await refreshAll();
+      $('authGate').classList.add('hidden');
+    } catch (err) {
+      await sb.auth.signOut();
+      currentSession = null;
+      $('authGate').classList.remove('hidden');
+      $('logoutBtn').classList.add('hidden');
+      $('whoami').textContent = 'Not signed in';
+      $('whoamiSub').textContent = 'Waiting for staff authentication';
+      setMsg($('loginMsg'), 'Your session expired — please sign in again.');
+    }
   } else {
     $('authGate').classList.remove('hidden');
     $('logoutBtn').classList.add('hidden');
