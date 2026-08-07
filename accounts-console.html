@@ -2,8 +2,9 @@
 <html lang="ckb" dir="rtl">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#061428">
+  <meta name="color-scheme" content="dark">
   <title>Globall Cloud — Accounts Console</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,198 +12,272 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="admin-dashboard.js"></script>
   <style>
-    :root{--bg:#061428;--bg2:#0d1f38;--card:#102742;--card2:#173457;--line:#29496f;--text:#f5f9fd;--muted:#9bb2d0;--accent:#00c2d9;--accent2:#4fe3f0;--warn:#f0a83a;--bad:#e5533d;--good:#2ed27f;--shadow:0 18px 40px rgba(0,0,0,.26);--radius:20px;--mono:'JetBrains Mono',monospace;--font:'Vazirmatn',sans-serif;}
-    *{box-sizing:border-box} html,body{margin:0;min-height:100%;background:radial-gradient(circle at 20% -10%, rgba(0,194,217,.11), transparent 35%),linear-gradient(180deg,var(--bg),#08111e 80%);color:var(--text);font-family:var(--font)} body{padding:24px} a{color:inherit;text-decoration:none} button,input,select,textarea{font:inherit;color:inherit} .wrap{max-width:1380px;margin:0 auto}
-    .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap}.brand{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--accent2),var(--accent));display:grid;place-items:center;color:#03181d;font-weight:900}.subtitle{color:var(--muted);font-size:14px;margin-top:4px}
-    .hero{background:linear-gradient(160deg, rgba(16,39,66,.96), rgba(11,25,44,.98));border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:22px;box-shadow:var(--shadow)} .hero-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:18px;align-items:stretch} @media(max-width:980px){.hero-grid{grid-template-columns:1fr}}
-    .panel{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:18px;box-shadow:var(--shadow)} .stat-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}@media(max-width:980px){.stat-row{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.stat-row{grid-template-columns:1fr}}
-    .stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px}.stat b{display:block;font-size:28px;line-height:1;margin-bottom:6px}.stat span{color:var(--muted);font-size:13px}
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.btn{border:1px solid transparent;border-radius:999px;padding:12px 16px;cursor:pointer;font-weight:800;background:transparent;transition:.2s}.btn-primary{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#03181d}.btn-outline{border-color:var(--line);background:rgba(255,255,255,.02)}.btn-danger{background:var(--bad);color:#fff}.btn:active{transform:scale(.98)}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 12px}.tab{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.02);cursor:pointer;font-weight:800;color:var(--muted)}.tab.active{background:var(--accent);border-color:transparent;color:#03181d}
-    .layout{display:grid;grid-template-columns:320px 1fr;gap:18px;margin-top:18px}@media(max-width:1080px){.layout{grid-template-columns:1fr}}
-    .form-row{margin-bottom:12px}.label{display:block;font-size:13px;color:var(--muted);font-weight:700;margin-bottom:7px}.field{width:100%;padding:13px 14px;border-radius:14px;border:1.5px solid var(--line);background:rgba(255,255,255,.03);outline:none}.field:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,194,217,.14)}.small{font-size:12px;color:var(--muted)} textarea.field{min-height:92px;resize:vertical}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.grid{grid-template-columns:1fr}}
-    .table-wrap{overflow:auto;border-radius:18px;border:1px solid rgba(255,255,255,.08)} table{width:100%;border-collapse:collapse;min-width:980px;background:rgba(8,16,29,.55)} th,td{padding:14px 12px;border-bottom:1px solid rgba(255,255,255,.08);text-align:start;vertical-align:top} th{font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:#cfe4ff;background:rgba(255,255,255,.03)} td{font-size:14px;color:var(--text)} tr:hover td{background:rgba(255,255,255,.02)} .mono{font-family:var(--mono)} .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800}.ok{background:rgba(46,210,127,.14);color:#8ef0b6}.warn{background:rgba(240,168,58,.16);color:#ffd182}.bad{background:rgba(229,83,61,.15);color:#ffaf9f}.muted{color:var(--muted)}
-    .section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}.section-title h2{margin:0;font-size:20px}.section-title p{margin:4px 0 0;color:var(--muted);font-size:14px}
-    .hidden{display:none !important} .loading{opacity:.7;pointer-events:none} .notice{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--muted)}
+    :root{
+      --bg:#061428;--bg2:#0b1a30;--panel:#102742;--panel2:#173457;--line:#27486d;
+      --text:#f5f9fd;--muted:#9db4d1;--accent:#00c2d9;--accent2:#4fe3f0;--good:#2ed27f;--warn:#f0a83a;--bad:#e5533d;
+      --shadow:0 18px 40px rgba(0,0,0,.28);--radius:22px;--font:'Vazirmatn',sans-serif;--mono:'JetBrains Mono',monospace;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:radial-gradient(circle at 12% -10%, rgba(0,194,217,.12), transparent 35%),linear-gradient(180deg,var(--bg),#08111e 80%);color:var(--text);font-family:var(--font)}
+    body{padding:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom));overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    button,input,select,textarea{font:inherit;color:inherit}
+    .shell{max-width:1420px;margin:0 auto;display:grid;gap:18px}
+    .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:14px;min-width:0}
+    .mark{width:54px;height:54px;border-radius:18px;background:linear-gradient(135deg,var(--accent2),var(--accent));display:grid;place-items:center;color:#03181d;font-weight:900;font-size:18px;box-shadow:0 14px 28px rgba(0,194,217,.18)}
+    .eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);font-weight:900}
+    .title{font-size:22px;font-weight:900;line-height:1.15;margin-top:3px}
+    .subtitle{color:var(--muted);font-size:14px;margin-top:4px}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .btn{border:1px solid transparent;border-radius:999px;padding:12px 16px;cursor:pointer;font-weight:800;background:transparent;transition:.2s;min-height:46px}
+    .btn:hover{transform:translateY(-1px)} .btn:active{transform:translateY(0) scale(.99)}
+    .btn-primary{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#03181d}
+    .btn-outline{border-color:var(--line);background:rgba(255,255,255,.02)}
+    .btn-danger{background:var(--bad);color:#fff}
+    .hero,.panel{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid rgba(255,255,255,.08);border-radius:28px;box-shadow:var(--shadow)}
+    .hero{padding:18px}
+    .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:stretch}
+    .panel{padding:18px}
+    .section-title{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    .section-title h2{margin:0;font-size:20px;line-height:1.2}
+    .section-title p{margin:4px 0 0;color:var(--muted);font-size:14px;line-height:1.6}
+    .notice{padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--muted);line-height:1.7}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);font-weight:800;white-space:nowrap}
+    .badge-super{background:rgba(46,210,127,.14);color:#8ef0b6;border-color:rgba(46,210,127,.35)}
+    .badge-admin{background:rgba(0,194,217,.14);color:#9feef8;border-color:rgba(0,194,217,.35)}
+    .badge-accountant{background:rgba(240,168,58,.14);color:#ffd182;border-color:rgba(240,168,58,.35)}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px}
+    .stat b{display:block;font-size:28px;line-height:1;margin-bottom:6px}
+    .stat span{color:var(--muted);font-size:13px}
+    .chips,.tabs,.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+    .chips{margin-top:14px}
+    .chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:12px;font-weight:800;color:#d7ebff}
+    .tabs{margin:16px 0 12px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.02);cursor:pointer;font-weight:800;color:var(--muted);white-space:nowrap}
+    .tab.active{background:var(--accent);border-color:transparent;color:#03181d}
+    .layout{display:grid;grid-template-columns:minmax(320px,380px) 1fr;gap:18px;align-items:start}
+    .stack{display:grid;gap:18px}
+    .form-row{margin-bottom:12px}
+    .label{display:block;font-size:13px;color:var(--muted);font-weight:800;margin-bottom:7px}
+    .field{width:100%;padding:13px 14px;border-radius:14px;border:1.5px solid var(--line);background:rgba(255,255,255,.03);outline:none;transition:.2s}
+    .field:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,194,217,.14)}
+    .small{font-size:12px;color:var(--muted);line-height:1.6}
+    textarea.field{min-height:98px;resize:vertical}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .table-wrap{overflow:auto;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(8,16,29,.52)}
+    table{width:100%;border-collapse:collapse;min-width:920px}
+    th,td{padding:14px 12px;border-bottom:1px solid rgba(255,255,255,.08);text-align:start;vertical-align:top}
+    th{font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:#d5e8ff;background:rgba(255,255,255,.03)}
+    td{font-size:14px;color:var(--text)}
+    tr:hover td{background:rgba(255,255,255,.02)}
+    .mono{font-family:var(--mono)}
+    .ok,.warn,.bad{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:900}
+    .ok{background:rgba(46,210,127,.14);color:#8ef0b6}.warn{background:rgba(240,168,58,.16);color:#ffd182}.bad{background:rgba(229,83,61,.15);color:#ffaf9f}
+    .hidden{display:none !important}.loading{opacity:.72;pointer-events:none}
     .receipt-files{display:flex;gap:10px;flex-wrap:wrap}.receipt-files img{width:78px;height:78px;object-fit:cover;border-radius:14px;border:1px solid rgba(255,255,255,.12)}
-    .role-badge{display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);font-weight:800}
-    .role-super{background:rgba(46,210,127,.14);color:#8ef0b6;border-color:rgba(46,210,127,.4)}
-    .role-admin{background:rgba(0,194,217,.14);color:#9feef8;border-color:rgba(0,194,217,.4)}
-    .role-accountant{background:rgba(240,168,58,.14);color:#ffd182;border-color:rgba(240,168,58,.35)}
+    .list-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+    .search{min-width:240px;max-width:320px;width:100%}
+    .muted{color:var(--muted)}
+    .auth-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:18px}
+    .muted-box{padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+    @media (max-width: 1080px){.hero-grid,.layout{grid-template-columns:1fr}}
+    @media (max-width: 640px){body{padding:12px}.hero,.panel{padding:16px}.title{font-size:19px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}.search{min-width:100%;max-width:100%}.top-actions{width:100%}.top-actions .btn{flex:1}}
   </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="topbar">
-    <div class="brand">
-      <div class="logo">GC</div>
-      <div>
-        <div style="font-size:22px;font-weight:900">Globall Cloud Accounts Console</div>
-        <div class="subtitle">Customer accounts, staff access, warehouse receipts, and activity logs in one place</div>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark">GC</div>
+        <div>
+          <div class="eyebrow">Globall Cloud Accounts Console</div>
+          <div class="title">Customer accounts, staff access, warehouse receipts, and activity logs in one controlled place</div>
+          <div class="subtitle">China · UAE · Iraq logistics operations</div>
+        </div>
       </div>
-    </div>
-    <div class="toolbar">
-      <button class="btn btn-outline" id="refreshBtn">Refresh</button>
-      <button class="btn btn-danger hidden" id="logoutBtn">Sign out</button>
-    </div>
-  </div>
+      <div class="toolbar top-actions">
+        <button class="btn btn-outline" id="refreshBtn">Refresh</button>
+        <button class="btn btn-danger hidden" id="logoutBtn">Sign out</button>
+      </div>
+    </header>
 
-  <div class="hero">
-    <div class="hero-grid">
-      <div>
-        <div class="notice">
-          Staff-only console. Customer sign-up stays disabled in Supabase Auth; management creates and edits accounts here.
-          <div id="roleBadge" class="role-badge role-admin hidden">—</div>
-        </div>
-        <div class="tabs">
-          <button class="tab active" data-tab="dashboard">Dashboard</button>
-          <button class="tab" data-tab="customers">Customers</button>
-          <button class="tab" data-tab="staff">Staff</button>
-          <button class="tab" data-tab="receipts">Warehouse Receipts</button>
-          <button class="tab" data-tab="logs">Activity Logs</button>
-        </div>
-        <div id="authGate" class="panel">
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="panel" style="box-shadow:none;background:transparent;border:0;padding:0">
           <div class="section-title">
             <div>
-              <h2>Staff login</h2>
-              <p>Use your staff email and password to open the management tools.</p>
+              <h2>Professional staff portal</h2>
+              <p>Everything is grouped into one safe console for internal operations.</p>
             </div>
           </div>
-          <form id="staffLoginForm">
-            <div class="grid">
-              <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="loginEmail" required></div>
-              <div class="form-row"><label class="label">Password</label><input class="field" type="password" id="loginPassword" required></div>
+          <div class="notice">
+            Staff-only console. Customer sign-up stays disabled in Supabase Auth; management creates and edits accounts here.
+            <div id="roleBadge" class="badge badge-admin hidden" style="margin-top:10px">—</div>
+          </div>
+          <div class="chips">
+            <span class="chip">Customer accounts</span>
+            <span class="chip">Staff access</span>
+            <span class="chip">Warehouse receipts</span>
+            <span class="chip">Activity logs</span>
+            <span class="chip">Invite / reset flows</span>
+          </div>
+          <div class="tabs">
+            <button class="tab active" data-tab="dashboard">Dashboard</button>
+            <button class="tab" data-tab="customers">Customers</button>
+            <button class="tab" data-tab="staff">Staff</button>
+            <button class="tab" data-tab="receipts">Warehouse Receipts</button>
+            <button class="tab" data-tab="logs">Activity Logs</button>
+          </div>
+          <div id="authGate" class="auth-box">
+            <div class="section-title">
+              <div>
+                <h2>Staff login</h2>
+                <p>Use your staff email and password to open the management tools.</p>
+              </div>
             </div>
-            <button class="btn btn-primary" type="submit">Sign in</button>
-            <p id="loginMsg" class="small"></p>
+            <form id="staffLoginForm">
+              <div class="grid">
+                <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="loginEmail" required></div>
+                <div class="form-row"><label class="label">Password</label><input class="field" type="password" id="loginPassword" required></div>
+              </div>
+              <div class="toolbar"><button class="btn btn-primary" type="submit">Sign in</button></div>
+              <p id="loginMsg" class="small"></p>
+            </form>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">
+            <div>
+              <h2 id="whoami">Not signed in</h2>
+              <p id="whoamiSub">Waiting for staff authentication</p>
+            </div>
+          </div>
+          <div class="stats" id="statsRow">
+            <div class="stat"><b>—</b><span>Customers</span></div>
+            <div class="stat"><b>—</b><span>Staff</span></div>
+            <div class="stat"><b>—</b><span>Receipts</span></div>
+            <div class="stat"><b>—</b><span>Logs</span></div>
+          </div>
+          <div class="muted-box" style="margin-top:14px">
+            <div class="small">Tip</div>
+            <div style="margin-top:4px;font-weight:800">Keep this page for staff only and create customer accounts from here.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="layout">
+      <div class="stack">
+        <div class="panel">
+          <div class="section-title">
+            <div>
+              <h2>Quick actions</h2>
+              <p>Create or update accounts, then manage warehouse intake.</p>
+            </div>
+          </div>
+
+          <form id="customerForm" class="tab-pane hidden">
+            <input type="hidden" id="customerId">
+            <div class="grid">
+              <div class="form-row"><label class="label">Customer name</label><input class="field" id="customerName"></div>
+              <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="customerEmail"></div>
+            </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">Phone</label><input class="field" id="customerPhone"></div>
+              <div class="form-row"><label class="label">Phone 2</label><input class="field" id="customerPhone2"></div>
+            </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">City</label><input class="field" id="customerCity"></div>
+              <div class="form-row"><label class="label">Delivery location</label><input class="field" id="customerDelivery"></div>
+            </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">Manager</label><select class="field" id="customerManager"></select></div>
+              <div class="form-row"><label class="label">Status</label><select class="field" id="customerStatus"><option value="true">Active</option><option value="false">Inactive</option></select></div>
+            </div>
+            <div class="form-row"><label class="label">Note</label><textarea class="field" id="customerNote"></textarea></div>
+            <div class="grid">
+              <div class="form-row"><label class="label">Invite only</label><select class="field" id="customerInvite"><option value="true">Send invite email</option><option value="false">Create temporary password</option></select></div>
+              <div class="form-row"><label class="label">Temporary password</label><input class="field" id="customerPassword" placeholder="Leave blank to auto-generate"></div>
+            </div>
+            <div class="toolbar">
+              <button class="btn btn-primary" type="submit">Save customer</button>
+              <button class="btn btn-outline" type="button" id="customerClearBtn">Clear</button>
+            </div>
+            <p id="customerMsg" class="small"></p>
           </form>
+
+          <form id="staffForm" class="tab-pane hidden">
+            <input type="hidden" id="staffId">
+            <div class="grid">
+              <div class="form-row"><label class="label">Full name</label><input class="field" id="staffFullName"></div>
+              <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="staffEmail"></div>
+            </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">Role</label><select class="field" id="staffRole"><option value="admin">admin</option><option value="accountant">accountant</option><option value="super_admin">super_admin</option></select></div>
+              <div class="form-row"><label class="label">Branch</label><select class="field" id="staffBranch"><option value="all">all</option><option value="dubai">dubai</option><option value="china">china</option><option value="erbil">erbil</option></select></div>
+            </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">Invite only</label><select class="field" id="staffInvite"><option value="true">Send invite email</option><option value="false">Create temporary password</option></select></div>
+              <div class="form-row"><label class="label">Temporary password</label><input class="field" id="staffPassword" placeholder="Leave blank to auto-generate"></div>
+            </div>
+            <div class="toolbar">
+              <button class="btn btn-primary" type="submit">Save staff</button>
+              <button class="btn btn-outline" type="button" id="staffClearBtn">Clear</button>
+            </div>
+            <p id="staffMsg" class="small"></p>
+          </form>
+
+          <form id="receiptForm" class="tab-pane hidden" enctype="multipart/form-data">
+            <div class="grid">
+              <div class="form-row"><label class="label">Batch code</label><input class="field" id="receiptBatch" placeholder="GC-..." required></div>
+              <div class="form-row"><label class="label">Location</label><select class="field" id="receiptLocation"><option value="Dubai">Dubai</option><option value="Erbil">Erbil</option><option value="China">China</option></select></div>
+            </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">Customer code</label><input class="field" id="receiptCustomerCode" placeholder="GC... or directory code"></div>
+              <div class="form-row"><label class="label">Customer phone</label><input class="field" id="receiptCustomerPhone"></div>
+            </div>
+            <div class="form-row"><label class="label">Notes</label><textarea class="field" id="receiptNotes" placeholder="Received goods from Dubai / Erbil..."></textarea></div>
+            <div class="form-row"><label class="label">Receipt photos</label><input class="field" type="file" id="receiptPhotos" multiple accept="image/*"></div>
+            <div class="receipt-files" id="receiptPreview"></div>
+            <div class="toolbar" style="margin-top:12px">
+              <button class="btn btn-primary" type="submit">Save receipt</button>
+              <button class="btn btn-outline" type="button" id="receiptClearBtn">Clear</button>
+            </div>
+            <p id="receiptMsg" class="small"></p>
+          </form>
+
+          <div id="dashboardPane" class="tab-pane">
+            <div class="muted-box">
+              This console keeps the public site clean and makes all administrative work happen from one controlled staff portal.
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="panel">
-        <div class="section-title">
+        <div class="list-head">
           <div>
-            <h2 id="whoami">Not signed in</h2>
-            <p id="whoamiSub">Waiting for staff authentication</p>
+            <h2 id="listTitle">Overview</h2>
+            <p id="listSubtitle" class="muted">Latest accounts and records</p>
           </div>
+          <input class="field search" id="searchBox" placeholder="Search records...">
         </div>
-        <div class="stat-row" id="statsRow">
-          <div class="stat"><b>—</b><span>Customers</span></div>
-          <div class="stat"><b>—</b><span>Staff</span></div>
-          <div class="stat"><b>—</b><span>Receipts</span></div>
-          <div class="stat"><b>—</b><span>Logs</span></div>
+
+        <div class="stats" id="analyticsStatsRow" style="margin-bottom:14px"></div>
+
+        <div class="table-wrap">
+          <table>
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+          </table>
         </div>
       </div>
-    </div>
+    </section>
   </div>
-
-  <div class="layout">
-    <div class="panel">
-      <div class="section-title">
-        <div>
-          <h2>Quick actions</h2>
-          <p>Create or update accounts, then manage warehouse intake.</p>
-        </div>
-      </div>
-
-      <form id="customerForm" class="tab-pane hidden">
-        <input type="hidden" id="customerId">
-        <div class="grid">
-          <div class="form-row"><label class="label">Customer name</label><input class="field" id="customerName"></div>
-          <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="customerEmail"></div>
-        </div>
-        <div class="grid">
-          <div class="form-row"><label class="label">Phone</label><input class="field" id="customerPhone"></div>
-          <div class="form-row"><label class="label">Phone 2</label><input class="field" id="customerPhone2"></div>
-        </div>
-        <div class="grid">
-          <div class="form-row"><label class="label">City</label><input class="field" id="customerCity"></div>
-          <div class="form-row"><label class="label">Delivery location</label><input class="field" id="customerDelivery"></div>
-        </div>
-        <div class="grid">
-          <div class="form-row"><label class="label">Manager</label><select class="field" id="customerManager"></select></div>
-          <div class="form-row"><label class="label">Status</label><select class="field" id="customerStatus"><option value="true">Active</option><option value="false">Inactive</option></select></div>
-        </div>
-        <div class="form-row"><label class="label">Note</label><textarea class="field" id="customerNote"></textarea></div>
-        <div class="grid">
-          <div class="form-row"><label class="label">Invite only</label><select class="field" id="customerInvite"><option value="true">Send invite email</option><option value="false">Create temporary password</option></select></div>
-          <div class="form-row"><label class="label">Temporary password</label><input class="field" id="customerPassword" placeholder="Leave blank to auto-generate"></div>
-        </div>
-        <div class="toolbar">
-          <button class="btn btn-primary" type="submit">Save customer</button>
-          <button class="btn btn-outline" type="button" id="customerClearBtn">Clear</button>
-        </div>
-        <p id="customerMsg" class="small"></p>
-      </form>
-
-      <form id="staffForm" class="tab-pane hidden">
-        <input type="hidden" id="staffId">
-        <div class="grid">
-          <div class="form-row"><label class="label">Full name</label><input class="field" id="staffFullName"></div>
-          <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="staffEmail"></div>
-        </div>
-        <div class="grid">
-          <div class="form-row"><label class="label">Role</label><select class="field" id="staffRole"><option value="admin">admin</option><option value="accountant">accountant</option><option value="super_admin">super_admin</option></select></div>
-          <div class="form-row"><label class="label">Branch</label><select class="field" id="staffBranch"><option value="all">all</option><option value="dubai">dubai</option><option value="china">china</option><option value="erbil">erbil</option></select></div>
-        </div>
-        <div class="grid">
-          <div class="form-row"><label class="label">Invite only</label><select class="field" id="staffInvite"><option value="true">Send invite email</option><option value="false">Create temporary password</option></select></div>
-          <div class="form-row"><label class="label">Temporary password</label><input class="field" id="staffPassword" placeholder="Leave blank to auto-generate"></div>
-        </div>
-        <div class="toolbar">
-          <button class="btn btn-primary" type="submit">Save staff</button>
-          <button class="btn btn-outline" type="button" id="staffClearBtn">Clear</button>
-        </div>
-        <p id="staffMsg" class="small"></p>
-      </form>
-
-      <form id="receiptForm" class="tab-pane hidden" enctype="multipart/form-data">
-        <div class="grid">
-          <div class="form-row"><label class="label">Batch code</label><input class="field" id="receiptBatch" placeholder="GC-..." required></div>
-          <div class="form-row"><label class="label">Location</label><select class="field" id="receiptLocation"><option value="Dubai">Dubai</option><option value="Erbil">Erbil</option><option value="China">China</option></select></div>
-        </div>
-        <div class="grid">
-          <div class="form-row"><label class="label">Customer code</label><input class="field" id="receiptCustomerCode" placeholder="GC... or directory code"></div>
-          <div class="form-row"><label class="label">Customer phone</label><input class="field" id="receiptCustomerPhone"></div>
-        </div>
-        <div class="form-row"><label class="label">Notes</label><textarea class="field" id="receiptNotes" placeholder="Received goods from Dubai / Erbil..."></textarea></div>
-        <div class="form-row"><label class="label">Receipt photos</label><input class="field" type="file" id="receiptPhotos" multiple accept="image/*"></div>
-        <div class="receipt-files" id="receiptPreview"></div>
-        <div class="toolbar" style="margin-top:12px">
-          <button class="btn btn-primary" type="submit">Save receipt</button>
-          <button class="btn btn-outline" type="button" id="receiptClearBtn">Clear</button>
-        </div>
-        <p id="receiptMsg" class="small"></p>
-      </form>
-
-      <div id="dashboardPane" class="tab-pane">
-        <div class="notice">This console keeps the public site clean and makes all administrative work happen from one controlled staff portal.</div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="section-title">
-        <div>
-          <h2 id="listTitle">Overview</h2>
-          <p id="listSubtitle">Latest accounts and records</p>
-        </div>
-        <div class="toolbar" style="min-width:220px;justify-content:flex-end">
-          <input class="field" id="searchBox" placeholder="Search records..." style="min-width:220px">
-        </div>
-      </div>
-
-      <div class="stat-row" id="analyticsStatsRow" style="margin-bottom:14px"></div>
-
-      <div class="table-wrap">
-        <table>
-          <thead id="tableHead"></thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script>
 const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
@@ -211,42 +286,17 @@ const API_URL = `${SUPABASE_URL}/functions/v1/account-admin`;
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
 });
-const adminDashboard = (typeof AdminDashboard !== 'undefined') ? new AdminDashboard(sb) : null;
-
-let currentTab = 'dashboard';
-let currentSession = null;
-let currentRole = 'guest';
-let customers = [];
-let staff = [];
-let receipts = [];
-let logs = [];
-
+const adminDashboard = typeof AdminDashboard !== 'undefined' ? new AdminDashboard(sb) : null;
+const state = { tab: 'dashboard', session: null, role: 'guest', customers: [], staff: [], receipts: [], logs: [] };
 const $ = (id) => document.getElementById(id);
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const money = (v) => `$${Number(v || 0).toLocaleString(undefined,{maximumFractionDigits:2})}`;
-const badge = (active) => `<span class="badge ${active ? 'ok' : 'warn'}">${active ? 'ACTIVE' : 'INACTIVE'}</span>`;
-const initials = (name) => String(name || '?').split(' ').slice(0,2).map(s => s[0] || '').join('').toUpperCase();
-const roleLabelMap = { super_admin: 'Super Admin', admin: 'Admin', accountant: 'Accountant' };
-
-function setMsg(el, text, ok = false) {
-  el.textContent = text || '';
-  el.style.color = ok ? 'var(--good)' : 'var(--muted)';
-}
-
-function roleToClass(role) {
-  if (role === 'super_admin') return 'role-super';
-  if (role === 'accountant') return 'role-accountant';
-  return 'role-admin';
-}
-
-function showRole(role) {
-  const badgeEl = $('roleBadge');
-  badgeEl.className = `role-badge ${roleToClass(role)}`;
-  badgeEl.textContent = `${roleLabelMap[role] || role || 'Guest'} access`;
-  badgeEl.classList.remove('hidden');
-}
-
-async function authFetch(path, opts = {}) {
+const money = (v) => `$${Number(v || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+const badge = (active) => `<span class="${active ? 'ok' : 'warn'}">${active ? 'ACTIVE' : 'INACTIVE'}</span>`;
+const roleLabel = { super_admin: 'Super Admin', admin: 'Admin', accountant: 'Accountant' };
+const roleClass = (r) => r === 'super_admin' ? 'badge-super' : r === 'accountant' ? 'badge-accountant' : 'badge-admin';
+function setMsg(el, text, ok = false) { el.textContent = text || ''; el.style.color = ok ? 'var(--good)' : 'var(--muted)'; }
+function showRole(role) { const el = $('roleBadge'); el.className = `badge ${roleClass(role)}`; el.textContent = `${roleLabel[role] || role || 'Guest'} access`; el.classList.remove('hidden'); }
+async function authFetch(path = '/', opts = {}) {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) throw new Error('Please sign in first');
   const headers = new Headers(opts.headers || {});
@@ -254,15 +304,13 @@ async function authFetch(path, opts = {}) {
   if (opts.body && !(opts.body instanceof FormData)) headers.set('Content-Type', 'application/json');
   const res = await fetch(`${API_URL}${path}`, { ...opts, headers });
   const text = await res.text();
-  let data = null;
-  try { data = text ? JSON.parse(text) : null; } catch { data = { raw: text }; }
+  let data = null; try { data = text ? JSON.parse(text) : null; } catch { data = { raw: text }; }
   if (!res.ok) throw new Error(data?.error || `Request failed (${res.status})`);
   return data;
 }
-
 function setActiveTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  state.tab = tab;
+  document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
   $('dashboardPane').classList.toggle('hidden', tab !== 'dashboard');
   $('customerForm').classList.toggle('hidden', tab !== 'customers');
   $('staffForm').classList.toggle('hidden', tab !== 'staff');
@@ -271,57 +319,19 @@ function setActiveTab(tab) {
   $('listSubtitle').textContent = tab === 'customers' ? 'Create, edit, archive, and link customer accounts' : tab === 'staff' ? 'Manage staff roles and access' : tab === 'receipts' ? 'Goods received in Dubai, China, or Erbil with photos' : tab === 'logs' ? 'Latest management activity' : 'Latest accounts and records';
   renderList();
 }
-
 function loadManagerOptions() {
-  const select = $('customerManager');
-  select.innerHTML = '<option value="">Unassigned</option>' + staff.map(s => `<option value="${esc(s.id)}">${esc(s.full_name)} (${esc(s.role)})</option>`).join('');
+  $('customerManager').innerHTML = '<option value="">Unassigned</option>' + state.staff.map((s) => `<option value="${esc(s.id)}">${esc(s.full_name)} (${esc(s.role)})</option>`).join('');
 }
-
-function resetCustomerForm() {
-  $('customerId').value = '';
-  $('customerName').value = '';
-  $('customerEmail').value = '';
-  $('customerPhone').value = '';
-  $('customerPhone2').value = '';
-  $('customerCity').value = '';
-  $('customerDelivery').value = '';
-  $('customerManager').value = '';
-  $('customerStatus').value = 'true';
-  $('customerNote').value = '';
-  $('customerInvite').value = 'true';
-  $('customerPassword').value = '';
-  setMsg($('customerMsg'), '');
-}
-
-function resetStaffForm() {
-  $('staffId').value = '';
-  $('staffFullName').value = '';
-  $('staffEmail').value = '';
-  $('staffRole').value = 'admin';
-  $('staffBranch').value = 'all';
-  $('staffInvite').value = 'true';
-  $('staffPassword').value = '';
-  setMsg($('staffMsg'), '');
-}
-
-function resetReceiptForm() {
-  $('receiptBatch').value = '';
-  $('receiptLocation').value = 'Dubai';
-  $('receiptCustomerCode').value = '';
-  $('receiptCustomerPhone').value = '';
-  $('receiptNotes').value = '';
-  $('receiptPhotos').value = '';
-  $('receiptPreview').innerHTML = '';
-  setMsg($('receiptMsg'), '');
-}
-
+function resetCustomerForm() { $('customerId').value=''; $('customerName').value=''; $('customerEmail').value=''; $('customerPhone').value=''; $('customerPhone2').value=''; $('customerCity').value=''; $('customerDelivery').value=''; $('customerManager').value=''; $('customerStatus').value='true'; $('customerNote').value=''; $('customerInvite').value='true'; $('customerPassword').value=''; setMsg($('customerMsg'), ''); }
+function resetStaffForm() { $('staffId').value=''; $('staffFullName').value=''; $('staffEmail').value=''; $('staffRole').value='admin'; $('staffBranch').value='all'; $('staffInvite').value='true'; $('staffPassword').value=''; setMsg($('staffMsg'), ''); }
+function resetReceiptForm() { $('receiptBatch').value=''; $('receiptLocation').value='Dubai'; $('receiptCustomerCode').value=''; $('receiptCustomerPhone').value=''; $('receiptNotes').value=''; $('receiptPhotos').value=''; $('receiptPreview').innerHTML=''; setMsg($('receiptMsg'), ''); }
 function renderList() {
   const q = $('searchBox').value.trim().toLowerCase();
-  if (currentTab === 'customers') {
-    const rows = customers.filter(r => !q || JSON.stringify(r).toLowerCase().includes(q));
-    $('tableHead').innerHTML = `<tr><th>Code</th><th>Name</th><th>Phone</th><th>Email</th><th>Manager</th><th>Shipments</th><th>Status</th><th>Actions</th></tr>`;
-    $('tableBody').innerHTML = rows.map(r => {
-      const manager = staff.find(s => s.id === r.manager_staff_id);
+  if (state.tab === 'customers') {
+    const rows = state.customers.filter((r) => !q || JSON.stringify(r).toLowerCase().includes(q));
+    $('tableHead').innerHTML = '<tr><th>Code</th><th>Name</th><th>Phone</th><th>Email</th><th>Manager</th><th>Shipments</th><th>Status</th><th>Actions</th></tr>';
+    $('tableBody').innerHTML = rows.map((r) => {
+      const manager = state.staff.find((s) => s.id === r.manager_staff_id);
       return `<tr>
         <td class="mono">${esc(r.code || '—')}</td>
         <td><b>${esc(r.name || '—')}</b><div class="muted">${esc(r.city || '')}</div></td>
@@ -330,71 +340,55 @@ function renderList() {
         <td>${esc(manager?.full_name || '—')}<div class="muted">${esc(manager?.role || '')}</div></td>
         <td><b>${r.shipment_count || 0}</b><div class="muted">${money(r.outstanding_amount || 0)} due</div></td>
         <td>${badge(r.is_active)}</td>
-        <td>
-          <div class="toolbar">
-            <button class="btn btn-outline" onclick='editCustomer(${JSON.stringify(r).replace(/'/g, "&#39;")})'>Edit</button>
-            <button class="btn btn-danger" onclick="archiveCustomerAccount('${esc(r.id)}')">Archive</button>
-          </div>
-        </td>
+        <td><div class="toolbar"><button class="btn btn-outline" onclick='editCustomer(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button><button class="btn btn-danger" onclick="archiveCustomerAccount('${esc(r.id)}')">Archive</button></div></td>
       </tr>`;
     }).join('') || '<tr><td colspan="8">No customers found.</td></tr>';
-  } else if (currentTab === 'staff') {
-    const rows = staff.filter(r => !q || JSON.stringify(r).toLowerCase().includes(q));
-    $('tableHead').innerHTML = `<tr><th>Name</th><th>Email / ID</th><th>Role</th><th>Branch</th><th>Status</th><th>Actions</th></tr>`;
-    $('tableBody').innerHTML = rows.map(r => {
-      return `<tr>
-        <td><b>${esc(r.full_name || '—')}</b><div class="muted mono">${initials(r.full_name)}</div></td>
-        <td class="mono">${esc(r.id)}</td>
-        <td><span class="badge ok">${esc(r.role || '')}</span></td>
-        <td>${esc(r.branch || '')}</td>
-        <td>${badge(r.is_active)}</td>
-        <td>
-          <div class="toolbar">
-            <button class="btn btn-outline" onclick='editStaff(${JSON.stringify(r).replace(/'/g, "&#39;")})'>Edit</button>
-            <button class="btn btn-danger" onclick="archiveStaffAccount('${esc(r.id)}')">Deactivate</button>
-          </div>
-        </td>
-      </tr>`;
-    }).join('') || '<tr><td colspan="6">No staff found.</td></tr>';
-  } else if (currentTab === 'receipts') {
-    const rows = receipts.filter(r => !q || JSON.stringify(r).toLowerCase().includes(q));
-    $('tableHead').innerHTML = `<tr><th>Batch</th><th>Location</th><th>Customer</th><th>Photos</th><th>Received</th><th>Notes</th></tr>`;
-    $('tableBody').innerHTML = rows.map(r => {
+  } else if (state.tab === 'staff') {
+    const rows = state.staff.filter((r) => !q || JSON.stringify(r).toLowerCase().includes(q));
+    $('tableHead').innerHTML = '<tr><th>Name</th><th>Email / ID</th><th>Role</th><th>Branch</th><th>Status</th><th>Actions</th></tr>';
+    $('tableBody').innerHTML = rows.map((r) => `<tr>
+      <td><b>${esc(r.full_name || '—')}</b><div class="muted mono">${(String(r.full_name || '?').split(' ').slice(0,2).map((s) => s[0] || '').join('')).toUpperCase()}</div></td>
+      <td class="mono">${esc(r.id)}</td>
+      <td><span class="ok">${esc(r.role || '')}</span></td>
+      <td>${esc(r.branch || '')}</td>
+      <td>${badge(r.is_active)}</td>
+      <td><div class="toolbar"><button class="btn btn-outline" onclick='editStaff(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button><button class="btn btn-danger" onclick="archiveStaffAccount('${esc(r.id)}')">Deactivate</button></div></td>
+    </tr>`).join('') || '<tr><td colspan="6">No staff found.</td></tr>';
+  } else if (state.tab === 'receipts') {
+    const rows = state.receipts.filter((r) => !q || JSON.stringify(r).toLowerCase().includes(q));
+    $('tableHead').innerHTML = '<tr><th>Batch</th><th>Location</th><th>Customer</th><th>Photos</th><th>Received</th><th>Notes</th></tr>';
+    $('tableBody').innerHTML = rows.map((r) => {
       const photos = Array.isArray(r.photos) ? r.photos : [];
       return `<tr>
         <td class="mono">${esc(r.batch_code || '')}</td>
         <td>${esc(r.location || '')}</td>
         <td>${esc(r.directory_phone || '')}<div class="muted mono">${esc(r.directory_customer_id || '')}</div></td>
-        <td>${photos.length} photos<div class="receipt-files">${photos.slice(0,3).map(p => `<a href="${esc(p)}" target="_blank"><img src="${esc(p)}"></a>`).join('')}</div></td>
+        <td>${photos.length} photos<div class="receipt-files">${photos.slice(0,3).map((p) => `<a href="${esc(p)}" target="_blank" rel="noreferrer"><img src="${esc(p)}" alt="receipt"></a>`).join('')}</div></td>
         <td>${esc(r.received_at || '')}<div class="muted">${esc(r.created_by_name || '')}</div></td>
         <td>${esc(r.notes || '')}</td>
       </tr>`;
     }).join('') || '<tr><td colspan="6">No receipts yet.</td></tr>';
-  } else if (currentTab === 'logs') {
-    const rows = logs.filter(r => !q || JSON.stringify(r).toLowerCase().includes(q));
-    $('tableHead').innerHTML = `<tr><th>Time</th><th>Actor</th><th>Action</th><th>Target</th><th>Details</th></tr>`;
-    $('tableBody').innerHTML = rows.map(r => `<tr>
+  } else if (state.tab === 'logs') {
+    const rows = state.logs.filter((r) => !q || JSON.stringify(r).toLowerCase().includes(q));
+    $('tableHead').innerHTML = '<tr><th>Time</th><th>Actor</th><th>Action</th><th>Target</th><th>Details</th></tr>';
+    $('tableBody').innerHTML = rows.map((r) => `<tr>
       <td class="mono">${esc(r.created_at || '')}</td>
       <td>${esc(r.staff_name || '—')}<div class="muted mono">${esc(r.staff_id || '')}</div></td>
-      <td><span class="badge warn">${esc(r.action || '')}</span></td>
+      <td><span class="warn">${esc(r.action || '')}</span></td>
       <td class="mono">${esc(r.target_id || '—')}</td>
-      <td><div class="muted">${esc(r.details || '')}</div></td>
+      <td class="muted">${esc(r.details || '')}</td>
     </tr>`).join('') || '<tr><td colspan="5">No logs yet.</td></tr>';
   } else {
-    $('tableHead').innerHTML = `<tr><th>Welcome</th><th>What this console does</th></tr>`;
-    $('tableBody').innerHTML = `<tr><td>Accounts</td><td>Create customer and staff accounts, assign managers, and manage active/inactive status.</td></tr>
-      <tr><td>Warehouse receipts</td><td>Register inbound goods by batch code, link them to customer code or phone, and attach photos.</td></tr>
-      <tr><td>Activity log</td><td>See the latest staff actions for accountability.</td></tr>`;
+    $('tableHead').innerHTML = '<tr><th>Welcome</th><th>What this console does</th></tr>';
+    $('tableBody').innerHTML = `<tr><td>Accounts</td><td>Create customer and staff accounts, assign managers, and manage active/inactive status.</td></tr><tr><td>Warehouse receipts</td><td>Register inbound goods by batch code, link them to customer code or phone, and attach photos.</td></tr><tr><td>Activity log</td><td>See the latest staff actions for accountability.</td></tr>`;
   }
 }
-
 async function refreshAnalytics() {
-  const row = $('analyticsStatsRow');
-  if (!row || !adminDashboard) return;
-  const metrics = await adminDashboard.calculateMetrics();
+  if (!adminDashboard || !$('analyticsStatsRow')) return;
+  const metrics = await adminDashboard.calculateMetrics().catch(() => null);
   if (!metrics) return;
   const g = (k) => metrics.get(k);
-  row.innerHTML = `
+  $('analyticsStatsRow').innerHTML = `
     <div class="stat"><b>${money(g('totalRevenue')?.value)}</b><span>Revenue (30d)</span></div>
     <div class="stat"><b>${money(g('outstandingBalance')?.value)}</b><span>Outstanding</span></div>
     <div class="stat"><b>${g('activeShipments')?.value ?? 0}</b><span>Active shipments</span></div>
@@ -405,39 +399,21 @@ async function refreshAnalytics() {
     <div class="stat"><b>${g('totalMessages')?.value ?? 0}</b><span>Messages (30d)</span></div>
   `;
 }
-
 async function refreshAll() {
-  if (!currentSession) return;
+  if (!state.session) return;
   $('refreshBtn').classList.add('loading');
   try {
-    const [c, s, r, l] = await Promise.all([
-      authFetch('/?kind=customer'),
-      authFetch('/?kind=staff'),
-      authFetch('/?kind=receipt'),
-      authFetch('/?kind=log'),
-    ]);
-    customers = c.items || [];
-    staff = s.items || [];
-    receipts = r.items || [];
-    logs = l.items || [];
+    const [c, s, r, l] = await Promise.all([authFetch('/?kind=customer'), authFetch('/?kind=staff'), authFetch('/?kind=receipt'), authFetch('/?kind=log')]);
+    state.customers = c.items || []; state.staff = s.items || []; state.receipts = r.items || []; state.logs = l.items || [];
     loadManagerOptions();
-    $('statsRow').innerHTML = `
-      <div class="stat"><b>${customers.length}</b><span>Customers</span></div>
-      <div class="stat"><b>${staff.length}</b><span>Staff</span></div>
-      <div class="stat"><b>${receipts.length}</b><span>Receipts</span></div>
-      <div class="stat"><b>${logs.length}</b><span>Logs</span></div>
-    `;
-    $('whoami').textContent = `${currentSession.user.user_metadata?.full_name || currentSession.user.email.split('@')[0]} · ${currentSession.user.email}`;
-    $('whoamiSub').textContent = `${roleLabelMap[currentRole] || currentRole} access active`;
+    $('statsRow').innerHTML = `<div class="stat"><b>${state.customers.length}</b><span>Customers</span></div><div class="stat"><b>${state.staff.length}</b><span>Staff</span></div><div class="stat"><b>${state.receipts.length}</b><span>Receipts</span></div><div class="stat"><b>${state.logs.length}</b><span>Logs</span></div>`;
+    const name = state.session.user.user_metadata?.full_name || state.session.user.email?.split('@')[0] || 'Staff';
+    $('whoami').textContent = `${name} · ${state.session.user.email || ''}`;
+    $('whoamiSub').textContent = `${roleLabel[state.role] || state.role} access active`;
     renderList();
     refreshAnalytics();
-  } catch (err) {
-    throw err;
-  } finally {
-    $('refreshBtn').classList.remove('loading');
-  }
+  } finally { $('refreshBtn').classList.remove('loading'); }
 }
-
 async function resolveCurrentRole(user) {
   const freshUser = user || (await sb.auth.getUser()).data.user;
   let role = freshUser?.app_metadata?.role || freshUser?.user_metadata?.role || 'guest';
@@ -445,187 +421,98 @@ async function resolveCurrentRole(user) {
     const staffRes = await authFetch('/?kind=staff');
     const row = (staffRes.items || []).find((s) => s.id === freshUser?.id);
     if (row?.role) role = row.role;
-  } catch (e) {
-    // Keep metadata-derived role if staff listing is not available yet.
-  }
-  currentRole = role;
-  showRole(role);
-  return role;
+  } catch {}
+  state.role = role; showRole(role); return role;
 }
-
 async function syncSessionUI() {
   await sb.auth.refreshSession().catch(() => null);
   const { data: { session } } = await sb.auth.getSession();
-  currentSession = session;
+  state.session = session || null;
   if (session) {
     $('logoutBtn').classList.remove('hidden');
     try {
       const { data: { user } } = await sb.auth.getUser();
-      if (user) currentSession = { ...session, user };
+      if (user) state.session = { ...session, user };
       await resolveCurrentRole(user);
-      await refreshAll();
       $('authGate').classList.add('hidden');
+      await refreshAll();
     } catch (err) {
-      await sb.auth.signOut();
-      currentSession = null;
-      currentRole = 'guest';
-      $('authGate').classList.remove('hidden');
-      $('logoutBtn').classList.add('hidden');
-      $('roleBadge').classList.add('hidden');
-      $('whoami').textContent = 'Not signed in';
-      $('whoamiSub').textContent = 'Waiting for staff authentication';
+      await sb.auth.signOut(); state.session = null; state.role = 'guest';
+      $('authGate').classList.remove('hidden'); $('logoutBtn').classList.add('hidden'); $('roleBadge').classList.add('hidden');
+      $('whoami').textContent = 'Not signed in'; $('whoamiSub').textContent = 'Waiting for staff authentication';
       setMsg($('loginMsg'), 'Your session expired — please sign in again.');
     }
   } else {
-    $('authGate').classList.remove('hidden');
-    $('logoutBtn').classList.add('hidden');
-    $('roleBadge').classList.add('hidden');
-    $('whoami').textContent = 'Not signed in';
-    $('whoamiSub').textContent = 'Waiting for staff authentication';
+    $('authGate').classList.remove('hidden'); $('logoutBtn').classList.add('hidden'); $('roleBadge').classList.add('hidden');
+    $('whoami').textContent = 'Not signed in'; $('whoamiSub').textContent = 'Waiting for staff authentication';
   }
 }
-
 $('staffLoginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  setMsg($('loginMsg'), 'Signing in...');
-  try {
-    const email = $('loginEmail').value.trim();
-    const password = $('loginPassword').value;
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-    setMsg($('loginMsg'), 'Signed in successfully', true);
-    await syncSessionUI();
-  } catch (err) {
-    setMsg($('loginMsg'), err.message || 'Login failed');
-  }
+  e.preventDefault(); setMsg($('loginMsg'), 'Signing in...');
+  try { const email = $('loginEmail').value.trim(); const password = $('loginPassword').value; const { error } = await sb.auth.signInWithPassword({ email, password }); if (error) throw error; setMsg($('loginMsg'), 'Signed in successfully', true); await syncSessionUI(); }
+  catch (err) { setMsg($('loginMsg'), err.message || 'Login failed'); }
 });
-
 $('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); await syncSessionUI(); });
 $('refreshBtn').addEventListener('click', refreshAll);
 $('searchBox').addEventListener('input', renderList);
-document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
+document.querySelectorAll('.tab').forEach((btn) => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
 $('customerClearBtn').addEventListener('click', resetCustomerForm);
 $('staffClearBtn').addEventListener('click', resetStaffForm);
 $('receiptClearBtn').addEventListener('click', resetReceiptForm);
-
 $('customerForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  setMsg($('customerMsg'), 'Saving customer...');
+  e.preventDefault(); setMsg($('customerMsg'), 'Saving customer...');
   try {
-    const payload = {
-      id: $('customerId').value || undefined,
-      name: $('customerName').value.trim(),
-      email: $('customerEmail').value.trim(),
-      phone: $('customerPhone').value.trim(),
-      phone2: $('customerPhone2').value.trim(),
-      city: $('customerCity').value.trim(),
-      delivery_location: $('customerDelivery').value.trim(),
-      note: $('customerNote').value.trim(),
-      manager_staff_id: $('customerManager').value || null,
-      is_active: $('customerStatus').value === 'true',
-      send_invite: $('customerInvite').value === 'true',
-      password: $('customerPassword').value.trim() || undefined,
-    };
+    const payload = { id: $('customerId').value || undefined, name: $('customerName').value.trim(), email: $('customerEmail').value.trim(), phone: $('customerPhone').value.trim(), phone2: $('customerPhone2').value.trim(), city: $('customerCity').value.trim(), delivery_location: $('customerDelivery').value.trim(), note: $('customerNote').value.trim(), manager_staff_id: $('customerManager').value || null, is_active: $('customerStatus').value === 'true', send_invite: $('customerInvite').value === 'true', password: $('customerPassword').value.trim() || undefined };
     const action = $('customerId').value ? 'update' : 'create';
     const res = await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'customer', action, data: payload }) });
     setMsg($('customerMsg'), action === 'create' ? `Customer saved${res.warning ? ' · ' + res.warning : ''}` : 'Customer updated', true);
-    resetCustomerForm();
-    await refreshAll();
-    setActiveTab('customers');
+    resetCustomerForm(); await refreshAll(); setActiveTab('customers');
   } catch (err) { setMsg($('customerMsg'), err.message || 'Failed to save customer'); }
 });
-
 $('staffForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  setMsg($('staffMsg'), 'Saving staff...');
+  e.preventDefault(); setMsg($('staffMsg'), 'Saving staff...');
   try {
-    const payload = {
-      id: $('staffId').value || undefined,
-      full_name: $('staffFullName').value.trim(),
-      email: $('staffEmail').value.trim(),
-      role: $('staffRole').value,
-      branch: $('staffBranch').value,
-      send_invite: $('staffInvite').value === 'true',
-      password: $('staffPassword').value.trim() || undefined,
-    };
+    const payload = { id: $('staffId').value || undefined, full_name: $('staffFullName').value.trim(), email: $('staffEmail').value.trim(), role: $('staffRole').value, branch: $('staffBranch').value, send_invite: $('staffInvite').value === 'true', password: $('staffPassword').value.trim() || undefined };
     const action = $('staffId').value ? 'update' : 'create';
     const res = await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'staff', action, data: payload }) });
     setMsg($('staffMsg'), action === 'create' ? `Staff saved${res.warning ? ' · ' + res.warning : ''}` : 'Staff updated', true);
-    resetStaffForm();
-    await refreshAll();
-    setActiveTab('staff');
+    resetStaffForm(); await refreshAll(); setActiveTab('staff');
   } catch (err) { setMsg($('staffMsg'), err.message || 'Failed to save staff'); }
 });
-
 $('receiptPhotos').addEventListener('change', () => {
   const files = Array.from($('receiptPhotos').files || []);
-  $('receiptPreview').innerHTML = files.map(file => `<div><img src="${URL.createObjectURL(file)}" alt=""><div class="small">${esc(file.name)}</div></div>`).join('');
+  $('receiptPreview').innerHTML = files.map((file) => `<div><img src="${URL.createObjectURL(file)}" alt=""><div class="small">${esc(file.name)}</div></div>`).join('');
 });
-
 $('receiptForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  setMsg($('receiptMsg'), 'Uploading receipt...');
+  e.preventDefault(); setMsg($('receiptMsg'), 'Uploading receipt...');
   try {
     const formData = new FormData();
-    formData.append('kind', 'receipt');
-    formData.append('action', 'create');
-    formData.append('batch_code', $('receiptBatch').value.trim());
-    formData.append('location', $('receiptLocation').value);
-    formData.append('customer_code', $('receiptCustomerCode').value.trim());
-    formData.append('customer_phone', $('receiptCustomerPhone').value.trim());
-    formData.append('notes', $('receiptNotes').value.trim());
+    formData.append('kind', 'receipt'); formData.append('action', 'create');
+    formData.append('batch_code', $('receiptBatch').value.trim()); formData.append('location', $('receiptLocation').value); formData.append('customer_code', $('receiptCustomerCode').value.trim()); formData.append('customer_phone', $('receiptCustomerPhone').value.trim()); formData.append('notes', $('receiptNotes').value.trim());
     for (const file of Array.from($('receiptPhotos').files || [])) formData.append('photos', file);
     const res = await authFetch('/', { method: 'POST', body: formData });
     setMsg($('receiptMsg'), `Receipt saved: ${res.receipt.batch_code}${res.customer ? ' · linked to customer' : ''}`, true);
-    resetReceiptForm();
-    await refreshAll();
-    setActiveTab('receipts');
+    resetReceiptForm(); await refreshAll(); setActiveTab('receipts');
   } catch (err) { setMsg($('receiptMsg'), err.message || 'Failed to save receipt'); }
 });
-
 window.editCustomer = (row) => {
-  $('customerId').value = row.id || '';
-  $('customerName').value = row.name || '';
-  $('customerEmail').value = row.email || '';
-  $('customerPhone').value = row.phone || '';
-  $('customerPhone2').value = row.phone2 || '';
-  $('customerCity').value = row.city || '';
-  $('customerDelivery').value = row.delivery_location || '';
-  $('customerManager').value = row.manager_staff_id || '';
-  $('customerStatus').value = String(Boolean(row.is_active));
-  $('customerNote').value = row.note || '';
-  $('customerInvite').value = row.auth_user_id ? 'false' : 'true';
-  $('customerPassword').value = '';
-  setActiveTab('customers');
+  $('customerId').value = row.id || ''; $('customerName').value = row.name || ''; $('customerEmail').value = row.email || ''; $('customerPhone').value = row.phone || ''; $('customerPhone2').value = row.phone2 || ''; $('customerCity').value = row.city || ''; $('customerDelivery').value = row.delivery_location || ''; $('customerManager').value = row.manager_staff_id || ''; $('customerStatus').value = String(Boolean(row.is_active)); $('customerNote').value = row.note || ''; $('customerInvite').value = row.auth_user_id ? 'false' : 'true'; $('customerPassword').value = ''; setActiveTab('customers'); $('customerForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
-
 window.editStaff = (row) => {
-  $('staffId').value = row.id || '';
-  $('staffFullName').value = row.full_name || '';
-  $('staffEmail').value = row.email || '';
-  $('staffRole').value = row.role || 'admin';
-  $('staffBranch').value = row.branch || 'all';
-  $('staffInvite').value = 'false';
-  $('staffPassword').value = '';
-  setActiveTab('staff');
+  $('staffId').value = row.id || ''; $('staffFullName').value = row.full_name || ''; $('staffEmail').value = row.email || ''; $('staffRole').value = row.role || 'admin'; $('staffBranch').value = row.branch || 'all'; $('staffInvite').value = row.auth_user_id ? 'false' : 'true'; $('staffPassword').value = ''; setActiveTab('staff'); $('staffForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
-
 window.archiveCustomerAccount = async (id) => {
   if (!confirm('Archive this customer account?')) return;
-  await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'customer', action: 'archive', data: { id, hard_delete_auth: true } }) });
-  await refreshAll();
+  try { await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'customer', action: 'archive', data: { id } }) }); await refreshAll(); }
+  catch (err) { alert(err.message || 'Unable to archive customer'); }
 };
-
 window.archiveStaffAccount = async (id) => {
   if (!confirm('Deactivate this staff account?')) return;
-  await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'staff', action: 'delete', data: { id } }) });
-  await refreshAll();
+  try { await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'staff', action: 'deactivate', data: { id } }) }); await refreshAll(); }
+  catch (err) { alert(err.message || 'Unable to deactivate staff'); }
 };
-
-sb.auth.onAuthStateChange(() => syncSessionUI());
 setActiveTab('dashboard');
 syncSessionUI();
-setInterval(() => { if (currentSession) refreshAll(); }, 60000);
 </script>
 </body>
 </html>
