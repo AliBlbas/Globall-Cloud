@@ -3071,11 +3071,12 @@ async function renderAdminGate(){
   }
   loginView.style.display = 'none'; dashView.style.display = 'block';
   startInactivityTimer();
-  document.getElementById('staffRoleLabel').textContent = staffRow.role==='admin' ? 'ئەدمین' : 'محاسب';
+  const roleLabels = {admin:'ئەدمین', super_admin:'سوپەر ئەدمین', accountant:'محاسب'};
+  document.getElementById('staffRoleLabel').textContent = roleLabels[staffRow.role] || 'محاسب';
   document.getElementById('staffEmailLabel').textContent = session.user.email;
   const shipments = await getAllShipments();
   currentShipmentsCache = shipments;
-  if(staffRow.role==='admin'){
+  if(staffRow.role==='admin' || staffRow.role==='super_admin'){
     currentMessagesCache = await getRecentMessages();
     document.getElementById('adminContent').innerHTML = renderAdminMainHTML(shipments);
     setTimeout(()=>initAdminCharts(shipments), 0);
