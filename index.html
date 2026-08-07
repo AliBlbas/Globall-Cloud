@@ -1420,6 +1420,7 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
+          <a id="staffConsoleLinkBtn" class="btn btn-primary" href="./accounts-console.html" style="display:none;">👥 بەڕێوەبردنی ستاف و هەژمارەکان</a>
           <button class="btn btn-outline" onclick="openMfaSettings()">🔐 2FA</button>
           <button class="btn btn-outline" onclick="openChangelog()">🆕 نوێترین گۆڕانکارییەکان</button>
           <button class="btn btn-outline" onclick="handleStaffSignOut()">چوونەدەرەوە</button>
@@ -3074,6 +3075,7 @@ async function renderAdminGate(){
   const roleLabels = {admin:'ئەدمین', super_admin:'سوپەر ئەدمین', accountant:'محاسب'};
   document.getElementById('staffRoleLabel').textContent = roleLabels[staffRow.role] || 'محاسب';
   document.getElementById('staffEmailLabel').textContent = session.user.email;
+  document.getElementById('staffConsoleLinkBtn').style.display = (staffRow.role==='super_admin') ? 'inline-flex' : 'none';
   const shipments = await getAllShipments();
   currentShipmentsCache = shipments;
   if(staffRow.role==='admin' || staffRow.role==='super_admin'){
