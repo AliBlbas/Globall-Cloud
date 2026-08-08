@@ -38,144 +38,144 @@
 // error instead of silently pretending to work.
 
 const STRIPE_PUBLISHABLE_KEY = ''; // fill in: pk_live_... / pk_test_...
-const PAYPAL_CLIENT_ID = ''; // fill in: your PayPal client id
-const EDGE_FUNCTION_URL = ''; // fill in once you build it, e.g.
-// 'https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/payments'
+const PAYPAL_CLIENT_ID = '';       // fill in: your PayPal client id
+const EDGE_FUNCTION_URL = '';      // fill in once you build it, e.g.
+                                    // 'https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/payments'
 
 class PaymentGateway {
-	constructor() {
-		this.configured = !!(STRIPE_PUBLISHABLE_KEY && EDGE_FUNCTION_URL);
-		this.stripe = (STRIPE_PUBLISHABLE_KEY && window.Stripe) ? window.Stripe(STRIPE_PUBLISHABLE_KEY) : null;
-		this.pendingPayments = new Map();
-	}
+  constructor() {
+    this.configured = !!(STRIPE_PUBLISHABLE_KEY && EDGE_FUNCTION_URL);
+    this.stripe = (STRIPE_PUBLISHABLE_KEY && window.Stripe) ? window.Stripe(STRIPE_PUBLISHABLE_KEY) : null;
+    this.pendingPayments = new Map();
+  }
 
-	_notConfigured() {
-		return { success: false, error: 'Payment gateway not configured yet — see comment at top of payment-gateway.js' };
-	}
+  _notConfigured() {
+    return { success: false, error: 'Payment gateway not configured yet — see comment at top of payment-gateway.js' };
+  }
 
-	async initializeStripePayment(shipmentId, amount, currency = 'USD') {
-		if (!this.configured || !this.stripe) return this._notConfigured();
+  async initializeStripePayment(shipmentId, amount, currency = 'USD') {
+    if (!this.configured || !this.stripe) return this._notConfigured();
 
-		try {
-			const sb = window.sb || window.supabase;
-			const session = sb ? (await sb.auth.getSession()).data.session : null;
+    try {
+      const sb = window.sb || window.supabase;
+      const session = sb ? (await sb.auth.getSession()).data.session : null;
 
-			const response = await fetch(`${EDGE_FUNCTION_URL}/create-payment-intent`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
-				},
-				body: JSON.stringify({ shipmentId, amount: Math.round(amount * 100), currency: currency.toLowerCase() }),
-			});
-			if (!response.ok) throw new Error(`Edge function error: ${response.status}`);
-			const { clientSecret } = await response.json();
+      const response = await fetch(`${EDGE_FUNCTION_URL}/create-payment-intent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ shipmentId, amount: Math.round(amount * 100), currency: currency.toLowerCase() }),
+      });
+      if (!response.ok) throw new Error(`Edge function error: ${response.status}`);
+      const { clientSecret } = await response.json();
 
-			const elements = this.stripe.elements({
-				clientSecret,
-				appearance: { theme: 'dark', variables: { colorPrimary: '#00C2D9', colorText: '#F5F9FD', fontFamily: '"Vazirmatn", sans-serif' } },
-			});
-			elements.create('payment').mount('#payment-element');
-			this.pendingPayments.set(shipmentId, { clientSecret, elements });
+      const elements = this.stripe.elements({
+        clientSecret,
+        appearance: { theme: 'dark', variables: { colorPrimary: '#00C2D9', colorText: '#F5F9FD', fontFamily: '"Vazirmatn", sans-serif' } },
+      });
+      elements.create('payment').mount('#payment-element');
+      this.pendingPayments.set(shipmentId, { clientSecret, elements });
 
-			return { success: true, clientSecret };
-		} catch (error) {
-			console.error('Error initializing Stripe payment:', error);
-			return { success: false, error: error.message };
-		}
-	}
+      return { success: true, clientSecret };
+    } catch (error) {
+      console.error('Error initializing Stripe payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
 
-	async submitStripePayment(shipmentId) {
-		const payment = this.pendingPayments.get(shipmentId);
-		if (!payment) return { success: false, error: 'Payment not found' };
+  async submitStripePayment(shipmentId) {
+    const payment = this.pendingPayments.get(shipmentId);
+    if (!payment) return { success: false, error: 'Payment not found' };
 
-		try {
-			const { error, paymentIntent } = await this.stripe.confirmPayment({
-				elements: payment.elements,
-				confirmParams: { return_url: `https://globall-cloud.pages.dev/?paid=${shipmentId}` },
-			});
-			if (error) return { success: false, error: error.message };
-			if (paymentIntent?.status === 'succeeded') {
-				return { success: true, paymentId: paymentIntent.id };
-			}
-			return { success: false, error: 'Payment not completed' };
-		} catch (error) {
-			console.error('Error submitting Stripe payment:', error);
-			return { success: false, error: error.message };
-		}
-	}
+    try {
+      const { error, paymentIntent } = await this.stripe.confirmPayment({
+        elements: payment.elements,
+        confirmParams: { return_url: `https://globall-cloud.pages.dev/?paid=${shipmentId}` },
+      });
+      if (error) return { success: false, error: error.message };
+      if (paymentIntent?.status === 'succeeded') {
+        return { success: true, paymentId: paymentIntent.id };
+      }
+      return { success: false, error: 'Payment not completed' };
+    } catch (error) {
+      console.error('Error submitting Stripe payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
 
-	async initializePayPalPayment(shipmentId, amount, currency = 'USD') {
-		if (!this.configured || !PAYPAL_CLIENT_ID) return this._notConfigured();
+  async initializePayPalPayment(shipmentId, amount, currency = 'USD') {
+    if (!this.configured || !PAYPAL_CLIENT_ID) return this._notConfigured();
 
-		try {
-			if (!window.paypal) await this._loadPayPalSDK();
+    try {
+      if (!window.paypal) await this._loadPayPalSDK();
 
-			const response = await fetch(`${EDGE_FUNCTION_URL}/create-paypal-order`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ shipmentId, amount, currency }),
-			});
-			if (!response.ok) throw new Error(`Edge function error: ${response.status}`);
-			const { id: paypalOrderId } = await response.json();
+      const response = await fetch(`${EDGE_FUNCTION_URL}/create-paypal-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shipmentId, amount, currency }),
+      });
+      if (!response.ok) throw new Error(`Edge function error: ${response.status}`);
+      const { id: paypalOrderId } = await response.json();
 
-			await window.paypal
-				.Buttons({
-					createOrder: async () => paypalOrderId,
-					onApprove: async (data) => this._capturePayPalPayment(shipmentId, data.orderID),
-					onError: (err) => console.error('PayPal error:', err),
-				})
-				.render('#paypal-button-container');
+      await window.paypal
+        .Buttons({
+          createOrder: async () => paypalOrderId,
+          onApprove: async (data) => this._capturePayPalPayment(shipmentId, data.orderID),
+          onError: (err) => console.error('PayPal error:', err),
+        })
+        .render('#paypal-button-container');
 
-			return { success: true, paypalOrderId };
-		} catch (error) {
-			console.error('Error initializing PayPal payment:', error);
-			return { success: false, error: error.message };
-		}
-	}
+      return { success: true, paypalOrderId };
+    } catch (error) {
+      console.error('Error initializing PayPal payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
 
-	async _capturePayPalPayment(shipmentId, paypalOrderId) {
-		try {
-			const response = await fetch(`${EDGE_FUNCTION_URL}/capture-paypal-payment`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ shipmentId, paypalOrderId }),
-			});
-			const result = await response.json();
-			if (result.status === 'COMPLETED') return { success: true, paymentId: paypalOrderId };
-			throw new Error('Payment not completed');
-		} catch (error) {
-			console.error('Error capturing PayPal payment:', error);
-			return { success: false, error: error.message };
-		}
-	}
+  async _capturePayPalPayment(shipmentId, paypalOrderId) {
+    try {
+      const response = await fetch(`${EDGE_FUNCTION_URL}/capture-paypal-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shipmentId, paypalOrderId }),
+      });
+      const result = await response.json();
+      if (result.status === 'COMPLETED') return { success: true, paymentId: paypalOrderId };
+      throw new Error('Payment not completed');
+    } catch (error) {
+      console.error('Error capturing PayPal payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
 
-	_loadPayPalSDK() {
-		return new Promise((resolve, reject) => {
-			const script = document.createElement('script');
-			script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=USD`;
-			script.onload = resolve;
-			script.onerror = reject;
-			document.head.appendChild(script);
-		});
-	}
+  _loadPayPalSDK() {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=USD`;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
 
-	/** Read-only: payment history comes straight from the real shipments table. */
-	async getPaymentHistory(directoryCustomerId) {
-		const sb = window.sb || window.supabase;
-		if (!sb) return { success: false, error: 'no-client' };
-		const { data, error } = await sb
-			.from('shipments')
-			.select('id,total_amount,paid_amount,created_at,status')
-			.eq('directory_customer_id', directoryCustomerId)
-			.order('created_at', { ascending: false });
-		if (error) return { success: false, error: error.message };
-		return { success: true, payments: data };
-	}
+  /** Read-only: payment history comes straight from the real shipments table. */
+  async getPaymentHistory(directoryCustomerId) {
+    const sb = window.sb || window.supabase;
+    if (!sb) return { success: false, error: 'no-client' };
+    const { data, error } = await sb
+      .from('shipments')
+      .select('id,total_amount,paid_amount,created_at,status')
+      .eq('directory_customer_id', directoryCustomerId)
+      .order('created_at', { ascending: false });
+    if (error) return { success: false, error: error.message };
+    return { success: true, payments: data };
+  }
 }
 
 window.paymentGateway = new PaymentGateway();
 
 if (typeof module !== 'undefined' && module.exports) {
-	module.exports = { PaymentGateway };
+  module.exports = { PaymentGateway };
 }

@@ -1,17 +1,17 @@
 {
-	"name": "Globall Cloud — China · UAE · Iraq Logistics",
-	"short_name": "Globall Cloud",
-	"description": "گەیاندنی بار بە متمانەوە لە چین و ئیمارات بۆ هەموو شارەکانی عێراق. شوێنکەوتنی ڕاستەوخۆ، نرخی ڕکابەرانە.",
-	"start_url": "/",
-	"scope": "/",
-	"display": "standalone",
-	"orientation": "portrait-primary",
-	"background_color": "#061428",
-	"theme_color": "#061428",
-	"lang": "ckb",
-	"dir": "rtl",
-	"icons": [
-		{ "src": "logo-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-		{ "src": "logo-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-	]
+  "name": "Globall Cloud — China · UAE · Iraq Logistics",
+  "short_name": "Globall Cloud",
+  "description": "گەیاندنی بار بە متمانەوە لە چین و ئیمارات بۆ هەموو شارەکانی عێراق. شوێنکەوتنی ڕاستەوخۆ، نرخی ڕکابەرانە.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#061428",
+  "theme_color": "#061428",
+  "lang": "ckb",
+  "dir": "rtl",
+  "icons": [
+    { "src": "logo-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "logo-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
 }
