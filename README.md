@@ -3,7 +3,7 @@
 Globall Cloud is a logistics platform for shipping from China and the UAE to Iraq.
 
 ## Live stack
-- Frontend: static website on Cloudflare Pages
+- Frontend: static website on Cloudflare Pages with security headers
 - Backend: Supabase (Postgres, Auth, Storage, RLS, RPC)
 - Staff tools: customer accounts, staff access, warehouse receipts, and activity logs
 
@@ -51,6 +51,7 @@ Globall Cloud is a logistics platform for shipping from China and the UAE to Ira
   own the submit event.
 - `database-schema.js` — schema reference
 - `manifest.json`, `robots.txt`, `sitemap.xml`
+- Frontend pages use the Supabase publishable key and expose the live client as `window.sb` so shared modules work consistently.
 
 ## Optional add-on modules (standalone, NOT currently loaded by any page)
 - `price-calculator.js` — deterministic shipping cost estimator (weight ×
@@ -130,6 +131,10 @@ keeping:
   which meant the fragment URLs already listed in `sitemap.xml` didn't
   actually work if you opened them directly. Generalized to all real page
   routes.
+- **`index.html`**: the USD→IQD exchange rate now comes from shared Supabase
+  settings (`app_settings.usd_iqd_rate`) with localStorage as an offline
+  fallback, so the public quote calculator and staff finance panel stay in
+  sync across devices.
 - **`manifest.json`**: declared the app icon as 512×512; the actual PNG on
   disk is 256×256. A declared size that doesn't match the file can make
   Chrome/Android install a blurry or rejected icon. Corrected to 256×256 —
@@ -149,11 +154,6 @@ keeping:
 - Never put secret payment/API keys in browser JS — route them through a Supabase Edge Function, same pattern as `account-admin`.
 
 ## Possible future improvements (not implemented here)
-- The staff-editable USD→IQD exchange rate in index.html's quote
-  calculator is stored in `localStorage`, so it's per-device rather than
-  shared — a different staff member on a different device sees the
-  default rate until they set their own. Making it shared would need a
-  small DB table/RPC.
 - The sitemap's `#fragment` URLs now work correctly when opened directly,
   but search engines generally don't index fragment URLs as separate
   pages from the base URL. If distinct search-engine ranking per page
