@@ -148,5 +148,5 @@ GROUP BY d.id;
 `;
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { supabaseSchema };
+	module.exports = { supabaseSchema };
 }

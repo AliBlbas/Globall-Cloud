@@ -23,76 +23,76 @@
 // needed, and it works today.
 
 class WhatsAppMessenger {
-  constructor() {
-    // Must match the real business number used across the site
-    // (index.html / OWNER_WHATSAPP / tel: links).
-    this.businessNumber = '9647507577137';
-    this.messageTemplates = this.setupTemplates();
-  }
+	constructor() {
+		// Must match the real business number used across the site
+		// (index.html / OWNER_WHATSAPP / tel: links).
+		this.businessNumber = '9647507577137';
+		this.messageTemplates = this.setupTemplates();
+	}
 
-  setupTemplates() {
-    return {
-      orderConfirmation: (v) =>
-        `سڵاو ${v.name || ''}، داواکارییەکەت (${v.orderId}) وەرگیرا.\n📦 کێش: ${v.weight || '-'}kg\n🚚 جۆر: ${v.type || '-'}\n💰 نرخ: $${v.cost || '-'}\nشوێنکەوتن: ${v.trackingLink || ''}`,
-      warehouseReceived: (v) =>
-        `بارەکەت گەیشتە کۆگا.\n📍 شوێن: ${v.location || '-'}\n⏰ کات: ${v.timestamp || '-'}\nکۆدی بار: ${v.orderId || ''}`,
-      inTransit: (v) =>
-        `بارەکەت لە ڕێگادایە.\n📍 لە: ${v.origin || '-'}\n🎯 بۆ: ${v.destination || '-'}\n⏱️ ETA: ${v.eta || '-'}`,
-      customsClearance: (v) =>
-        `بارەکەت لە گومرکدایە.\n🔍 دۆخ: ${v.status || '-'}`,
-      outForDelivery: (v) =>
-        `بارەکەت ئەمڕۆ دەگاتە دەست.\n🏠 ناونیشان: ${v.address || '-'}`,
-      delivered: (v) =>
-        `بارەکەت گەیشت! ✅\n⏰ کات: ${v.timestamp || '-'}`,
-      delayed: (v) =>
-        `بارەکەت دواکەوت.\n⚠️ هۆکار: ${v.reason || '-'}\n📅 ETAی نوێ: ${v.newEta || '-'}`,
-      priceQuote: (v) =>
-        `نرخی ${v.type || ''}\n📦 کێش: ${v.weight || '-'}kg\n📍 ڕێگا: ${v.route || '-'}\n💰 نرخی کۆتایی: $${v.finalPrice || '-'}`,
-      supportResponse: (v) =>
-        `سڵاو ${v.name || ''}،\n${v.message || ''}\n\nGloball Cloud`,
-    };
-  }
+	setupTemplates() {
+		return {
+			orderConfirmation: (v) =>
+				`سڵاو ${v.name || ''}، داواکارییەکەت (${v.orderId}) وەرگیرا.\n📦 کێش: ${v.weight || '-'}kg\n🚚 جۆر: ${v.type || '-'}\n💰 نرخ: $${v.cost || '-'}\nشوێنکەوتن: ${v.trackingLink || ''}`,
+			warehouseReceived: (v) =>
+				`بارەکەت گەیشتە کۆگا.\n📍 شوێن: ${v.location || '-'}\n⏰ کات: ${v.timestamp || '-'}\nکۆدی بار: ${v.orderId || ''}`,
+			inTransit: (v) =>
+				`بارەکەت لە ڕێگادایە.\n📍 لە: ${v.origin || '-'}\n🎯 بۆ: ${v.destination || '-'}\n⏱️ ETA: ${v.eta || '-'}`,
+			customsClearance: (v) =>
+				`بارەکەت لە گومرکدایە.\n🔍 دۆخ: ${v.status || '-'}`,
+			outForDelivery: (v) =>
+				`بارەکەت ئەمڕۆ دەگاتە دەست.\n🏠 ناونیشان: ${v.address || '-'}`,
+			delivered: (v) =>
+				`بارەکەت گەیشت! ✅\n⏰ کات: ${v.timestamp || '-'}`,
+			delayed: (v) =>
+				`بارەکەت دواکەوت.\n⚠️ هۆکار: ${v.reason || '-'}\n📅 ETAی نوێ: ${v.newEta || '-'}`,
+			priceQuote: (v) =>
+				`نرخی ${v.type || ''}\n📦 کێش: ${v.weight || '-'}kg\n📍 ڕێگا: ${v.route || '-'}\n💰 نرخی کۆتایی: $${v.finalPrice || '-'}`,
+			supportResponse: (v) =>
+				`سڵاو ${v.name || ''}،\n${v.message || ''}\n\nGloball Cloud`,
+		};
+	}
 
-  toWhatsAppDigits(phone) {
-    if (!phone) return null;
-    let d = String(phone).replace(/[^\d]/g, '');
-    if (!d) return null;
-    if (d.startsWith('00')) d = d.slice(2);
-    if (d.startsWith('0')) d = '964' + d.slice(1);
-    else if (!d.startsWith('964')) d = '964' + d;
-    return d;
-  }
+	toWhatsAppDigits(phone) {
+		if (!phone) return null;
+		let d = String(phone).replace(/[^\d]/g, '');
+		if (!d) return null;
+		if (d.startsWith('00')) d = d.slice(2);
+		if (d.startsWith('0')) d = '964' + d.slice(1);
+		else if (!d.startsWith('964')) d = '964' + d;
+		return d;
+	}
 
-  /**
-   * Opens wa.me with a prefilled message. Staff taps Send — this is the only
-   * approach that works without Meta Business API access.
-   * @returns {boolean} whether a window was opened
-   */
-  sendMessage(recipientPhone, templateName, variables = {}) {
-    const build = this.messageTemplates[templateName];
-    if (!build) {
-      console.error(`Template '${templateName}' not found`);
-      return false;
-    }
-    const digits = this.toWhatsAppDigits(recipientPhone);
-    if (!digits) {
-      console.error('Invalid recipient phone number');
-      return false;
-    }
-    const text = build(variables);
-    window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank');
-    return true;
-  }
+	/**
+	 * Opens wa.me with a prefilled message. Staff taps Send — this is the only
+	 * approach that works without Meta Business API access.
+	 * @returns {boolean} whether a window was opened
+	 */
+	sendMessage(recipientPhone, templateName, variables = {}) {
+		const build = this.messageTemplates[templateName];
+		if (!build) {
+			console.error(`Template '${templateName}' not found`);
+			return false;
+		}
+		const digits = this.toWhatsAppDigits(recipientPhone);
+		if (!digits) {
+			console.error('Invalid recipient phone number');
+			return false;
+		}
+		const text = build(variables);
+		window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank');
+		return true;
+	}
 
-  /** Opens a WhatsApp chat to the business number itself (owner notifications). */
-  notifyOwner(text) {
-    window.open(`https://wa.me/${this.businessNumber}?text=${encodeURIComponent(text)}`, '_blank');
-  }
+	/** Opens a WhatsApp chat to the business number itself (owner notifications). */
+	notifyOwner(text) {
+		window.open(`https://wa.me/${this.businessNumber}?text=${encodeURIComponent(text)}`, '_blank');
+	}
 }
 
 // Initialize global messenger
 window.whatsappMessenger = new WhatsAppMessenger();
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { WhatsAppMessenger };
+	module.exports = { WhatsAppMessenger };
 }
