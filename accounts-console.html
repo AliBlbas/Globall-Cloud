@@ -22,340 +22,267 @@
          the two it needs onto this page's own tokens rather than duplicating
          the stylesheet. */
       --teal-l:var(--accent2);--radius-m:16px;
-      --sidebar-w:250px;
     }
     *{box-sizing:border-box}
     html,body{margin:0;min-height:100%;background:radial-gradient(circle at 12% -10%, rgba(0,194,217,.12), transparent 35%),linear-gradient(180deg,var(--bg),#08111e 80%);color:var(--text);font-family:var(--font)}
-    body{overflow-x:hidden}
+    body{padding:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom));overflow-x:hidden}
     a{color:inherit;text-decoration:none}
     button,input,select,textarea{font:inherit;color:inherit}
-    svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;width:1em;height:1em}
-    ::selection{background:rgba(0,194,217,.3)}
-    :focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
-
-    /* ===== Shared building blocks (buttons, fields, tables, badges) ===== */
-    .btn{border:1px solid transparent;border-radius:999px;padding:12px 16px;cursor:pointer;font-weight:800;background:transparent;transition:.2s;min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+    .shell{max-width:1420px;margin:0 auto;display:grid;gap:18px}
+    .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:14px;min-width:0}
+    .mark{width:54px;height:54px;border-radius:18px;background:linear-gradient(135deg,var(--accent2),var(--accent));display:grid;place-items:center;color:#03181d;font-weight:900;font-size:18px;box-shadow:0 14px 28px rgba(0,194,217,.18)}
+    .eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);font-weight:900}
+    .title{font-size:22px;font-weight:900;line-height:1.15;margin-top:3px}
+    .subtitle{color:var(--muted);font-size:14px;margin-top:4px}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .btn{border:1px solid transparent;border-radius:999px;padding:12px 16px;cursor:pointer;font-weight:800;background:transparent;transition:.2s;min-height:46px}
     .btn:hover{transform:translateY(-1px)} .btn:active{transform:translateY(0) scale(.99)}
     .btn-primary{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#03181d}
     .btn-outline{border-color:var(--line);background:rgba(255,255,255,.02)}
     .btn-danger{background:var(--bad);color:#fff}
-    .btn-icon{min-height:40px;width:40px;padding:0;flex-shrink:0}
-    .btn-icon svg{width:18px;height:18px}
-    .panel{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
-    .badge{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);font-weight:800;white-space:nowrap;font-size:12.5px}
+    .hero,.panel{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid rgba(255,255,255,.08);border-radius:28px;box-shadow:var(--shadow)}
+    .hero{padding:18px}
+    .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:stretch}
+    .panel{padding:18px}
+    .section-title{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    .section-title h2{margin:0;font-size:20px;line-height:1.2}
+    .section-title p{margin:4px 0 0;color:var(--muted);font-size:14px;line-height:1.6}
+    .notice{padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--muted);line-height:1.7}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);font-weight:800;white-space:nowrap}
     .badge-super{background:rgba(46,210,127,.14);color:#8ef0b6;border-color:rgba(46,210,127,.35)}
     .badge-admin{background:rgba(0,194,217,.14);color:#9feef8;border-color:rgba(0,194,217,.35)}
     .badge-accountant{background:rgba(240,168,58,.14);color:#ffd182;border-color:rgba(240,168,58,.35)}
     .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-    .stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px}
-    .stat b{display:block;font-size:26px;line-height:1;margin-bottom:6px;font-family:var(--mono)}
-    .stat span{color:var(--muted);font-size:12.5px}
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px}
+    .stat b{display:block;font-size:28px;line-height:1;margin-bottom:6px}
+    .stat span{color:var(--muted);font-size:13px}
+    .chips,.tabs,.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+    .chips{margin-top:14px}
+    .chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:12px;font-weight:800;color:#d7ebff}
+    .tabs{margin:16px 0 12px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.02);cursor:pointer;font-weight:800;color:var(--muted);white-space:nowrap}
+    .tab.active{background:var(--accent);border-color:transparent;color:#03181d}
+    .layout{display:grid;grid-template-columns:minmax(320px,380px) 1fr;gap:18px;align-items:start}
+    .stack{display:grid;gap:18px}
     .form-row{margin-bottom:12px}
     .label{display:block;font-size:13px;color:var(--muted);font-weight:800;margin-bottom:7px}
     .field{width:100%;padding:13px 14px;border-radius:14px;border:1.5px solid var(--line);background:rgba(255,255,255,.03);outline:none;transition:.2s}
     .field:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,194,217,.14)}
-    .small{font-size:12px;color:var(--muted);line-height:1.6;margin:10px 0 0}
+    .small{font-size:12px;color:var(--muted);line-height:1.6}
     textarea.field{min-height:98px;resize:vertical}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .table-wrap{overflow:auto;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(8,16,29,.52)}
-    table{width:100%;border-collapse:collapse;min-width:820px}
+    table{width:100%;border-collapse:collapse;min-width:920px}
     th,td{padding:14px 12px;border-bottom:1px solid rgba(255,255,255,.08);text-align:start;vertical-align:top}
-    th{font-size:11.5px;letter-spacing:.4px;text-transform:uppercase;color:#d5e8ff;background:rgba(255,255,255,.03);position:sticky;top:0}
-    td{font-size:13.5px;color:var(--text)}
+    th{font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:#d5e8ff;background:rgba(255,255,255,.03)}
+    td{font-size:14px;color:var(--text)}
     tr:hover td{background:rgba(255,255,255,.02)}
     .mono{font-family:var(--mono)}
-    .ok,.warn,.bad{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;font-size:11.5px;font-weight:900}
+    .ok,.warn,.bad{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:900}
     .ok{background:rgba(46,210,127,.14);color:#8ef0b6}.warn{background:rgba(240,168,58,.16);color:#ffd182}.bad{background:rgba(229,83,61,.15);color:#ffaf9f}
     .hidden{display:none !important}.loading{opacity:.72;pointer-events:none}
     .receipt-files{display:flex;gap:10px;flex-wrap:wrap}.receipt-files img{width:78px;height:78px;object-fit:cover;border-radius:14px;border:1px solid rgba(255,255,255,.12)}
+    .list-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+    .search{min-width:240px;max-width:320px;width:100%}
     .muted{color:var(--muted)}
-    .muted-box{padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);line-height:1.7}
-
-    /* ===== Login gate — the only thing shown before staff sign in ===== */
-    .login-gate{min-height:100vh;display:grid;place-items:center;padding:24px}
-    .login-card{width:100%;max-width:400px}
-    .login-brand{display:flex;align-items:center;gap:13px;margin-bottom:26px}
-    .mark{width:50px;height:50px;border-radius:16px;background:linear-gradient(135deg,var(--accent2),var(--accent));display:grid;place-items:center;color:#03181d;font-weight:900;font-size:17px;box-shadow:0 14px 28px rgba(0,194,217,.18);flex-shrink:0}
-    .login-brand b{font-size:16px;display:block}
-    .login-brand small{color:var(--muted);font-size:11.5px;letter-spacing:1px;font-weight:700}
-    .login-card h1{margin:0 0 6px;font-size:22px}
-    .login-card>p{margin:0 0 22px;color:var(--muted);font-size:14px;line-height:1.6}
-    .login-foot{margin-top:16px;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}
-    .login-foot svg{width:15px;height:15px;flex-shrink:0;color:var(--good)}
-
-    /* ===== App shell — sidebar + main, shown once signed in ===== */
-    .app-shell{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh;align-items:start}
-    .sidebar{background:linear-gradient(180deg,var(--panel),var(--bg2));border-inline-end:1px solid rgba(255,255,255,.08);padding:20px 14px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
-    .sidebar-brand{display:flex;align-items:center;gap:11px;padding:2px 8px 18px;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,.08)}
-    .sidebar-brand .mark{width:38px;height:38px;font-size:13px;border-radius:12px}
-    .sidebar-brand b{font-size:14px;display:block;line-height:1.3}
-    .sidebar-brand small{color:var(--muted);font-size:10.5px;letter-spacing:.5px}
-    .sidebar-nav{display:flex;flex-direction:column;gap:3px;flex:1;overflow-y:auto}
-    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:13px;border:1px solid transparent;background:transparent;cursor:pointer;font-weight:700;font-size:13.5px;color:var(--muted);text-align:start;width:100%}
-    .nav-item svg{width:18px;height:18px;flex-shrink:0}
-    .nav-item:hover{background:rgba(255,255,255,.04);color:var(--text)}
-    .nav-item.active{background:rgba(0,194,217,.13);border-color:rgba(0,194,217,.3);color:var(--accent2)}
-    .sidebar-foot{border-top:1px solid rgba(255,255,255,.08);padding-top:14px;margin-top:10px}
-    .whoami-box{padding:0 4px;margin-bottom:10px}
-    .whoami-box #whoami{font-size:13px;font-weight:800;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .whoami-box #whoamiSub{font-size:11.5px;color:var(--muted);display:block;margin-top:2px}
-
-    .main{padding:26px 30px 40px;min-width:0}
-    .main-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:22px}
-    .main-header h1{margin:0;font-size:21px;line-height:1.25}
-    .main-header p{margin:5px 0 0;color:var(--muted);font-size:13.5px}
-
-    /* ===== Dashboard view ===== */
-    .dash-block{margin-bottom:26px}
-    .dash-block-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
-    .dash-block-head h2{margin:0;font-size:15px}
-    .dash-block-head span{font-size:12px;color:var(--muted)}
-    .quick-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
-    .quick-action{display:flex;align-items:center;gap:13px;padding:16px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);cursor:pointer;text-align:start;transition:.15s}
-    .quick-action:hover{background:rgba(0,194,217,.07);border-color:rgba(0,194,217,.25);transform:translateY(-1px)}
-    .quick-action-icon{width:40px;height:40px;border-radius:12px;background:rgba(0,194,217,.12);color:var(--accent2);display:grid;place-items:center;flex-shrink:0}
-    .quick-action-icon svg{width:19px;height:19px}
-    .quick-action b{display:block;font-size:13.5px;color:var(--text)}
-    .quick-action span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
-
-    /* ===== Data view (customers / staff / receipts / logs) ===== */
-    .data-grid{display:grid;grid-template-columns:minmax(300px,360px) 1fr;gap:20px;align-items:start}
-    .data-grid:has(.form-col.hidden){grid-template-columns:1fr}
-    .list-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-    .list-head h2{margin:0;font-size:16px}
-    .list-head p{margin:3px 0 0;color:var(--muted);font-size:12.5px}
-    .search{min-width:220px;max-width:280px;width:100%}
-
-    @media (max-width: 1080px){
-      .data-grid,.data-grid:has(.form-col.hidden){grid-template-columns:1fr}
-    }
-    @media (max-width: 900px){
-      .app-shell{grid-template-columns:1fr}
-      .sidebar{position:static;height:auto;flex-direction:row;flex-wrap:wrap;padding:12px 14px;gap:10px 16px}
-      .sidebar-brand{border-bottom:0;padding:0;margin:0;flex:0 0 auto}
-      .sidebar-nav{flex-direction:row;flex:1 1 auto;overflow-x:auto;overflow-y:visible}
-      .nav-item{flex-direction:row;white-space:nowrap;padding:9px 12px}
-      .sidebar-foot{border-top:0;margin-top:0;padding-top:0;flex:0 0 auto;display:flex;align-items:center;gap:10px}
-      .whoami-box{margin-bottom:0}
-      .whoami-box #whoamiSub{display:none}
-      .main{padding:18px 16px 32px}
-    }
-    @media (max-width: 640px){
-      .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .grid{grid-template-columns:1fr}
-      .search{min-width:100%;max-width:100%}
-      .main-header .toolbar{width:100%}.main-header .toolbar .btn{flex:1}
-      .login-card{padding:0}
-    }
+    .auth-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:18px}
+    .muted-box{padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+    @media (max-width: 1080px){.hero-grid,.layout{grid-template-columns:1fr}}
+    @media (max-width: 640px){body{padding:12px}.hero,.panel{padding:16px}.title{font-size:19px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}.search{min-width:100%;max-width:100%}.top-actions{width:100%}.top-actions .btn{flex:1}}
   </style>
 </head>
 <body>
-  <!-- Shown only when signed out -->
-  <div id="authGate" class="login-gate">
-    <div class="login-card panel">
-      <div class="login-brand">
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
         <div class="mark">GC</div>
-        <div><b>Globall Cloud</b><br><small>ACCOUNTS CONSOLE</small></div>
-      </div>
-      <h1>Staff sign in</h1>
-      <p>Use your staff email and password to open the management console.</p>
-      <form id="staffLoginForm">
-        <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="loginEmail" required autocomplete="username"></div>
-        <div class="form-row"><label class="label">Password</label><input class="field" type="password" id="loginPassword" required autocomplete="current-password"></div>
-        <button class="btn btn-primary" type="submit" style="width:100%">Sign in</button>
-        <p id="loginMsg" class="small"></p>
-      </form>
-      <div class="login-foot">
-        <svg viewBox="0 0 24 24"><path d="M12 3l7 3.5v5c0 4.5-3 8.2-7 9.5-4-1.3-7-5-7-9.5v-5L12 3z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg>
-        <span>Customer sign-up stays disabled — accounts are created here by staff.</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Shown only when signed in -->
-  <div id="consoleShell" class="app-shell hidden">
-    <aside class="sidebar">
-      <div class="sidebar-brand">
-        <div class="mark">GC</div>
-        <div><b>Globall Cloud</b><small>Accounts Console</small></div>
-      </div>
-      <nav class="sidebar-nav">
-        <button class="nav-item tab active" data-tab="dashboard">
-          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-          <span>Dashboard</span>
-        </button>
-        <button class="nav-item tab" data-tab="customers">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg>
-          <span>Customers</span>
-        </button>
-        <button class="nav-item tab" data-tab="staff">
-          <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="11" r="2"/><path d="M6.2 16c0-1.5 1.3-2.5 2.8-2.5s2.8 1 2.8 2.5"/><path d="M14 10h4M14 14h4"/></svg>
-          <span>Staff</span>
-        </button>
-        <button class="nav-item tab" data-tab="receipts">
-          <svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
-          <span>Warehouse receipts</span>
-        </button>
-        <button class="nav-item tab" data-tab="logs">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
-          <span>Activity logs</span>
-        </button>
-      </nav>
-      <div class="sidebar-foot">
-        <div class="whoami-box">
-          <span id="whoami">Not signed in</span>
-          <span id="whoamiSub">Waiting for staff authentication</span>
-          <div id="roleBadge" class="badge badge-admin hidden" style="margin-top:8px">—</div>
-        </div>
-        <div class="toolbar">
-          <button class="btn btn-outline btn-icon" id="refreshBtn" title="Refresh" aria-label="Refresh">
-            <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v6h-6"/></svg>
-          </button>
-          <button class="btn btn-outline btn-icon hidden" id="logoutBtn" title="Sign out" aria-label="Sign out">
-            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-          </button>
-        </div>
-      </div>
-    </aside>
-
-    <main class="main">
-      <header class="main-header">
         <div>
-          <h1 id="listTitle">Dashboard</h1>
-          <p id="listSubtitle">Live snapshot of accounts, shipments, and activity</p>
+          <div class="eyebrow">Globall Cloud Accounts Console</div>
+          <div class="title">Customer accounts, staff access, warehouse receipts, and activity logs in one controlled place</div>
+          <div class="subtitle">China · UAE · Iraq logistics operations</div>
         </div>
-      </header>
+      </div>
+      <div class="toolbar top-actions">
+        <button class="btn btn-outline" id="refreshBtn">Refresh</button>
+        <button class="btn btn-danger hidden" id="logoutBtn">Sign out</button>
+      </div>
+    </header>
 
-      <div id="dashboardPane" class="tab-pane">
-        <div class="dash-block">
-          <div class="dash-block-head"><h2>Business overview</h2><span>Last 30 days, refreshed live from Supabase</span></div>
-          <div class="stats" id="analyticsStatsRow"></div>
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="panel" style="box-shadow:none;background:transparent;border:0;padding:0">
+          <div class="section-title">
+            <div>
+              <h2>Professional staff portal</h2>
+              <p>Everything is grouped into one safe console for internal operations.</p>
+            </div>
+          </div>
+          <div class="notice">
+            Staff-only console. Customer sign-up stays disabled in Supabase Auth; management creates and edits accounts here.
+            <div id="roleBadge" class="badge badge-admin hidden" style="margin-top:10px">—</div>
+          </div>
+          <div class="chips">
+            <span class="chip">Customer accounts</span>
+            <span class="chip">Staff access</span>
+            <span class="chip">Warehouse receipts</span>
+            <span class="chip">Activity logs</span>
+            <span class="chip">Invite / reset flows</span>
+          </div>
+          <div class="tabs">
+            <button class="tab active" data-tab="dashboard">Dashboard</button>
+            <button class="tab" data-tab="customers">Customers</button>
+            <button class="tab" data-tab="staff">Staff</button>
+            <button class="tab" data-tab="receipts">Warehouse Receipts</button>
+            <button class="tab" data-tab="logs">Activity Logs</button>
+          </div>
+          <div id="authGate" class="auth-box">
+            <div class="section-title">
+              <div>
+                <h2>Staff login</h2>
+                <p>Use your staff email and password to open the management tools.</p>
+              </div>
+            </div>
+            <form id="staffLoginForm">
+              <div class="grid">
+                <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="loginEmail" required></div>
+                <div class="form-row"><label class="label">Password</label><input class="field" type="password" id="loginPassword" required></div>
+              </div>
+              <div class="toolbar"><button class="btn btn-primary" type="submit">Sign in</button></div>
+              <p id="loginMsg" class="small"></p>
+            </form>
+          </div>
         </div>
-        <div class="dash-block">
-          <div class="dash-block-head"><h2>Records in this console</h2></div>
-          <div class="stats" id="recordsStatsRow">
+
+        <div class="panel">
+          <div class="section-title">
+            <div>
+              <h2 id="whoami">Not signed in</h2>
+              <p id="whoamiSub">Waiting for staff authentication</p>
+            </div>
+          </div>
+          <div class="stats" id="statsRow">
             <div class="stat"><b>—</b><span>Customers</span></div>
             <div class="stat"><b>—</b><span>Staff</span></div>
             <div class="stat"><b>—</b><span>Receipts</span></div>
             <div class="stat"><b>—</b><span>Logs</span></div>
           </div>
+          <div class="muted-box" style="margin-top:14px">
+            <div class="small">Tip</div>
+            <div style="margin-top:4px;font-weight:800">Keep this page for staff only and create customer accounts from here.</div>
+          </div>
         </div>
-        <div class="dash-block">
-          <div class="dash-block-head"><h2>Quick actions</h2></div>
-          <div class="quick-actions">
-            <button class="quick-action" data-goto="customers">
-              <div class="quick-action-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/><path d="M19 8v4M17 10h4"/></svg></div>
-              <span><b>Add a customer</b><span>Create an account and assign a manager</span></span>
-            </button>
-            <button class="quick-action" data-goto="staff">
-              <div class="quick-action-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="11" r="2"/><path d="M14 10h4M14 14h4"/></svg></div>
-              <span><b>Add staff</b><span>Grant console access with a role</span></span>
-            </button>
-            <button class="quick-action" data-goto="receipts">
-              <div class="quick-action-icon"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg></div>
-              <span><b>Log a receipt</b><span>Register goods received with photos</span></span>
-            </button>
+      </div>
+    </section>
+
+    <section class="layout">
+      <div class="stack">
+        <div class="panel">
+          <div class="section-title">
+            <div>
+              <h2>Quick actions</h2>
+              <p>Create or update accounts, then manage warehouse intake.</p>
+            </div>
+          </div>
+
+          <form id="customerForm" class="tab-pane hidden" novalidate>
+            <input type="hidden" id="customerId">
+            <div class="grid">
+              <div class="form-row"><label class="label">Customer name</label><input class="field" id="customerName" data-validate="required"></div>
+              <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="customerEmail" data-validate="email"></div>
+            </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">Phone</label><input class="field" id="customerPhone" data-validate="required,phone"></div>
+              <div class="form-row"><label class="label">Phone 2</label><input class="field" id="customerPhone2" data-validate="phone"></div>
+            </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">City</label><input class="field" id="customerCity"></div>
+              <div class="form-row"><label class="label">Delivery location</label><input class="field" id="customerDelivery"></div>
+            </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">Manager</label><select class="field" id="customerManager"></select></div>
+              <div class="form-row"><label class="label">Status</label><select class="field" id="customerStatus"><option value="true">Active</option><option value="false">Inactive</option></select></div>
+            </div>
+            <div class="form-row"><label class="label">Note</label><textarea class="field" id="customerNote"></textarea></div>
+            <div class="grid">
+              <div class="form-row"><label class="label">Invite only</label><select class="field" id="customerInvite"><option value="true">Send invite email</option><option value="false">Create temporary password</option></select></div>
+              <div class="form-row"><label class="label">Temporary password</label><input class="field" id="customerPassword" placeholder="Leave blank to auto-generate"></div>
+            </div>
+            <div class="toolbar">
+              <button class="btn btn-primary" type="submit">Save customer</button>
+              <button class="btn btn-outline" type="button" id="customerClearBtn">Clear</button>
+            </div>
+            <p id="customerMsg" class="small"></p>
+          </form>
+
+          <form id="staffForm" class="tab-pane hidden" novalidate>
+            <input type="hidden" id="staffId">
+            <div class="grid">
+              <div class="form-row"><label class="label">Full name</label><input class="field" id="staffFullName" data-validate="required"></div>
+              <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="staffEmail" data-validate="required,email"></div>
+            </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">Role</label><select class="field" id="staffRole"><option value="admin">admin</option><option value="accountant">accountant</option><option value="super_admin">super_admin</option></select></div>
+              <div class="form-row"><label class="label">Branch</label><select class="field" id="staffBranch"><option value="all">all</option><option value="dubai">dubai</option><option value="china">china</option><option value="erbil">erbil</option></select></div>
+            </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">Invite only</label><select class="field" id="staffInvite"><option value="true">Send invite email</option><option value="false">Create temporary password</option></select></div>
+              <div class="form-row"><label class="label">Temporary password</label><input class="field" id="staffPassword" placeholder="Leave blank to auto-generate"></div>
+            </div>
+            <div class="toolbar">
+              <button class="btn btn-primary" type="submit">Save staff</button>
+              <button class="btn btn-outline" type="button" id="staffClearBtn">Clear</button>
+            </div>
+            <p id="staffMsg" class="small"></p>
+          </form>
+
+          <form id="receiptForm" class="tab-pane hidden" enctype="multipart/form-data" novalidate>
+            <div class="grid">
+              <div class="form-row"><label class="label">Batch code</label><input class="field" id="receiptBatch" placeholder="GC-..." data-validate="required"></div>
+              <div class="form-row"><label class="label">Location</label><select class="field" id="receiptLocation"><option value="Dubai">Dubai</option><option value="Erbil">Erbil</option><option value="China">China</option></select></div>
+            </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">Customer code</label><input class="field" id="receiptCustomerCode" placeholder="GC... or directory code"></div>
+              <div class="form-row"><label class="label">Customer phone</label><input class="field" id="receiptCustomerPhone" data-validate="phone"></div>
+            </div>
+            <div class="form-row"><label class="label">Notes</label><textarea class="field" id="receiptNotes" placeholder="Received goods from Dubai / Erbil..."></textarea></div>
+            <div class="form-row"><label class="label">Receipt photos</label><input class="field" type="file" id="receiptPhotos" multiple accept="image/*"></div>
+            <div class="receipt-files" id="receiptPreview"></div>
+            <div class="toolbar" style="margin-top:12px">
+              <button class="btn btn-primary" type="submit">Save receipt</button>
+              <button class="btn btn-outline" type="button" id="receiptClearBtn">Clear</button>
+            </div>
+            <p id="receiptMsg" class="small"></p>
+          </form>
+
+          <div id="dashboardPane" class="tab-pane">
+            <div class="muted-box">
+              This console keeps the public site clean and makes all administrative work happen from one controlled staff portal.
+            </div>
           </div>
         </div>
       </div>
 
-      <div id="dataView" class="tab-pane hidden">
-        <div class="data-grid">
-          <div class="form-col panel" id="formCol">
-            <form id="customerForm" class="hidden" novalidate>
-              <input type="hidden" id="customerId">
-              <div class="grid">
-                <div class="form-row"><label class="label">Customer name</label><input class="field" id="customerName" data-validate="required"></div>
-                <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="customerEmail" data-validate="email"></div>
-              </div>
-              <div class="grid">
-                <div class="form-row"><label class="label">Phone</label><input class="field" id="customerPhone" data-validate="required,phone"></div>
-                <div class="form-row"><label class="label">Phone 2</label><input class="field" id="customerPhone2" data-validate="phone"></div>
-              </div>
-              <div class="grid">
-                <div class="form-row"><label class="label">City</label><input class="field" id="customerCity"></div>
-                <div class="form-row"><label class="label">Delivery location</label><input class="field" id="customerDelivery"></div>
-              </div>
-              <div class="grid">
-                <div class="form-row"><label class="label">Manager</label><select class="field" id="customerManager"></select></div>
-                <div class="form-row"><label class="label">Status</label><select class="field" id="customerStatus"><option value="true">Active</option><option value="false">Inactive</option></select></div>
-              </div>
-              <div class="form-row"><label class="label">Note</label><textarea class="field" id="customerNote"></textarea></div>
-              <div class="grid">
-                <div class="form-row"><label class="label">Invite only</label><select class="field" id="customerInvite"><option value="true">Send invite email</option><option value="false">Create temporary password</option></select></div>
-                <div class="form-row"><label class="label">Temporary password</label><input class="field" id="customerPassword" placeholder="Leave blank to auto-generate"></div>
-              </div>
-              <div class="toolbar">
-                <button class="btn btn-primary" type="submit">Save customer</button>
-                <button class="btn btn-outline" type="button" id="customerClearBtn">Clear</button>
-              </div>
-              <p id="customerMsg" class="small"></p>
-            </form>
-
-            <form id="staffForm" class="hidden" novalidate>
-              <input type="hidden" id="staffId">
-              <div class="grid">
-                <div class="form-row"><label class="label">Full name</label><input class="field" id="staffFullName" data-validate="required"></div>
-                <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="staffEmail" data-validate="required,email"></div>
-              </div>
-              <div class="grid">
-                <div class="form-row"><label class="label">Role</label><select class="field" id="staffRole"><option value="admin">admin</option><option value="accountant">accountant</option><option value="super_admin">super_admin</option></select></div>
-                <div class="form-row"><label class="label">Branch</label><select class="field" id="staffBranch"><option value="all">all</option><option value="dubai">dubai</option><option value="china">china</option><option value="erbil">erbil</option></select></div>
-              </div>
-              <div class="grid">
-                <div class="form-row"><label class="label">Invite only</label><select class="field" id="staffInvite"><option value="true">Send invite email</option><option value="false">Create temporary password</option></select></div>
-                <div class="form-row"><label class="label">Temporary password</label><input class="field" id="staffPassword" placeholder="Leave blank to auto-generate"></div>
-              </div>
-              <div class="toolbar">
-                <button class="btn btn-primary" type="submit">Save staff</button>
-                <button class="btn btn-outline" type="button" id="staffClearBtn">Clear</button>
-              </div>
-              <p id="staffMsg" class="small"></p>
-            </form>
-
-            <form id="receiptForm" class="hidden" enctype="multipart/form-data" novalidate>
-              <div class="grid">
-                <div class="form-row"><label class="label">Batch code</label><input class="field" id="receiptBatch" placeholder="GC-..." data-validate="required"></div>
-                <div class="form-row"><label class="label">Location</label><select class="field" id="receiptLocation"><option value="Dubai">Dubai</option><option value="Erbil">Erbil</option><option value="China">China</option></select></div>
-              </div>
-              <div class="grid">
-                <div class="form-row"><label class="label">Customer code</label><input class="field" id="receiptCustomerCode" placeholder="GC... or directory code"></div>
-                <div class="form-row"><label class="label">Customer phone</label><input class="field" id="receiptCustomerPhone" data-validate="phone"></div>
-              </div>
-              <div class="form-row"><label class="label">Notes</label><textarea class="field" id="receiptNotes" placeholder="Received goods from Dubai / Erbil..."></textarea></div>
-              <div class="form-row"><label class="label">Receipt photos</label><input class="field" type="file" id="receiptPhotos" multiple accept="image/*"></div>
-              <div class="receipt-files" id="receiptPreview"></div>
-              <div class="toolbar" style="margin-top:12px">
-                <button class="btn btn-primary" type="submit">Save receipt</button>
-                <button class="btn btn-outline" type="button" id="receiptClearBtn">Clear</button>
-              </div>
-              <p id="receiptMsg" class="small"></p>
-            </form>
-
-            <div id="logsInfoPane" class="hidden">
-              <div class="muted-box">Activity logs are written automatically whenever staff create, edit, or archive a record — there's nothing to fill in here. Use the search box to filter by staff member, action, or record.</div>
-            </div>
+      <div class="panel">
+        <div class="list-head">
+          <div>
+            <h2 id="listTitle">Overview</h2>
+            <p id="listSubtitle" class="muted">Latest accounts and records</p>
           </div>
+          <input class="field search" id="searchBox" placeholder="Search records...">
+        </div>
 
-          <div class="table-col panel">
-            <div class="list-head">
-              <div>
-                <h2 id="dataViewTitle">Customer accounts</h2>
-                <p id="dataViewSubtitle">Create, edit, archive, and link customer accounts</p>
-              </div>
-              <input class="field search" id="searchBox" placeholder="Search records...">
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead id="tableHead"></thead>
-                <tbody id="tableBody"></tbody>
-              </table>
-            </div>
-          </div>
+        <div class="stats" id="analyticsStatsRow" style="margin-bottom:14px"></div>
+
+        <div class="table-wrap">
+          <table>
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+          </table>
         </div>
       </div>
-    </main>
+    </section>
   </div>
 
 <script>
@@ -388,32 +315,16 @@ async function authFetch(path = '/', opts = {}) {
   return data;
 }
 const VALID_TABS = ['dashboard', 'customers', 'staff', 'receipts', 'logs'];
-const TAB_META = {
-  dashboard: { title: 'Dashboard', sub: 'Live snapshot of accounts, shipments, and activity' },
-  customers: { title: 'Customer accounts', sub: 'Create, edit, archive, and link customer accounts' },
-  staff: { title: 'Staff accounts', sub: 'Manage staff roles and access' },
-  receipts: { title: 'Warehouse receipts', sub: 'Goods received in Dubai, China, or Erbil with photos' },
-  logs: { title: 'Activity logs', sub: 'Latest management activity' },
-};
 function setActiveTab(tab) {
   state.tab = tab;
   if (location.hash !== '#' + tab) history.replaceState(null, '', '#' + tab);
   document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
-
-  const isDashboard = tab === 'dashboard';
-  $('dashboardPane').classList.toggle('hidden', !isDashboard);
-  $('dataView').classList.toggle('hidden', isDashboard);
-  $('formCol').classList.toggle('hidden', tab === 'logs'); // logs is a read-only trail, nothing to create
-  $('logsInfoPane').classList.toggle('hidden', tab !== 'logs');
+  $('dashboardPane').classList.toggle('hidden', tab !== 'dashboard');
   $('customerForm').classList.toggle('hidden', tab !== 'customers');
   $('staffForm').classList.toggle('hidden', tab !== 'staff');
   $('receiptForm').classList.toggle('hidden', tab !== 'receipts');
-
-  const meta = TAB_META[tab] || TAB_META.dashboard;
-  $('listTitle').textContent = meta.title;
-  $('listSubtitle').textContent = meta.sub;
-  if (!isDashboard) { $('dataViewTitle').textContent = meta.title; $('dataViewSubtitle').textContent = meta.sub; }
-
+  $('listTitle').textContent = tab === 'customers' ? 'Customer accounts' : tab === 'staff' ? 'Staff accounts' : tab === 'receipts' ? 'Warehouse receipts' : tab === 'logs' ? 'Activity logs' : 'Overview';
+  $('listSubtitle').textContent = tab === 'customers' ? 'Create, edit, archive, and link customer accounts' : tab === 'staff' ? 'Manage staff roles and access' : tab === 'receipts' ? 'Goods received in Dubai, China, or Erbil with photos' : tab === 'logs' ? 'Latest management activity' : 'Latest accounts and records';
   renderList();
 }
 function loadManagerOptions() {
@@ -475,8 +386,10 @@ function renderList() {
       <td class="mono">${esc(r.target_id || '—')}</td>
       <td class="muted">${esc(r.details || '')}</td>
     </tr>`).join('') || '<tr><td colspan="5">No logs yet.</td></tr>';
+  } else {
+    $('tableHead').innerHTML = '<tr><th>Welcome</th><th>What this console does</th></tr>';
+    $('tableBody').innerHTML = `<tr><td>Accounts</td><td>Create customer and staff accounts, assign managers, and manage active/inactive status.</td></tr><tr><td>Warehouse receipts</td><td>Register inbound goods by batch code, link them to customer code or phone, and attach photos.</td></tr><tr><td>Activity log</td><td>See the latest staff actions for accountability.</td></tr>`;
   }
-  // 'dashboard' has its own view (stat cards + quick actions, see refreshAnalytics) — no table to fill.
 }
 async function refreshAnalytics() {
   if (!adminDashboard || !$('analyticsStatsRow')) return;
@@ -501,7 +414,7 @@ async function refreshAll() {
     const [c, s, r, l] = await Promise.all([authFetch('/?kind=customer'), authFetch('/?kind=staff'), authFetch('/?kind=receipt'), authFetch('/?kind=log')]);
     state.customers = c.items || []; state.staff = s.items || []; state.receipts = r.items || []; state.logs = l.items || [];
     loadManagerOptions();
-    $('recordsStatsRow').innerHTML = `<div class="stat"><b>${state.customers.length}</b><span>Customers</span></div><div class="stat"><b>${state.staff.length}</b><span>Staff</span></div><div class="stat"><b>${state.receipts.length}</b><span>Receipts</span></div><div class="stat"><b>${state.logs.length}</b><span>Logs</span></div>`;
+    $('statsRow').innerHTML = `<div class="stat"><b>${state.customers.length}</b><span>Customers</span></div><div class="stat"><b>${state.staff.length}</b><span>Staff</span></div><div class="stat"><b>${state.receipts.length}</b><span>Receipts</span></div><div class="stat"><b>${state.logs.length}</b><span>Logs</span></div>`;
     const name = state.session.user.user_metadata?.full_name || state.session.user.email?.split('@')[0] || 'Staff';
     $('whoami').textContent = `${name} · ${state.session.user.email || ''}`;
     $('whoamiSub').textContent = `${roleLabel[state.role] || state.role} access active`;
@@ -530,18 +443,15 @@ async function syncSessionUI() {
       if (user) state.session = { ...session, user };
       await resolveCurrentRole(user);
       $('authGate').classList.add('hidden');
-      $('consoleShell').classList.remove('hidden');
       await refreshAll();
     } catch (err) {
       await sb.auth.signOut(); state.session = null; state.role = 'guest';
-      $('authGate').classList.remove('hidden'); $('consoleShell').classList.add('hidden');
-      $('logoutBtn').classList.add('hidden'); $('roleBadge').classList.add('hidden');
+      $('authGate').classList.remove('hidden'); $('logoutBtn').classList.add('hidden'); $('roleBadge').classList.add('hidden');
       $('whoami').textContent = 'Not signed in'; $('whoamiSub').textContent = 'Waiting for staff authentication';
       setMsg($('loginMsg'), 'Your session expired — please sign in again.');
     }
   } else {
-    $('authGate').classList.remove('hidden'); $('consoleShell').classList.add('hidden');
-    $('logoutBtn').classList.add('hidden'); $('roleBadge').classList.add('hidden');
+    $('authGate').classList.remove('hidden'); $('logoutBtn').classList.add('hidden'); $('roleBadge').classList.add('hidden');
     $('whoami').textContent = 'Not signed in'; $('whoamiSub').textContent = 'Waiting for staff authentication';
   }
 }
@@ -554,7 +464,6 @@ $('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); 
 $('refreshBtn').addEventListener('click', refreshAll);
 $('searchBox').addEventListener('input', renderList);
 document.querySelectorAll('.tab').forEach((btn) => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
-document.querySelectorAll('[data-goto]').forEach((btn) => btn.addEventListener('click', () => setActiveTab(btn.dataset.goto)));
 $('customerClearBtn').addEventListener('click', resetCustomerForm);
 $('staffClearBtn').addEventListener('click', resetStaffForm);
 $('receiptClearBtn').addEventListener('click', resetReceiptForm);

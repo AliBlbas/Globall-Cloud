@@ -48,7 +48,7 @@
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
 }
 
-.origin-point { fill: #22C55E; }
+.origin-point { fill: #2ED27F; }
 .current-point { fill: #00D4FF; }
 .dest-point { fill: #E5533D; }
 
@@ -155,9 +155,9 @@
 .tracking-step-date { color: var(--muted-2); font-family: var(--mono); font-size: 12px; }
 
 .tracking-step--done {
-  border-inline-start-color: #22C55E;
+  border-inline-start-color: #2ED27F;
 }
-.tracking-step--done .tracking-step-dot { background: #22C55E; }
+.tracking-step--done .tracking-step-dot { background: #2ED27F; }
 .tracking-step--done .tracking-step-label { color: var(--text); }
 
 .tracking-step--current {
@@ -203,9 +203,9 @@
 }
 
 .timeline-item.completed .timeline-dot {
-  background: #22C55E;
-  border-color: #22C55E;
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+  background: #2ED27F;
+  border-color: #2ED27F;
+  box-shadow: 0 0 8px rgba(46, 210, 127, 0.4);
 }
 
 .timeline-item.current .timeline-dot {
@@ -224,7 +224,7 @@
   border-inline-start: 3px solid var(--line-soft);
 }
 
-.timeline-item.completed .timeline-content { border-inline-start-color: #22C55E; }
+.timeline-item.completed .timeline-content { border-inline-start-color: #2ED27F; }
 
 .timeline-item.current .timeline-content {
   border-inline-start-color: #00D4FF;
@@ -263,7 +263,7 @@
   letter-spacing: 0.3px;
 }
 
-.badge-success { background: rgba(34, 197, 94, 0.12); color: #22C55E; }
+.badge-success { background: rgba(46, 210, 127, 0.12); color: #2ED27F; }
 .badge-info { background: rgba(0, 194, 217, 0.12); color: #00D4FF; }
 .badge-warning { background: rgba(240, 168, 58, 0.12); color: #F0A83A; }
 .badge-danger { background: rgba(229, 83, 61, 0.12); color: #E5533D; }

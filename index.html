@@ -141,9 +141,7 @@ html{scrollbar-width:thin; scrollbar-color:var(--teal) var(--ink-2);}
 .btn{display:inline-flex; align-items:center; gap:8px; justify-content:center; padding:14px 24px; border-radius:999px; font-weight:800; font-size:14.5px; cursor:pointer; border:1px solid transparent; transition:transform .2s ease, opacity .2s ease, background .2s ease, box-shadow .2s ease; min-height:46px;}
 .btn:active{transform:scale(.97);}
 .btn-icon{min-width:44px; min-height:44px; padding:10px!important; display:inline-flex; align-items:center; justify-content:center;}
-.btn-primary{position:relative; overflow:hidden; background:linear-gradient(135deg,var(--teal-l),var(--teal) 55%,#0A8C9C); color:#03181d; box-shadow:0 8px 22px rgba(0,194,217,.25), 0 1px 0 rgba(255,255,255,.15) inset;}
-.btn-primary::after{content:''; position:absolute; inset:0; background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.55) 48%, transparent 66%); transform:translateX(-120%); transition:transform .7s ease;}
-.btn-primary:hover::after{transform:translateX(120%);}
+.btn-primary{position:relative; background:linear-gradient(135deg,var(--teal-l),var(--teal) 55%,#0A8C9C); color:#03181d; box-shadow:0 8px 22px rgba(0,194,217,.25), 0 1px 0 rgba(255,255,255,.15) inset;}
 .btn-primary:hover{opacity:.98; transform:translateY(-2px); box-shadow:0 14px 32px rgba(0,194,217,.4), 0 0 0 1px rgba(255,199,104,.25);}
 .btn-outline{background:transparent; border-color:var(--line); color:var(--text);}
 .btn-outline:hover{border-color:var(--teal-l); color:var(--teal-l); transform:translateY(-1px);}
@@ -240,11 +238,19 @@ textarea.field{resize:vertical; min-height:100px;}
 .hero-ctas{display:flex; gap:14px; flex-wrap:wrap;}
 @media(max-width:940px){ .hero{grid-template-columns:1fr;} }
 
-.route-map{position:relative; aspect-ratio:4/3; border-radius:var(--radius-l); background:radial-gradient(circle at 50% 85%, rgba(47,169,184,.16), transparent 60%), linear-gradient(180deg, var(--surface), var(--ink-2)); border:1px solid var(--line-soft); overflow:hidden;}
+.route-map{position:relative; aspect-ratio:4/3; border-radius:var(--radius-l);
+  background:
+    radial-gradient(var(--line-soft) 1px, transparent 1.3px),
+    radial-gradient(circle at 14% 84%, rgba(0,194,217,.22), transparent 55%),
+    radial-gradient(circle at 88% 14%, rgba(240,168,58,.16), transparent 55%),
+    linear-gradient(180deg, var(--surface), var(--ink-2));
+  background-size:24px 24px, auto, auto, auto;
+  border:1px solid var(--line-soft); overflow:hidden;}
 .route-map svg{position:absolute; inset:0; width:100%; height:100%;}
 .route-dot{position:absolute; width:11px; height:11px; border-radius:50%; background:var(--teal-l); box-shadow:0 0 0 5px rgba(95,214,224,.18); transform:translate(-50%,-50%);}
 .route-label{position:absolute; transform:translate(-50%,10px); font-size:11.5px; font-weight:700; color:var(--text); white-space:nowrap; text-align:center;}
 .route-pulse{position:absolute; width:9px; height:9px; margin:-4.5px; border-radius:50%; background:var(--teal-l); box-shadow:0 0 14px 3px rgba(95,214,224,.7); offset-rotate:0deg; animation:travel 6s ease-in-out infinite;}
+@media (prefers-reduced-motion: reduce){ .route-pulse{animation:none; opacity:0;} }
 
 /* ---------- signature: customs seal ---------- */
 .seal-badge{position:absolute; inset-inline-end:16px; top:16px; width:74px; height:74px; z-index:3;}
@@ -827,7 +833,13 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
       </div>
     </div>
     <div class="route-map">
-      <img src="hero-banner.jpg" alt="Globall Cloud — گەیاندنی بار بە کەشتی، فڕۆکە و بارهەڵگر لەنێوان چین، ئیمارات و عێراق" loading="eager" style="width:100%; height:100%; object-fit:cover; display:block;">
+      <svg viewBox="0 0 400 300" aria-hidden="true" focusable="false">
+        <path d="M32 222 Q200 -138 368 222" fill="none" stroke="var(--teal-l)" stroke-width="1.6" stroke-dasharray="2 8" stroke-linecap="round" opacity=".55"/>
+      </svg>
+      <div class="route-dot" style="left:8%; top:74%;" aria-hidden="true"></div>
+      <div class="route-dot" style="left:50%; top:14%;" aria-hidden="true"></div>
+      <div class="route-dot" style="left:92%; top:74%;" aria-hidden="true"></div>
+      <div class="route-pulse" aria-hidden="true"></div>
       <div class="seal-badge" aria-hidden="true">
         <svg viewBox="0 0 100 100">
           <circle cx="50" cy="50" r="46" fill="none" stroke="var(--amber-l)" stroke-width="1.4" stroke-dasharray="4 5" opacity=".8"/>

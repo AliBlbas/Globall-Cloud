@@ -38,14 +38,11 @@ Globall Cloud is a logistics platform for shipping from China and the UAE to Ira
 ## Project files (live / wired in)
 - `index.html` — main website and customer portal
 - `management.html` — staff entry page
-- `accounts-console.html` — staff management console (customer accounts,
-  staff accounts, warehouse receipts, activity log). Restructured into a
-  sidebar + dashboard layout — see "Accounts console layout" below. Loads
-  `admin-dashboard.js` for the Dashboard's live metrics and
-  `form-validation.js` / `form-validation-styles.css` for inline field
-  validation on the customer/staff/receipt forms.
+- `accounts-console.html` — staff management console. Loads `admin-dashboard.js`
+  for the analytics tab and `form-validation.js` / `form-validation-styles.css`
+  for inline field validation on the customer/staff/receipt forms.
 - `account-admin` edge function — manager workflow for accounts and receipts
-- `admin-dashboard.js` — analytics engine, wired into accounts-console.html's Dashboard
+- `admin-dashboard.js` — analytics engine, wired into accounts-console.html's Dashboard tab
 - `form-validation.js` / `form-validation-styles.css` — reusable field
   validation (required/email/phone/etc. with inline errors). Pages that
   handle their own form submission — like accounts-console.html — call
@@ -101,32 +98,6 @@ keeping:
   Cloudflare Pages' own GitHub integration — no Actions needed.
 - `.github/ISSUE_TEMPLATE/custom.md` — the unfilled placeholder template
   GitHub scaffolds by default.
-
-## Accounts console layout
-`accounts-console.html` was restructured from a single stacked page into a
-sidebar app shell, for two concrete problems the old layout had:
-- The tab buttons, a login form, and five decorative chips that just
-  repeated the tab labels were all crammed into one hero panel, physically
-  separate from the forms and tables they controlled below.
-- Two different stat widgets covered overlapping ground: a simple
-  Customers/Staff/Receipts/Logs count in the hero, and a separate
-  financial-metrics row that showed above the table on *every* tab
-  (so switching to "Staff" still showed revenue numbers), while the actual
-  "Dashboard" tab was just a static sentence.
-
-Now:
-- A left-hand (RTL: right-hand) sidebar holds navigation, sign-in identity,
-  and sign-out — always visible, never mixed with page content.
-- Dashboard is a real view: live business metrics, a record-count summary,
-  and quick-action shortcuts into each section — not a placeholder.
-- Customers / Staff / Receipts / Logs each get a focused two-column view
-  (form beside table); Logs has no create-form, so that tab collapses to a
-  full-width table automatically via CSS (`:has()`).
-- Signed-out visitors see only a centered sign-in card — the console shell
-  (nav, forms, tables) no longer renders in the background before login.
-
-Every element id the JavaScript relies on (`$('...')` lookups) was kept
-identical through the restructure — only the layout around them changed.
 
 ## Notable bugs fixed in this pass
 - **`tracking-enhanced.js`**: `subscribeToRealtime()` called `cleanup()` as a
