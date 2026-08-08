@@ -1,14 +1,8 @@
-/* Enhanced Tracking — live route map.
-   Trimmed from the original file to only the rules the map actually
-   uses. The original also shipped .timeline/.timeline-item/.badge/
-   .tracking-* rules for a card layout nothing in this codebase
-   generates — and those generic names would have silently collided
-   with index.html's own, already-working .timeline (used on every
-   tracking result). .route-line was renamed to .map-route-path for
-   the same reason: index.html already has its own .route-line for
-   the origin -> destination text row (display:flex, for a <div>,
-   not an SVG stroke). Uses the same --surface / --text / --muted
-   variables as the rest of the site so it matches automatically. */
+/* Enhanced Tracking Styles — companion to tracking-enhanced.js.
+   Uses the same design tokens as index.html's :root (--surface, --teal,
+   --line-soft, etc.) so it drops in without a separate theme, and uses
+   logical (inline-start/end) properties throughout to match index.html's
+   RTL-first layout instead of hardcoded left/right. */
 
 .live-map-container {
   background: var(--surface);
@@ -18,6 +12,24 @@
   margin-bottom: 24px;
   position: relative;
 }
+
+.map-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.map-summary-route {
+  font-weight: 700;
+  color: var(--text);
+  font-family: var(--mono);
+}
+
+.map-summary-eta { color: var(--muted); }
 
 .route-visualization {
   width: 100%;
@@ -47,7 +59,7 @@
   pointer-events: none;
 }
 
-.map-route-path {
+.route-line {
   stroke: #1677FF;
   stroke-width: 3;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
@@ -62,7 +74,7 @@
   border-top: 1px solid var(--line-soft);
 }
 
-.map-legend .legend-item {
+.legend-item {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -70,13 +82,215 @@
   color: var(--muted);
 }
 
-.map-legend .legend-item .dot {
+.legend-item .dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
 }
 
+.tracking-details {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-m);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.tracking-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.tracking-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-family: var(--mono);
+}
+
+.tracking-route {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.tracking-route strong { color: var(--text); }
+
+.tracking-progress { margin-bottom: 20px; }
+
+.progress-bar {
+  height: 6px;
+  background: linear-gradient(90deg, var(--teal), var(--teal-l));
+  border-radius: 999px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 12px rgba(0, 194, 217, 0.3);
+}
+
+/* Simple step list, used by tracking-integration.html's renderTrackingDetails() */
+.tracking-step-list { display: flex; flex-direction: column; gap: 10px; }
+
+.tracking-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border-radius: 8px;
+  border-inline-start: 3px solid var(--line-soft);
+  font-size: 13.5px;
+}
+
+.tracking-step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--line-soft);
+  flex-shrink: 0;
+}
+
+.tracking-step-label { color: var(--muted); flex: 1; }
+.tracking-step-date { color: var(--muted-2); font-family: var(--mono); font-size: 12px; }
+
+.tracking-step--done {
+  border-inline-start-color: #22C55E;
+}
+.tracking-step--done .tracking-step-dot { background: #22C55E; }
+.tracking-step--done .tracking-step-label { color: var(--text); }
+
+.tracking-step--current {
+  border-inline-start-color: #00D4FF;
+  background: rgba(0, 194, 217, 0.08);
+}
+.tracking-step--current .tracking-step-dot {
+  background: #00D4FF;
+  box-shadow: 0 0 8px rgba(0, 194, 217, 0.5);
+}
+.tracking-step--current .tracking-step-label { color: var(--text); font-weight: 700; }
+
+.timeline { position: relative; padding-inline-start: 24px; }
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 5px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--line-soft);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+}
+
+.timeline-item:last-child { margin-bottom: 0; padding-bottom: 0; }
+
+.timeline-dot {
+  position: absolute;
+  inset-inline-start: -17px;
+  top: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 2px solid var(--line-soft);
+  transition: all 0.2s ease;
+}
+
+.timeline-item.completed .timeline-dot {
+  background: #22C55E;
+  border-color: #22C55E;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+}
+
+.timeline-item.current .timeline-dot {
+  background: #00D4FF;
+  border-color: #00D4FF;
+  width: 16px;
+  height: 16px;
+  inset-inline-start: -19px;
+  box-shadow: 0 0 12px rgba(0, 194, 217, 0.5);
+}
+
+.timeline-content {
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border-radius: 8px;
+  border-inline-start: 3px solid var(--line-soft);
+}
+
+.timeline-item.completed .timeline-content { border-inline-start-color: #22C55E; }
+
+.timeline-item.current .timeline-content {
+  border-inline-start-color: #00D4FF;
+  background: rgba(0, 194, 217, 0.08);
+}
+
+.timeline-content strong {
+  display: block;
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.timeline-content p {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 0 6px 0;
+}
+
+.timeline-date {
+  display: block;
+  font-size: 11.5px;
+  color: var(--muted-2);
+  font-family: var(--mono);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: var(--mono);
+  letter-spacing: 0.3px;
+}
+
+.badge-success { background: rgba(34, 197, 94, 0.12); color: #22C55E; }
+.badge-info { background: rgba(0, 194, 217, 0.12); color: #00D4FF; }
+.badge-warning { background: rgba(240, 168, 58, 0.12); color: #F0A83A; }
+.badge-danger { background: rgba(229, 83, 61, 0.12); color: #E5533D; }
+
+.notification-badge {
+  position: absolute;
+  top: -8px;
+  inset-inline-end: -8px;
+  width: 20px;
+  height: 20px;
+  background: #E5533D;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(229, 83, 61, 0.4);
+}
+
 @media (max-width: 640px) {
   .live-map-container { padding: 16px; }
   .route-visualization { min-height: 250px; }
+  .tracking-details { padding: 16px; }
+  .timeline { padding-inline-start: 20px; }
+  .timeline-dot { inset-inline-start: -14px; }
+  .timeline-item.current .timeline-dot { inset-inline-start: -16px; }
+  .badge { padding: 4px 10px; font-size: 11px; }
 }

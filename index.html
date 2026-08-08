@@ -65,8 +65,663 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="tracking-styles.css">
+<style>
+:root{
+  --ink:#080F1E; --ink-2:#0D1D34; --surface:#122A4A; --surface-2:#1A3B63;
+  --line:#2A4D78; --line-soft:#1F3C60;
+  --teal:#00C2D9; --teal-l:#4FE3F0; --teal-dark:#042C33;
+  --red:#E5533D; --red-l:#F17A66;
+  --amber:#F0A83A; --amber-l:#FFC768; --mint:#2ED27F;
+  --text:#F5F9FD; --muted:#9BB2D0; --muted-2:#647FA3;
+  --radius-s:10px; --radius-m:16px; --radius-l:26px;
+  --maxw:1180px;
+  --font:'Vazirmatn','Noto Sans Arabic',sans-serif; --mono:'JetBrains Mono',monospace;
+  --shadow:0 20px 50px rgba(2,8,20,.45);
+  --grain-line:rgba(255,255,255,.035);
+}
+[data-theme="light"]{
+  --ink:#F3F7FC; --ink-2:#E6EDF6; --surface:#FFFFFF; --surface-2:#EEF3F9;
+  --line:#D7E1EC; --line-soft:#E4EBF3;
+  --teal:#00A8BD; --teal-l:#00C2D9; --teal-dark:#042C33;
+  --red:#D8402A; --red-l:#E5533D;
+  --amber:#D98B1A; --amber-l:#F0A83A; --mint:#1FAE6C;
+  --text:#0B1B2E; --muted:#54687F; --muted-2:#7A8FA6;
+  --shadow:0 20px 50px rgba(20,45,80,.12);
+  --grain-line:rgba(10,35,65,.045);
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth; overflow-x:hidden; max-width:100%;}
+body{margin:0; font-family:var(--font); background-color:var(--ink);
+  overflow-x:hidden; max-width:100%; position:relative;
+  background-image:
+    radial-gradient(ellipse 900px 600px at 15% -10%, rgba(0,194,217,.10), transparent 60%),
+    linear-gradient(var(--grain-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grain-line) 1px, transparent 1px);
+  background-size:auto, 56px 56px, 56px 56px;
+  background-attachment:fixed;
+  color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4{margin:0; line-height:1.25;}
+p{margin:0;}
+a{color:inherit; text-decoration:none;}
+button, input, select, textarea{font-family:inherit; color:inherit;}
+ul{list-style:none; margin:0; padding:0;}
+.icon{width:20px; height:20px; display:inline-block; vertical-align:-4px; fill:none;}
+.icon-sm{width:16px; height:16px; vertical-align:-2px;}
+.icon-lg{width:28px; height:28px;}
+.brand-logo{width:34px; height:34px; object-fit:contain; flex-shrink:0;}
+:focus-visible{outline:2px solid var(--teal-l); outline-offset:2px; border-radius:4px;}
+@media (prefers-reduced-motion: reduce){ *{animation:none!important; transition:none!important; scroll-behavior:auto!important;} }
+
+::selection{background:rgba(0,194,217,.32); color:var(--text);}
+html{scrollbar-width:thin; scrollbar-color:var(--teal) var(--ink-2);}
+::-webkit-scrollbar{width:10px; height:10px;}
+::-webkit-scrollbar-track{background:var(--ink-2);}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--teal-l),var(--teal)); border-radius:999px; border:2px solid var(--ink-2);}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,var(--amber-l),var(--teal-l));}
+
+/* page transition */
+.page.active{animation:pageFadeIn .5s cubic-bezier(.16,1,.3,1);}
+@keyframes pageFadeIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+@media (prefers-reduced-motion: reduce){ .page.active{animation:none;} }
+
+.container{max-width:var(--maxw); margin:0 auto; padding-inline:24px;}
+.container.narrow{max-width:640px;}
+.section{padding-block:clamp(40px,6vw,80px);}
+.section-head{text-align:center; max-width:560px; margin:0 auto 44px;}
+.eyebrow{font-family:var(--mono); letter-spacing:2px; color:var(--teal-l); font-size:12.5px; font-weight:700; margin-bottom:12px; display:block;}
+.section-head h2{font-size:clamp(24px,3.4vw,34px); font-weight:800; margin-bottom:12px;}
+.section-head p{color:var(--muted); font-size:15.5px;}
+
+/* ---------- reveal ---------- */
+.reveal{opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease;}
+.reveal.in-view{opacity:1; transform:translateY(0);}
+
+/* ---------- buttons & fields ---------- */
+.btn{display:inline-flex; align-items:center; gap:8px; justify-content:center; padding:14px 24px; border-radius:999px; font-weight:800; font-size:14.5px; cursor:pointer; border:1px solid transparent; transition:transform .2s ease, opacity .2s ease, background .2s ease, box-shadow .2s ease; min-height:46px;}
+.btn:active{transform:scale(.97);}
+.btn-icon{min-width:44px; min-height:44px; padding:10px!important; display:inline-flex; align-items:center; justify-content:center;}
+.btn-primary{position:relative; overflow:hidden; background:linear-gradient(135deg,var(--teal-l),var(--teal) 55%,#0A8C9C); color:#03181d; box-shadow:0 8px 22px rgba(0,194,217,.25), 0 1px 0 rgba(255,255,255,.15) inset;}
+.btn-primary::after{content:''; position:absolute; inset:0; background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.55) 48%, transparent 66%); transform:translateX(-120%); transition:transform .7s ease;}
+.btn-primary:hover::after{transform:translateX(120%);}
+.btn-primary:hover{opacity:.98; transform:translateY(-2px); box-shadow:0 14px 32px rgba(0,194,217,.4), 0 0 0 1px rgba(255,199,104,.25);}
+.btn-outline{background:transparent; border-color:var(--line); color:var(--text);}
+.btn-outline:hover{border-color:var(--teal-l); color:var(--teal-l); transform:translateY(-1px);}
+.btn-ghost{background:var(--surface-2); color:var(--text);}
+.btn-block{width:100%;}
+.btn:disabled{opacity:.6; cursor:default; transform:none;}
+
+.field-label{display:block; font-size:13px; font-weight:700; color:var(--muted); margin-bottom:7px;}
+.field, select.field, textarea.field{
+  width:100%; background:var(--surface-2); border:1.5px solid var(--line); border-radius:12px;
+  padding:14px 16px; font-size:16px; color:var(--text); transition:border-color .2s ease, box-shadow .2s ease; min-height:48px;
+}
+.field:focus{outline:none; border-color:var(--teal); box-shadow:0 0 0 3px rgba(0,194,217,.15);}
+.field::placeholder{color:var(--muted-2);}
+textarea.field{resize:vertical; min-height:100px;}
+.form-row{margin-bottom:16px;}
+.form-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+@media(max-width:640px){ .form-grid{grid-template-columns:1fr;} }
+
+/* ---------- nav ---------- */
+.nav{position:relative; position:sticky; top:0; z-index:200; background:rgba(6,20,40,.86); backdrop-filter:blur(10px); border-bottom:1px solid var(--line-soft);}
+.nav::after{content:''; position:absolute; left:0; right:0; bottom:-1px; height:1px; background:linear-gradient(90deg,transparent,var(--teal) 35%,var(--amber-l) 65%,transparent); opacity:.55;}
+.nav-inner{max-width:var(--maxw); margin:0 auto; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; gap:18px;}
+.brand{display:flex; align-items:center; gap:10px; cursor:pointer; flex-shrink:0;}
+.brand b{font-size:17.5px; font-weight:800;}
+.brand small{display:block; font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.5px;}
+.nav-links{display:flex; gap:26px;}
+.nav-links a{color:var(--muted); font-weight:700; font-size:14px; cursor:pointer; padding:6px 0; border-bottom:2px solid transparent;}
+.nav-links a.active, .nav-links a:hover{color:var(--text); border-color:var(--teal);}
+.nav-right{display:flex; align-items:center; gap:10px;}
+.lang-toggle{display:flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; flex-shrink:0;}
+.lang-toggle button{padding:7px 12px; font-size:11.5px; font-weight:800; background:none; border:none; color:var(--muted); cursor:pointer; font-family:var(--mono);}
+.lang-toggle button.active{background:var(--teal); color:var(--teal-dark);}
+.theme-toggle-btn{display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:none; color:var(--muted); cursor:pointer; flex-shrink:0; transition:color .2s ease, border-color .2s ease, transform .2s ease;}
+.theme-toggle-btn:hover{color:var(--teal-l); border-color:var(--teal-l);}
+.theme-toggle-btn:active{transform:scale(.92);}
+.theme-toggle-btn svg{width:18px; height:18px;}
+.nav-auth{font-size:13.5px; font-weight:700; color:var(--text); cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px;}
+.burger{display:none; background:none; border:1px solid var(--line); border-radius:10px; width:38px; height:38px; align-items:center; justify-content:center; cursor:pointer; color:var(--text);}
+.mobile-menu{display:none; flex-direction:column; gap:4px; padding:14px 24px 20px; border-bottom:1px solid var(--line-soft); background:var(--ink-2);}
+.mobile-menu.open{display:flex;}
+.mobile-menu a{padding:14px 4px; font-weight:700; color:var(--muted); border-bottom:1px solid var(--line-soft); min-height:44px; display:flex; align-items:center;}
+.mobile-menu a.active{color:var(--teal-l);}
+
+.top-announcement{position:relative; z-index:205; background:linear-gradient(90deg, rgba(0,194,217,.16), rgba(240,168,58,.12)); border-bottom:1px solid var(--line-soft); backdrop-filter:blur(10px);}
+.top-announcement-inner{max-width:var(--maxw); margin:0 auto; padding:8px 24px; display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; font-size:11.5px; font-weight:800; color:var(--text);}
+.announcement-pill,.announcement-chip{display:inline-flex; align-items:center; gap:7px; padding:7px 12px; border-radius:999px; background:rgba(7,18,32,.38); border:1px solid rgba(255,255,255,.08); box-shadow:0 10px 24px rgba(0,0,0,.12);}
+.announcement-pill svg,.announcement-chip svg{color:var(--teal-l);}
+.hero{position:relative;}
+.route-map{position:relative; isolation:isolate;}
+.route-map::before{content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(2,8,20,.08), rgba(2,8,20,.48)); z-index:1; pointer-events:none;}
+.route-map > img{position:relative; z-index:0;}
+.hero-overlay{position:absolute; inset:18px; z-index:2; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none;}
+.hero-status-card{align-self:flex-start; max-width:240px; padding:16px 16px 14px; border-radius:18px; background:rgba(6,20,40,.58); border:1px solid rgba(255,255,255,.12); backdrop-filter:blur(14px); box-shadow:0 18px 36px rgba(0,0,0,.18);}
+.hero-kicker{display:inline-flex; align-items:center; gap:6px; font-size:10.5px; letter-spacing:1.6px; font-family:var(--mono); color:var(--teal-l); font-weight:800; margin-bottom:8px; text-transform:uppercase;}
+.hero-status-card b{display:block; font-size:15px; font-weight:900; margin-bottom:5px; line-height:1.35;}
+.hero-status-card small{display:block; color:var(--muted); font-size:12px; line-height:1.7;}
+.hero-route-stack{display:grid; gap:10px; align-self:flex-end; width:min(100%, 280px);}
+.route-chip{display:flex; align-items:center; gap:10px; padding:13px 14px; border-radius:16px; background:rgba(7,18,32,.62); border:1px solid rgba(255,255,255,.10); backdrop-filter:blur(14px); box-shadow:0 14px 30px rgba(0,0,0,.18);}
+.route-chip-num{width:34px; height:34px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:11px; font-weight:900; color:#03181d; background:linear-gradient(135deg,var(--teal-l),var(--amber-l)); flex-shrink:0;}
+.route-chip b{display:block; font-size:13.5px; font-weight:800; line-height:1.2;}
+.route-chip small{display:block; color:var(--muted); font-size:11.5px; margin-top:2px;}
+@media(max-width:940px){ .hero-overlay{inset:14px;} }
+@media(max-width:640px){ .hero-overlay{position:static; margin-top:12px; padding:0; pointer-events:auto;} .route-map{padding:12px; display:flex; flex-direction:column; gap:12px;} .route-map::before{border-radius:var(--radius-l);} .route-map > img{border-radius:var(--radius-l);} .seal-badge{inset-inline-end:12px; top:12px;} .hero-status-card,.route-chip{backdrop-filter:none;} }
+.corridor-strip{background:linear-gradient(160deg, var(--surface), var(--ink-2)); border:1px solid var(--line-soft); border-radius:var(--radius-l); padding:28px 24px; box-shadow:var(--shadow);}
+.corridor-head{display:flex; justify-content:space-between; gap:18px; align-items:flex-start; margin-bottom:18px; flex-wrap:wrap;}
+.corridor-head h3{font-size:clamp(20px,3vw,28px); font-weight:900; margin-bottom:8px;}
+.corridor-head p{color:var(--muted); font-size:14px; line-height:1.8; max-width:60ch;}
+.corridor-badge{display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:999px; background:rgba(0,194,217,.10); border:1px solid rgba(0,194,217,.18); color:var(--teal-l); font-size:12px; font-weight:800; white-space:nowrap;}
+.corridor-list{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px;}
+@media(max-width:860px){ .corridor-list{grid-template-columns:1fr;} }
+.corridor-item{position:relative; padding:20px 18px; border-radius:18px; background:rgba(255,255,255,.03); border:1px solid var(--line-soft); overflow:hidden;}
+.corridor-item::after{content:''; position:absolute; inset-inline:0; top:0; height:2px; background:linear-gradient(90deg,var(--teal-l),var(--amber-l)); opacity:.9;}
+.corridor-top{display:flex; align-items:center; gap:12px; margin-bottom:12px;}
+.corridor-flag{width:40px; height:40px; border-radius:14px; display:flex; align-items:center; justify-content:center; background:rgba(0,194,217,.09); font-size:22px; flex-shrink:0;}
+.corridor-item h4{font-size:15px; font-weight:900; margin:0 0 4px;}
+.corridor-meta{font-size:11.5px; color:var(--muted-2); font-family:var(--mono); letter-spacing:.3px; text-transform:uppercase;}
+.corridor-item p{color:var(--muted); font-size:13.5px; line-height:1.75; margin:0;}
+.corridor-tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;}
+.corridor-tags span{font-size:11px; font-weight:800; color:var(--text); background:var(--surface-2); border:1px solid var(--line-soft); padding:6px 10px; border-radius:999px;}
+@media(max-width:900px){
+  .nav-links, .nav-right .btn{display:none;}
+  .burger{display:flex;}
+}
+
+/* ---------- pages ---------- */
+.page{display:none;}
+.page.active{display:block;}
+
+/* ---------- hero ---------- */
+.hero{max-width:var(--maxw); margin:0 auto; padding:clamp(40px,7vw,72px) 24px 30px; display:grid; grid-template-columns:1.05fr .95fr; gap:50px; align-items:center;}
+.hero h1{font-size:clamp(30px,4.6vw,52px); font-weight:900; letter-spacing:-.8px; margin-bottom:18px; background:linear-gradient(135deg,var(--text) 35%,var(--teal-l) 85%,var(--amber-l)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; filter:drop-shadow(0 2px 24px rgba(0,194,217,.18));}
+.hero .sub{color:var(--muted); font-size:16.5px; line-height:1.75; max-width:48ch; margin-bottom:30px;}
+.hero-ctas{display:flex; gap:14px; flex-wrap:wrap;}
+@media(max-width:940px){ .hero{grid-template-columns:1fr;} }
+
+.route-map{position:relative; aspect-ratio:4/3; border-radius:var(--radius-l); background:radial-gradient(circle at 50% 85%, rgba(47,169,184,.16), transparent 60%), linear-gradient(180deg, var(--surface), var(--ink-2)); border:1px solid var(--line-soft); overflow:hidden;}
+.route-map svg{position:absolute; inset:0; width:100%; height:100%;}
+.route-dot{position:absolute; width:11px; height:11px; border-radius:50%; background:var(--teal-l); box-shadow:0 0 0 5px rgba(95,214,224,.18); transform:translate(-50%,-50%);}
+.route-label{position:absolute; transform:translate(-50%,10px); font-size:11.5px; font-weight:700; color:var(--text); white-space:nowrap; text-align:center;}
+.route-pulse{position:absolute; width:9px; height:9px; margin:-4.5px; border-radius:50%; background:var(--teal-l); box-shadow:0 0 14px 3px rgba(95,214,224,.7); offset-rotate:0deg; animation:travel 6s ease-in-out infinite;}
+
+/* ---------- signature: customs seal ---------- */
+.seal-badge{position:absolute; inset-inline-end:16px; top:16px; width:74px; height:74px; z-index:3;}
+.seal-badge svg{width:100%; height:100%; animation:seal-spin 22s linear infinite;}
+.seal-badge .seal-center{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--amber-l);}
+@keyframes seal-spin{from{transform:rotate(0deg);} to{transform:rotate(360deg);}}
+@media (prefers-reduced-motion: reduce){ .seal-badge svg{animation:none;} }
+@keyframes travel{
+  0%{left:8%; top:74%; opacity:0;}
+  6%{opacity:1;}
+  50%{left:50%; top:14%;}
+  94%{opacity:1;}
+  100%{left:92%; top:74%; opacity:0;}
+}
+
+/* ---------- trust bar ---------- */
+.trust-bar{display:grid; grid-template-columns:repeat(4,1fr); gap:20px; max-width:var(--maxw); margin:0 auto; padding:0 24px;}
+.trust-item{text-align:center; padding:24px 10px; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); transition:transform .25s ease, border-color .25s ease, box-shadow .25s ease;}
+.trust-item:hover{transform:translateY(-3px); border-color:var(--teal); box-shadow:0 12px 28px rgba(0,194,217,.14);}
+.trust-item b{display:block; font-size:clamp(20px,2.6vw,28px); font-weight:800; font-family:var(--mono); background:linear-gradient(135deg,var(--teal-l),var(--amber-l)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;}
+.trust-item span{font-size:12.5px; color:var(--muted);}
+@media(max-width:760px){ .trust-bar{grid-template-columns:repeat(2,1fr);} }
+
+/* ---------- live track band ---------- */
+.live-track{background:linear-gradient(120deg, var(--surface), var(--ink-2)); border-top:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft);}
+.live-track-inner{max-width:800px; margin:0 auto; padding:46px 24px; text-align:center;}
+.live-track h3{font-size:22px; font-weight:800; margin-bottom:8px;}
+.live-track p{color:var(--muted); margin-bottom:22px; font-size:14.5px;}
+.track-search{display:flex; gap:10px; max-width:460px; margin:0 auto;}
+.track-search .field{flex:1;}
+@media(max-width:480px){ .track-search{flex-direction:column;} }
+
+/* ---------- grids ---------- */
+.grid-5{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:18px;}
+.grid-4{display:grid; grid-template-columns:repeat(4,1fr); gap:20px;}
+@media(max-width:760px){ .grid-4{grid-template-columns:1fr 1fr;} }
+@media(max-width:520px){ .grid-4{grid-template-columns:1fr;} }
+.grid-3{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px;}
+
+.business-hub-layout{display:grid; grid-template-columns:1.2fr .8fr; gap:20px; align-items:stretch;}
+.business-hub-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px;}
+@media(max-width:900px){ .business-hub-layout{grid-template-columns:1fr;} }
+@media(max-width:640px){ .business-hub-grid{grid-template-columns:1fr;} }
+.hub-card{display:flex; flex-direction:column; align-items:flex-start; gap:12px; text-align:start; padding:24px 22px; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); cursor:pointer; transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease; min-height:100%;}
+.hub-card:hover{transform:translateY(-3px); border-color:var(--teal); box-shadow:0 16px 34px rgba(0,194,217,.14);}
+.hub-card h4{font-size:15px; font-weight:800; margin:0;}
+.hub-card p{color:var(--muted); font-size:13.5px; line-height:1.75;}
+.hub-icon{width:46px; height:46px; border-radius:13px; background:var(--surface-2); display:flex; align-items:center; justify-content:center; color:var(--teal-l); flex-shrink:0;}
+.hub-icon svg{width:24px; height:24px;}
+.hub-link{display:inline-flex; align-items:center; gap:6px; margin-top:auto; color:var(--teal-l); font-size:12.5px; font-weight:800;}
+.hub-link svg{transform:scaleX(-1);}
+.preview-sub{color:var(--muted); font-size:13.8px; line-height:1.75; margin-top:4px;}
+.dash-mini-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:16px 0 18px;}
+.mini-stat{padding:14px; background:var(--surface-2); border:1px solid var(--line-soft); border-radius:14px;}
+.mini-stat b{display:block; font-family:var(--mono); font-size:18px; margin-bottom:4px;}
+.mini-stat span{font-size:11.5px; color:var(--muted);}
+.preview-actions{display:grid; gap:10px;}
+.warehouse-list{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px;}
+@media(max-width:920px){ .warehouse-list{grid-template-columns:1fr;} }
+.warehouse-card{display:flex; flex-direction:column; gap:12px; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); padding:22px;}
+.warehouse-card:hover{border-color:var(--teal);}
+.warehouse-card .tag{font-size:11px; font-weight:800; letter-spacing:1px; color:var(--teal-l); font-family:var(--mono);}
+.warehouse-card h4{font-size:15.5px; font-weight:800;}
+.warehouse-card p{color:var(--muted); font-size:13.5px; line-height:1.75;}
+.warehouse-meta{display:flex; flex-direction:column; gap:8px; font-size:12.5px; color:var(--muted);}
+.warehouse-meta span{display:flex; align-items:flex-start; gap:7px;}
+.warehouse-meta svg{width:16px; height:16px; color:var(--teal-l); flex-shrink:0; margin-top:2px;}
+
+.ops-layout{display:grid; grid-template-columns:.78fr 1.22fr; gap:20px; align-items:stretch;}
+.ops-metrics{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px;}
+.ops-metric{padding:18px; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m);}
+.ops-metric b{display:block; font-family:var(--mono); font-size:24px; margin-bottom:4px; background:linear-gradient(135deg,var(--teal-l),var(--amber-l)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;}
+.ops-metric span{color:var(--muted); font-size:12px; line-height:1.5;}
+.ops-cards{display:grid; gap:14px;}
+.ops-card{padding:20px; background:linear-gradient(160deg,var(--surface),var(--ink-2)); border:1px solid var(--line-soft); border-radius:var(--radius-m); box-shadow:0 10px 24px rgba(2,8,20,.18);}
+.ops-card-top{display:flex; align-items:flex-start; gap:12px; margin-bottom:10px;}
+.ops-card .service-icon{margin:0; flex-shrink:0;}
+.ops-card h4{font-size:15.5px; font-weight:800; margin:0 0 4px;}
+.ops-card p{color:var(--muted); font-size:13.5px; line-height:1.75; margin:0 0 12px;}
+.ops-points{display:flex; flex-wrap:wrap; gap:8px;}
+.ops-points span{font-size:11.5px; color:var(--text); background:var(--surface-2); border:1px solid var(--line-soft); border-radius:999px; padding:6px 10px;}
+@media(max-width:900px){ .ops-layout{grid-template-columns:1fr;} }
+
+.testimonial-card{position:relative; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); padding:26px 24px; display:flex; flex-direction:column; gap:14px; transition:transform .25s ease, border-color .25s ease, box-shadow .25s ease;}
+.testimonial-card:hover{transform:translateY(-3px); border-color:var(--line); box-shadow:0 16px 34px rgba(2,8,20,.35);}
+.testimonial-stars{display:flex; gap:3px; color:var(--amber-l);}
+.testimonial-stars svg{width:15px; height:15px;}
+.testimonial-quote{color:var(--muted); font-size:14px; line-height:1.8; flex:1;}
+.testimonial-person{display:flex; align-items:center; gap:12px; padding-top:12px; border-top:1px solid var(--line-soft);}
+.testimonial-avatar{width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--teal-l),var(--teal) 60%,#0A8C9C); color:#03181d; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex-shrink:0;}
+.testimonial-person b{display:block; font-size:13.5px; font-weight:800;}
+.testimonial-person span{display:block; font-size:11.5px; color:var(--muted-2);}
+
+/* ---------- skeleton loaders ---------- */
+.skeleton-row{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 18px; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); margin-bottom:10px;}
+.skeleton-bar{border-radius:6px; background:linear-gradient(90deg, var(--line-soft) 25%, var(--line) 50%, var(--line-soft) 75%); background-size:200% 100%; animation:skeletonShimmer 1.4s ease-in-out infinite;}
+@keyframes skeletonShimmer{0%{background-position:200% 0;} 100%{background-position:-200% 0;}}
+@media (prefers-reduced-motion: reduce){ .skeleton-bar{animation:none; opacity:.5;} }
+
+/* ---------- floating WhatsApp button ---------- */
+.whatsapp-float{position:fixed; inset-inline-start:22px; bottom:22px; z-index:230; width:54px; height:54px; border-radius:50%; background:#25D366; color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 26px rgba(37,211,102,.4); transition:transform .2s ease, box-shadow .2s ease;}
+.whatsapp-float svg{width:28px; height:28px;}
+.whatsapp-float::before{content:''; position:absolute; inset:-4px; border-radius:50%; border:2px solid #25D366; opacity:.6; animation:waPulse 2.2s ease-out infinite;}
+.whatsapp-float:hover{transform:translateY(-3px) scale(1.05); box-shadow:0 14px 32px rgba(37,211,102,.5);}
+@keyframes waPulse{0%{transform:scale(1); opacity:.6;} 100%{transform:scale(1.35); opacity:0;}}
+@media (prefers-reduced-motion: reduce){ .whatsapp-float::before{animation:none; display:none;} }
+@media(max-width:760px){ body:has(.portal-bottom-nav.active) .whatsapp-float{bottom:calc(78px + env(safe-area-inset-bottom));} }
+
+/* ---------- portal bottom nav (app-style) ---------- */
+.portal-dash{padding-bottom:26px;}
+.portal-bottom-nav{position:fixed; left:0; right:0; bottom:0; z-index:250; display:none;}
+.portal-bottom-nav.active{display:none; animation:navSlideUp .35s cubic-bezier(.16,1,.3,1);}
+@media(max-width:760px){
+  .portal-bottom-nav.active{display:block;}
+  body:has(.portal-bottom-nav.active){padding-bottom:calc(64px + env(safe-area-inset-bottom));}
+}
+@keyframes navSlideUp{from{transform:translateY(100%);} to{transform:translateY(0);}}
+.portal-bottom-nav-inner{position:relative; max-width:520px; margin:0 auto; display:flex; align-items:center; justify-content:space-between;
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  background:rgba(9,20,38,.88); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border-top:1px solid var(--line-soft); box-shadow:0 -12px 32px rgba(2,8,20,.4);}
+.pbn-item{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; background:none; border:none; color:var(--muted-2); font-size:10.5px; font-weight:700; cursor:pointer; padding:8px 2px; min-height:52px;}
+.pbn-icon-wrap{position:relative; display:inline-flex;}
+.pbn-badge{position:absolute; top:-5px; inset-inline-end:-9px; min-width:16px; height:16px; padding:0 4px; border-radius:999px; background:var(--red-l, #e5533d); color:#fff; font-size:9.5px; font-weight:800; display:flex; align-items:center; justify-content:center; line-height:1; box-shadow:0 0 0 2px var(--bg, #0b1b30);}
+.pbn-item svg{width:23px; height:23px; stroke:currentColor; transition:transform .2s ease;}
+.pbn-item.active{color:var(--teal-l);}
+.pbn-item.active svg{transform:translateY(-1px);}
+.pbn-item:active svg{transform:scale(.88);}
+.pbn-fab{flex:0 0 auto; width:56px; height:56px; border-radius:50%; margin-top:-30px;
+  background:linear-gradient(135deg,var(--teal-l),var(--teal) 55%,#0A8C9C); color:#03181d;
+  display:flex; align-items:center; justify-content:center; border:4px solid var(--ink);
+  box-shadow:0 10px 24px rgba(0,194,217,.4); transition:transform .2s ease;}
+.pbn-fab svg{width:24px; height:24px;}
+.pbn-fab:active{transform:scale(.92);}
+@media(max-width:520px){ .whatsapp-float{width:50px; height:50px; inset-inline-start:16px; bottom:16px;} }
+.grid-2{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+@media(max-width:760px){ .grid-2{grid-template-columns:1fr;} }
+
+.card{background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); padding:22px;}
+.service-card{position:relative; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); padding:24px; cursor:pointer; overflow:hidden; transition:border-color .25s, transform .25s, box-shadow .25s;}
+.service-card::before{content:''; position:absolute; inset-inline:0; top:0; height:3px; background:linear-gradient(90deg,var(--teal),var(--amber-l)); transform:scaleX(0); transform-origin:0 0; transition:transform .35s ease;}
+.service-card:hover{border-color:var(--teal); transform:translateY(-5px); box-shadow:0 16px 34px rgba(0,194,217,.14);}
+.service-card:hover::before{transform:scaleX(1);}
+.service-icon{width:46px; height:46px; border-radius:13px; background:var(--surface-2); display:flex; align-items:center; justify-content:center; color:var(--teal-l); margin-bottom:16px; transition:box-shadow .3s ease, transform .3s ease;}
+.service-card:hover .service-icon{box-shadow:0 0 0 1px rgba(0,194,217,.3), 0 8px 20px rgba(0,194,217,.25); transform:translateY(-2px);}
+.service-card h4{font-size:15.5px; font-weight:800; margin-bottom:8px;}
+.service-card p{color:var(--muted); font-size:13.5px;}
+.service-card .learn{display:inline-flex; align-items:center; gap:6px; margin-top:14px; font-size:12.5px; font-weight:700; color:var(--teal-l);}
+.service-card .learn svg{transform:scaleX(-1);}
+[dir="ltr"] .service-card .learn svg{transform:none;}
+
+.service-detail{display:flex; gap:20px; padding:26px; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-l); margin-bottom:20px;}
+.service-detail .service-icon{flex-shrink:0;}
+.service-detail h3{font-size:19px; font-weight:800; margin-bottom:8px;}
+.service-detail p.desc{color:var(--muted); font-size:14.5px; margin-bottom:14px;}
+.feature-list{display:flex; flex-direction:column; gap:8px;}
+.feature-list li{display:flex; align-items:center; gap:8px; font-size:13.5px; color:var(--text);}
+.feature-list .icon{color:var(--mint); flex-shrink:0;}
+@media(max-width:640px){ .service-detail{flex-direction:column;} }
+
+.step-card{position:relative; padding:26px 20px; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m);}
+.step-num{font-family:var(--mono); font-weight:800; color:var(--teal-l); font-size:13px; letter-spacing:1px; margin-bottom:14px; display:block;}
+.step-card h4{font-size:15px; font-weight:800; margin-bottom:6px;}
+.step-card p{color:var(--muted); font-size:13.5px;}
+
+.feature-card{text-align:center; padding:26px 18px;}
+.feature-card .service-icon{margin-inline:auto;}
+
+.cta-band{position:relative; background:linear-gradient(120deg, var(--teal-dark), var(--ink-2) 65%); border:1px solid var(--line-soft); border-radius:var(--radius-l); padding:44px 30px; text-align:center; max-width:var(--maxw); margin:0 auto; box-shadow:0 20px 50px rgba(0,194,217,.08); overflow:hidden;}
+.cta-band::after{content:''; position:absolute; inset-inline-end:-60px; top:-60px; width:220px; height:220px; border-radius:50%; background:radial-gradient(circle,rgba(240,168,58,.16),transparent 70%); pointer-events:none;}
+.cta-band h3{font-size:clamp(20px,3vw,28px); font-weight:800; margin-bottom:10px;}
+.cta-band p{color:var(--muted); margin-bottom:24px;}
+.cta-actions{display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
+
+/* ---------- footer ---------- */
+footer{position:relative; border-top:1px solid var(--line-soft); background:var(--ink-2); margin-top:60px;}
+footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2px; background:linear-gradient(90deg,transparent,var(--teal),var(--amber-l),transparent);}
+.footer-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:32px; padding-block:50px;}
+.footer-col h5{font-size:13px; font-weight:800; color:var(--muted); letter-spacing:.5px; margin-bottom:16px; text-transform:uppercase;}
+.footer-col p{color:var(--muted); font-size:13.5px;}
+.footer-col ul li{margin-bottom:10px;}
+.footer-col ul a{color:var(--muted); font-size:13.5px; cursor:pointer;}
+.footer-col ul a:hover{color:var(--teal-l);}
+.footer-contact-row{display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:13.5px; color:var(--muted);}
+.footer-bottom{border-top:1px solid var(--line-soft); padding:18px 24px; text-align:center; font-size:12.5px; color:var(--muted-2);}
+@media(max-width:860px){ .footer-grid{grid-template-columns:1fr 1fr; padding-block:36px;} }
+@media(max-width:520px){ .footer-grid{grid-template-columns:1fr;} }
+
+/* ---------- track page ---------- */
+.page-head{max-width:var(--maxw); margin:0 auto; padding:44px 24px 10px; text-align:center;}
+.page-head h1{font-size:clamp(24px,3.6vw,34px); font-weight:800; margin-bottom:8px;}
+.page-head p{color:var(--muted); font-size:14.5px;}
+.track-hero-card{background:linear-gradient(120deg,var(--surface),var(--ink-2)); border:1px solid var(--line-soft); border-radius:var(--radius-l); padding:24px; margin-bottom:22px;}
+.thc-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;}
+.id-badge{font-family:var(--mono); font-weight:700; font-size:15px; letter-spacing:.5px;}
+.stamp{display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:.4px; padding:5px 12px; border-radius:7px; border:1px dashed currentColor; text-transform:uppercase;}
+.stamp.transit{color:var(--teal-l); background:rgba(95,214,224,.08);}
+.stamp.delivered{color:var(--mint); background:rgba(52,199,123,.08);}
+.stamp.pending{color:var(--amber); background:rgba(240,168,58,.08);}
+.route-line{display:flex; align-items:center; gap:10px; font-size:16px; font-weight:700; flex-wrap:wrap;}
+.route-line .arrow{color:var(--teal-l);}
+.kv{display:flex; justify-content:space-between; align-items:center; font-size:13.5px; padding:9px 0; border-bottom:1px dashed var(--line-soft); gap:10px;}
+.kv:last-child{border-bottom:none;}
+.kv span{color:var(--muted);}
+.kv b{font-weight:700; text-align:end;}
+.card h4{font-size:14.5px; font-weight:800; margin-bottom:14px;}
+
+.timeline{position:relative; padding-inline-start:4px;}
+.tl-step{position:relative; padding-inline-start:28px; padding-bottom:22px;}
+.tl-step:last-child{padding-bottom:0;}
+.tl-step::before{content:''; position:absolute; inset-inline-start:5px; top:16px; bottom:-6px; width:2px; background:var(--line-soft);}
+.tl-step:last-child::before{display:none;}
+.tl-step.done::before{background:var(--mint);}
+.tl-dot{position:absolute; inset-inline-start:0; top:2px; width:12px; height:12px; border-radius:50%; background:var(--surface-2); border:2px solid var(--line);}
+.tl-step.done .tl-dot{background:var(--mint); border-color:var(--mint);}
+.tl-step.current .tl-dot{background:var(--teal); border-color:var(--teal-l); box-shadow:0 0 0 4px rgba(47,169,184,.22);}
+.tl-body b{display:block; font-size:14px; font-weight:700;}
+.tl-step.future .tl-body b{color:var(--muted);}
+.tl-body span{font-size:12px; color:var(--muted); font-family:var(--mono);}
+
+.empty-state{text-align:center; padding:50px 20px; background:var(--surface); border:1px dashed var(--line); border-radius:var(--radius-l);}
+.empty-state .icon-lg{color:var(--muted); margin-bottom:14px;}
+.empty-state h3{font-size:17px; font-weight:800; margin-bottom:8px;}
+.empty-state p{color:var(--muted); font-size:13.5px; margin-bottom:20px;}
+
+.track-row{display:flex; justify-content:space-between; align-items:center; gap:14px; padding:16px; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); cursor:pointer; margin-bottom:12px;}
+.track-row:hover{border-color:var(--teal);}
+.track-row .trow-left b{display:block; font-family:var(--mono); font-size:13.5px; margin-bottom:4px;}
+.track-row .trow-left span{font-size:12.5px; color:var(--muted);}
+.track-row-rich{flex-direction:column; align-items:stretch; gap:12px;}
+.trow-top{display:flex; align-items:center; gap:12px;}
+.trow-top .trow-left{flex:1; min-width:0;}
+.trow-icon{flex:0 0 auto; width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; background:rgba(95,214,224,.1); color:var(--teal-l);}
+.trow-icon svg{width:19px; height:19px;}
+.trow-progress{height:5px; border-radius:99px; background:var(--line-soft); overflow:hidden;}
+.trow-progress-fill{height:100%; border-radius:99px; background:linear-gradient(90deg,var(--teal),var(--teal-l)); transition:width .5s cubic-bezier(.16,1,.3,1);}
+.trow-progress-fill.delivered{background:linear-gradient(90deg,var(--mint),#5FE0A0);}
+.trow-meta{display:flex; justify-content:space-between; font-size:11.5px; color:var(--muted-2); font-weight:700;}
+
+/* ---------- request page ---------- */
+.request-panel{max-width:640px; margin:0 auto; padding:0 24px 60px;}
+.success-panel{text-align:center; padding:40px 24px; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-l);}
+.success-panel .icon-lg{color:var(--mint); margin-bottom:14px;}
+.success-id{font-family:var(--mono); font-size:22px; font-weight:800; color:var(--teal-l); margin:12px 0 22px; letter-spacing:1px;}
+.success-actions{display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
+
+/* ---------- portal ---------- */
+.portal-panel{max-width:460px; margin:0 auto; padding:6px 24px 60px;}
+.portal-dash{max-width:760px; margin:0 auto; padding:0 24px 60px;}
+.auth-badge{width:60px; height:60px; border-radius:18px; background:linear-gradient(135deg,var(--teal-l),var(--teal)); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; box-shadow:0 12px 26px rgba(0,194,217,.28);}
+.auth-badge svg{color:var(--teal-dark);}
+.auth-card{background:linear-gradient(160deg,var(--surface),var(--ink-2)); border:1px solid var(--line-soft); border-radius:var(--radius-l); padding:32px 28px; box-shadow:var(--shadow); position:relative; overflow:hidden;}
+.auth-card::before{content:''; position:absolute; top:-70px; inset-inline-end:-70px; width:200px; height:200px; border-radius:50%; background:radial-gradient(circle, rgba(79,227,240,.16), transparent 70%); pointer-events:none;}
+.field-icon-wrap{position:relative;}
+.field-icon-wrap .field{padding-inline-start:42px;}
+.field-icon-wrap .field-icon{position:absolute; inset-inline-start:14px; top:50%; transform:translateY(-50%); color:var(--muted-2); pointer-events:none;}
+.auth-trust{display:flex; align-items:center; justify-content:center; gap:6px; margin-top:18px; font-size:12px; color:var(--muted-2); text-align:center;}
+.auth-trust svg{color:var(--mint); flex-shrink:0;}
+@media(max-width:480px){ .auth-card{padding:26px 20px;} }
+
+.dash-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:14px; padding:20px 22px; background:linear-gradient(120deg,var(--surface),var(--ink-2)); border:1px solid var(--line-soft); border-radius:var(--radius-l);}
+.dash-head-info{display:flex; align-items:center; gap:14px;}
+.dash-avatar{width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,var(--teal-l),var(--teal)); display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 8px 18px rgba(0,194,217,.25); overflow:hidden;}
+.dash-avatar img{width:100%; height:100%; object-fit:cover;}
+.avatar-upload{position:relative; width:88px; height:88px; margin:0 auto 18px; cursor:pointer;}
+.avatar-upload .dash-avatar{width:100%; height:100%; box-shadow:none;}
+.avatar-upload .dash-avatar svg{width:34px; height:34px;}
+.avatar-upload-badge{position:absolute; bottom:0; inset-inline-end:0; width:30px; height:30px; border-radius:50%; background:var(--teal); color:var(--teal-dark); display:flex; align-items:center; justify-content:center; border:3px solid var(--surface); box-shadow:0 4px 10px rgba(0,0,0,.3);}
+.avatar-upload-badge svg{width:14px; height:14px;}
+.dash-avatar svg{color:var(--teal-dark);}
+.dash-head h2{font-size:19px; font-weight:800; margin-bottom:2px;}
+.dash-head .dash-sub{display:block; font-size:12.5px; color:var(--muted); font-weight:600;}
+.quick-actions{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:28px;}
+@media(max-width:600px){ .quick-actions{grid-template-columns:1fr;} }
+.qa-card{display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center; padding:22px 10px; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); cursor:pointer; font-size:13.5px; font-weight:700; transition:transform .2s ease, border-color .2s ease; min-height:48px;}
+.qa-card:hover{border-color:var(--teal); transform:translateY(-3px);}
+
+/* ---------- contact ---------- */
+.contact-grid{display:grid; grid-template-columns:1fr 1fr; gap:26px; max-width:var(--maxw); margin:0 auto; padding:0 24px 70px; align-items:start;}
+@media(max-width:860px){ .contact-grid{grid-template-columns:1fr;} }
+.contact-info-card{display:flex; align-items:flex-start; gap:14px; padding:18px; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); margin-bottom:14px;}
+.contact-info-card .service-icon{margin:0;}
+.contact-info-card b{display:block; font-size:14px; margin-bottom:3px;}
+.contact-info-card span, .contact-info-card a{color:var(--muted); font-size:13.5px;}
+
+/* ---------- misc ---------- */
+.hint{font-size:11.5px; color:var(--muted-2); text-align:center; margin-top:10px;}
+.mono{font-family:var(--mono);}
+/* ---------- staff console (admin / accountant) ---------- */
+.admin-shell{max-width:980px; margin:0 auto; padding:clamp(30px,7vh,70px) 24px 70px;}
+
+/* split login card */
+.admin-login-split{position:relative; width:100%; display:grid; grid-template-columns:.86fr 1.14fr; border-radius:var(--radius-l); overflow:hidden; box-shadow:var(--shadow); border:1px solid var(--line-soft); animation:loginFadeIn .55s ease;}
+@keyframes loginFadeIn{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);}}
+
+.admin-login-visual{position:relative; padding:38px 32px; background:
+    radial-gradient(circle at 20% 0%, rgba(0,194,217,.20), transparent 55%),
+    radial-gradient(circle at 100% 100%, rgba(240,168,58,.14), transparent 50%),
+    linear-gradient(165deg, #0A1526, #071120 70%);
+  border-inline-end:1px solid var(--line-soft);
+  display:flex; flex-direction:column; justify-content:space-between; gap:28px; min-height:520px;}
+.admin-login-visual::before{content:''; position:absolute; inset:0;
+  background-image:linear-gradient(var(--grain-line) 1px, transparent 1px), linear-gradient(90deg, var(--grain-line) 1px, transparent 1px);
+  background-size:34px 34px; opacity:.5; pointer-events:none;}
+.admin-login-visual::after{content:''; position:absolute; top:-1px; inset-inline:0; height:2px; background:linear-gradient(90deg,transparent,var(--amber-l),var(--teal),transparent);}
+.admin-login-visual > *{position:relative; z-index:1;}
+.admin-visual-brand{display:flex; align-items:center; gap:11px;}
+.admin-visual-brand img{width:32px; height:32px; object-fit:contain; flex-shrink:0;}
+.admin-visual-brand b{font-size:16px; font-weight:800; display:block;}
+.admin-visual-brand small{font-family:var(--mono); font-size:9.5px; letter-spacing:2px; color:var(--teal-l); font-weight:700;}
+.admin-visual-mid .shield-wrap-lg{width:56px; height:56px; border-radius:16px; background:radial-gradient(circle at 30% 20%, rgba(240,168,58,.22), rgba(0,194,217,.1)); border:1px solid var(--line-soft); display:flex; align-items:center; justify-content:center; margin-bottom:18px;}
+.admin-visual-mid .shield-wrap-lg svg{width:28px; height:28px; color:var(--amber-l);}
+.admin-visual-mid h2{font-size:23px; font-weight:800; margin-bottom:10px; letter-spacing:-.3px;}
+.admin-visual-mid p{color:var(--muted); font-size:13.5px; line-height:1.75; max-width:34ch;}
+.admin-visual-features{display:flex; flex-direction:column; gap:12px;}
+.admin-visual-features li{display:flex; align-items:center; gap:10px; font-size:12.5px; color:var(--muted); font-weight:600;}
+.admin-visual-features li svg{width:17px; height:17px; flex-shrink:0; color:var(--mint); background:rgba(46,210,127,.12); border-radius:50%; padding:3px; box-sizing:content-box;}
+@media(max-width:820px){ .admin-login-split{grid-template-columns:1fr;} .admin-login-visual{min-height:0; padding:26px 24px;} .admin-visual-features{flex-direction:row; flex-wrap:wrap; gap:14px 20px;} }
+@media(max-width:520px){ .admin-visual-features{display:none;} }
+
+.admin-login-form-panel{background:var(--ink-2); padding:38px 34px 32px; display:flex; flex-direction:column; justify-content:center;}
+.admin-back-link{display:inline-flex; align-items:center; gap:6px; color:var(--muted-2); font-size:12.5px; font-weight:700; cursor:pointer; margin-bottom:20px; width:fit-content;}
+.admin-back-link:hover{color:var(--teal-l);}
+.admin-back-link svg{width:14px; height:14px; transform:scaleX(-1);}
+[dir="ltr"] .admin-back-link svg{transform:none;}
+.admin-login-head{margin-bottom:18px;}
+.admin-login-head h1{font-size:22px; font-weight:800; margin-bottom:5px;}
+.secure-note{display:flex; align-items:center; gap:7px; font-size:11.5px; color:var(--mint); font-family:var(--mono); letter-spacing:.3px; margin-bottom:24px; padding:8px 12px; background:rgba(46,210,127,.08); border:1px solid rgba(46,210,127,.25); border-radius:9px; width:fit-content;}
+.secure-note svg{width:13px; height:13px; flex-shrink:0;}
+
+.field-icon-wrap .field-icon{position:absolute; inset-inline-start:14px; top:50%; transform:translateY(-50%); width:17px; height:17px; color:var(--muted-2); pointer-events:none;}
+.field-pw-wrap{position:relative;}
+.field-pw-wrap .field{padding-inline-end:44px;}
+.field-pw-wrap.has-icon .field{padding-inline-start:42px;}
+.field-pw-wrap .field-icon{position:absolute; inset-inline-start:14px; top:50%; transform:translateY(-50%); width:17px; height:17px; color:var(--muted-2); pointer-events:none;}
+.pw-toggle{position:absolute; inset-inline-end:2px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--muted); cursor:pointer; padding:12px; min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center; border-radius:8px;}
+.pw-toggle:hover{color:var(--teal-l);}
+.btn-spinner{width:16px; height:16px; border:2px solid rgba(3,24,29,.3); border-top-color:#03181d; border-radius:50%; animation:btnspin .7s linear infinite; display:inline-block;}
+@keyframes btnspin{to{transform:rotate(360deg);}}
+.admin-error{color:var(--red-l); font-size:13px; margin-top:12px; text-align:center; padding:10px 12px; background:rgba(229,83,61,.08); border:1px solid rgba(229,83,61,.25); border-radius:9px;}
+.admin-lockout{color:var(--amber-l); font-size:13px; margin-top:12px; text-align:center; padding:10px 12px; background:rgba(240,168,58,.08); border:1px solid rgba(240,168,58,.3); border-radius:9px; font-family:var(--mono);}
+.admin-warning{background:rgba(245,166,35,.1); border:1px solid rgba(245,166,35,.3); color:var(--amber); font-size:13px; padding:12px 14px; border-radius:10px; margin-top:16px; line-height:1.6;}
+.caps-warning{display:block; margin-top:7px; font-size:11.5px; color:var(--amber-l); font-weight:700;}
+.attempts-hint{text-align:center; font-size:11.5px; color:var(--muted-2); margin-top:10px; font-family:var(--mono);}
+.admin-login-footnote{text-align:center; font-size:10.5px; color:var(--muted-2); margin-top:22px; font-family:var(--mono); letter-spacing:.3px;}
+
+/* ---------- legal pages ---------- */
+.legal-doc{max-width:760px; margin:0 auto;}
+.legal-section{margin-bottom:26px; padding-bottom:26px; border-bottom:1px solid var(--line-soft);}
+.legal-section:last-child{border-bottom:none; margin-bottom:0; padding-bottom:0;}
+.legal-section h3{font-size:16.5px; font-weight:800; margin-bottom:10px; color:var(--teal-l);}
+.legal-section p{color:var(--muted); font-size:14px; line-height:1.85; white-space:pre-line;}
+
+/* ---------- toast notifications ---------- */
+.toast-container{position:fixed; bottom:24px; inset-inline-end:24px; z-index:400; display:flex; flex-direction:column; gap:10px; max-width:min(360px, calc(100vw - 32px));}
+.toast{display:flex; align-items:flex-start; gap:10px; padding:14px 16px; border-radius:12px; background:var(--surface); border:1px solid var(--line-soft); box-shadow:var(--shadow); font-size:13.5px; font-weight:600; color:var(--text); animation:toastIn .3s cubic-bezier(.16,1,.3,1);}
+.toast svg{width:18px; height:18px; flex-shrink:0; margin-top:1px;}
+.toast.success{border-color:rgba(46,210,127,.35);}
+.toast.success svg{color:var(--mint);}
+.toast.error{border-color:rgba(229,83,61,.35);}
+.toast.error svg{color:var(--red-l);}
+.toast.info svg{color:var(--teal-l);}
+.toast.leaving{animation:toastOut .25s ease forwards;}
+@keyframes toastIn{from{opacity:0; transform:translateY(12px) scale(.96);} to{opacity:1; transform:translateY(0) scale(1);}}
+@keyframes toastOut{to{opacity:0; transform:translateY(-8px) scale(.96);}}
+@media(max-width:480px){ .toast-container{inset-inline:16px; bottom:16px; max-width:none;} }
+.shield-wrap{position:relative; flex-shrink:0; border-radius:14px; background:radial-gradient(circle at 30% 20%, rgba(240,168,58,.18), rgba(0,194,217,.08)); border:1px solid var(--line-soft); display:flex; align-items:center; justify-content:center; color:var(--amber-l);}
+
+.map-embed-wrap{margin-top:16px; border-radius:var(--radius-m); overflow:hidden; border:1px solid var(--line-soft); height:220px;}
+.map-embed-wrap iframe{width:100%; height:100%; border:0; filter:grayscale(.15) invert(.92) contrast(.9);}
+.map-directions-link{display:flex; align-items:center; gap:8px; justify-content:center; margin-top:10px; padding:10px; font-size:12.5px; font-weight:700; color:var(--teal-l); border:1px solid var(--line-soft); border-radius:10px; background:var(--surface);}
+.map-directions-link:hover{border-color:var(--teal);}
+
+.route-picker{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px;}
+.route-card{display:flex; align-items:center; gap:12px; padding:14px 16px; background:var(--surface); border:1.5px solid var(--line-soft); border-radius:14px; cursor:pointer; transition:border-color .2s, box-shadow .2s, transform .15s;}
+.route-card:hover{border-color:var(--line);}
+.route-card.active{border-color:var(--teal); box-shadow:0 0 0 1px var(--teal), 0 8px 24px rgba(0,194,217,.18); background:linear-gradient(160deg, rgba(0,194,217,.10), var(--surface));}
+.route-card .flag{font-size:26px; line-height:1; flex-shrink:0;}
+.route-card .rc-text{display:flex; flex-direction:column; gap:2px; min-width:0;}
+.route-card .rc-city{font-size:13.5px; font-weight:800; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.route-card .rc-code{font-size:11px; color:var(--muted-2); font-family:var(--mono);}
+.route-divider{display:flex; align-items:center; justify-content:center; gap:8px; margin:4px 0 14px; color:var(--muted-2);}
+.route-divider::before, .route-divider::after{content:''; flex:1; height:1px; background:var(--line-soft);}
+.route-divider svg{width:16px; height:16px; color:var(--teal-l); flex-shrink:0;}
+
+.confirm-modal-overlay{position:fixed; inset:0; background:rgba(3,10,20,.72); backdrop-filter:blur(4px); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px; overflow-y:auto;}
+.confirm-modal{background:var(--ink-2); border:1px solid var(--line-soft); border-radius:var(--radius-l); padding:26px; max-width:380px; text-align:center; box-shadow:var(--shadow); max-height:calc(100vh - 40px); overflow-y:auto; margin:auto;}
+.confirm-modal h3{font-size:17px; margin-bottom:8px;}
+.confirm-modal p{font-size:13.5px; color:var(--muted); line-height:1.7;}
+.admin-topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px 22px; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); margin-bottom:20px;}
+
+.admin-stats{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:26px;}
+#printLabelArea{display:none;}
+@media print{
+  body *{ visibility:hidden; }
+  #printLabelArea, #printLabelArea *{ visibility:visible; }
+  #printLabelArea{ display:block; position:fixed; inset:0; padding:28px; }
+}
+.admin-charts-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:26px;}
+.admin-chart-card{background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); padding:16px;}
+.admin-chart-card b{display:block; margin-bottom:10px; font-size:14px;}
+@media(max-width:720px){ .admin-charts-grid{grid-template-columns:1fr;} }
+.admin-stat-card{position:relative; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); padding:18px 16px; text-align:center; overflow:hidden;}
+.admin-stat-card::before{content:''; position:absolute; top:0; inset-inline:0; height:2px; background:var(--accent-c,var(--teal));}
+.admin-stat-card b{display:block; font-size:clamp(20px,2.6vw,26px); font-weight:800; font-family:var(--mono); color:var(--text); margin-bottom:4px;}
+.admin-stat-card span{font-size:11.5px; color:var(--muted); font-weight:600;}
+@media(max-width:640px){ .admin-stats{grid-template-columns:1fr 1fr;} }
+.admin-stats-3{grid-template-columns:repeat(3,1fr);}
+@media(max-width:640px){ .admin-stats-3{grid-template-columns:1fr 1fr;} }
+@media(max-width:400px){ .admin-stats-3{grid-template-columns:1fr;} }
+
+.admin-section-title{font-size:14px; font-weight:800; color:var(--text); margin-bottom:14px; display:flex; align-items:center; gap:8px;}
+.admin-section-title svg{width:17px; height:17px; color:var(--teal-l);}
+
+.admin-list{display:flex; flex-direction:column; gap:12px;}
+.admin-row{position:relative; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; padding:16px 18px 16px 22px; background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); transition:border-color .2s, transform .2s;}
+.admin-row::before{content:''; position:absolute; inset-inline-start:0; top:10px; bottom:10px; width:3px; border-radius:3px; background:var(--line-soft);}
+.admin-row.status-pending::before{background:var(--amber-l);}
+.admin-row.status-transit::before{background:var(--teal-l);}
+.admin-row.status-delivered::before{background:var(--mint);}
+.admin-row:hover{border-color:var(--line);}
+.admin-row-main{display:flex; flex-direction:column; gap:5px; font-size:13.5px;}
+.dir-stats-line{display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px; color:var(--muted-2); font-family:var(--mono); margin-top:2px;}
+.dir-stats-line svg{width:12px; height:12px; vertical-align:-1px;}
+.admin-row-top{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.admin-row-main .mono{font-size:15px; letter-spacing:.3px;}
+.admin-row-main span{color:var(--muted);}
+.admin-status-pill{font-family:var(--mono); font-size:10.5px; font-weight:700; letter-spacing:.4px; padding:3px 10px; border-radius:999px; text-transform:uppercase;}
+.admin-status-pill.status-pending{color:var(--amber-l); background:rgba(240,168,58,.12);}
+.admin-status-pill.status-transit{color:var(--teal-l); background:rgba(0,194,217,.12);}
+.admin-status-pill.status-delivered{color:var(--mint); background:rgba(46,210,127,.12);}
+.admin-select-wrap{display:flex; flex-direction:column; gap:5px;}
+.admin-row-actions{display:flex; gap:8px; align-self:center;}
+.admin-row-actions .btn-icon{min-width:38px; min-height:38px; width:38px; height:38px;}
+.admin-select-wrap label{font-size:10.5px; color:var(--muted-2); font-weight:700;}
+.admin-fin-inputs{display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap;}
+.admin-fin-field{display:flex; flex-direction:column; gap:5px;}
+.admin-fin-field label{font-size:10.5px; color:var(--muted-2); font-weight:700;}
+.admin-fin-remaining{font-size:12px; color:var(--muted); font-family:var(--mono);}
+.admin-empty{text-align:center; padding:56px 20px; color:var(--muted); background:var(--surface); border:1px dashed var(--line-soft); border-radius:var(--radius-m);}
+.admin-empty svg{width:38px; height:38px; color:var(--muted-2); margin-bottom:12px;}
+
+.admin-toolbar{display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:18px;}
+.admin-tabs{display:flex; gap:6px; background:var(--surface); border:1px solid var(--line-soft); border-radius:999px; padding:4px; flex-wrap:wrap;}
+.admin-tab{border:none; background:none; color:var(--muted); font-size:12.5px; font-weight:700; padding:8px 16px; border-radius:999px; cursor:pointer; white-space:nowrap; font-family:var(--font);}
+.admin-tab.active{background:var(--teal); color:var(--teal-dark);}
+.admin-search{flex:1; min-width:180px; max-width:280px;}
+.admin-search input{width:100%; background:var(--surface); border:1.5px solid var(--line-soft); border-radius:999px; padding:10px 16px; font-size:16px; color:var(--text);}
+.admin-search input:focus{outline:none; border-color:var(--teal);}
+
+.admin-panel{background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); padding:20px; margin-bottom:22px;}
+.route-bar-row{display:flex; align-items:center; gap:10px; margin-bottom:12px; font-size:12.5px;}
+.route-bar-row:last-child{margin-bottom:0;}
+.route-bar-label{flex-shrink:0; width:150px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.route-bar-track{flex:1; height:8px; background:var(--surface-2); border-radius:6px; overflow:hidden;}
+.route-bar-fill{height:100%; background:linear-gradient(90deg,var(--teal),var(--teal-l)); border-radius:6px;}
+.route-bar-count{flex-shrink:0; font-family:var(--mono); font-weight:700; color:var(--text); width:22px; text-align:end;}
+
+.msg-list{display:flex; flex-direction:column; gap:10px;}
+.msg-item{padding:14px 16px; background:var(--surface-2); border-radius:12px; border:1px solid var(--line-soft);}
+.msg-item-top{display:flex; justify-content:space-between; gap:10px; margin-bottom:6px; align-items:baseline;}
+.msg-item-top b{font-size:13.5px;}
+.msg-item-top span{font-size:11px; color:var(--muted-2); font-family:var(--mono); white-space:nowrap;}
+.msg-item p{font-size:13px; color:var(--muted); line-height:1.6;}
+.msg-item .email{font-size:11.5px; color:var(--teal-l); margin-bottom:4px; display:block;}
+
+.faq-item{background:var(--surface); border:1px solid var(--line-soft); border-radius:var(--radius-m); margin-bottom:10px; overflow:hidden;}
+.faq-q{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 18px; cursor:pointer; font-size:14.5px; font-weight:700;}
+.faq-q svg{width:16px; height:16px; color:var(--teal-l); flex-shrink:0; transition:transform .25s;}
+.faq-item.open .faq-q svg{transform:rotate(180deg);}
+.faq-a{max-height:0; overflow:hidden; transition:max-height .3s ease;}
+.faq-a p{padding:0 18px 16px; color:var(--muted); font-size:13.5px; line-height:1.7;}
+.faq-item.open .faq-a{max-height:200px;}
+@media(max-width:600px){ .admin-row{flex-direction:column; align-items:stretch;} }
+.staff-link{margin-inline-start:10px; color:var(--muted-2); font-size:11.5px; opacity:.6;}
+.staff-link:hover{opacity:1; color:var(--teal-l);}
+</style>
 </head>
 <body>
 
@@ -172,7 +827,7 @@
       </div>
     </div>
     <div class="route-map">
-      <img src="hero-banner.jpg" alt="Globall Cloud" loading="eager" style="width:100%; height:100%; object-fit:cover; display:block;">
+      <img src="hero-banner.jpg" alt="Globall Cloud — گەیاندنی بار بە کەشتی، فڕۆکە و بارهەڵگر لەنێوان چین، ئیمارات و عێراق" loading="eager" style="width:100%; height:100%; object-fit:cover; display:block;">
       <div class="seal-badge" aria-hidden="true">
         <svg viewBox="0 0 100 100">
           <circle cx="50" cy="50" r="46" fill="none" stroke="var(--amber-l)" stroke-width="1.4" stroke-dasharray="4 5" opacity=".8"/>
@@ -895,14 +1550,12 @@
   <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2zm0 18.13h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.36c0-4.52 3.68-8.2 8.21-8.2a8.16 8.16 0 0 1 5.8 2.4 8.15 8.15 0 0 1 2.4 5.8c0 4.53-3.69 8.22-8.16 8.22zm4.5-6.15c-.25-.12-1.46-.72-1.68-.8-.23-.08-.39-.12-.56.13-.16.24-.64.8-.79.96-.14.16-.29.18-.54.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.23-1.46-1.37-1.7-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.13-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.42-.14-.01-.31-.01-.47-.01a.9.9 0 0 0-.66.31c-.23.24-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.57.12.16 1.75 2.68 4.25 3.75.59.26 1.06.41 1.42.52.6.19 1.14.16 1.57.1.48-.07 1.46-.6 1.67-1.18.2-.58.2-1.07.14-1.18-.06-.1-.22-.16-.47-.28z"/></svg>
 </a>
 
-<script src="translations.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="tracking-enhanced.js"></script>
 <script>
 /* ================= SUPABASE (real backend for admin / accountant) =================
    1. Create a free project at https://supabase.com
@@ -951,7 +1604,270 @@ async function notifyOwner(subject, fields){
 }
 
 /* ================= I18N ================= */
-
+const I18N = {
+ku:{
+  brand:{tagline:'لۆجستیک'},
+  topbar:{note:'سەرەکییەکانی چین، دوبەی و هەولێر بەبەردەوامی چالاکن',support:'پشتیوانی زیندوو ٢٤/٧'},
+  nav:{home:'سەرەکی',about:'دەربارەمان',services:'خزمەتگوزارییەکان',track:'شوێنکەوتن',contact:'پەیوەندی',signIn:'چوونەژوورەوە',dashboard:'داشبۆرد',quote:'داواکردنی نرخ'},
+  hero:{eyebrow:'چین  ·  ئیمارات  ·  عێراق',title:'گەیاندنی بار بە متمانە، خێرایی و بێ سنوور',subtitle:'Globall Cloud بارت بە شێوەیەکی ئاسایشدار لە چین و ئیمارات بۆ هەموو شارەکانی عێراق دەگەیەنێت — بە شوێنکەوتنی ڕاستەوخۆ، ڕێکاری ڕوون و پشتیوانی ٢٤/٧.',ctaTrack:'شوێنکەوتنی بار',ctaQuote:'داواکردنی نرخ',route:{a:'گوانگژۆ، چین',b:'دوبەی، ئیمارات',c:'هەولێر، عێراق'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'بارەکەت لە نێوان چین → دوبەی → هەولێر بەردەوامە و هەر نوێکارییەک زوو دەردەکەوێت.',routeOrigin:'سەرەتا / Origin Hub',routeTransit:'ترانزیت / Transit Hub',routeDestination:'گەیاندن / Delivery Hub'},
+  trust:{s1v:'+٢٥K',s1l:'بار گەیەنراو',s2v:'١٢+',s2l:'شوێن و بازاڕ',s3v:'٢٤/٧',s3l:'پشتیوانی زیندوو',s4v:'٩٨%',s4l:'گەیاندنی لەکاتی خۆیدا'},
+  liveTrack:{heading:'شوێنکەوتنی بارەکەت لە چرکەیەکدا',sub:'ژمارەی شوێنکەوتنەکەت بنووسە و نوێترین دۆخی بارەکەت ببینە',placeholder:'وەک GC10052341',button:'شوێنکەوتن'},
+  business:{eyebrow:'پەڕەکانی بازرگانی',heading:'هەموو خزمەتگوزاری و پەڕە گرنگەکان لە یەک شوێن',sub:'بە یەک کلیک بچۆ بۆ خزمەتگوزاری، خەملاندنی نرخ، داشبۆرد، کۆگاکان و پەیوەندی.',
+    items:{
+      services:{title:'خزمەتگوزاری',desc:'گەیشتن بە Air، Sea، Land، گومرگ و Door-to-Door.',action:'بینینی خزمەتگوزاری',icon:'i-box',route:'services'},
+      quote:{title:'نرخی بار',desc:'نرخی خێرا و خەمڵێنراو بزانە پێش داواکاری.',action:'خەملاندنی نرخ',icon:'i-card',route:'services'},
+      dashboard:{title:'داشبۆردی کڕیار',desc:'بارەکان، ئاگادارییەکان و هەژمارەکانت بەڕێوەببە.',action:'کردنەوەی داشبۆرد',icon:'i-user',route:'portal'},
+      track:{title:'شوێنکەوتن',desc:'ژمارەی شوێنکەوتن داخڵ بکە و دۆخی بار ببینە.',action:'شوێنکەوتن بکە',icon:'i-search',route:'track'},
+      warehouses:{title:'کۆگاکان',desc:'هابەکانی چین، دوبەی و هەولێر لە یەک تۆڕدا.',action:'بینینی کۆگاکان',icon:'i-warehouse',route:'contact'},
+      contact:{title:'پەیوەندی',desc:'واتساپ، ئیمەیل و ڕێکخستن لە کەمترین کاتدا.',action:'پەیوەندیمان پێوە بکە',icon:'i-chat',route:'contact'}
+    }},
+  dashboardPreview:{heading:'پێشبینی داشبۆردی کڕیار',sub:'کڕیاران دەتوانن لێرە بارەکان، نرخ و ئاگادارییەکان بە شێوەی خێرا بەڕێوەببەن.',stats:[{v:'4',l:'بارە چالاکەکان'},{v:'29',l:'گەیشتوو'},{v:'2',l:'چاوەڕوان'},{v:'8',l:'فاکتۆرەکان'}],btnPortal:'کردنەوەی پرۆتال',btnTrack:'شوێنکەوتن بکە'},
+  warehouses:{eyebrow:'کۆگاکان',heading:'تۆڕی کۆگاکانمان',sub:'هابە سەرەکییەکان لە چین، دوبەی و هەولێر بۆ جوڵاندنی خێرای بار.',
+    items:{
+      guangzhou:{tag:'هاب سەرەکی چین',title:'کۆگای گوانگجو',address:'گوانگجو، چین',hours:'دووشەممە - شەممە',features:['کۆکردنەوەی بار','وێنەی QC','پاکەتکردنی خێرا']},
+      dubai:{tag:'هاب ترانزیت',title:'کۆگای دوبەی',address:'دوبەی، ئیمارات',hours:'دووشەممە - شەممە',features:['ترانزیتی خێرا','بەڕێوەبردنی هەلومەرج','ئاسایشی باش']},
+      erbil:{tag:'هابی دابەشکردن',title:'کۆگای هەولێر',address:'هەولێر، عێراق',hours:'شەممە - پێنجشەممە',features:['دابەشکردنی ناوخۆیی','پێشوازی کڕیار','گواستنەوەی خێرا']}
+    }},
+  ops:{eyebrow:'بەڕێوەبردنی ناوخۆ',heading:'کۆنسۆڵی ستاف و کارگێڕی',sub:'هەموو کارە سەرەکییەکان لە یەک دەشبووردا ببینە: بارەکان، دارایی، کۆگا و پشتگیری.',
+    metrics:[{v:'12',l:'باری چاوەڕوان'},{v:'98%',l:'ڕێژەی سەرکەوتن'},{v:'7',l:'تیکەتی کراوە'},{v:'3',l:'ژمارەی کۆگا'}],
+    cards:[
+      {icon:'i-card',title:'دارایی و وەسڵەکان',desc:'داهات، وەسڵە PDF و پارەی لەبەردەست نەماوەکان بە شێوەی ڕوون ببینە.',points:['وەسڵی PDF','ڕاپۆرتی داهات','داواکاری پارەدان']},
+      {icon:'i-warehouse',title:'وەسڵی کۆگا',desc:'ورودبوونی بار لە هەر هابێکدا تۆمار بکە و بەڵگەکەی بخەوە.',points:['وێنەی بار','تۆماری هاتن','لێدانی پارچە']},
+      {icon:'i-chat',title:'ڕیزبەندی پشتگیری',desc:'پەیامی کڕیاران بە خێرایی وەربگرە و هەموو گفتوگۆکان لە شوێنێکدا پارێزە.',points:['هەواڵی واتساپ','تێبینی دۆخ','وەڵامی ئامادە']}
+    ]},
+  services:{eyebrow:'خزمەتگوزاری',heading:'خزمەتگوزارییەکانمان',sub:'چارەسەری تەواو بۆ گەیاندنی بار لە دەرەوە بۆ ناو عێراق',learnMore:'زیاتر بزانە',
+    quote:{eyebrow:'تەخمینی نرخ',heading:'حساباتی نرخی گەیاندن',type:'جۆری گەیاندن',air:'ئاسمانی (Air)',sea:'دەریایی (Sea)',land:'وشکانی (Land)',
+      weight:'کێش (کیلۆگرام)',weightPh:'بۆ نموونە 50',dest:'شاری مەبەست لە عێراق',btn:'حسابکردنی تەخمین',
+      needWeight:'تکایە کێشی بار بنووسە.',resultLabel:'تەخمینی نرخ',cta:'داواکردنی نرخی وردتر',
+      note:'* ئەمە تەنها تەخمینێکی گشتییە — نرخی کۆتایی دوای پشکنینی وردی بار لەلایەن ستافمانەوە دیاری دەکرێت.'},
+    items:{
+      air:{title:'گەیاندنی ئاسمانی',desc:'خێراترین ڕێگا بۆ بارە پەلەیەکان.',features:['کاتی گەیشتن: ١-٣ ڕۆژ','گونجاو بۆ بارە بەنرخ و پەلەکان','شوێنکەوتنی ڕاستەوخۆ']},
+      sea:{title:'گەیاندنی دەریایی',desc:'گونجاوترین تێچوون بۆ بارە قورس و گەورەکان.',features:['کاتی گەیشتن: ١٢-١٨ ڕۆژ','باشترین تێچوون بۆ بارە قورسەکان','گونجاو بۆ کۆنتەینەری تەواو یان بەشی کۆنتەینەر']},
+      land:{title:'گەیاندنی وشکانی',desc:'گەیاندن بە رێگای وشکانی لە دوبەی بەرەو عێراق، بەڕێکەوتن بە سعودیە.',features:['کاتی گەیشتن: ٧-١٠ ڕۆژ','ڕێگا: دوبەی ← سعودیە ← عێراق (هەولێر)','گونجاو بۆ بارە مامناوەندەکان']},
+      customs:{title:'ئاسانکاری گومرگی',desc:'کارگێڕی تەواوی مامەڵەی گومرگ لە بەندەرەکانی عێراق.',features:['کارگێڕی بەڵگەنامەکان','پارەدانی باج و تێچووەکان','ڕاوێژکاری یاسایی گومرگ']},
+      warehouse:{title:'کۆگاداری',desc:'کۆگای پارێزراو و چاودێریکراو لە ئیمارات و عێراق.',features:['چاودێری ٢٤/٧','سیستەمی بەڕێوەبردنی کۆگا','بیمەی گونجاو بۆ کاڵاکان']},
+      door:{title:'گەیاندن بۆ بەردەرگا',desc:'گەیاندنی کۆتایی بارەکەت ڕاستەوخۆ بۆ ماڵ یان کۆمپانیاکەت.',features:['گەیاندن بۆ هەموو شارەکانی عێراق','ڕێکخستنی کاتی گەیاندن','پشتڕاستکردنەوەی وەرگرتن']}
+    },
+    faqEyebrow:'پرسیارە باوەکان',faqHeading:'پرسیار و وەڵام',faq:[
+      {q:'چەند کات دەخایەنێت لە دوبەی بۆ هەولێر؟',a:'گەیاندنی ئاسمانی ١-٣ ڕۆژ، وشکانی ٧-١٠ ڕۆژ (بەڕێکەوتن بە سعودیە)، دەریایی ١٢-١٨ ڕۆژ بەپێی جۆری بار.'},
+      {q:'کام جۆر بار دەگوازرێتەوە؟',a:'هەموو جۆرە بارێک لە پارچەی بچووکەوە تا کۆنتەینەری تەواو، بۆ بارگەی بازرگانی و کەسی.'},
+      {q:'ئایا بیمە هەیە بۆ بارەکان؟',a:'بەڵێ، هەموو بارەکان بە پارێزگاری تەواو و بیمەی گونجاو دەگوازرێنەوە.'},
+      {q:'چۆن دەتوانم شوێنکەوتنی بارەکەم بکەم؟',a:'بە بەکارهێنانی ژمارەی شوێنکەوتن لە بەشی "شوێنکەوتن" لە ماڵپەڕەکە، ڕاستەوخۆ دۆخی بارەکەت دەبینیت.'},
+      {q:'ئایا کارگێڕی گومرگ ئەنجام دەدەن؟',a:'بەڵێ، تیمەکەمان هەموو کارەکانی بەڵگەنامە و پارەدانی باج لە بەندەرەکانی عێراق ئەنجام دەدات.'}
+    ]},
+  how:{eyebrow:'پرۆسە',heading:'چۆن کاردەکات',items:[
+    {title:'داواکاری بکە',desc:'وردەکاری بارەکەت بنێرە و بە چرکەیەک نرخێک وەربگرە.'},
+    {title:'وەرگرتن',desc:'تیمەکەمان بارەکەت لە چین یان ئیمارات وەردەگرێت.'},
+    {title:'گواستنەوە و گومرگ',desc:'بار بە دەریا یان ئاسمان دەگوازرێتەوە و کارەکانی گومرگ ئەنجام دەدرێت.'},
+    {title:'گەیاندن',desc:'بارەکەت بە سەلامەتی دەگاتە دەست تۆ لە هەر شوێنێکی عێراق.'}
+  ]},
+  why:{eyebrow:'هۆکار',heading:'بۆچی Globall Cloud',items:[
+    {title:'شوێنکەوتنی ڕاستەوخۆ',desc:'لە هەر ساتێکدا بزانە بارەکەت لەکوێیە.',icon:'i-search'},
+    {title:'پارێزراو و بیمەکراو',desc:'هەموو بارەکان بە پارێزگاری تەواو دەگوازرێنەوە.',icon:'i-shield'},
+    {title:'باشترین نرخ',desc:'نرخی ڕکابەرانە بەبێ کێشەی شاراوە.',icon:'i-card'},
+    {title:'پشتگیری ٢٤/٧',desc:'تیمی پشتگیریمان هەمیشە ئامادەیە بۆ یارمەتیدانت.',icon:'i-clock'}
+  ]},
+  about:{eyebrow:'دەربارەمان',heading:'دەربارەی Globall Cloud',sub:'هاوبەشی متمانەپێکراوت بۆ گەیاندنی بار لەنێوان چین، ئیمارات و عێراق.',
+    missionTitle:'ئەرکمان',missionBody:'ئەرکی Globall Cloud گەیاندنی خزمەتگوزاری گەیاندنی بارە بە ستانداردی نێودەوڵەتی، بە شەفافیەت و متمانەوە، بۆ هەموو کڕیارێک لە هەرێمی کوردستان و عێراق.',
+    visionTitle:'ئاواتمان',visionBody:'ئامانجمان ئەوەیە ببینە باشترین و متمانەپێکراوترین کۆمپانیای لۆجستیک لە هەرێم، بە بەکارهێنانی تەکنەلۆجیای نوێ و خزمەتگوزاریەکی کڕیار-ناوەندی.',
+    valuesEyebrow:'بەهاکانمان',valuesHeading:'ئەوەی ڕێنماییمان دەکات',values:[
+      {title:'ڕاستگۆیی',desc:'کارکردن بە ڕاستی و ڕوونی لەگەڵ هەموو کڕیارێک.',icon:'i-shield'},
+      {title:'شەفافیەت',desc:'نرخ و پرۆسەکان ڕوون و بەبێ کێشەی شاراوە.',icon:'i-eye'},
+      {title:'بەرپرسیارێتی',desc:'بەرپرسیارین لەسەر هەر بارێک تا گەیشتنی سەلامەت.',icon:'i-box'},
+      {title:'ڕێزگرتن لە کڕیار',desc:'کاتی کڕیار و پێداویستیەکانی لە پێشینەن.',icon:'i-user'}
+    ],
+    storyTitle:'چیرۆکمان',storyBody:'Globall Cloud وەک هاوبەشێکی گەیاندنی بار دەستی کرد بۆ چارەسەرکردنی کێشەی گەیاندنی بار لەنێوان بازاڕەکانی چین و ئیمارات و شارەکانی عێراق. لە ڕێگەی کارامەیی و پابەندبوونمانەوە، بووینەتە هەڵبژاردەیەکی متمانەپێکراو بۆ کۆمپانیا و کەسانی زۆر کە پێویستیان بە گەیاندنی بارێکی ئارام و خێرایە. بەردەوامین لە پەرەپێدانی خزمەتگوزارییەکانمان بۆ باشترکردنی ئەزموونی هەر کڕیارێک.'},
+  cta:{heading:'ئامادەیت بار بنێریت؟',sub:'ئەمڕۆ داواکاریەکەت بنێرە و لە کەمترین کات نرخێک وەربگرە.',b1:'داواکردنی نرخ',b2:'پەیوەندیمان پێوە بکە'},
+  corridor:{eyebrow:'ڕێڕەوی کارەکە',heading:'لە چین بۆ دوبەی بۆ هەولێر',sub:'سێ هەنگاوی سەرەکی بە ڕوونی و بە شێوازی کۆمپانیایەکی نێودەوڵەتی ببینە.',badge:'ڕێڕەوی زیندوو',items:[
+    {flag:'🇨🇳',title:'گەیاندن لە چین',meta:'Origin Hub',desc:'بارەکەت وەردەگیرێت، QC دەکرێت و بۆ ترانزیت ئامادە دەبێت.',tags:['QC','Packing','Pickup']},
+    {flag:'🇦🇪',title:'هابەی دوبەی',meta:'Transit Hub',desc:'لە دوبەیدا ڕێکخستن و بەڕێوەبردنی ڕێگەی گواستنەوە بە شێوەی خێرا.',tags:['Transit','Air Cargo','Sea Cargo']},
+    {flag:'🇮🇶',title:'گەیاندنی هەولێر',meta:'Delivery Hub',desc:'پاش گومرگ و ڕێکخستنی دوایین، بارەکەت بە سەلامەتی دەگات.',tags:['Customs','Door-to-Door','Final Mile']}
+  ]},
+  footer:{blurb:'Globall Cloud — گەیاندنی بار بە متمانەوە لە چین و ئیمارات بۆ هەموو عێراق.',quick:'بەستەرە خێراکان',servicesH:'خزمەتگوزارییەکان',contactH:'پەیوەندی',address:'هەولێری نوێ، پشت مەعەد گەشە، هەولێر، عێراق',rights:'هەموو مافەکان پارێزراون.',privacy:'ڕێساکانی تایبەتێتی',terms:'مەرجی بەکارهێنان'},
+  testi:{
+    eyebrow:'ڕاوبۆچوونی کڕیاران',
+    heading:'کڕیارانمان چی دەڵێن',
+    sub:'چەند وتەیەک لە کڕیارانێک کە بارەکانیان بە Globall Cloud گەیاندووە.',
+    items:[
+      {quote:'بارەکانم لە گوانجۆوە بۆ هەولێر بە کاتی خۆیان گەیشتن، وشوێنکەوتنەکە زۆر ڕوونبوو — هەموو هەنگاوێکی بارەکەم بە ڕوونی دەبینی.', name:'ئاراس محەمەد', role:'خاوەن فرۆشگای ئەلیکترۆنی، هەولێر', initials:'ئم', stars:5},
+      {quote:'کاری ترخانکردنی گومرگ زۆر سەختە، بەڵام تیمی Globall Cloud هەموو کاغەزەکانیان بۆ ئامادەکرد و کێشەم لەگەڵ نەبوو. زۆر پیشەیین.', name:'سارا ڕەشید', role:'بازرگانی کەلوپەلی ماڵەوە', initials:'سڕ', stars:5},
+      {quote:'لە یەکەم داواکارییەوە هەتا وەرگرتنی بارەکە، هەمیشە وەڵامی پەیوەندییەکانم زوو بوو. ئێستا هەموو هاوردەکانم لە ڕێگەیانەوە دەکەم.', name:'کاروان عەزیز', role:'هاوردەکەری کاڵای تەکنەلۆجیا', initials:'کع', stars:5}
+    ]
+  },
+  legal:{
+    updated:'دوایین نوێکردنەوە: ٢٠٢٦',
+    privacyEyebrow:'تایبەتێتی',
+    privacyTitle:'ڕێساکانی تایبەتێتی',
+    termsEyebrow:'یاسایی',
+    termsTitle:'مەرجی بەکارهێنان',
+    privacyBody:[
+      {h:'١. چ زانیارییەک کۆدەکرێتەوە', p:'کاتێک هەژمار دروست دەکەیت، داواکاری بارکردن پێشکەش دەکەیت، یان فۆرمی پەیوەندی پڕدەکەیتەوە، ئەم زانیاریانە کۆدەکرێتەوە: ناو، ژمارە مۆبایل، ئیمەیل، ناونیشانی کۆچ و گەیشتن، و وردەکاری بارەکە (کێش، جۆر، بابەت). هیچ زانیاری داراییی (وەک ژمارەی کارتی بانکی) لەلایەن ئێمەوە کۆناکرێتەوە.'},
+      {h:'٢. چۆن زانیاریەکان بەکاردێت', p:'زانیاریەکانت تەنها بۆ ئەمانە بەکاردێت: جێبەجێکردن و شوێنکەوتنی بارەکەت، پەیوەندیکردن پێت سەبارەت بە دۆخی بارەکە، و باشترکردنی خزمەتگوزاریمان. ئێمە زانیاریەکانت نافرۆشین یان بە کۆمپانیای درەوە ناداین بۆ مەبەستی بازاڕگەرمکردن.'},
+      {h:'٣. کۆدکردن و ئاسایشی داتا', p:'هەموو پەیوەندییەکان لەنێوان وێبگەڕەکەت و سێرڤەرەکانمان بە TLS/HTTPS کۆدەکراون. هەژمارەکەت بە Supabase Auth پارێزراوە، و داتاکانت بە سیاسەتی Row-Level Security پارێزراون — تەنها خۆت و ئەندامی مۆڵەتدراوی ستاف دەتوانن دەستیان پێبگات.'},
+      {h:'٤. مافەکانت', p:'دەتوانیت داوای بینین، ڕاستکردنەوە، یان سڕینەوەی هەژمار و زانیاریە کەسیەکانت لە هەر کاتێکدا بکەیت، تەنها پەیوەندیمان پێوە بکە لە ڕێگەی ئیمەیل یان واتساپەوە کە لە لاپەڕەی پەیوەندیدا هەیە.'},
+      {h:'٥. پەیوەندیکردن', p:'ئەگەر پرسیارت هەیە سەبارەت بەم ڕێساکانی تایبەتێتی، پەیوەندیمان پێوە بکە: tamanblbas271@gmail.com یان +964 750 757 7137.'}
+    ],
+    termsBody:[
+      {h:'١. قبوڵکردنی مەرجەکان', p:'بەکارهێنانی ئەم وێبسایتە، دروستکردنی هەژمار، یان داواکردنی خزمەتگوزاری لە Globall Cloud بە واتای قبوڵکردنی ئەم مەرجانەیە.'},
+      {h:'٢. خزمەتگوزارییەکان', p:'Globall Cloud خزمەتگوزاری گەیاندنی بار (ئاسمانی، دەریایی، وشکانی)، ترخانکردنی گومرگی، و گەیاندنی دەرگا-بۆ-دەرگا پێشکەش دەکات لەنێوان چین، ئیمارات، و عێراق. کاتی گەیشتن و نرخەکان لەسەر بنەمای جۆری بار و ڕووت دیاریدەکرێن.'},
+      {h:'٣. ئەرکی کڕیار', p:'کڕیار بەرپرسیارە لە ڕاستی زانیاریە پێشکەشکراوەکان و پاراستنی وشەی نهێنی هەژمارەکەی. بارکردنی کاڵای ئاسایی مەمنوعە (وەک چەک، مادەی هۆشبەر، یان کاڵای قەدەغەکراو لەلایەن یاسای عێراقەوە) بە تەواوی قەدەغەیە.'},
+      {h:'٤. نرخ و پارەدان', p:'نرخەکان بە دۆلاری ئەمریکی ($) دیاریدەکرێن مەگەر بەپێچەوانەوە ڕێککەوتبێت. پارەدان لەسەر بنەمای ڕێککەوتنی نێوان کڕیار و کۆمپانیا جێبەجێدەکرێت.'},
+      {h:'٥. سنووری بەرپرسیارێتی', p:'Globall Cloud هەوڵی خۆی دەدات بۆ گەیاندنی سەلامەت و لەکاتی بار، بەڵام بەرپرسیار نییە لە دواکەوتنی هاوردەکراو لە هۆکاری دەرەکی (وەک تەقلیدی گومرگ یان کارەساتی سروشتی).'},
+      {h:'٦. گۆڕانکاری مەرجەکان', p:'Globall Cloud مافی خۆی هەیە ئەم مەرجانە لە هەر کاتێکدا نوێ بکاتەوە. بەردەوامبوون لە بەکارهێنانی خزمەتگوزارییەکانمان دوای نوێکردنەوە بە واتای قبوڵکردنی مەرجە نوێیەکانە.'}
+    ]
+  },
+  track:{heading:'شوێنکەوتنی بار',sub:'ژمارەی شوێنکەوتنی بارەکەت بنووسە بۆ زانینی دۆخی ئێستا',searchPh:'وەک GC10052341',searchBtn:'بگەڕێ',
+    notFoundTitle:'هیچ بارێک نەدۆزرایەوە',notFoundBody:'تکایە ژمارەی شوێنکەوتن بپشکنە، یان داواکارییەکی نوێ تۆمار بکە.',requestInstead:'داواکاری نوێ بکە',
+    detailsH:'زانیاری بارکردن',timelineH:'هێڵی کات',save:'زیادکردن بۆ بارەکانم',saved:'زیادکرا ✓',signInToSave:'چوونەژوورەوە بۆ هەڵگرتن',
+    status:{pending:'چاوەڕوانە',transit:'لە ڕێگادایە',delivered:'گەیشت'},
+    steps:{placed:'داواکاری تۆمارکرا',pickedUp:'وەرگیرا',transit:'لە ڕێگایە',customs:'گومرگ',outForDelivery:'بەرەو گەیاندن',delivered:'گەیشت'},
+    type:{air:'گەیاندنی ئاسمانی',sea:'گەیاندنی دەریایی',land:'گەیاندنی وشکانی'},
+    weight:'کێش',volume:'قەبارە',items:'ژمارەی کاڵا',total:'کۆی گشتی',paid:'دراوە',due:'ماوە',eta:'خەمڵێنراو:',pendingValue:'دوای پێداچوونەوە'},
+  invoice:{downloadBtn:'دابەزاندنی وەسڵ (PDF)',generating:'خەریکی ئامادەکردنە...',title:'وەسڵی گەیاندن',trackingId:'ژمارەی شوێنکەوتن',dateIssued:'بەرواری دەرکردن',billTo:'کڕیار',route:'ڕێگا',serviceType:'جۆری خزمەتگوزاری',statusLabel:'دۆخ',thanks:'سوپاس بۆ باوەڕپێکردنتان بە Globall Cloud',failMsg:'دروستکردنی وەسڵ سەرکەوتوو نەبوو، تکایە دووبارە هەوڵبدەرەوە.'},
+  request:{heading:'داواکردنی نرخ / بارکردنی نوێ',sub:'وردەکاری بارەکەت پڕبکەرەوە، ڕاستەوخۆ ژمارەی شوێنکەوتن وەردەگریت.',
+    name:'ناوی تەواو',phone:'ژمارەی مۆبایل',email:'ئیمەیل (ئارەزوومەندانە)',origin:'لە کوێوە',destination:'بۆ کوێ',type:'جۆری گەیاندن',weight:'کێشی خەمڵێنراو (کیلۆگرام)',notes:'تێبینی زیاتر',
+    submit:'ناردنی داواکاری',sending:'دەنێردرێت...',successTitle:'داواکاریەکەت وەرگیرا 🎉',successBody:'ژمارەی شوێنکەوتنت ئەمەیە، هەڵیبگرە بۆ داهاتوو:',trackNow:'ئێستا شوێنی بکەوە',backHome:'گەڕانەوە بۆ سەرەکی',waConfirm:'پشتڕاستکردنەوە بە واتساپ',waPrefix:'سڵاو، داواکارییەکم ناردووە — ژمارەی شوێنکەوتن:'},
+  portal:{signInH:'چوونەژوورەوە',signInSub:'ناو و ئیمەیلت بنووسە بۆ بینینی بارەکانت',dashboardSub:'داشبۆردی هەژمارەکەت',name:'ناو',email:'ئیمەیل',phone:'ژمارەی مۆبایل (ئارەزوومەندانە)',continueBtn:'بەردەوامبە',trustNote:'زانیارییەکانت تایبەتن و لەگەڵ کەس هاوبەش ناکرێن',
+    hi:'سڵاو',myShipments:'بارەکانم',emptyTitle:'هێشتا هیچ بارێکت نییە',emptyBody:'بارێک بشوێنەوە یان داواکارییەکی نوێ بکە بۆ ئەوەی لێرە دەربکەوێت.',
+    qTrack:'شوێنکەوتنی بار',qRequest:'داواکاری نوێ',qEdit:'دەستکاری پرۆفایل',save:'پاشکەوتکردن',cancel:'پاشگەزبوونەوە',signOut:'چوونەدەرەوە'},
+  pbn:{home:'سەرەکی',shipments:'بارەکان',services:'خزمەتگوزاری',track:'شوێنکەوتن',profile:'پرۆفایل',login:'چوونەژوورەوە'},
+  contact:{heading:'پەیوەندیمان پێوە بکە',sub:'ئامادەین یارمەتیت بدەین — پەیوەندیمان پێوە بکە بە هەر ڕێگایەک کە لات باشترە.',
+    phoneL:'ژمارەی مۆبایل',emailL:'ئیمەیل',whatsappL:'واتساپ',addressL:'ناونیشان',hoursL:'کاتەکانی کارکردن',hoursV:'شەممە - پێنجشەممە: ٩ی بەیانی - ٧ی ئێوارە',
+    formName:'ناوت',formCompany:'کۆمپانیا (ئارەزوومەندانە)',formType:'جۆری داواکاری',typeShipping:'گەیاندنی بار',typeInfo:'زانیاری',typeSupport:'پشتگیری',formEmail:'ئیمەیلت',formMsg:'پەیامەکەت',send:'ناردنی پەیام',sending:'دەنێردرێت...',sentMsg:'پەیامەکەت پاشکەوتکرا! بەم زووانە پەیوەندیت پێوە دەکەین.',getDirections:'ڕێنیشاندن بۆ نووسینگە'},
+  places:{guangzhou:'گوانگژۆ، چین',shenzhen:'شینجن، چین',dubai:'دوبەی، ئیمارات',sharjah:'شارجە، ئیمارات',erbil:'هەولێر، عێراق',sulaymaniyah:'سلێمانی، عێراق',duhok:'دهۆک، عێراق',baghdad:'بەغدا، عێراق',basra:'بەسرە، عێراق',kirkuk:'کەرکووک، عێراق',mosul:'مووسڵ، عێراق'}
+},
+en:{
+  brand:{tagline:'LOGISTICS'},
+  topbar:{note:'Active lanes across China, Dubai, and Erbil',support:'Live support 24/7'},
+  nav:{home:'Home',about:'About Us',services:'Services',track:'Track',contact:'Contact',signIn:'Sign In',dashboard:'Dashboard',quote:'Get a Quote'},
+  hero:{eyebrow:'CHINA  ·  UAE  ·  IRAQ',title:'Delivering Trust Across Borders',subtitle:'Globall Cloud moves your cargo safely and quickly from China and the United Arab Emirates to every city in Iraq — with live tracking, clear milestones, and 24/7 support.',ctaTrack:'Track Shipment',ctaQuote:'Get a Quote',route:{a:'Guangzhou, China',b:'Dubai, UAE',c:'Erbil, Iraq'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'Your cargo is moving through our China → Dubai → Erbil network with live updates.',routeOrigin:'Origin Hub',routeTransit:'Transit Hub',routeDestination:'Delivery Hub'},
+  trust:{s1v:'25K+',s1l:'Delivered shipments',s2v:'12+',s2l:'Connected markets',s3v:'24/7',s3l:'Live support',s4v:'98%',s4l:'On-time delivery'},
+  liveTrack:{heading:'Track in seconds',sub:'Enter your tracking number to see the latest shipment status instantly.',placeholder:'e.g. GC10052341',button:'Track Shipment'},
+  business:{eyebrow:'BUSINESS PAGES',heading:'Everything customers need is one tap away',sub:'Jump straight to services, pricing, dashboard tools, warehouses, and support.',
+    items:{
+      services:{title:'Services',desc:'Air, sea, land, customs, and door-to-door delivery.',action:'View services',icon:'i-box',route:'services'},
+      quote:{title:'Price Calculator',desc:'Estimate your shipping cost before you request a quote.',action:'Calculate price',icon:'i-card',route:'services'},
+      dashboard:{title:'Customer Dashboard',desc:'Manage shipments, notifications, and account details.',action:'Open dashboard',icon:'i-user',route:'portal'},
+      track:{title:'Tracking',desc:'Enter a tracking ID and see the latest shipment status.',action:'Track shipment',icon:'i-search',route:'track'},
+      warehouses:{title:'Warehouses',desc:'China, Dubai, and Erbil hubs that keep cargo moving.',action:'View network',icon:'i-warehouse',route:'contact'},
+      contact:{title:'Contact',desc:'WhatsApp, email, and quick support in one place.',action:'Get in touch',icon:'i-chat',route:'contact'}
+    }},
+  dashboardPreview:{heading:'Customer Dashboard Preview',sub:'A quick look at the portal customers use to manage shipments anywhere.',stats:[{v:'4',l:'Active shipments'},{v:'29',l:'Delivered'},{v:'2',l:'Pending'},{v:'8',l:'Invoices'}],btnPortal:'Open portal',btnTrack:'Track a parcel'},
+  warehouses:{eyebrow:'WAREHOUSES',heading:'Our Warehouse Network',sub:'Strategic hubs in China, Dubai, and Erbil keep cargo moving smoothly.',
+    items:{
+      guangzhou:{tag:'Origin Hub',title:'Guangzhou Warehouse',address:'Guangzhou, China',hours:'Mon - Sat',features:['Cargo consolidation','QC photo checks','Fast packing']},
+      dubai:{tag:'Transit Hub',title:'Dubai Warehouse',address:'Dubai, UAE',hours:'Mon - Sat',features:['Transit coordination','Secure handling','Status updates']},
+      erbil:{tag:'Distribution Hub',title:'Erbil Warehouse',address:'Erbil, Iraq',hours:'Sat - Thu',features:['Local delivery prep','Customer pickup','Rapid dispatch']}
+    }},
+  ops:{eyebrow:'OPERATIONS',heading:'Staff workspace and control center',sub:'A back-office hub for shipments, finance, warehouses, and support in one clean view.',
+    metrics:[{v:'12',l:'Pending loads'},{v:'98%',l:'On-time rate'},{v:'7',l:'Open tickets'},{v:'3',l:'Warehouses'}],
+    cards:[
+      {icon:'i-card',title:'Finance & invoices',desc:'Track revenue, export PDF receipts, and follow up on unpaid orders.',points:['PDF invoice export','Revenue overview','Unpaid orders']},
+      {icon:'i-warehouse',title:'Warehouse receipts',desc:'Register inbound cargo and keep proof at every hub.',points:['Inbound scans','Photo proof','Handover logs']},
+      {icon:'i-chat',title:'Support queue',desc:'Handle customer messages and resolve issues fast.',points:['WhatsApp handoff','Status notes','Saved replies']}
+    ]},
+  services:{eyebrow:'SERVICES',heading:'Our Services',sub:'End-to-end solutions for moving cargo into Iraq',learnMore:'Learn more',
+    quote:{eyebrow:'Get an Estimate',heading:'Shipping Cost Calculator',type:'Shipping type',air:'Air Freight',sea:'Sea Freight',land:'Land Freight',
+      weight:'Weight (kg)',weightPh:'e.g. 50',dest:'Destination city in Iraq',btn:'Calculate estimate',
+      needWeight:'Please enter the shipment weight.',resultLabel:'Estimated price',cta:'Request a detailed quote',
+      note:'* This is a rough estimate only — final pricing is confirmed by our team after reviewing your shipment.'},
+    items:{
+      air:{title:'Air Freight',desc:'The fastest route for urgent cargo.',features:['Transit time: 1-3 days','Ideal for urgent, high-value cargo','Real-time flight tracking']},
+      sea:{title:'Sea Freight',desc:'The most cost-effective option for heavy loads.',features:['Transit time: 12-18 days','Best cost for heavy loads','Full container or shared container options']},
+      land:{title:'Land Freight',desc:'Overland delivery from Dubai to Iraq via Saudi Arabia.',features:['Transit time: 7-10 days','Route: Dubai → Saudi Arabia → Iraq (Erbil)','Ideal for mid-sized shipments']},
+      customs:{title:'Customs Clearance',desc:'Complete customs handling at Iraqi ports of entry.',features:['Documentation handling','Duty and tax payment','Customs legal consultation']},
+      warehouse:{title:'Warehousing',desc:'Secure, monitored storage in the UAE and Iraq.',features:['24/7 monitoring','Warehouse management system','Optional cargo insurance']},
+      door:{title:'Door-to-Door Delivery',desc:'Final-mile delivery straight to your home or business.',features:['Delivery to every city in Iraq','Scheduled delivery windows','Delivery confirmation']}
+    },
+    faqEyebrow:'FAQ',faqHeading:'Frequently Asked Questions',faq:[
+      {q:'How long does shipping take from Dubai to Erbil?',a:'Air freight takes 1-3 days, land freight (via Saudi Arabia) takes 7-10 days, sea freight takes 12-18 days depending on cargo type.'},
+      {q:'What types of cargo do you transport?',a:'Everything from small parcels to full containers, for both commercial and personal shipments.'},
+      {q:'Is my shipment insured?',a:'Yes, every shipment is handled with full protection and optional cargo insurance.'},
+      {q:'How can I track my shipment?',a:'Use your tracking number on the "Track" page to see the live status of your cargo.'},
+      {q:'Do you handle customs clearance?',a:'Yes, our team handles all documentation and duty payments at Iraqi ports of entry.'}
+    ]},
+  how:{eyebrow:'PROCESS',heading:'How It Works',items:[
+    {title:'Request a Quote',desc:'Send your shipment details and get a price in seconds.'},
+    {title:'Pickup',desc:'Our team collects your cargo in China or the UAE.'},
+    {title:'Transit & Customs',desc:'Cargo moves by sea or air while we handle customs.'},
+    {title:'Delivery',desc:'Your shipment arrives safely anywhere in Iraq.'}
+  ]},
+  why:{eyebrow:'WHY US',heading:'Why Globall Cloud',items:[
+    {title:'Real-Time Tracking',desc:'Know exactly where your shipment is, any moment.',icon:'i-search'},
+    {title:'Secure & Insured',desc:'Every shipment is handled with full protection.',icon:'i-shield'},
+    {title:'Best Pricing',desc:'Competitive rates with no hidden costs.',icon:'i-card'},
+    {title:'24/7 Support',desc:'Our team is always here to help.',icon:'i-clock'}
+  ]},
+  about:{eyebrow:'ABOUT US',heading:'About Globall Cloud',sub:'Your trusted logistics partner between China, the UAE, and Iraq.',
+    missionTitle:'Our Mission',missionBody:'The mission of Globall Cloud is to deliver international-standard shipping services with full transparency and trust, for every client across the Kurdistan Region and Iraq.',
+    visionTitle:'Our Vision',visionBody:'We aim to become the most trusted logistics company in the region, powered by modern technology and a customer-first approach.',
+    valuesEyebrow:'OUR VALUES',valuesHeading:'What Guides Us',values:[
+      {title:'Honesty',desc:'Dealing truthfully and transparently with every client.',icon:'i-shield'},
+      {title:'Transparency',desc:'Clear pricing and processes with no hidden surprises.',icon:'i-eye'},
+      {title:'Accountability',desc:'We own every shipment until it arrives safely.',icon:'i-box'},
+      {title:'Customer Respect',desc:'Your time and needs always come first.',icon:'i-user'}
+    ],
+    storyTitle:'Our Story',storyBody:'Globall Cloud started as a shipping partner focused on solving cargo movement between the markets of China and the UAE and the cities of Iraq. Through efficiency and commitment, we have become a trusted choice for businesses and individuals who need reliable, fast cargo delivery. We continue to grow our services to improve the experience of every client.'},
+  cta:{heading:'Ready to Ship?',sub:'Submit your request today and get a quote in minutes.',b1:'Get a Quote',b2:'Contact Us'},
+  corridor:{eyebrow:'Operational Corridor',heading:'China → Dubai → Erbil',sub:'See the three stages of the network at a glance, presented like a premium logistics brand.',badge:'Live Corridor',items:[
+    {flag:'🇨🇳',title:'China pickup',meta:'Origin Hub',desc:'Cargo is received, checked, and prepared for the next leg.',tags:['QC','Packing','Pickup']},
+    {flag:'🇦🇪',title:'Dubai transit hub',meta:'Transit Hub',desc:'Fast handling and re-routing through our UAE operations center.',tags:['Transit','Air Cargo','Sea Cargo']},
+    {flag:'🇮🇶',title:'Erbil delivery',meta:'Delivery Hub',desc:'After customs and final sorting, the shipment reaches your customer safely.',tags:['Customs','Door-to-Door','Final Mile']}
+  ]},
+  footer:{blurb:'Globall Cloud — Shipping you can trust, from China and the UAE to all of Iraq.',quick:'Quick Links',servicesH:'Services',contactH:'Contact',address:'New Erbil, behind Ma\u2019ad Gasha, Erbil, Iraq',rights:'All rights reserved.',privacy:'Privacy Policy',terms:'Terms of Service'},
+  testi:{
+    eyebrow:'Client Reviews',
+    heading:'What Our Clients Say',
+    sub:'A few words from customers who have shipped with Globall Cloud.',
+    items:[
+      {quote:'My shipments from Guangzhou to Erbil arrived right on schedule, and the tracking was crystal clear — I could see every step of my cargo\u2019s journey.', name:'Aras Mohammed', role:'Electronics store owner, Erbil', initials:'AM', stars:5},
+      {quote:'Customs clearance is usually a headache, but the Globall Cloud team handled all the paperwork and I had zero issues. Very professional.', name:'Sara Rasheed', role:'Home goods trader', initials:'SR', stars:5},
+      {quote:'From the first request to receiving my cargo, replies to my messages were always fast. Now I route all my imports through them.', name:'Karwan Aziz', role:'Tech goods importer', initials:'KA', stars:5}
+    ]
+  },
+  legal:{
+    updated:'Last updated: 2026',
+    privacyEyebrow:'Privacy',
+    privacyTitle:'Privacy Policy',
+    termsEyebrow:'Legal',
+    termsTitle:'Terms of Service',
+    privacyBody:[
+      {h:'1. Information We Collect', p:'When you create an account, submit a shipping request, or fill out a contact form, we collect: your name, phone number, email, origin/destination addresses, and shipment details (weight, type, item description). We never collect financial information such as bank card numbers.'},
+      {h:'2. How We Use Your Information', p:'Your information is used only to: process and track your shipment, contact you about the status of your cargo, and improve our services. We do not sell your data or share it with third parties for marketing purposes.'},
+      {h:'3. Data Security & Encryption', p:'All communication between your browser and our servers is encrypted via TLS/HTTPS. Your account is secured by Supabase Auth, and your data is protected by Row-Level Security policies — only you and authorized staff members can access it.'},
+      {h:'4. Your Rights', p:'You may request to view, correct, or delete your account and personal data at any time. Simply contact us via the email or WhatsApp number listed on our Contact page.'},
+      {h:'5. Contact Us', p:'If you have questions about this Privacy Policy, reach us at tamanblbas271@gmail.com or +964 750 757 7137.'}
+    ],
+    termsBody:[
+      {h:'1. Acceptance of Terms', p:'By using this website, creating an account, or requesting services from Globall Cloud, you agree to these Terms of Service.'},
+      {h:'2. Our Services', p:'Globall Cloud provides air, sea, and land freight, customs clearance, and door-to-door delivery between China, the UAE, and Iraq. Delivery times and rates depend on cargo type and route.'},
+      {h:'3. Customer Responsibilities', p:'Customers are responsible for the accuracy of information provided and for keeping their account password secure. Shipping of prohibited items (weapons, narcotics, or goods banned under Iraqi law) is strictly forbidden.'},
+      {h:'4. Pricing & Payment', p:'Prices are quoted in US Dollars ($) unless otherwise agreed. Payment terms are set according to the agreement between the customer and the company.'},
+      {h:'5. Limitation of Liability', p:'Globall Cloud makes every effort to ensure safe, on-time delivery, but is not liable for delays caused by factors outside our control, such as customs procedures or natural disasters.'},
+      {h:'6. Changes to These Terms', p:'Globall Cloud reserves the right to update these terms at any time. Continued use of our services after an update constitutes acceptance of the revised terms.'}
+    ]
+  },
+  track:{heading:'Track Shipment',sub:'Enter your tracking ID to see its current status',searchPh:'e.g. GC10052341',searchBtn:'Track',
+    notFoundTitle:'No shipment found',notFoundBody:'Please check the tracking ID, or submit a new request.',requestInstead:'Request a Shipment',
+    detailsH:'Shipment Details',timelineH:'Timeline',save:'Add to My Shipments',saved:'Saved ✓',signInToSave:'Sign in to save',
+    status:{pending:'Pending',transit:'In Transit',delivered:'Delivered'},
+    steps:{placed:'Order Placed',pickedUp:'Picked Up',transit:'In Transit',customs:'Customs',outForDelivery:'Out for Delivery',delivered:'Delivered'},
+    type:{air:'Air Freight',sea:'Sea Freight',land:'Land Freight'},
+    weight:'Weight',volume:'Volume',items:'Items',total:'Total',paid:'Paid',due:'Due',eta:'Expected:',pendingValue:'To be confirmed'},
+  invoice:{downloadBtn:'Download Invoice (PDF)',generating:'Generating...',title:'Shipping Invoice',trackingId:'Tracking ID',dateIssued:'Date Issued',billTo:'Bill To',route:'Route',serviceType:'Service Type',statusLabel:'Status',thanks:'Thank you for trusting Globall Cloud',failMsg:'Invoice generation failed, please try again.'},
+  request:{heading:'Get a Quote / New Shipment',sub:'Fill in your shipment details and get a tracking ID instantly.',
+    name:'Full Name',phone:'Phone Number',email:'Email (optional)',origin:'Origin',destination:'Destination',type:'Shipping Type',weight:'Estimated Weight (kg)',notes:'Additional Notes',
+    submit:'Submit Request',sending:'Sending...',successTitle:'Request received 🎉',successBody:'Your tracking number is — save it for later:',trackNow:'Track It Now',backHome:'Back to Home',waConfirm:'Confirm via WhatsApp',waPrefix:'Hi, I just submitted a request — tracking number:'},
+  portal:{signInH:'Sign In',signInSub:'Enter your name and email to see your shipments',dashboardSub:'Your account dashboard',name:'Name',email:'Email',phone:'Phone (optional)',continueBtn:'Continue',trustNote:'Your info stays private and is never shared',
+    hi:'Hi',myShipments:'My Shipments',emptyTitle:'No shipments yet',emptyBody:'Track a shipment or submit a new request to see it here.',
+    qTrack:'Track Shipment',qRequest:'New Request',qEdit:'Edit Profile',save:'Save',cancel:'Cancel',signOut:'Sign Out'},
+  pbn:{home:'Home',shipments:'Shipments',services:'Services',track:'Track',profile:'Profile',login:'Login'},
+  contact:{heading:'Get in Touch',sub:'We are here to help - reach us however is easiest for you.',
+    phoneL:'Phone',emailL:'Email',whatsappL:'WhatsApp',addressL:'Address',hoursL:'Working Hours',hoursV:'Sat - Thu: 9 AM - 7 PM',
+    formName:'Your Name',formCompany:'Company (optional)',formType:'Request Type',typeShipping:'Shipping',typeInfo:'Information',typeSupport:'Support',formEmail:'Your Email',formMsg:'Your Message',send:'Send Message',sending:'Sending...',sentMsg:'Message saved! We will get back to you shortly.',getDirections:'Get Directions'},
+  places:{guangzhou:'Guangzhou, China',shenzhen:'Shenzhen, China',dubai:'Dubai, UAE',sharjah:'Sharjah, UAE',erbil:'Erbil, Iraq',sulaymaniyah:'Sulaymaniyah, Iraq',duhok:'Duhok, Iraq',baghdad:'Baghdad, Iraq',basra:'Basra, Iraq',kirkuk:'Kirkuk, Iraq',mosul:'Mosul, Iraq'}
+}
+};
 
 const SERVICE_ORDER = ['air','sea','land','customs','warehouse','door'];
 const SERVICE_ICONS = {air:'i-plane',sea:'i-ship',land:'i-route',customs:'i-clipboard',warehouse:'i-warehouse',door:'i-truck'};
@@ -1258,6 +2174,10 @@ async function handleSignOut(){
 function statusOf(s){ return s.currentStepIndex>=5 ? 'delivered' : (s.currentStepIndex===0 ? 'pending' : 'transit'); }
 
 /* ================= ROUTER ================= */
+// Every page this app can show, kept in sync with id="page-*" sections below.
+// Used to validate incoming hashes so a stray/unknown #fragment can't leave
+// the app on a blank page.
+const VALID_ROUTES = ['home','about','services','track','contact','request','portal','privacy','terms','admin'];
 function route(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const target = document.getElementById('page-'+id);
@@ -1265,6 +2185,13 @@ function route(id){
   document.querySelectorAll('.nav-links a, .mobile-menu a[data-route]').forEach(a=>a.classList.toggle('active', a.dataset.route===id));
   window.scrollTo({top:0, behavior:'auto'});
   closeMobileMenu();
+  // Keep the URL shareable/bookmarkable (e.g. #services) without adding a
+  // history entry per click or re-triggering the hashchange listener below
+  // (replaceState is silent to 'hashchange' — only real navigation fires it).
+  const hash = id==='home' ? '' : '#'+id;
+  if(location.hash!==hash){
+    history.replaceState(null, '', location.pathname+location.search+hash);
+  }
   if(id==='portal') renderPortal();
   else updatePortalBottomNavVisibility(id);
   if(id==='services') renderServicesDetail();
@@ -1543,7 +2470,6 @@ async function shipmentCardHTML(s){
     </div>
     <div class="route-line"><span>${placeLabel(s.originKey)}</span><span class="arrow">→</span><span>${placeLabel(s.destKey)}</span></div>
   </div>
-  <div id="liveMapContainer" class="reveal in-view"></div>
   <div class="grid-2 reveal in-view">
     <div class="card">
       <h4>${t('track.detailsH')}</h4>
@@ -1758,12 +2684,6 @@ async function doTrackSearch(){
   wrap.innerHTML = '<p class="hint">'+ (currentLang==='ku'?'گەڕان...':'Searching...') +'</p>';
   const shipment = await getShipment(val);
   wrap.innerHTML = shipment ? await shipmentCardHTML(shipment) : notFoundHTML();
-  if(shipment && window.enhancedTracking){
-    try{
-      await enhancedTracking.initializeTracking(shipment.id);
-      enhancedTracking.initializeMap('liveMapContainer', shipment.id);
-    }catch(e){ console.warn('live map unavailable:', e); }
-  }
 }
 
 /* ================= REQUEST FORM ================= */
@@ -3276,7 +4196,7 @@ async function submitWarehouseReceipt(){
   msgEl.style.display = 'none';
   if(!batchCode){ msgEl.textContent = 'تکایە کۆدی کڕیار بنووسە.'; msgEl.style.display = 'block'; return; }
 
-  const {data: dirMatch} = await sb.from('customer_directory').select('id,name,phone').ilike('code', batchCode).limit(1);
+  const {data: dirMatch} = await sb.from('customer_directory').select('id,name').ilike('code', batchCode).limit(1);
   const directoryCustomerId = dirMatch && dirMatch[0] ? dirMatch[0].id : null;
   if(!directoryCustomerId && !window.confirm('ئەم کۆدە لە کۆگای موشتەریان نەدۆزرایەوە. دەتەوێت بەبێ بەستنەوە بە کڕیارێک تۆماری بکەیت؟')){
     return;
@@ -3306,21 +4226,6 @@ async function submitWarehouseReceipt(){
 
   logActivity('warehouse_receipt', batchCode, location+(photoUrls.length?' — '+photoUrls.length+' وێنە':''));
   showToast('وەرگرتنی باچ تۆمارکرا.', 'success');
-
-  /* NEW: notify the customer their goods reached the warehouse. Same
-     proven wa.me pattern as sendWhatsAppUpdate() elsewhere in this file —
-     no API keys, staff just taps Send. Silently skipped if the batch code
-     wasn't linked to a directory customer, or that customer has no phone
-     on file, so it never blocks the receipt from saving. */
-  if(directoryCustomerId && dirMatch[0]?.phone){
-    const custPhone = toWhatsAppDigits(dirMatch[0].phone);
-    if(custPhone){
-      const custName = dirMatch[0].name ? ('سڵاو '+dirMatch[0].name+'، ') : 'سڵاو، ';
-      const whMsg = custName+'بارەکەت گەیشتە کۆگای '+location+' و تۆمارکرا. (کۆد: '+batchCode+')\nبەم زووانە بۆ گواستنەوە ئامادە دەکرێت. — Globall Cloud';
-      window.open('https://wa.me/'+custPhone+'?text='+encodeURIComponent(whMsg), '_blank');
-    }
-  }
-
   document.getElementById('whBatchCode').value = '';
   document.getElementById('whNotes').value = '';
   document.getElementById('whPhotos').value = '';
@@ -3644,9 +4549,13 @@ async function init(){
   applyI18n();
   await updateNavAuthState();
   setupReveal();
-  route(location.hash==='#admin' ? 'admin' : 'home');
+  const initialRoute = location.hash.replace('#','');
+  route(VALID_ROUTES.includes(initialRoute) ? initialRoute : 'home');
 }
-window.addEventListener('hashchange', ()=>{ if(location.hash==='#admin') route('admin'); });
+window.addEventListener('hashchange', ()=>{
+  const id = location.hash.replace('#','');
+  route(VALID_ROUTES.includes(id) ? id : 'home');
+});
 init();
 </script>
 <div id="printLabelArea"></div>

@@ -11,11 +11,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="admin-dashboard.js"></script>
+  <script src="form-validation.js"></script>
+  <link rel="stylesheet" href="form-validation-styles.css">
   <style>
     :root{
       --bg:#061428;--bg2:#0b1a30;--panel:#102742;--panel2:#173457;--line:#27486d;
       --text:#f5f9fd;--muted:#9db4d1;--accent:#00c2d9;--accent2:#4fe3f0;--good:#2ed27f;--warn:#f0a83a;--bad:#e5533d;
       --shadow:0 18px 40px rgba(0,0,0,.28);--radius:22px;--font:'Vazirmatn',sans-serif;--mono:'JetBrains Mono',monospace;
+      /* form-validation-styles.css ships with index.html's token names — alias
+         the two it needs onto this page's own tokens rather than duplicating
+         the stylesheet. */
+      --teal-l:var(--accent2);--radius-m:16px;
     }
     *{box-sizing:border-box}
     html,body{margin:0;min-height:100%;background:radial-gradient(circle at 12% -10%, rgba(0,194,217,.12), transparent 35%),linear-gradient(180deg,var(--bg),#08111e 80%);color:var(--text);font-family:var(--font)}
@@ -180,15 +186,15 @@
             </div>
           </div>
 
-          <form id="customerForm" class="tab-pane hidden">
+          <form id="customerForm" class="tab-pane hidden" novalidate>
             <input type="hidden" id="customerId">
             <div class="grid">
-              <div class="form-row"><label class="label">Customer name</label><input class="field" id="customerName"></div>
-              <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="customerEmail"></div>
+              <div class="form-row"><label class="label">Customer name</label><input class="field" id="customerName" data-validate="required"></div>
+              <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="customerEmail" data-validate="email"></div>
             </div>
             <div class="grid">
-              <div class="form-row"><label class="label">Phone</label><input class="field" id="customerPhone"></div>
-              <div class="form-row"><label class="label">Phone 2</label><input class="field" id="customerPhone2"></div>
+              <div class="form-row"><label class="label">Phone</label><input class="field" id="customerPhone" data-validate="required,phone"></div>
+              <div class="form-row"><label class="label">Phone 2</label><input class="field" id="customerPhone2" data-validate="phone"></div>
             </div>
             <div class="grid">
               <div class="form-row"><label class="label">City</label><input class="field" id="customerCity"></div>
@@ -210,11 +216,11 @@
             <p id="customerMsg" class="small"></p>
           </form>
 
-          <form id="staffForm" class="tab-pane hidden">
+          <form id="staffForm" class="tab-pane hidden" novalidate>
             <input type="hidden" id="staffId">
             <div class="grid">
-              <div class="form-row"><label class="label">Full name</label><input class="field" id="staffFullName"></div>
-              <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="staffEmail"></div>
+              <div class="form-row"><label class="label">Full name</label><input class="field" id="staffFullName" data-validate="required"></div>
+              <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="staffEmail" data-validate="required,email"></div>
             </div>
             <div class="grid">
               <div class="form-row"><label class="label">Role</label><select class="field" id="staffRole"><option value="admin">admin</option><option value="accountant">accountant</option><option value="super_admin">super_admin</option></select></div>
@@ -231,14 +237,14 @@
             <p id="staffMsg" class="small"></p>
           </form>
 
-          <form id="receiptForm" class="tab-pane hidden" enctype="multipart/form-data">
+          <form id="receiptForm" class="tab-pane hidden" enctype="multipart/form-data" novalidate>
             <div class="grid">
-              <div class="form-row"><label class="label">Batch code</label><input class="field" id="receiptBatch" placeholder="GC-..." required></div>
+              <div class="form-row"><label class="label">Batch code</label><input class="field" id="receiptBatch" placeholder="GC-..." data-validate="required"></div>
               <div class="form-row"><label class="label">Location</label><select class="field" id="receiptLocation"><option value="Dubai">Dubai</option><option value="Erbil">Erbil</option><option value="China">China</option></select></div>
             </div>
             <div class="grid">
               <div class="form-row"><label class="label">Customer code</label><input class="field" id="receiptCustomerCode" placeholder="GC... or directory code"></div>
-              <div class="form-row"><label class="label">Customer phone</label><input class="field" id="receiptCustomerPhone"></div>
+              <div class="form-row"><label class="label">Customer phone</label><input class="field" id="receiptCustomerPhone" data-validate="phone"></div>
             </div>
             <div class="form-row"><label class="label">Notes</label><textarea class="field" id="receiptNotes" placeholder="Received goods from Dubai / Erbil..."></textarea></div>
             <div class="form-row"><label class="label">Receipt photos</label><input class="field" type="file" id="receiptPhotos" multiple accept="image/*"></div>
@@ -308,8 +314,10 @@ async function authFetch(path = '/', opts = {}) {
   if (!res.ok) throw new Error(data?.error || `Request failed (${res.status})`);
   return data;
 }
+const VALID_TABS = ['dashboard', 'customers', 'staff', 'receipts', 'logs'];
 function setActiveTab(tab) {
   state.tab = tab;
+  if (location.hash !== '#' + tab) history.replaceState(null, '', '#' + tab);
   document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
   $('dashboardPane').classList.toggle('hidden', tab !== 'dashboard');
   $('customerForm').classList.toggle('hidden', tab !== 'customers');
@@ -322,9 +330,9 @@ function setActiveTab(tab) {
 function loadManagerOptions() {
   $('customerManager').innerHTML = '<option value="">Unassigned</option>' + state.staff.map((s) => `<option value="${esc(s.id)}">${esc(s.full_name)} (${esc(s.role)})</option>`).join('');
 }
-function resetCustomerForm() { $('customerId').value=''; $('customerName').value=''; $('customerEmail').value=''; $('customerPhone').value=''; $('customerPhone2').value=''; $('customerCity').value=''; $('customerDelivery').value=''; $('customerManager').value=''; $('customerStatus').value='true'; $('customerNote').value=''; $('customerInvite').value='true'; $('customerPassword').value=''; setMsg($('customerMsg'), ''); }
-function resetStaffForm() { $('staffId').value=''; $('staffFullName').value=''; $('staffEmail').value=''; $('staffRole').value='admin'; $('staffBranch').value='all'; $('staffInvite').value='true'; $('staffPassword').value=''; setMsg($('staffMsg'), ''); }
-function resetReceiptForm() { $('receiptBatch').value=''; $('receiptLocation').value='Dubai'; $('receiptCustomerCode').value=''; $('receiptCustomerPhone').value=''; $('receiptNotes').value=''; $('receiptPhotos').value=''; $('receiptPreview').innerHTML=''; setMsg($('receiptMsg'), ''); }
+function resetCustomerForm() { window.formValidator.resetForm('customerForm'); $('customerId').value=''; $('customerName').value=''; $('customerEmail').value=''; $('customerPhone').value=''; $('customerPhone2').value=''; $('customerCity').value=''; $('customerDelivery').value=''; $('customerManager').value=''; $('customerStatus').value='true'; $('customerNote').value=''; $('customerInvite').value='true'; $('customerPassword').value=''; setMsg($('customerMsg'), ''); }
+function resetStaffForm() { window.formValidator.resetForm('staffForm'); $('staffId').value=''; $('staffFullName').value=''; $('staffEmail').value=''; $('staffRole').value='admin'; $('staffBranch').value='all'; $('staffInvite').value='true'; $('staffPassword').value=''; setMsg($('staffMsg'), ''); }
+function resetReceiptForm() { window.formValidator.resetForm('receiptForm'); $('receiptBatch').value=''; $('receiptLocation').value='Dubai'; $('receiptCustomerCode').value=''; $('receiptCustomerPhone').value=''; $('receiptNotes').value=''; $('receiptPhotos').value=''; $('receiptPreview').innerHTML=''; setMsg($('receiptMsg'), ''); }
 function renderList() {
   const q = $('searchBox').value.trim().toLowerCase();
   if (state.tab === 'customers') {
@@ -459,8 +467,11 @@ document.querySelectorAll('.tab').forEach((btn) => btn.addEventListener('click',
 $('customerClearBtn').addEventListener('click', resetCustomerForm);
 $('staffClearBtn').addEventListener('click', resetStaffForm);
 $('receiptClearBtn').addEventListener('click', resetReceiptForm);
+['customerForm', 'staffForm', 'receiptForm'].forEach((id) => window.formValidator.initializeForm(id, { manageSubmit: false }));
 $('customerForm').addEventListener('submit', async (e) => {
-  e.preventDefault(); setMsg($('customerMsg'), 'Saving customer...');
+  e.preventDefault();
+  if (!window.formValidator.validateForm('customerForm')) { setMsg($('customerMsg'), 'Please fix the highlighted fields'); return; }
+  setMsg($('customerMsg'), 'Saving customer...');
   try {
     const payload = { id: $('customerId').value || undefined, name: $('customerName').value.trim(), email: $('customerEmail').value.trim(), phone: $('customerPhone').value.trim(), phone2: $('customerPhone2').value.trim(), city: $('customerCity').value.trim(), delivery_location: $('customerDelivery').value.trim(), note: $('customerNote').value.trim(), manager_staff_id: $('customerManager').value || null, is_active: $('customerStatus').value === 'true', send_invite: $('customerInvite').value === 'true', password: $('customerPassword').value.trim() || undefined };
     const action = $('customerId').value ? 'update' : 'create';
@@ -470,7 +481,9 @@ $('customerForm').addEventListener('submit', async (e) => {
   } catch (err) { setMsg($('customerMsg'), err.message || 'Failed to save customer'); }
 });
 $('staffForm').addEventListener('submit', async (e) => {
-  e.preventDefault(); setMsg($('staffMsg'), 'Saving staff...');
+  e.preventDefault();
+  if (!window.formValidator.validateForm('staffForm')) { setMsg($('staffMsg'), 'Please fix the highlighted fields'); return; }
+  setMsg($('staffMsg'), 'Saving staff...');
   try {
     const payload = { id: $('staffId').value || undefined, full_name: $('staffFullName').value.trim(), email: $('staffEmail').value.trim(), role: $('staffRole').value, branch: $('staffBranch').value, send_invite: $('staffInvite').value === 'true', password: $('staffPassword').value.trim() || undefined };
     const action = $('staffId').value ? 'update' : 'create';
@@ -484,7 +497,9 @@ $('receiptPhotos').addEventListener('change', () => {
   $('receiptPreview').innerHTML = files.map((file) => `<div><img src="${URL.createObjectURL(file)}" alt=""><div class="small">${esc(file.name)}</div></div>`).join('');
 });
 $('receiptForm').addEventListener('submit', async (e) => {
-  e.preventDefault(); setMsg($('receiptMsg'), 'Uploading receipt...');
+  e.preventDefault();
+  if (!window.formValidator.validateForm('receiptForm')) { setMsg($('receiptMsg'), 'Please fix the highlighted fields'); return; }
+  setMsg($('receiptMsg'), 'Uploading receipt...');
   try {
     const formData = new FormData();
     formData.append('kind', 'receipt'); formData.append('action', 'create');
@@ -496,9 +511,11 @@ $('receiptForm').addEventListener('submit', async (e) => {
   } catch (err) { setMsg($('receiptMsg'), err.message || 'Failed to save receipt'); }
 });
 window.editCustomer = (row) => {
+  window.formValidator.resetForm('customerForm');
   $('customerId').value = row.id || ''; $('customerName').value = row.name || ''; $('customerEmail').value = row.email || ''; $('customerPhone').value = row.phone || ''; $('customerPhone2').value = row.phone2 || ''; $('customerCity').value = row.city || ''; $('customerDelivery').value = row.delivery_location || ''; $('customerManager').value = row.manager_staff_id || ''; $('customerStatus').value = String(Boolean(row.is_active)); $('customerNote').value = row.note || ''; $('customerInvite').value = row.auth_user_id ? 'false' : 'true'; $('customerPassword').value = ''; setActiveTab('customers'); $('customerForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 window.editStaff = (row) => {
+  window.formValidator.resetForm('staffForm');
   $('staffId').value = row.id || ''; $('staffFullName').value = row.full_name || ''; $('staffEmail').value = row.email || ''; $('staffRole').value = row.role || 'admin'; $('staffBranch').value = row.branch || 'all'; $('staffInvite').value = row.auth_user_id ? 'false' : 'true'; $('staffPassword').value = ''; setActiveTab('staff'); $('staffForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 window.archiveCustomerAccount = async (id) => {
@@ -511,7 +528,12 @@ window.archiveStaffAccount = async (id) => {
   try { await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'staff', action: 'deactivate', data: { id } }) }); await refreshAll(); }
   catch (err) { alert(err.message || 'Unable to deactivate staff'); }
 };
-setActiveTab('dashboard');
+window.addEventListener('hashchange', () => {
+  const tab = location.hash.replace('#', '');
+  if (VALID_TABS.includes(tab)) setActiveTab(tab);
+});
+const initialTab = location.hash.replace('#', '');
+setActiveTab(VALID_TABS.includes(initialTab) ? initialTab : 'dashboard');
 syncSessionUI();
 </script>
 </body>

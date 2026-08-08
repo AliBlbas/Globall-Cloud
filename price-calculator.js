@@ -1,22 +1,24 @@
 // Price Calculator — Globall Cloud
-// FIXED / CONSOLIDATED VERSION.
 //
 // This project previously shipped TWO separate, silently diverging pricing
-// engines with the same base numbers (price-calculator.js and
+// engines with the same base numbers (this file and a since-deleted
 // dynamic-pricing-engine.js) — a bug waiting to happen, since editing one
-// wouldn't update the other. This file replaces both.
-//
-// dynamic-pricing-engine.js additionally called
+// wouldn't update the other. dynamic-pricing-engine.js additionally called
 // `fetch('https://api.example.com/market-data')` every hour —
 // api.example.com is a documentation placeholder domain, not a real
 // endpoint, so that call always failed silently (caught by try/catch) and
-// did nothing. That fake fetch has been removed. Seasonal and demand-based
-// pricing is kept as *local, deterministic* logic (no network dependency),
-// available as opt-in modifiers.
+// did nothing. It has been removed entirely; this file is the one
+// surviving pricing engine. Seasonal and demand-based pricing here is kept
+// as *local, deterministic* logic (no network dependency), available as
+// opt-in modifiers.
 //
-// This file is currently NOT loaded by index.html — it is a standalone
-// module ready to wire into the quote form when you want dynamic pricing on
-// the live site.
+// NOT currently loaded by index.html, and intentionally so: index.html's
+// quote form (#page-services) already has its own tailored calcQuote(),
+// with its own rate table and a live USD→IQD conversion this generic
+// module doesn't do. Wiring this file in alongside that one would recreate
+// the exact duplicate-pricing-logic problem described above. Keep this as
+// a standalone utility (e.g. for a future staff-side quick-quote tool, or
+// an API) rather than loading it next to index.html's calculator.
 
 class PriceCalculator {
   constructor() {

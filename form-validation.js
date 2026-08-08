@@ -43,7 +43,13 @@ class FormValidator {
     });
   }
 
-  // Initialize form validation
+  // Initialize form validation.
+  // By default this also takes over the form's submit event (validates, then
+  // fires a 'validatedSubmit' custom event with the form data on success).
+  // Pages that already have their own submit handler — and just want live
+  // field-level validation plus a validateForm(formId) gate to call from
+  // that handler — should pass { manageSubmit: false } to skip attaching
+  // our own submit listener and avoid a second one racing it.
   initializeForm(formId, config = {}) {
     const form = document.getElementById(formId);
     if (!form) return;
@@ -60,8 +66,10 @@ class FormValidator {
       this.setupFieldValidation(formId, field);
     });
 
-    // Setup form submit
-    form.addEventListener('submit', (e) => this.handleFormSubmit(e, formId));
+    // Setup form submit (unless the host page manages it — see above)
+    if (config.manageSubmit !== false) {
+      form.addEventListener('submit', (e) => this.handleFormSubmit(e, formId));
+    }
   }
 
   // Setup individual field validation
@@ -187,7 +195,7 @@ class FormValidator {
       errorContainer.className = 'field-error';
       errorContainer.innerHTML = errors.map(err => `
         <div class="error-message">
-          <svg class="icon-sm"><use href="#i-x"></use></svg>
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           <span>${err}</span>
         </div>
       `).join('');
@@ -227,7 +235,7 @@ class FormValidator {
     if (helpers.length > 0) {
       helperContainer.innerHTML = `
         <div class="helper-text">
-          <svg class="icon-sm"><use href="#i-info"></use></svg>
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.5" r="1" fill="currentColor" stroke="none"/></svg>
           <span>${helpers[0]}</span>
         </div>
       `;
@@ -243,7 +251,7 @@ class FormValidator {
 
     // Validate all fields
     if (!this.validateForm(formId)) {
-      showToast('Please fix the errors in the form', 'error');
+      if (typeof showToast === 'function') showToast('Please fix the errors in the form', 'error');
       return;
     }
 
@@ -280,10 +288,10 @@ class FormValidator {
     if (!formData) return;
 
     formData.element.reset();
-    formData.fields.forEach((fieldData) => {
+    formData.fields.forEach((fieldData, fieldName) => {
       fieldData.errors = [];
       fieldData.touched = false;
-      this.updateFieldUI(formId, fieldData.element.name);
+      this.updateFieldUI(formId, fieldName);
     });
   }
 

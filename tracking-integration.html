@@ -1,33 +1,38 @@
 <!-- Enhanced Tracking Integration Example -->
-<!-- Add this to your tracking page (page-track) -->
+<!-- A ready-to-copy snippet showing how to wire tracking-enhanced.js into the
+     public tracking page (page-track) in index.html. Not linked from any page
+     by default — copy the pieces you want into index.html's #page-track
+     section, after loading tracking-enhanced.js and tracking-styles.css.
+     Assumes the host page already defines `showToast(message, type)`
+     (index.html does — see line ~3956). -->
 
 <div class="tracking-integration-example">
   <!-- Live Map Section -->
   <section class="tracking-section">
-    <h2>📍 Live Route Map</h2>
+    <h2>📍 نەخشەی زیندووی ڕێگا</h2>
     <div id="liveMapContainer" class="live-map-container">
-      <!-- Map will be rendered here by JavaScript -->
+      <!-- Rendered by EnhancedTracking once a shipment ID is tracked -->
     </div>
   </section>
 
   <!-- Notification Setup -->
   <section class="tracking-section">
     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-      <h2 style="margin: 0;">🔔 Real-time Notifications</h2>
+      <h2 style="margin: 0;">🔔 ئاگادارکردنەوەی ڕاستەوخۆ</h2>
       <button class="btn btn-small" id="enableNotificationsBtn" onclick="enableNotifications()">
-        Enable Notifications
+        چالاککردنی ئاگادارکردنەوە
       </button>
     </div>
     <p style="color: var(--muted); font-size: 14px;">
-      Get instant updates when your shipment status changes. Enable browser notifications to stay informed.
+      کاتێک باری بارگەکەت گۆڕا، ڕاستەوخۆ ئاگادار دەبیتەوە.
     </p>
   </section>
 
   <!-- Tracking Details -->
   <section class="tracking-section">
-    <h2>📦 Tracking Details</h2>
+    <h2>📦 وردەکارییەکانی شوێنکەوتن</h2>
     <div id="trackingDetailsContainer">
-      <!-- Tracking details and timeline will be rendered here -->
+      <!-- Step timeline rendered by renderTrackingDetails() below -->
     </div>
   </section>
 </div>
@@ -57,48 +62,82 @@
 </style>
 
 <script>
-// Integration script for enhanced tracking
+// Integration script for enhanced tracking. Requires tracking-enhanced.js
+// to already be loaded on the page (defines window.enhancedTracking and
+// the TRACKING_STEP_KEYS list this script reuses below).
+
+const TRACKING_STEP_LABELS_KU = {
+  placed: 'داواکاری تۆمارکرا',
+  pickedUp: 'وەرگیرا لە کۆگا',
+  transit: 'لە ڕێگادایە',
+  customs: 'لە گومرکدایە',
+  outForDelivery: 'بۆ گەیاندن دەرچووە',
+  delivered: 'گەیشت',
+};
+
+// Minimal local escaping — this snippet may be pasted into pages that
+// don't expose index.html's own escapeHtml(), so it stays self-contained.
+function trackingEscapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
+function renderTrackingDetails(shipment) {
+  const currentIndex = shipment.current_step_index ?? 0;
+  const stepDates = shipment.step_dates || {};
+  const rows = TRACKING_STEP_KEYS.map((key, i) => {
+    const state = i < currentIndex ? 'done' : i === currentIndex ? 'current' : 'pending';
+    const date = stepDates[key] ? new Date(stepDates[key]).toISOString().slice(0, 10) : '';
+    return `
+      <div class="tracking-step tracking-step--${state}">
+        <span class="tracking-step-dot" aria-hidden="true"></span>
+        <span class="tracking-step-label">${trackingEscapeHtml(TRACKING_STEP_LABELS_KU[key] || key)}</span>
+        ${date ? `<span class="tracking-step-date">${trackingEscapeHtml(date)}</span>` : ''}
+      </div>`;
+  }).join('');
+  return `<div class="tracking-step-list">${rows}</div>`;
+}
 
 function enableNotifications() {
   window.enhancedTracking.requestNotificationPermission().then(granted => {
     if (granted) {
-      showToast('Notifications enabled! You will receive updates.', 'success');
+      showToast('ئاگادارکردنەوەکان چالاک کران!', 'success');
     } else {
-      showToast('Notifications are disabled in your browser settings.', 'error');
+      showToast('ئاگادارکردنەوەکان لە ڕێکخستنەکانی وێبگەڕەکەت ناچالاکن.', 'error');
     }
   });
 }
 
-// Example: Initialize tracking when user searches
+// Tracks whichever shipment ID was searched most recently, so a second
+// search can clean up the first one's realtime subscription.
+let activeTrackedShipmentId = null;
+
 function doTrackSearch() {
   const shipmentId = document.getElementById('trackInput').value.trim();
   if (!shipmentId) {
-    showToast('Please enter a shipment ID', 'error');
+    showToast('تکایە ژمارەی شوێنکەوتن بنووسە', 'error');
     return;
   }
 
-  window.enhancedTracking.initializeTracking(shipmentId)
+  if (activeTrackedShipmentId && activeTrackedShipmentId !== shipmentId) {
+    window.enhancedTracking.cleanup(activeTrackedShipmentId);
+  }
+
+  window.enhancedTracking.initializeTracking(shipmentId, 'liveMapContainer')
     .then(shipment => {
-      // Initialize map
-      window.enhancedTracking.initializeMap('liveMapContainer', shipmentId);
-
-      // Update tracking details
-      const container = document.getElementById('trackingDetailsContainer');
-      container.innerHTML = window.enhancedTracking.generateTrackingHTML(shipment);
-
-      showToast('Tracking initialized! Real-time updates enabled.', 'success');
+      activeTrackedShipmentId = shipmentId;
+      document.getElementById('trackingDetailsContainer').innerHTML = renderTrackingDetails(shipment);
+      showToast('شوێنکەوتن دەستیپێکرد! نوێکردنەوەکان ڕاستەوخۆن.', 'success');
     })
     .catch(error => {
       console.error('Tracking error:', error);
-      showToast('Shipment not found. Please check the ID.', 'error');
+      showToast('بارگە نەدۆزرایەوە. تکایە ژمارەکە بپشکنە.', 'error');
     });
 }
 
-// Cleanup when leaving page
+// Clean up the active subscription when leaving the page.
 window.addEventListener('beforeunload', () => {
-  // Clean up subscriptions
-  for (let [shipmentId] of window.enhancedTracking.shipments) {
-    window.enhancedTracking.cleanup(shipmentId);
-  }
+  if (activeTrackedShipmentId) window.enhancedTracking.cleanup(activeTrackedShipmentId);
 });
 </script>
