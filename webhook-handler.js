@@ -26,12 +26,13 @@ class ShipmentEvents {
    * updateShipmentStep() already does in index.html's admin panel).
    */
   async notifyStatusChange(shipmentId, statusLabel) {
-    if (!window.sb) {
-      console.error('Supabase client (window.sb) not available');
+    const sb = window.sb || window.supabase;
+    if (!sb || !sb.from) {
+      console.error('Supabase client not available');
       return { success: false, error: 'no-client' };
     }
 
-    const { data: shipment, error } = await window.sb
+    const { data: shipment, error } = await sb
       .from('shipments')
       .select('customer_phone, customer_name')
       .eq('id', shipmentId)
@@ -54,9 +55,10 @@ class ShipmentEvents {
    * (see database-schema.js: warehouse_receipts table).
    */
   async notifyWarehouseReceived(receiptId) {
-    if (!window.sb) return { success: false, error: 'no-client' };
+    const sb = window.sb || window.supabase;
+    if (!sb || !sb.from) return { success: false, error: 'no-client' };
 
-    const { data: receipt, error } = await window.sb
+    const { data: receipt, error } = await sb
       .from('warehouse_receipts')
       .select('batch_code, location, directory_phone, received_at')
       .eq('id', receiptId)
@@ -84,8 +86,9 @@ class ShipmentEvents {
    * same row shape.
    */
   async logInboundMessage({ name, email, message, company, request_type }) {
-    if (!window.sb) return { success: false, error: 'no-client' };
-    const { error } = await window.sb.from('messages').insert([
+    const sb = window.sb || window.supabase;
+    if (!sb || !sb.from) return { success: false, error: 'no-client' };
+    const { error } = await sb.from('messages').insert([
       { name, email, message, company, request_type },
     ]);
     if (error) return { success: false, error: error.message };

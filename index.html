@@ -1387,7 +1387,7 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
         <p id="staffLoginError" class="admin-error" style="display:none;"></p>
         <p id="staffLoginLockout" class="admin-lockout" style="display:none;"></p>
         <div id="adminNotConfigured" class="admin-warning" style="display:none;">
-          Supabase هێشتا پەیوەست نەکراوە — URL و anon key لە کۆدەکەدا زیادبکە (سەرەتای script tag).
+          Supabase هێشتا پەیوەست نەکراوە — URL و publishable key لە کۆدەکەدا زیادبکە (سەرەتای script tag).
         </div>
         <p class="admin-login-footnote">GLOBALL CLOUD · SECURE ACCESS</p>
       </div>
@@ -1573,14 +1573,15 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
    1. Create a free project at https://supabase.com
    2. Run supabase-schema.sql in its SQL Editor
    3. Paste your Project URL + anon public key below (Project Settings → API)
-   The anon key is DESIGNED to be public / embedded in frontend code — it is safe
+   The publishable key is DESIGNED to be public / embedded in frontend code — it is safe
    to publish, since access is enforced by the Row Level Security policies in the
    schema file, not by hiding this key. Never put your "service_role" key here. */
 const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFoc2xpZm50aGl3ZmttYXN3am5vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0NzAzODYsImV4cCI6MjEwMDA0NjM4Nn0.ln7Txjtyc-tLqx9s2O6-8-lk2XkyEb7bY8Iz3LYLdSc';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
 const sb = (SUPABASE_URL.startsWith('http') && window.supabase)
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
   : null;
+if (sb) window.sb = sb;
 const STEP_KEYS = ['placed','pickedUp','transit','customs','outForDelivery','delivered'];
 
 /* ================= OWNER NOTIFICATIONS =================
@@ -1913,21 +1914,76 @@ function escapeHtml(str){
   if(str===null || str===undefined) return '';
   return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-/* USD → IQD dual-currency display. Rate is staff-editable (see finance panel) and
-   saved locally so it survives reloads — no code changes needed when the market rate moves. */
-function getExchangeRate(){
-  const saved = Number(localStorage.getItem('gc_usd_iqd_rate'));
-  return saved > 0 ? saved : 1500;
-}
-function setExchangeRate(val){
+/* USD → IQD dual-currency display. Rate is shared through Supabase when
+   available, with localStorage kept as an offline fallback cache. */
+const EXCHANGE_RATE_DEFAULT = 1500;
+const EXCHANGE_RATE_STORAGE_KEY = 'gc_usd_iqd_rate';
+let exchangeRateState = { value: EXCHANGE_RATE_DEFAULT, loaded: false, loading: null };
+
+function normalizeExchangeRate(val){
   const n = Number(val);
-  if(!n || n <= 0) return false;
-  localStorage.setItem('gc_usd_iqd_rate', String(n));
+  return Number.isFinite(n) && n > 0 ? Math.round(n) : null;
+}
+function setExchangeRateLocal(val){
+  const n = normalizeExchangeRate(val);
+  if(!n) return false;
+  exchangeRateState.value = n;
+  try{ localStorage.setItem(EXCHANGE_RATE_STORAGE_KEY, String(n)); }catch(e){}
   return true;
 }
-function saveExchangeRate(){
+function getExchangeRate(){
+  return normalizeExchangeRate(exchangeRateState.value) || EXCHANGE_RATE_DEFAULT;
+}
+async function loadExchangeRate(){
+  if(exchangeRateState.loading) return exchangeRateState.loading;
+  exchangeRateState.loading = (async ()=>{
+    // Start with any locally cached value so the UI never jumps to an empty state.
+    try{
+      const saved = normalizeExchangeRate(localStorage.getItem(EXCHANGE_RATE_STORAGE_KEY));
+      if(saved) exchangeRateState.value = saved;
+    }catch(e){}
+
+    if(!sb){
+      exchangeRateState.loaded = true;
+      return exchangeRateState.value;
+    }
+
+    const { data, error } = await sb
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'usd_iqd_rate')
+      .maybeSingle();
+
+    if(!error && data && data.value !== null && data.value !== undefined){
+      const n = normalizeExchangeRate(data.value);
+      if(n) setExchangeRateLocal(n);
+    }
+
+    exchangeRateState.loaded = true;
+    return exchangeRateState.value;
+  })().finally(()=>{ exchangeRateState.loading = null; });
+  return exchangeRateState.loading;
+}
+async function setExchangeRate(val){
+  const prev = getExchangeRate();
+  if(!setExchangeRateLocal(val)) return false;
+
+  if(sb){
+    const payload = { key: 'usd_iqd_rate', value: exchangeRateState.value, updated_at: new Date().toISOString() };
+    const { error } = await sb.from('app_settings').upsert(payload, { onConflict: 'key' });
+    if(error){
+      setExchangeRateLocal(prev);
+      console.error('Failed to persist exchange rate:', error);
+      return false;
+    }
+  }
+
+  return true;
+}
+async function saveExchangeRate(){
   const val = document.getElementById('exchangeRateInput').value;
-  if(!setExchangeRate(val)){ showToast('ژمارەیەکی ڕاست بنووسە.', 'error'); return; }
+  const ok = await setExchangeRate(val);
+  if(!ok){ showToast('ژمارەیەکی ڕاست بنووسە یان Supabase نەگەیشت.', 'error'); return; }
   showToast('نرخی دراو نوێکرایەوە.', 'success');
   logActivity('update_exchange_rate', null, 'rate='+val);
   const wrap = document.getElementById('adminPanel-finance');
@@ -4332,7 +4388,7 @@ async function submitNewShipment(){
 function financeRowsHTML(shipments){
   const listTitle = `<div class="admin-section-title"><svg><use href="#i-card"></use></svg><span>دارایی بارەکان</span></div>
   <div class="admin-row" style="margin-bottom:16px; background:var(--surface-2);">
-    <div class="admin-row-main"><b>نرخی دراوی دۆلار بۆ دینار</b><span class="hint">ئێستا: 1 USD = ${getExchangeRate().toLocaleString()} IQD — بەردەوام لەگۆڕاندایە، ڕۆژانە نوێی بکەرەوە</span></div>
+    <div class="admin-row-main"><b>نرخی دراوی دۆلار بۆ دینار</b><span class="hint">ئێستا: 1 USD = ${getExchangeRate().toLocaleString()} IQD — rate ـەکە لە Supabase ـدا هاوبەشە و بۆ هەموو staff یکسانە</span></div>
     <div style="display:flex; gap:8px; align-items:center;">
       <input class="field" type="number" id="exchangeRateInput" value="${getExchangeRate()}" style="max-width:120px;" placeholder="1500">
       <button class="btn btn-outline" style="padding:10px 16px;" onclick="saveExchangeRate()">نوێکردنەوە</button>
@@ -4557,6 +4613,7 @@ async function init(){
   document.documentElement.dir = currentLang==='ku' ? 'rtl' : 'ltr';
   setThemeIcon();
 
+  await loadExchangeRate();
   await initShipments();
   applyI18n();
   await updateNavAuthState();
