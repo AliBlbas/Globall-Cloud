@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#061428">
+  <meta name="theme-color" content="#06111f">
   <meta name="color-scheme" content="dark">
-  <title>Globall Cloud — Accounts Console</title>
+  <meta name="description" content="Globall Cloud secure staff operations console">
+  <title>Globall Cloud — Operations Console</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -14,282 +15,420 @@
   <script src="form-validation.js"></script>
   <link rel="stylesheet" href="form-validation-styles.css">
   <style>
-    :root{
-      --bg:#061428;--bg2:#0b1a30;--panel:#102742;--panel2:#173457;--line:#27486d;
-      --text:#f5f9fd;--muted:#9db4d1;--accent:#00c2d9;--accent2:#4fe3f0;--good:#2ed27f;--warn:#f0a83a;--bad:#e5533d;
-      --shadow:0 18px 40px rgba(0,0,0,.28);--radius:22px;--font:'Vazirmatn',sans-serif;--mono:'JetBrains Mono',monospace;
-      /* form-validation-styles.css ships with index.html's token names — alias
-         the two it needs onto this page's own tokens rather than duplicating
-         the stylesheet. */
-      --teal-l:var(--accent2);--radius-m:16px;
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;background:radial-gradient(circle at 12% -10%, rgba(0,194,217,.12), transparent 35%),linear-gradient(180deg,var(--bg),#08111e 80%);color:var(--text);font-family:var(--font)}
-    body{padding:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom));overflow-x:hidden}
-    a{color:inherit;text-decoration:none}
-    button,input,select,textarea{font:inherit;color:inherit}
-    .shell{max-width:1420px;margin:0 auto;display:grid;gap:18px}
-    .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
-    .brand{display:flex;align-items:center;gap:14px;min-width:0}
-    .mark{width:54px;height:54px;border-radius:18px;background:linear-gradient(135deg,var(--accent2),var(--accent));display:grid;place-items:center;color:#03181d;font-weight:900;font-size:18px;box-shadow:0 14px 28px rgba(0,194,217,.18)}
-    .eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);font-weight:900}
-    .title{font-size:22px;font-weight:900;line-height:1.15;margin-top:3px}
-    .subtitle{color:var(--muted);font-size:14px;margin-top:4px}
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .btn{border:1px solid transparent;border-radius:999px;padding:12px 16px;cursor:pointer;font-weight:800;background:transparent;transition:.2s;min-height:46px}
-    .btn:hover{transform:translateY(-1px)} .btn:active{transform:translateY(0) scale(.99)}
-    .btn-primary{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#03181d}
-    .btn-outline{border-color:var(--line);background:rgba(255,255,255,.02)}
-    .btn-danger{background:var(--bad);color:#fff}
-    .hero,.panel{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid rgba(255,255,255,.08);border-radius:28px;box-shadow:var(--shadow)}
-    .hero{padding:18px}
-    .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:stretch}
-    .panel{padding:18px}
-    .section-title{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-    .section-title h2{margin:0;font-size:20px;line-height:1.2}
-    .section-title p{margin:4px 0 0;color:var(--muted);font-size:14px;line-height:1.6}
-    .notice{padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--muted);line-height:1.7}
-    .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);font-weight:800;white-space:nowrap}
-    .badge-super{background:rgba(46,210,127,.14);color:#8ef0b6;border-color:rgba(46,210,127,.35)}
-    .badge-admin{background:rgba(0,194,217,.14);color:#9feef8;border-color:rgba(0,194,217,.35)}
-    .badge-accountant{background:rgba(240,168,58,.14);color:#ffd182;border-color:rgba(240,168,58,.35)}
-    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-    .stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px}
-    .stat b{display:block;font-size:28px;line-height:1;margin-bottom:6px}
-    .stat span{color:var(--muted);font-size:13px}
-    .chips,.tabs,.toolbar{display:flex;gap:8px;flex-wrap:wrap}
-    .chips{margin-top:14px}
-    .chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:12px;font-weight:800;color:#d7ebff}
-    .tabs{margin:16px 0 12px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
-    .tabs::-webkit-scrollbar{display:none}
-    .tab{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.02);cursor:pointer;font-weight:800;color:var(--muted);white-space:nowrap}
-    .tab.active{background:var(--accent);border-color:transparent;color:#03181d}
-    .layout{display:grid;grid-template-columns:minmax(320px,380px) 1fr;gap:18px;align-items:start}
-    .stack{display:grid;gap:18px}
-    .form-row{margin-bottom:12px}
-    .label{display:block;font-size:13px;color:var(--muted);font-weight:800;margin-bottom:7px}
-    .field{width:100%;padding:13px 14px;border-radius:14px;border:1.5px solid var(--line);background:rgba(255,255,255,.03);outline:none;transition:.2s}
-    .field:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,194,217,.14)}
-    .small{font-size:12px;color:var(--muted);line-height:1.6}
-    textarea.field{min-height:98px;resize:vertical}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .table-wrap{overflow:auto;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(8,16,29,.52)}
-    table{width:100%;border-collapse:collapse;min-width:920px}
-    th,td{padding:14px 12px;border-bottom:1px solid rgba(255,255,255,.08);text-align:start;vertical-align:top}
-    th{font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:#d5e8ff;background:rgba(255,255,255,.03)}
-    td{font-size:14px;color:var(--text)}
-    tr:hover td{background:rgba(255,255,255,.02)}
-    .mono{font-family:var(--mono)}
-    .ok,.warn,.bad{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:900}
-    .ok{background:rgba(46,210,127,.14);color:#8ef0b6}.warn{background:rgba(240,168,58,.16);color:#ffd182}.bad{background:rgba(229,83,61,.15);color:#ffaf9f}
-    .hidden{display:none !important}.loading{opacity:.72;pointer-events:none}
-    .receipt-files{display:flex;gap:10px;flex-wrap:wrap}.receipt-files img{width:78px;height:78px;object-fit:cover;border-radius:14px;border:1px solid rgba(255,255,255,.12)}
-    .list-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-    .search{min-width:240px;max-width:320px;width:100%}
-    .muted{color:var(--muted)}
-    .auth-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:18px}
-    .muted-box{padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
-    @media (max-width: 1080px){.hero-grid,.layout{grid-template-columns:1fr}}
-    @media (max-width: 640px){body{padding:12px}.hero,.panel{padding:16px}.title{font-size:19px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}.search{min-width:100%;max-width:100%}.top-actions{width:100%}.top-actions .btn{flex:1}}
-  </style>
+:root{
+  --gc-bg:#06111f;
+  --gc-bg-2:#091a2e;
+  --gc-sidebar:#071525;
+  --gc-surface:#0d2036;
+  --gc-surface-2:#102944;
+  --gc-surface-3:#143451;
+  --gc-line:rgba(151,190,226,.14);
+  --gc-line-strong:rgba(151,190,226,.24);
+  --gc-text:#f4f8fc;
+  --gc-muted:#8ea8c3;
+  --gc-muted-2:#6f8ba8;
+  --gc-cyan:#00c2d9;
+  --gc-cyan-2:#54e8f2;
+  --gc-green:#36d58a;
+  --gc-amber:#f2b34c;
+  --gc-red:#ef6a5b;
+  --gc-purple:#9c8cff;
+  --gc-shadow:0 24px 70px rgba(0,0,0,.28);
+  --gc-radius:22px;
+  --gc-radius-sm:14px;
+  --gc-font:'Vazirmatn',sans-serif;
+  --gc-mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box}
+html{min-height:100%;background:var(--gc-bg)}
+body{
+  margin:0;min-height:100%;background:
+  radial-gradient(circle at 88% -8%,rgba(0,194,217,.12),transparent 28%),
+  radial-gradient(circle at 4% 96%,rgba(78,117,255,.08),transparent 28%),
+  linear-gradient(180deg,#06111f 0%,#081626 100%);
+  color:var(--gc-text);font-family:var(--gc-font);overflow-x:hidden;
+}
+body,button,input,select,textarea{font-family:var(--gc-font)}
+button,input,select,textarea{color:inherit}
+button{border:0}
+a{color:inherit;text-decoration:none}
+svg{display:block}
+.hidden{display:none!important}
+.mono{font-family:var(--gc-mono);direction:ltr;text-align:start}
+.muted,.small{color:var(--gc-muted)}
+.small{font-size:12px;line-height:1.7}
+.loading{opacity:.65;pointer-events:none}
+.loading svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.app-shell{min-height:100vh;display:grid;grid-template-columns:280px minmax(0,1fr)}
+.sidebar{
+  position:sticky;top:0;height:100vh;z-index:50;display:flex;flex-direction:column;
+  padding:24px 18px;border-inline-end:1px solid var(--gc-line);
+  background:linear-gradient(180deg,rgba(7,21,37,.98),rgba(5,16,29,.98));
+  backdrop-filter:blur(18px);
+}
+.brand{display:flex;align-items:center;gap:12px;padding:2px 8px 22px}
+.brand-mark{
+  width:46px;height:46px;flex:0 0 46px;border-radius:15px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--gc-cyan-2),var(--gc-cyan));color:#03151a;
+  box-shadow:0 12px 30px rgba(0,194,217,.2);font-weight:900
+}
+.brand-copy{min-width:0}.brand-copy strong{display:block;font-size:16px;font-weight:900;letter-spacing:.2px}
+.brand-copy span{display:block;margin-top:2px;font-size:11px;color:var(--gc-muted);font-weight:600}
+.nav-label{padding:0 10px;margin:14px 0 8px;font-size:10px;letter-spacing:1.5px;color:var(--gc-muted-2);font-weight:900;text-transform:uppercase}
+.nav{display:grid;gap:6px}
+.nav-btn{
+  width:100%;display:flex;align-items:center;gap:11px;padding:12px 12px;border-radius:13px;
+  background:transparent;color:#a9bfd6;cursor:pointer;text-align:start;font-weight:800;
+  transition:background .18s ease,color .18s ease,transform .18s ease
+}
+.nav-btn:hover{background:rgba(255,255,255,.045);color:var(--gc-text);transform:translateX(-1px)}
+.nav-btn.active{background:linear-gradient(90deg,rgba(0,194,217,.16),rgba(0,194,217,.05));color:#dffcff;box-shadow:inset 3px 0 0 var(--gc-cyan)}
+.nav-btn .nav-icon{width:19px;height:19px;color:currentColor;opacity:.92}
+.nav-btn .nav-text{flex:1}.nav-btn .nav-count{font:700 10px var(--gc-mono);color:var(--gc-muted-2)}
+.sidebar-spacer{flex:1}
+.user-card{
+  margin-top:18px;padding:13px;border:1px solid var(--gc-line);border-radius:17px;
+  background:rgba(255,255,255,.025)
+}
+.user-row{display:flex;align-items:center;gap:10px}
+.avatar{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:rgba(0,194,217,.12);color:var(--gc-cyan-2);font-weight:900}
+.user-meta{min-width:0;flex:1}.user-meta strong{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.user-meta span{display:block;margin-top:2px;color:var(--gc-muted);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.role-badge{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:900}
+.badge-super{background:rgba(54,213,138,.12);color:#8ef0b8;border:1px solid rgba(54,213,138,.25)}
+.badge-admin{background:rgba(0,194,217,.12);color:#9ceef6;border:1px solid rgba(0,194,217,.25)}
+.badge-accountant{background:rgba(242,179,76,.12);color:#ffd98d;border:1px solid rgba(242,179,76,.25)}
+
+.main{min-width:0;padding:24px 28px 40px}
+.main-inner{max-width:1500px;margin:0 auto}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
+.topbar-left{display:flex;align-items:center;gap:12px;min-width:0}
+.mobile-menu{display:none}
+.page-heading{min-width:0}.eyebrow{font-size:10px;letter-spacing:1.7px;text-transform:uppercase;color:var(--gc-cyan-2);font-weight:900}
+.page-heading h1{margin:3px 0 0;font-size:24px;line-height:1.2;font-weight:900;letter-spacing:-.4px}
+.page-heading p{margin:5px 0 0;color:var(--gc-muted);font-size:12px}
+.top-actions{display:flex;align-items:center;gap:8px}
+.icon-btn,.btn{
+  min-height:42px;border:1px solid var(--gc-line);background:rgba(255,255,255,.025);border-radius:12px;
+  cursor:pointer;transition:.18s ease;font-weight:800
+}
+.icon-btn{width:42px;display:grid;place-items:center;color:#b9cee3}
+.icon-btn:hover,.btn-outline:hover{border-color:var(--gc-line-strong);background:rgba(255,255,255,.055);transform:translateY(-1px)}
+.icon-btn svg{width:18px;height:18px}
+.btn{padding:10px 15px}.btn svg{width:17px;height:17px}
+.btn-primary{border-color:transparent;background:linear-gradient(135deg,var(--gc-cyan-2),var(--gc-cyan));color:#03161a;box-shadow:0 10px 24px rgba(0,194,217,.12)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(0,194,217,.18)}
+.btn-danger{background:rgba(239,106,91,.1);color:#ff9f95;border-color:rgba(239,106,91,.2)}
+.btn-danger:hover{background:rgba(239,106,91,.16)}
+.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+.auth-gate{max-width:680px;margin:8vh auto 0}
+.auth-card,.panel{
+  border:1px solid var(--gc-line);background:linear-gradient(180deg,rgba(16,41,68,.94),rgba(9,26,46,.96));
+  border-radius:var(--gc-radius);box-shadow:var(--gc-shadow)
+}
+.auth-card{padding:32px}
+.auth-brand{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+.auth-brand .brand-mark{width:52px;height:52px;flex-basis:52px}
+.auth-title{margin:0;font-size:25px;font-weight:900}.auth-sub{margin:7px 0 0;color:var(--gc-muted);font-size:13px;line-height:1.7}
+.auth-security{display:flex;gap:8px;align-items:center;margin-top:18px;padding:10px 12px;border-radius:12px;background:rgba(54,213,138,.06);border:1px solid rgba(54,213,138,.14);color:#9de9be;font-size:11px;font-weight:700}
+.auth-security svg{width:16px;height:16px;flex:none}
+.login-form{display:grid;gap:14px;margin-top:24px}
+
+.view{display:none}.view.active{display:block}
+.dashboard-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.75fr);gap:18px}
+.panel{padding:20px}
+.panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+.panel-head h2{margin:0;font-size:16px;font-weight:900}.panel-head p{margin:5px 0 0;color:var(--gc-muted);font-size:11px;line-height:1.7}
+.live-dot{display:inline-flex;align-items:center;gap:6px;color:#9de9be;font-size:10px;font-weight:900}
+.live-dot:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--gc-green);box-shadow:0 0 0 4px rgba(54,213,138,.1)}
+.hero-panel{position:relative;overflow:hidden;min-height:230px;padding:25px;background:
+  radial-gradient(circle at 82% 12%,rgba(0,194,217,.18),transparent 34%),
+  linear-gradient(135deg,#123454,#0b2038 65%,#0a1b30)}
+.hero-panel:after{content:"";position:absolute;width:220px;height:220px;border:1px solid rgba(84,232,242,.12);border-radius:50%;inset-inline-end:-80px;bottom:-120px;box-shadow:0 0 0 30px rgba(84,232,242,.025),0 0 0 60px rgba(84,232,242,.018)}
+.hero-kicker{display:inline-flex;padding:6px 9px;border-radius:999px;background:rgba(0,194,217,.1);border:1px solid rgba(0,194,217,.2);color:var(--gc-cyan-2);font-size:10px;font-weight:900}
+.hero-panel h2{position:relative;z-index:1;max-width:620px;margin:15px 0 8px;font-size:26px;line-height:1.35;font-weight:900}
+.hero-panel p{position:relative;z-index:1;max-width:620px;margin:0;color:#abc2d9;font-size:12px;line-height:1.9}
+.hero-actions{position:relative;z-index:1;display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.quick-action{
+  display:flex;align-items:center;gap:11px;min-height:92px;padding:13px;border:1px solid var(--gc-line);
+  border-radius:16px;background:rgba(255,255,255,.025);cursor:pointer;text-align:start;transition:.18s ease
+}
+.quick-action:hover{transform:translateY(-2px);border-color:rgba(0,194,217,.28);background:rgba(0,194,217,.05)}
+.quick-icon{width:38px;height:38px;flex:none;display:grid;place-items:center;border-radius:12px;background:rgba(0,194,217,.1);color:var(--gc-cyan-2)}
+.quick-icon svg{width:19px;height:19px}
+.quick-copy{min-width:0}.quick-copy strong{display:block;font-size:12px;font-weight:900}.quick-copy span{display:block;margin-top:3px;color:var(--gc-muted);font-size:10px;line-height:1.5}
+
+.stats-section{margin-top:18px}.stats-section h3{margin:0 0 10px;font-size:11px;color:#b9cee3;font-weight:900}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.stat-card{min-width:0;padding:15px;border:1px solid var(--gc-line);border-radius:16px;background:rgba(255,255,255,.025)}
+.stat-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.stat-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(0,194,217,.08);color:var(--gc-cyan-2)}.stat-icon svg{width:15px;height:15px}
+.stat-value{margin-top:12px;font-size:22px;font-weight:900;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stat-label{margin-top:6px;color:var(--gc-muted);font-size:10px}.stat-note{margin-top:7px;color:var(--gc-muted-2);font-size:9px}
+.stat-green .stat-icon{background:rgba(54,213,138,.08);color:#83e8b0}.stat-amber .stat-icon{background:rgba(242,179,76,.08);color:#ffd17f}.stat-purple .stat-icon{background:rgba(156,140,255,.09);color:#bdb3ff}
+
+.data-view .panel{padding:18px}
+.data-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:15px}
+.data-title h2{margin:0;font-size:17px;font-weight:900}.data-title p{margin:4px 0 0;color:var(--gc-muted);font-size:11px}
+.search-wrap{position:relative;min-width:min(100%,330px)}.search-wrap svg{position:absolute;inset-inline-start:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--gc-muted-2);pointer-events:none}
+.search{width:100%;padding:11px 13px 11px 38px;min-height:42px;border:1px solid var(--gc-line);border-radius:12px;background:rgba(0,0,0,.14);outline:none}.search:focus,.field:focus{border-color:rgba(0,194,217,.5);box-shadow:0 0 0 3px rgba(0,194,217,.08)}
+.data-layout{display:grid;grid-template-columns:minmax(330px,.75fr) minmax(0,1.7fr);gap:16px;align-items:start}
+.form-panel{position:sticky;top:18px}
+.form-panel .panel-head{margin-bottom:12px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-row{min-width:0}.form-row.full{grid-column:1/-1}
+.label{display:block;margin:0 0 6px;color:#bdd0e3;font-size:10px;font-weight:800}
+.field{width:100%;min-height:42px;padding:10px 12px;border:1px solid var(--gc-line);border-radius:11px;background:rgba(0,0,0,.13);outline:none;color:var(--gc-text)}
+textarea.field{min-height:86px;resize:vertical}
+select.field{appearance:auto}
+.form-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.table-panel{min-width:0}
+.table-wrap{overflow:auto;border:1px solid var(--gc-line);border-radius:15px}
+table{width:100%;border-collapse:separate;border-spacing:0;min-width:820px}
+th,td{padding:12px 13px;text-align:start;border-bottom:1px solid var(--gc-line);vertical-align:middle;font-size:11px}
+th{background:#0a1b2f;color:#8fa9c3;font-size:9px;letter-spacing:.7px;text-transform:uppercase;font-weight:900;white-space:nowrap}
+tr:last-child td{border-bottom:0}tbody tr:hover td{background:rgba(255,255,255,.018)}
+.ok,.warn{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;font-size:9px;font-weight:900;white-space:nowrap}
+.ok{color:#8cebb5;background:rgba(54,213,138,.09)}.warn{color:#ffd184;background:rgba(242,179,76,.09)}
+.receipt-files{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}.receipt-files a{display:block}.receipt-files img{width:36px;height:36px;object-fit:cover;border-radius:8px;border:1px solid var(--gc-line)}
+.empty-state{text-align:center;padding:34px 18px;color:var(--gc-muted);font-size:12px}
+.muted-box{padding:12px 14px;border:1px solid var(--gc-line);border-radius:13px;background:rgba(255,255,255,.025);color:var(--gc-muted);font-size:11px;line-height:1.7}
+.form-msg{min-height:20px;margin:9px 0 0;font-size:11px}
+.notice{padding:12px 14px;border-radius:13px;background:rgba(0,194,217,.05);border:1px solid rgba(0,194,217,.12);color:#a9d6df;font-size:11px;line-height:1.8}
+.mobile-backdrop{display:none}
+
+@media (max-width:1180px){
+  .app-shell{grid-template-columns:235px minmax(0,1fr)}
+  .main{padding-inline:20px}
+  .dashboard-grid{grid-template-columns:1fr}
+  .data-layout{grid-template-columns:1fr}
+  .form-panel{position:static}
+}
+@media (max-width:820px){
+  .app-shell{display:block}
+  .sidebar{position:fixed;inset-block:0;inset-inline-start:0;width:280px;transform:translateX(110%);transition:transform .22s ease;box-shadow:30px 0 80px rgba(0,0,0,.35)}
+  [dir="rtl"] .sidebar{transform:translateX(110%)} [dir="rtl"] .sidebar.open{transform:translateX(0)}
+  .mobile-backdrop{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.48);backdrop-filter:blur(2px)}
+  .mobile-backdrop.show{display:block}
+  .main{padding:16px 14px 30px}.mobile-menu{display:grid}
+  .topbar{margin-bottom:18px}.page-heading h1{font-size:20px}.page-heading p{display:none}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .quick-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:560px){
+  .auth-card{padding:22px}.auth-gate{margin-top:5vh}
+  .hero-panel{padding:20px}.hero-panel h2{font-size:21px}
+  .top-actions .btn-outline{display:none}
+  .form-grid{grid-template-columns:1fr}.form-row.full{grid-column:auto}
+  .quick-grid{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr 1fr;gap:8px}.stat-card{padding:12px}.stat-value{font-size:19px}
+}
+</style>
 </head>
 <body>
-  <div class="shell">
-    <header class="topbar">
-      <div class="brand">
-        <div class="mark">GC</div>
-        <div>
-          <div class="eyebrow">Globall Cloud Accounts Console</div>
-          <div class="title">Customer accounts, staff access, warehouse receipts, and activity logs in one controlled place</div>
-          <div class="subtitle">China · UAE · Iraq logistics operations</div>
-        </div>
-      </div>
-      <div class="toolbar top-actions">
-        <button class="btn btn-outline" id="refreshBtn">Refresh</button>
-        <button class="btn btn-danger hidden" id="logoutBtn">Sign out</button>
-      </div>
-    </header>
 
-    <section class="hero">
-      <div class="hero-grid">
-        <div class="panel" style="box-shadow:none;background:transparent;border:0;padding:0">
-          <div class="section-title">
-            <div>
-              <h2>Professional staff portal</h2>
-              <p>Everything is grouped into one safe console for internal operations.</p>
+<div class="mobile-backdrop" id="mobileBackdrop"></div>
+<div id="authGate" class="auth-gate">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="brand-mark">GC</div>
+      <div>
+        <h1 class="auth-title">Globall Cloud Console</h1>
+        <p class="auth-sub">Secure operations workspace for customer accounts, staff access and warehouse intake.</p>
+      </div>
+    </div>
+    <div class="auth-security">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      Supabase authentication is required. No operational data is shown before sign-in.
+    </div>
+    <form id="staffLoginForm" class="login-form">
+      <div class="form-row"><label class="label" for="loginEmail">Staff email</label><input class="field" type="email" id="loginEmail" autocomplete="username" required placeholder="name@company.com"></div>
+      <div class="form-row"><label class="label" for="loginPassword">Password</label><input class="field" type="password" id="loginPassword" autocomplete="current-password" required placeholder="••••••••"></div>
+      <button class="btn btn-primary" type="submit">Sign in to console</button>
+      <p id="loginMsg" class="form-msg"></p>
+    </form>
+  </div>
+</div>
+
+<div id="consoleShell" class="app-shell hidden">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">GC</div>
+      <div class="brand-copy"><strong>Globall Cloud</strong><span>Operations Console</span></div>
+    </div>
+
+    <div class="nav-label">Workspace</div>
+    <nav class="nav" aria-label="Console navigation">
+      <button class="nav-btn tab active" data-tab="dashboard" type="button">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg><span class="nav-text">Dashboard</span>
+      </button>
+      <button class="nav-btn tab" data-tab="customers" type="button">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 20v-1.5a4.5 4.5 0 0 0-4.5-4.5h-3A4.5 4.5 0 0 0 4 18.5V20"/><circle cx="10" cy="7.5" r="3.5"/><path d="M16 11a3.5 3.5 0 1 0 0-7"/><path d="M17 14.2a4.5 4.5 0 0 1 3 4.3V20"/></svg><span class="nav-text">Customers</span><span class="nav-count" id="customerNavCount">—</span>
+      </button>
+      <button class="nav-btn tab" data-tab="staff" type="button">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20v-1.5A4.5 4.5 0 0 1 8.5 14h7a4.5 4.5 0 0 1 4.5 4.5V20"/><circle cx="12" cy="7" r="3.5"/></svg><span class="nav-text">Staff access</span><span class="nav-count" id="staffNavCount">—</span>
+      </button>
+      <button class="nav-btn tab" data-tab="receipts" type="button">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/></svg><span class="nav-text">Warehouse receipts</span><span class="nav-count" id="receiptNavCount">—</span>
+      </button>
+      <button class="nav-btn tab" data-tab="logs" type="button">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg><span class="nav-text">Activity logs</span><span class="nav-count" id="logNavCount">—</span>
+      </button>
+    </nav>
+
+    <div class="nav-label">Session</div>
+    <div class="toolbar">
+      <button id="refreshBtn" class="btn btn-outline" type="button" style="flex:1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 11a8 8 0 0 0-14.7-4L4 9"/><path d="M4 4v5h5"/><path d="M4 13a8 8 0 0 0 14.7 4L20 15"/><path d="M20 20v-5h-5"/></svg>Refresh
+      </button>
+      <button id="logoutBtn" class="btn btn-danger hidden" type="button" title="Sign out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 5H5v14h5"/><path d="M14 8l4 4-4 4"/><path d="M18 12H9"/></svg>
+      </button>
+    </div>
+
+    <div class="sidebar-spacer"></div>
+    <div class="user-card">
+      <div class="user-row">
+        <div class="avatar" id="userAvatar">GC</div>
+        <div class="user-meta"><strong id="sidebarUserName">Staff</strong><span id="sidebarUserEmail">Not signed in</span></div>
+      </div>
+      <span id="roleBadge" class="role-badge hidden">Guest access</span>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="main-inner">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn mobile-menu" id="mobileMenuBtn" type="button" aria-label="Open navigation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </button>
+          <div class="page-heading">
+            <div class="eyebrow">Globall Cloud / Staff</div>
+            <h1 id="pageTitle">Operations dashboard</h1>
+            <p id="pageSubtitle">Live overview of your logistics operation.</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <span class="live-dot">Live workspace</span>
+        </div>
+      </header>
+
+      <section id="dashboardView" class="view active">
+        <div class="dashboard-grid">
+          <div class="panel hero-panel">
+            <span class="hero-kicker">CONTROL CENTER</span>
+            <h2>Run customer accounts and warehouse operations from one place.</h2>
+            <p>Keep the public website focused on customers while staff handle accounts, receipts, permissions and operational records here.</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary quick-action-trigger" data-target="customers" type="button">New customer</button>
+              <button class="btn btn-outline quick-action-trigger" data-target="receipts" type="button">Start receipt intake</button>
             </div>
           </div>
-          <div class="notice">
-            Staff-only console. Customer sign-up stays disabled in Supabase Auth; management creates and edits accounts here.
-            <div id="roleBadge" class="badge badge-admin hidden" style="margin-top:10px">—</div>
-          </div>
-          <div class="chips">
-            <span class="chip">Customer accounts</span>
-            <span class="chip">Staff access</span>
-            <span class="chip">Warehouse receipts</span>
-            <span class="chip">Activity logs</span>
-            <span class="chip">Invite / reset flows</span>
-          </div>
-          <div class="tabs">
-            <button class="tab active" data-tab="dashboard">Dashboard</button>
-            <button class="tab" data-tab="customers">Customers</button>
-            <button class="tab" data-tab="staff">Staff</button>
-            <button class="tab" data-tab="receipts">Warehouse Receipts</button>
-            <button class="tab" data-tab="logs">Activity Logs</button>
-          </div>
-          <div id="authGate" class="auth-box">
-            <div class="section-title">
-              <div>
-                <h2>Staff login</h2>
-                <p>Use your staff email and password to open the management tools.</p>
-              </div>
+          <div class="panel">
+            <div class="panel-head"><div><h2>Quick actions</h2><p>Jump directly into the most-used workflows.</p></div></div>
+            <div class="quick-grid">
+              <button class="quick-action" data-target="customers" type="button"><div class="quick-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 20v-1.5a4.5 4.5 0 0 0-4.5-4.5h-3A4.5 4.5 0 0 0 4 18.5V20"/><circle cx="10" cy="7.5" r="3.5"/><path d="M18 8v6M15 11h6"/></svg></div><div class="quick-copy"><strong>Customer accounts</strong><span>Create, edit and manage customers.</span></div></button>
+              <button class="quick-action" data-target="staff" type="button"><div class="quick-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="7" r="3.5"/><path d="M4 20v-1.5A4.5 4.5 0 0 1 8.5 14h7a4.5 4.5 0 0 1 4.5 4.5V20"/><path d="M19 4v5M16.5 6.5h5"/></svg></div><div class="quick-copy"><strong>Staff access</strong><span>Roles, branches and staff accounts.</span></div></button>
+              <button class="quick-action" data-target="receipts" type="button"><div class="quick-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M8.5 8h7M8.5 12h7"/></svg></div><div class="quick-copy"><strong>Warehouse intake</strong><span>Register batches and upload photos.</span></div></button>
+              <button class="quick-action" data-target="logs" type="button"><div class="quick-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></div><div class="quick-copy"><strong>Activity logs</strong><span>Review recent staff actions.</span></div></button>
             </div>
-            <form id="staffLoginForm">
-              <div class="grid">
-                <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="loginEmail" required></div>
-                <div class="form-row"><label class="label">Password</label><input class="field" type="password" id="loginPassword" required></div>
+          </div>
+        </div>
+
+        <div class="stats-section">
+          <h3>Business performance · last 30 days</h3>
+          <div class="stats" id="analyticsStatsRow"></div>
+        </div>
+
+        <div class="stats-section">
+          <h3>Operational records · live totals</h3>
+          <div class="stats" id="recordsStatsRow"></div>
+        </div>
+      </section>
+
+      <section id="dataView" class="view">
+        <div class="data-toolbar">
+          <div class="data-title"><h2 id="listTitle">Overview</h2><p id="listSubtitle">Latest accounts and records.</p></div>
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.8" cy="10.8" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+            <input class="search" id="searchBox" placeholder="Search records..." autocomplete="off">
+          </div>
+        </div>
+
+        <div id="customerFormPanel" class="data-layout hidden">
+          <div class="panel form-panel">
+            <div class="panel-head"><div><h2>Customer account</h2><p>Create a new customer or edit an existing record.</p></div></div>
+            <form id="customerForm" novalidate>
+              <input type="hidden" id="customerId">
+              <div class="form-grid">
+                <div class="form-row"><label class="label" for="customerName">Customer name</label><input class="field" id="customerName" data-validate="required"></div>
+                <div class="form-row"><label class="label" for="customerEmail">Email</label><input class="field" type="email" id="customerEmail" data-validate="email"></div>
+                <div class="form-row"><label class="label" for="customerPhone">Phone</label><input class="field" id="customerPhone" data-validate="required,phone"></div>
+                <div class="form-row"><label class="label" for="customerPhone2">Phone 2</label><input class="field" id="customerPhone2" data-validate="phone"></div>
+                <div class="form-row"><label class="label" for="customerCity">City</label><input class="field" id="customerCity"></div>
+                <div class="form-row"><label class="label" for="customerDelivery">Delivery location</label><input class="field" id="customerDelivery"></div>
+                <div class="form-row"><label class="label" for="customerManager">Manager</label><select class="field" id="customerManager"></select></div>
+                <div class="form-row"><label class="label" for="customerStatus">Status</label><select class="field" id="customerStatus"><option value="true">Active</option><option value="false">Inactive</option></select></div>
+                <div class="form-row full"><label class="label" for="customerNote">Note</label><textarea class="field" id="customerNote"></textarea></div>
+                <div class="form-row"><label class="label" for="customerInvite">Onboarding</label><select class="field" id="customerInvite"><option value="true">Send invite email</option><option value="false">Use temporary password</option></select></div>
+                <div class="form-row"><label class="label" for="customerPassword">Temporary password</label><input class="field" id="customerPassword" autocomplete="new-password" placeholder="Optional"></div>
               </div>
-              <div class="toolbar"><button class="btn btn-primary" type="submit">Sign in</button></div>
-              <p id="loginMsg" class="small"></p>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save customer</button><button class="btn btn-outline" type="button" id="customerClearBtn">Clear</button></div>
+              <p id="customerMsg" class="form-msg"></p>
             </form>
           </div>
+          <div class="panel table-panel"><div class="panel-head"><div><h2>Customer directory</h2><p>Accounts, shipment totals and outstanding balance.</p></div></div><div class="table-wrap"><table><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table></div></div>
         </div>
 
-        <div class="panel">
-          <div class="section-title">
-            <div>
-              <h2 id="whoami">Not signed in</h2>
-              <p id="whoamiSub">Waiting for staff authentication</p>
-            </div>
+        <div id="staffFormPanel" class="data-layout hidden">
+          <div class="panel form-panel">
+            <div class="panel-head"><div><h2>Staff access</h2><p>Manage operational roles and branch permissions.</p></div></div>
+            <form id="staffForm" novalidate>
+              <input type="hidden" id="staffId">
+              <div class="form-grid">
+                <div class="form-row"><label class="label" for="staffFullName">Full name</label><input class="field" id="staffFullName" data-validate="required"></div>
+                <div class="form-row"><label class="label" for="staffEmail">Email</label><input class="field" type="email" id="staffEmail" data-validate="required,email"></div>
+                <div class="form-row"><label class="label" for="staffRole">Role</label><select class="field" id="staffRole"><option value="admin">admin</option><option value="accountant">accountant</option><option value="super_admin">super_admin</option></select></div>
+                <div class="form-row"><label class="label" for="staffBranch">Branch</label><select class="field" id="staffBranch"><option value="all">all</option><option value="dubai">dubai</option><option value="china">china</option><option value="erbil">erbil</option></select></div>
+                <div class="form-row"><label class="label" for="staffInvite">Onboarding</label><select class="field" id="staffInvite"><option value="true">Send invite email</option><option value="false">Use temporary password</option></select></div>
+                <div class="form-row"><label class="label" for="staffPassword">Temporary password</label><input class="field" id="staffPassword" autocomplete="new-password" placeholder="Optional"></div>
+              </div>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save staff</button><button class="btn btn-outline" type="button" id="staffClearBtn">Clear</button></div>
+              <p id="staffMsg" class="form-msg"></p>
+            </form>
           </div>
-          <div class="section-title" style="margin-top:6px">
-            <div>
-              <h2>Record counts</h2>
-              <p>Live totals for customers, staff, warehouse receipts, and activity logs.</p>
-            </div>
-          </div>
-          <div class="stats" id="recordsStatsRow">
-            <div class="stat"><b>—</b><span>Customers</span></div>
-            <div class="stat"><b>—</b><span>Staff</span></div>
-            <div class="stat"><b>—</b><span>Receipts</span></div>
-            <div class="stat"><b>—</b><span>Logs</span></div>
-          </div>
-          <div class="muted-box" style="margin-top:14px">
-            <div class="small">Tip</div>
-            <div style="margin-top:4px;font-weight:800">Keep this page for staff only and create customer accounts from here.</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="layout">
-      <div class="stack">
-        <div class="panel">
-          <div class="section-title">
-            <div>
-              <h2>Quick actions</h2>
-              <p>Create or update accounts, then manage warehouse intake.</p>
-            </div>
-          </div>
-
-          <form id="customerForm" class="tab-pane hidden" novalidate>
-            <input type="hidden" id="customerId">
-            <div class="grid">
-              <div class="form-row"><label class="label">Customer name</label><input class="field" id="customerName" data-validate="required"></div>
-              <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="customerEmail" data-validate="email"></div>
-            </div>
-            <div class="grid">
-              <div class="form-row"><label class="label">Phone</label><input class="field" id="customerPhone" data-validate="required,phone"></div>
-              <div class="form-row"><label class="label">Phone 2</label><input class="field" id="customerPhone2" data-validate="phone"></div>
-            </div>
-            <div class="grid">
-              <div class="form-row"><label class="label">City</label><input class="field" id="customerCity"></div>
-              <div class="form-row"><label class="label">Delivery location</label><input class="field" id="customerDelivery"></div>
-            </div>
-            <div class="grid">
-              <div class="form-row"><label class="label">Manager</label><select class="field" id="customerManager"></select></div>
-              <div class="form-row"><label class="label">Status</label><select class="field" id="customerStatus"><option value="true">Active</option><option value="false">Inactive</option></select></div>
-            </div>
-            <div class="form-row"><label class="label">Note</label><textarea class="field" id="customerNote"></textarea></div>
-            <div class="grid">
-              <div class="form-row"><label class="label">Invite only</label><select class="field" id="customerInvite"><option value="true">Send invite email</option><option value="false">Create temporary password</option></select></div>
-              <div class="form-row"><label class="label">Temporary password</label><input class="field" id="customerPassword" placeholder="Leave blank to auto-generate"></div>
-            </div>
-            <div class="toolbar">
-              <button class="btn btn-primary" type="submit">Save customer</button>
-              <button class="btn btn-outline" type="button" id="customerClearBtn">Clear</button>
-            </div>
-            <p id="customerMsg" class="small"></p>
-          </form>
-
-          <form id="staffForm" class="tab-pane hidden" novalidate>
-            <input type="hidden" id="staffId">
-            <div class="grid">
-              <div class="form-row"><label class="label">Full name</label><input class="field" id="staffFullName" data-validate="required"></div>
-              <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="staffEmail" data-validate="required,email"></div>
-            </div>
-            <div class="grid">
-              <div class="form-row"><label class="label">Role</label><select class="field" id="staffRole"><option value="admin">admin</option><option value="accountant">accountant</option><option value="super_admin">super_admin</option></select></div>
-              <div class="form-row"><label class="label">Branch</label><select class="field" id="staffBranch"><option value="all">all</option><option value="dubai">dubai</option><option value="china">china</option><option value="erbil">erbil</option></select></div>
-            </div>
-            <div class="grid">
-              <div class="form-row"><label class="label">Invite only</label><select class="field" id="staffInvite"><option value="true">Send invite email</option><option value="false">Create temporary password</option></select></div>
-              <div class="form-row"><label class="label">Temporary password</label><input class="field" id="staffPassword" placeholder="Leave blank to auto-generate"></div>
-            </div>
-            <div class="toolbar">
-              <button class="btn btn-primary" type="submit">Save staff</button>
-              <button class="btn btn-outline" type="button" id="staffClearBtn">Clear</button>
-            </div>
-            <p id="staffMsg" class="small"></p>
-          </form>
-
-          <form id="receiptForm" class="tab-pane hidden" enctype="multipart/form-data" novalidate>
-            <div class="grid">
-              <div class="form-row"><label class="label">Batch code</label><input class="field" id="receiptBatch" placeholder="GC-..." data-validate="required"></div>
-              <div class="form-row"><label class="label">Location</label><select class="field" id="receiptLocation"><option value="Dubai">Dubai</option><option value="Erbil">Erbil</option><option value="China">China</option></select></div>
-            </div>
-            <div class="grid">
-              <div class="form-row"><label class="label">Customer code</label><input class="field" id="receiptCustomerCode" placeholder="GC... or directory code"></div>
-              <div class="form-row"><label class="label">Customer phone</label><input class="field" id="receiptCustomerPhone" data-validate="phone"></div>
-            </div>
-            <div class="form-row"><label class="label">Notes</label><textarea class="field" id="receiptNotes" placeholder="Received goods from Dubai / Erbil..."></textarea></div>
-            <div class="form-row"><label class="label">Receipt photos</label><input class="field" type="file" id="receiptPhotos" multiple accept="image/*"></div>
-            <div class="receipt-files" id="receiptPreview"></div>
-            <div class="toolbar" style="margin-top:12px">
-              <button class="btn btn-primary" type="submit">Save receipt</button>
-              <button class="btn btn-outline" type="button" id="receiptClearBtn">Clear</button>
-            </div>
-            <p id="receiptMsg" class="small"></p>
-          </form>
-
-          <div id="dashboardPane" class="tab-pane">
-            <div class="muted-box">
-              This console keeps the public site clean and makes all administrative work happen from one controlled staff portal.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="list-head">
-          <div>
-            <h2 id="listTitle">Overview</h2>
-            <p id="listSubtitle" class="muted">Latest accounts and records</p>
-          </div>
-          <input class="field search" id="searchBox" placeholder="Search records...">
+          <div class="panel table-panel"><div class="panel-head"><div><h2>Staff directory</h2><p>Current staff identities and access levels.</p></div></div><div class="table-wrap"><table><thead id="staffTableHead"></thead><tbody id="staffTableBody"></tbody></table></div></div>
         </div>
 
-        <div class="stats" id="analyticsStatsRow" style="margin-bottom:14px"></div>
-
-        <div class="table-wrap">
-          <table>
-            <thead id="tableHead"></thead>
-            <tbody id="tableBody"></tbody>
-          </table>
+        <div id="receiptFormPanel" class="data-layout hidden">
+          <div class="panel form-panel">
+            <div class="panel-head"><div><h2>Warehouse receipt</h2><p>Register inbound goods with customer linking and photos.</p></div></div>
+            <form id="receiptForm" enctype="multipart/form-data" novalidate>
+              <div class="form-grid">
+                <div class="form-row"><label class="label" for="receiptBatch">Batch code</label><input class="field" id="receiptBatch" placeholder="GC-..." data-validate="required"></div>
+                <div class="form-row"><label class="label" for="receiptLocation">Location</label><select class="field" id="receiptLocation"><option value="Dubai">Dubai</option><option value="Erbil">Erbil</option><option value="China">China</option></select></div>
+                <div class="form-row"><label class="label" for="receiptCustomerCode">Customer code</label><input class="field" id="receiptCustomerCode" placeholder="GC..."></div>
+                <div class="form-row"><label class="label" for="receiptCustomerPhone">Customer phone</label><input class="field" id="receiptCustomerPhone" data-validate="phone"></div>
+                <div class="form-row full"><label class="label" for="receiptNotes">Notes</label><textarea class="field" id="receiptNotes" placeholder="Received goods from Dubai / Erbil..."></textarea></div>
+                <div class="form-row full"><label class="label" for="receiptPhotos">Receipt photos</label><input class="field" type="file" id="receiptPhotos" multiple accept="image/*"></div>
+              </div>
+              <div class="receipt-files" id="receiptPreview"></div>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save receipt</button><button class="btn btn-outline" type="button" id="receiptClearBtn">Clear</button></div>
+              <p id="receiptMsg" class="form-msg"></p>
+            </form>
+          </div>
+          <div class="panel table-panel"><div class="panel-head"><div><h2>Warehouse history</h2><p>Recent batches, linked customers and uploaded evidence.</p></div></div><div class="table-wrap"><table><thead id="receiptTableHead"></thead><tbody id="receiptTableBody"></tbody></table></div></div>
         </div>
-      </div>
-    </section>
-  </div>
+
+        <div id="logsPanel" class="panel hidden">
+          <div class="panel-head"><div><h2>Activity log</h2><p>Audit trail for management actions.</p></div></div>
+          <div class="table-wrap"><table><thead id="logTableHead"></thead><tbody id="logTableBody"></tbody></table></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
 
 <script>
 const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
@@ -298,6 +437,7 @@ const API_URL = `${SUPABASE_URL}/functions/v1/account-admin`;
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
 });
+window.sb = sb;
 const adminDashboard = typeof AdminDashboard !== 'undefined' ? new AdminDashboard(sb) : null;
 const state = { tab: 'dashboard', session: null, role: 'guest', customers: [], staff: [], receipts: [], logs: [] };
 const $ = (id) => document.getElementById(id);
@@ -324,14 +464,31 @@ const VALID_TABS = ['dashboard', 'customers', 'staff', 'receipts', 'logs'];
 function setActiveTab(tab) {
   state.tab = tab;
   if (location.hash !== '#' + tab) history.replaceState(null, '', '#' + tab);
+
   document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
-  $('dashboardPane').classList.toggle('hidden', tab !== 'dashboard');
-  $('customerForm').classList.toggle('hidden', tab !== 'customers');
-  $('staffForm').classList.toggle('hidden', tab !== 'staff');
-  $('receiptForm').classList.toggle('hidden', tab !== 'receipts');
-  $('listTitle').textContent = tab === 'customers' ? 'Customer accounts' : tab === 'staff' ? 'Staff accounts' : tab === 'receipts' ? 'Warehouse receipts' : tab === 'logs' ? 'Activity logs' : 'Overview';
-  $('listSubtitle').textContent = tab === 'customers' ? 'Create, edit, archive, and link customer accounts' : tab === 'staff' ? 'Manage staff roles and access' : tab === 'receipts' ? 'Goods received in Dubai, China, or Erbil with photos' : tab === 'logs' ? 'Latest management activity' : 'Latest accounts and records';
-  renderList();
+  $('dashboardView').classList.toggle('active', tab === 'dashboard');
+  $('dataView').classList.toggle('active', tab !== 'dashboard');
+
+  ['customerFormPanel','staffFormPanel','receiptFormPanel','logsPanel'].forEach((id) => $(id).classList.add('hidden'));
+  if (tab === 'customers') $('customerFormPanel').classList.remove('hidden');
+  if (tab === 'staff') $('staffFormPanel').classList.remove('hidden');
+  if (tab === 'receipts') $('receiptFormPanel').classList.remove('hidden');
+  if (tab === 'logs') $('logsPanel').classList.remove('hidden');
+
+  const titles = {
+    dashboard: ['Operations dashboard','Live overview of your logistics operation.'],
+    customers: ['Customer accounts','Manage customer records, account onboarding and shipment relationships.'],
+    staff: ['Staff access','Manage staff identities, roles and branch permissions.'],
+    receipts: ['Warehouse receipts','Register inbound goods and keep photo evidence attached to each batch.'],
+    logs: ['Activity logs','Review the latest management actions for accountability.']
+  };
+  $('pageTitle').textContent = titles[tab][0];
+  $('pageSubtitle').textContent = titles[tab][1];
+  $('listTitle').textContent = titles[tab][0];
+  $('listSubtitle').textContent = titles[tab][1];
+
+  if (tab !== 'dashboard') renderList();
+  closeMobileNav();
 }
 function loadManagerOptions() {
   $('customerManager').innerHTML = '<option value="">Unassigned</option>' + state.staff.map((s) => `<option value="${esc(s.id)}">${esc(s.full_name)} (${esc(s.role)})</option>`).join('');
@@ -340,61 +497,74 @@ function resetCustomerForm() { window.formValidator.resetForm('customerForm'); $
 function resetStaffForm() { window.formValidator.resetForm('staffForm'); $('staffId').value=''; $('staffFullName').value=''; $('staffEmail').value=''; $('staffRole').value='admin'; $('staffBranch').value='all'; $('staffInvite').value='true'; $('staffPassword').value=''; setMsg($('staffMsg'), ''); }
 function resetReceiptForm() { window.formValidator.resetForm('receiptForm'); $('receiptBatch').value=''; $('receiptLocation').value='Dubai'; $('receiptCustomerCode').value=''; $('receiptCustomerPhone').value=''; $('receiptNotes').value=''; $('receiptPhotos').value=''; $('receiptPreview').innerHTML=''; setMsg($('receiptMsg'), ''); }
 function renderList() {
-  const q = $('searchBox').value.trim().toLowerCase();
+  const q = ($('searchBox')?.value || '').trim().toLowerCase();
+  const matches = (r) => !q || JSON.stringify(r).toLowerCase().includes(q);
+
+  const setTable = (headId, bodyId, head, body, empty, colspan) => {
+    $(headId).innerHTML = head;
+    $(bodyId).innerHTML = body || `<tr><td colspan="${colspan}" class="empty-state">${empty}</td></tr>`;
+  };
+
   if (state.tab === 'customers') {
-    const rows = state.customers.filter((r) => !q || JSON.stringify(r).toLowerCase().includes(q));
-    $('tableHead').innerHTML = '<tr><th>Code</th><th>Name</th><th>Phone</th><th>Email</th><th>Manager</th><th>Shipments</th><th>Status</th><th>Actions</th></tr>';
-    $('tableBody').innerHTML = rows.map((r) => {
+    const rows = state.customers.filter(matches);
+    const body = rows.map((r) => {
       const manager = state.staff.find((s) => s.id === r.manager_staff_id);
       return `<tr>
         <td class="mono">${esc(r.code || '—')}</td>
         <td><b>${esc(r.name || '—')}</b><div class="muted">${esc(r.city || '')}</div></td>
         <td>${esc(r.phone || '')}<div class="muted">${esc(r.phone2 || '')}</div></td>
-        <td>${esc(r.email || '')}</td>
+        <td>${esc(r.email || '—')}</td>
         <td>${esc(manager?.full_name || '—')}<div class="muted">${esc(manager?.role || '')}</div></td>
-        <td><b>${r.shipment_count || 0}</b><div class="muted">${money(r.outstanding_amount || 0)} due</div></td>
+        <td><b>${Number(r.shipment_count || 0)}</b><div class="muted">${money(r.outstanding_amount || 0)} due</div></td>
         <td>${badge(r.is_active)}</td>
-        <td><div class="toolbar"><button class="btn btn-outline" onclick='editCustomer(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button><button class="btn btn-danger" onclick="archiveCustomerAccount('${esc(r.id)}')">Archive</button></div></td>
+        <td><div class="toolbar"><button class="btn btn-outline" type="button" onclick='editCustomer(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button><button class="btn btn-danger" type="button" onclick="archiveCustomerAccount('${esc(r.id)}')">Archive</button></div></td>
       </tr>`;
-    }).join('') || '<tr><td colspan="8">No customers found.</td></tr>';
-  } else if (state.tab === 'staff') {
-    const rows = state.staff.filter((r) => !q || JSON.stringify(r).toLowerCase().includes(q));
-    $('tableHead').innerHTML = '<tr><th>Name</th><th>Email / ID</th><th>Role</th><th>Branch</th><th>Status</th><th>Actions</th></tr>';
-    $('tableBody').innerHTML = rows.map((r) => `<tr>
-      <td><b>${esc(r.full_name || '—')}</b><div class="muted mono">${(String(r.full_name || '?').split(' ').slice(0,2).map((s) => s[0] || '').join('')).toUpperCase()}</div></td>
-      <td class="mono">${esc(r.id)}</td>
+    }).join('');
+    setTable('tableHead','tableBody','<tr><th>Code</th><th>Name</th><th>Phone</th><th>Email</th><th>Manager</th><th>Shipments</th><th>Status</th><th>Actions</th></tr>',body,'No customers found.',8);
+    return;
+  }
+
+  if (state.tab === 'staff') {
+    const rows = state.staff.filter(matches);
+    const body = rows.map((r) => `<tr>
+      <td><b>${esc(r.full_name || '—')}</b><div class="muted mono">${(String(r.full_name || '?').split(' ').slice(0,2).map((x) => x[0] || '').join('')).toUpperCase()}</div></td>
+      <td class="mono">${esc(r.email || r.id || '—')}</td>
       <td><span class="ok">${esc(r.role || '')}</span></td>
       <td>${esc(r.branch || '')}</td>
       <td>${badge(r.is_active)}</td>
-      <td><div class="toolbar"><button class="btn btn-outline" onclick='editStaff(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button><button class="btn btn-danger" onclick="archiveStaffAccount('${esc(r.id)}')">Deactivate</button></div></td>
-    </tr>`).join('') || '<tr><td colspan="6">No staff found.</td></tr>';
-  } else if (state.tab === 'receipts') {
-    const rows = state.receipts.filter((r) => !q || JSON.stringify(r).toLowerCase().includes(q));
-    $('tableHead').innerHTML = '<tr><th>Batch</th><th>Location</th><th>Customer</th><th>Photos</th><th>Received</th><th>Notes</th></tr>';
-    $('tableBody').innerHTML = rows.map((r) => {
+      <td><div class="toolbar"><button class="btn btn-outline" type="button" onclick='editStaff(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button><button class="btn btn-danger" type="button" onclick="archiveStaffAccount('${esc(r.id)}')">Deactivate</button></div></td>
+    </tr>`).join('');
+    setTable('staffTableHead','staffTableBody','<tr><th>Name</th><th>Email / ID</th><th>Role</th><th>Branch</th><th>Status</th><th>Actions</th></tr>',body,'No staff records found.',6);
+    return;
+  }
+
+  if (state.tab === 'receipts') {
+    const rows = state.receipts.filter(matches);
+    const body = rows.map((r) => {
       const photos = Array.isArray(r.photos) ? r.photos : [];
       return `<tr>
-        <td class="mono">${esc(r.batch_code || '')}</td>
-        <td>${esc(r.location || '')}</td>
-        <td>${esc(r.directory_phone || '')}<div class="muted mono">${esc(r.directory_customer_id || '')}</div></td>
-        <td>${photos.length} photos<div class="receipt-files">${photos.slice(0,3).map((p) => `<a href="${esc(p)}" target="_blank" rel="noreferrer"><img src="${esc(p)}" alt="receipt"></a>`).join('')}</div></td>
-        <td>${esc(r.received_at || '')}<div class="muted">${esc(r.created_by_name || '')}</div></td>
-        <td>${esc(r.notes || '')}</td>
+        <td class="mono">${esc(r.batch_code || '—')}</td>
+        <td>${esc(r.location || '—')}</td>
+        <td>${esc(r.directory_phone || '—')}<div class="muted mono">${esc(r.directory_customer_id || '')}</div></td>
+        <td>${photos.length} photo${photos.length === 1 ? '' : 's'}<div class="receipt-files">${photos.slice(0,3).map((p) => `<a href="${esc(p)}" target="_blank" rel="noreferrer"><img src="${esc(p)}" alt="receipt photo"></a>`).join('')}</div></td>
+        <td>${esc(r.received_at || r.created_at || '—')}<div class="muted">${esc(r.created_by_name || '')}</div></td>
+        <td>${esc(r.notes || '—')}</td>
       </tr>`;
-    }).join('') || '<tr><td colspan="6">No receipts yet.</td></tr>';
-  } else if (state.tab === 'logs') {
-    const rows = state.logs.filter((r) => !q || JSON.stringify(r).toLowerCase().includes(q));
-    $('tableHead').innerHTML = '<tr><th>Time</th><th>Actor</th><th>Action</th><th>Target</th><th>Details</th></tr>';
-    $('tableBody').innerHTML = rows.map((r) => `<tr>
-      <td class="mono">${esc(r.created_at || '')}</td>
+    }).join('');
+    setTable('receiptTableHead','receiptTableBody','<tr><th>Batch</th><th>Location</th><th>Customer</th><th>Photos</th><th>Received</th><th>Notes</th></tr>',body,'No warehouse receipts found.',6);
+    return;
+  }
+
+  if (state.tab === 'logs') {
+    const rows = state.logs.filter(matches);
+    const body = rows.map((r) => `<tr>
+      <td class="mono">${esc(r.created_at || '—')}</td>
       <td>${esc(r.staff_name || '—')}<div class="muted mono">${esc(r.staff_id || '')}</div></td>
-      <td><span class="warn">${esc(r.action || '')}</span></td>
+      <td><span class="warn">${esc(r.action || '—')}</span></td>
       <td class="mono">${esc(r.target_id || '—')}</td>
-      <td class="muted">${esc(r.details || '')}</td>
-    </tr>`).join('') || '<tr><td colspan="5">No logs yet.</td></tr>';
-  } else {
-    $('tableHead').innerHTML = '<tr><th>Welcome</th><th>What this console does</th></tr>';
-    $('tableBody').innerHTML = `<tr><td>Accounts</td><td>Create customer and staff accounts, assign managers, and manage active/inactive status.</td></tr><tr><td>Warehouse receipts</td><td>Register inbound goods by batch code, link them to customer code or phone, and attach photos.</td></tr><tr><td>Activity log</td><td>See the latest staff actions for accountability.</td></tr>`;
+      <td class="muted">${esc(r.details || '—')}</td>
+    </tr>`).join('');
+    setTable('logTableHead','logTableBody','<tr><th>Time</th><th>Actor</th><th>Action</th><th>Target</th><th>Details</th></tr>',body,'No activity logs found.',5);
   }
 }
 async function refreshAnalytics() {
@@ -402,34 +572,68 @@ async function refreshAnalytics() {
   const metrics = await adminDashboard.calculateMetrics().catch(() => null);
   if (!metrics) return;
   const g = (k) => metrics.get(k);
-  $('analyticsStatsRow').innerHTML = `
-    <div class="stat"><b>${money(g('totalRevenue')?.value)}</b><span>Revenue (30d)</span></div>
-    <div class="stat"><b>${money(g('outstandingBalance')?.value)}</b><span>Outstanding</span></div>
-    <div class="stat"><b>${g('totalShipments')?.value ?? 0}</b><span>Total shipments</span></div>
-    <div class="stat"><b>${g('totalCustomers')?.value ?? 0}</b><span>Total customers</span></div>
-    <div class="stat"><b>${g('activeShipments')?.value ?? 0}</b><span>Active shipments</span></div>
-    <div class="stat"><b>${g('deliveredToday')?.value ?? 0}</b><span>Delivered today</span></div>
-    <div class="stat"><b>${g('newCustomers')?.value ?? 0}</b><span>New customers (30d)</span></div>
-    <div class="stat"><b>${g('avgDeliveryTime')?.value ?? 0}</b><span>Avg delivery (days)</span></div>
-    <div class="stat"><b>${g('deliverySuccessRate')?.value ?? 0}%</b><span>Success rate</span></div>
-    <div class="stat"><b>${g('totalReceipts')?.value ?? 0}</b><span>Warehouse receipts</span></div>
-    <div class="stat"><b>${g('totalMessages')?.value ?? 0}</b><span>Messages (30d)</span></div>
-  `;
+  const card = (value, label, icon, tone = '') => `<div class="stat-card ${tone}">
+    <div class="stat-top"><span class="stat-icon">${icon}</span></div>
+    <div class="stat-value">${value}</div><div class="stat-label">${label}</div>
+  </div>`;
+  const icons = {
+    money:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M17 7.5c0-1.7-2-2.5-5-2.5s-5 .8-5 2.5 1.6 2.3 5 3c3.4.7 5 1.6 5 3.5S15 17 12 17s-5-.8-5-2.5"/></svg>',
+    box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></svg>',
+    users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="8" r="3"/><path d="M4 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1M16 5.5a3 3 0 0 1 0 5.8M18 14.5a4.5 4.5 0 0 1 3 4.5"/></svg>',
+    clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg>',
+    check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m5 12 4 4L19 6"/></svg>'
+  };
+  $('analyticsStatsRow').innerHTML = [
+    card(money(g('totalRevenue')?.value), 'Revenue · 30d', icons.money),
+    card(money(g('outstandingBalance')?.value), 'Outstanding', icons.money, 'stat-amber'),
+    card(g('totalShipments')?.value ?? 0, 'Shipments · 30d', icons.box),
+    card(g('activeShipments')?.value ?? 0, 'Active shipments', icons.box),
+    card(g('totalCustomers')?.value ?? 0, 'Customer directory', icons.users),
+    card(g('newCustomers')?.value ?? 0, 'New customers · 30d', icons.users, 'stat-purple'),
+    card(`${g('avgDeliveryTime')?.value ?? 0}d`, 'Average delivery', icons.clock, 'stat-amber'),
+    card(`${g('deliverySuccessRate')?.value ?? 0}%`, 'Delivered share', icons.check, 'stat-green')
+  ].join('');
 }
 async function refreshAll() {
   if (!state.session) return;
   $('refreshBtn').classList.add('loading');
   try {
-    const [c, s, r, l] = await Promise.all([authFetch('/?kind=customer'), authFetch('/?kind=staff'), authFetch('/?kind=receipt'), authFetch('/?kind=log')]);
-    state.customers = c.items || []; state.staff = s.items || []; state.receipts = r.items || []; state.logs = l.items || [];
+    const [c, s, r, l] = await Promise.all([
+      authFetch('/?kind=customer'),
+      authFetch('/?kind=staff'),
+      authFetch('/?kind=receipt'),
+      authFetch('/?kind=log')
+    ]);
+    state.customers = c.items || [];
+    state.staff = s.items || [];
+    state.receipts = r.items || [];
+    state.logs = l.items || [];
+
     loadManagerOptions();
-    $('recordsStatsRow').innerHTML = `<div class="stat"><b>${state.customers.length}</b><span>Customers</span></div><div class="stat"><b>${state.staff.length}</b><span>Staff</span></div><div class="stat"><b>${state.receipts.length}</b><span>Receipts</span></div><div class="stat"><b>${state.logs.length}</b><span>Logs</span></div>`;
+    $('recordsStatsRow').innerHTML = `
+      <div class="stat-card"><div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="8" r="3"/><path d="M4 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/></svg></span></div><div class="stat-value">${state.customers.length}</div><div class="stat-label">Customer records</div></div>
+      <div class="stat-card"><div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="7" r="3.5"/><path d="M4 20v-1.5A4.5 4.5 0 0 1 8.5 14h7a4.5 4.5 0 0 1 4.5 4.5V20"/></svg></span></div><div class="stat-value">${state.staff.length}</div><div class="stat-label">Staff records</div></div>
+      <div class="stat-card"><div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/></svg></span></div><div class="stat-value">${state.receipts.length}</div><div class="stat-label">Warehouse receipts</div></div>
+      <div class="stat-card"><div class="stat-top"><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></span></div><div class="stat-value">${state.logs.length}</div><div class="stat-label">Activity entries</div></div>
+    `;
+    $('customerNavCount').textContent = state.customers.length;
+    $('staffNavCount').textContent = state.staff.length;
+    $('receiptNavCount').textContent = state.receipts.length;
+    $('logNavCount').textContent = state.logs.length;
+
     const name = state.session.user.user_metadata?.full_name || state.session.user.email?.split('@')[0] || 'Staff';
-    $('whoami').textContent = `${name} · ${state.session.user.email || ''}`;
-    $('whoamiSub').textContent = `${roleLabel[state.role] || state.role} access active`;
+    const email = state.session.user.email || '';
+    $('sidebarUserName').textContent = name;
+    $('sidebarUserEmail').textContent = email;
+    $('userAvatar').textContent = String(name).trim().split(/\s+/).slice(0,2).map((x) => x[0] || '').join('').toUpperCase() || 'GC';
     renderList();
-    refreshAnalytics();
-  } finally { $('refreshBtn').classList.remove('loading'); }
+    await refreshAnalytics();
+  } catch (err) {
+    console.error('refreshAll failed:', err);
+    setMsg($('loginMsg'), err.message || 'Unable to refresh console data');
+  } finally {
+    $('refreshBtn').classList.remove('loading');
+  }
 }
 async function resolveCurrentRole(user) {
   const freshUser = user || (await sb.auth.getUser()).data.user;
@@ -445,102 +649,220 @@ async function syncSessionUI() {
   await sb.auth.refreshSession().catch(() => null);
   const { data: { session } } = await sb.auth.getSession();
   state.session = session || null;
+
   if (session) {
-    $('logoutBtn').classList.remove('hidden');
     try {
       const { data: { user } } = await sb.auth.getUser();
       if (user) state.session = { ...session, user };
       await resolveCurrentRole(user);
       $('authGate').classList.add('hidden');
+      $('consoleShell').classList.remove('hidden');
+      $('logoutBtn').classList.remove('hidden');
       await refreshAll();
     } catch (err) {
-      await sb.auth.signOut(); state.session = null; state.role = 'guest';
-      $('authGate').classList.remove('hidden'); $('logoutBtn').classList.add('hidden'); $('roleBadge').classList.add('hidden');
-      $('whoami').textContent = 'Not signed in'; $('whoamiSub').textContent = 'Waiting for staff authentication';
-      setMsg($('loginMsg'), 'Your session expired — please sign in again.');
+      console.error('Session initialization failed:', err);
+      await sb.auth.signOut();
+      state.session = null;
+      state.role = 'guest';
+      $('authGate').classList.remove('hidden');
+      $('consoleShell').classList.add('hidden');
+      $('logoutBtn').classList.add('hidden');
+      $('roleBadge').classList.add('hidden');
+      setMsg($('loginMsg'), 'Your session is no longer valid — please sign in again.');
     }
   } else {
-    $('authGate').classList.remove('hidden'); $('logoutBtn').classList.add('hidden'); $('roleBadge').classList.add('hidden');
-    $('whoami').textContent = 'Not signed in'; $('whoamiSub').textContent = 'Waiting for staff authentication';
+    $('authGate').classList.remove('hidden');
+    $('consoleShell').classList.add('hidden');
+    $('logoutBtn').classList.add('hidden');
+    $('roleBadge').classList.add('hidden');
   }
 }
 $('staffLoginForm').addEventListener('submit', async (e) => {
-  e.preventDefault(); setMsg($('loginMsg'), 'Signing in...');
-  try { const email = $('loginEmail').value.trim(); const password = $('loginPassword').value; const { error } = await sb.auth.signInWithPassword({ email, password }); if (error) throw error; setMsg($('loginMsg'), 'Signed in successfully', true); await syncSessionUI(); }
-  catch (err) { setMsg($('loginMsg'), err.message || 'Login failed'); }
+  e.preventDefault();
+  setMsg($('loginMsg'), 'Signing in...');
+  try {
+    const email = $('loginEmail').value.trim();
+    const password = $('loginPassword').value;
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    setMsg($('loginMsg'), 'Signed in successfully', true);
+    $('loginPassword').value = '';
+    await syncSessionUI();
+  } catch (err) {
+    setMsg($('loginMsg'), err.message || 'Login failed');
+  }
 });
-$('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); await syncSessionUI(); });
+
+$('logoutBtn').addEventListener('click', async () => {
+  await sb.auth.signOut();
+  await syncSessionUI();
+});
+
 $('refreshBtn').addEventListener('click', refreshAll);
 $('searchBox').addEventListener('input', renderList);
-document.querySelectorAll('.tab').forEach((btn) => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
+
+function closeMobileNav() {
+  $('sidebar').classList.remove('open');
+  $('mobileBackdrop').classList.remove('show');
+}
+$('mobileMenuBtn').addEventListener('click', () => {
+  $('sidebar').classList.add('open');
+  $('mobileBackdrop').classList.add('show');
+});
+$('mobileBackdrop').addEventListener('click', closeMobileNav);
+
+document.querySelectorAll('.tab').forEach((btn) => {
+  btn.addEventListener('click', () => setActiveTab(btn.dataset.tab));
+});
+document.querySelectorAll('.quick-action, .quick-action-trigger').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.target;
+    if (VALID_TABS.includes(target)) setActiveTab(target);
+  });
+});
+
 $('customerClearBtn').addEventListener('click', resetCustomerForm);
 $('staffClearBtn').addEventListener('click', resetStaffForm);
 $('receiptClearBtn').addEventListener('click', resetReceiptForm);
+
 ['customerForm', 'staffForm', 'receiptForm'].forEach((id) => window.formValidator.initializeForm(id, { manageSubmit: false }));
+
 $('customerForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!window.formValidator.validateForm('customerForm')) { setMsg($('customerMsg'), 'Please fix the highlighted fields'); return; }
   setMsg($('customerMsg'), 'Saving customer...');
   try {
-    const payload = { id: $('customerId').value || undefined, name: $('customerName').value.trim(), email: $('customerEmail').value.trim(), phone: $('customerPhone').value.trim(), phone2: $('customerPhone2').value.trim(), city: $('customerCity').value.trim(), delivery_location: $('customerDelivery').value.trim(), note: $('customerNote').value.trim(), manager_staff_id: $('customerManager').value || null, is_active: $('customerStatus').value === 'true', send_invite: $('customerInvite').value === 'true', password: $('customerPassword').value.trim() || undefined };
+    const payload = {
+      id: $('customerId').value || undefined,
+      name: $('customerName').value.trim(),
+      email: $('customerEmail').value.trim(),
+      phone: $('customerPhone').value.trim(),
+      phone2: $('customerPhone2').value.trim(),
+      city: $('customerCity').value.trim(),
+      delivery_location: $('customerDelivery').value.trim(),
+      note: $('customerNote').value.trim(),
+      manager_staff_id: $('customerManager').value || null,
+      is_active: $('customerStatus').value === 'true',
+      send_invite: $('customerInvite').value === 'true',
+      password: $('customerPassword').value.trim() || undefined
+    };
     const action = $('customerId').value ? 'update' : 'create';
     const res = await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'customer', action, data: payload }) });
     setMsg($('customerMsg'), action === 'create' ? `Customer saved${res.warning ? ' · ' + res.warning : ''}` : 'Customer updated', true);
-    resetCustomerForm(); await refreshAll(); setActiveTab('customers');
-  } catch (err) { setMsg($('customerMsg'), err.message || 'Failed to save customer'); }
+    resetCustomerForm();
+    await refreshAll();
+    setActiveTab('customers');
+  } catch (err) {
+    setMsg($('customerMsg'), err.message || 'Failed to save customer');
+  }
 });
+
 $('staffForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!window.formValidator.validateForm('staffForm')) { setMsg($('staffMsg'), 'Please fix the highlighted fields'); return; }
   setMsg($('staffMsg'), 'Saving staff...');
   try {
-    const payload = { id: $('staffId').value || undefined, full_name: $('staffFullName').value.trim(), email: $('staffEmail').value.trim(), role: $('staffRole').value, branch: $('staffBranch').value, send_invite: $('staffInvite').value === 'true', password: $('staffPassword').value.trim() || undefined };
+    const payload = {
+      id: $('staffId').value || undefined,
+      full_name: $('staffFullName').value.trim(),
+      email: $('staffEmail').value.trim(),
+      role: $('staffRole').value,
+      branch: $('staffBranch').value,
+      send_invite: $('staffInvite').value === 'true',
+      password: $('staffPassword').value.trim() || undefined
+    };
     const action = $('staffId').value ? 'update' : 'create';
     const res = await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'staff', action, data: payload }) });
     setMsg($('staffMsg'), action === 'create' ? `Staff saved${res.warning ? ' · ' + res.warning : ''}` : 'Staff updated', true);
-    resetStaffForm(); await refreshAll(); setActiveTab('staff');
-  } catch (err) { setMsg($('staffMsg'), err.message || 'Failed to save staff'); }
+    resetStaffForm();
+    await refreshAll();
+    setActiveTab('staff');
+  } catch (err) {
+    setMsg($('staffMsg'), err.message || 'Failed to save staff');
+  }
 });
+
 $('receiptPhotos').addEventListener('change', () => {
   const files = Array.from($('receiptPhotos').files || []);
   $('receiptPreview').innerHTML = files.map((file) => `<div><img src="${URL.createObjectURL(file)}" alt=""><div class="small">${esc(file.name)}</div></div>`).join('');
 });
+
 $('receiptForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!window.formValidator.validateForm('receiptForm')) { setMsg($('receiptMsg'), 'Please fix the highlighted fields'); return; }
   setMsg($('receiptMsg'), 'Uploading receipt...');
   try {
     const formData = new FormData();
-    formData.append('kind', 'receipt'); formData.append('action', 'create');
-    formData.append('batch_code', $('receiptBatch').value.trim()); formData.append('location', $('receiptLocation').value); formData.append('customer_code', $('receiptCustomerCode').value.trim()); formData.append('customer_phone', $('receiptCustomerPhone').value.trim()); formData.append('notes', $('receiptNotes').value.trim());
+    formData.append('kind', 'receipt');
+    formData.append('action', 'create');
+    formData.append('batch_code', $('receiptBatch').value.trim());
+    formData.append('location', $('receiptLocation').value);
+    formData.append('customer_code', $('receiptCustomerCode').value.trim());
+    formData.append('customer_phone', $('receiptCustomerPhone').value.trim());
+    formData.append('notes', $('receiptNotes').value.trim());
     for (const file of Array.from($('receiptPhotos').files || [])) formData.append('photos', file);
     const res = await authFetch('/', { method: 'POST', body: formData });
     setMsg($('receiptMsg'), `Receipt saved: ${res.receipt.batch_code}${res.customer ? ' · linked to customer' : ''}`, true);
-    resetReceiptForm(); await refreshAll(); setActiveTab('receipts');
-  } catch (err) { setMsg($('receiptMsg'), err.message || 'Failed to save receipt'); }
+    resetReceiptForm();
+    await refreshAll();
+    setActiveTab('receipts');
+  } catch (err) {
+    setMsg($('receiptMsg'), err.message || 'Failed to save receipt');
+  }
 });
+
 window.editCustomer = (row) => {
   window.formValidator.resetForm('customerForm');
-  $('customerId').value = row.id || ''; $('customerName').value = row.name || ''; $('customerEmail').value = row.email || ''; $('customerPhone').value = row.phone || ''; $('customerPhone2').value = row.phone2 || ''; $('customerCity').value = row.city || ''; $('customerDelivery').value = row.delivery_location || ''; $('customerManager').value = row.manager_staff_id || ''; $('customerStatus').value = String(Boolean(row.is_active)); $('customerNote').value = row.note || ''; $('customerInvite').value = row.auth_user_id ? 'false' : 'true'; $('customerPassword').value = ''; setActiveTab('customers'); $('customerForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('customerId').value = row.id || '';
+  $('customerName').value = row.name || '';
+  $('customerEmail').value = row.email || '';
+  $('customerPhone').value = row.phone || '';
+  $('customerPhone2').value = row.phone2 || '';
+  $('customerCity').value = row.city || '';
+  $('customerDelivery').value = row.delivery_location || '';
+  $('customerManager').value = row.manager_staff_id || '';
+  $('customerStatus').value = String(Boolean(row.is_active));
+  $('customerNote').value = row.note || '';
+  $('customerInvite').value = row.auth_user_id ? 'false' : 'true';
+  $('customerPassword').value = '';
+  setActiveTab('customers');
+  $('customerForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
+
 window.editStaff = (row) => {
   window.formValidator.resetForm('staffForm');
-  $('staffId').value = row.id || ''; $('staffFullName').value = row.full_name || ''; $('staffEmail').value = row.email || ''; $('staffRole').value = row.role || 'admin'; $('staffBranch').value = row.branch || 'all'; $('staffInvite').value = row.auth_user_id ? 'false' : 'true'; $('staffPassword').value = ''; setActiveTab('staff'); $('staffForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('staffId').value = row.id || '';
+  $('staffFullName').value = row.full_name || '';
+  $('staffEmail').value = row.email || '';
+  $('staffRole').value = row.role || 'admin';
+  $('staffBranch').value = row.branch || 'all';
+  $('staffInvite').value = row.auth_user_id ? 'false' : 'true';
+  $('staffPassword').value = '';
+  setActiveTab('staff');
+  $('staffForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
+
 window.archiveCustomerAccount = async (id) => {
   if (!confirm('Archive this customer account?')) return;
-  try { await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'customer', action: 'archive', data: { id } }) }); await refreshAll(); }
-  catch (err) { alert(err.message || 'Unable to archive customer'); }
+  try {
+    await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'customer', action: 'archive', data: { id } }) });
+    await refreshAll();
+  } catch (err) { alert(err.message || 'Unable to archive customer'); }
 };
+
 window.archiveStaffAccount = async (id) => {
   if (!confirm('Deactivate this staff account?')) return;
-  try { await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'staff', action: 'deactivate', data: { id } }) }); await refreshAll(); }
-  catch (err) { alert(err.message || 'Unable to deactivate staff'); }
+  try {
+    await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'staff', action: 'deactivate', data: { id } }) });
+    await refreshAll();
+  } catch (err) { alert(err.message || 'Unable to deactivate staff'); }
 };
+
 window.addEventListener('hashchange', () => {
   const tab = location.hash.replace('#', '');
   if (VALID_TABS.includes(tab)) setActiveTab(tab);
 });
+
 const initialTab = location.hash.replace('#', '');
 setActiveTab(VALID_TABS.includes(initialTab) ? initialTab : 'dashboard');
 syncSessionUI();

@@ -1569,6 +1569,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = (SUPABASE_URL.startsWith('http') && window.supabase)
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
+window.sb = sb;
 const STEP_KEYS = ['placed','pickedUp','transit','customs','outForDelivery','delivered'];
 
 /* ================= OWNER NOTIFICATIONS =================
