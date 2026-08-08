@@ -172,6 +172,7 @@
             <div class="small">Tip</div>
             <div style="margin-top:4px;font-weight:800">Keep this page for staff only and create customer accounts from here.</div>
           </div>
+          <div class="muted-box" id="loadStatus" style="margin-top:12px"></div>
         </div>
       </div>
     </section>
@@ -204,15 +205,12 @@
               <div class="form-row"><label class="label">Manager</label><select class="field" id="customerManager"></select></div>
               <div class="form-row"><label class="label">Status</label><select class="field" id="customerStatus"><option value="true">Active</option><option value="false">Inactive</option></select></div>
             </div>
-            <div class="form-row"><label class="label">Note</label><textarea class="field" id="customerNote"></textarea></div>
             <div class="grid">
-              <div class="form-row"><label class="label">Invite only</label><select class="field" id="customerInvite"><option value="true">Send invite email</option><option value="false">Create temporary password</option></select></div>
-              <div class="form-row"><label class="label">Temporary password</label><input class="field" id="customerPassword" placeholder="Leave blank to auto-generate"></div>
+              <div class="form-row"><label class="label">Invite to login</label><select class="field" id="customerInvite"><option value="true">Yes</option><option value="false">No</option></select></div>
+              <div class="form-row"><label class="label">Password (optional)</label><input class="field" type="password" id="customerPassword"></div>
             </div>
-            <div class="toolbar">
-              <button class="btn btn-primary" type="submit">Save customer</button>
-              <button class="btn btn-outline" type="button" id="customerClearBtn">Clear</button>
-            </div>
+            <div class="form-row"><label class="label">Notes</label><textarea class="field" id="customerNote"></textarea></div>
+            <div class="toolbar"><button class="btn btn-primary" type="submit">Save customer</button><button class="btn btn-outline" type="button" id="customerClearBtn">Clear</button></div>
             <p id="customerMsg" class="small"></p>
           </form>
 
@@ -220,39 +218,33 @@
             <input type="hidden" id="staffId">
             <div class="grid">
               <div class="form-row"><label class="label">Full name</label><input class="field" id="staffFullName" data-validate="required"></div>
-              <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="staffEmail" data-validate="required,email"></div>
+              <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="staffEmail" data-validate="email"></div>
             </div>
             <div class="grid">
-              <div class="form-row"><label class="label">Role</label><select class="field" id="staffRole"><option value="admin">admin</option><option value="accountant">accountant</option><option value="super_admin">super_admin</option></select></div>
-              <div class="form-row"><label class="label">Branch</label><select class="field" id="staffBranch"><option value="all">all</option><option value="dubai">dubai</option><option value="china">china</option><option value="erbil">erbil</option></select></div>
+              <div class="form-row"><label class="label">Role</label><select class="field" id="staffRole"><option value="admin">Admin</option><option value="accountant">Accountant</option><option value="super_admin">Super admin</option></select></div>
+              <div class="form-row"><label class="label">Branch</label><select class="field" id="staffBranch"><option value="all">All</option><option value="dubai">Dubai</option><option value="china">China</option><option value="erbil">Erbil</option></select></div>
             </div>
             <div class="grid">
-              <div class="form-row"><label class="label">Invite only</label><select class="field" id="staffInvite"><option value="true">Send invite email</option><option value="false">Create temporary password</option></select></div>
-              <div class="form-row"><label class="label">Temporary password</label><input class="field" id="staffPassword" placeholder="Leave blank to auto-generate"></div>
+              <div class="form-row"><label class="label">Invite to login</label><select class="field" id="staffInvite"><option value="true">Yes</option><option value="false">No</option></select></div>
+              <div class="form-row"><label class="label">Password (optional)</label><input class="field" type="password" id="staffPassword"></div>
             </div>
-            <div class="toolbar">
-              <button class="btn btn-primary" type="submit">Save staff</button>
-              <button class="btn btn-outline" type="button" id="staffClearBtn">Clear</button>
-            </div>
+            <div class="toolbar"><button class="btn btn-primary" type="submit">Save staff</button><button class="btn btn-outline" type="button" id="staffClearBtn">Clear</button></div>
             <p id="staffMsg" class="small"></p>
           </form>
 
-          <form id="receiptForm" class="tab-pane hidden" enctype="multipart/form-data" novalidate>
+          <form id="receiptForm" class="tab-pane hidden" novalidate>
             <div class="grid">
-              <div class="form-row"><label class="label">Batch code</label><input class="field" id="receiptBatch" placeholder="GC-..." data-validate="required"></div>
-              <div class="form-row"><label class="label">Location</label><select class="field" id="receiptLocation"><option value="Dubai">Dubai</option><option value="Erbil">Erbil</option><option value="China">China</option></select></div>
+              <div class="form-row"><label class="label">Batch code</label><input class="field" id="receiptBatch" data-validate="required"></div>
+              <div class="form-row"><label class="label">Location</label><select class="field" id="receiptLocation"><option value="Dubai">Dubai</option><option value="China">China</option><option value="Erbil">Erbil</option></select></div>
             </div>
             <div class="grid">
-              <div class="form-row"><label class="label">Customer code</label><input class="field" id="receiptCustomerCode" placeholder="GC... or directory code"></div>
-              <div class="form-row"><label class="label">Customer phone</label><input class="field" id="receiptCustomerPhone" data-validate="phone"></div>
+              <div class="form-row"><label class="label">Customer code</label><input class="field" id="receiptCustomerCode"></div>
+              <div class="form-row"><label class="label">Customer phone</label><input class="field" id="receiptCustomerPhone"></div>
             </div>
-            <div class="form-row"><label class="label">Notes</label><textarea class="field" id="receiptNotes" placeholder="Received goods from Dubai / Erbil..."></textarea></div>
-            <div class="form-row"><label class="label">Receipt photos</label><input class="field" type="file" id="receiptPhotos" multiple accept="image/*"></div>
-            <div class="receipt-files" id="receiptPreview"></div>
-            <div class="toolbar" style="margin-top:12px">
-              <button class="btn btn-primary" type="submit">Save receipt</button>
-              <button class="btn btn-outline" type="button" id="receiptClearBtn">Clear</button>
-            </div>
+            <div class="form-row"><label class="label">Notes</label><textarea class="field" id="receiptNotes"></textarea></div>
+            <div class="form-row"><label class="label">Photos</label><input class="field" id="receiptPhotos" type="file" multiple accept="image/*"></div>
+            <div id="receiptPreview" class="receipt-files" style="margin:10px 0 14px"></div>
+            <div class="toolbar"><button class="btn btn-primary" type="submit">Save receipt</button><button class="btn btn-outline" type="button" id="receiptClearBtn">Clear</button></div>
             <p id="receiptMsg" class="small"></p>
           </form>
 
@@ -293,7 +285,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
 });
 const adminDashboard = typeof AdminDashboard !== 'undefined' ? new AdminDashboard(sb) : null;
-const state = { tab: 'dashboard', session: null, role: 'guest', customers: [], staff: [], receipts: [], logs: [] };
+const state = { tab: 'dashboard', session: null, role: 'guest', customers: [], staff: [], receipts: [], logs: [], lastLoadError: '' };
 const $ = (id) => document.getElementById(id);
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const money = (v) => `$${Number(v || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
@@ -301,6 +293,7 @@ const badge = (active) => `<span class="${active ? 'ok' : 'warn'}">${active ? 'A
 const roleLabel = { super_admin: 'Super Admin', admin: 'Admin', accountant: 'Accountant' };
 const roleClass = (r) => r === 'super_admin' ? 'badge-super' : r === 'accountant' ? 'badge-accountant' : 'badge-admin';
 function setMsg(el, text, ok = false) { el.textContent = text || ''; el.style.color = ok ? 'var(--good)' : 'var(--muted)'; }
+function setLoadError(text) { state.lastLoadError = text || ''; const el = $('loadStatus'); if (el) { el.textContent = text || ''; el.classList.toggle('warn', Boolean(text)); el.classList.toggle('ok', false); } }
 function showRole(role) { const el = $('roleBadge'); el.className = `badge ${roleClass(role)}`; el.textContent = `${roleLabel[role] || role || 'Guest'} access`; el.classList.remove('hidden'); }
 async function authFetch(path = '/', opts = {}) {
   const { data: { session } } = await sb.auth.getSession();
@@ -319,12 +312,13 @@ function setActiveTab(tab) {
   state.tab = tab;
   if (location.hash !== '#' + tab) history.replaceState(null, '', '#' + tab);
   document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
-  $('dashboardPane').classList.toggle('hidden', tab !== 'dashboard');
+  const dashboardPane = $('dashboardPane');
+  if (dashboardPane) dashboardPane.classList.toggle('hidden', tab !== 'dashboard');
   $('customerForm').classList.toggle('hidden', tab !== 'customers');
   $('staffForm').classList.toggle('hidden', tab !== 'staff');
   $('receiptForm').classList.toggle('hidden', tab !== 'receipts');
   $('listTitle').textContent = tab === 'customers' ? 'Customer accounts' : tab === 'staff' ? 'Staff accounts' : tab === 'receipts' ? 'Warehouse receipts' : tab === 'logs' ? 'Activity logs' : 'Overview';
-  $('listSubtitle').textContent = tab === 'customers' ? 'Create, edit, archive, and link customer accounts' : tab === 'staff' ? 'Manage staff roles and access' : tab === 'receipts' ? 'Goods received in Dubai, China, or Erbil with photos' : tab === 'logs' ? 'Latest management activity' : 'Latest accounts and records';
+  $('listSubtitle').textContent = tab === 'customers' ? 'Create, edit, archive, and link customer accounts' : tab === 'staff' ? 'Manage staff roles and access' : tab === 'receipts' ? 'Goods received in Dubai, China, or Erbil with photos' : tab === 'logs' ? 'Latest management activity' : 'Latest customer accounts and records';
   renderList();
 }
 function loadManagerOptions() {
@@ -340,8 +334,9 @@ function renderList() {
     $('tableHead').innerHTML = '<tr><th>Code</th><th>Name</th><th>Phone</th><th>Email</th><th>Manager</th><th>Shipments</th><th>Status</th><th>Actions</th></tr>';
     $('tableBody').innerHTML = rows.map((r) => {
       const manager = state.staff.find((s) => s.id === r.manager_staff_id);
+      const code = r.display_gc || r.gc_code || r.code || '—';
       return `<tr>
-        <td class="mono">${esc(r.code || '—')}</td>
+        <td class="mono">${esc(code)}</td>
         <td><b>${esc(r.name || '—')}</b><div class="muted">${esc(r.city || '')}</div></td>
         <td>${esc(r.phone || '')}<div class="muted">${esc(r.phone2 || '')}</div></td>
         <td>${esc(r.email || '')}</td>
@@ -356,7 +351,7 @@ function renderList() {
     $('tableHead').innerHTML = '<tr><th>Name</th><th>Email / ID</th><th>Role</th><th>Branch</th><th>Status</th><th>Actions</th></tr>';
     $('tableBody').innerHTML = rows.map((r) => `<tr>
       <td><b>${esc(r.full_name || '—')}</b><div class="muted mono">${(String(r.full_name || '?').split(' ').slice(0,2).map((s) => s[0] || '').join('')).toUpperCase()}</div></td>
-      <td class="mono">${esc(r.id)}</td>
+      <td class="mono">${esc(r.email || r.id)}</td>
       <td><span class="ok">${esc(r.role || '')}</span></td>
       <td>${esc(r.branch || '')}</td>
       <td>${badge(r.is_active)}</td>
@@ -387,8 +382,20 @@ function renderList() {
       <td class="muted">${esc(r.details || '')}</td>
     </tr>`).join('') || '<tr><td colspan="5">No logs yet.</td></tr>';
   } else {
-    $('tableHead').innerHTML = '<tr><th>Welcome</th><th>What this console does</th></tr>';
-    $('tableBody').innerHTML = `<tr><td>Accounts</td><td>Create customer and staff accounts, assign managers, and manage active/inactive status.</td></tr><tr><td>Warehouse receipts</td><td>Register inbound goods by batch code, link them to customer code or phone, and attach photos.</td></tr><tr><td>Activity log</td><td>See the latest staff actions for accountability.</td></tr>`;
+    const rows = state.customers.slice(0, 6);
+    $('tableHead').innerHTML = '<tr><th>Code</th><th>Name</th><th>Phone</th><th>Email</th><th>Manager</th><th>Status</th></tr>';
+    $('tableBody').innerHTML = rows.map((r) => {
+      const manager = state.staff.find((s) => s.id === r.manager_staff_id);
+      const code = r.display_gc || r.gc_code || r.code || '—';
+      return `<tr>
+        <td class="mono">${esc(code)}</td>
+        <td><b>${esc(r.name || '—')}</b><div class="muted">${esc(r.city || '')}</div></td>
+        <td>${esc(r.phone || '—')}</td>
+        <td>${esc(r.email || '—')}</td>
+        <td>${esc(manager?.full_name || '—')}</td>
+        <td>${badge(r.is_active)}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="6">No customer accounts loaded yet.</td></tr>';
   }
 }
 async function refreshAnalytics() {
@@ -410,9 +417,25 @@ async function refreshAnalytics() {
 async function refreshAll() {
   if (!state.session) return;
   $('refreshBtn').classList.add('loading');
+  setLoadError('');
   try {
-    const [c, s, r, l] = await Promise.all([authFetch('/?kind=customer'), authFetch('/?kind=staff'), authFetch('/?kind=receipt'), authFetch('/?kind=log')]);
-    state.customers = c.items || []; state.staff = s.items || []; state.receipts = r.items || []; state.logs = l.items || [];
+    const settled = await Promise.allSettled([
+      authFetch('/?kind=customer'),
+      authFetch('/?kind=staff'),
+      authFetch('/?kind=receipt'),
+      authFetch('/?kind=log'),
+    ]);
+    const [customers, staff, receipts, logs] = settled;
+    if (customers.status === 'fulfilled') state.customers = customers.value.items || []; else console.error(customers.reason);
+    if (staff.status === 'fulfilled') state.staff = staff.value.items || []; else console.error(staff.reason);
+    if (receipts.status === 'fulfilled') state.receipts = receipts.value.items || []; else console.error(receipts.reason);
+    if (logs.status === 'fulfilled') state.logs = logs.value.items || []; else console.error(logs.reason);
+
+    const failed = settled
+      .map((r, i) => (r.status === 'rejected' ? ['customers','staff','receipts','logs'][i] : null))
+      .filter(Boolean);
+    if (failed.length) setLoadError(`Some panels failed to load: ${failed.join(', ')}`);
+
     loadManagerOptions();
     $('statsRow').innerHTML = `<div class="stat"><b>${state.customers.length}</b><span>Customers</span></div><div class="stat"><b>${state.staff.length}</b><span>Staff</span></div><div class="stat"><b>${state.receipts.length}</b><span>Receipts</span></div><div class="stat"><b>${state.logs.length}</b><span>Logs</span></div>`;
     const name = state.session.user.user_metadata?.full_name || state.session.user.email?.split('@')[0] || 'Staff';
@@ -448,32 +471,41 @@ async function syncSessionUI() {
       await sb.auth.signOut(); state.session = null; state.role = 'guest';
       $('authGate').classList.remove('hidden'); $('logoutBtn').classList.add('hidden'); $('roleBadge').classList.add('hidden');
       $('whoami').textContent = 'Not signed in'; $('whoamiSub').textContent = 'Waiting for staff authentication';
-      setMsg($('loginMsg'), 'Your session expired — please sign in again.');
+      setLoadError('Session could not be validated. Please sign in again.');
     }
   } else {
     $('authGate').classList.remove('hidden'); $('logoutBtn').classList.add('hidden'); $('roleBadge').classList.add('hidden');
-    $('whoami').textContent = 'Not signed in'; $('whoamiSub').textContent = 'Waiting for staff authentication';
   }
 }
+
 $('staffLoginForm').addEventListener('submit', async (e) => {
-  e.preventDefault(); setMsg($('loginMsg'), 'Signing in...');
-  try { const email = $('loginEmail').value.trim(); const password = $('loginPassword').value; const { error } = await sb.auth.signInWithPassword({ email, password }); if (error) throw error; setMsg($('loginMsg'), 'Signed in successfully', true); await syncSessionUI(); }
-  catch (err) { setMsg($('loginMsg'), err.message || 'Login failed'); }
+  e.preventDefault();
+  setMsg($('loginMsg'), 'Signing in...');
+  const email = $('loginEmail').value.trim();
+  const password = $('loginPassword').value;
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    setMsg($('loginMsg'), 'Signed in successfully', true);
+    state.session = data.session || null;
+    await syncSessionUI();
+  } catch (err) { setMsg($('loginMsg'), err.message || 'Login failed'); }
 });
-$('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); await syncSessionUI(); });
-$('refreshBtn').addEventListener('click', refreshAll);
-$('searchBox').addEventListener('input', renderList);
+$('logoutBtn').addEventListener('click', async () => {
+  await sb.auth.signOut(); state.session = null; state.role = 'guest'; $('authGate').classList.remove('hidden'); $('logoutBtn').classList.add('hidden'); $('roleBadge').classList.add('hidden'); $('whoami').textContent = 'Not signed in'; $('whoamiSub').textContent = 'Waiting for staff authentication'; setLoadError('');
+});
+$('refreshBtn').addEventListener('click', () => refreshAll().catch((err) => setLoadError(err.message || 'Refresh failed')));
 document.querySelectorAll('.tab').forEach((btn) => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
+$('searchBox').addEventListener('input', renderList);
 $('customerClearBtn').addEventListener('click', resetCustomerForm);
 $('staffClearBtn').addEventListener('click', resetStaffForm);
 $('receiptClearBtn').addEventListener('click', resetReceiptForm);
-['customerForm', 'staffForm', 'receiptForm'].forEach((id) => window.formValidator.initializeForm(id, { manageSubmit: false }));
 $('customerForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!window.formValidator.validateForm('customerForm')) { setMsg($('customerMsg'), 'Please fix the highlighted fields'); return; }
   setMsg($('customerMsg'), 'Saving customer...');
   try {
-    const payload = { id: $('customerId').value || undefined, name: $('customerName').value.trim(), email: $('customerEmail').value.trim(), phone: $('customerPhone').value.trim(), phone2: $('customerPhone2').value.trim(), city: $('customerCity').value.trim(), delivery_location: $('customerDelivery').value.trim(), note: $('customerNote').value.trim(), manager_staff_id: $('customerManager').value || null, is_active: $('customerStatus').value === 'true', send_invite: $('customerInvite').value === 'true', password: $('customerPassword').value.trim() || undefined };
+    const payload = { id: $('customerId').value || undefined, name: $('customerName').value.trim(), email: $('customerEmail').value.trim(), phone: $('customerPhone').value.trim(), phone2: $('customerPhone2').value.trim(), city: $('customerCity').value.trim(), delivery_location: $('customerDelivery').value.trim(), manager_staff_id: $('customerManager').value || undefined, is_active: $('customerStatus').value === 'true', note: $('customerNote').value.trim(), send_invite: $('customerInvite').value === 'true', password: $('customerPassword').value.trim() || undefined };
     const action = $('customerId').value ? 'update' : 'create';
     const res = await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'customer', action, data: payload }) });
     setMsg($('customerMsg'), action === 'create' ? `Customer saved${res.warning ? ' · ' + res.warning : ''}` : 'Customer updated', true);
@@ -525,7 +557,7 @@ window.archiveCustomerAccount = async (id) => {
 };
 window.archiveStaffAccount = async (id) => {
   if (!confirm('Deactivate this staff account?')) return;
-  try { await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'staff', action: 'deactivate', data: { id } }) }); await refreshAll(); }
+  try { await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'staff', action: 'archive', data: { id } }) }); await refreshAll(); }
   catch (err) { alert(err.message || 'Unable to deactivate staff'); }
 };
 window.addEventListener('hashchange', () => {
