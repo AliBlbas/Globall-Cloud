@@ -162,7 +162,13 @@
               <p id="whoamiSub">Waiting for staff authentication</p>
             </div>
           </div>
-          <div class="stats" id="statsRow">
+          <div class="section-title" style="margin-top:6px">
+            <div>
+              <h2>Record counts</h2>
+              <p>Live totals for customers, staff, warehouse receipts, and activity logs.</p>
+            </div>
+          </div>
+          <div class="stats" id="recordsStatsRow">
             <div class="stat"><b>—</b><span>Customers</span></div>
             <div class="stat"><b>—</b><span>Staff</span></div>
             <div class="stat"><b>—</b><span>Receipts</span></div>
@@ -399,11 +405,14 @@ async function refreshAnalytics() {
   $('analyticsStatsRow').innerHTML = `
     <div class="stat"><b>${money(g('totalRevenue')?.value)}</b><span>Revenue (30d)</span></div>
     <div class="stat"><b>${money(g('outstandingBalance')?.value)}</b><span>Outstanding</span></div>
+    <div class="stat"><b>${g('totalShipments')?.value ?? 0}</b><span>Total shipments</span></div>
+    <div class="stat"><b>${g('totalCustomers')?.value ?? 0}</b><span>Total customers</span></div>
     <div class="stat"><b>${g('activeShipments')?.value ?? 0}</b><span>Active shipments</span></div>
     <div class="stat"><b>${g('deliveredToday')?.value ?? 0}</b><span>Delivered today</span></div>
     <div class="stat"><b>${g('newCustomers')?.value ?? 0}</b><span>New customers (30d)</span></div>
     <div class="stat"><b>${g('avgDeliveryTime')?.value ?? 0}</b><span>Avg delivery (days)</span></div>
     <div class="stat"><b>${g('deliverySuccessRate')?.value ?? 0}%</b><span>Success rate</span></div>
+    <div class="stat"><b>${g('totalReceipts')?.value ?? 0}</b><span>Warehouse receipts</span></div>
     <div class="stat"><b>${g('totalMessages')?.value ?? 0}</b><span>Messages (30d)</span></div>
   `;
 }
@@ -414,7 +423,7 @@ async function refreshAll() {
     const [c, s, r, l] = await Promise.all([authFetch('/?kind=customer'), authFetch('/?kind=staff'), authFetch('/?kind=receipt'), authFetch('/?kind=log')]);
     state.customers = c.items || []; state.staff = s.items || []; state.receipts = r.items || []; state.logs = l.items || [];
     loadManagerOptions();
-    $('statsRow').innerHTML = `<div class="stat"><b>${state.customers.length}</b><span>Customers</span></div><div class="stat"><b>${state.staff.length}</b><span>Staff</span></div><div class="stat"><b>${state.receipts.length}</b><span>Receipts</span></div><div class="stat"><b>${state.logs.length}</b><span>Logs</span></div>`;
+    $('recordsStatsRow').innerHTML = `<div class="stat"><b>${state.customers.length}</b><span>Customers</span></div><div class="stat"><b>${state.staff.length}</b><span>Staff</span></div><div class="stat"><b>${state.receipts.length}</b><span>Receipts</span></div><div class="stat"><b>${state.logs.length}</b><span>Logs</span></div>`;
     const name = state.session.user.user_metadata?.full_name || state.session.user.email?.split('@')[0] || 'Staff';
     $('whoami').textContent = `${name} · ${state.session.user.email || ''}`;
     $('whoamiSub').textContent = `${roleLabel[state.role] || state.role} access active`;
