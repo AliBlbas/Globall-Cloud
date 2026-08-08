@@ -82,18 +82,7 @@ Globall Cloud is a logistics platform for shipping from China and the UAE to Ira
   clear "not configured" message until you (1) add publishable keys, (2)
   build a payments Edge Function, (3) point `EDGE_FUNCTION_URL` at it.
 
-## Layout redesign
-The staff console now uses a proper admin shell instead of a buried-tabs layout:
-- The login gate stays separate from the authenticated console shell.
-- Business metrics live in a dedicated analytics stats row.
-- Record counts are shown in their own clearly labeled section.
-- `refreshAll()` updates the record counts, while `refreshAnalytics()` updates the business metrics.
-- The README now reflects the split between the public logistics site and the secure staff console.
-- The shell is responsive: desktop sidebar navigation collapses into a mobile drawer.
-- Dashboard metrics are intentionally separated from raw record counts for faster operational scanning.
-- Forms remain wired to the existing `account-admin` edge function; the redesign does not replace the backend workflow.
-- Analytics now reads only columns present in the live schema and derives shipment state from `current_step_index` / `step_dates` instead of relying on nonexistent `status` or `delivered_at` columns.
-
+## Removed
 A few files in the original repo were dead weight and were deleted rather
 than fixed, since nothing referenced them and there was nothing worth
 keeping:

@@ -34,7 +34,6 @@ class EnhancedTracking {
     this.shipments = new Map();        // shipmentId -> last-known row from Supabase
     this.containers = new Map();       // shipmentId -> DOM element id to render the map into
     this.realtimeChannels = new Map(); // shipmentId -> active Supabase realtime channel
-    this.client = null;
   }
 
   /**
@@ -49,7 +48,6 @@ class EnhancedTracking {
     if (!sb) throw new Error('Supabase client not available');
 
     const shipment = await this.fetchShipmentData(sb, shipmentId);
-    this.client = sb;
     this.shipments.set(shipmentId, shipment);
     if (containerId) this.initializeMap(containerId, shipmentId);
     this.subscribeToRealtime(sb, shipmentId);
@@ -83,7 +81,7 @@ class EnhancedTracking {
   }
 
   unsubscribeChannel(shipmentId) {
-    const sb = this.client || window.sb || window.supabase;
+    const sb = window.sb || window.supabase;
     const channel = this.realtimeChannels.get(shipmentId);
     if (channel && sb) sb.removeChannel(channel);
     this.realtimeChannels.delete(shipmentId);

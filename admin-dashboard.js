@@ -59,7 +59,7 @@ class AdminDashboard {
       const [shipmentsRes, customersRes, receiptsRes, messagesRes] = await Promise.all([
         supabase
           .from('shipments')
-          .select('id,created_at,total_amount,paid_amount,origin_key,dest_key,branch,customer_name,customer_phone,directory_customer_id,current_step_index,step_dates,eta')
+          .select('id,status,created_at,delivered_at,total_amount,paid_amount,origin_key,dest_key,branch,customer_name,customer_phone,directory_customer_id,current_step_index,eta')
           .gte('created_at', this.startDate.toISOString())
           .lte('created_at', this.endDate.toISOString()),
         supabase
@@ -108,24 +108,17 @@ class AdminDashboard {
       return sum + Math.max(0, total - paid);
     }, 0);
 
-    const getStepDates = (s) => (s && s.step_dates && typeof s.step_dates === 'object') ? s.step_dates : {};
-    const isDelivered = (s) => Number(s?.current_step_index ?? 0) >= 5;
-    const deliveredAt = (s) => {
-      const dates = getStepDates(s);
-      const value = dates.delivered || dates.delivered_at || null;
-      return value ? new Date(value) : null;
-    };
     const deliveredToday = shipments.filter((s) => {
-      const d = deliveredAt(s);
-      return isDelivered(s) && d && d.toDateString() === new Date().toDateString();
+      if (!s.delivered_at || s.status !== 'delivered') return false;
+      return new Date(s.delivered_at).toDateString() === new Date().toDateString();
     }).length;
 
-    const activeShipments = shipments.filter((s) => !isDelivered(s)).length;
+    const activeShipments = shipments.filter((s) => !['delivered', 'cancelled'].includes(String(s.status || '').toLowerCase())).length;
     const newCustomers = customers.filter((c) => new Date(c.created_at) >= this.startDate).length;
 
     const deliveryTimes = shipments
-      .filter((s) => s.created_at && deliveredAt(s))
-      .map((s) => (deliveredAt(s) - new Date(s.created_at)) / (1000 * 60 * 60 * 24))
+      .filter((s) => s.created_at && s.delivered_at)
+      .map((s) => (new Date(s.delivered_at) - new Date(s.created_at)) / (1000 * 60 * 60 * 24))
       .filter((n) => Number.isFinite(n) && n >= 0);
 
     const avgDeliveryTime = deliveryTimes.length
@@ -133,7 +126,7 @@ class AdminDashboard {
       : 0;
 
     const successRate = shipments.length
-      ? (shipments.filter((s) => isDelivered(s)).length / shipments.length) * 100
+      ? (shipments.filter((s) => s.status === 'delivered').length / shipments.length) * 100
       : 0;
 
     this.metrics.set('totalRevenue', { ...this.metrics.get('totalRevenue'), value: Math.round(totalRevenue * 100) / 100 });
@@ -188,13 +181,13 @@ class AdminDashboard {
     const routePerformance = {};
 
     shipments.forEach((s) => {
-      const step = Number(s.current_step_index ?? 0);
-      const status = step >= 5 ? 'delivered' : step >= 2 ? 'transit' : 'pending';
+      const status = String(s.status || 'unknown');
       byStatus[status] = (byStatus[status] || 0) + 1;
       const route = `${s.origin_key || '—'} → ${s.dest_key || '—'}`;
       if (!routePerformance[route]) routePerformance[route] = { count: 0, delivered: 0, delayed: 0 };
       routePerformance[route].count += 1;
       if (status === 'delivered') routePerformance[route].delivered += 1;
+      if (status === 'delayed') routePerformance[route].delayed += 1;
     });
 
     return { totalShipments: shipments.length, byStatus, routePerformance, generatedAt: new Date().toISOString() };
@@ -206,7 +199,7 @@ class AdminDashboard {
 
     const [{ data: customers, error: cErr }, { data: shipments, error: sErr }] = await Promise.all([
       supabase.from('customer_directory').select('id,name,phone,email,created_at,city,delivery_location'),
-      supabase.from('shipments').select('id,customer_name,customer_phone,customer_email,total_amount,directory_customer_id,customer_user_id,created_at,current_step_index'),
+      supabase.from('shipments').select('id,customer_name,customer_phone,customer_email,total_amount,directory_customer_id,customer_user_id,created_at,status'),
     ]);
 
     if (cErr) throw cErr;
@@ -231,7 +224,7 @@ class AdminDashboard {
 
     const topCustomers = Object.entries(customerStats).sort((a, b) => b[1].totalSpent - a[1].totalSpent).slice(0, 10);
 
-    return { totalCustomers: customerRows.length, topCustomers, customerStats, generatedAt: new Date().toISOString() };
+    return { totalCustomers: customers.length, topCustomers, customerStats, generatedAt: new Date().toISOString() };
   }
 
   startAutoRefresh() {
