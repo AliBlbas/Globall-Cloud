@@ -5,6 +5,7 @@
   Permissions-Policy: camera=(), geolocation=(), microphone=(), payment=()
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-site
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https://ahslifnthiwfkmaswjno.supabase.co https://formsubmit.co https://wa.me; frame-src 'self' https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://formsubmit.co'
 
 /*.css
   Cache-Control: public, max-age=3600

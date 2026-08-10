@@ -3,5 +3,6 @@ Allow: /
 Disallow: /management.html
 Disallow: /accounts-console.html
 Disallow: /tracking-integration.html
+Disallow: /staff-os.html
 
 Sitemap: https://globall-cloud.pages.dev/sitemap.xml

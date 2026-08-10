@@ -37,7 +37,16 @@ Globall Cloud is a logistics platform for shipping from China and the UAE to Ira
 
 ## Project files (live / wired in)
 - `index.html` — main website and customer portal
-- `management.html` — staff entry page
+- `management.html` — staff entry page, links out to `accounts-console.html`
+  and `staff-os.html`
+- `staff-os.html` — authenticated Staff OS hub: a Supabase Auth login gate,
+  then a lightweight dashboard (account/staff/receipt counts + quick-nav
+  cards into `accounts-console.html`'s tabs and `tracking-integration.html`).
+  It doesn't duplicate any CRUD logic — verifies the signed-in user has an
+  active `staff` row before rendering, then hands off to the existing
+  console for actual work. Linked from the main nav (desktop + mobile) and
+  `management.html`; excluded from `robots.txt` and marked `noindex` like
+  the other staff-only pages.
 - `accounts-console.html` — staff management console. Loads `admin-dashboard.js`
   for the analytics tab and `form-validation.js` / `form-validation-styles.css`
   for inline field validation on the customer/staff/receipt forms.
@@ -92,6 +101,19 @@ Globall Cloud is a logistics platform for shipping from China and the UAE to Ira
   build a payments Edge Function, (3) point `EDGE_FUNCTION_URL` at it. Not
   wired into any page because doing so without those three pieces in place
   would just show customers a broken "pay now" button.
+
+## Security hardening (defense-in-depth)
+Supabase Row-Level Security remains the actual security boundary for every
+table. On top of that, three browser-side staff functions in `index.html`
+now also verify the caller has an active, role-appropriate `staff` row
+before making the request at all — `getAllShipments()`, `getRecentMessages()`,
+and `getShipmentForStaff(id)`. This doesn't change what RLS already allows
+or blocks; it just stops the client from *asking* for staff-only data when
+there's no valid staff session, so a coding mistake elsewhere in the client
+can't accidentally trigger a broad read that RLS then has to be the only
+thing catching. `_headers` also ships a `Content-Security-Policy-Report-Only`
+policy — report-only so it can be observed in the browser console for a
+while before anyone flips it to enforcing.
 
 ## Removed
 A few files in the original repo were dead weight and were deleted rather
