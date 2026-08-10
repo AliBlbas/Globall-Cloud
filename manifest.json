@@ -11,7 +11,7 @@
   "lang": "ckb",
   "dir": "rtl",
   "icons": [
-    { "src": "logo-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "logo-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "logo-icon.png", "sizes": "256x256", "type": "image/png", "purpose": "any" },
+    { "src": "logo-icon.png", "sizes": "256x256", "type": "image/png", "purpose": "maskable" }
   ]
 }
