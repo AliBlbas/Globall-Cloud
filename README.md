@@ -38,6 +38,7 @@ Globall Cloud is a logistics platform for shipping from China and the UAE to Ira
 ## Project files (live / wired in)
 - `index.html` — main website and customer portal
 - `management.html` — staff entry page
+- `staff-portal.html` — authenticated Staff OS hub for quick access to internal tools
 - `accounts-console.html` — staff management console. Loads `admin-dashboard.js`
   for the analytics tab and `form-validation.js` / `form-validation-styles.css`
   for inline field validation on the customer/staff/receipt forms.

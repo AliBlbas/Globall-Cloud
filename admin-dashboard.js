@@ -1,9 +1,18 @@
 // Admin Dashboard Analytics Engine
 // Aligned with the live Globall Cloud Supabase schema.
 //
-// Analytics now load through the account-admin Edge Function instead of
-// querying public tables directly from the browser. This keeps the staff
-// console fast while making the database exposure easier to tighten later.
+// FIXED: the previous version read `window.supabase` and called
+// `.from()` directly on it. But `window.supabase` is only the raw
+// supabase-js *library* namespace (it just has `.createClient`) — neither
+// index.html nor accounts-console.html ever assigns the real client back to
+// `window.supabase`. The actual usable client in both pages is a local
+// variable called `sb`. Calling `window.supabase.from(...)` therefore threw
+// "supabase.from is not a function" every time, was swallowed by the
+// try/catch, and silently returned null — so this dashboard could never
+// have worked, wired in or not.
+//
+// Fix: accept the real client explicitly (or fall back to `window.sb` if
+// the host page exposes one), instead of assuming.
 
 class AdminDashboard {
   constructor(client) {
@@ -12,44 +21,7 @@ class AdminDashboard {
     this.startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     this.endDate = new Date();
     this.refreshInterval = 300000;
-    this.apiBaseUrl = this.resolveApiBaseUrl();
     this.initializeDashboard();
-  }
-
-  resolveApiBaseUrl() {
-    const base =
-      this.client?.supabaseUrl ||
-      this.client?.url ||
-      window.SUPABASE_URL ||
-      'https://ahslifnthiwfkmaswjno.supabase.co';
-    return `${String(base).replace(/\/$/, '')}/functions/v1/account-admin`;
-  }
-
-  async getSessionToken() {
-    const supabase = this.client;
-    if (!supabase?.auth?.getSession) return null;
-    const { data } = await supabase.auth.getSession();
-    return data?.session?.access_token || null;
-  }
-
-  async edgeGet(kind) {
-    const token = await this.getSessionToken();
-    if (!token) throw new Error('Please sign in first');
-
-    const res = await fetch(`${this.apiBaseUrl}?kind=${encodeURIComponent(kind)}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    const text = await res.text();
-    let data = null;
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      data = { raw: text };
-    }
-
-    if (!res.ok) throw new Error(data?.error || `Request failed (${res.status})`);
-    return Array.isArray(data?.items) ? data.items : [];
   }
 
   initializeDashboard() {
@@ -78,19 +50,45 @@ class AdminDashboard {
 
   async fetchDashboardData() {
     try {
-      if (!this.client) {
+      const supabase = this.client;
+      if (!supabase) {
         console.error('AdminDashboard: no Supabase client available (pass one to `new AdminDashboard(sb)`)');
         return null;
       }
 
-      const [shipments, customers, receipts, messages] = await Promise.all([
-        this.edgeGet('shipment'),
-        this.edgeGet('customer'),
-        this.edgeGet('receipt'),
-        this.edgeGet('log'),
+      const [shipmentsRes, customersRes, receiptsRes, messagesRes] = await Promise.all([
+        supabase
+          .from('shipments')
+          .select('id,status,created_at,delivered_at,total_amount,paid_amount,origin_key,dest_key,branch,customer_name,customer_phone,directory_customer_id,current_step_index,eta')
+          .gte('created_at', this.startDate.toISOString())
+          .lte('created_at', this.endDate.toISOString()),
+        supabase
+          .from('customer_directory')
+          .select('id,name,phone,email,city,delivery_location,created_at')
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('warehouse_receipts')
+          .select('id,batch_code,location,created_at,received_at,directory_customer_id,created_by_name,consolidated')
+          .gte('created_at', this.startDate.toISOString())
+          .lte('created_at', this.endDate.toISOString()),
+        supabase
+          .from('messages')
+          .select('id,created_at,company,request_type')
+          .gte('created_at', this.startDate.toISOString())
+          .lte('created_at', this.endDate.toISOString()),
       ]);
 
-      return { shipments, customers, receipts, messages };
+      if (shipmentsRes.error) throw shipmentsRes.error;
+      if (customersRes.error) throw customersRes.error;
+      if (receiptsRes.error) throw receiptsRes.error;
+      if (messagesRes.error) throw messagesRes.error;
+
+      return {
+        shipments: shipmentsRes.data || [],
+        customers: customersRes.data || [],
+        receipts: receiptsRes.data || [],
+        messages: messagesRes.data || [],
+      };
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       return null;
@@ -147,7 +145,16 @@ class AdminDashboard {
   }
 
   async generateRevenueReport() {
-    const shipments = await this.edgeGet('shipment');
+    const supabase = this.client;
+    if (!supabase) return null;
+
+    const { data: shipments, error } = await supabase
+      .from('shipments')
+      .select('created_at,total_amount,origin_key,dest_key,type')
+      .gte('created_at', this.startDate.toISOString())
+      .lte('created_at', this.endDate.toISOString());
+
+    if (error) throw error;
 
     const byRoute = {};
     const byDay = {};
@@ -187,15 +194,22 @@ class AdminDashboard {
   }
 
   async generateCustomerInsights() {
-    const [customers, shipments] = await Promise.all([
-      this.edgeGet('customer'),
-      this.edgeGet('shipment'),
+    const supabase = this.client;
+    if (!supabase) return null;
+
+    const [{ data: customers, error: cErr }, { data: shipments, error: sErr }] = await Promise.all([
+      supabase.from('customer_directory').select('id,name,phone,email,created_at,city,delivery_location'),
+      supabase.from('shipments').select('id,customer_name,customer_phone,customer_email,total_amount,directory_customer_id,customer_user_id,created_at,status'),
     ]);
 
+    if (cErr) throw cErr;
+    if (sErr) throw sErr;
+
+    const shipmentRows = shipments || [];
     const customerStats = {};
 
     customers.forEach((c) => {
-      const linked = shipments.filter((s) => s.directory_customer_id === c.id || s.customer_phone === c.phone);
+      const linked = shipmentRows.filter((s) => s.directory_customer_id === c.id || s.customer_phone === c.phone);
       customerStats[c.id] = {
         name: c.name,
         phone: c.phone,

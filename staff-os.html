@@ -1,1 +1,95 @@
-<!doctype html><html lang="ckb" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#061428"><meta name="robots" content="noindex,nofollow,noarchive"><title>Globall Cloud — Staff OS</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"><style>:root{--bg:#061428;--card:#102742;--line:#29496f;--text:#f5f9fd;--muted:#9bb2d0;--a:#00c2d9;--a2:#4fe3f0;--font:'Vazirmatn',sans-serif;--mono:'JetBrains Mono',monospace}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% -10%,rgba(0,194,217,.14),transparent 35%),linear-gradient(180deg,var(--bg),#08111e 85%);color:var(--text);font-family:var(--font);padding:18px}.wrap{max-width:1050px;margin:auto}.top{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}.brand{display:flex;gap:12px;align-items:center}.logo{width:50px;height:50px;border-radius:16px;background:linear-gradient(135deg,var(--a2),var(--a));display:grid;place-items:center;color:#03181d;font-weight:900}.eyebrow{font:800 11px var(--mono);letter-spacing:2px;color:var(--a2)}h1{font-size:clamp(32px,6vw,58px);line-height:1.05;margin:12px 0}.muted{color:var(--muted);line-height:1.9}.hero{margin-top:18px;padding:26px;border:1px solid rgba(255,255,255,.08);border-radius:28px;background:linear-gradient(160deg,rgba(16,39,66,.98),rgba(8,20,35,.98));box-shadow:0 24px 60px rgba(0,0,0,.3)}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}.card{display:block;padding:18px;border-radius:20px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);transition:.2s}.card:hover{transform:translateY(-2px);border-color:rgba(79,227,240,.45)}.card b{display:block;font-size:16px;margin-bottom:6px}.card span{display:block;color:var(--muted);font-size:12.5px;line-height:1.7}.btn{display:inline-flex;padding:12px 16px;border-radius:999px;border:1px solid var(--line);font-weight:800;color:var(--text);text-decoration:none}.primary{background:linear-gradient(135deg,var(--a2),var(--a));color:#03181d;border:0}@media(max-width:720px){body{padding:12px}.hero{padding:18px}.grid{grid-template-columns:1fr}.top .btn{flex:1}}</style></head><body><div class="wrap"><header class="top"><div class="brand"><div class="logo">GC</div><div><div class="eyebrow">GLOBALL CLOUD · STAFF OS</div><strong>Internal Operations</strong></div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn" href="./index.html">وێبسایت</a><a class="btn primary" href="./staff-portal.html">Open Staff Portal</a></div></header><main class="hero"><div class="eyebrow">AUTHENTICATED WORKSPACE</div><h1>کۆنترۆڵی ستاف<br><span style="color:var(--a2)">لە یەک شوێن.</span></h1><p class="muted">ئەمە دەروازەی ستافی Globall Cloud ـە. کارە سەرەکییەکان لە Staff Portal ـی پشتڕاستکراوەدا جێبەجێ دەکرێن؛ ئەم پەیجە تەنها navigation ـی پاک و پڕۆفیشنالە.</p><section class="grid"><a class="card" href="./staff-portal.html"><b>Staff Portal</b><span>کڕیار، ستاف، warehouse receipts، logs و dashboard.</span></a><a class="card" href="./accounts-console.html"><b>Full Console</b><span>کۆنترۆڵی وردتر بۆ account و operational records.</span></a><a class="card" href="./operations-suite.html"><b>Operations Suite</b><span>دەروازەی premium بۆ کارەکانی ڕۆژانەی operations.</span></a></section></main></div></body></html>
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#061428">
+<title>Globall Cloud — Staff OS</title>
+<meta name="description" content="Globall Cloud internal staff operations center.">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root{--bg:#050d1a;--panel:#0b1b31;--panel2:#102844;--line:#21456d;--text:#f6fbff;--muted:#91a8c5;--cyan:#00c2d9;--cyan2:#55e5f2;--mint:#58e6b0;--amber:#ffc96b;--danger:#ff6b7a;--shadow:0 24px 70px rgba(0,0,0,.34);--r:24px;--font:'Vazirmatn',sans-serif;--mono:'JetBrains Mono',monospace}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 90% 0,rgba(0,194,217,.14),transparent 28%),radial-gradient(circle at 0 30%,rgba(75,122,255,.09),transparent 26%),var(--bg);color:var(--text);font-family:var(--font)}a{color:inherit;text-decoration:none}button,input{font:inherit}.wrap{width:min(1240px,calc(100% - 28px));margin:auto}
+.top{padding:18px 0;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,var(--cyan2),var(--cyan));color:#03151b;display:grid;place-items:center;font-weight:900;font-size:19px;box-shadow:0 0 30px rgba(0,194,217,.2)}.eyebrow{font:700 11px var(--mono);letter-spacing:2px;color:var(--cyan2);text-transform:uppercase}.brand b{font-size:18px}.muted{color:var(--muted)}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:rgba(255,255,255,.035);color:var(--text);padding:11px 16px;border-radius:999px;font-weight:800;cursor:pointer;transition:.2s}.btn:hover{transform:translateY(-1px);border-color:rgba(85,229,242,.55)}.btn-primary{border:0;background:linear-gradient(135deg,var(--cyan2),var(--cyan));color:#03151b}.btn-danger{border-color:rgba(255,107,122,.35);color:#ffd5da}
+.hero{display:grid;grid-template-columns:1.3fr .7fr;gap:16px;margin:8px 0 16px}.hero-card,.panel{background:linear-gradient(155deg,rgba(16,40,68,.96),rgba(7,20,36,.97));border:1px solid rgba(111,177,230,.16);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}.hero-card{padding:28px;position:relative}.hero-card:after{content:'';position:absolute;width:240px;height:240px;border-radius:50%;right:-90px;top:-100px;background:radial-gradient(circle,rgba(0,194,217,.18),transparent 70%);pointer-events:none}.hero h1{font-size:clamp(30px,5vw,58px);line-height:1.05;margin:10px 0 12px;letter-spacing:-.03em}.hero h1 span{color:var(--cyan2)}.hero p{font-size:15px;line-height:1.9;color:var(--muted);max-width:65ch}.status{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(88,230,176,.25);background:rgba(88,230,176,.07);color:#b9f6df;padding:8px 11px;border-radius:999px;font:700 11px var(--mono)}.dot{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 15px var(--mint)}
+.profile{padding:22px}.profile-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.avatar{width:58px;height:58px;border-radius:20px;background:linear-gradient(135deg,var(--cyan2),var(--cyan));display:grid;place-items:center;color:#03151b;font-weight:900;font-size:21px}.role{margin-top:8px;display:inline-flex;padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.06);color:#dcecff;font:700 10px var(--mono)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}.metric{padding:18px;background:linear-gradient(180deg,rgba(16,40,68,.94),rgba(10,26,45,.94));border:1px solid rgba(111,177,230,.13);border-radius:20px}.metric b{display:block;font:900 27px var(--mono);margin-bottom:6px}.metric span{font-size:12px;color:var(--muted)}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:22px 2px 10px}.section-head h2{margin:0;font-size:20px}.section-head p{margin:3px 0 0;color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.action{padding:19px;text-align:right;min-height:155px;display:flex;flex-direction:column;justify-content:space-between}.action .icon{width:42px;height:42px;border-radius:15px;display:grid;place-items:center;background:rgba(0,194,217,.1);border:1px solid rgba(0,194,217,.2);color:var(--cyan2);font:900 16px var(--mono)}.action b{display:block;font-size:16px;margin-top:14px}.action span{display:block;color:var(--muted);font-size:12.5px;line-height:1.7;margin-top:5px}.action small{display:block;color:var(--cyan2);font:700 10px var(--mono);margin-top:12px;letter-spacing:.7px}
+.panel{padding:18px}.security{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.security .item{padding:14px;border-radius:17px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}.security b{display:block;margin-bottom:4px;font-size:13px}.security span{font-size:11px;color:var(--muted);line-height:1.7}.footer{padding:24px 0 40px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:11px;font-family:var(--mono)}
+.gate{min-height:100vh;display:grid;place-items:center;padding:20px}.gate-card{width:min(520px,100%);padding:28px;border-radius:28px;background:linear-gradient(155deg,#102844,#081727);border:1px solid rgba(85,229,242,.18);box-shadow:var(--shadow)}.gate-card h1{font-size:32px;margin:10px 0}.field{width:100%;margin:7px 0 12px;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:#061428;color:var(--text);outline:none}.field:focus{border-color:var(--cyan)}.msg{min-height:22px;color:#ffb9c0;font-size:12px;line-height:1.7}.hidden{display:none!important}
+@media(max-width:900px){.hero{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:repeat(2,1fr)}.security{grid-template-columns:1fr}}
+@media(max-width:600px){.wrap{width:min(100% - 20px,1240px)}.top{align-items:flex-start}.top-actions .btn{padding:9px 12px;font-size:12px}.hero-card{padding:21px}.metrics{grid-template-columns:repeat(2,1fr);gap:8px}.metric{padding:14px}.metric b{font-size:22px}.grid{grid-template-columns:1fr}.action{min-height:135px}.footer{padding-bottom:30px}}
+</style>
+</head>
+<body>
+<div id="gate" class="gate">
+  <div class="gate-card">
+    <div class="eyebrow">GLOBALL CLOUD · STAFF OS</div>
+    <h1>کۆنسۆڵی ستاف</h1>
+    <p class="muted" style="line-height:1.9">تەنها ئەندامانی ستافی ڕێگەپێدراو دەتوانن بچنە ناو ئەم بەشە. داتا لە Supabase Auth و staff access ـەوە پشتڕاست دەکرێتەوە.</p>
+    <form id="loginForm">
+      <label class="muted" style="font-size:12px">ئیمەیڵ</label>
+      <input id="email" class="field" type="email" autocomplete="username" required>
+      <label class="muted" style="font-size:12px">وشەی نهێنی</label>
+      <input id="password" class="field" type="password" autocomplete="current-password" required>
+      <div id="loginMsg" class="msg"></div>
+      <button class="btn btn-primary" style="width:100%;padding:14px" type="submit">چوونەژوورەوە بۆ Staff OS →</button>
+    </form>
+    <div style="margin-top:14px;text-align:center"><a class="muted" href="./index.html">گەڕانەوە بۆ وێبسایت</a></div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <div class="wrap">
+    <header class="top">
+      <div class="brand"><div class="logo">GC</div><div><div class="eyebrow">Internal Operations</div><b>Globall Cloud Staff OS</b><div class="muted" style="font-size:11px">China · UAE · Iraq Logistics</div></div></div>
+      <div class="top-actions"><a class="btn" href="./index.html">وێبسایت</a><a class="btn" href="./accounts-console.html">Full Console</a><button id="signOut" class="btn btn-danger">دەرچوون</button></div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-card"><div class="status"><i class="dot"></i> LIVE · SUPABASE CONNECTED</div><h1>سڵاو، <span id="staffName">Staff</span></h1><p>یەک شوێنی پاک و خێرا بۆ بەڕێوەبردنی کڕیار، بار، وەرگرتنی warehouse، شوێنکەوتن و کارەکانی ڕۆژانەی ستاف.</p><div class="top-actions"><a class="btn btn-primary" href="./accounts-console.html">کردنەوەی کۆنسۆڵ</a><a class="btn" href="./tracking-integration.html">Live Tracking</a></div></div>
+      <div class="profile"><div class="profile-head"><div><div class="eyebrow">Authenticated staff</div><div id="staffEmail" style="font-weight:800;margin-top:8px">—</div><div id="staffRole" class="role">Checking role…</div></div><div id="avatar" class="avatar">GC</div></div><div style="margin-top:20px;color:var(--muted);font-size:12px;line-height:1.8">دەستڕاگەیشتن بە پەیوەندیی Supabase Edge Function و Row-Level Security پارێزراوە.</div></div>
+    </section>
+
+    <section class="metrics"><div class="metric"><b id="mCustomers">—</b><span>Customer accounts</span></div><div class="metric"><b id="mStaff">—</b><span>Staff members</span></div><div class="metric"><b id="mReceipts">—</b><span>Warehouse receipts</span></div><div class="metric"><b id="mShipments">—</b><span>Shipments · 30d</span></div></section>
+
+    <div class="section-head"><div><h2>کۆنترۆڵی خێرا</h2><p>هەموو کاری گرنگ لە یەک شوێن</p></div></div>
+    <section class="grid">
+      <a class="panel action" href="./accounts-console.html#customers"><div class="icon">01</div><div><b>کڕیارەکان</b><span>دروستکردن، دەستکاریکردن، archive و manager assignment.</span><small>CUSTOMER DIRECTORY</small></div></a>
+      <a class="panel action" href="./accounts-console.html#staff"><div class="icon">02</div><div><b>ستاف و دەستڕاگەیشتن</b><span>Role، branch، invite و deactivate بۆ ئەندامانی تیم.</span><small>STAFF ACCESS</small></div></a>
+      <a class="panel action" href="./accounts-console.html#receipts"><div class="icon">03</div><div><b>Warehouse</b><span>تۆمارکردنی batch، شوێن، وێنە و بەڵگەی وەرگرتنی بار.</span><small>RECEIPTS</small></div></a>
+      <a class="panel action" href="./accounts-console.html#logs"><div class="icon">04</div><div><b>Activity Logs</b><span>بینینی کێ چی کردووە و کاتی گۆڕانکارییەکان.</span><small>AUDIT TRAIL</small></div></a>
+      <a class="panel action" href="./tracking-integration.html"><div class="icon">05</div><div><b>Live Tracking</b><span>شوێنکەوتنی بار و corridor ـەکانی چین، دوبەی و هەولێر.</span><small>TRACKING</small></div></a>
+      <a class="panel action" href="./management.html"><div class="icon">06</div><div><b>Management Center</b><span>دەروازەی گشتی بۆ هەموو ئامرازەکانی بەڕێوەبردن.</span><small>CONTROL CENTER</small></div></a>
+    </section>
+
+    <div class="section-head"><div><h2>Security layer</h2><p>ئەمە UI ـی جوان نییە تەنها؛ access ـەکەش پشتڕاست دەکرێتەوە.</p></div></div>
+    <section class="panel security"><div class="item"><b>Supabase Auth</b><span>Session ـی staff پێش نیشاندانی dashboard پشتڕاست دەکرێتەوە.</span></div><div class="item"><b>Staff role check</b><span>ئیمەیڵ بە staff record ـەوە پەیوەست دەکرێت و guest ڕێگەی پێ نادرێت.</span></div><div class="item"><b>Edge Function</b><span>کارە هەستیارەکان لە account-admin ـەوە بە token ـی session جێبەجێ دەکرێن.</span></div></section>
+
+    <footer class="footer"><span>GLOBALL CLOUD · STAFF OS</span><span>Supabase · Cloudflare Pages · GitHub</span></footer>
+  </div>
+</div>
+<script>
+const SUPABASE_URL='https://ahslifnthiwfkmaswjno.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
+const API_URL=`${SUPABASE_URL}/functions/v1/account-admin`;
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+window.sb=sb;
+const $=id=>document.getElementById(id);
+function setMsg(t,ok=false){$('loginMsg').textContent=t||'';$('loginMsg').style.color=ok?'#58e6b0':'#ffb9c0'}
+async function authFetch(path='/'){const {data:{session}}=await sb.auth.getSession();if(!session)throw new Error('No active staff session');const r=await fetch(API_URL+path,{headers:{Authorization:`Bearer ${session.access_token}`}});const text=await r.text();let data={};try{data=text?JSON.parse(text):{}}catch{}if(!r.ok)throw new Error(data.error||`Request failed (${r.status})`);return data}
+async function verifyStaff(user){const res=await authFetch('/?kind=staff');const row=(res.items||[]).find(s=>s.id===user.id);if(!row||row.is_active===false||!['admin','accountant','super_admin'].includes(row.role))throw new Error('ئەم ئەکاونتە دەستڕاگەیشتنی ستافی نییە.');return row}
+async function loadMetrics(){try{$('mCustomers').textContent=(await authFetch('/?kind=customer')).items?.length??0}catch{$('mCustomers').textContent='—'}try{$('mStaff').textContent=(await authFetch('/?kind=staff')).items?.length??0}catch{$('mStaff').textContent='—'}try{$('mReceipts').textContent=(await authFetch('/?kind=receipt')).items?.length??0}catch{$('mReceipts').textContent='—'}try{$('mShipments').textContent='Live'}catch{$('mShipments').textContent='—'}}
+async function enter(user){const row=await verifyStaff(user);$('gate').classList.add('hidden');$('app').classList.remove('hidden');const name=row.full_name||user.user_metadata?.full_name||user.email?.split('@')[0]||'Staff';$('staffName').textContent=name;$('staffEmail').textContent=user.email||row.email||'—';$('staffRole').textContent=`${row.role} · ${row.branch||'all'} branch`;$('avatar').textContent=name.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase();await loadMetrics()}
+async function boot(){const {data:{session}}=await sb.auth.getSession();if(session){try{await enter(session.user)}catch(e){await sb.auth.signOut();setMsg(e.message)}}}
+$('loginForm').addEventListener('submit',async e=>{e.preventDefault();setMsg('پشکنین دەکرێت…',true);try{const {data,error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;await enter(data.user)}catch(e){setMsg(e.message||'چوونەژوورەوە سەرکەوتوو نەبوو.');await sb.auth.signOut().catch(()=>{})}});
+$('signOut').addEventListener('click',async()=>{await sb.auth.signOut();location.reload()});
+sb.auth.onAuthStateChange((_event,session)=>{if(!session){$('app').classList.add('hidden');$('gate').classList.remove('hidden')}});boot();
+</script>
+</body>
+</html>
