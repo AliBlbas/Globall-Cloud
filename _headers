@@ -16,6 +16,27 @@
 /manifest.json
   Cache-Control: no-cache, no-store, must-revalidate
 
+/management.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/accounts-console.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/staff-os.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/staff-portal.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/operations-suite.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/tracking-integration.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/system-status.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+
 /*.css
   Cache-Control: public, max-age=3600
 
