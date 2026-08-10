@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#061428">
+  <title>Globall Cloud — System Status</title>
+  <meta name="description" content="Verified production status page for Globall Cloud and its connected stack.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#061428;--bg2:#0c1b31;--card:#102742;--line:#29496f;--text:#f5f9fd;--muted:#9bb2d0;--accent:#00c2d9;--accent2:#4fe3f0;--good:#22c55e;--warn:#f59e0b;--shadow:0 18px 40px rgba(0,0,0,.26);--radius:24px;--font:'Vazirmatn',sans-serif;--mono:'JetBrains Mono',monospace;}
+    *{box-sizing:border-box} html,body{margin:0;min-height:100%;background:radial-gradient(circle at 20% -10%, rgba(0,194,217,.11), transparent 35%),linear-gradient(180deg,var(--bg),#08111e 80%);color:var(--text);font-family:var(--font)}
+    body{padding:24px;padding-bottom:calc(24px + env(safe-area-inset-bottom))} a{color:inherit;text-decoration:none}
+    .wrap{max-width:1200px;margin:0 auto}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+    .brand{display:flex;align-items:center;gap:12px;min-width:min(100%,360px)}
+    .logo{width:46px;height:46px;border-radius:16px;background:linear-gradient(135deg,var(--accent2),var(--accent));display:grid;place-items:center;color:#03181d;font-weight:900;font-size:20px;flex:0 0 auto}
+    .eyebrow{font-family:var(--mono);letter-spacing:2px;color:var(--accent2);font-size:12px;font-weight:800;text-transform:uppercase}
+    .subtitle{color:var(--muted);font-size:14px;margin-top:4px;line-height:1.6}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border-radius:999px;font-weight:800;border:1px solid transparent;cursor:pointer;transition:.2s;min-height:46px;white-space:nowrap}
+    .btn-primary{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#03181d}
+    .btn-outline{border-color:var(--line);background:rgba(255,255,255,.02)}
+    .btn:hover{transform:translateY(-1px)}
+    .hero{background:linear-gradient(160deg, rgba(16,39,66,.96), rgba(11,25,44,.98));border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:24px;box-shadow:var(--shadow)}
+    .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;align-items:stretch}
+    @media(max-width:960px){.grid{grid-template-columns:1fr}}
+    .card{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:20px;box-shadow:var(--shadow)}
+    h1{margin:10px 0 12px;font-size:clamp(32px,4vw,50px);line-height:1.08;letter-spacing:-.02em}
+    .lead{color:var(--muted);font-size:16px;line-height:1.9;max-width:62ch;margin:0}
+    .chips{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 22px}
+    .chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:12px;font-weight:800;color:#d8ecff}
+    .section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    .section-title h2{margin:0;font-size:20px}
+    .section-title p{margin:4px 0 0;color:var(--muted);font-size:14px;line-height:1.6}
+    .item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+    .item:last-child{border-bottom:none}
+    .bullet{width:36px;height:36px;border-radius:12px;background:rgba(0,194,217,.12);display:grid;place-items:center;color:var(--accent2);font-weight:900;flex:0 0 auto}
+    .item b{display:block;margin-bottom:4px}
+    .item span{display:block;color:var(--muted);font-size:13.5px;line-height:1.7}
+    .status{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);font-family:var(--mono);font-size:12px}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .good{background:var(--good);box-shadow:0 0 0 4px rgba(34,197,94,.12)}
+    .warn{background:var(--warn);box-shadow:0 0 0 4px rgba(245,158,11,.12)}
+    .links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+    @media(max-width:640px){.links{grid-template-columns:1fr}}
+    .linkcard{padding:14px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
+    .linkcard b{display:block;margin-bottom:4px;font-size:14px}
+    .linkcard span{color:var(--muted);font-size:13px;line-height:1.6}
+    .note{margin-top:16px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:13.5px;line-height:1.8}
+    .footer{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px;color:var(--muted);font-size:13px;line-height:1.6}
+    @media(max-width:640px){body{padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom))} .hero{padding:18px} .card{padding:16px} .top{margin-bottom:14px} .btn{flex:1 1 100%}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <div class="logo">GC</div>
+        <div>
+          <div class="eyebrow">Verified production stack</div>
+          <div style="font-weight:900;font-size:18px">Globall Cloud</div>
+          <div class="subtitle">A clean internal status page for the live website, Supabase backend, Cloudflare hosting, and GitHub source control.</div>
+        </div>
+      </div>
+      <div class="actions">
+        <a class="btn btn-outline" href="./management.html">Back to management</a>
+        <a class="btn btn-primary" href="./operations-suite.html">Open operations suite</a>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="grid">
+        <div class="card">
+          <div class="eyebrow">Current health</div>
+          <h1>Everything important is wired to real services, not placeholders.</h1>
+          <p class="lead">This page is meant for internal review. It reflects the current production direction of Globall Cloud and gives staff a quick view of what is already connected, what is already hardened, and what still deserves attention.</p>
+          <div class="chips">
+            <span class="chip">Cloudflare Pages</span>
+            <span class="chip">Supabase Postgres + Auth</span>
+            <span class="chip">GitHub source control</span>
+            <span class="chip">Staff-only tools</span>
+            <span class="chip">Edge Function API</span>
+          </div>
+          <div class="status"><span class="dot good"></span> Frontend + backend stack verified</div>
+          <div class="note">Keep browser secrets out of the front end. Use publishable keys in the site, and keep service-role access inside Edge Functions only.</div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">
+            <div>
+              <h2>Verified pieces</h2>
+              <p>Current stack and routes</p>
+            </div>
+          </div>
+          <div class="item"><div class="bullet">1</div><div><b>Cloudflare Pages</b><span>Static front end hosting with security headers and fast delivery.</span></div></div>
+          <div class="item"><div class="bullet">2</div><div><b>Supabase project</b><span>Project ID ahslifnthiwfkmaswjno with API URL https://ahslifnthiwfkmaswjno.supabase.co.</span></div></div>
+          <div class="item"><div class="bullet">3</div><div><b>GitHub repository</b><span>Private repo under AliBlbas/Globall-Cloud stores the source of truth.</span></div></div>
+          <div class="item"><div class="bullet">4</div><div><b>Staff tools</b><span>management.html, staff-portal.html, operations-suite.html, and accounts-console.html are part of the internal workflow.</span></div></div>
+          <div class="item"><div class="bullet">5</div><div><b>Edge Function</b><span>account-admin handles account and receipt actions, while analytics now route through it instead of direct browser table reads.</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid" style="margin-top:18px">
+      <div class="card">
+        <div class="section-title">
+          <div>
+            <h2>Security and hardening</h2>
+            <p>What is already improved</p>
+          </div>
+          <div class="status"><span class="dot good"></span> hardening applied</div>
+        </div>
+        <div class="item"><div class="bullet">✓</div><div><b>Helper RPC functions tightened</b><span>Security-invoker changes were applied where appropriate.</span></div></div>
+        <div class="item"><div class="bullet">✓</div><div><b>Reproducible migration added</b><span>Database hardening is tracked in supabase/migrations/20260810_security_hardening.sql.</span></div></div>
+        <div class="item"><div class="bullet">✓</div><div><b>Analytics path cleaned up</b><span>admin-dashboard.js now uses the Edge Function API for its data path.</span></div></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">
+          <div>
+            <h2>Still worth tightening</h2>
+            <p>Not broken, but not the final polish</p>
+          </div>
+          <div class="status"><span class="dot warn"></span> review recommended</div>
+        </div>
+        <div class="item"><div class="bullet">!</div><div><b>GraphQL exposure</b><span>Some tables are still visible to signed-in users and a small number to anon through GraphQL schema discovery.</span></div></div>
+        <div class="item"><div class="bullet">!</div><div><b>Security-definer RPCs</b><span>Publicly callable definer functions should stay under review until everything that can move behind the edge is moved.</span></div></div>
+        <div class="item"><div class="bullet">!</div><div><b>Auth settings</b><span>OTP expiry and leaked-password protection should be set to stricter production values.</span></div></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <div class="section-title">
+        <div>
+          <h2>Quick links</h2>
+          <p>Open the internal screens directly</p>
+        </div>
+      </div>
+      <div class="links">
+        <a class="linkcard" href="./management.html"><b>Management</b><span>Staff doorway for internal access.</span></a>
+        <a class="linkcard" href="./staff-portal.html"><b>Staff portal</b><span>Premium staff-facing overview.</span></a>
+        <a class="linkcard" href="./operations-suite.html"><b>Operations suite</b><span>Customer, warehouse, and activity workflow.</span></a>
+        <a class="linkcard" href="./accounts-console.html"><b>Accounts console</b><span>Detailed customer and staff administration.</span></a>
+      </div>
+      <div class="footer">
+        <span>Globall Cloud — China · UAE · Iraq logistics</span>
+        <span>System status page created for internal review</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
