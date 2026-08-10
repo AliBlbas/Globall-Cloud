@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'gc-v1';
+const CACHE_VERSION = 'gc-v2';
 const STATIC_CACHE = `gc-static-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
@@ -54,7 +54,7 @@ self.addEventListener('fetch', (event) => {
 
   if (isNavigation) {
     event.respondWith(
-      fetch(request).catch(async () => {
+      fetch(request).then((response) => response).catch(async () => {
         const cached = await caches.match('/index.html');
         return cached || caches.match('/');
       })
@@ -69,8 +69,10 @@ self.addEventListener('fetch', (event) => {
       if (cached) return cached;
       try {
         const response = await fetch(request);
-        const cache = await caches.open(STATIC_CACHE);
-        cache.put(request, response.clone());
+        if (response && response.ok) {
+          const cache = await caches.open(STATIC_CACHE);
+          cache.put(request, response.clone());
+        }
         return response;
       } catch {
         return cached || Response.error();
