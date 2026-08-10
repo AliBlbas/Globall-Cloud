@@ -38,7 +38,6 @@ Globall Cloud is a logistics platform for shipping from China and the UAE to Ira
 ## Project files (live / wired in)
 - `index.html` — main website and customer portal
 - `management.html` — staff entry page
-- `staff-portal.html` — authenticated Staff OS hub for quick access to internal tools
 - `accounts-console.html` — staff management console. Loads `admin-dashboard.js`
   for the analytics tab and `form-validation.js` / `form-validation-styles.css`
   for inline field validation on the customer/staff/receipt forms.
@@ -53,36 +52,46 @@ Globall Cloud is a logistics platform for shipping from China and the UAE to Ira
 - `database-schema.js` — schema reference
 - `manifest.json`, `robots.txt`, `sitemap.xml`
 - Frontend pages now use the Supabase publishable key and expose the live client as `window.sb` so shared modules work consistently.
-
-## Optional add-on modules (standalone, NOT currently loaded by any page)
-- `price-calculator.js` — deterministic shipping cost estimator (weight ×
-  rate × city factor, with a minimum charge). Not wired into index.html
-  because index.html already has its own tailored `calcQuote()` with its
-  own rate table *and* a live USD→IQD conversion — wiring this in too would
-  just create a second, competing pricing calculation. Kept as a clean,
-  documented utility for a future use case (e.g. a staff-side quick quote
-  tool, or an API).
-- `tracking-enhanced.js` + `tracking-styles.css` — optional animated route
-  map + browser notifications for the public tracking page, on top of
-  supabase-js **v2** realtime (`channel().on().subscribe()`) and the real
-  shipment columns (`origin_key`, `dest_key`, `current_step_index`).
-  index.html's tracking page already works without this. See
-  `tracking-integration.html` for a ready-to-copy usage example.
-- `whatsapp-messenger.js` — sends customer updates via prefilled `wa.me`
-  links (same safe approach already used in index.html). Deliberately does
-  *not* call the WhatsApp Cloud API directly, which would need Meta
-  Business verification and a server to hold the API key.
-- `webhook-handler.js` — browser-callable helpers that notify a customer
-  after a status change or warehouse receipt, using the real `shipments` /
-  `warehouse_receipts` tables. True inbound webhooks (e.g. from a payment
-  provider) need a Supabase Edge Function, not browser code — see the TODO
-  in the file.
-- `payment-gateway.js` — **not active yet.** Real Stripe/PayPal payments
+- `tracking-enhanced.js` + `tracking-styles.css` — now loaded by `index.html`.
+  Adds a small animated SVG route map and an "enable notifications" button
+  under every tracking result (`#page-track`, portal tracking, and after a
+  language switch), on top of supabase-js **v2** realtime
+  (`channel().on().subscribe()`) and the real shipment columns
+  (`origin_key`, `dest_key`, `current_step_index`). The plain tracking
+  result still renders first and works even if this script fails to load —
+  see `startEnhancedTrackingFor()` in index.html.
+- `whatsapp-messenger.js` — now loaded by `index.html` and
+  `accounts-console.html`. index.html's staff "send WhatsApp update" button
+  (`sendWhatsAppUpdate()`) now picks one of this file's per-status message
+  templates (`warehouseReceived` / `inTransit` / `customsClearance` /
+  `outForDelivery` / `delivered`) based on the shipment's current step,
+  instead of one generic line for every status. Still opens a prefilled
+  `wa.me` link that staff tap Send on — no Meta Business API, no secret
+  key, nothing sent silently.
+- `webhook-handler.js` — now loaded by `index.html` and
+  `accounts-console.html`. After a warehouse receipt is registered (in
+  either the index.html admin panel's receipt form or
+  accounts-console.html's Warehouse Receipts tab), staff get a confirm
+  prompt to send a "goods arrived" WhatsApp notice to the customer via
+  `shipmentEvents.notifyWarehouseReceived()` / `whatsappMessenger`. Nothing
+  fires automatically — same "staff taps Send" model as everywhere else on
+  the site. `warehouse_receipts` inserts from index.html's admin panel now
+  also save `directory_phone` (looked up from `customer_directory` by
+  batch code) so this lookup has a phone number to use.
+- `price-calculator.js` — now loaded by `accounts-console.html` only, as a
+  new "Quick Quote" tab (`runQuickQuote()`) for staff to sanity-check a
+  price internally. Deliberately **still not** loaded by `index.html` —
+  that page keeps its own tailored `calcQuote()` (own rate table + live
+  USD→IQD conversion); loading both there would recreate the exact
+  duplicate-pricing-engine bug described in "Removed" below.
+- `payment-gateway.js` — **still not active.** Real Stripe/PayPal payments
   need a server holding a secret key; this project only has one Supabase
   Edge Function (`account-admin`). This file is wired for the correct
   browser-publishable-key + Edge-Function shape and fails safely with a
   clear "not configured" message until you (1) add publishable keys, (2)
-  build a payments Edge Function, (3) point `EDGE_FUNCTION_URL` at it.
+  build a payments Edge Function, (3) point `EDGE_FUNCTION_URL` at it. Not
+  wired into any page because doing so without those three pieces in place
+  would just show customers a broken "pay now" button.
 
 ## Removed
 A few files in the original repo were dead weight and were deleted rather

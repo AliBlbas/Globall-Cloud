@@ -12,6 +12,9 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="admin-dashboard.js"></script>
   <script src="form-validation.js"></script>
+  <script src="price-calculator.js"></script>
+  <script src="whatsapp-messenger.js"></script>
+  <script src="webhook-handler.js"></script>
   <link rel="stylesheet" href="form-validation-styles.css">
   <style>
     :root{
@@ -136,6 +139,7 @@
             <button class="tab" data-tab="staff">Staff</button>
             <button class="tab" data-tab="receipts">Warehouse Receipts</button>
             <button class="tab" data-tab="logs">Activity Logs</button>
+            <button class="tab" data-tab="quote">Quick Quote</button>
           </div>
           <div id="authGate" class="auth-box">
             <div class="section-title">
@@ -261,10 +265,33 @@
               This console keeps the public site clean and makes all administrative work happen from one controlled staff portal.
             </div>
           </div>
+
+          <div id="quotePane" class="tab-pane hidden">
+            <div class="grid">
+              <div class="form-row"><label class="label">Shipment type</label>
+                <select class="field" id="quoteType"><option value="air">Air</option><option value="sea">Sea</option><option value="land">Land</option></select>
+              </div>
+              <div class="form-row"><label class="label">Weight (kg)</label><input class="field" type="number" id="quoteWeight" value="100" min="1"></div>
+            </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">Origin</label>
+                <select class="field" id="quoteOrigin"><option value="China">China</option><option value="UAE">UAE</option><option value="Erbil">Erbil</option><option value="Baghdad">Baghdad</option></select>
+              </div>
+              <div class="form-row"><label class="label">Destination</label>
+                <select class="field" id="quoteDest"><option value="Iraq">Iraq</option><option value="UAE">UAE</option><option value="Baghdad">Baghdad</option><option value="Basra">Basra</option></select>
+              </div>
+            </div>
+            <div class="form-row"><label class="label"><input type="checkbox" id="quoteSeasonal" style="width:auto; margin-inline-end:6px;">Apply seasonal multiplier</label></div>
+            <div class="toolbar">
+              <button class="btn btn-primary" type="button" onclick="runQuickQuote()">Calculate</button>
+            </div>
+            <div id="quoteResult" class="muted-box" style="margin-top:14px;"></div>
+            <p class="small muted" style="margin-top:10px;">Internal estimate only (price-calculator.js's generic rate table) — for the customer-facing quote on the public site, use the Request page's own calculator, which has the live USD→IQD rate.</p>
+          </div>
         </div>
       </div>
 
-      <div class="panel">
+      <div class="panel" id="listPanel">
         <div class="list-head">
           <div>
             <h2 id="listTitle">Overview</h2>
@@ -316,7 +343,7 @@ async function authFetch(path = '/', opts = {}) {
   if (!res.ok) throw new Error(data?.error || `Request failed (${res.status})`);
   return data;
 }
-const VALID_TABS = ['dashboard', 'customers', 'staff', 'receipts', 'logs'];
+const VALID_TABS = ['dashboard', 'customers', 'staff', 'receipts', 'logs', 'quote'];
 function setActiveTab(tab) {
   state.tab = tab;
   if (location.hash !== '#' + tab) history.replaceState(null, '', '#' + tab);
@@ -326,9 +353,33 @@ function setActiveTab(tab) {
   $('customerForm').classList.toggle('hidden', tab !== 'customers');
   $('staffForm').classList.toggle('hidden', tab !== 'staff');
   $('receiptForm').classList.toggle('hidden', tab !== 'receipts');
+  $('quotePane').classList.toggle('hidden', tab !== 'quote');
+  $('listPanel').classList.toggle('hidden', tab === 'quote');
   $('listTitle').textContent = tab === 'customers' ? 'Customer accounts' : tab === 'staff' ? 'Staff accounts' : tab === 'receipts' ? 'Warehouse receipts' : tab === 'logs' ? 'Activity logs' : 'Overview';
   $('listSubtitle').textContent = tab === 'customers' ? 'Create, edit, archive, and link customer accounts' : tab === 'staff' ? 'Manage staff roles and access' : tab === 'receipts' ? 'Goods received in Dubai, China, or Erbil with photos' : tab === 'logs' ? 'Latest management activity' : 'Latest customer accounts and records';
-  renderList();
+  if (tab !== 'quote') renderList();
+}
+/* Staff-side quick quote tool, powered by price-calculator.js's generic
+   rate/distance tables. Intentionally separate from index.html's own
+   calcQuote() (see price-calculator.js header comment) — this is for a
+   staff member to sanity-check a price internally, not the customer-facing
+   quote form. */
+function runQuickQuote() {
+  if (!window.priceCalculator) { $('quoteResult').textContent = 'price-calculator.js failed to load.'; return; }
+  const type = $('quoteType').value;
+  const weight = Number($('quoteWeight').value) || 0;
+  const origin = $('quoteOrigin').value;
+  const destination = $('quoteDest').value;
+  const useSeasonal = $('quoteSeasonal').checked;
+  const result = window.priceCalculator.calculateShippingCost(type, weight, origin, destination, { useSeasonal });
+  const time = window.priceCalculator.calculateDeliveryTime(type);
+  if (!result) { $('quoteResult').textContent = 'Could not calculate — check inputs.'; return; }
+  $('quoteResult').innerHTML = `
+    <div class="stats">
+      <div class="stat"><b>${money(result.totalCost)}</b><span>Estimated total (USD)</span></div>
+      <div class="stat"><b>${money(result.baseCost)}</b><span>Base cost</span></div>
+      <div class="stat"><b>${time ? `${time.min}–${time.max} ${time.unit}` : '—'}</b><span>Est. delivery time</span></div>
+    </div>`;
 }
 function loadManagerOptions() {
   $('customerManager').innerHTML = '<option value="">Unassigned</option>' + state.staff.map((s) => `<option value="${esc(s.id)}">${esc(s.full_name)} (${esc(s.role)})</option>`).join('');
@@ -337,6 +388,7 @@ function resetCustomerForm() { window.formValidator.resetForm('customerForm'); $
 function resetStaffForm() { window.formValidator.resetForm('staffForm'); $('staffId').value=''; $('staffFullName').value=''; $('staffEmail').value=''; $('staffRole').value='admin'; $('staffBranch').value='all'; $('staffInvite').value='true'; $('staffPassword').value=''; setMsg($('staffMsg'), ''); }
 function resetReceiptForm() { window.formValidator.resetForm('receiptForm'); $('receiptBatch').value=''; $('receiptLocation').value='Dubai'; $('receiptCustomerCode').value=''; $('receiptCustomerPhone').value=''; $('receiptNotes').value=''; $('receiptPhotos').value=''; $('receiptPreview').innerHTML=''; setMsg($('receiptMsg'), ''); }
 function renderList() {
+  if (state.tab === 'quote') return;
   const q = $('searchBox').value.trim().toLowerCase();
   if (state.tab === 'customers') {
     const rows = state.customers.filter((r) => !q || JSON.stringify(r).toLowerCase().includes(q));
@@ -539,6 +591,17 @@ $('receiptForm').addEventListener('submit', async (e) => {
     for (const file of Array.from($('receiptPhotos').files || [])) formData.append('photos', file);
     const res = await authFetch('/', { method: 'POST', body: formData });
     setMsg($('receiptMsg'), `Receipt saved: ${res.receipt.batch_code}${res.customer ? ' · linked to customer' : ''}`, true);
+    // Optional: notify the customer via WhatsApp (prefilled wa.me link — staff
+    // taps Send). Uses whatsapp-messenger.js directly with the phone typed
+    // into this form, so it doesn't depend on the edge function's response shape.
+    const notifyPhone = $('receiptCustomerPhone').value.trim();
+    if (notifyPhone && window.whatsappMessenger && confirm('Send a WhatsApp warehouse-arrival notice to this customer?')) {
+      window.whatsappMessenger.sendMessage(notifyPhone, 'warehouseReceived', {
+        location: $('receiptLocation').value,
+        timestamp: new Date().toLocaleString(),
+        orderId: $('receiptBatch').value.trim(),
+      });
+    }
     resetReceiptForm(); await refreshAll(); setActiveTab('receipts');
   } catch (err) { setMsg($('receiptMsg'), err.message || 'Failed to save receipt'); }
 });

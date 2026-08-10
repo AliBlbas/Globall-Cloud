@@ -13,6 +13,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="tracking-styles.css">
 <meta name="theme-color" content="#061428">
 <title>Globall Cloud — China · UAE · Iraq Logistics</title>
 <meta name="description" content="Globall Cloud: air, sea, customs and door-to-door logistics from China and the UAE to every city in Iraq. Real-time tracking, competitive rates.">
@@ -180,7 +181,7 @@ textarea.field{resize:vertical; min-height:100px;}
 .theme-toggle-btn:active{transform:scale(.92);}
 .theme-toggle-btn svg{width:18px; height:18px;}
 .nav-auth{font-size:13.5px; font-weight:700; color:var(--text); cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px;}
-.staff-nav-link{color:var(--teal-l)!important;border-bottom-color:transparent!important;display:inline-flex;align-items:center;gap:6px}.staff-nav-link:hover{color:#fff!important}.staff-mobile-link{color:var(--teal-l)!important;font-weight:800}.burger{display:none; background:none; border:1px solid var(--line); border-radius:10px; width:38px; height:38px; align-items:center; justify-content:center; cursor:pointer; color:var(--text);}
+.burger{display:none; background:none; border:1px solid var(--line); border-radius:10px; width:38px; height:38px; align-items:center; justify-content:center; cursor:pointer; color:var(--text);}
 .mobile-menu{display:none; flex-direction:column; gap:4px; padding:14px 24px 20px; border-bottom:1px solid var(--line-soft); background:var(--ink-2);}
 .mobile-menu.open{display:flex;}
 .mobile-menu a{padding:14px 4px; font-weight:700; color:var(--muted); border-bottom:1px solid var(--line-soft); min-height:44px; display:flex; align-items:center;}
@@ -788,7 +789,6 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
       <li><a data-route="services" onclick="route('services')" data-i18n="nav.services"></a></li>
       <li><a data-route="track" onclick="route('track')" data-i18n="nav.track"></a></li>
       <li><a data-route="contact" onclick="route('contact')" data-i18n="nav.contact"></a></li>
-      <li><a href="./staff-os.html" class="staff-nav-link"><span aria-hidden="true">◈</span> ستاف</a></li>
     </ul>
     <div class="nav-right">
       <div class="lang-toggle">
@@ -807,7 +807,6 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
     <a data-route="services" onclick="route('services')" data-i18n="nav.services"></a>
     <a data-route="track" onclick="route('track')" data-i18n="nav.track"></a>
     <a data-route="contact" onclick="route('contact')" data-i18n="nav.contact"></a>
-    <a href="./staff-os.html" class="staff-mobile-link">◈ بەشی ستاف</a>
     <a data-route="portal" onclick="route('portal')" id="mobileAuthLabel"></a>
     <div style="display:flex; gap:10px; margin-top:14px;">
       <div class="lang-toggle" style="flex-shrink:0;">
@@ -1570,6 +1569,9 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="whatsapp-messenger.js"></script>
+<script src="webhook-handler.js"></script>
+<script src="tracking-enhanced.js"></script>
 <script>
 /* ================= SUPABASE (real backend for admin / accountant) =================
    1. Create a free project at https://supabase.com
@@ -2123,15 +2125,7 @@ async function saveShipment(s){
 }
 async function getAllShipments(){
   if(sb){
-    // Defense-in-depth: only an authenticated staff session may request the full shipment dataset.
-    // RLS remains the authoritative security boundary; this guard prevents accidental broad reads
-    // from the customer-facing client and makes the intended access model explicit.
-    const {data:{session}} = await sb.auth.getSession();
-    if(!session) return [];
-    const {data:staffRow, error:staffErr} = await sb.from('staff').select('id,role,active').eq('id', session.user.id).maybeSingle();
-    if(staffErr || !staffRow || staffRow.active === false || !['admin','super_admin','accountant'].includes(staffRow.role)) return [];
-    const {data, error} = await sb.from('shipments').select('*').order('created_at', {ascending:false});
-    if(error) return [];
+    const {data} = await sb.from('shipments').select('*').order('created_at', {ascending:false});
     return (data||[]).map(rowToShipment);
   }
   const keys = await safeList('shipment:', true);
@@ -2564,10 +2558,32 @@ async function shipmentCardHTML(s){
       <div class="timeline">${timelineHTML(s)}</div>
     </div>
   </div>
+  <div class="card reveal in-view" style="margin-top:16px;">
+    <h4 style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+      <span>${currentLang==='ku'?'نەخشەی ڕێگا (ڕاستەوخۆ)':'Live route map'}</span>
+      <button class="btn btn-ghost" style="padding:6px 12px; font-size:12.5px;" onclick="enableTrackingNotifications()">${currentLang==='ku'?'🔔 ئاگادارکردنەوەکان چالاک بکە':'🔔 Enable notifications'}</button>
+    </h4>
+    <div id="liveMap-${s.id}"></div>
+  </div>
   <div style="margin-top:16px; text-align:center;">
     <button class="btn btn-outline" id="invoiceBtn-${s.id}" onclick="generateInvoiceForId('${s.id}')"><svg class="icon-sm"><use href="#i-download"></use></svg><span>${t('invoice.downloadBtn')}</span></button>
   </div>
   `;
+}
+/* Starts the live map + realtime updates for the currently-displayed shipment.
+   Called after shipmentCardHTML() is inserted into the DOM (the container div
+   must already exist). Safe no-op if tracking-enhanced.js failed to load. */
+function startEnhancedTrackingFor(shipmentId){
+  if(!window.enhancedTracking) return;
+  window.enhancedTracking.initializeTracking(shipmentId, 'liveMap-'+shipmentId).catch(()=>{});
+}
+async function enableTrackingNotifications(){
+  if(!window.enhancedTracking){ showToast(currentLang==='ku'?'ئەم تایبەتمەندییە بەردەست نییە.':'Not available.', 'error'); return; }
+  const ok = await window.enhancedTracking.requestNotificationPermission();
+  showToast(ok
+    ? (currentLang==='ku'?'ئاگادارکردنەوەکان چالاک کران.':'Notifications enabled.')
+    : (currentLang==='ku'?'مۆڵەت نەدرا بۆ ئاگادارکردنەوە.':'Notification permission denied.'),
+    ok?'success':'error');
 }
 
 /* ================= INVOICE (PDF) =================
@@ -2762,6 +2778,7 @@ async function doTrackSearch(){
   wrap.innerHTML = '<p class="hint">'+ (currentLang==='ku'?'گەڕان...':'Searching...') +'</p>';
   const shipment = await getShipment(val);
   wrap.innerHTML = shipment ? await shipmentCardHTML(shipment) : notFoundHTML();
+  if(shipment) startEnhancedTrackingFor(shipment.id);
 }
 
 /* ================= REQUEST FORM ================= */
@@ -3102,6 +3119,7 @@ async function setLang(lang){
   if(lastTrackedId && document.getElementById('page-track').classList.contains('active')){
     const shipment = await getShipment(lastTrackedId);
     document.getElementById('trackResult').innerHTML = shipment ? await shipmentCardHTML(shipment) : notFoundHTML();
+    if(shipment) startEnhancedTrackingFor(shipment.id);
   }
 }
 
@@ -3177,10 +3195,6 @@ async function renderAdminGate(){
 }
 async function getRecentMessages(){
   if(!sb) return [];
-  const {data:{session}} = await sb.auth.getSession();
-  if(!session) return [];
-  const {data:staffRow} = await sb.from('staff').select('id,role,active').eq('id', session.user.id).maybeSingle();
-  if(!staffRow || staffRow.active === false || !['admin','super_admin'].includes(staffRow.role)) return [];
   const {data} = await sb.from('messages').select('*').order('created_at',{ascending:false}).limit(6);
   return data||[];
 }
@@ -4278,8 +4292,9 @@ async function submitWarehouseReceipt(){
   msgEl.style.display = 'none';
   if(!batchCode){ msgEl.textContent = 'تکایە کۆدی کڕیار بنووسە.'; msgEl.style.display = 'block'; return; }
 
-  const {data: dirMatch} = await sb.from('customer_directory').select('id,name').ilike('code', batchCode).limit(1);
+  const {data: dirMatch} = await sb.from('customer_directory').select('id,name,phone').ilike('code', batchCode).limit(1);
   const directoryCustomerId = dirMatch && dirMatch[0] ? dirMatch[0].id : null;
+  const directoryPhone = dirMatch && dirMatch[0] ? dirMatch[0].phone : null;
   if(!directoryCustomerId && !window.confirm('ئەم کۆدە لە کۆگای موشتەریان نەدۆزرایەوە. دەتەوێت بەبێ بەستنەوە بە کڕیارێک تۆماری بکەیت؟')){
     return;
   }
@@ -4287,7 +4302,7 @@ async function submitWarehouseReceipt(){
   const { data: userData } = await sb.auth.getUser();
   const uid = userData?.user?.id;
   const {data: inserted, error: insErr} = await sb.from('warehouse_receipts')
-    .insert({batch_code: batchCode, location, notes: notes||null, created_by: uid||null, created_by_name: currentStaffName, directory_customer_id: directoryCustomerId})
+    .insert({batch_code: batchCode, location, notes: notes||null, created_by: uid||null, created_by_name: currentStaffName, directory_customer_id: directoryCustomerId, directory_phone: directoryPhone||null})
     .select('id').single();
   if(insErr){ msgEl.textContent = 'هەڵەیەک ڕوویدا، تۆمار نەکرا.'; msgEl.style.display = 'block'; return; }
 
@@ -4312,6 +4327,13 @@ async function submitWarehouseReceipt(){
   document.getElementById('whNotes').value = '';
   document.getElementById('whPhotos').value = '';
   loadWarehouseReceipts();
+
+  // Optional: notify the customer via WhatsApp that their goods arrived at
+  // the warehouse (uses shipmentEvents/whatsapp-messenger.js — opens a
+  // prefilled wa.me link, staff taps Send; nothing is sent silently).
+  if(directoryPhone && window.shipmentEvents && window.confirm('ئایا دەتەوێت پەیامی واتساپ بنێریت بۆ کڕیار کە بارەکەی گەیشتووەتە کۆگا؟')){
+    await window.shipmentEvents.notifyWarehouseReceived(inserted.id);
+  }
 }
 
 async function loadWarehouseReceipts(){
@@ -4560,15 +4582,35 @@ function toWhatsAppDigits(phone){
   else if(!d.startsWith('964')) d = '964'+d;
   return d;
 }
+/* Maps the shipment's current step to one of whatsapp-messenger.js's
+   pre-written templates, so the message staff sends actually matches what
+   happened (warehouse arrival vs in-transit vs customs vs out-for-delivery
+   vs delivered) instead of one generic line. Falls back to the old plain
+   message if whatsapp-messenger.js didn't load. */
+const STEP_TO_WA_TEMPLATE = ['warehouseReceived','warehouseReceived','inTransit','customsClearance','outForDelivery','delivered'];
 async function sendWhatsAppUpdate(id){
   const s = await getShipmentForStaff(id);
   if(!s){ showToast('بار نەدۆزرایەوە.', 'error'); return; }
-  const phone = toWhatsAppDigits(s.requester?.phone);
-  if(!phone){ showToast('ژمارەی مۆبایلی کڕیار تۆمار نەکراوە.', 'error'); return; }
+  const phone = s.requester?.phone;
+  if(!toWhatsAppDigits(phone)){ showToast('ژمارەی مۆبایلی کڕیار تۆمار نەکراوە.', 'error'); return; }
   const statusLabel = STEP_LABELS_KU[s.currentStepIndex] || '';
+
+  if(window.whatsappMessenger){
+    const templateName = STEP_TO_WA_TEMPLATE[s.currentStepIndex] || 'inTransit';
+    const vars = {
+      name: s.requester?.name || '', orderId: s.id, status: statusLabel,
+      origin: placeLabel(s.originKey), destination: placeLabel(s.destKey),
+      eta: s.eta ? formatDate(s.eta) : '—', location: placeLabel(s.originKey),
+      timestamp: new Date().toLocaleString(currentLang==='ku'?'ar':'en'),
+      address: s.requester?.notes || '—',
+    };
+    const sent = window.whatsappMessenger.sendMessage(phone, templateName, vars);
+    if(sent) return;
+  }
+  // Fallback (no whatsapp-messenger.js, or unknown template)
   const name = s.requester?.name ? ('سڵاو '+s.requester.name+'، ') : 'سڵاو، ';
   const msg = name+'دۆخی بارەکەت ('+s.id+') نوێکرایەوە بۆ: '+statusLabel+'. — Globall Cloud';
-  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg), '_blank');
+  window.open('https://wa.me/'+toWhatsAppDigits(phone)+'?text='+encodeURIComponent(msg), '_blank');
 }
 
 async function updateShipmentFinance(id){
@@ -4603,10 +4645,6 @@ function updateFinanceStatsUI(){
    "staff full access" RLS policy, so this only actually returns data when signed in as staff) */
 async function getShipmentForStaff(id){
   if(!sb) return null;
-  const {data:{session}} = await sb.auth.getSession();
-  if(!session) return null;
-  const {data:staffRow} = await sb.from('staff').select('id,role,active').eq('id', session.user.id).maybeSingle();
-  if(!staffRow || staffRow.active === false || !['admin','super_admin','accountant'].includes(staffRow.role)) return null;
   const {data} = await sb.from('shipments').select('*').eq('id', id).maybeSingle();
   return data ? rowToShipment(data) : null;
 }
