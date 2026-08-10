@@ -2,9 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /management.html
 Disallow: /accounts-console.html
-Disallow: /staff-portal.html
-Disallow: /operations-suite.html
-Disallow: /system-status.html
 Disallow: /tracking-integration.html
 Disallow: /staff-os.html
 

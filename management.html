@@ -4,20 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#061428">
-  <meta name="robots" content="noindex,nofollow,noarchive">
-  <meta name="description" content="Staff-only management entry for Globall Cloud accounts, warehouse receipts, and activity logs.">
   <title>Globall Cloud — Management</title>
+  <meta name="description" content="Staff-only management entry for Globall Cloud accounts, warehouse receipts, and activity logs.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg:#061428; --bg2:#0c1b31; --card:#102742; --line:#29496f; --text:#f5f9fd; --muted:#9bb2d0;
-      --accent:#00c2d9; --accent2:#4fe3f0; --shadow:0 18px 40px rgba(0,0,0,.26); --radius:24px;
-      --font:'Vazirmatn',sans-serif; --mono:'JetBrains Mono',monospace;
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;background:radial-gradient(circle at 20% -10%, rgba(0,194,217,.11), transparent 35%),linear-gradient(180deg,var(--bg),#08111e 80%);color:var(--text);font-family:var(--font)}
+    :root{--bg:#061428;--bg2:#0c1b31;--card:#102742;--card2:#173457;--line:#29496f;--text:#f5f9fd;--muted:#9bb2d0;--accent:#00c2d9;--accent2:#4fe3f0;--shadow:0 18px 40px rgba(0,0,0,.26);--radius:24px;--font:'Vazirmatn',sans-serif;--mono:'JetBrains Mono',monospace;}
+    *{box-sizing:border-box} html,body{margin:0;min-height:100%;background:radial-gradient(circle at 20% -10%, rgba(0,194,217,.11), transparent 35%),linear-gradient(180deg,var(--bg),#08111e 80%);color:var(--text);font-family:var(--font)}
     body{padding:24px;padding-bottom:calc(24px + env(safe-area-inset-bottom))} a{color:inherit;text-decoration:none}
     .wrap{max-width:1160px;margin:0 auto}
     .top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
@@ -49,7 +43,7 @@
     .note{margin-top:16px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:13.5px;line-height:1.8}
     .footer{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px;color:var(--muted);font-size:13px;line-height:1.6}
     .mini-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
-    @media(max-width:640px){.mini-grid{grid-template-columns:1fr}} 
+    @media(max-width:640px){.mini-grid{grid-template-columns:1fr}}
     .mini{padding:14px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
     .mini b{display:block;margin-bottom:4px;font-size:14px}
     .mini span{color:var(--muted);font-size:13px;line-height:1.6}
@@ -85,45 +79,38 @@
             <span class="chip">Staff access</span>
             <span class="chip">Warehouse receipts</span>
             <span class="chip">Activity logs</span>
+            <span class="chip">Invite and reset flows</span>
           </div>
           <div class="actions">
-            <a class="btn btn-primary" href="./accounts-console.html">Open accounts console</a>
-            <a class="btn btn-outline" href="./staff-portal.html">Open staff portal</a>
+            <a class="btn btn-primary" href="./accounts-console.html">Launch management console</a>
+            <a class="btn btn-outline" href="./accounts-console.html#receipts">Start receipt intake</a>
           </div>
+          <div class="note">Recommended practice: only staff sign in here. Customers should keep using the public site and customer portal, while management creates or disables accounts from this console.</div>
         </div>
 
         <div class="card">
           <div class="panel-title">
             <div>
-              <h2>Trusted workspace</h2>
-              <p>Only the tools needed for operations and support.</p>
+              <h2>What you can do</h2>
+              <p>Everything in one staff flow</p>
             </div>
           </div>
-          <div class="feature">
-            <div class="bullet">1</div>
-            <div><b>Customer management</b><span>Open the accounts console to manage profiles, shipments, and directory data in one place.</span></div>
+          <div class="feature"><div class="bullet">1</div><div><b>Create and edit customers</b><span>Assign a manager, keep accounts active or inactive, and send invites or temporary passwords from the admin flow.</span></div></div>
+          <div class="feature"><div class="bullet">2</div><div><b>Create and edit staff</b><span>Control roles like admin, accountant, and super_admin. Keep staff active only when they are working.</span></div></div>
+          <div class="feature"><div class="bullet">3</div><div><b>Register warehouse receipts</b><span>Log goods received in Dubai, Erbil, or China with batch codes and photo evidence.</span></div></div>
+          <div class="feature"><div class="bullet">4</div><div><b>Review activity</b><span>Track who did what, when, and which record changed for accountability.</span></div></div>
+          <div class="mini-grid">
+            <div class="mini"><b>Clear ownership</b><span>One controlled staff portal for internal operations.</span></div>
+            <div class="mini"><b>Mobile friendly</b><span>Buttons and cards stack cleanly on small screens.</span></div>
           </div>
-          <div class="feature">
-            <div class="bullet">2</div>
-            <div><b>Staff control</b><span>Use the staff portal for controlled access, roles, and daily operations.</span></div>
-          </div>
-          <div class="feature">
-            <div class="bullet">3</div>
-            <div><b>Receipt workflow</b><span>Register warehouse receipts with supporting notes and photos for traceability.</span></div>
-          </div>
-          <div class="feature">
-            <div class="bullet">4</div>
-            <div><b>Activity audit</b><span>Review actions and changes with a clearer, more professional portal layout.</span></div>
-          </div>
-          <div class="note">This page is intentionally excluded from search engines and kept as an internal entry point.</div>
         </div>
       </div>
-
-      <div class="footer">
-        <span>Globall Cloud · internal management entry</span>
-        <span>Optimized for desktop and mobile</span>
-      </div>
     </section>
+
+    <div class="footer">
+      <span>Globall Cloud — China · UAE · Iraq logistics</span>
+      <span>Professional internal tools for management only</span>
+    </div>
   </div>
 </body>
 </html>
