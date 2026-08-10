@@ -10,19 +10,10 @@
 /*.html
   Cache-Control: no-cache, no-store, must-revalidate
 
-/sw.js
-  Cache-Control: no-cache, no-store, must-revalidate
-
-/manifest.json
-  Cache-Control: no-cache, no-store, must-revalidate
-
 /management.html
   X-Robots-Tag: noindex, nofollow, noarchive
 
 /accounts-console.html
-  X-Robots-Tag: noindex, nofollow, noarchive
-
-/staff-os.html
   X-Robots-Tag: noindex, nofollow, noarchive
 
 /staff-portal.html
@@ -31,11 +22,20 @@
 /operations-suite.html
   X-Robots-Tag: noindex, nofollow, noarchive
 
+/system-status.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+
 /tracking-integration.html
   X-Robots-Tag: noindex, nofollow, noarchive
 
-/system-status.html
+/staff-os.html
   X-Robots-Tag: noindex, nofollow, noarchive
+
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/manifest.json
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /*.css
   Cache-Control: public, max-age=3600
