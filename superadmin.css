@@ -5,6 +5,18 @@
   --sa-text:#f5fbff;--sa-muted:#91a8c5;--sa-cyan:#55e5f2;--sa-cyan-2:#00c2d9;
   --sa-mint:#58e6b0;--sa-amber:#ffc96b;--sa-danger:#ff6b7a;--sa-shadow:0 22px 70px rgba(0,0,0,.34)
 }
+.logo{
+  background:linear-gradient(135deg,#0b2944,#061428)!important;
+  background-image:url('/logo-icon-original.png')!important;
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  color:transparent!important;
+  font-size:0!important;
+  box-shadow:0 0 30px rgba(0,194,217,.18)!important;
+  border:1px solid rgba(85,229,242,.16)!important;
+}
+.brand .logo{flex:0 0 48px}
 @media(max-width:760px){
   body{background:radial-gradient(circle at 90% 0,rgba(0,194,217,.12),transparent 30%),var(--sa-bg)!important}
   .wrap{width:min(100% - 20px,1240px)!important}
@@ -22,6 +34,7 @@
   .action{min-height:124px!important;padding:16px!important;border-radius:18px!important}
   .security{grid-template-columns:1fr!important}
   .footer{font-size:9.5px!important}
+  .brand .logo{width:40px!important;height:40px!important;flex-basis:40px!important;border-radius:13px!important}
 }
 .sa-kicker{font:800 10px/1.2 'JetBrains Mono',monospace;letter-spacing:1.5px;color:var(--sa-cyan);text-transform:uppercase}
 .sa-role{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid rgba(85,229,242,.18);background:rgba(85,229,242,.07);border-radius:999px;color:#d9fbff;font:800 10px 'JetBrains Mono',monospace}
