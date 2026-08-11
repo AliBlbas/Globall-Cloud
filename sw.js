@@ -1,17 +1,18 @@
-const CACHE_VERSION = 'gc-v9';
+const CACHE_VERSION = 'gc-v10';
 const STATIC_CACHE = `gc-static-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/', '/index.html', '/management.html', '/staff-os.html', '/staff-portal.html',
   '/accounts-console.html', '/operations-suite.html', '/styles.css', '/tracking-styles.css',
-  '/mobile-final.css', '/logo-fix.css', '/staff-auth-fix.js', '/tracking-enhanced.js', '/tracking-integration.html', '/translations.js',
+  '/mobile-final.css', '/logo-fix.css', '/staff-auth-fix.js', '/superadmin.css', '/tracking-enhanced.js', '/tracking-integration.html', '/translations.js',
   '/form-validation.js', '/form-validation-styles.css', '/whatsapp-messenger.js', '/webhook-handler.js',
   '/admin-dashboard.js', '/price-calculator.js', '/logo-icon-original.png', '/logo-icon.png', '/og-image.jpg', '/manifest.json'
 ];
 
-const MOBILE_CSS = '/mobile-final.css?v=20260811-9';
-const LOGO_CSS = '/logo-fix.css?v=20260811-3';
+const MOBILE_CSS = '/mobile-final.css?v=20260811-10';
+const LOGO_CSS = '/logo-fix.css?v=20260811-4';
+const SUPERADMIN_CSS = '/superadmin.css?v=20260811-1';
 const PINGDOM_SCRIPT = '<script src="//rum-static.pingdom.net/pa-6a7b6dd8a6e49b001200002c.js" async></script>';
-const STAFF_AUTH_SCRIPT = '<script src="/staff-auth-fix.js?v=20260811-1" defer></script>';
+const STAFF_AUTH_SCRIPT = '<script src="/staff-auth-fix.js?v=20260811-2" defer></script>';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -38,13 +39,18 @@ function injectSiteAssets(response) {
 
   return response.text().then((html) => {
     let injected = html;
+    const path = new URL(response.url || self.location.href).pathname;
 
     if (!injected.includes('rum-static.pingdom.net/pa-6a7b6dd8a6e49b001200002c.js')) {
       injected = injected.replace(/<head([^>]*)>/i, `<head$1>${PINGDOM_SCRIPT}`);
     }
 
-    if (/\/staff-os\.html(?:$|[?#])/.test(new URL(response.url || location.href).pathname) && !injected.includes('/staff-auth-fix.js')) {
+    if (/\/staff-os\.html$/.test(path) && !injected.includes('/staff-auth-fix.js')) {
       injected = injected.replace(/<head([^>]*)>/i, `<head$1>${STAFF_AUTH_SCRIPT}`);
+    }
+
+    if (/\/staff-os\.html$/.test(path) && !injected.includes('/superadmin.css')) {
+      injected = injected.replace(/<\/head>/i, `<link rel="stylesheet" href="${SUPERADMIN_CSS}"></head>`);
     }
 
     if (!injected.includes('/logo-fix.css')) {
