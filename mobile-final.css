@@ -1,0 +1,208 @@
+/* Globall Cloud — unified mobile design system
+ * Applied after page styles by the service worker.
+ * Intentionally uses a small number of !important rules to override legacy
+ * inline desktop geometry without rewriting each internal console page.
+ */
+
+@media (max-width: 760px) {
+  :root { color-scheme: dark; }
+
+  html, body {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-x: none;
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+  }
+
+  *, *::before, *::after { box-sizing: border-box !important; }
+
+  img, svg, video, canvas, iframe, table { max-width: 100% !important; }
+  input, select, textarea, button { max-width: 100% !important; min-width: 0 !important; }
+  input, select, textarea { font-size: 16px !important; }
+  a, button { touch-action: manipulation; }
+
+  /* ---------- Public site header ---------- */
+  .top-announcement { min-height: 0 !important; height: auto !important; }
+  .top-announcement-inner {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 8px 12px !important;
+    gap: 7px !important;
+    flex-wrap: nowrap !important;
+    overflow: hidden !important;
+  }
+  .announcement-pill, .announcement-chip {
+    min-width: 0 !important;
+    box-shadow: none !important;
+    padding: 7px 9px !important;
+    font-size: 10.5px !important;
+    line-height: 1.35 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .top-announcement-inner > :first-child { flex: 1 1 64% !important; }
+  .top-announcement-inner > :last-child { flex: 0 1 36% !important; justify-content: center !important; }
+
+  .nav { min-height: 60px !important; height: auto !important; }
+  .nav-inner {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 60px !important;
+    padding: 8px 10px !important;
+    gap: 7px !important;
+  }
+  .nav-links, .nav-auth { display: none !important; }
+  .nav-right { gap: 6px !important; margin-inline-start: auto !important; }
+  .brand { min-width: 0 !important; gap: 7px !important; max-width: 48vw !important; }
+  .brand-logo { width: 34px !important; height: 34px !important; }
+  .brand b { font-size: 14px !important; line-height: 1.1 !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+  .brand small { font-size: 8px !important; white-space: nowrap !important; }
+  .lang-toggle button { padding: 5px 8px !important; font-size: 10px !important; }
+  .theme-toggle-btn { width: 34px !important; height: 34px !important; }
+  .burger { width: 36px !important; height: 36px !important; flex: 0 0 auto !important; }
+
+  /* ---------- Public site hero ---------- */
+  .hero {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 24px 14px 20px !important;
+    display: block !important;
+  }
+  .hero h1 {
+    font-size: clamp(29px, 8vw, 37px) !important;
+    line-height: 1.2 !important;
+    letter-spacing: -.5px !important;
+    overflow-wrap: anywhere !important;
+  }
+  .hero .sub { font-size: 14.5px !important; line-height: 1.82 !important; max-width: none !important; }
+  .hero-ctas { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 9px !important; }
+  .hero-ctas .btn { width: 100% !important; min-height: 44px !important; padding: 11px 8px !important; font-size: 12.5px !important; }
+  .route-map { width: 100% !important; max-width: none !important; margin-top: 16px !important; }
+  .section { padding-block: 30px 40px !important; }
+  .section-head { margin-bottom: 24px !important; }
+  .section-head h2 { font-size: 23px !important; }
+  .section-head p { font-size: 13.5px !important; }
+
+  /* ---------- Public site app-style navigation ---------- */
+  .portal-bottom-nav {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 8px !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+  }
+  .portal-bottom-nav-inner {
+    max-width: none !important;
+    border: 1px solid rgba(255,255,255,.08) !important;
+    border-radius: 18px !important;
+    padding: 5px 7px calc(5px + env(safe-area-inset-bottom)) !important;
+  }
+  .pbn-item { min-height: 44px !important; padding: 4px 1px !important; gap: 2px !important; font-size: 9px !important; }
+  .pbn-item svg { width: 20px !important; height: 20px !important; }
+  .pbn-fab { width: 50px !important; height: 50px !important; margin-top: -19px !important; border-width: 3px !important; }
+  .pbn-fab svg { width: 21px !important; height: 21px !important; }
+  body:has(.portal-bottom-nav.active) { padding-bottom: calc(78px + env(safe-area-inset-bottom)) !important; }
+  body:has(.portal-bottom-nav.active) .whatsapp-float {
+    bottom: calc(86px + env(safe-area-inset-bottom)) !important;
+    inset-inline-start: 12px !important;
+    width: 46px !important;
+    height: 46px !important;
+  }
+  .whatsapp-float svg { width: 24px !important; height: 24px !important; }
+
+  /* ---------- Shared internal-console geometry ---------- */
+  .shell, .wrap, .gate { width: 100% !important; max-width: none !important; min-width: 0 !important; }
+  .shell, .wrap { margin-inline: auto !important; }
+
+  .topbar, .top { width: 100% !important; min-width: 0 !important; flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
+  .topbar { margin-bottom: 8px !important; }
+  .top { margin-bottom: 12px !important; }
+
+  .topbar .brand, .top .brand, .brand { width: 100% !important; max-width: none !important; min-width: 0 !important; }
+  .topbar .brand > div:last-child, .top .brand > div:last-child { min-width: 0 !important; }
+  .eyebrow, .title, .subtitle, .lead, h1, h2, h3, h4, p, span, b, small {
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+  }
+
+  .toolbar, .top-actions, .actions {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+  .toolbar .btn, .top-actions .btn, .actions .btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    padding: 10px 9px !important;
+    white-space: normal !important;
+  }
+
+  .hero-grid, .layout, .grid, .business-hub-layout, .ops-layout { grid-template-columns: 1fr !important; }
+  .hero-grid { min-width: 0 !important; }
+  .hero, .panel, .card, .hero-card, .profile, .auth-box, .gate-card { min-width: 0 !important; max-width: 100% !important; }
+
+  /* ---------- Accounts console ---------- */
+  .shell { padding-inline: 12px !important; gap: 12px !important; }
+  .accounts-console .shell { padding-inline: 12px !important; }
+  .mark, .logo { flex: 0 0 auto !important; }
+  .title { font-size: clamp(17px, 5vw, 20px) !important; line-height: 1.28 !important; }
+  .subtitle { font-size: 12.5px !important; line-height: 1.6 !important; }
+  .hero, .panel { padding: 14px !important; border-radius: 20px !important; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+  .stat { padding: 13px !important; min-width: 0 !important; }
+  .stat b { font-size: 23px !important; }
+  .chips { display: grid !important; grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 7px !important; }
+  .chip { min-width: 0 !important; text-align: center !important; padding: 7px 8px !important; font-size: 10.5px !important; }
+  .tabs { width: 100% !important; max-width: 100% !important; overflow-x: auto !important; flex-wrap: nowrap !important; }
+  .tab { flex: 0 0 auto !important; padding: 9px 12px !important; font-size: 11px !important; }
+  .layout { gap: 12px !important; }
+  .grid { grid-template-columns: 1fr !important; }
+  .table-wrap { width: 100% !important; max-width: 100% !important; overflow-x: auto !important; }
+
+  /* ---------- Management portal ---------- */
+  .wrap { padding-inline: 12px !important; }
+  .management .hero, .management .card { padding: 16px !important; }
+  .management h1 { font-size: clamp(27px, 8vw, 37px) !important; line-height: 1.18 !important; }
+  .management .lead { font-size: 14px !important; line-height: 1.8 !important; }
+  .management .chips { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+  .management .feature { align-items: flex-start !important; }
+  .management .mini-grid { grid-template-columns: 1fr !important; }
+
+  /* ---------- Staff OS ---------- */
+  .staff-os .wrap { width: 100% !important; padding-inline: 10px !important; }
+  .staff-os .hero-card, .staff-os .profile, .staff-os .panel { padding: 17px !important; }
+  .staff-os .hero h1 { font-size: clamp(28px, 8vw, 38px) !important; }
+  .staff-os .metrics { grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 8px !important; }
+  .staff-os .metric { padding: 13px !important; }
+  .staff-os .metric b { font-size: 21px !important; }
+  .staff-os .grid { grid-template-columns: 1fr !important; }
+  .staff-os .action { min-height: 120px !important; }
+  .staff-os .security { grid-template-columns: 1fr !important; }
+
+  /* ---------- Generic safeguards for other internal pages ---------- */
+  .form-grid { grid-template-columns: 1fr !important; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; }
+  .dashboard-grid, .cards-grid, .services-grid, .feature-grid { min-width: 0 !important; }
+  .table-wrap, .table-responsive, .overflow-auto { max-width: 100% !important; overflow-x: auto !important; }
+  pre, code { max-width: 100% !important; overflow-x: auto !important; white-space: pre-wrap !important; overflow-wrap: anywhere !important; }
+  .modal, .modal-card, dialog { max-width: calc(100vw - 24px) !important; width: auto !important; }
+}
+
+@media (max-width: 390px) {
+  .top-announcement-inner { padding-inline: 8px !important; }
+  .announcement-pill, .announcement-chip { font-size: 9px !important; padding-inline: 7px !important; }
+  .nav-inner { padding-inline: 8px !important; }
+  .brand b { font-size: 13px !important; }
+  .hero { padding-inline: 11px !important; }
+  .hero-ctas, .toolbar, .top-actions, .actions { grid-template-columns: 1fr !important; }
+  .chips { grid-template-columns: 1fr !important; }
+  .title { font-size: 17px !important; }
+  .stats, .staff-os .metrics { grid-template-columns: 1fr 1fr !important; }
+}
