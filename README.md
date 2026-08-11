@@ -60,7 +60,7 @@ Globall Cloud is a logistics platform for shipping from China and the UAE to Ira
   own the submit event.
 - `database-schema.js` — schema reference
 - `manifest.json`, `robots.txt`, `sitemap.xml`
-- Frontend pages now use the Supabase publishable key and expose the live client as `window.sb` so shared modules work consistently.
+- Frontend pages now use the Supabase publishable key and expose the live client as `window.sb` so shared modules work consistently. Public tracking uses a narrow, non-financial RPC; authenticated customers use their own RLS-protected shipment row.
 - `tracking-enhanced.js` + `tracking-styles.css` — now loaded by `index.html`.
   Adds a small animated SVG route map and an "enable notifications" button
   under every tracking result (`#page-track`, portal tracking, and after a
@@ -194,3 +194,17 @@ keeping:
   pages from the base URL. If distinct search-engine ranking per page
   ever matters, that needs real separate URLs (or server-side
   rendering/prerendering), which is a bigger change than this pass.
+
+
+## Security fixes in the current hardening pass
+- Fixed staff client guards to read the real `staff.is_active` column (the previous `active` field silently failed the role gate).
+- Public tracking no longer exposes customer phone/email, payment totals, auth IDs, or other private shipment columns.
+- Guest browser flows no longer resolve customer-directory IDs; directory linking is restricted to authenticated/staff contexts.
+
+## Hardening update — 2026-08-11
+
+The current maintenance pass hardens the Supabase tracking boundary, preserves compatibility
+with the existing staff console (`is_active` / `active`), and verifies all bundled JavaScript
+files with Node syntax checks. Production database changes are applied through Supabase
+migrations; frontend release should continue through the normal GitHub → Cloudflare Pages flow.
+

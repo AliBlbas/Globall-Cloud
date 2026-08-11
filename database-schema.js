@@ -59,7 +59,10 @@ CREATE TABLE public.staff (
   full_name text,
   role text CHECK (role = ANY (ARRAY['admin'::text, 'accountant'::text, 'super_admin'::text])),
   created_at timestamptz DEFAULT now(),
-  branch text CHECK (branch = ANY (ARRAY['dubai'::text, 'china'::text, 'erbil'::text, 'all'::text]))
+  branch text CHECK (branch = ANY (ARRAY['dubai'::text, 'china'::text, 'erbil'::text, 'all'::text])),
+  is_active boolean DEFAULT true,
+  updated_at timestamptz DEFAULT now(),
+  active boolean GENERATED ALWAYS AS (is_active) STORED
 );
 
 -- warehouse_receipts
@@ -137,8 +140,9 @@ LEFT JOIN public.shipments s
 GROUP BY d.id;
 
 -- Helper RPCs
--- find_directory_customer_by_phone(p_phone text)
--- track_shipment(p_id text)
+-- find_directory_customer_by_phone(p_phone text): authenticated/staff only
+-- track_shipment(p_id text): public tracking with contact/internal IDs masked
+-- for anonymous callers; owner/staff callers receive permitted private fields.
 -- admin_list_customers_public()
 -- admin_list_shipments_public()
 -- admin_upsert_customer_public(...)

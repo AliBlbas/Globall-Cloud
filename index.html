@@ -2114,6 +2114,11 @@ async function lookupDirectoryCustomerId(phone){
 
 async function getShipment(id){
   if(sb){
+    const {data:{session}} = await sb.auth.getSession();
+    if(session){
+      const {data, error} = await sb.from('shipments').select('*').eq('id', id).maybeSingle();
+      if(!error && data) return rowToShipment(data);
+    }
     const {data} = await sb.rpc('track_shipment', {p_id:id});
     return (data && data[0]) ? rowToShipment(data[0]) : null;
   }
@@ -2132,8 +2137,8 @@ async function getAllShipments(){
     // from the customer-facing client and makes the intended access model explicit.
     const {data:{session}} = await sb.auth.getSession();
     if(!session) return [];
-    const {data:staffRow, error:staffErr} = await sb.from('staff').select('id,role,active').eq('id', session.user.id).maybeSingle();
-    if(staffErr || !staffRow || staffRow.active === false || !['admin','super_admin','accountant'].includes(staffRow.role)) return [];
+    const {data:staffRow, error:staffErr} = await sb.from('staff').select('id,role,is_active').eq('id', session.user.id).maybeSingle();
+    if(staffErr || !staffRow || staffRow.is_active === false || !['admin','super_admin','accountant'].includes(staffRow.role)) return [];
     const {data, error} = await sb.from('shipments').select('*').order('created_at', {ascending:false});
     if(error) return [];
     return (data||[]).map(rowToShipment);
@@ -2543,7 +2548,12 @@ async function copyTrackingId(id){
 }
 async function shipmentCardHTML(s){
   const status = statusOf(s);
-  const dueVal = (s.totalAmount!==null && s.totalAmount!==undefined) ? formatMoney(s.totalAmount - s.paidAmount) : formatMoney(null);
+  const hasFinance = s.totalAmount !== null && s.totalAmount !== undefined;
+  const dueVal = hasFinance ? formatMoney(s.totalAmount - (s.paidAmount||0)) : '';
+  const financeHTML = hasFinance ? `
+      <div class="kv"><span>${t('track.total')}</span><b>${formatMoney(s.totalAmount)}</b></div>
+      <div class="kv"><span>${t('track.paid')}</span><b>${formatMoney(s.paidAmount)}</b></div>
+      <div class="kv"><span>${t('track.due')}</span><b style="color:var(--amber);">${dueVal}</b></div>` : '';
   return `
   <div class="track-hero-card reveal in-view">
     <div class="thc-top">
@@ -2559,9 +2569,7 @@ async function shipmentCardHTML(s){
       <div class="kv"><span>${t('track.weight')}</span><b>${s.weightKg} kg</b></div>
       <div class="kv"><span>${t('track.volume')}</span><b>${s.volumeCbm} CBM</b></div>
       ${s.itemsCount!=null?`<div class="kv"><span>${t('track.items')}</span><b>${s.itemsCount}</b></div>`:''}
-      <div class="kv"><span>${t('track.total')}</span><b>${formatMoney(s.totalAmount)}</b></div>
-      <div class="kv"><span>${t('track.paid')}</span><b>${formatMoney(s.paidAmount)}</b></div>
-      <div class="kv"><span>${t('track.due')}</span><b style="color:var(--amber);">${dueVal}</b></div>
+      ${financeHTML}
     </div>
     <div class="card">
       <h4>${t('track.timelineH')}</h4>
@@ -2575,9 +2583,9 @@ async function shipmentCardHTML(s){
     </h4>
     <div id="liveMap-${s.id}"></div>
   </div>
-  <div style="margin-top:16px; text-align:center;">
+  ${hasFinance ? `<div style="margin-top:16px; text-align:center;">
     <button class="btn btn-outline" id="invoiceBtn-${s.id}" onclick="generateInvoiceForId('${s.id}')"><svg class="icon-sm"><use href="#i-download"></use></svg><span>${t('invoice.downloadBtn')}</span></button>
-  </div>
+  </div>` : ''}
   `;
 }
 /* Starts the live map + realtime updates for the currently-displayed shipment.
@@ -3207,8 +3215,8 @@ async function getRecentMessages(){
   if(!sb) return [];
   const {data:{session}} = await sb.auth.getSession();
   if(!session) return [];
-  const {data:staffRow} = await sb.from('staff').select('id,role,active').eq('id', session.user.id).maybeSingle();
-  if(!staffRow || staffRow.active === false || !['admin','super_admin'].includes(staffRow.role)) return [];
+  const {data:staffRow} = await sb.from('staff').select('id,role,is_active').eq('id', session.user.id).maybeSingle();
+  if(!staffRow || staffRow.is_active === false || !['admin','super_admin'].includes(staffRow.role)) return [];
   const {data} = await sb.from('messages').select('*').order('created_at',{ascending:false}).limit(6);
   return data||[];
 }
@@ -4681,8 +4689,8 @@ async function getShipmentForStaff(id){
   if(!sb) return null;
   const {data:{session}} = await sb.auth.getSession();
   if(!session) return null;
-  const {data:staffRow} = await sb.from('staff').select('id,role,active').eq('id', session.user.id).maybeSingle();
-  if(!staffRow || staffRow.active === false || !['admin','super_admin','accountant'].includes(staffRow.role)) return null;
+  const {data:staffRow} = await sb.from('staff').select('id,role,is_active').eq('id', session.user.id).maybeSingle();
+  if(!staffRow || staffRow.is_active === false || !['admin','super_admin','accountant'].includes(staffRow.role)) return null;
   const {data} = await sb.from('shipments').select('*').eq('id', id).maybeSingle();
   return data ? rowToShipment(data) : null;
 }

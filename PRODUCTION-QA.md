@@ -104,3 +104,14 @@ enforce, and they're a genuine trade-off, not a bug to silently patch:
   in front of these pages — a real architecture change, not a config edit.
 
 Whichever you pick, decide deliberately — don't just flip the header.
+
+## 2026-08-11 Hardening Verification
+
+- Static JavaScript syntax check: all 8 JavaScript files pass `node --check`.
+- Local asset reference check: no genuinely missing static asset was found; only runtime-generated `${...}` references were detected.
+- `staff.active` compatibility: live Supabase now provides a generated `active` alias backed by `is_active`, preventing legacy staff-console reads from breaking.
+- Public tracking RPC: anonymous tracking was tested against a real shipment ID. Customer contact data, notes, financial amounts, customer IDs, photos, batch code, and branch are masked for anonymous callers.
+- Customer phone lookup RPC: anonymous execution is revoked; authenticated customers/staff may use it within the ownership/staff guard.
+- Production Supabase status: ACTIVE_HEALTHY.
+- Remaining Supabase Advisor findings are intentionally left for a separate controlled pass because some require product-level decisions (GraphQL exposure, public extension placement, Auth OTP policy, leaked-password protection, and other existing policies).
+
