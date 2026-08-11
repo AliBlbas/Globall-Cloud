@@ -24,17 +24,12 @@ const STATIC_ASSETS = [
   '/manifest.json',
 ];
 
-/* The public site is intentionally mobile-first on narrow screens.
-   Keep the override here so every CSS entry point receives the same guardrail
-   even when an older static stylesheet is still present in the browser cache. */
 const MOBILE_OVERRIDE = `
 @media (max-width:760px){
   html,body{width:100%;max-width:100%;min-width:0;overflow-x:clip;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
-
   .top-announcement{min-height:48px;}
   .top-announcement-inner{width:100%;max-width:100%;padding:7px 12px;gap:7px;flex-wrap:nowrap;justify-content:center;overflow:hidden;}
   .announcement-pill,.announcement-chip{min-width:0;max-width:100%;padding:6px 9px;font-size:9.5px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:none;}
-
   .nav{min-height:64px;}
   .nav-inner{padding:10px 12px;gap:8px;min-height:64px;}
   .nav-links,.nav-auth{display:none!important;}
@@ -46,13 +41,11 @@ const MOBILE_OVERRIDE = `
   .lang-toggle button{padding:6px 9px;font-size:10px;}
   .theme-toggle-btn{width:36px;height:36px;}
   .burger{width:38px;height:38px;flex:0 0 auto;}
-
   .hero{width:100%;padding:28px 16px 22px;display:block;}
   .hero h1{font-size:clamp(31px,8.3vw,38px);line-height:1.2;letter-spacing:-.6px;margin-bottom:14px;}
   .hero .sub{font-size:15px;line-height:1.85;max-width:none;margin-bottom:20px;}
   .hero-ctas{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .hero-ctas .btn{width:100%;min-width:0;padding:12px 10px;font-size:13px;min-height:46px;}
-
   .route-map{margin-top:18px;aspect-ratio:1.1/1;padding:10px;border-radius:20px;}
   .hero-overlay{inset:10px!important;}
   .hero-status-card{max-width:200px;padding:11px 12px;border-radius:14px;}
@@ -63,12 +56,10 @@ const MOBILE_OVERRIDE = `
   .route-chip-num{width:28px;height:28px;font-size:9px;}
   .route-chip b{font-size:11.5px;}
   .route-chip small{font-size:10px;}
-
   .section{padding-block:32px 42px;}
   .section-head{margin-bottom:26px;}
   .section-head h2{font-size:24px;}
   .section-head p{font-size:14px;}
-
   .portal-bottom-nav{left:8px;right:8px;bottom:8px;border-radius:18px;overflow:hidden;}
   .portal-bottom-nav-inner{max-width:none;border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));box-shadow:0 14px 34px rgba(0,0,0,.36);}
   .pbn-item{min-height:46px;gap:3px;padding:5px 1px;font-size:9.5px;}
@@ -78,12 +69,10 @@ const MOBILE_OVERRIDE = `
   body:has(.portal-bottom-nav.active){padding-bottom:calc(84px + env(safe-area-inset-bottom));}
   body:has(.portal-bottom-nav.active) .whatsapp-float{bottom:calc(94px + env(safe-area-inset-bottom));inset-inline-start:14px;width:48px;height:48px;}
   .whatsapp-float svg{width:25px;height:25px;}
-
   .container{padding-inline:16px;}
   .form-grid,.grid-2,.grid-3,.grid-4,.business-hub-grid,.ops-metrics{min-width:0;}
   .card,.hub-card,.ops-card,.warehouse-card,.testimonial-card{padding:18px;}
 }
-
 @media (max-width:390px){
   .top-announcement-inner{padding-inline:9px;}
   .announcement-pill,.announcement-chip{font-size:9px;padding-inline:8px;}
@@ -143,6 +132,9 @@ self.addEventListener('fetch', (event) => {
         if (!response || !response.ok) return response;
         const css = await response.text();
         const headers = new Headers(response.headers);
+        headers.delete('content-encoding');
+        headers.delete('content-length');
+        headers.delete('etag');
         headers.set('Content-Type', 'text/css; charset=UTF-8');
         const transformed = new Response(css + '\n' + MOBILE_OVERRIDE, {
           status: response.status,
