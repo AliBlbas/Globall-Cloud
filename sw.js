@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'gc-v7';
+const CACHE_VERSION = 'gc-v8';
 const STATIC_CACHE = `gc-static-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/', '/index.html', '/management.html', '/staff-os.html', '/staff-portal.html',
@@ -8,8 +8,9 @@ const STATIC_ASSETS = [
   '/admin-dashboard.js', '/price-calculator.js', '/logo-icon-original.png', '/logo-icon.png', '/og-image.jpg', '/manifest.json'
 ];
 
-const MOBILE_CSS = '/mobile-final.css?v=20260811-7';
-const LOGO_CSS = '/logo-fix.css?v=20260811-1';
+const MOBILE_CSS = '/mobile-final.css?v=20260811-8';
+const LOGO_CSS = '/logo-fix.css?v=20260811-2';
+const PINGDOM_SCRIPT = '<script src="//rum-static.pingdom.net/pa-6a7b6dd8a6e49b001200002c.js" async></script>';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -30,39 +31,53 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-function injectStyles(response) {
+function injectSiteAssets(response) {
   const contentType = response.headers.get('content-type') || '';
   if (!contentType.includes('text/html')) return response;
+
   return response.text().then((html) => {
     let injected = html;
+
+    if (!injected.includes('rum-static.pingdom.net/pa-6a7b6dd8a6e49b001200002c.js')) {
+      injected = injected.replace(/<head([^>]*)>/i, `<head$1>${PINGDOM_SCRIPT}`);
+    }
+
     if (!injected.includes('/logo-fix.css')) {
       injected = injected.replace(/<\/head>/i, `<link rel="stylesheet" href="${LOGO_CSS}"></head>`);
     }
+
     if (!injected.includes('/mobile-final.css')) {
       injected = injected.replace(/<\/head>/i, `<link rel="stylesheet" href="${MOBILE_CSS}" media="screen and (max-width: 760px)"></head>`);
     }
+
     const headers = new Headers(response.headers);
     headers.delete('content-encoding');
     headers.delete('content-length');
     headers.delete('etag');
     headers.set('content-type', 'text/html; charset=UTF-8');
-    return new Response(injected, { status: response.status, statusText: response.statusText, headers });
+
+    return new Response(injected, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
   });
 }
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
+
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request, { cache: 'no-store' })
-        .then(injectStyles)
+        .then(injectSiteAssets)
         .catch(async () => {
           const cached = await caches.match('/index.html');
-          return cached ? injectStyles(cached) : Response.error();
+          return cached ? injectSiteAssets(cached) : Response.error();
         })
     );
     return;
