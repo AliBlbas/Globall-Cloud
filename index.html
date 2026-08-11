@@ -800,7 +800,7 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
       <span class="nav-auth" onclick="route('portal')"><svg class="icon-sm"><use href="#i-user"></use></svg><span id="authNavLabel"></span></span>
       <button class="btn btn-primary" onclick="route('request')" data-i18n="nav.quote"></button>
     </div>
-    <button class="burger" onclick="toggleMobileMenu()"><svg class="icon"><use href="#i-menu"></use></svg></button>
+    <button class="burger" onclick="toggleMobileMenu()" aria-label="کردنەوەی مینیو" title="کردنەوەی مینیو"><svg class="icon"><use href="#i-menu"></use></svg></button>
   </div>
   <div class="mobile-menu" id="mobileMenu">
     <a data-route="home" onclick="route('home')" data-i18n="nav.home"></a>
@@ -2524,7 +2524,7 @@ function timelineHTML(s){
     else if(key==='delivered' && s.eta) dateStr = t('track.eta')+' '+formatDate(s.eta);
     const photoUrls = s.stepPhotos && s.stepPhotos[key] ? (Array.isArray(s.stepPhotos[key]) ? s.stepPhotos[key] : [s.stepPhotos[key]]) : [];
     const photoHTML = photoUrls.length ? `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">${photoUrls.map(url=>
-        `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" alt="" style="width:56px; height:56px; object-fit:cover; border-radius:10px; border:1px solid var(--line-soft);"></a>`
+        `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" alt="وێنەی ئەم هەنگاوە" style="width:56px; height:56px; object-fit:cover; border-radius:10px; border:1px solid var(--line-soft);"></a>`
       ).join('')}${photoUrls.length>1 ? `<span class="hint" style="align-self:center;">(${photoUrls.length} کارتۆن)</span>` : ''}</div>` : '';
     return `<div class="tl-step ${cls}"><div class="tl-dot"></div><div class="tl-body"><b>${t('track.steps.'+key)}</b><span>${dateStr}</span>${photoHTML}</div></div>`;
   }).join('');
@@ -2606,7 +2606,7 @@ function invoiceDocumentHTML(s){
   return `<div style="width:780px; background:#ffffff; color:#101820; font-family:'Vazirmatn','Noto Sans Arabic',sans-serif; padding:48px; direction:${currentLang==='ku'?'rtl':'ltr'};" dir="${currentLang==='ku'?'rtl':'ltr'}">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #00A8BD; padding-bottom:20px; margin-bottom:28px;">
       <div style="display:flex; align-items:center; gap:12px;">
-        <img src="logo-icon.png" style="width:46px; height:46px;" crossorigin="anonymous">
+        <img src="logo-icon.png" alt="Globall Cloud" style="width:46px; height:46px;" crossorigin="anonymous">
         <div><div style="font-size:22px; font-weight:800;">Globall Cloud</div><div style="font-size:11.5px; color:#647FA3; letter-spacing:1px;">CHINA · UAE · IRAQ LOGISTICS</div></div>
       </div>
       <div style="text-align:end;">
@@ -2652,7 +2652,7 @@ function commercialInvoiceDocumentHTML(s, goodsDesc){
   return `<div style="width:780px; background:#ffffff; color:#101820; font-family:'Vazirmatn','Noto Sans Arabic',sans-serif; padding:48px; direction:${currentLang==='ku'?'rtl':'ltr'};" dir="${currentLang==='ku'?'rtl':'ltr'}">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #00A8BD; padding-bottom:20px; margin-bottom:28px;">
       <div style="display:flex; align-items:center; gap:12px;">
-        <img src="logo-icon.png" style="width:46px; height:46px;" crossorigin="anonymous">
+        <img src="logo-icon.png" alt="Globall Cloud" style="width:46px; height:46px;" crossorigin="anonymous">
         <div><div style="font-size:22px; font-weight:800;">Globall Cloud</div><div style="font-size:11.5px; color:#647FA3; letter-spacing:1px;">CHINA · UAE · IRAQ LOGISTICS</div></div>
       </div>
       <div style="text-align:end;">
@@ -3440,7 +3440,7 @@ async function viewCustomerReceipts(directoryCustomerId, customerName){
         <div class="admin-row-top"><b class="mono">📦 ${escapeHtml(r.batch_code)}</b><span class="hint">${r.location==='Dubai'?'عەنبەری دوبەی':r.location==='China'?'عەنبەری چین':'عەنبەری هەولێر'}</span></div>
         ${r.notes ? `<span>${escapeHtml(r.notes)}</span>` : ''}
         ${(r.photos||[]).length ? `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">${r.photos.map(url=>
-          `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" alt="" style="width:56px; height:56px; object-fit:cover; border-radius:10px; border:1px solid var(--line-soft);"></a>`
+          `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" alt="وێنەی وەرگرتن" style="width:56px; height:56px; object-fit:cover; border-radius:10px; border:1px solid var(--line-soft);"></a>`
         ).join('')}</div>` : ''}
         <span class="hint" style="text-align:start; margin-top:4px;">${escapeHtml(r.created_by_name||'ستاف')} · ${timeAgoKu(r.received_at)}</span>
       </div>
@@ -3878,8 +3878,8 @@ function renderDirectoryRows(list, keepPage){
         ${c.phone ? `<a class="btn btn-outline btn-icon" href="tel:${escapeHtml(c.phone)}"><svg class="icon-sm"><use href="#i-phone"></use></svg></a>` : ''}
         ${c.phone ? `<a class="btn btn-outline btn-icon" style="color:#25D366; border-color:rgba(37,211,102,.35);" target="_blank" rel="noopener" href="https://wa.me/${escapeHtml(c.phone.replace(/[^0-9]/g,''))}"><svg class="icon-sm"><use href="#i-chat"></use></svg></a>` : ''}
         <button class="btn btn-outline btn-icon" onclick="viewCustomerReceipts('${c.id}', '${escapeHtml(c.name).replace(/'/g,"&#39;")}')" title="وەرگرتنەکانی لە عەنبەر" aria-label="وەرگرتنەکانی لە عەنبەر"><svg class="icon-sm"><use href="#i-box"></use></svg></button>
-        <button class="btn btn-outline btn-icon" onclick='openDirectoryForm(${JSON.stringify(c).replace(/'/g,"&#39;")})'><svg class="icon-sm"><use href="#i-settings"></use></svg></button>
-        <button class="btn btn-outline btn-icon" style="color:var(--red-l); border-color:rgba(229,83,61,.35);" onclick="confirmDeleteDirectoryEntry('${c.id}')"><svg class="icon-sm"><use href="#i-trash"></use></svg></button>
+        <button class="btn btn-outline btn-icon" onclick='openDirectoryForm(${JSON.stringify(c).replace(/'/g,"&#39;")})' aria-label="دەستکاریکردن" title="دەستکاریکردن"><svg class="icon-sm"><use href="#i-settings"></use></svg></button>
+        <button class="btn btn-outline btn-icon" style="color:var(--red-l); border-color:rgba(229,83,61,.35);" onclick="confirmDeleteDirectoryEntry('${c.id}')" aria-label="سڕینەوە" title="سڕینەوە"><svg class="icon-sm"><use href="#i-trash"></use></svg></button>
       </div>
     </div>`;
   }).join('') + '</div>';
@@ -4211,7 +4211,7 @@ function printShipmentLabel(shipmentId){
   area.innerHTML = `
     <div style="border:2px solid #111; border-radius:10px; padding:22px; max-width:420px; font-family:sans-serif; color:#111;">
       <div style="display:flex; align-items:center; gap:10px; border-bottom:2px solid #111; padding-bottom:12px; margin-bottom:14px;">
-        <img src="logo-icon.png" style="width:42px; height:42px;">
+        <img src="logo-icon.png" alt="Globall Cloud" style="width:42px; height:42px;">
         <div><b style="font-size:18px;">Globall Cloud</b><br><span style="font-size:12px;">China · UAE · Iraq Logistics</span></div>
       </div>
       <div style="text-align:center; margin-bottom:14px;">
@@ -4361,7 +4361,7 @@ async function loadWarehouseReceipts(){
         <div class="admin-row-top"><b class="mono">📦 ${escapeHtml(r.batch_code)}</b><span class="hint">${r.location==='Dubai'?'عەنبەری دوبەی':r.location==='China'?'عەنبەری چین':'عەنبەری هەولێر'}</span></div>
         ${r.notes ? `<span>${escapeHtml(r.notes)}</span>` : ''}
         ${(r.photos||[]).length ? `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">${r.photos.map(url=>
-          `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" alt="" style="width:64px; height:64px; object-fit:cover; border-radius:10px; border:1px solid var(--line-soft);"></a>`
+          `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" alt="وێنەی وەرگرتن" style="width:64px; height:64px; object-fit:cover; border-radius:10px; border:1px solid var(--line-soft);"></a>`
         ).join('')}</div>` : ''}
         <span class="hint" style="text-align:start; margin-top:4px;">${escapeHtml(r.created_by_name||'ستاف')} · ${timeAgoKu(r.received_at)}</span>
       </div>
@@ -4598,10 +4598,21 @@ function toWhatsAppDigits(phone){
 }
 /* Maps the shipment's current step to one of whatsapp-messenger.js's
    pre-written templates, so the message staff sends actually matches what
-   happened (warehouse arrival vs in-transit vs customs vs out-for-delivery
-   vs delivered) instead of one generic line. Falls back to the old plain
-   message if whatsapp-messenger.js didn't load. */
-const STEP_TO_WA_TEMPLATE = ['warehouseReceived','warehouseReceived','inTransit','customsClearance','outForDelivery','delivered'];
+   happened (order placed vs warehouse arrival vs in-transit vs customs vs
+   out-for-delivery vs delivered) instead of one generic line. Index must
+   match STEP_ORDER above: ['placed','pickedUp','transit','customs',
+   'outForDelivery','delivered'] — 'placed' is the customer's request just
+   being submitted (nothing physically received yet), which is
+   orderConfirmation, NOT warehouseReceived; 'pickedUp' is the real
+   warehouse-arrival step. Falls back to the old plain message if
+   whatsapp-messenger.js didn't load. */
+const STEP_TO_WA_TEMPLATE = ['orderConfirmation','warehouseReceived','inTransit','customsClearance','outForDelivery','delivered'];
+/* Builds a real, clickable tracking URL a customer can open from outside
+   the app (e.g. from a WhatsApp message) — see the ?track= handling in
+   init(). goTrack()/doTrackSearch() alone only work as in-app JS calls. */
+function getTrackingShareLink(id){
+  return location.origin + location.pathname + '?track=' + encodeURIComponent(id) + '#track';
+}
 async function sendWhatsAppUpdate(id){
   const s = await getShipmentForStaff(id);
   if(!s){ showToast('بار نەدۆزرایەوە.', 'error'); return; }
@@ -4616,7 +4627,16 @@ async function sendWhatsAppUpdate(id){
       origin: placeLabel(s.originKey), destination: placeLabel(s.destKey),
       eta: s.eta ? formatDate(s.eta) : '—', location: placeLabel(s.originKey),
       timestamp: new Date().toLocaleString(currentLang==='ku'?'ar':'en'),
-      address: s.requester?.notes || '—',
+      // orderConfirmation-only fields (real data — see rowToShipment()):
+      weight: s.weightKg || '', type: s.type ? (s.type[0].toUpperCase()+s.type.slice(1)) : '',
+      cost: s.totalAmount || '', trackingLink: getTrackingShareLink(s.id),
+      // No address field exists anywhere in this project's data model (see
+      // requester={name,phone,email,notes} in rowToShipment()) — `notes` is
+      // a free-text "additional notes" box on the request form, not an
+      // address, so it must not be relabeled as one here. Left unset on
+      // purpose: outForDelivery's template falls back to its own '-'
+      // rather than showing the customer their own note mislabeled
+      // "🏠 Address:".
     };
     const sent = window.whatsappMessenger.sendMessage(phone, templateName, vars);
     if(sent) return;
@@ -4693,7 +4713,17 @@ async function init(){
   await updateNavAuthState();
   setupReveal();
   const initialRoute = location.hash.replace('#','');
-  route(VALID_ROUTES.includes(initialRoute) ? initialRoute : 'home');
+  // Supports a real, clickable tracking link from outside the app (e.g. a
+  // WhatsApp message): ?track=<ID>#track. Without this, goTrack(prefill)
+  // only works as an in-app JS call — there was no URL a customer could
+  // actually tap from their phone that would land pre-filled on their
+  // shipment. See getTrackingShareLink() near sendWhatsAppUpdate().
+  const trackParam = new URLSearchParams(location.search).get('track');
+  route(trackParam ? 'track' : (VALID_ROUTES.includes(initialRoute) ? initialRoute : 'home'));
+  if(trackParam){
+    document.getElementById('trackInput').value = trackParam;
+    doTrackSearch();
+  }
 }
 window.addEventListener('hashchange', ()=>{
   const id = location.hash.replace('#','');

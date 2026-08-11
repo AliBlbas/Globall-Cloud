@@ -6,6 +6,8 @@
   <meta name="theme-color" content="#061428">
   <meta name="color-scheme" content="dark">
   <title>Globall Cloud — Accounts Console</title>
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <link rel="icon" type="image/png" href="logo-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -292,6 +294,7 @@
       </div>
 
       <div class="panel" id="listPanel">
+        <p id="loadStatus" style="display:none; margin-bottom:14px;"></p>
         <div class="list-head">
           <div>
             <h2 id="listTitle">Overview</h2>
@@ -329,7 +332,7 @@ const badge = (active) => `<span class="${active ? 'ok' : 'warn'}">${active ? 'A
 const roleLabel = { super_admin: 'Super Admin', admin: 'Admin', accountant: 'Accountant' };
 const roleClass = (r) => r === 'super_admin' ? 'badge-super' : r === 'accountant' ? 'badge-accountant' : 'badge-admin';
 function setMsg(el, text, ok = false) { el.textContent = text || ''; el.style.color = ok ? 'var(--good)' : 'var(--muted)'; }
-function setLoadError(text) { state.lastLoadError = text || ''; const el = $('loadStatus'); if (el) { el.textContent = text || ''; el.classList.toggle('warn', Boolean(text)); el.classList.toggle('ok', false); } }
+function setLoadError(text) { state.lastLoadError = text || ''; const el = $('loadStatus'); if (el) { el.textContent = text || ''; el.classList.toggle('warn', Boolean(text)); el.classList.toggle('ok', false); el.style.display = text ? 'inline-flex' : 'none'; } }
 function showRole(role) { const el = $('roleBadge'); el.className = `badge ${roleClass(role)}`; el.textContent = `${roleLabel[role] || role || 'Guest'} access`; el.classList.remove('hidden'); }
 async function authFetch(path = '/', opts = {}) {
   const { data: { session } } = await sb.auth.getSession();

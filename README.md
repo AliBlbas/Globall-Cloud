@@ -113,7 +113,10 @@ there's no valid staff session, so a coding mistake elsewhere in the client
 can't accidentally trigger a broad read that RLS then has to be the only
 thing catching. `_headers` also ships a `Content-Security-Policy-Report-Only`
 policy — report-only so it can be observed in the browser console for a
-while before anyone flips it to enforcing.
+while before anyone flips it to enforcing. **Read the warning at the top of
+`PRODUCTION-QA.md` before ever doing that** — as written, `script-src`
+would block this project's own inline `<script>` blocks (i.e. all of its
+logic), so enforcing it needs a deliberate choice, not a flag flip.
 
 ## Removed
 A few files in the original repo were dead weight and were deleted rather

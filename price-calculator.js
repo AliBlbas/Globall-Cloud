@@ -148,8 +148,17 @@ class PriceCalculator {
 
 window.priceCalculator = new PriceCalculator();
 
-// Example opt-in modifier — remove if not needed:
-window.priceCalculator.addModifier('rush', (baseCost) => baseCost * 1.25);
+// A modifier registered here would apply to every single call to
+// calculateShippingCost() from that point on — including this project's
+// Quick Quote tool in accounts-console.html — with no visible indication
+// in the UI that anything was added. That's exactly backwards for a tool
+// staff use to sanity-check a number: baseline output must match the
+// baseRates/distanceMatrix above with nothing hidden added on top. This
+// file used to auto-register a 25%-markup 'rush' modifier right here at
+// load time, unconditionally, on every quote — removed for that reason.
+// addModifier()/removeModifier() below are still there if a specific
+// scenario (e.g. a genuine rush order) ever needs one applied deliberately
+// and visibly, on purpose, not as a silent default.
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { PriceCalculator };

@@ -55,16 +55,36 @@ class EnhancedTracking {
   }
 
   async fetchShipmentData(sb, shipmentId) {
-    const { data, error } = await sb
-      .from('shipments')
-      .select('id,origin_key,dest_key,current_step_index,step_dates,eta,branch')
-      .eq('id', shipmentId)
-      .single();
+    // Uses the same track_shipment RPC as index.html's own public getShipment()
+    // — not a direct sb.from('shipments').select(...). This project routes ALL
+    // public/anonymous shipment reads through narrow RPCs (see
+    // database-schema.js: track_shipment, admin_list_*_public, etc.) rather
+    // than direct table access, which strongly implies RLS on `shipments`
+    // does not grant anonymous SELECT directly. A raw .from('shipments')
+    // select here — on the one page anonymous customers actually use this
+    // module from — would likely be silently blocked by RLS for exactly the
+    // visitors it's meant to serve, even though it can appear to work fine
+    // when tested while signed in as staff (who may have broader table
+    // access through RLS). Confirm this against your actual RLS policies;
+    // if `shipments` genuinely does allow anonymous SELECT, either path works.
+    const { data, error } = await sb.rpc('track_shipment', { p_id: shipmentId });
     if (error) throw error;
-    return data;
+    const row = data && data[0];
+    if (!row) throw new Error('Shipment not found');
+    return row;
   }
 
   // Correct v2 realtime syntax: channel().on().subscribe()
+  // Note: Supabase Realtime's postgres_changes is itself RLS-gated — it
+  // can only be subscribed through a direct table+filter (no RPC
+  // equivalent exists), so if RLS turns out not to allow anonymous
+  // SELECT on `shipments` (see the comment on fetchShipmentData above),
+  // this subscription will silently receive nothing for a signed-out
+  // visitor even though the initial map (fetched via the RPC) still
+  // renders fine. Degrades gracefully either way — worst case here is
+  // "the map doesn't auto-update without a re-search", not a crash — but
+  // if you want the live-update part working for anonymous customers too,
+  // that's a Supabase RLS policy change, not something fixable from here.
   subscribeToRealtime(sb, shipmentId) {
     this.unsubscribeChannel(shipmentId); // drop any previous channel for this id, keep shipment/container state
 
