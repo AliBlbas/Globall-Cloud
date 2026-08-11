@@ -1,0 +1,31 @@
+/* Globall Cloud — Super Admin premium layer
+   UI only: no auth/data behavior changes. */
+:root{
+  --sa-bg:#06101f;--sa-panel:#0b1b31;--sa-panel-2:#102844;--sa-line:rgba(111,177,230,.15);
+  --sa-text:#f5fbff;--sa-muted:#91a8c5;--sa-cyan:#55e5f2;--sa-cyan-2:#00c2d9;
+  --sa-mint:#58e6b0;--sa-amber:#ffc96b;--sa-danger:#ff6b7a;--sa-shadow:0 22px 70px rgba(0,0,0,.34)
+}
+@media(max-width:760px){
+  body{background:radial-gradient(circle at 90% 0,rgba(0,194,217,.12),transparent 30%),var(--sa-bg)!important}
+  .wrap{width:min(100% - 20px,1240px)!important}
+  .top{padding:12px 0!important;align-items:center!important;position:sticky;top:0;z-index:20;background:rgba(6,16,31,.82);backdrop-filter:blur(18px);border-bottom:1px solid rgba(111,177,230,.08)}
+  .top-actions{width:100%!important;display:grid!important;grid-template-columns:1fr 1fr!important}
+  .top-actions .btn{width:100%!important;padding:10px!important;font-size:11.5px!important}
+  .hero{gap:10px!important;margin-top:10px!important}
+  .hero-card,.profile{padding:18px!important;border-radius:22px!important;box-shadow:var(--sa-shadow)!important}
+  .hero h1{font-size:31px!important;line-height:1.12!important}
+  .hero p{font-size:13.5px!important;line-height:1.85!important}
+  .metrics{grid-template-columns:1fr 1fr!important;gap:8px!important}
+  .metric{padding:13px!important;border-radius:17px!important}
+  .metric b{font-size:20px!important}
+  .grid{grid-template-columns:1fr!important;gap:9px!important}
+  .action{min-height:124px!important;padding:16px!important;border-radius:18px!important}
+  .security{grid-template-columns:1fr!important}
+  .footer{font-size:9.5px!important}
+}
+.sa-kicker{font:800 10px/1.2 'JetBrains Mono',monospace;letter-spacing:1.5px;color:var(--sa-cyan);text-transform:uppercase}
+.sa-role{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid rgba(85,229,242,.18);background:rgba(85,229,242,.07);border-radius:999px;color:#d9fbff;font:800 10px 'JetBrains Mono',monospace}
+.sa-role::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--sa-mint);box-shadow:0 0 13px var(--sa-mint)}
+.sa-profile-card{position:relative;overflow:hidden}
+.sa-profile-card::after{content:'';position:absolute;width:210px;height:210px;inset-inline-end:-80px;top:-90px;border-radius:50%;background:radial-gradient(circle,rgba(85,229,242,.15),transparent 70%);pointer-events:none}
+.sa-nav-badge{padding:5px 8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);font:700 9px 'JetBrains Mono',monospace;color:var(--sa-muted)}
