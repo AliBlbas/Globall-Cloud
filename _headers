@@ -13,6 +13,9 @@
 /sw.js
   Cache-Control: no-cache, no-store, must-revalidate
 
+/mobile-final.css
+  Cache-Control: public, max-age=300, must-revalidate
+
 /*.css
   Cache-Control: public, max-age=3600
 
