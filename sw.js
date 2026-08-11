@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'gc-v5';
+const CACHE_VERSION = 'gc-v6';
 const STATIC_CACHE = `gc-static-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
@@ -25,7 +25,7 @@ const STATIC_ASSETS = [
   '/manifest.json',
 ];
 
-const MOBILE_CSS = '/mobile-final.css?v=20260811-5';
+const MOBILE_CSS = '/mobile-final.css?v=20260811-6';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -50,35 +50,24 @@ self.addEventListener('activate', (event) => {
 function injectMobileStyles(response) {
   const contentType = response.headers.get('content-type') || '';
   if (!contentType.includes('text/html')) return response;
-
   return response.text().then((html) => {
-    if (html.includes('/mobile-final.css')) {
-      return new Response(html, { status: response.status, statusText: response.statusText, headers: response.headers });
-    }
-
-    const link = `<link rel="stylesheet" href="${MOBILE_CSS}" media="screen and (max-width: 760px)">`;
-    const injected = html.replace(/<\/head>/i, `${link}</head>`);
+    if (html.includes('/mobile-final.css')) return new Response(html, { status: response.status, statusText: response.statusText, headers: response.headers });
+    const link = `<link rel="stylesheet" href="${MOBILE_CSS}" media="screen and (max-width: 760px">`;
+    const injected = html.replace(/<\\/head>/i, `${link}</head>`);
     const headers = new Headers(response.headers);
     headers.delete('content-encoding');
     headers.delete('content-length');
     headers.delete('etag');
     headers.set('content-type', 'text/html; charset=UTF-8');
-
-    return new Response(injected, {
-      status: response.status,
-      statusText: response.statusText,
-      headers,
-    });
+    return new Response(injected, { status: response.status, statusText: response.statusText, headers });
   });
 }
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
-
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request, { cache: 'no-store' })
@@ -90,10 +79,8 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
-
   const isStaticAsset = ['style', 'script', 'image', 'font'].includes(request.destination);
   if (!isStaticAsset) return;
-
   event.respondWith(
     caches.match(request).then(async (cached) => {
       if (cached) return cached;
