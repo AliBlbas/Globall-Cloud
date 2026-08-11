@@ -1,28 +1,11 @@
 const CACHE_VERSION = 'gc-v6';
 const STATIC_CACHE = `gc-static-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/management.html',
-  '/staff-os.html',
-  '/staff-portal.html',
-  '/accounts-console.html',
-  '/operations-suite.html',
-  '/styles.css',
-  '/tracking-styles.css',
-  '/mobile-final.css',
-  '/tracking-enhanced.js',
-  '/tracking-integration.html',
-  '/translations.js',
-  '/form-validation.js',
-  '/form-validation-styles.css',
-  '/whatsapp-messenger.js',
-  '/webhook-handler.js',
-  '/admin-dashboard.js',
-  '/price-calculator.js',
-  '/logo-icon.png',
-  '/og-image.jpg',
-  '/manifest.json',
+  '/', '/index.html', '/management.html', '/staff-os.html', '/staff-portal.html',
+  '/accounts-console.html', '/operations-suite.html', '/styles.css', '/tracking-styles.css',
+  '/mobile-final.css', '/tracking-enhanced.js', '/tracking-integration.html', '/translations.js',
+  '/form-validation.js', '/form-validation-styles.css', '/whatsapp-messenger.js', '/webhook-handler.js',
+  '/admin-dashboard.js', '/price-calculator.js', '/logo-icon.png', '/og-image.jpg', '/manifest.json'
 ];
 
 const MOBILE_CSS = '/mobile-final.css?v=20260811-6';
@@ -39,8 +22,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(
-      keys
-        .filter((key) => key.startsWith('gc-static-') && key !== STATIC_CACHE)
+      keys.filter((key) => key.startsWith('gc-static-') && key !== STATIC_CACHE)
         .map((key) => caches.delete(key))
     ))
   );
@@ -52,8 +34,8 @@ function injectMobileStyles(response) {
   if (!contentType.includes('text/html')) return response;
   return response.text().then((html) => {
     if (html.includes('/mobile-final.css')) return new Response(html, { status: response.status, statusText: response.statusText, headers: response.headers });
-    const link = `<link rel="stylesheet" href="${MOBILE_CSS}" media="screen and (max-width: 760px">`;
-    const injected = html.replace(/<\\/head>/i, `${link}</head>`);
+    const link = `<link rel="stylesheet" href="${MOBILE_CSS}" media="screen and (max-width: 760px)">`;
+    const injected = html.replace(/<\/head>/i, `${link}</head>`);
     const headers = new Headers(response.headers);
     headers.delete('content-encoding');
     headers.delete('content-length');
@@ -68,6 +50,7 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request, { cache: 'no-store' })
@@ -79,8 +62,10 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
+
   const isStaticAsset = ['style', 'script', 'image', 'font'].includes(request.destination);
   if (!isStaticAsset) return;
+
   event.respondWith(
     caches.match(request).then(async (cached) => {
       if (cached) return cached;
