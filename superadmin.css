@@ -1,5 +1,5 @@
 /* Globall Cloud — Super Admin premium layer
-   UI only: no auth/data behavior changes. */
+   Visual system for the internal Super Admin experience. */
 :root{
   --sa-bg:#06101f;--sa-panel:#0b1b31;--sa-panel-2:#102844;--sa-line:rgba(111,177,230,.15);
   --sa-text:#f5fbff;--sa-muted:#91a8c5;--sa-cyan:#55e5f2;--sa-cyan-2:#00c2d9;
@@ -11,12 +11,51 @@
   background-size:cover!important;
   background-position:center!important;
   background-repeat:no-repeat!important;
-  color:transparent!important;
-  font-size:0!important;
+  color:transparent!important;font-size:0!important;
   box-shadow:0 0 30px rgba(0,194,217,.18)!important;
   border:1px solid rgba(85,229,242,.16)!important;
 }
 .brand .logo{flex:0 0 48px}
+
+/* Super Admin visual hierarchy */
+.hero-card,.profile,.metric,.action,.security .item{
+  border-color:rgba(85,229,242,.12)!important;
+}
+.hero-card{
+  background:
+    radial-gradient(circle at 88% 14%,rgba(85,229,242,.09),transparent 25%),
+    linear-gradient(155deg,rgba(16,40,68,.98),rgba(7,20,36,.98))!important;
+}
+.hero-card .status{box-shadow:0 0 0 1px rgba(88,230,176,.04) inset,0 10px 30px rgba(88,230,176,.06)}
+.profile{
+  background:
+    radial-gradient(circle at 12% 0,rgba(255,255,255,.05),transparent 26%),
+    linear-gradient(180deg,rgba(16,40,68,.98),rgba(7,20,36,.98))!important;
+}
+.metric{transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.metric:hover{transform:translateY(-2px);border-color:rgba(85,229,242,.25)!important;box-shadow:0 16px 32px rgba(0,0,0,.18)}
+.action{position:relative;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease,background .2s ease}
+.action:hover{transform:translateY(-3px);border-color:rgba(85,229,242,.26)!important;box-shadow:0 20px 42px rgba(0,0,0,.22)}
+.action .icon{box-shadow:0 8px 24px rgba(0,194,217,.08)}
+.security .item{background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.02))!important}
+
+/* Role pill — stronger Super Admin treatment without changing auth logic */
+.role{
+  border:1px solid rgba(85,229,242,.18)!important;
+  background:linear-gradient(180deg,rgba(85,229,242,.09),rgba(85,229,242,.045))!important;
+  color:#d9fbff!important;
+  box-shadow:0 8px 22px rgba(0,194,217,.07);
+}
+.role::before{content:'●';color:var(--sa-mint);margin-inline-end:6px;font-size:9px;vertical-align:1px}
+
+/* Reusable Super Admin badges if added by future panels */
+.sa-kicker{font:800 10px/1.2 'JetBrains Mono',monospace;letter-spacing:1.5px;color:var(--sa-cyan);text-transform:uppercase}
+.sa-role{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid rgba(85,229,242,.18);background:rgba(85,229,242,.07);border-radius:999px;color:#d9fbff;font:800 10px 'JetBrains Mono',monospace}
+.sa-role::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--sa-mint);box-shadow:0 0 13px var(--sa-mint)}
+.sa-profile-card{position:relative;overflow:hidden}
+.sa-profile-card::after{content:'';position:absolute;width:210px;height:210px;inset-inline-end:-80px;top:-90px;border-radius:50%;background:radial-gradient(circle,rgba(85,229,242,.15),transparent 70%);pointer-events:none}
+.sa-nav-badge{padding:5px 8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);font:700 9px 'JetBrains Mono',monospace;color:var(--sa-muted)}
+
 @media(max-width:760px){
   body{background:radial-gradient(circle at 90% 0,rgba(0,194,217,.12),transparent 30%),var(--sa-bg)!important}
   .wrap{width:min(100% - 20px,1240px)!important}
@@ -36,9 +75,3 @@
   .footer{font-size:9.5px!important}
   .brand .logo{width:40px!important;height:40px!important;flex-basis:40px!important;border-radius:13px!important}
 }
-.sa-kicker{font:800 10px/1.2 'JetBrains Mono',monospace;letter-spacing:1.5px;color:var(--sa-cyan);text-transform:uppercase}
-.sa-role{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid rgba(85,229,242,.18);background:rgba(85,229,242,.07);border-radius:999px;color:#d9fbff;font:800 10px 'JetBrains Mono',monospace}
-.sa-role::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--sa-mint);box-shadow:0 0 13px var(--sa-mint)}
-.sa-profile-card{position:relative;overflow:hidden}
-.sa-profile-card::after{content:'';position:absolute;width:210px;height:210px;inset-inline-end:-80px;top:-90px;border-radius:50%;background:radial-gradient(circle,rgba(85,229,242,.15),transparent 70%);pointer-events:none}
-.sa-nav-badge{padding:5px 8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);font:700 9px 'JetBrains Mono',monospace;color:var(--sa-muted)}
