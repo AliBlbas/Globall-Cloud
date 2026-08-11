@@ -294,3 +294,152 @@
   .timeline-item.current .timeline-dot { inset-inline-start: -16px; }
   .badge { padding: 4px 10px; font-size: 11px; }
 }
+
+/* ---------- Production mobile guardrails ---------- */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+img,
+svg,
+video,
+canvas,
+iframe {
+  max-width: 100%;
+}
+
+iframe,
+video {
+  width: 100%;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+@media (max-width: 768px) {
+  body { overflow-x: clip; }
+
+  main,
+  section,
+  header,
+  footer,
+  nav,
+  article,
+  aside,
+  .container,
+  .page,
+  .card,
+  .panel,
+  .modal,
+  .modal-card,
+  .track-hero-card,
+  .hero-card,
+  .route-map,
+  .corridor-strip {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .container {
+    width: 100%;
+    padding-inline: 16px;
+  }
+
+  .nav-inner,
+  .top-announcement-inner {
+    width: 100%;
+    max-width: 100%;
+    padding-inline: 16px;
+  }
+
+  .brand b,
+  .brand small,
+  .nav-auth,
+  .section-head h2,
+  .section-head p,
+  .hero h1,
+  .hero p,
+  .tracking-header h3,
+  .map-summary-route,
+  .map-summary-eta,
+  .tracking-route,
+  .route-chip b,
+  .route-chip small,
+  .kv,
+  .field-label {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .btn,
+  .field,
+  select.field,
+  textarea.field,
+  input,
+  select,
+  textarea {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  input,
+  select,
+  textarea,
+  .field,
+  select.field,
+  textarea.field {
+    font-size: 16px !important;
+  }
+
+  table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  pre,
+  code {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .form-grid,
+  .grid,
+  .stats-grid,
+  .cards-grid,
+  .services-grid,
+  .feature-grid,
+  .dashboard-grid {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 390px) {
+  .container,
+  .nav-inner,
+  .top-announcement-inner {
+    padding-inline: 12px;
+  }
+
+  .live-map-container,
+  .tracking-details {
+    padding: 12px;
+  }
+
+  .btn { padding-inline: 16px; }
+}
