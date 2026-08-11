@@ -1,16 +1,17 @@
-const CACHE_VERSION = 'gc-v8';
+const CACHE_VERSION = 'gc-v9';
 const STATIC_CACHE = `gc-static-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/', '/index.html', '/management.html', '/staff-os.html', '/staff-portal.html',
   '/accounts-console.html', '/operations-suite.html', '/styles.css', '/tracking-styles.css',
-  '/mobile-final.css', '/logo-fix.css', '/tracking-enhanced.js', '/tracking-integration.html', '/translations.js',
+  '/mobile-final.css', '/logo-fix.css', '/staff-auth-fix.js', '/tracking-enhanced.js', '/tracking-integration.html', '/translations.js',
   '/form-validation.js', '/form-validation-styles.css', '/whatsapp-messenger.js', '/webhook-handler.js',
   '/admin-dashboard.js', '/price-calculator.js', '/logo-icon-original.png', '/logo-icon.png', '/og-image.jpg', '/manifest.json'
 ];
 
-const MOBILE_CSS = '/mobile-final.css?v=20260811-8';
-const LOGO_CSS = '/logo-fix.css?v=20260811-2';
+const MOBILE_CSS = '/mobile-final.css?v=20260811-9';
+const LOGO_CSS = '/logo-fix.css?v=20260811-3';
 const PINGDOM_SCRIPT = '<script src="//rum-static.pingdom.net/pa-6a7b6dd8a6e49b001200002c.js" async></script>';
+const STAFF_AUTH_SCRIPT = '<script src="/staff-auth-fix.js?v=20260811-1" defer></script>';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -40,6 +41,10 @@ function injectSiteAssets(response) {
 
     if (!injected.includes('rum-static.pingdom.net/pa-6a7b6dd8a6e49b001200002c.js')) {
       injected = injected.replace(/<head([^>]*)>/i, `<head$1>${PINGDOM_SCRIPT}`);
+    }
+
+    if (/\/staff-os\.html(?:$|[?#])/.test(new URL(response.url || location.href).pathname) && !injected.includes('/staff-auth-fix.js')) {
+      injected = injected.replace(/<head([^>]*)>/i, `<head$1>${STAFF_AUTH_SCRIPT}`);
     }
 
     if (!injected.includes('/logo-fix.css')) {
