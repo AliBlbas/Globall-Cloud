@@ -36,7 +36,8 @@ jobs:
           set -euo pipefail
           grep -q "ahslifnthiwfkmaswjno.supabase.co" production-bridge.js
           grep -q "account-admin" accounts-console-script.js
-          grep -q "gc-v12" sw.js
+          grep -q "gc-v17" sw.js
+          grep -q "production-bridge.js" sw.js
           grep -q "no-store" _headers
           grep -q "Content-Security-Policy" _headers
           grep -q 'project_id = "ahslifnthiwfkmaswjno"' supabase/config.toml
@@ -63,5 +64,6 @@ jobs:
           test -f staff-auth-fix.js
           test -f accounts-console.html
           test -f staff-os.html
+          test -f logistics-os.html
           test -f supabase/config.toml
           test -f functions/health.js
