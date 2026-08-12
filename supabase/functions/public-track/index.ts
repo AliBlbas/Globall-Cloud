@@ -7,15 +7,19 @@ const ALLOWED_ORIGINS = new Set([
   'https://globall-cloud.netlify.app',
 ])
 
+function originAllowed(req: Request): boolean {
+  const origin = req.headers.get('origin')
+  return !origin || ALLOWED_ORIGINS.has(origin)
+}
+
 function cors(req: Request) {
   const origin = req.headers.get('origin') || ''
   return {
-    'Access-Control-Allow-Origin': ALLOWED_ORIGINS.has(origin)
-      ? origin
-      : 'https://globall-cloud.pages.dev',
+    ...(ALLOWED_ORIGINS.has(origin) ? { 'Access-Control-Allow-Origin': origin } : {}),
     'Access-Control-Allow-Headers':
       'authorization, apikey, content-type, x-client-info, x-supabase-auth-token',
     'Access-Control-Allow-Methods': 'GET,OPTIONS',
+    'Cache-Control': 'no-store',
     'Vary': 'Origin',
   }
 }
@@ -23,11 +27,7 @@ function cors(req: Request) {
 function json(req: Request, body: Json, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Cache-Control': 'no-store',
-      ...cors(req),
-    },
+    headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors(req) },
   })
 }
 
@@ -55,37 +55,22 @@ async function getUser(req: Request) {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: cors(req) })
-  }
-  if (req.method !== 'GET') {
-    return json(req, { error: 'Method not allowed' }, 405)
-  }
+  if (!originAllowed(req)) return json(req, { error: 'Origin not allowed' }, 403)
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors(req) })
+  if (req.method !== 'GET') return json(req, { error: 'Method not allowed' }, 405)
 
   try {
     const id = String(new URL(req.url).searchParams.get('id') || '').trim()
-    if (!id || id.length > 128) {
-      return json(req, { error: 'Invalid tracking id' }, 400)
-    }
+    if (!id || id.length > 128) return json(req, { error: 'Invalid tracking id' }, 400)
 
-    const service = createClient(
-      env('SUPABASE_URL'),
-      env('SUPABASE_SERVICE_ROLE_KEY'),
-      {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-          detectSessionInUrl: false,
-        },
-      },
-    )
+    const service = createClient(env('SUPABASE_URL'), env('SUPABASE_SERVICE_ROLE_KEY'), {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    })
 
     const user = await getUser(req)
     const { data: shipment, error } = await service
       .from('shipments')
-      .select(
-        'id,customer_user_id,customer_name,customer_phone,customer_email,notes,origin_key,dest_key,type,weight_kg,volume_cbm,items_count,total_amount,paid_amount,current_step_index,step_dates,eta,directory_customer_id,step_photos,batch_code,branch,created_at',
-      )
+      .select('id,customer_user_id,customer_name,customer_phone,customer_email,notes,origin_key,dest_key,type,weight_kg,volume_cbm,items_count,total_amount,paid_amount,current_step_index,step_dates,eta,directory_customer_id,step_photos,batch_code,branch,created_at')
       .eq('id', id)
       .maybeSingle()
 
