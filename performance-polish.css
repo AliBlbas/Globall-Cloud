@@ -1,0 +1,27 @@
+/* Globall Cloud — layout performance layer */
+
+.content-visibility-auto,
+.lazy-section,
+.services-grid,
+.feature-grid,
+.faq-list,
+.contact-grid {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 700px;
+}
+
+[data-gc-perf="ready"] .reveal,
+[data-gc-perf="ready"] .card,
+[data-gc-perf="ready"] .panel,
+[data-gc-perf="ready"] .service-card,
+[data-gc-perf="ready"] .feature-card {
+  contain: layout paint style;
+}
+
+@media (prefers-reduced-data: reduce) {
+  body { background-image: none !important; }
+  .hero-card::before,
+  .track-hero-card::before,
+  .service-card::before,
+  .feature-card::before { display: none !important; }
+}
