@@ -1,11 +1,14 @@
 /* Globall Cloud — defensive Staff OS auth bridge
- * Keeps Supabase Auth as the source of truth and verifies the staff row before
- * exposing the internal console. This layer only runs on staff-os.html.
+ * Keeps Supabase Auth as the source of truth and delegates staff-role
+ * verification to the protected account-admin Edge Function instead of
+ * exposing a direct public-client read path to the staff table.
  */
 (() => {
   'use strict';
 
   if (!/\/staff-os\.html(?:$|[?#])/.test(window.location.pathname)) return;
+
+  const ADMIN_FUNCTION = 'https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/account-admin';
 
   const waitFor = (getter, timeoutMs = 10000, intervalMs = 100) => new Promise((resolve, reject) => {
     const started = Date.now();
@@ -58,20 +61,39 @@
     if (gate) gate.classList.remove('hidden');
   };
 
+  const getAuthHeaders = async (client) => {
+    const headers = { Accept: 'application/json' };
+    const { data: sessionData } = await client.auth.getSession();
+    const token = sessionData?.session?.access_token;
+    if (!token) throw new Error('Session token نەدۆزرایەوە.');
+    headers.Authorization = `Bearer ${token}`;
+    return headers;
+  };
+
   const verifyStaff = async (client, userId) => {
-    const { data, error } = await client
-      .from('staff')
-      .select('id,full_name,role,branch,is_active,active')
-      .eq('id', userId)
-      .maybeSingle();
+    const headers = await getAuthHeaders(client);
+    const response = await fetch(`${ADMIN_FUNCTION}?kind=staff`, {
+      method: 'GET',
+      headers,
+      credentials: 'omit',
+      cache: 'no-store',
+    });
 
-    if (error) throw error;
-    if (!data) throw new Error('ئەم بەکارهێنەرە لە staff access ـدا نییە.');
+    let body = null;
+    try { body = await response.json(); } catch (_) {}
+    if (!response.ok) {
+      if (response.status === 401) throw new Error('Session ـەکە بەسەرچووە. دووبارە login بکە.');
+      if (response.status === 403) throw new Error('ئەم هەژمارە دەستڕاگەیشتنی Staff OS ـی نییە.');
+      throw new Error(body?.error || `Staff verification failed (${response.status})`);
+    }
 
-    const active = data.is_active !== false && data.active !== false;
+    const row = (body?.items || []).find((item) => String(item?.id || '') === String(userId));
+    if (!row) throw new Error('ئەم بەکارهێنەرە لە staff access ـدا نییە.');
+
+    const active = row.is_active !== false;
     if (!active) throw new Error('دەستڕاگەیشتنی ئەم staff ـە ناچالاکە.');
 
-    return data;
+    return row;
   };
 
   const boot = async () => {
@@ -81,7 +103,6 @@
       const client = await waitFor(() => window.sb || null);
       const form = document.getElementById('loginForm');
 
-      // Replace only the login submit path; leave the rest of the original page intact.
       form?.addEventListener('submit', async (event) => {
         event.preventDefault();
         event.stopImmediatePropagation();
@@ -110,7 +131,6 @@
         }
       }, true);
 
-      // Verify an already-existing session before exposing the internal console.
       const { data: sessionData } = await client.auth.getSession();
       const session = sessionData?.session;
       if (!session?.user?.id) {
@@ -130,7 +150,7 @@
     } catch (error) {
       console.error('[Globall Cloud] Staff auth bridge:', error);
       showGate();
-      setMessage('Supabase Auth ئامادە نەبوو. تکایە دووبارە هەوڵبدەرەوە.');
+      setMessage(error?.message || 'Supabase Auth ئامادە نەبوو. تکایە دووبارە هەوڵبدەرەوە.');
       setBusy(false);
     }
   };
