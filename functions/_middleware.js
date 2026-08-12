@@ -1,15 +1,21 @@
 /*
  * Globall Cloud — HTML delivery middleware
  * Injects the production runtime guard and premium polish layer into HTML
- * responses without rewriting the large legacy index.html inline script.
- * JSON/API/function responses are left untouched.
+ * navigations without rewriting the large legacy index.html inline script.
+ * Non-document requests are passed through untouched.
  */
 
+const HTML_ACCEPT = 'text/html';
+
 export async function onRequest(context) {
+  const accept = context.request.headers.get('accept') || '';
+  if (!accept.toLowerCase().includes(HTML_ACCEPT)) {
+    return context.next();
+  }
+
   const response = await context.next();
   const contentType = response.headers.get('content-type') || '';
-
-  if (!contentType.toLowerCase().includes('text/html')) {
+  if (!contentType.toLowerCase().includes(HTML_ACCEPT)) {
     return response;
   }
 
