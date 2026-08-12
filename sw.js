@@ -1,15 +1,16 @@
-const CACHE_VERSION = 'gc-v10';
+const CACHE_VERSION = 'gc-v11';
 const STATIC_CACHE = `gc-static-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/', '/index.html', '/management.html', '/staff-os.html', '/staff-portal.html',
   '/accounts-console.html', '/operations-suite.html', '/styles.css', '/tracking-styles.css',
-  '/mobile-final.css', '/logo-fix.css', '/staff-auth-fix.js', '/superadmin.css', '/tracking-enhanced.js', '/tracking-integration.html', '/translations.js',
+  '/mobile-final.css', '/mobile-polish.css', '/logo-fix.css', '/staff-auth-fix.js', '/superadmin.css', '/tracking-enhanced.js', '/tracking-integration.html', '/translations.js',
   '/form-validation.js', '/form-validation-styles.css', '/whatsapp-messenger.js', '/webhook-handler.js',
   '/admin-dashboard.js', '/price-calculator.js', '/logo-icon-original.png', '/logo-icon.png', '/og-image.jpg', '/manifest.json'
 ];
 
-const MOBILE_CSS = '/mobile-final.css?v=20260811-10';
-const LOGO_CSS = '/logo-fix.css?v=20260811-4';
+const MOBILE_CSS = '/mobile-final.css?v=20260812-11';
+const MOBILE_POLISH_CSS = '/mobile-polish.css?v=20260812-1';
+const LOGO_CSS = '/logo-fix.css?v=20260812-5';
 const SUPERADMIN_CSS = '/superadmin.css?v=20260811-1';
 const PINGDOM_SCRIPT = '<script src="//rum-static.pingdom.net/pa-6a7b6dd8a6e49b001200002c.js" async></script>';
 const STAFF_AUTH_SCRIPT = '<script src="/staff-auth-fix.js?v=20260811-2" defer></script>';
@@ -59,6 +60,10 @@ function injectSiteAssets(response) {
 
     if (!injected.includes('/mobile-final.css')) {
       injected = injected.replace(/<\/head>/i, `<link rel="stylesheet" href="${MOBILE_CSS}" media="screen and (max-width: 760px)"></head>`);
+    }
+
+    if (!injected.includes('/mobile-polish.css')) {
+      injected = injected.replace(/<\/head>/i, `<link rel="stylesheet" href="${MOBILE_POLISH_CSS}" media="screen and (max-width: 760px)"></head>`);
     }
 
     const headers = new Headers(response.headers);
