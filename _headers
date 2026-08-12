@@ -6,7 +6,7 @@
   Permissions-Policy: camera=(), geolocation=(), microphone=(), payment=()
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-site
-  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rum-static.pingdom.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https://ahslifnthiwfkmaswjno.supabase.co https://formsubmit.co https://wa.me https://rum-static.pingdom.net; frame-src 'self' https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://formsubmit.co
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rum-static.pingdom.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https://ahslifnthiwfkmaswjno.supabase.co https://formsubmit.co https://wa.me https://rum-static.pingdom.net https://router.project-osrm.org; frame-src 'self' https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://formsubmit.co
 
 /management.html
   X-Robots-Tag: noindex, nofollow, noarchive
@@ -48,6 +48,12 @@
   Cache-Control: public, max-age=300, must-revalidate
 
 /mobile-elite.css
+  Cache-Control: public, max-age=300, must-revalidate
+
+/live-logistics-map.css
+  Cache-Control: public, max-age=300, must-revalidate
+
+/live-logistics-map.js
   Cache-Control: public, max-age=300, must-revalidate
 
 /logo-fix.css
