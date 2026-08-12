@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'gc-v12';
+const CACHE_VERSION = 'gc-v13';
 const STATIC_CACHE = `gc-static-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/', '/index.html', '/management.html', '/staff-os.html', '/staff-portal.html',
@@ -8,9 +8,9 @@ const STATIC_ASSETS = [
   '/admin-dashboard.js', '/price-calculator.js', '/logo-icon-original.png', '/logo-icon.png', '/og-image.jpg', '/manifest.json'
 ];
 
-const MOBILE_CSS = '/mobile-final.css?v=20260812-11';
-const MOBILE_POLISH_CSS = '/mobile-polish.css?v=20260812-2';
-const LOGO_CSS = '/logo-fix.css?v=20260812-6';
+const MOBILE_CSS = '/mobile-final.css?v=20260812-12';
+const MOBILE_POLISH_CSS = '/mobile-polish.css?v=20260812-3';
+const LOGO_CSS = '/logo-fix.css?v=20260812-7';
 const SUPERADMIN_CSS = '/superadmin.css?v=20260811-1';
 const PINGDOM_SCRIPT = '<script src="//rum-static.pingdom.net/pa-6a7b6dd8a6e49b001200002c.js" async></script>';
 const STAFF_AUTH_SCRIPT = '<script src="/staff-auth-fix.js?v=20260811-2" defer></script>';
