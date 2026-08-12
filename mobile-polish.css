@@ -1,0 +1,222 @@
+/* Globall Cloud — mobile visual polish layer
+   Loads after mobile-final.css and only affects <=760px.
+   Focus: spacing, safe-area handling, readable controls, stronger brand presence,
+   and cleaner cards/forms without changing application behavior.
+*/
+@media (max-width:760px){
+  :root{
+    --gc-mobile-gutter:16px;
+    --gc-mobile-radius:18px;
+  }
+
+  body{
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+
+  .nav-inner{
+    padding-inline-start:max(12px, env(safe-area-inset-left));
+    padding-inline-end:max(12px, env(safe-area-inset-right));
+  }
+
+  .brand{
+    gap:9px!important;
+    max-width:64%!important;
+  }
+
+  .brand-logo,
+  .logo-icon,
+  img[src*="logo-icon"]{
+    background:linear-gradient(145deg, rgba(0,194,217,.12), rgba(255,255,255,.02))!important;
+    border:1px solid rgba(79,227,240,.20)!important;
+    box-shadow:0 6px 18px rgba(0,0,0,.16), 0 0 0 1px rgba(255,255,255,.025) inset!important;
+    object-fit:contain!important;
+    object-position:center!important;
+  }
+
+  .nav-right{
+    gap:7px!important;
+  }
+
+  .lang-toggle{
+    box-shadow:0 4px 14px rgba(0,0,0,.12)!important;
+    background:rgba(255,255,255,.02)!important;
+  }
+
+  .theme-toggle-btn,
+  .burger{
+    box-shadow:0 4px 14px rgba(0,0,0,.10)!important;
+  }
+
+  .hero{
+    min-height:0!important;
+    padding-top:30px!important;
+  }
+
+  .hero h1{
+    max-width:680px!important;
+    font-weight:900!important;
+    text-wrap:balance!important;
+  }
+
+  .hero .sub{
+    max-width:640px!important;
+  }
+
+  .hero-ctas .btn{
+    border-radius:14px!important;
+    box-shadow:0 8px 20px rgba(0,0,0,.12)!important;
+  }
+
+  .route-map,
+  .hero-status-card,
+  .route-chip,
+  .card,
+  .hub-card,
+  .ops-card,
+  .warehouse-card,
+  .testimonial-card,
+  .panel,
+  .modal-card,
+  .auth-box,
+  .gate-card{
+    box-shadow:0 12px 34px rgba(0,0,0,.16)!important;
+  }
+
+  .route-map{
+    border:1px solid rgba(79,227,240,.13)!important;
+    background:linear-gradient(180deg, rgba(18,42,74,.88), rgba(8,18,32,.96))!important;
+  }
+
+  .section{
+    scroll-margin-top:78px!important;
+  }
+
+  .section-head{
+    text-align:start!important;
+    margin-inline:0!important;
+  }
+
+  .section-head .eyebrow{
+    text-align:start!important;
+  }
+
+  .card,
+  .hub-card,
+  .ops-card,
+  .warehouse-card,
+  .testimonial-card{
+    border:1px solid rgba(255,255,255,.07)!important;
+    background:linear-gradient(180deg, rgba(18,42,74,.88), rgba(13,29,52,.94))!important;
+  }
+
+  .card:active,
+  .hub-card:active,
+  .ops-card:active,
+  .warehouse-card:active{
+    transform:translateY(1px)!important;
+  }
+
+  .field,
+  select.field,
+  textarea.field,
+  input,
+  select,
+  textarea{
+    border-radius:14px!important;
+    min-height:50px!important;
+  }
+
+  .field-label{
+    font-size:12.5px!important;
+    margin-bottom:6px!important;
+  }
+
+  .btn-block{
+    min-height:50px!important;
+    border-radius:14px!important;
+  }
+
+  .mobile-menu{
+    padding-inline-start:max(12px, env(safe-area-inset-left))!important;
+    padding-inline-end:max(12px, env(safe-area-inset-right))!important;
+  }
+
+  .mobile-menu a{
+    border-radius:14px!important;
+  }
+
+  .tracking-details,
+  .live-map-container{
+    border-radius:18px!important;
+    border-color:rgba(79,227,240,.10)!important;
+    box-shadow:0 12px 30px rgba(0,0,0,.14)!important;
+  }
+
+  .tracking-header{
+    align-items:flex-start!important;
+    gap:10px!important;
+  }
+
+  .tracking-header .badge,
+  .tracking-header button{
+    flex:0 0 auto!important;
+  }
+
+  .tracking-step{
+    min-height:46px!important;
+    padding:10px 11px!important;
+  }
+
+  .whatsapp-float{
+    box-shadow:0 10px 24px rgba(0,0,0,.24)!important;
+    border:2px solid rgba(255,255,255,.16)!important;
+  }
+}
+
+@media (max-width:430px){
+  :root{--gc-mobile-gutter:12px;}
+
+  .nav-inner{padding-inline:9px!important;}
+  .brand{max-width:57%!important;}
+  .brand b{font-size:13.75px!important;}
+  .brand small{font-size:7.75px!important;}
+
+  .hero{
+    padding-inline:12px!important;
+    padding-top:24px!important;
+  }
+
+  .hero h1{
+    font-size:28px!important;
+    letter-spacing:-.35px!important;
+  }
+
+  .hero-ctas{gap:8px!important;}
+
+  .card,
+  .hub-card,
+  .ops-card,
+  .warehouse-card,
+  .testimonial-card{
+    padding:15px!important;
+  }
+
+  .section{
+    padding-block:26px 38px!important;
+  }
+
+  .section-head h2{
+    font-size:21px!important;
+  }
+}
+
+@media (max-width:360px){
+  .brand{max-width:52%!important;}
+  .brand b{font-size:12.75px!important;}
+  .brand small{display:none!important;}
+  .lang-toggle button{padding-inline:6px!important;font-size:9px!important;}
+  .theme-toggle-btn,.burger{width:32px!important;height:32px!important;}
+  .hero h1{font-size:26px!important;}
+  .hero .sub{font-size:13px!important;}
+  .hero-ctas .btn{font-size:12px!important;}
+}

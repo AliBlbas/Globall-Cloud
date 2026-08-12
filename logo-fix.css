@@ -1,4 +1,4 @@
-/* Globall Cloud — canonical brand asset + mobile-safe logo rendering */
+/* Globall Cloud — canonical brand asset + responsive-safe logo rendering */
 .brand-logo,
 .logo-icon,
 img[src*="logo-icon.png"]{
@@ -8,13 +8,15 @@ img[src*="logo-icon.png"]{
   max-width:40px;
   max-height:40px;
   min-width:40px;
-  object-fit:cover;
+  object-fit:contain;
   object-position:center;
   display:block;
   flex:0 0 40px;
   border-radius:12px;
-  background:#061428;
-  overflow:hidden;
+  background:linear-gradient(145deg, rgba(0,194,217,.10), rgba(255,255,255,.02));
+  border:1px solid rgba(79,227,240,.18);
+  padding:3px;
+  box-shadow:0 6px 18px rgba(0,0,0,.14), 0 0 0 1px rgba(255,255,255,.025) inset;
 }
 @media (max-width:760px){
   .brand-logo,
@@ -27,6 +29,7 @@ img[src*="logo-icon.png"]{
     max-height:38px!important;
     flex-basis:38px!important;
     border-radius:11px!important;
+    padding:3px!important;
   }
 }
 @media (max-width:390px){
@@ -39,5 +42,7 @@ img[src*="logo-icon.png"]{
     max-width:36px!important;
     max-height:36px!important;
     flex-basis:36px!important;
+    border-radius:10px!important;
+    padding:2px!important;
   }
 }
