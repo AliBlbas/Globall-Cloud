@@ -1,21 +1,20 @@
 export async function onRequestGet(context) {
-  const url = new URL(context.request.url);
   const supabaseUrl = 'https://ahslifnthiwfkmaswjno.supabase.co';
   const started = Date.now();
 
   let supabase = { ok: false, status: 0 };
   try {
-    const response = await fetch(`${supabaseUrl}/rest/v1/`, {
+    const response = await fetch(`${supabaseUrl}/auth/v1/health`, {
       method: 'GET',
-      headers: { apikey: context.env?.SUPABASE_PUBLISHABLE_KEY || '' },
+      headers: { accept: 'application/json' },
     });
-    supabase = { ok: response.ok || response.status === 404, status: response.status };
+    supabase = { ok: response.ok, status: response.status };
   } catch {
     supabase = { ok: false, status: 0 };
   }
 
   const payload = {
-    ok: true,
+    ok: supabase.ok,
     service: 'globall-cloud',
     cloudflare: 'pages',
     supabase: {
