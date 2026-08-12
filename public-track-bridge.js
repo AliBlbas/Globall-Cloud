@@ -1,8 +1,10 @@
 /* Globall Cloud — public tracking bridge
  * Routes public tracking reads through the hardened public-track Edge Function
- * without rewriting the large legacy index.html document.
+ * without a legacy RPC fallback.
  */
 (function(){
+  'use strict';
+
   const FUNCTION_URL = 'https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/public-track';
 
   async function authHeaders(){
@@ -33,25 +35,14 @@
     return body.shipment;
   }
 
-  // Patch the legacy global getShipment after the main inline script has loaded.
-  // The old implementation remains only as an emergency fallback during this
-  // migration; successful tracking always uses the Edge Function above.
+  // Replace the legacy global reader when present. No legacy RPC fallback is
+  // allowed here: an Edge Function failure must be visible and recoverable at
+  // the UI layer rather than silently bypassing the security boundary.
   if(typeof window.getShipment === 'function'){
-    const legacyGetShipment = window.getShipment;
-    window.getShipment = async function(id){
-      try{
-        const tracked = await publicTrack(id);
-        if(typeof window.rowToShipment === 'function') return window.rowToShipment(tracked);
-        return tracked;
-      }catch(err){
-        console.warn('public-track bridge fallback:', err);
-        return legacyGetShipment(id);
-      }
-    };
+    window.getShipment = publicTrack;
   }
 
-  // Patch the optional enhanced tracker instance too, so the live route map
-  // never needs the public SECURITY DEFINER RPC directly.
+  // Patch the optional enhanced tracker instance too.
   const patchEnhancedTracker = () => {
     const tracker = window.enhancedTracking;
     if(!tracker || typeof tracker.fetchShipmentData !== 'function') return false;
