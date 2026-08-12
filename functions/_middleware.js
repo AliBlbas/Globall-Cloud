@@ -1,7 +1,7 @@
 /*
  * Globall Cloud — HTML delivery middleware
- * Injects the production runtime guard, premium polish, admin recovery, and
- * the public tracking bridge into HTML navigations.
+ * Injects the production runtime guard, premium polish, admin recovery,
+ * public tracking bridge, and public-config compatibility bridge.
  * Non-document requests are passed through untouched.
  */
 
@@ -40,6 +40,10 @@ export async function onRequest(context) {
         );
         element.append(
           '<script src="/public-track-bridge.js?v=20260812" defer data-gc-public-track-bridge="1"></script>',
+          { html: true },
+        );
+        element.append(
+          '<script src="/public-config-bridge.js?v=20260812" defer data-gc-public-config="1"></script>',
           { html: true },
         );
       },
