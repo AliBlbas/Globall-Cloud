@@ -1,11 +1,13 @@
-const CACHE_VERSION = 'gc-v15';
+const CACHE_VERSION = 'gc-v16';
 const STATIC_CACHE = `gc-static-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/', '/index.html', '/management.html', '/staff-os.html', '/staff-portal.html',
-  '/accounts-console.html', '/operations-suite.html', '/styles.css', '/tracking-styles.css',
-  '/mobile-final.css', '/mobile-polish.css', '/mobile-elite.css', '/live-logistics-map.css', '/live-logistics-map.js', '/logo-fix.css', '/staff-auth-fix.js', '/superadmin.css', '/tracking-enhanced.js', '/tracking-integration.html', '/translations.js',
-  '/form-validation.js', '/form-validation-styles.css', '/whatsapp-messenger.js', '/webhook-handler.js',
-  '/admin-dashboard.js', '/price-calculator.js', '/logo-icon-original.png', '/logo-icon.png', '/og-image.jpg', '/manifest.json'
+  '/accounts-console.html', '/operations-suite.html', '/logistics-os.html', '/operations-command-center.html',
+  '/styles.css', '/tracking-styles.css', '/mobile-final.css', '/mobile-polish.css', '/mobile-elite.css',
+  '/live-logistics-map.css', '/live-logistics-map.js', '/logo-fix.css', '/staff-auth-fix.js', '/superadmin.css',
+  '/tracking-enhanced.js', '/tracking-integration.html', '/translations.js', '/form-validation.js',
+  '/form-validation-styles.css', '/whatsapp-messenger.js', '/webhook-handler.js', '/admin-dashboard.js',
+  '/price-calculator.js', '/logo-icon-original.png', '/logo-icon.png', '/og-image.jpg', '/manifest.json'
 ];
 
 const MOBILE_CSS = '/mobile-final.css?v=20260812-12';
