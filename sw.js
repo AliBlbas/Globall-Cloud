@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'gc-v19';
+const CACHE_VERSION = 'gc-v20';
 const STATIC_CACHE = `gc-static-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/', '/index.html', '/management.html', '/staff-os.html', '/staff-portal.html',
@@ -19,9 +19,9 @@ const LIVE_MAP_JS = '/live-logistics-map.js?v=20260812-1';
 const LOGO_CSS = '/logo-fix.css?v=20260812-7';
 const SUPERADMIN_CSS = '/superadmin.css?v=20260811-1';
 const PINGDOM_SCRIPT = '<script src="//rum-static.pingdom.net/pa-6a7b6dd8a6e49b001200002c.js" async></script>';
-const STAFF_AUTH_SCRIPT = '<script src="/staff-auth-fix.js?v=20260813-1" defer></script>';
-const PRODUCTION_BRIDGE_SCRIPT = '<script src="/production-bridge.js?v=20260813-2" defer></script>';
-const EXCEPTION_ENGINE_SCRIPT = '<script src="/operations-exception-engine.js?v=20260813-2" defer></script>';
+const STAFF_AUTH_SCRIPT = '<script src="/staff-auth-fix.js?v=20260813-2" defer></script>';
+const PRODUCTION_BRIDGE_SCRIPT = '<script src="/production-bridge.js?v=20260813-3" defer></script>';
+const EXCEPTION_ENGINE_SCRIPT = '<script src="/operations-exception-engine.js?v=20260813-3" defer></script>';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(STATIC_CACHE).then((cache) => cache.addAll(STATIC_ASSETS)).catch(() => undefined));
