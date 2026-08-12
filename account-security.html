@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#061428">
+  <title>Globall Cloud — Account Security</title>
+  <link rel="icon" type="image/png" href="logo-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#061428;--panel:#0f2541;--panel2:#142e4f;--line:#27486d;--text:#f6fbff;--muted:#9db4d1;--accent:#00c2d9;--accent2:#4fe3f0;--good:#2ed27f;--bad:#e5533d;--shadow:0 24px 70px rgba(0,0,0,.3)}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 15% -10%,rgba(0,194,217,.12),transparent 32%),linear-gradient(180deg,var(--bg),#08111e 90%);color:var(--text);font-family:'Vazirmatn',sans-serif}body{padding:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom))}button,input{font:inherit;color:inherit}.shell{max-width:1120px;margin:auto;display:grid;gap:18px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.brand{display:flex;gap:12px;align-items:center}.mark{width:52px;height:52px;border-radius:17px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent2),var(--accent));color:#03181d;font-weight:900}.eyebrow{color:var(--accent2);font-size:12px;letter-spacing:1.5px;font-weight:900}.title{font-size:22px;font-weight:900}.subtitle{font-size:13px;color:var(--muted)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{background:linear-gradient(180deg,var(--panel),#0a1930);border:1px solid rgba(255,255,255,.08);border-radius:26px;padding:20px;box-shadow:var(--shadow)}.section-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:16px}.section-head h2{margin:0;font-size:20px}.section-head p{margin:5px 0 0;color:var(--muted);line-height:1.7}.badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid rgba(79,227,240,.2);background:rgba(79,227,240,.08);color:#baf9ff;font-weight:800}.rows{display:grid;gap:10px}.row{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)}.row:last-child{border-bottom:0}.label{color:var(--muted);font-size:13px}.value{font-weight:800;overflow-wrap:anywhere}.locked{display:inline-flex;align-items:center;gap:6px;color:#cfe4f8;font-size:12px;font-weight:800}.mono{font-family:'JetBrains Mono',monospace}.form-row{display:grid;gap:7px;margin-bottom:12px}.form-row label{font-size:13px;color:var(--muted);font-weight:800}.field{width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03);outline:none}.field:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(79,227,240,.12)}.btn{border:1px solid transparent;border-radius:999px;min-height:46px;padding:11px 16px;cursor:pointer;font-weight:900}.btn-primary{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#03181d}.btn-outline{border-color:var(--line);background:rgba(255,255,255,.03)}.status{min-height:22px;color:var(--muted);font-size:13px}.status.good{color:#8ef0b6}.status.bad{color:#ffaf9f}.note{padding:14px 16px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:var(--muted);line-height:1.8}.danger{background:rgba(229,83,61,.06);border-color:rgba(229,83,61,.2)}.hidden{display:none!important}@media(max-width:760px){body{padding:12px}.grid{grid-template-columns:1fr}.panel{padding:16px}.title{font-size:19px}.row{align-items:flex-start;flex-direction:column;gap:6px}.top .btn{width:100%}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <div class="brand"><div class="mark">GC</div><div><div class="eyebrow">GLOBALL CLOUD · ACCOUNT SECURITY</div><div class="title">پاراستنی ئەکاونت</div><div class="subtitle">تەنها password ـی خۆت بگۆڕە؛ ناسنامەی ئەکاونتەکەت قفڵە.</div></div></div>
+      <button class="btn btn-outline" id="backBtn">گەڕانەوە</button>
+    </header>
+
+    <section id="authPanel" class="panel">
+      <div class="section-head"><div><h2>Login پێویستە</h2><p>بۆ بینینی زانیارییەکانی ئەکاونت و گۆڕینی password، سەرەتا login بکە.</p></div></div>
+      <form id="loginForm">
+        <div class="grid"><div class="form-row"><label for="email">ئیمەیل</label><input class="field" id="email" type="email" autocomplete="email" required></div><div class="form-row"><label for="password">پاسۆرد</label><input class="field" id="password" type="password" autocomplete="current-password" required></div></div>
+        <button class="btn btn-primary" type="submit">چوونەژوورەوە</button><div id="loginStatus" class="status"></div>
+      </form>
+    </section>
+
+    <section id="accountPanel" class="grid hidden">
+      <div class="panel">
+        <div class="section-head"><div><h2>ناسنامەی ئەکاونت</h2><p>ئەم زانیارییانە بۆ security ـەوە read-only ـن.</p></div><span id="roleBadge" class="badge">—</span></div>
+        <div class="rows">
+          <div class="row"><div class="label">ناو</div><div id="profileName" class="value">—</div></div>
+          <div class="row"><div class="label">ئیمەیل <span class="locked">🔒 قفڵکراوە</span></div><div id="profileEmail" class="value mono">—</div></div>
+          <div class="row"><div class="label">GC Code <span class="locked">🔒 قفڵکراوە</span></div><div id="profileGc" class="value mono">—</div></div>
+        </div>
+        <div class="note" style="margin-top:14px">ئیمەیل و GC Code لەم پەڕەیەدا ناگۆڕدرێن. تەنها Super Admin دەتوانێت identity settings ـی ئەکاونتەکە بگۆڕێت.</div>
+      </div>
+
+      <div class="panel">
+        <div class="section-head"><div><h2>گۆڕینی پاسۆرد</h2><p>تەنها پاسۆردی ئەکاونتی خۆت دەتوانیت بگۆڕیت.</p></div></div>
+        <form id="passwordForm">
+          <div class="form-row"><label for="newPassword">پاسۆردی نوێ</label><input class="field" id="newPassword" type="password" minlength="12" autocomplete="new-password" required></div>
+          <div class="form-row"><label for="confirmPassword">دووبارە پاسۆردی نوێ</label><input class="field" id="confirmPassword" type="password" minlength="12" autocomplete="new-password" required></div>
+          <button class="btn btn-primary" type="submit">گۆڕینی پاسۆرد</button>
+          <div id="passwordStatus" class="status"></div>
+        </form>
+        <div class="note" style="margin-top:14px">پاسۆرد دەبێت لانیکەم 12 کاراکتر بێت. هیچ password ـێک لە page ـەکەدا هەڵناگیرێت.</div>
+      </div>
+    </section>
+
+    <section id="errorPanel" class="panel danger hidden"><div id="errorText">هەڵەیەک ڕوویدا.</div></section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="account-security.js"></script>
+</body>
+</html>
