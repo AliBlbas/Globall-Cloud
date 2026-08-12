@@ -1,0 +1,113 @@
+import { createClient } from 'npm:@supabase/supabase-js@2'
+
+type Payload = {
+  name?: unknown
+  email?: unknown
+  message?: unknown
+  company?: unknown
+  request_type?: unknown
+  company_website?: unknown
+}
+
+const ALLOWED_ORIGINS = new Set([
+  'https://globall-cloud.pages.dev',
+  'https://globall-cloud.netlify.app',
+])
+
+const WINDOW_MS = 10 * 60 * 1000
+const MAX_PER_WINDOW = 5
+const buckets = new Map<string, { start: number; count: number }>()
+
+function cors(req: Request) {
+  const origin = req.headers.get('origin') || ''
+  return {
+    'Access-Control-Allow-Origin': ALLOWED_ORIGINS.has(origin)
+      ? origin
+      : 'https://globall-cloud.pages.dev',
+    'Access-Control-Allow-Headers': 'content-type, apikey, x-client-info',
+    'Access-Control-Allow-Methods': 'POST,OPTIONS',
+    'Vary': 'Origin',
+  }
+}
+
+function json(req: Request, body: Record<string, unknown>, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+      ...cors(req),
+    },
+  })
+}
+
+function text(value: unknown, max: number): string {
+  return String(value ?? '').trim().slice(0, max)
+}
+
+function clientKey(req: Request): string {
+  const forwarded = req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for') || 'unknown'
+  return forwarded.split(',')[0].trim().slice(0, 80) || 'unknown'
+}
+
+function rateLimited(key: string): boolean {
+  const now = Date.now()
+  const current = buckets.get(key)
+  if (!current || now - current.start >= WINDOW_MS) {
+    buckets.set(key, { start: now, count: 1 })
+    return false
+  }
+  if (current.count >= MAX_PER_WINDOW) return true
+  current.count += 1
+  return false
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors(req) })
+  if (req.method !== 'POST') return json(req, { error: 'Method not allowed' }, 405)
+
+  try {
+    if (rateLimited(clientKey(req))) {
+      return json(req, { error: 'Too many requests. Please try again later.' }, 429)
+    }
+
+    const body = (await req.json().catch(() => ({}))) as Payload
+
+    if (text(body.company_website, 120)) {
+      return json(req, { ok: true })
+    }
+
+    const name = text(body.name, 100)
+    const email = text(body.email, 160).toLowerCase()
+    const message = text(body.message, 4000)
+    const company = text(body.company, 120)
+    const requestType = text(body.request_type, 40)
+
+    if (!name || name.length < 2) return json(req, { error: 'Invalid name.' }, 400)
+    if (!/^\S+@\S+\.\S+$/.test(email)) return json(req, { error: 'Invalid email.' }, 400)
+    if (!message || message.length < 5) return json(req, { error: 'Message is too short.' }, 400)
+    if (!['shipping', 'info', 'support'].includes(requestType)) return json(req, { error: 'Invalid request type.' }, 400)
+
+    const url = Deno.env.get('SUPABASE_URL')
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    if (!url || !serviceKey) throw new Error('Supabase service configuration is missing')
+
+    const service = createClient(url, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    })
+
+    const { error } = await service.from('messages').insert({
+      name,
+      email,
+      message,
+      company: company || null,
+      request_type: requestType,
+    })
+
+    if (error) throw error
+    return json(req, { ok: true }, 201)
+  } catch (error) {
+    console.error('public-message error', error)
+    return json(req, { error: 'Unable to send message right now.' }, 500)
+  }
+})
