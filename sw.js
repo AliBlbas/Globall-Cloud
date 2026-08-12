@@ -1,9 +1,9 @@
-const CACHE_VERSION = 'gc-v14';
+const CACHE_VERSION = 'gc-v15';
 const STATIC_CACHE = `gc-static-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/', '/index.html', '/management.html', '/staff-os.html', '/staff-portal.html',
   '/accounts-console.html', '/operations-suite.html', '/styles.css', '/tracking-styles.css',
-  '/mobile-final.css', '/mobile-polish.css', '/mobile-elite.css', '/logo-fix.css', '/staff-auth-fix.js', '/superadmin.css', '/tracking-enhanced.js', '/tracking-integration.html', '/translations.js',
+  '/mobile-final.css', '/mobile-polish.css', '/mobile-elite.css', '/live-logistics-map.css', '/live-logistics-map.js', '/logo-fix.css', '/staff-auth-fix.js', '/superadmin.css', '/tracking-enhanced.js', '/tracking-integration.html', '/translations.js',
   '/form-validation.js', '/form-validation-styles.css', '/whatsapp-messenger.js', '/webhook-handler.js',
   '/admin-dashboard.js', '/price-calculator.js', '/logo-icon-original.png', '/logo-icon.png', '/og-image.jpg', '/manifest.json'
 ];
@@ -11,6 +11,8 @@ const STATIC_ASSETS = [
 const MOBILE_CSS = '/mobile-final.css?v=20260812-12';
 const MOBILE_POLISH_CSS = '/mobile-polish.css?v=20260812-3';
 const MOBILE_ELITE_CSS = '/mobile-elite.css?v=20260812-1';
+const LIVE_MAP_CSS = '/live-logistics-map.css?v=20260812-1';
+const LIVE_MAP_JS = '/live-logistics-map.js?v=20260812-1';
 const LOGO_CSS = '/logo-fix.css?v=20260812-7';
 const SUPERADMIN_CSS = '/superadmin.css?v=20260811-1';
 const PINGDOM_SCRIPT = '<script src="//rum-static.pingdom.net/pa-6a7b6dd8a6e49b001200002c.js" async></script>';
@@ -69,6 +71,14 @@ function injectSiteAssets(response) {
 
     if (!injected.includes('/mobile-elite.css')) {
       injected = injected.replace(/<\/head>/i, `<link rel="stylesheet" href="${MOBILE_ELITE_CSS}" media="screen and (max-width: 760px)"></head>`);
+    }
+
+    if (!injected.includes('/live-logistics-map.css')) {
+      injected = injected.replace(/<\/head>/i, `<link rel="stylesheet" href="${LIVE_MAP_CSS}"></head>`);
+    }
+
+    if (!injected.includes('/live-logistics-map.js')) {
+      injected = injected.replace(/<\/body>/i, `<script src="${LIVE_MAP_JS}" defer></script></body>`);
     }
 
     const headers = new Headers(response.headers);
