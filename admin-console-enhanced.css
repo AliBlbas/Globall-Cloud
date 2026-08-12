@@ -91,6 +91,195 @@ html[data-gc-admin-auth="ready"] .auth-box {
   overflow-wrap: anywhere;
 }
 
+/* ---------- enterprise command-center polish ---------- */
+html[data-gc-admin-auth="ready"] .panel,
+html[data-gc-admin-auth="ready"] .hero,
+html[data-gc-admin-auth="ready"] .auth-box {
+  border-radius: 22px;
+}
+
+html[data-gc-admin-auth="ready"] .hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+html[data-gc-admin-auth="ready"] .hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 90% 18%, rgba(79,227,240,.15), transparent 26%),
+    linear-gradient(135deg, rgba(255,255,255,.035), transparent 48%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+html[data-gc-admin-auth="ready"] .hero h1 {
+  letter-spacing: -.025em;
+  text-wrap: balance;
+}
+
+html[data-gc-admin-auth="ready"] .hero p {
+  max-width: 72ch;
+  color: var(--muted);
+}
+
+html[data-gc-admin-auth="ready"] .tabs {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html[data-gc-admin-auth="ready"] .tabs::-webkit-scrollbar { display: none; }
+
+html[data-gc-admin-auth="ready"] .tab {
+  position: relative;
+  white-space: nowrap;
+  min-height: 42px;
+  font-weight: 750;
+}
+
+html[data-gc-admin-auth="ready"] .tab.active::after {
+  content: '';
+  position: absolute;
+  inset: auto 12px 3px;
+  height: 2px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--teal), var(--teal-l));
+  box-shadow: 0 0 14px rgba(79,227,240,.35);
+}
+
+html[data-gc-admin-auth="ready"] .stat {
+  min-height: 122px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+html[data-gc-admin-auth="ready"] .stat strong,
+html[data-gc-admin-auth="ready"] .stat b {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.025em;
+}
+
+html[data-gc-admin-auth="ready"] .panel > h2,
+html[data-gc-admin-auth="ready"] .panel > h3 {
+  letter-spacing: -.015em;
+}
+
+html[data-gc-admin-auth="ready"] .panel:has(table) {
+  overflow: hidden;
+}
+
+html[data-gc-admin-auth="ready"] table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--surface-2) 92%, transparent);
+  border-bottom-color: rgba(79,227,240,.12);
+}
+
+html[data-gc-admin-auth="ready"] table tbody tr:nth-child(even) {
+  background: rgba(255,255,255,.012);
+}
+
+html[data-gc-admin-auth="ready"] .table-wrap {
+  border-radius: 16px;
+}
+
+html[data-gc-admin-auth="ready"] .btn:focus-visible,
+html[data-gc-admin-auth="ready"] .tab:focus-visible,
+html[data-gc-admin-auth="ready"] input:focus-visible,
+html[data-gc-admin-auth="ready"] select:focus-visible,
+html[data-gc-admin-auth="ready"] textarea:focus-visible {
+  outline: 2px solid var(--teal-l);
+  outline-offset: 2px;
+}
+
+html[data-gc-admin-auth="ready"] input,
+html[data-gc-admin-auth="ready"] select,
+html[data-gc-admin-auth="ready"] textarea {
+  border-color: rgba(255,255,255,.10);
+  background: rgba(255,255,255,.028);
+}
+
+html[data-gc-admin-auth="ready"] input:hover,
+html[data-gc-admin-auth="ready"] select:hover,
+html[data-gc-admin-auth="ready"] textarea:hover {
+  border-color: rgba(79,227,240,.22);
+}
+
+html[data-gc-admin-auth="ready"] .loading,
+html[data-gc-admin-auth="ready"] .skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,255,255,.045);
+}
+
+html[data-gc-admin-auth="ready"] .loading::after,
+html[data-gc-admin-auth="ready"] .skeleton::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: -40%;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.075), transparent);
+  animation: gcSkeletonShimmer 1.25s ease-in-out infinite;
+}
+
+@keyframes gcSkeletonShimmer {
+  to { inset-inline-start: 110%; }
+}
+
+html[data-gc-admin-auth="ready"] .empty-state,
+html[data-gc-admin-auth="ready"] .empty {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed rgba(255,255,255,.10);
+  border-radius: 18px;
+  background: rgba(255,255,255,.018);
+}
+
+html[data-gc-admin-auth="ready"] .status,
+html[data-gc-admin-auth="ready"] .status-pill {
+  font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+}
+
+html[data-gc-admin-auth="ready"] .toolbar {
+  align-items: center;
+}
+
+html[data-gc-admin-auth="ready"] .search,
+html[data-gc-admin-auth="ready"] [role="search"] {
+  min-width: min(100%, 320px);
+}
+
+html[data-gc-admin-auth="ready"] .toast,
+html[data-gc-admin-auth="ready"] .notification,
+html[data-gc-admin-auth="ready"] [role="status"] {
+  backdrop-filter: blur(14px);
+}
+
+html[data-gc-admin-auth="ready"] :where(.danger,.error)[role="alert"] {
+  border-color: rgba(229,83,61,.24);
+  background: rgba(229,83,61,.06);
+}
+
+@media (max-width: 900px) {
+  html[data-gc-admin-auth="ready"] .tabs {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+}
+
 @media (max-width: 700px) {
   body { padding-bottom: calc(18px + env(safe-area-inset-bottom)); }
   .topbar { position: sticky; top: 0; z-index: 20; padding-block: 6px 10px; backdrop-filter: blur(16px); background: rgba(6,20,40,.78); }
@@ -100,10 +289,30 @@ html[data-gc-admin-auth="ready"] .auth-box {
   .tab { min-height: 44px; }
   table { min-width: 720px; }
   .table-wrap { box-shadow: inset 0 0 0 1px rgba(255,255,255,.03); }
+
+  html[data-gc-admin-auth="ready"] .hero,
+  html[data-gc-admin-auth="ready"] .panel,
+  html[data-gc-admin-auth="ready"] .auth-box { border-radius: 18px; }
+
+  html[data-gc-admin-auth="ready"] .stat {
+    min-height: 104px;
+  }
+
+  html[data-gc-admin-auth="ready"] .toolbar,
+  html[data-gc-admin-auth="ready"] .top-actions {
+    gap: 8px;
+  }
+
+  html[data-gc-admin-auth="ready"] .toolbar .btn,
+  html[data-gc-admin-auth="ready"] .top-actions .btn {
+    min-height: 46px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html[data-gc-admin-auth="ready"] table tbody tr,
   html[data-gc-admin-auth="ready"] .tab,
   [data-gc-admin-chip="1"] { transition: none; transform: none; }
+  html[data-gc-admin-auth="ready"] .loading::after,
+  html[data-gc-admin-auth="ready"] .skeleton::after { animation: none; }
 }
