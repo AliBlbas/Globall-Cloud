@@ -1,6 +1,6 @@
 /* Globall Cloud — public tracking bridge
- * Keeps the legacy page code stable while moving public tracking reads to the
- * hardened public-track Edge Function. No direct shipment table access is added.
+ * Routes public tracking reads through the hardened public-track Edge Function
+ * without rewriting the large legacy index.html document.
  */
 (function(){
   const FUNCTION_URL = 'https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/public-track';
@@ -19,7 +19,7 @@
 
   async function publicTrack(id){
     const trackingId = String(id || '').trim();
-    if(!trackingId || trackingId.length > 128) return null;
+    if(!trackingId || trackingId.length > 128) throw new Error('Invalid tracking id');
     const res = await fetch(`${FUNCTION_URL}?id=${encodeURIComponent(trackingId)}`, {
       method:'GET',
       headers: await authHeaders(),
@@ -28,23 +28,39 @@
     });
     let body = null;
     try { body = await res.json(); } catch (_) {}
-    if(!res.ok) return null;
-    return body?.shipment || null;
+    if(!res.ok) throw new Error(body?.error || `Tracking request failed (${res.status})`);
+    if(!body?.shipment) throw new Error('Shipment not found');
+    return body.shipment;
   }
 
-  // The legacy index.html declares getShipment() in the global classic-script
-  // scope. Replacing window.getShipment here updates that public function after
-  // the page script has loaded, without rewriting the large inline document.
+  // Patch the legacy global getShipment after the main inline script has loaded.
+  // The old implementation remains only as an emergency fallback during this
+  // migration; successful tracking always uses the Edge Function above.
   if(typeof window.getShipment === 'function'){
     const legacyGetShipment = window.getShipment;
     window.getShipment = async function(id){
-      try {
+      try{
         const tracked = await publicTrack(id);
-        if(tracked) return typeof window.rowToShipment === 'function' ? window.rowToShipment(tracked) : tracked;
-      } catch (_) {}
-      return legacyGetShipment(id);
+        if(typeof window.rowToShipment === 'function') return window.rowToShipment(tracked);
+        return tracked;
+      }catch(err){
+        console.warn('public-track bridge fallback:', err);
+        return legacyGetShipment(id);
+      }
     };
   }
+
+  // Patch the optional enhanced tracker instance too, so the live route map
+  // never needs the public SECURITY DEFINER RPC directly.
+  const patchEnhancedTracker = () => {
+    const tracker = window.enhancedTracking;
+    if(!tracker || typeof tracker.fetchShipmentData !== 'function') return false;
+    tracker.fetchShipmentData = async function(_sb, shipmentId){
+      return publicTrack(shipmentId);
+    };
+    return true;
+  };
+  if(!patchEnhancedTracker()) setTimeout(patchEnhancedTracker, 0);
 
   window.publicTrack = publicTrack;
 })();
