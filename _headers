@@ -8,6 +8,15 @@
   Cross-Origin-Resource-Policy: same-site
   Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rum-static.pingdom.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https://ahslifnthiwfkmaswjno.supabase.co https://formsubmit.co https://wa.me https://rum-static.pingdom.net https://router.project-osrm.org; frame-src 'self' https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://formsubmit.co
 
+/
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/*.html
+  Cache-Control: no-store, max-age=0, must-revalidate
+
 /management.html
   X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: private, no-store, max-age=0, must-revalidate
@@ -25,6 +34,18 @@
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
 /operations-suite.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: private, no-store, max-age=0, must-revalidate
+
+/operations-command-center.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: private, no-store, max-age=0, must-revalidate
+
+/customer-portal.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: private, no-store, max-age=0, must-revalidate
+
+/warehouse-os.html
   X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
