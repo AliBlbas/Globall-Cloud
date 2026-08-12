@@ -44,6 +44,12 @@
 /mobile-final.css
   Cache-Control: public, max-age=300, must-revalidate
 
+/mobile-polish.css
+  Cache-Control: public, max-age=300, must-revalidate
+
+/mobile-elite.css
+  Cache-Control: public, max-age=300, must-revalidate
+
 /logo-fix.css
   Cache-Control: public, max-age=300, must-revalidate
 
