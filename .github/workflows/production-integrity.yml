@@ -36,10 +36,22 @@ jobs:
           set -euo pipefail
           grep -q "ahslifnthiwfkmaswjno.supabase.co" production-bridge.js
           grep -q "account-admin" accounts-console-script.js
-          grep -q "gc-v11" sw.js
+          grep -q "gc-v12" sw.js
           grep -q "no-store" _headers
           grep -q "Content-Security-Policy" _headers
+          grep -q 'project_id = "ahslifnthiwfkmaswjno"' supabase/config.toml
+          grep -q '\[functions.account-admin\]' supabase/config.toml
+          grep -q 'verify_jwt = true' supabase/config.toml
           ! grep -RniE "service_role|SUPABASE_SERVICE_ROLE_KEY|sb_secret_" --exclude-dir=.git --exclude='*.md' .
+
+      - name: Validate Supabase migration filenames
+        shell: bash
+        run: |
+          set -euo pipefail
+          find supabase/migrations -maxdepth 1 -type f -name '*.sql' -print0 | while IFS= read -r -d '' file; do
+            base="$(basename "$file")"
+            [[ "$base" =~ ^[0-9]{14}_[a-z0-9_]+\.sql$ ]]
+          done
 
       - name: Verify required production files exist
         shell: bash
@@ -51,4 +63,5 @@ jobs:
           test -f staff-auth-fix.js
           test -f accounts-console.html
           test -f staff-os.html
-          test -f _headers
+          test -f supabase/config.toml
+          test -f functions/health.js
