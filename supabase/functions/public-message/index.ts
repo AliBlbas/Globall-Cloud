@@ -13,19 +13,22 @@ const ALLOWED_ORIGINS = new Set([
   'https://globall-cloud.pages.dev',
   'https://globall-cloud.netlify.app',
 ])
-
 const WINDOW_MS = 10 * 60 * 1000
 const MAX_PER_WINDOW = 5
 const buckets = new Map<string, { start: number; count: number }>()
 
+function originAllowed(req: Request) {
+  const origin = req.headers.get('origin')
+  return !origin || ALLOWED_ORIGINS.has(origin)
+}
+
 function cors(req: Request) {
   const origin = req.headers.get('origin') || ''
   return {
-    'Access-Control-Allow-Origin': ALLOWED_ORIGINS.has(origin)
-      ? origin
-      : 'https://globall-cloud.pages.dev',
+    ...(ALLOWED_ORIGINS.has(origin) ? { 'Access-Control-Allow-Origin': origin } : {}),
     'Access-Control-Allow-Headers': 'content-type, apikey, x-client-info',
     'Access-Control-Allow-Methods': 'POST,OPTIONS',
+    'Cache-Control': 'no-store',
     'Vary': 'Origin',
   }
 }
@@ -33,11 +36,7 @@ function cors(req: Request) {
 function json(req: Request, body: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Cache-Control': 'no-store',
-      ...cors(req),
-    },
+    headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors(req) },
   })
 }
 
@@ -63,19 +62,15 @@ function rateLimited(key: string): boolean {
 }
 
 Deno.serve(async (req) => {
+  if (!originAllowed(req)) return json(req, { error: 'Origin not allowed' }, 403)
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors(req) })
   if (req.method !== 'POST') return json(req, { error: 'Method not allowed' }, 405)
 
   try {
-    if (rateLimited(clientKey(req))) {
-      return json(req, { error: 'Too many requests. Please try again later.' }, 429)
-    }
+    if (rateLimited(clientKey(req))) return json(req, { error: 'Too many requests. Please try again later.' }, 429)
 
     const body = (await req.json().catch(() => ({}))) as Payload
-
-    if (text(body.company_website, 120)) {
-      return json(req, { ok: true })
-    }
+    if (text(body.company_website, 120)) return json(req, { ok: true })
 
     const name = text(body.name, 100)
     const email = text(body.email, 160).toLowerCase()
