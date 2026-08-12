@@ -1,0 +1,54 @@
+name: Production Integrity
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            node --check "$file"
+          done < <(find . -type f -name '*.js' -not -path './.git/*' -print0)
+
+      - name: Check critical integration invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "ahslifnthiwfkmaswjno.supabase.co" production-bridge.js
+          grep -q "account-admin" accounts-console-script.js
+          grep -q "gc-v11" sw.js
+          grep -q "no-store" _headers
+          grep -q "Content-Security-Policy" _headers
+          ! grep -RniE "service_role|SUPABASE_SERVICE_ROLE_KEY|sb_secret_" --exclude-dir=.git --exclude='*.md' .
+
+      - name: Verify required production files exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f index.html
+          test -f sw.js
+          test -f production-bridge.js
+          test -f staff-auth-fix.js
+          test -f accounts-console.html
+          test -f staff-os.html
+          test -f _headers
