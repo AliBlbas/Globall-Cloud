@@ -443,3 +443,216 @@ textarea {
 
   .btn { padding-inline: 16px; }
 }
+
+/* ---------- Safari / WebKit production compatibility ----------
+   This block is intentionally defensive. The main page contains a large
+   inline stylesheet loaded after this file, so compatibility declarations
+   that must win use !important only where Safari rendering needs a fallback. */
+
+@supports (-webkit-touch-callout: none) {
+  html,
+  body {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+  }
+
+  body {
+    background-attachment: scroll !important;
+  }
+
+  /* Safari historically needs the prefixed backdrop-filter property. */
+  .nav,
+  .top-announcement,
+  .modal,
+  .modal-card,
+  [class*="overlay"],
+  [class*="drawer"],
+  [class*="sheet"] {
+    -webkit-backdrop-filter: blur(10px) !important;
+    backdrop-filter: blur(10px) !important;
+  }
+
+  .nav {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 0 !important;
+  }
+
+  /* Avoid flex/grid children forcing horizontal overflow in WebKit. */
+  .nav-inner,
+  .container,
+  .section,
+  .hero,
+  .hero-inner,
+  .hero-content,
+  .hero-card,
+  .cards-grid,
+  .feature-grid,
+  .services-grid,
+  .dashboard-grid,
+  .form-grid,
+  .modal-card,
+  .modal-content,
+  .page,
+  main,
+  section,
+  article,
+  aside,
+  footer {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Keep long labels, emails and tracking IDs from stretching a card. */
+  .brand,
+  .brand > *,
+  .nav-links,
+  .nav-right,
+  .hero-content,
+  .card,
+  .panel,
+  .field,
+  input,
+  select,
+  textarea,
+  button,
+  a,
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  small,
+  label,
+  span {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* WebKit can retain intrinsic widths on replaced media and iframes. */
+  img,
+  svg,
+  video,
+  canvas,
+  iframe {
+    width: auto;
+    max-width: 100% !important;
+    height: auto;
+  }
+
+  iframe {
+    border: 0;
+  }
+
+  /* Prevent iOS Safari from zooming form controls while preserving the 16px UX. */
+  input,
+  select,
+  textarea,
+  .field,
+  select.field,
+  textarea.field {
+    font-size: 16px !important;
+    min-height: 48px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  select.field,
+  select {
+    background-image: none;
+  }
+
+  /* Stable button hit-area and no accidental native bevels. */
+  button,
+  .btn,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"] {
+    -webkit-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Safari needs explicit scrolling on overflowing data areas. */
+  table {
+    max-width: 100% !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* A safer fallback for Safari versions that do not fully support overflow: clip. */
+  .page,
+  .modal,
+  .modal-card,
+  .mobile-menu,
+  .drawer,
+  .sheet {
+    overflow-x: hidden !important;
+  }
+
+  /* Use dynamic viewport units where Safari supports them, without breaking old iOS. */
+  @supports (height: 100dvh) {
+    .page,
+    .modal,
+    .modal-card,
+    .mobile-menu,
+    .drawer,
+    .sheet {
+      max-height: 100dvh !important;
+    }
+  }
+}
+
+/* Safari 15/16 fallback when the newer feature query above is unavailable. */
+@supports not (height: 100dvh) {
+  .page,
+  .modal,
+  .modal-card,
+  .mobile-menu,
+  .drawer,
+  .sheet {
+    max-height: -webkit-fill-available;
+  }
+}
+
+/* iPhone safe areas: keep bottom controls clear of the home indicator. */
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .mobile-menu,
+  .bottom-nav,
+  .mobile-nav,
+  .sticky-actions,
+  .floating-actions {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Improve rendering consistency of gradients and clipped rounded surfaces. */
+@media (max-width: 768px) {
+  .card,
+  .panel,
+  .hero-card,
+  .modal-card,
+  .tracking-details,
+  .live-map-container {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  .btn,
+  .field,
+  .lang-toggle,
+  .theme-toggle-btn,
+  .burger {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}
