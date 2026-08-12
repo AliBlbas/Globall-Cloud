@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#061428">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>Globall Cloud — Command Center</title>
+<link rel="icon" type="image/png" href="logo-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="stylesheet" href="command-center.css?v=20260812">
+</head>
+<body>
+<div id="boot" class="boot"><div class="boot-ring"></div><b>Globall Cloud</b><span>Secure Command Center</span></div>
+<div class="app-shell hidden" id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <a class="brand" href="./index.html"><img src="logo-icon.png" alt="Globall Cloud"><span><b>Globall Cloud</b><small>Logistics OS</small></span></a>
+      <button class="icon-btn mobile-only" id="closeNav" aria-label="Close navigation">×</button>
+    </div>
+    <div class="workspace"><span class="pulse"></span><span>Operations Online</span></div>
+    <nav class="nav-group">
+      <button class="nav-item active" data-view="overview">◈<span>Overview</span><kbd>G O</kbd></button>
+      <button class="nav-item" data-view="shipments">◫<span>Shipments</span><em id="navShipments">0</em></button>
+      <button class="nav-item" data-view="customers">◎<span>Customers</span><em id="navCustomers">0</em></button>
+      <button class="nav-item" data-view="warehouse">▣<span>Warehouse</span><em id="navReceipts">0</em></button>
+      <button class="nav-item" data-view="staff">◌<span>Staff & Access</span><em id="navStaff">0</em></button>
+      <button class="nav-item" data-view="finance">◈<span>Finance</span></button>
+      <button class="nav-item" data-view="audit">⌁<span>Audit & Activity</span></button>
+    </nav>
+    <div class="nav-divider"></div>
+    <button class="nav-item" id="openCommand">⌘<span>Command Palette</span><kbd>⌘K</kbd></button>
+    <button class="nav-item" id="openAdmin">⚙<span>Advanced Console</span></button>
+    <div class="sidebar-bottom">
+      <div class="security-card"><span class="shield">✓</span><div><b>Protected Session</b><small>Role-aware · Supabase Auth</small></div></div>
+      <button class="profile" id="profileBtn"><span class="avatar" id="avatar">GC</span><span><b id="profileName">Staff</b><small id="profileRole">Loading…</small></span><i>⋯</i></button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="mobile-left"><button class="icon-btn mobile-only" id="openNav">☰</button></div>
+      <div class="crumb"><span>Command Center</span><b id="viewTitle">Overview</b></div>
+      <div class="top-actions">
+        <div class="live-clock"><span class="pulse"></span><span id="clock">--:--</span><small>LIVE</small></div>
+        <button class="icon-btn" id="themeBtn" title="Toggle theme">◐</button>
+        <button class="icon-btn notif" id="notifBtn" title="Notifications">♢<span></span></button>
+        <button class="top-profile" id="topProfile"><span class="avatar sm" id="topAvatar">GC</span><span class="desktop-only"><b id="topName">Staff</b><small id="topRole">—</small></span></button>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="view" data-panel="overview">
+        <div class="welcome-row">
+          <div><p class="eyebrow">GLOBAL OPERATIONS</p><h1>Good morning, <span id="helloName">Team</span> <span class="accent">.</span></h1><p class="lead">A real-time command view of shipments, warehouse intake, customers and finance.</p></div>
+          <div class="hero-actions"><button class="btn primary" id="newShipment">＋ New Shipment</button><button class="btn ghost" id="newReceipt">＋ Warehouse Receipt</button></div>
+        </div>
+        <div class="kpi-grid" id="kpis"></div>
+        <div class="grid-main">
+          <section class="panel route-panel">
+            <div class="panel-head"><div><span class="eyebrow">NETWORK</span><h2>Route performance</h2><p>Last 30 days across China · UAE · Iraq.</p></div><button class="mini-btn" id="refreshBtn">↻ Refresh</button></div>
+            <div class="route-map"><div class="route-line line-a"></div><div class="route-line line-b"></div><div class="node n-cn"><b>CN</b><span>China</span></div><div class="node n-ae"><b>AE</b><span>UAE</span></div><div class="node n-iq"><b>IQ</b><span>Iraq</span></div><div class="map-badge"><b id="routeVolume">0</b><span>shipments</span></div></div>
+            <div class="route-metrics" id="routeMetrics"></div>
+          </section>
+          <section class="panel focus-panel">
+            <div class="panel-head"><div><span class="eyebrow">ATTENTION</span><h2>Needs attention</h2></div><span class="count-badge" id="attentionCount">0</span></div>
+            <div id="attentionList" class="attention-list"></div>
+          </section>
+        </div>
+        <div class="grid-two">
+          <section class="panel"><div class="panel-head"><div><span class="eyebrow">SHIPMENTS</span><h2>Latest activity</h2></div><button class="text-btn" data-view-link="shipments">View all →</button></div><div class="table-lite" id="latestShipments"></div></section>
+          <section class="panel"><div class="panel-head"><div><span class="eyebrow">TEAM</span><h2>Staff activity</h2></div><button class="text-btn" data-view-link="audit">Audit log →</button></div><div class="activity-feed" id="activityFeed"></div></section>
+        </div>
+      </div>
+
+      <div class="view hidden" data-panel="shipments"><div class="page-head"><div><p class="eyebrow">OPERATIONS</p><h1>Shipment command</h1><p class="lead">Monitor volume, delivery progress and customer-linked activity.</p></div><button class="btn primary" id="shipmentAdmin">Open full shipment console</button></div><div class="toolbar-card"><input id="shipmentSearch" class="search" placeholder="Search shipment, customer, route…"><div class="filter-pills"><button class="filter active">All</button><button class="filter">Recent</button><button class="filter">High Value</button></div></div><div class="panel"><div class="table-scroll"><table><thead><tr><th>Shipment</th><th>Customer</th><th>Route</th><th>Value</th><th>Progress</th><th>Created</th></tr></thead><tbody id="shipmentTable"></tbody></table></div></div></div>
+
+      <div class="view hidden" data-panel="customers"><div class="page-head"><div><p class="eyebrow">CRM</p><h1>Customer intelligence</h1><p class="lead">Customer health, value and recent activity at a glance.</p></div><button class="btn primary" id="customerAdmin">Open accounts console</button></div><div class="customer-grid" id="customerCards"></div></div>
+
+      <div class="view hidden" data-panel="warehouse"><div class="page-head"><div><p class="eyebrow">FULFILLMENT</p><h1>Warehouse control</h1><p class="lead">Receipts, batch flow, location mix and evidence.</p></div><button class="btn primary" id="receiptAction">New receipt</button></div><div class="warehouse-grid" id="warehouseCards"></div><div class="panel"><div class="table-scroll"><table><thead><tr><th>Batch</th><th>Location</th><th>Customer</th><th>Evidence</th><th>Received</th></tr></thead><tbody id="receiptTable"></tbody></table></div></div></div>
+
+      <div class="view hidden" data-panel="staff"><div class="page-head"><div><p class="eyebrow">PEOPLE & ACCESS</p><h1>Staff control</h1><p class="lead">Role-aware operations for Super Admin, Admin and Accountant.</p></div><button class="btn primary" id="staffAdmin">Manage staff</button></div><div class="customer-grid" id="staffCards"></div></div>
+
+      <div class="view hidden" data-panel="finance"><div class="page-head"><div><p class="eyebrow">FINANCE</p><h1>Financial command</h1><p class="lead">Revenue, outstanding balance and operational value from live shipment data.</p></div><button class="btn ghost" id="financeExport">Export view</button></div><div class="finance-hero" id="financeHero"></div><div class="grid-two"><section class="panel"><div class="panel-head"><div><span class="eyebrow">TOP ROUTES</span><h2>Revenue by route</h2></div></div><div id="routeRevenue"></div></section><section class="panel"><div class="panel-head"><div><span class="eyebrow">HEALTH</span><h2>Finance signals</h2></div></div><div id="financeSignals"></div></section></div></div>
+
+      <div class="view hidden" data-panel="audit"><div class="page-head"><div><p class="eyebrow">SECURITY & AUDIT</p><h1>Activity intelligence</h1><p class="lead">Who changed what, when, and from which operational surface.</p></div><span class="security-pill">✓ Protected</span></div><div class="audit-grid" id="auditGrid"></div></div>
+    </section>
+  </main>
+</div>
+
+<div class="modal hidden" id="modal"><div class="modal-card" id="modalContent"></div></div>
+<div class="toast-stack" id="toasts"></div>
+
+<script>
+const SUPABASE_URL='https://ahslifnthiwfkmaswjno.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
+const API_URL=`${SUPABASE_URL}/functions/v1/account-admin`;
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const state={session:null,role:'guest',customers:[],staff:[],receipts:[],shipments:[],logs:[],theme:localStorage.getItem('gc-command-theme')||'dark'};
+const $=id=>document.getElementById(id); const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const money=v=>'$'+Number(v||0).toLocaleString(undefined,{maximumFractionDigits:0});
+const date=v=>v?new Date(v).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+function toast(msg,type='info'){const el=document.createElement('div');el.className='toast '+type;el.innerHTML='<b>'+({'ok':'✓','warn':'!','info':'i','bad':'×'}[type]||'i')+'</b><span>'+esc(msg)+'</span>'; $('toasts').appendChild(el); setTimeout(()=>el.remove(),3800)}
+async function authFetch(path='/',opts={}){const {data:{session}}=await sb.auth.getSession();if(!session)throw new Error('Session required');const h=new Headers(opts.headers||{});h.set('Authorization','Bearer '+session.access_token);if(opts.body&&!(opts.body instanceof FormData))h.set('Content-Type','application/json');const r=await fetch(API_URL+path,{...opts,headers:h});const t=await r.text();let d=null;try{d=t?JSON.parse(t):null}catch{d={}}if(!r.ok)throw new Error(d?.error||`Request failed (${r.status})`);return d}
+function nameOf(){return state.session?.user?.user_metadata?.full_name||state.session?.user?.email?.split('@')[0]||'Team'}
+function initials(n){return String(n||'GC').split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()}
+function setUserUI(){const n=nameOf();const i=initials(n);['profileName','topName','helloName'].forEach(x=>$(x).textContent=x==='helloName'?n: n);['avatar','topAvatar'].forEach(x=>$(x).textContent=i);$('profileRole').textContent=state.role.replace('_',' ').toUpperCase();$('topRole').textContent=state.role.replace('_',' ')}
+function metrics(){const sh=state.shipments, delivered=sh.filter(s=>Number(s.current_step_index)>=5).length, active=sh.length-delivered, revenue=sh.reduce((a,s)=>a+Number(s.total_amount||0),0), due=sh.reduce((a,s)=>a+Math.max(0,Number(s.total_amount||0)-Number(s.paid_amount||0)),0), avg=sh.length?(sh.reduce((a,s)=>a+(Number(s.current_step_index||0)),0)/sh.length):0;return{shipments:sh.length,delivered,active,revenue,due,avg:Math.round(avg*10)/10,customers:state.customers.length,receipts:state.receipts.length,staff:state.staff.length}}
+function renderKpis(){const m=metrics();const cards=[['Revenue',money(m.revenue),'30d','mint'],['Outstanding',money(m.due),'To collect','amber'],['Active shipments',m.active,'In transit','cyan'],['Delivered',m.delivered,'Progressed','blue'],['Customers',m.customers,'Directory','violet'],['Warehouse receipts',m.receipts,'Evidence','teal']];$('kpis').innerHTML=cards.map(([t,v,s,c])=>`<div class="kpi ${c}"><div class="kpi-icon">${{'mint':'◈','amber':'◌','cyan':'◫','blue':'✓','violet':'◎','teal':'▣'}[c]}</div><div><span>${t}</span><b>${v}</b><small>${s}</small></div></div>`).join('');$('navShipments').textContent=m.shipments;$('navCustomers').textContent=m.customers;$('navReceipts').textContent=m.receipts;$('navStaff').textContent=m.staff;$('routeVolume').textContent=m.shipments}
+function renderRoutes(){const sh=state.shipments;const routes={};sh.forEach(s=>{const k=`${s.origin_key||'—'} → ${s.dest_key||'—'}`;routes[k]=(routes[k]||0)+Number(s.total_amount||0)});const rows=Object.entries(routes).sort((a,b)=>b[1]-a[1]).slice(0,4);$('routeMetrics').innerHTML=rows.length?rows.map(([r,v])=>`<div class="metric-row"><span>${esc(r)}</span><b>${money(v)}</b><i style="width:${Math.min(100,Math.max(8,(v/(rows[0][1]||1))*100))}%"></i></div>`).join(''):'<div class="empty">No shipment route data yet.</div>')}
+function renderAttention(){const m=metrics();const list=[];if(m.due>0)list.push(['Finance','Outstanding balance exists',money(m.due),'warn']);if(m.active>0)list.push(['Operations',`${m.active} shipments still active`,'Monitor today','info']);if(state.receipts.some(r=>!(r.photos||[]).length))list.push(['Warehouse','Receipt without photo evidence','Review evidence','bad']);$('attentionCount').textContent=list.length;$('attentionList').innerHTML=list.length?list.map(x=>`<div class="attention ${x[3]}"><div class="dot"></div><div><b>${esc(x[0])}</b><span>${esc(x[1])}</span><small>${esc(x[2])}</small></div></div>`).join(''):'<div class="empty good">✓ Everything looks healthy.</div>'}
+function renderLatest(){const rows=state.shipments.slice(0,6);$('latestShipments').innerHTML=rows.length?rows.map(s=>`<div class="row-item"><span class="id-chip">${esc(String(s.id).slice(0,8).toUpperCase())}</span><div class="row-main"><b>${esc(s.customer_name||'Customer')}</b><small>${esc(s.origin_key||'—')} → ${esc(s.dest_key||'—')}</small></div><div class="row-value"><b>${money(s.total_amount)}</b><small>${date(s.created_at)}</small></div></div>`).join(''):'<div class="empty">No shipments yet.</div>'}
+function renderActivity(){const rows=state.logs.slice(0,6);$('activityFeed').innerHTML=rows.length?rows.map(l=>`<div class="feed"><span class="feed-dot"></span><div><b>${esc(l.action||'Activity')}</b><span>${esc(l.staff_name||'Staff')} · ${date(l.created_at)}</span><small>${esc(l.target_id||'')}</small></div></div>`).join(''):'<div class="empty">No activity logs.</div>'}
+function renderShipments(){const q=($('shipmentSearch')?.value||'').toLowerCase();const rows=state.shipments.filter(s=>!q||JSON.stringify(s).toLowerCase().includes(q));$('shipmentTable').innerHTML=rows.map(s=>{const p=Math.min(100,Math.max(8,(Number(s.current_step_index||0)/5)*100));return`<tr><td><b class="mono">${esc(String(s.id).slice(0,12))}</b></td><td>${esc(s.customer_name||'—')}<small>${esc(s.customer_phone||'')}</small></td><td>${esc(s.origin_key||'—')} → ${esc(s.dest_key||'—')}</td><td><b>${money(s.total_amount)}</b><small>Paid ${money(s.paid_amount)}</small></td><td><div class="progress"><i style="width:${p}%"></i></div><small>${Math.round(p)}%</small></td><td>${date(s.created_at)}</td></tr>`}).join('')||'<tr><td colspan="6" class="empty-cell">No matching shipments.</td></tr>'}
+function renderCustomers(){const rows=state.customers.slice().sort((a,b)=>Number(b.shipment_count||0)-Number(a.shipment_count||0)).slice(0,12);$('customerCards').innerHTML=rows.map(c=>`<article class="customer-card"><div class="customer-top"><span class="avatar">${initials(c.name)}</span><div><b>${esc(c.name||'Customer')}</b><small>${esc(c.code||'No code')} · ${esc(c.city||'Iraq')}</small></div><span class="status ${c.is_active?'online':'offline'}">${c.is_active?'ACTIVE':'INACTIVE'}</span></div><div class="customer-stats"><div><span>Shipments</span><b>${c.shipment_count||0}</b></div><div><span>Total</span><b>${money(c.total_amount)}</b></div><div><span>Due</span><b>${money(c.outstanding_amount)}</b></div></div><div class="customer-foot"><span>${esc(c.phone||'—')}</span><button class="mini-btn" onclick="openAccounts()">Open</button></div></article>`).join('')||'<div class="empty">No customers.</div>'}
+function renderWarehouse(){const rows=state.receipts.slice(0,10);const loc={China:0,Dubai:0,Erbil:0};state.receipts.forEach(r=>{if(loc[r.location]!==undefined)loc[r.location]++});$('warehouseCards').innerHTML=[['Total receipts',state.receipts.length,'▣','cyan'],['Dubai',loc.Dubai,'AE','amber'],['China',loc.China,'CN','blue'],['Erbil',loc.Erbil,'IQ','mint']].map(x=>`<div class="warehouse-kpi"><span>${x[2]}</span><div><b>${x[1]}</b><small>${x[0]}</small></div></div>`).join('');$('receiptTable').innerHTML=rows.map(r=>`<tr><td class="mono">${esc(r.batch_code||'—')}</td><td>${esc(r.location||'—')}</td><td>${esc(r.directory_phone||'—')}</td><td><span class="evidence ${Array.isArray(r.photos)&&r.photos.length?'good':'bad'}">${Array.isArray(r.photos)?r.photos.length:0} photos</span></td><td>${date(r.received_at||r.created_at)}</td></tr>`).join('')||'<tr><td colspan="5" class="empty-cell">No receipts.</td></tr>'}
+function renderStaff(){const counts={super_admin:0,admin:0,accountant:0};state.staff.forEach(s=>{counts[s.role]=(counts[s.role]||0)+1});$('staffCards').innerHTML=Object.entries(counts).map(([r,c])=>`<article class="role-card"><div class="role-symbol">${r==='super_admin'?'★':r==='admin'?'◆':'◌'}</div><div><b>${r.replace('_',' ')}</b><small>Active staff role</small></div><strong>${c}</strong></article>`).join('')+state.staff.slice(0,8).map(s=>`<article class="customer-card compact"><div class="customer-top"><span class="avatar">${initials(s.full_name)}</span><div><b>${esc(s.full_name||'Staff')}</b><small>${esc(s.role||'')} · ${esc(s.branch||'all')}</small></div><span class="status ${s.is_active?'online':'offline'}">${s.is_active?'ACTIVE':'OFFLINE'}</span></div></article>`).join('')}
+function renderFinance(){const m=metrics();$('financeHero').innerHTML=`<div class="finance-total"><span>Total shipment value</span><b>${money(m.revenue)}</b><small>30-day operational view</small></div><div class="finance-side"><div><span>Outstanding</span><b>${money(m.due)}</b></div><div><span>Collection health</span><b>${m.revenue?Math.round((1-m.due/m.revenue)*100):0}%</b></div></div>`;const routes={};state.shipments.forEach(s=>{const k=`${s.origin_key||'—'} → ${s.dest_key||'—'}`;routes[k]=(routes[k]||0)+Number(s.total_amount||0)});$('routeRevenue').innerHTML=Object.entries(routes).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([r,v])=>`<div class="metric-row"><span>${esc(r)}</span><b>${money(v)}</b><i style="width:${Math.max(6,(v/(Math.max(...Object.values(routes))||1))*100)}%"></i></div>`).join('')||'<div class="empty">No finance data.</div>';$('financeSignals').innerHTML=[['Collection gap',money(m.due),'warn'],['Active exposure',money(state.shipments.filter(s=>Number(s.current_step_index||0)<5).reduce((a,s)=>a+Number(s.total_amount||0),0)),'info'],['Top customer',esc(state.customers[0]?.name||'—'),'ok']].map(x=>`<div class="signal"><span>${x[0]}</span><b>${x[1]}</b><em class="${x[2]}">${x[2]==='ok'?'Healthy':x[2]==='warn'?'Review':'Monitor'}</em></div>`).join('')}
+function renderAudit(){const rows=state.logs.slice(0,20);$('auditGrid').innerHTML=rows.map(l=>`<article class="audit-card"><span class="audit-icon">⌁</span><div><b>${esc(l.action||'Activity')}</b><p>${esc(l.staff_name||'Staff')} changed <span class="mono">${esc(l.target_id||'record')}</span></p><small>${date(l.created_at)}</small></div></article>`).join('')||'<div class="empty">No audit events.</div>'}
+function renderAll(){renderKpis();renderRoutes();renderAttention();renderLatest();renderActivity();renderShipments();renderCustomers();renderWarehouse();renderStaff();renderFinance();renderAudit()}
+function switchView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('hidden',x.dataset.panel!==v));document.querySelectorAll('.nav-item[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===v));$('viewTitle').textContent={'overview':'Overview','shipments':'Shipments','customers':'Customers','warehouse':'Warehouse','staff':'Staff & Access','finance':'Finance','audit':'Audit & Activity'}[v]||'Overview';history.replaceState({},'',`#${v}`);if(window.innerWidth<980)$('sidebar').classList.remove('open')}
+async function loadAll(){try{$('refreshBtn')?.classList.add('spin');const [c,st,r,l,s]=await Promise.all([authFetch('/?kind=customer'),authFetch('/?kind=staff'),authFetch('/?kind=receipt'),authFetch('/?kind=log'),authFetch('/?kind=shipment')]);state.customers=c.items||[];state.staff=st.items||[];state.receipts=r.items||[];state.logs=l.items||[];state.shipments=s.items||[];renderAll();toast('Operations synced successfully','ok')}catch(e){toast(e.message||'Unable to load operations','bad')}finally{$('refreshBtn')?.classList.remove('spin')}}
+async function bootApp(){try{const {data:{session}}=await sb.auth.getSession();if(!session){location.href='./management.html';return}state.session=session;const {data:{user}}=await sb.auth.getUser();state.session={...session,user};const staff=(await authFetch('/?kind=staff')).items||[];const row=staff.find(x=>x.id===user.id);if(!row?.is_active)throw new Error('Your staff account is inactive');state.role=row.role||'guest';setUserUI();await loadAll();$('boot').remove();$('app').classList.remove('hidden');const start=location.hash.replace('#','');switchView(['overview','shipments','customers','warehouse','staff','finance','audit'].includes(start)?start:'overview');}catch(e){console.error(e);toast(e.message||'Authentication failed','bad');setTimeout(()=>location.href='./management.html',900)}}
+function openAccounts(){location.href='./accounts-console.html'} function openAdmin(){location.href='./accounts-console.html'}
+function openNew(kind){$('modal').classList.remove('hidden');$('modalContent').innerHTML=`<div class="modal-head"><div><span class="eyebrow">QUICK ACTION</span><h2>${kind==='shipment'?'New Shipment':'Warehouse Receipt'}</h2></div><button class="icon-btn" onclick="$('modal').classList.add('hidden')">×</button></div><p class="lead">Use the advanced console to complete this ${kind==='shipment'?'shipment':'receipt'} with full validation, evidence and customer linking.</p><div class="modal-actions"><button class="btn primary" onclick="openAccounts()">Open advanced console →</button><button class="btn ghost" onclick="$('modal').classList.add('hidden')">Cancel</button></div>`}
+$('themeBtn').onclick=()=>{state.theme=state.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=state.theme;localStorage.setItem('gc-command-theme',state.theme)};
+$('refreshBtn').onclick=loadAll;$('shipmentSearch').oninput=renderShipments;$('openAdmin').onclick=openAdmin;$('customerAdmin').onclick=openAccounts;$('staffAdmin').onclick=openAccounts;$('shipmentAdmin').onclick=()=>location.href='./index.html#track';$('newShipment').onclick=()=>openNew('shipment');$('newReceipt').onclick=()=>openNew('receipt');$('receiptAction').onclick=()=>openNew('receipt');$('financeExport').onclick=()=>toast('Finance export is ready for the advanced console','info');
+$('openNav').onclick=()=>$('sidebar').classList.add('open');$('closeNav').onclick=()=>$('sidebar').classList.remove('open');$('openCommand').onclick=()=>{$('modal').classList.remove('hidden');$('modalContent').innerHTML='<div class="modal-head"><div><span class="eyebrow">COMMAND PALETTE</span><h2>Jump anywhere</h2></div><button class="icon-btn" onclick="$('modal').classList.add(\'hidden\')">×</button></div><div class="command-list">'+['Overview','Shipments','Customers','Warehouse','Staff & Access','Finance','Audit & Activity'].map((x,i)=>`<button data-cmd="${['overview','shipments','customers','warehouse','staff','finance','audit'][i]}">${x}<kbd>${i+1}</kbd></button>`).join('')+'</div>';document.querySelectorAll('[data-cmd]').forEach(b=>b.onclick=()=>{$('modal').classList.add('hidden');switchView(b.dataset.cmd)})};
+$('notifBtn').onclick=()=>toast('Notification center is connected to live operational signals','info');$('topProfile').onclick=()=>toast(`${nameOf()} · ${state.role}`,'info');$('profileBtn').onclick=()=>toast(`${nameOf()} · ${state.role}`,'info');document.querySelectorAll('.nav-item[data-view]').forEach(b=>b.onclick=()=>switchView(b.dataset.view));document.querySelectorAll('[data-view-link]').forEach(b=>b.onclick=()=>switchView(b.dataset.viewLink));
+setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})},1000);document.documentElement.dataset.theme=state.theme;
+window.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('openCommand').click()}if(e.key==='Escape')$('modal').classList.add('hidden')});
+bootApp();
+</script>
+</body></html>
