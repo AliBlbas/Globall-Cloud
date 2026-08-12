@@ -1,7 +1,7 @@
 /*
  * Globall Cloud — HTML delivery middleware
- * Injects the production runtime guard and premium polish layer into HTML
- * navigations without rewriting the large legacy index.html inline script.
+ * Injects the production runtime guard, premium polish, and resilient
+ * admin-workspace recovery into HTML navigations.
  * Non-document requests are passed through untouched.
  */
 
@@ -28,6 +28,14 @@ export async function onRequest(context) {
         );
         element.append(
           '<script src="/runtime-guard.js?v=20260812" defer data-gc-runtime-guard="1"></script>',
+          { html: true },
+        );
+        element.append(
+          '<link rel="stylesheet" href="/admin-console-enhanced.css?v=20260812" data-gc-admin-polish="1">',
+          { html: true },
+        );
+        element.append(
+          '<script src="/admin-console-enhanced.js?v=20260812" defer data-gc-admin-recovery="1"></script>',
           { html: true },
         );
       },
