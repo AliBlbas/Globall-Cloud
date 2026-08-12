@@ -36,6 +36,7 @@
         global: { headers: { 'x-gc-client': 'web-production' } },
       });
     }
+    window.sb = window.gcSupabase;
     window.gcSupabaseConfig = { url: SUPABASE_URL, publishableKeyPresent: Boolean(SUPABASE_PUBLISHABLE_KEY) };
     window.dispatchEvent(new CustomEvent('gc:supabase-ready', { detail: { client: window.gcSupabase } }));
     return window.gcSupabase;
@@ -58,17 +59,25 @@
     });
   };
 
-  const verifyPublicConnection = async (client) => {
+  const verifyPublicConnection = async () => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
     try {
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/`, {
-        method: 'GET',
-        headers: { apikey: SUPABASE_PUBLISHABLE_KEY },
-        signal: controller.signal,
-        cache: 'no-store',
-      });
-      if (!response.ok && response.status !== 404) throw new Error(`Supabase REST health ${response.status}`);
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/app_settings?select=key,value&key=eq.usd_iqd_rate&limit=1`,
+        {
+          method: 'GET',
+          headers: {
+            apikey: SUPABASE_PUBLISHABLE_KEY,
+            Accept: 'application/json',
+          },
+          signal: controller.signal,
+          cache: 'no-store',
+        }
+      );
+      if (!response.ok) throw new Error(`Supabase public config health ${response.status}`);
+      const rows = await response.json();
+      if (!Array.isArray(rows)) throw new Error('Supabase public config returned an invalid payload');
       setStatusNodes(true);
       return true;
     } finally {
@@ -79,8 +88,8 @@
   const boot = async () => {
     setStatusNodes(false);
     try {
-      const client = await ensureClient();
-      await verifyPublicConnection(client);
+      await ensureClient();
+      await verifyPublicConnection();
     } catch (error) {
       console.error('[Globall Cloud] Production bridge:', error);
       window.gcSupabaseError = String(error?.message || error);
