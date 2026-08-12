@@ -1,8 +1,8 @@
 /*
  * Globall Cloud — HTML delivery middleware
  * Injects the production runtime guard, premium polish, admin recovery,
- * public tracking bridge, public-config compatibility bridge, and hardened
- * public contact message bridge.
+ * public tracking bridge, public-config compatibility bridge, hardened
+ * public contact message bridge, and safe performance layer.
  * Non-document requests are passed through untouched.
  */
 
@@ -24,7 +24,19 @@ export async function onRequest(context) {
     .on('head', {
       element(element) {
         element.append(
+          '<link rel="preconnect" href="https://fonts.googleapis.com">',
+          { html: true },
+        );
+        element.append(
+          '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
+          { html: true },
+        );
+        element.append(
           '<link rel="stylesheet" href="/site-polish.css?v=20260812" data-gc-premium-polish="1">',
+          { html: true },
+        );
+        element.append(
+          '<link rel="stylesheet" href="/performance-polish.css?v=20260812" data-gc-performance="1">',
           { html: true },
         );
         element.append(
@@ -49,6 +61,10 @@ export async function onRequest(context) {
         );
         element.append(
           '<script src="/public-message-bridge.js?v=20260812" defer data-gc-public-message="1"></script>',
+          { html: true },
+        );
+        element.append(
+          '<script src="/performance-polish.js?v=20260812" defer data-gc-performance="1"></script>',
           { html: true },
         );
       },
