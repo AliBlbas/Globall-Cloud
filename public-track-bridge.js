@@ -19,6 +19,14 @@
     return headers;
   }
 
+  function publishTracking(shipment, id){
+    try {
+      window.dispatchEvent(new CustomEvent('gc:tracking-loaded', {
+        detail: { shipment, trackingId: id, source: 'public-track' }
+      }));
+    } catch (_) {}
+  }
+
   async function publicTrack(id){
     const trackingId = String(id || '').trim();
     if(!trackingId || trackingId.length > 128) throw new Error('Invalid tracking id');
@@ -32,17 +40,14 @@
     try { body = await res.json(); } catch (_) {}
     if(!res.ok) throw new Error(body?.error || `Tracking request failed (${res.status})`);
     if(!body?.shipment) throw new Error('Shipment not found');
+    publishTracking(body.shipment, trackingId);
     return body.shipment;
   }
 
-  // Replace the legacy global reader when present. No legacy RPC fallback is
-  // allowed here: an Edge Function failure must be visible and recoverable at
-  // the UI layer rather than silently bypassing the security boundary.
   if(typeof window.getShipment === 'function'){
     window.getShipment = publicTrack;
   }
 
-  // Patch the optional enhanced tracker instance too.
   const patchEnhancedTracker = () => {
     const tracker = window.enhancedTracking;
     if(!tracker || typeof tracker.fetchShipmentData !== 'function') return false;
