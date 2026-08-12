@@ -1,0 +1,140 @@
+/* Globall Cloud — premium visual layer
+ * Additive only: relies on the existing design tokens and remains safe when
+ * the legacy page structure changes.
+ */
+
+:root {
+  --gc-glass: color-mix(in srgb, var(--surface) 86%, transparent);
+  --gc-glass-strong: color-mix(in srgb, var(--surface-2) 92%, transparent);
+  --gc-halo: 0 0 0 1px rgba(79, 227, 240, 0.09), 0 24px 70px rgba(2, 8, 20, 0.28);
+}
+
+body {
+  background-image:
+    radial-gradient(ellipse 1000px 700px at 88% -8%, rgba(0, 194, 217, 0.12), transparent 62%),
+    radial-gradient(ellipse 850px 550px at 12% 28%, rgba(22, 119, 255, 0.07), transparent 64%),
+    linear-gradient(var(--grain-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grain-line) 1px, transparent 1px);
+  background-size: auto, auto, 56px 56px, 56px 56px;
+}
+
+.nav {
+  box-shadow: 0 12px 36px rgba(2, 8, 20, 0.16);
+}
+
+.card,
+.panel,
+.hero-card,
+.track-hero-card,
+.live-map-container,
+.tracking-details,
+.route-map,
+.service-card,
+.feature-card,
+.stat-card,
+.calc-card,
+.contact-card,
+.auth-card,
+.modal-card {
+  box-shadow: var(--gc-halo);
+}
+
+.card:hover,
+.panel:hover,
+.service-card:hover,
+.feature-card:hover,
+.stat-card:hover {
+  transform: translateY(-2px);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  border-color: color-mix(in srgb, var(--teal) 42%, var(--line-soft));
+}
+
+.btn-primary {
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: -40% auto -40% -15%;
+  width: 34%;
+  transform: skewX(-18deg) translateX(-170%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.34), transparent);
+  transition: transform 0.75s ease;
+  z-index: -1;
+}
+
+.btn-primary:hover::after { transform: skewX(-18deg) translateX(420%); }
+
+.hero h1,
+.section-head h2 {
+  text-wrap: balance;
+}
+
+.eyebrow {
+  text-shadow: 0 0 22px rgba(79, 227, 240, 0.22);
+}
+
+[data-gc-runtime-state="ready"] {
+  color: var(--mint) !important;
+}
+
+[data-gc-runtime-state="guarded"] {
+  color: var(--muted) !important;
+}
+
+@media (max-width: 768px) {
+  .section { padding-block: clamp(32px, 9vw, 56px); }
+
+  .btn {
+    min-height: 48px;
+  }
+
+  .nav-inner {
+    gap: 10px;
+  }
+
+  .brand b {
+    font-size: 16px;
+  }
+
+  .brand small {
+    font-size: 9px;
+  }
+
+  .live-map-container,
+  .tracking-details,
+  .card,
+  .panel,
+  .hero-card,
+  .track-hero-card,
+  .route-map,
+  .service-card,
+  .feature-card,
+  .stat-card,
+  .calc-card,
+  .contact-card,
+  .auth-card {
+    border-radius: 18px;
+  }
+
+  .btn-primary:hover,
+  .card:hover,
+  .panel:hover,
+  .service-card:hover,
+  .feature-card:hover,
+  .stat-card:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card:hover,
+  .panel:hover,
+  .service-card:hover,
+  .feature-card:hover,
+  .stat-card:hover {
+    transform: none;
+  }
+}
