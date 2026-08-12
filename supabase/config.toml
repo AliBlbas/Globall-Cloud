@@ -1,0 +1,15 @@
+project_id = "ahslifnthiwfkmaswjno"
+
+[auth]
+enabled = true
+site_url = "https://globall-cloud.pages.dev"
+additional_redirect_urls = [
+  "https://globall-cloud.pages.dev/**",
+  "https://globall-cloud.netlify.app/**"
+]
+
+[functions.account-admin]
+verify_jwt = true
+
+[functions.lg-track-shipment]
+verify_jwt = true
