@@ -7,6 +7,9 @@
 
   if (!/\/staff-os\.html(?:$|[?#])/.test(window.location.pathname)) return;
 
+  const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
+
   const waitFor = (getter, timeoutMs = 10000, intervalMs = 100) => new Promise((resolve, reject) => {
     const started = Date.now();
     const timer = setInterval(() => {
@@ -58,6 +61,29 @@
     if (gate) gate.classList.remove('hidden');
   };
 
+  const getClient = async () => {
+    if (typeof window.gcEnsureSupabase === 'function') {
+      const client = await window.gcEnsureSupabase();
+      window.sb = client;
+      return client;
+    }
+
+    if (window.gcSupabase) {
+      window.sb = window.gcSupabase;
+      return window.gcSupabase;
+    }
+
+    const supabaseLib = await waitFor(() => window.supabase || null);
+    if (!window.gcSupabase) {
+      window.gcSupabase = supabaseLib.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+        global: { headers: { 'x-gc-client': 'staff-os' } },
+      });
+    }
+    window.sb = window.gcSupabase;
+    return window.gcSupabase;
+  };
+
   const verifyStaff = async (client, userId) => {
     const { data, error } = await client
       .from('staff')
@@ -78,10 +104,9 @@
     if (!document.getElementById('loginForm')) return;
 
     try {
-      const client = await waitFor(() => window.sb || null);
+      const client = await getClient();
       const form = document.getElementById('loginForm');
 
-      // Replace only the login submit path; leave the rest of the original page intact.
       form?.addEventListener('submit', async (event) => {
         event.preventDefault();
         event.stopImmediatePropagation();
@@ -110,7 +135,6 @@
         }
       }, true);
 
-      // Verify an already-existing session before exposing the internal console.
       const { data: sessionData } = await client.auth.getSession();
       const session = sessionData?.session;
       if (!session?.user?.id) {
@@ -130,7 +154,7 @@
     } catch (error) {
       console.error('[Globall Cloud] Staff auth bridge:', error);
       showGate();
-      setMessage('Supabase Auth ئامادە نەبوو. تکایە دووبارە هەوڵبدەرەوە.');
+      setMessage('پەیوەندیی Supabase ئامادە نەبوو. تکایە دووبارە هەوڵبدەرەوە.');
       setBusy(false);
     }
   };
