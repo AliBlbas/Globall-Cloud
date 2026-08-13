@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Globall Cloud</title>
+  <desc id="desc">Globall Cloud cargo logo</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0A2140"/>
+      <stop offset="1" stop-color="#061428"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#67EDF6"/>
+      <stop offset="1" stop-color="#00A8BD"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#bg)" stroke="#234C78" stroke-width="4"/>
+  <circle cx="64" cy="64" r="38" fill="none" stroke="url(#cyan)" stroke-width="8" opacity=".95"/>
+  <path d="M37 68h54M44 50h40M48 82h32" fill="none" stroke="#F5F9FD" stroke-width="6" stroke-linecap="round" opacity=".92"/>
+  <path d="M77 36l17 7-12 9 2-8-7-8z" fill="#FFC768"/>
+  <path d="M39 92c16 7 34 7 50 0" fill="none" stroke="#FFC768" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+</svg>
