@@ -1,0 +1,59 @@
+/* Globall Cloud — Safari/WebKit elite compatibility layer */
+
+html{-webkit-overflow-scrolling:touch}
+body{-webkit-text-size-adjust:100%;}
+
+/* WebKit can paint translucent/fixed layers out of order on iOS. */
+.nav,.top-announcement,.modal,.modal-backdrop,.floating-actions,.mobile-actions,.bottom-nav{
+  -webkit-transform:translateZ(0);
+  transform:translateZ(0);
+}
+
+/* Keep Leaflet maps stable inside rounded cards and prevent WebKit tile tearing. */
+.leaflet-container{
+  position:relative!important;
+  z-index:0;
+  overflow:hidden!important;
+  isolation:isolate;
+  -webkit-transform:translateZ(0);
+  transform:translateZ(0);
+  background:#0b1b31;
+  font-family:inherit;
+}
+.leaflet-pane,
+.leaflet-map-pane,
+.leaflet-tile-pane,
+.leaflet-overlay-pane,
+.leaflet-shadow-pane,
+.leaflet-marker-pane,
+.leaflet-tooltip-pane,
+.leaflet-popup-pane{
+  -webkit-transform:translateZ(0);
+  transform:translateZ(0);
+}
+.leaflet-tile{image-rendering:auto}
+.leaflet-control-container{position:absolute;inset:0;pointer-events:none}
+.leaflet-control{pointer-events:auto}
+.leaflet-top,.leaflet-bottom{z-index:1000}
+
+/* SVG icon sprites are safer when the <use> node itself cannot receive taps. */
+svg use{pointer-events:none}
+
+/* Stable image layout while remote assets/fonts arrive. */
+img{content-visibility:auto}
+img[width][height]{height:auto}
+
+/* Avoid Safari's fractional text/layout overflow in RTL cards. */
+:where(.card,.panel,.hero-card,.service-card,.feature-card,.gc-tracking-card){overflow-wrap:anywhere}
+
+/* Avoid expensive fixed background compositing on iOS. */
+body,[data-theme="light"] body{background-attachment:scroll!important}
+
+@media(max-width:760px){
+  .leaflet-container{min-height:220px}
+  .leaflet-control-zoom a{width:36px!important;height:36px!important;line-height:36px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .leaflet-marker-icon,.leaflet-marker-shadow{transition:none!important}
+}
