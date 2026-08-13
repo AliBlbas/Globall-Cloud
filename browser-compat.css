@@ -3,49 +3,37 @@
  */
 
 *,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;text-size-adjust:100%;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-body{min-height:100%;overflow-x:hidden}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+body{min-height:100%;overflow-x:hidden;-webkit-overflow-scrolling:touch;background-attachment:scroll}
 img,svg,video,canvas{display:block;max-width:100%;height:auto}
 button,input,select,textarea{-webkit-appearance:none;appearance:none;border-radius:0}
 button,input,select,textarea{font:inherit;line-height:1.2}
-button{cursor:pointer;-webkit-user-select:none;user-select:none}
+button{cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 select{background-image:none}
 
-/* Safari viewport + safe-area stability */
-:root{--gc-vh:100vh;--gc-dvh:100dvh}
+:root{--gc-vh:100vh;--gc-dvh:100dvh;--gc-svh:100svh;--gc-lvh:100lvh}
 body{min-height:var(--gc-dvh)}
 .min-h-screen,.min-height-screen,.full-screen{min-height:var(--gc-dvh)}
 
-/* Avoid layout drift from fractional flex/grid sizing. */
 .nav,.nav-inner,.hero,.hero-grid,.grid,.dashboard-grid,.feature-grid,.services-grid,.stats-grid,.cards-grid,.toolbar,.actions{min-width:0}
 .flex,.grid,.nav-inner{min-width:0}
 .flex>*,.grid>*{min-width:0}
 
-/* WebKit-safe backdrop effects with a solid fallback first. */
-.glass,.glass-card,.nav,.modal-card,.auth-card,.panel,.card,.hero-card{
-  background-color:rgba(11,27,49,.96);
-}
+.glass,.glass-card,.nav,.modal-card,.auth-card,.panel,.card,.hero-card{background-color:rgba(11,27,49,.96)}
 @supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
-  .glass,.glass-card,.nav,.modal-card,.auth-card,.panel,.card,.hero-card{
-    -webkit-backdrop-filter:blur(16px);
-    backdrop-filter:blur(16px);
-  }
+  .glass,.glass-card,.nav,.modal-card,.auth-card,.panel,.card,.hero-card{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
 }
 
-/* Do not rely on color-mix alone on older Safari/WebKit. */
 .btn-primary{background:#00c2d9}
 @supports (background:color-mix(in srgb, red 20%, transparent)){
   .btn-primary{background:linear-gradient(135deg,#55e5f2,#00c2d9)}
 }
 
-/* Keep interactive content above iOS safe-area. */
-.bottom-nav,.mobile-bottom-nav,.floating-actions,.mobile-actions{
-  padding-bottom:max(10px,env(safe-area-inset-bottom,0px));
-}
-
-/* Map/route containers must not overflow on narrow Safari viewports. */
-.live-map-container,.route-map,.route-visualization,.tracking-details,.map-summary,.map-legend{min-width:0;max-width:100%}
+body::before,body::after{transform:translateZ(0);backface-visibility:hidden}
+.bottom-nav,.mobile-bottom-nav,.floating-actions,.mobile-actions{padding-bottom:max(10px,env(safe-area-inset-bottom,0px))}
+.live-map-container,.route-map,.route-visualization,.tracking-details,.map-summary,.map-legend{min-width:0;max-width:100%;overflow:hidden}
 .route-visualization svg{width:100%;max-width:100%;height:auto;overflow:visible}
+.brand-logo,.logo-icon{aspect-ratio:1/1;object-fit:contain;flex:0 0 auto}
 
 @media (max-width:768px){
   html,body{width:100%;max-width:100%;overflow-x:hidden}
