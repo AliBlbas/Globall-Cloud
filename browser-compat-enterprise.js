@@ -69,6 +69,7 @@
   const injectMobileStyles = () => {
     injectStyle('/admin-webkit-polish.css?v=20260813', 'admin-webkit');
     injectStyle('/mobile-elite-v3.css?v=20260813', 'mobile-elite');
+    injectStyle('/enterprise-ui-v1.css?v=20260813', 'enterprise-ui-v1');
     injectCustomerPortalPolish();
     injectOperationsPolish();
   };
