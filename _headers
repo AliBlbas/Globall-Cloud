@@ -33,6 +33,10 @@
   X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
+/superadmin.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: private, no-store, max-age=0, must-revalidate
+
 /operations-suite.html
   X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: private, no-store, max-age=0, must-revalidate
