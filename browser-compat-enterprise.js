@@ -34,9 +34,23 @@
     link.rel = 'stylesheet'; link.href = href; link.dataset.gcRuntimeStyle = marker;
     document.head?.appendChild(link);
   };
+  const injectCustomerPortalPolish = () => {
+    if (!document.getElementById('gc-customer-portal-polish')) {
+      const style = document.createElement('style');
+      style.id = 'gc-customer-portal-polish';
+      style.textContent = `
+        body:has(#shipKpi){overflow-x:hidden} body:has(#shipKpi) .card{min-width:0} body:has(#shipKpi) .row>*{min-width:0;overflow-wrap:anywhere}
+        body:has(#shipKpi) .hero h1{letter-spacing:-.035em;line-height:1.12} body:has(#shipKpi) .hero p{line-height:1.9}
+        @media(max-width:680px){body:has(#shipKpi) .grid,body:has(#shipKpi) .grid3{grid-template-columns:minmax(0,1fr)!important}body:has(#shipKpi) .topin{min-height:66px}body:has(#shipKpi) #auth .box{max-height:calc(100dvh - 28px);overflow:auto;-webkit-overflow-scrolling:touch}}
+        @media(max-width:430px){body:has(#shipKpi) .wrap{padding-inline:12px}body:has(#shipKpi) .hero h1{font-size:28px!important}body:has(#shipKpi) .btn{min-height:46px}}
+      `;
+      document.head?.appendChild(style);
+    }
+  };
   const injectMobileStyles = () => {
     injectStyle('/admin-webkit-polish.css?v=20260813', 'admin-webkit');
     injectStyle('/mobile-elite-v3.css?v=20260813', 'mobile-elite');
+    injectCustomerPortalPolish();
   };
   setViewport();
   window.addEventListener('resize', setViewport, { passive: true });
