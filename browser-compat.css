@@ -12,8 +12,8 @@ button{cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-tap-high
 select{background-image:none}
 
 :root{--gc-vh:100vh;--gc-dvh:100dvh;--gc-svh:100svh;--gc-lvh:100lvh}
-body{min-height:var(--gc-dvh)}
-.min-h-screen,.min-height-screen,.full-screen{min-height:var(--gc-dvh)}
+body{min-height:var(--gc-dvh);min-height:100svh;min-height:100dvh}
+.min-h-screen,.min-height-screen,.full-screen{min-height:var(--gc-dvh);min-height:100svh;min-height:100dvh}
 
 .nav,.nav-inner,.hero,.hero-grid,.grid,.dashboard-grid,.feature-grid,.services-grid,.stats-grid,.cards-grid,.toolbar,.actions{min-width:0}
 .flex,.grid,.nav-inner{min-width:0}
@@ -39,6 +39,31 @@ body::before,body::after{transform:translateZ(0);backface-visibility:hidden}
   html,body{width:100%;max-width:100%;overflow-x:hidden}
   input,select,textarea{font-size:16px!important}
   .container,.wrap,.page,.section{width:100%;max-width:100%;min-width:0}
+}
+
+/* iPhone/iPad Safari has a moving browser chrome; avoid 100vh jumps. */
+@supports (-webkit-touch-callout:none){
+  html,body{width:100%;min-width:0;max-width:100%;overflow-x:hidden!important;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{min-height:100svh;min-height:100dvh;background-attachment:scroll}
+  .full-screen,.min-h-screen,.min-height-screen{min-height:100svh;min-height:100dvh}
+
+  .nav{position:-webkit-sticky;position:sticky;top:0;z-index:200}
+  .glass,.glass-card,.nav,.modal-card,.auth-card,.panel,.card,.hero-card,
+  .mobile-menu,.mobile-bottom-nav,.bottom-nav,.drawer,.sheet{ -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px) }
+
+  .nav-inner,.hero,.hero-grid,.hero-content,.hero-card,.container,.section,
+  .grid,.cards-grid,.feature-grid,.services-grid,.dashboard-grid,.form-grid,
+  .page,main,section,article,aside,footer,header{min-width:0!important;max-width:100%!important}
+
+  img,svg,video,canvas,iframe{max-width:100%!important}
+  iframe{border:0}
+
+  input,select,textarea,.field{font-size:16px!important;line-height:1.35!important;min-height:48px}
+  button{min-height:44px}
+
+  .bottom-nav,.mobile-bottom-nav,.floating-actions,.mobile-actions{
+    padding-bottom:max(10px,env(safe-area-inset-bottom,0px));
+  }
 }
 
 @media (prefers-reduced-motion:reduce){
