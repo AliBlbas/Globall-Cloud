@@ -1,7 +1,5 @@
-/*
- * Globall Cloud — HTML delivery middleware
- * Injects production runtime, premium polish, browser compatibility,
- * canonical logo rendering, admin recovery and the Super Admin entry point.
+/* Globall Cloud — HTML delivery middleware
+ * Production runtime + browser compatibility + canonical branding + premium/admin layers.
  */
 const HTML_ACCEPT='text/html';
 export async function onRequest(context){
@@ -21,10 +19,14 @@ export async function onRequest(context){
       element.append('<script src="/runtime-guard.js?v=20260813-4" defer data-gc-runtime-guard="1"></script>',{html:true});
       element.append('<link rel="stylesheet" href="/admin-console-enhanced.css?v=20260812" data-gc-admin-polish="1">',{html:true});
       element.append('<script src="/admin-console-enhanced.js?v=20260812" defer data-gc-admin-recovery="1"></script>',{html:true});
+      if(path==='/super-admin-command-center.html'){
+        element.append('<link rel="stylesheet" href="/super-admin-elite.css?v=20260813-1" data-gc-superadmin-elite="1">',{html:true});
+      }
     }})
     .on('body',{element(element){
-      if(path==='/staff-os.html')element.append('<div class="gc-superadmin-entry" style="position:fixed;inset-block-end:18px;inset-inline-start:18px;z-index:9999"><a href="./superadmin.html" style="display:inline-flex;align-items:center;gap:8px;padding:11px 14px;border-radius:999px;background:linear-gradient(135deg,#67edf5,#12d5e7);color:#03151b;font:800 11px system-ui,sans-serif;box-shadow:0 12px 35px rgba(18,213,231,.22);text-decoration:none">GC · Super Admin</a></div>',{html:true});
+      if(path==='/staff-os.html')element.append('<div class="gc-superadmin-entry" style="position:fixed;inset-block-end:18px;inset-inline-start:18px;z-index:9999"><a href="./super-admin-command-center.html" style="display:inline-flex;align-items:center;gap:8px;padding:11px 14px;border-radius:999px;background:linear-gradient(135deg,#67edf5,#12d5e7);color:#03151b;font:800 11px system-ui,sans-serif;box-shadow:0 12px 35px rgba(18,213,231,.22);text-decoration:none">GC · Super Admin</a></div>',{html:true});
       if(path==='/superadmin.html')element.append('<script src="/superadmin-staff-actions.js?v=20260813-2" defer data-gc-superadmin-staff-actions="1"></script>',{html:true});
+      if(path==='/super-admin-command-center.html')element.append('<script src="/super-admin-elite.js?v=20260813-1" defer data-gc-superadmin-elite="1"></script>',{html:true});
     }});
   return rewriter.transform(response);
 }
