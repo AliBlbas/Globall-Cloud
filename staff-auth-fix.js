@@ -1,6 +1,7 @@
 /* Globall Cloud — defensive Staff OS auth bridge
- * Keeps Supabase Auth as the source of truth and verifies the staff row before
- * exposing the internal console. This layer only runs on staff-os.html.
+ * Supabase Auth is the source of truth. Dashboard access is fail-closed and
+ * requires: valid session + matching staff identity + matching email + active
+ * staff record + supported role. Session changes are revalidated live.
  */
 (() => {
   'use strict';
@@ -9,6 +10,7 @@
 
   const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
+  const ALLOWED_ROLES = new Set(['admin', 'super_admin', 'accountant']);
 
   const waitFor = (getter, timeoutMs = 10000, intervalMs = 100) => new Promise((resolve, reject) => {
     const started = Date.now();
@@ -84,11 +86,15 @@
     return window.gcSupabase;
   };
 
-  const verifyStaff = async (client, userId) => {
+  const verifyStaff = async (client, sessionUser) => {
+    if (!sessionUser?.id || !sessionUser?.email) {
+      throw new Error('Session ـی دروست نەدۆزرایەوە.');
+    }
+
     const { data, error } = await client
       .from('staff')
-      .select('id,full_name,role,branch,is_active,active')
-      .eq('id', userId)
+      .select('id,email,full_name,role,branch,is_active,active')
+      .eq('id', sessionUser.id)
       .maybeSingle();
 
     if (error) throw error;
@@ -97,7 +103,26 @@
     const active = data.is_active !== false && data.active !== false;
     if (!active) throw new Error('دەستڕاگەیشتنی ئەم staff ـە ناچالاکە.');
 
+    if (!data.email || data.email.trim().toLowerCase() !== sessionUser.email.trim().toLowerCase()) {
+      throw new Error('ئیمەیڵی Auth لەگەڵ staff record یەکسان نییە.');
+    }
+
+    if (!ALLOWED_ROLES.has(data.role)) {
+      throw new Error('ڕۆڵی ئەم staff ـە بۆ Staff OS ڕێگەپێدراو نییە.');
+    }
+
+    if (!data.branch) {
+      throw new Error('Branch ـی staff دیاری نەکراوە.');
+    }
+
     return data;
+  };
+
+  const denyAndSignOut = async (client, reason) => {
+    console.warn('[Globall Cloud] Staff session rejected:', reason);
+    await client.auth.signOut().catch(() => undefined);
+    showGate();
+    setMessage(reason || 'ئەم هەژمارە ڕێگەی چوونە ناوی نییە.');
   };
 
   const boot = async () => {
@@ -120,9 +145,17 @@
 
           const { data, error } = await client.auth.signInWithPassword({ email, password });
           if (error) throw error;
-          if (!data?.user?.id) throw new Error('Login سەرکەوتوو بوو، بەڵام user session نەگەڕایەوە.');
+          if (!data?.user?.id || !data?.user?.email) throw new Error('Login سەرکەوتوو بوو، بەڵام session تەواو نەگەڕایەوە.');
 
-          await verifyStaff(client, data.user.id);
+          const staff = await verifyStaff(client, data.user);
+          window.gcStaffIdentity = {
+            id: staff.id,
+            email: staff.email,
+            role: staff.role,
+            branch: staff.branch,
+            fullName: staff.full_name,
+          };
+
           setMessage('Login سەرکەوتوو بوو. تکایە چاوەڕوان بە…', 'success');
           window.location.reload();
         } catch (error) {
@@ -137,20 +170,49 @@
 
       const { data: sessionData } = await client.auth.getSession();
       const session = sessionData?.session;
-      if (!session?.user?.id) {
+      if (!session?.user?.id || !session?.user?.email) {
         showGate();
         return;
       }
 
       try {
-        await verifyStaff(client, session.user.id);
+        const staff = await verifyStaff(client, session.user);
+        window.gcStaffIdentity = {
+          id: staff.id,
+          email: staff.email,
+          role: staff.role,
+          branch: staff.branch,
+          fullName: staff.full_name,
+        };
         showApp();
       } catch (error) {
-        console.warn('[Globall Cloud] Staff session rejected:', error);
-        await client.auth.signOut().catch(() => undefined);
-        showGate();
-        setMessage(error?.message || 'ئەم هەژمارە ڕێگەی چوونە ناوی نییە.');
+        await denyAndSignOut(client, error?.message);
+        return;
       }
+
+      client.auth.onAuthStateChange(async (event, nextSession) => {
+        if (event === 'SIGNED_OUT' || !nextSession?.user?.id) {
+          showGate();
+          window.gcStaffIdentity = null;
+          return;
+        }
+
+        if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+          try {
+            const staff = await verifyStaff(client, nextSession.user);
+            window.gcStaffIdentity = {
+              id: staff.id,
+              email: staff.email,
+              role: staff.role,
+              branch: staff.branch,
+              fullName: staff.full_name,
+            };
+            showApp();
+          } catch (error) {
+            await denyAndSignOut(client, error?.message);
+          }
+        }
+      });
     } catch (error) {
       console.error('[Globall Cloud] Staff auth bridge:', error);
       showGate();
