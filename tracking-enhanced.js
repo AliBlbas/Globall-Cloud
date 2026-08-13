@@ -1,50 +1,57 @@
 // Enhanced Tracking (optional add-on) — Globall Cloud
 //
 // Adds a small live SVG route map + browser notifications on top of the
-// public tracking page in index.html, which already works fully without
-// this file. Not loaded by any page by default — see tracking-integration.html
-// for a ready-to-copy usage example.
-//
-// Bugs fixed here vs. the original draft of this module:
-//  1. Realtime API mismatch: the original called `window.supabase.on(...)`,
-//     the Supabase JS v1 syntax. This project loads supabase-js v2 (see
-//     index.html: @supabase/supabase-js@2), where realtime subscriptions go
-//     through a channel: `sb.channel(name).on('postgres_changes', cfg, cb).subscribe()`.
-//  2. Wrong column names: the original read `origin`, `destination`,
-//     `status`, `progress`, `events`, none of which exist in the real
-//     schema. The real columns are `origin_key`, `dest_key`,
-//     `current_step_index`, `step_dates`, `eta` (see database-schema.js).
-//  3. Self-wiping state: `subscribeToRealtime()` called `cleanup()` as a
-//     "clear any previous subscription" guard, but `cleanup()` also deleted
-//     the shipment record that `initializeTracking()` had just fetched —
-//     so by the time a realtime update arrived, `handleRealtimeUpdate()`'s
-//     `this.shipments.get(shipmentId)` was always undefined and every
-//     update silently no-op'd. Resubscribing now only tears down the old
-//     channel, not the shipment/container state.
-//  4. Wrong redraw target: `updateTrackingUI()` checked for a
-//     `tracking-${shipmentId}` element but then always redrew into a
-//     hardcoded `liveMapContainer` — fine for one shipment on a page, but
-//     it meant two shipments tracked at once would overwrite each other's
-//     map. Each shipment now remembers its own container id.
+// public tracking page in index.html.
 
 const TRACKING_STEP_KEYS = ['placed', 'pickedUp', 'transit', 'customs', 'outForDelivery', 'delivered'];
 
-class EnhancedTracking {
-  constructor() {
-    this.shipments = new Map();        // shipmentId -> last-known row from Supabase
-    this.containers = new Map();       // shipmentId -> DOM element id to render the map into
-    this.realtimeChannels = new Map(); // shipmentId -> active Supabase realtime channel
+/* Safari/WebKit hardening.
+ * index.html already loads this module, so use that stable execution point to
+ * install the compatibility CSS without requiring a second HTML edit.
+ */
+(function installCrossBrowserAssets() {
+  const assets = ['browser-compat.css', 'logo-fix.css'];
+  for (const href of assets) {
+    if (document.querySelector(`link[data-gc-compat="${href}"]`)) continue;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.dataset.gcCompat = href;
+    document.head.appendChild(link);
   }
 
-  /**
-   * Start tracking a shipment: fetches its current state, renders the map
-   * (if a containerId is given) and subscribes to live updates.
-   * @param {string} shipmentId
-   * @param {string} [containerId] - id of an element to render the live map into
-   * @returns {Promise<object>} the shipment row
-   */
+  const fallbackLogo = '/logo-icon.svg';
+  const fixLogo = (img) => {
+    if (!(img instanceof HTMLImageElement) || img.dataset.gcLogoFixed === '1') return;
+    img.dataset.gcLogoFixed = '1';
+    img.addEventListener('error', () => {
+      if (img.src.endsWith('/logo-icon.svg')) return;
+      img.src = fallbackLogo;
+    }, { once: true });
+  };
+
+  document.querySelectorAll('img[src*="logo-icon"]').forEach(fixLogo);
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (!(node instanceof Element)) continue;
+        if (node.matches?.('img[src*="logo-icon"]')) fixLogo(node);
+        node.querySelectorAll?.('img[src*="logo-icon"]').forEach(fixLogo);
+      }
+    }
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+})();
+
+class EnhancedTracking {
+  constructor() {
+    this.shipments = new Map();
+    this.containers = new Map();
+    this.realtimeChannels = new Map();
+  }
+
   async initializeTracking(shipmentId, containerId) {
-    const sb = window.sb || window.supabase; // window.sb is the real client created in index.html
+    const sb = window.sb || window.supabase;
     if (!sb) throw new Error('Supabase client not available');
 
     const shipment = await this.fetchShipmentData(sb, shipmentId);
@@ -55,18 +62,6 @@ class EnhancedTracking {
   }
 
   async fetchShipmentData(sb, shipmentId) {
-    // Uses the same track_shipment RPC as index.html's own public getShipment()
-    // — not a direct sb.from('shipments').select(...). This project routes ALL
-    // public/anonymous shipment reads through narrow RPCs (see
-    // database-schema.js: track_shipment, admin_list_*_public, etc.) rather
-    // than direct table access, which strongly implies RLS on `shipments`
-    // does not grant anonymous SELECT directly. A raw .from('shipments')
-    // select here — on the one page anonymous customers actually use this
-    // module from — would likely be silently blocked by RLS for exactly the
-    // visitors it's meant to serve, even though it can appear to work fine
-    // when tested while signed in as staff (who may have broader table
-    // access through RLS). Confirm this against your actual RLS policies;
-    // if `shipments` genuinely does allow anonymous SELECT, either path works.
     const { data, error } = await sb.rpc('track_shipment', { p_id: shipmentId });
     if (error) throw error;
     const row = data && data[0];
@@ -74,20 +69,8 @@ class EnhancedTracking {
     return row;
   }
 
-  // Correct v2 realtime syntax: channel().on().subscribe()
-  // Note: Supabase Realtime's postgres_changes is itself RLS-gated — it
-  // can only be subscribed through a direct table+filter (no RPC
-  // equivalent exists), so if RLS turns out not to allow anonymous
-  // SELECT on `shipments` (see the comment on fetchShipmentData above),
-  // this subscription will silently receive nothing for a signed-out
-  // visitor even though the initial map (fetched via the RPC) still
-  // renders fine. Degrades gracefully either way — worst case here is
-  // "the map doesn't auto-update without a re-search", not a crash — but
-  // if you want the live-update part working for anonymous customers too,
-  // that's a Supabase RLS policy change, not something fixable from here.
   subscribeToRealtime(sb, shipmentId) {
-    this.unsubscribeChannel(shipmentId); // drop any previous channel for this id, keep shipment/container state
-
+    this.unsubscribeChannel(shipmentId);
     const channel = sb
       .channel(`shipment-${shipmentId}`)
       .on(
@@ -96,7 +79,6 @@ class EnhancedTracking {
         (payload) => this.handleRealtimeUpdate(shipmentId, payload)
       )
       .subscribe();
-
     this.realtimeChannels.set(shipmentId, channel);
   }
 
@@ -121,18 +103,16 @@ class EnhancedTracking {
     const stepKey = TRACKING_STEP_KEYS[stepIndex] || 'unknown';
     new Notification('🚚 Globall Cloud', {
       body: `${shipmentId}: ${stepKey}`,
-      icon: 'logo-icon.png',
+      icon: '/logo-icon.svg',
       tag: `tracking-${shipmentId}`,
     });
   }
 
-  /** Render (or re-render) the map for a shipment into a specific container id. */
   initializeMap(containerId, shipmentId) {
     this.containers.set(shipmentId, containerId);
     this.renderMap(shipmentId);
   }
 
-  /** Re-render into whichever container was registered for this shipment. */
   renderMap(shipmentId) {
     const containerId = this.containers.get(shipmentId);
     if (!containerId) return;
@@ -157,14 +137,10 @@ class EnhancedTracking {
         <svg viewBox="0 0 1000 600" class="route-visualization">
           <circle cx="150" cy="300" r="15" class="map-point origin-point"/>
           <text x="150" y="330" text-anchor="middle" class="map-label">${shipment.origin_key || '—'}</text>
-
           <circle cx="${progressX}" cy="270" r="12" class="map-point current-point">
             <animate attributeName="r" values="12;18;12" dur="1.5s" repeatCount="indefinite"/>
           </circle>
-
-          <polyline points="150,300 350,285 500,270 700,255 850,300"
-                    fill="none" class="route-line" stroke-dasharray="5,5"/>
-
+          <polyline points="150,300 350,285 500,270 700,255 850,300" fill="none" class="route-line" stroke-dasharray="5,5"/>
           <circle cx="850" cy="300" r="15" class="map-point dest-point"/>
           <text x="850" y="330" text-anchor="middle" class="map-label">${shipment.dest_key || '—'}</text>
         </svg>
@@ -184,7 +160,6 @@ class EnhancedTracking {
     return (await Notification.requestPermission()) === 'granted';
   }
 
-  /** Stop tracking a shipment entirely (unsubscribe + free its state). Call on page/section unmount. */
   cleanup(shipmentId) {
     this.unsubscribeChannel(shipmentId);
     this.shipments.delete(shipmentId);
