@@ -1,0 +1,36 @@
+/* Globall Cloud — Super Admin Elite UX layer */
+:root{
+  --elite-glow:0 0 0 1px rgba(63,227,239,.08),0 28px 90px rgba(0,0,0,.24);
+  --elite-glass:rgba(8,23,40,.76);
+}
+body{background-image:radial-gradient(900px 600px at 82% -8%,rgba(0,191,216,.11),transparent 60%),radial-gradient(700px 500px at 12% 18%,rgba(83,112,255,.07),transparent 65%)}
+.sidebar{box-shadow:18px 0 60px rgba(0,0,0,.16)}
+.nav{transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
+.nav:hover{transform:translateX(2px)}
+.nav.active{box-shadow:inset 3px 0 0 var(--cyan),0 8px 28px rgba(0,191,216,.07)}
+.hero,.profile,.panel,.kpi{box-shadow:var(--elite-glow)}
+.hero{background:linear-gradient(145deg,rgba(16,40,68,.98),rgba(5,16,29,.98))}
+.kpi{position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;inset:auto 12px 0 12px;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.28}
+.kpi b{letter-spacing:-.03em}
+.kpi[data-state="critical"]{border-color:rgba(255,114,129,.35);box-shadow:0 0 0 1px rgba(255,114,129,.08),0 20px 60px rgba(255,114,129,.08)}
+.kpi[data-state="attention"]{border-color:rgba(255,199,102,.32)}
+.kpi[data-state="healthy"]{border-color:rgba(92,230,177,.24)}
+.branch{position:relative;overflow:hidden}
+.branch::before{content:'';position:absolute;inset:auto 0 0 0;height:4px;background:linear-gradient(90deg,var(--cyan),var(--mint));transform:scaleX(var(--load,.1));transform-origin:100% 50%;opacity:.72}
+.branch small{display:flex;justify-content:space-between;gap:8px}
+.elite-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+.elite-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;border:1px solid rgba(127,184,233,.12);background:rgba(255,255,255,.03);font:800 9px ui-monospace,monospace;color:#c8d9eb}
+.elite-chip::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--mint);box-shadow:0 0 10px currentColor}
+.elite-chip.warn::before{background:var(--amber)}
+.elite-chip.bad::before{background:var(--red)}
+.command-palette{position:fixed;inset:0;z-index:1000;display:grid;place-items:start center;padding:10vh 18px;background:rgba(0,6,14,.68);backdrop-filter:blur(14px)}
+.command-box{width:min(720px,100%);border:1px solid rgba(127,184,233,.18);border-radius:24px;background:linear-gradient(145deg,#102844,#071524);box-shadow:0 40px 120px rgba(0,0,0,.45);overflow:hidden}
+.command-head{display:flex;align-items:center;gap:10px;padding:14px;border-bottom:1px solid rgba(127,184,233,.1)}
+.command-head input{flex:1;border:0;outline:0;background:transparent;color:var(--text);font-size:17px;padding:8px}
+.command-hint{font:700 10px ui-monospace,monospace;color:var(--muted);white-space:nowrap}
+.command-list{max-height:420px;overflow:auto;padding:8px}.command-item{display:flex;justify-content:space-between;gap:12px;padding:12px 13px;border-radius:12px;color:#dcebf8}.command-item:hover,.command-item.active{background:rgba(63,227,239,.08)}.command-item small{color:var(--muted)}
+.freshness{display:flex;align-items:center;gap:8px;font:800 10px ui-monospace,monospace;color:var(--muted)}.freshness i{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 12px var(--mint)}
+.live-pulse{animation:elitePulse 2.2s ease-in-out infinite}@keyframes elitePulse{0%,100%{opacity:1}50%{opacity:.58}}
+@media(max-width:720px){.command-palette{padding:6vh 10px}.command-head input{font-size:16px}.nav:hover{transform:none}.sidebar{box-shadow:0 12px 38px rgba(0,0,0,.2)}}
+@media(prefers-reduced-motion:reduce){.live-pulse{animation:none}}
