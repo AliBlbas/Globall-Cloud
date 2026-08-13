@@ -1,0 +1,140 @@
+/* Globall Cloud — Enterprise UI System v1
+   Additive design layer. No business/data logic. RTL + Safari safe. */
+:root{
+  --gc-e-bg:#050b18;
+  --gc-e-surface:rgba(14,31,55,.86);
+  --gc-e-surface-2:rgba(20,44,75,.72);
+  --gc-e-surface-3:rgba(7,20,38,.78);
+  --gc-e-line:rgba(94,150,206,.22);
+  --gc-e-line-strong:rgba(79,227,240,.38);
+  --gc-e-text:#f5f9fd;
+  --gc-e-muted:#9db3cf;
+  --gc-e-dim:#7189aa;
+  --gc-e-cyan:#24d5e6;
+  --gc-e-cyan-2:#6eeaf2;
+  --gc-e-green:#35d58a;
+  --gc-e-amber:#ffc768;
+  --gc-e-red:#ff6d5b;
+  --gc-e-radius:22px;
+  --gc-e-radius-sm:14px;
+  --gc-e-shadow:0 22px 70px rgba(0,0,0,.32);
+  --gc-e-shadow-cyan:0 18px 55px rgba(0,194,217,.16);
+}
+
+html{scroll-behavior:smooth;}
+body{background-color:var(--gc-e-bg);color:var(--gc-e-text);}
+body,button,input,select,textarea{font-family:var(--font,'Vazirmatn','Noto Sans Arabic',sans-serif);}
+
+/* Premium surface treatment without changing layout contracts. */
+.card,.panel,.hero-card,.identity,.live-map-container,.tracking-details,.corridor-strip,.route-card,.feature,.kpi,.rowitem,.modalbox,.section-card{
+  border-color:var(--gc-e-line)!important;
+  box-shadow:var(--gc-e-shadow);
+  -webkit-backdrop-filter:blur(18px) saturate(125%);
+  backdrop-filter:blur(18px) saturate(125%);
+}
+
+.card,.panel,.hero-card,.identity,.live-map-container,.tracking-details,.corridor-strip,.route-card,.feature,.kpi,.section-card{
+  background:linear-gradient(145deg,rgba(21,49,82,.86),rgba(7,20,38,.84));
+}
+
+.card:hover,.panel:hover,.feature:hover,.kpi:hover,.route-card:hover{
+  border-color:var(--gc-e-line-strong)!important;
+  box-shadow:var(--gc-e-shadow),var(--gc-e-shadow-cyan);
+}
+
+/* Better hierarchy */
+h1,h2,h3,h4{letter-spacing:-.025em;text-wrap:balance;}
+p{line-height:1.8;}
+small,.muted,.subtle{color:var(--gc-e-muted);}
+
+/* Buttons become a coherent action system. */
+.btn,button.btn,.button,.action-btn,[role="button"]{
+  border-radius:14px;
+  border-width:1px;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.btn:hover,button.btn:hover,.button:hover,.action-btn:hover,[role="button"]:hover{transform:translateY(-1px);}
+.btn:focus-visible,button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[role="button"]:focus-visible{
+  outline:3px solid rgba(36,213,230,.24)!important;
+  outline-offset:2px;
+}
+
+/* Forms */
+input,select,textarea,.field{border-color:var(--gc-e-line)!important;background:rgba(4,14,28,.72)!important;color:var(--gc-e-text)!important;border-radius:14px!important;}
+input::placeholder,textarea::placeholder{color:#7087a7;}
+input:hover,select:hover,textarea:hover,.field:hover{border-color:rgba(79,227,240,.3)!important;}
+
+/* Status vocabulary */
+.gc-status,.status-chip,.badge{display:inline-flex;align-items:center;gap:7px;min-height:30px;padding:5px 11px;border-radius:999px;font-size:12px;font-weight:800;line-height:1.2;white-space:nowrap;}
+.gc-status::before,.status-chip::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 12px currentColor;}
+.gc-status-live{color:var(--gc-e-green);background:rgba(53,213,138,.1);}
+.gc-status-progress{color:var(--gc-e-cyan);background:rgba(36,213,230,.1);}
+.gc-status-warning{color:var(--gc-e-amber);background:rgba(255,199,104,.1);}
+.gc-status-danger{color:var(--gc-e-red);background:rgba(255,109,91,.1);}
+
+/* Tables / operational lists */
+table{border-collapse:separate!important;border-spacing:0!important;}
+thead th{background:rgba(8,22,40,.92);color:var(--gc-e-muted);font-size:12px;font-weight:800;letter-spacing:.02em;}
+tbody tr{transition:background .15s ease;}
+tbody tr:hover{background:rgba(36,213,230,.045);}
+
+/* Premium top-level navigation */
+nav,.nav,.topbar,.top-nav,.site-header{border-color:var(--gc-e-line)!important;background:rgba(5,15,30,.84)!important;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);}
+
+/* Skeleton utility for real async surfaces. */
+.gc-skeleton{position:relative;overflow:hidden;background:rgba(120,150,180,.11)!important;color:transparent!important;border-color:transparent!important;min-height:1em;border-radius:10px;}
+.gc-skeleton::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.09),transparent);animation:gc-shimmer 1.35s infinite;}
+@keyframes gc-shimmer{100%{transform:translateX(100%);}}
+
+/* System notification rail */
+#gc-system-rail{position:fixed;z-index:2147483000;inset-inline-end:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:min(360px,calc(100vw - 28px));}
+.gc-system-toast{pointer-events:auto;display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--gc-e-line);border-radius:14px;background:rgba(5,16,31,.94);box-shadow:0 16px 45px rgba(0,0,0,.35);color:var(--gc-e-text);font-size:12px;animation:gc-toast-in .2s ease both;}
+.gc-system-dot{width:8px;height:8px;border-radius:50%;background:var(--gc-e-green);box-shadow:0 0 12px var(--gc-e-green);flex:0 0 auto;}
+.gc-system-toast.offline .gc-system-dot{background:var(--gc-e-red);box-shadow:0 0 12px var(--gc-e-red);}
+@keyframes gc-toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* Command palette */
+#gc-command-palette{position:fixed;inset:0;z-index:2147482999;display:none;align-items:flex-start;justify-content:center;padding:10vh 16px 24px;background:rgba(1,7,16,.64);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);}
+#gc-command-palette.open{display:flex;}
+.gc-command-box{width:min(680px,100%);max-height:min(72vh,680px);overflow:hidden;border:1px solid var(--gc-e-line-strong);border-radius:22px;background:linear-gradient(145deg,rgba(17,40,68,.98),rgba(5,15,30,.98));box-shadow:0 30px 100px rgba(0,0,0,.5);}
+.gc-command-head{padding:14px;border-bottom:1px solid var(--gc-e-line);}
+#gc-command-input{width:100%;height:48px;border:1px solid var(--gc-e-line-strong)!important;border-radius:13px!important;background:rgba(0,10,22,.7)!important;font-size:16px!important;outline:none;}
+.gc-command-list{max-height:52vh;overflow:auto;padding:8px;}
+.gc-command-item{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:12px 13px;border:0;border-radius:12px;background:transparent;color:var(--gc-e-text);text-align:inherit;cursor:pointer;}
+.gc-command-item:hover,.gc-command-item.active{background:rgba(36,213,230,.1);}
+.gc-command-item small{color:var(--gc-e-dim);font-family:var(--mono,'JetBrains Mono',monospace);}
+.gc-command-trigger{position:fixed;z-index:2147482990;inset-inline-end:16px;top:calc(14px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid var(--gc-e-line);border-radius:10px;background:rgba(5,16,31,.78);color:var(--gc-e-muted);font-size:11px;cursor:pointer;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);}
+
+/* Offline banner */
+.gc-offline-banner{position:fixed;z-index:2147483001;inset-inline:12px;top:calc(10px + env(safe-area-inset-top,0px));display:none;justify-content:center;pointer-events:none;}
+.gc-offline-banner.show{display:flex;}
+.gc-offline-banner span{padding:8px 13px;border:1px solid rgba(255,109,91,.35);border-radius:999px;background:rgba(60,17,15,.94);color:#ffd6d0;font-size:12px;font-weight:800;box-shadow:0 12px 30px rgba(0,0,0,.28);}
+
+/* Mobile-first command center */
+@media(max-width:760px){
+  .gc-command-trigger{top:auto;bottom:calc(82px + env(safe-area-inset-bottom,0px));inset-inline-end:12px;}
+  #gc-system-rail{inset-inline:12px;max-width:none;}
+  .gc-system-toast{width:100%;}
+  #gc-command-palette{padding:7vh 10px 18px;}
+  .gc-command-box{max-height:78vh;border-radius:18px;}
+  .gc-command-list{max-height:62vh;}
+  h1{line-height:1.18;}
+}
+
+@media(max-width:430px){
+  .gc-command-trigger{font-size:0;width:42px;height:42px;justify-content:center;border-radius:50%;}
+  .gc-command-trigger::before{content:"⌘";font-size:18px;}
+  .btn,button,.action-btn{min-height:44px;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}
+}
+
+@media print{
+  #gc-command-palette,#gc-command-trigger,#gc-system-rail,.gc-offline-banner{display:none!important;}
+  body{background:#fff!important;color:#111!important;}
+  .card,.panel,.hero-card,.identity{box-shadow:none!important;background:#fff!important;color:#111!important;}
+}
