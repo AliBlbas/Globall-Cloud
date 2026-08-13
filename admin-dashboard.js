@@ -1,18 +1,11 @@
-// Admin Dashboard Analytics Engine
-// Aligned with the live Globall Cloud Supabase schema.
+// Globall Cloud — Operations analytics adapter
+// Reads protected operational data through the authenticated `account-admin` Edge Function.
+// This avoids direct browser reads against RLS-protected tables and keeps the dashboard
+// aligned with the real production schema.
 //
-// FIXED: the previous version read `window.supabase` and called
-// `.from()` directly on it. But `window.supabase` is only the raw
-// supabase-js *library* namespace (it just has `.createClient`) — neither
-// index.html nor accounts-console.html ever assigns the real client back to
-// `window.supabase`. The actual usable client in both pages is a local
-// variable called `sb`. Calling `window.supabase.from(...)` therefore threw
-// "supabase.from is not a function" every time, was swallowed by the
-// try/catch, and silently returned null — so this dashboard could never
-// have worked, wired in or not.
-//
-// Fix: accept the real client explicitly (or fall back to `window.sb` if
-// the host page exposes one), instead of assuming.
+// Schema note: shipments does not have a `status` or `delivered_at` column.
+// Delivery is inferred from `step_dates.delivered` / `current_step_index`.
+// Never assume columns that are not present in the live schema.
 
 class AdminDashboard {
   constructor(client) {
@@ -21,10 +14,7 @@ class AdminDashboard {
     this.startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     this.endDate = new Date();
     this.refreshInterval = 300000;
-    this.initializeDashboard();
-  }
-
-  initializeDashboard() {
+    this._refreshTimer = null;
     this.setupMetrics();
     this.startAutoRefresh();
   }
@@ -41,58 +31,67 @@ class AdminDashboard {
       deliverySuccessRate: { unit: '%', label: 'Success Rate' },
       totalReceipts: { unit: 'count', label: 'Warehouse Receipts' },
       totalMessages: { unit: 'count', label: 'Messages' },
+      outstandingBalance: { unit: 'USD', label: 'Outstanding Balance' },
     };
-
     Object.entries(defs).forEach(([key, meta]) => {
       this.metrics.set(key, { value: 0, trend: 0, ...meta });
     });
   }
 
+  async getSession() {
+    const client = this.client || window.sb;
+    if (!client?.auth) throw new Error('Supabase client is not available');
+    const { data, error } = await client.auth.getSession();
+    if (error) throw error;
+    if (!data.session) throw new Error('Staff session is required');
+    return data.session;
+  }
+
+  async edgeList(kind) {
+    const session = await this.getSession();
+    const client = this.client || window.sb;
+    const baseUrl = `${client.supabaseUrl || ''}/functions/v1/account-admin`;
+    if (!baseUrl.startsWith('http')) throw new Error('Supabase project URL is unavailable');
+    const response = await fetch(`${baseUrl}?kind=${encodeURIComponent(kind)}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: client.supabaseKey,
+      },
+      cache: 'no-store',
+    });
+    const text = await response.text();
+    let payload = null;
+    try { payload = text ? JSON.parse(text) : null; } catch { payload = { error: text }; }
+    if (!response.ok) throw new Error(payload?.error || `account-admin failed (${response.status})`);
+    return Array.isArray(payload?.items) ? payload.items : [];
+  }
+
   async fetchDashboardData() {
     try {
-      const supabase = this.client;
-      if (!supabase) {
-        console.error('AdminDashboard: no Supabase client available (pass one to `new AdminDashboard(sb)`)');
-        return null;
-      }
-
-      const [shipmentsRes, customersRes, receiptsRes, messagesRes] = await Promise.all([
-        supabase
-          .from('shipments')
-          .select('id,status,created_at,delivered_at,total_amount,paid_amount,origin_key,dest_key,branch,customer_name,customer_phone,directory_customer_id,current_step_index,eta')
-          .gte('created_at', this.startDate.toISOString())
-          .lte('created_at', this.endDate.toISOString()),
-        supabase
-          .from('customer_directory')
-          .select('id,name,phone,email,city,delivery_location,created_at')
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('warehouse_receipts')
-          .select('id,batch_code,location,created_at,received_at,directory_customer_id,created_by_name,consolidated')
-          .gte('created_at', this.startDate.toISOString())
-          .lte('created_at', this.endDate.toISOString()),
-        supabase
-          .from('messages')
-          .select('id,created_at,company,request_type')
-          .gte('created_at', this.startDate.toISOString())
-          .lte('created_at', this.endDate.toISOString()),
+      const [shipments, customers, receipts, logs] = await Promise.all([
+        this.edgeList('shipment'),
+        this.edgeList('customer'),
+        this.edgeList('receipt'),
+        this.edgeList('log'),
       ]);
 
-      if (shipmentsRes.error) throw shipmentsRes.error;
-      if (customersRes.error) throw customersRes.error;
-      if (receiptsRes.error) throw receiptsRes.error;
-      if (messagesRes.error) throw messagesRes.error;
-
-      return {
-        shipments: shipmentsRes.data || [],
-        customers: customersRes.data || [],
-        receipts: receiptsRes.data || [],
-        messages: messagesRes.data || [],
-      };
+      // Messages are intentionally not queried directly because the current account-admin
+      // contract does not expose them. A recent activity count remains useful and safe.
+      return { shipments, customers, receipts, logs, messages: [] };
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error('AdminDashboard: protected data load failed', error);
       return null;
     }
+  }
+
+  isDelivered(shipment) {
+    const deliveredAt = shipment?.step_dates?.delivered;
+    return Boolean(deliveredAt) || Number(shipment?.current_step_index || 0) >= 5;
+  }
+
+  deliveredAt(shipment) {
+    return shipment?.step_dates?.delivered || null;
   }
 
   async calculateMetrics() {
@@ -100,7 +99,6 @@ class AdminDashboard {
     if (!data) return null;
 
     const { shipments, customers, receipts, messages } = data;
-
     const totalRevenue = shipments.reduce((sum, s) => sum + Number(s.total_amount || 0), 0);
     const totalDue = shipments.reduce((sum, s) => {
       const total = Number(s.total_amount || 0);
@@ -108,108 +106,99 @@ class AdminDashboard {
       return sum + Math.max(0, total - paid);
     }, 0);
 
-    const deliveredToday = shipments.filter((s) => {
-      if (!s.delivered_at || s.status !== 'delivered') return false;
-      return new Date(s.delivered_at).toDateString() === new Date().toDateString();
+    const delivered = shipments.filter((s) => this.isDelivered(s));
+    const activeShipments = shipments.filter((s) => !this.isDelivered(s)).length;
+    const deliveredToday = delivered.filter((s) => {
+      const at = this.deliveredAt(s);
+      return at && new Date(at).toDateString() === new Date().toDateString();
     }).length;
-
-    const activeShipments = shipments.filter((s) => !['delivered', 'cancelled'].includes(String(s.status || '').toLowerCase())).length;
     const newCustomers = customers.filter((c) => new Date(c.created_at) >= this.startDate).length;
 
-    const deliveryTimes = shipments
-      .filter((s) => s.created_at && s.delivered_at)
-      .map((s) => (new Date(s.delivered_at) - new Date(s.created_at)) / (1000 * 60 * 60 * 24))
+    const deliveryTimes = delivered
+      .map((s) => {
+        const deliveredAt = this.deliveredAt(s);
+        if (!s.created_at || !deliveredAt) return null;
+        return (new Date(deliveredAt) - new Date(s.created_at)) / (1000 * 60 * 60 * 24);
+      })
       .filter((n) => Number.isFinite(n) && n >= 0);
 
     const avgDeliveryTime = deliveryTimes.length
       ? deliveryTimes.reduce((a, b) => a + b, 0) / deliveryTimes.length
       : 0;
+    const successRate = shipments.length ? (delivered.length / shipments.length) * 100 : 0;
 
-    const successRate = shipments.length
-      ? (shipments.filter((s) => s.status === 'delivered').length / shipments.length) * 100
-      : 0;
-
-    this.metrics.set('totalRevenue', { ...this.metrics.get('totalRevenue'), value: Math.round(totalRevenue * 100) / 100 });
-    this.metrics.set('totalShipments', { ...this.metrics.get('totalShipments'), value: shipments.length });
-    this.metrics.set('activeShipments', { ...this.metrics.get('activeShipments'), value: activeShipments });
-    this.metrics.set('deliveredToday', { ...this.metrics.get('deliveredToday'), value: deliveredToday });
-    this.metrics.set('totalCustomers', { ...this.metrics.get('totalCustomers'), value: customers.length });
-    this.metrics.set('newCustomers', { ...this.metrics.get('newCustomers'), value: newCustomers });
-    this.metrics.set('avgDeliveryTime', { ...this.metrics.get('avgDeliveryTime'), value: Number(avgDeliveryTime.toFixed(1)) });
-    this.metrics.set('deliverySuccessRate', { ...this.metrics.get('deliverySuccessRate'), value: Number(successRate.toFixed(1)) });
-    this.metrics.set('totalReceipts', { ...this.metrics.get('totalReceipts'), value: receipts.length });
-    this.metrics.set('totalMessages', { ...this.metrics.get('totalMessages'), value: messages.length });
-    this.metrics.set('outstandingBalance', { value: Math.round(totalDue * 100) / 100, trend: 0, unit: 'USD', label: 'Outstanding Balance' });
+    const set = (key, value) => this.metrics.set(key, { ...this.metrics.get(key), value });
+    set('totalRevenue', Math.round(totalRevenue * 100) / 100);
+    set('totalShipments', shipments.length);
+    set('activeShipments', activeShipments);
+    set('deliveredToday', deliveredToday);
+    set('totalCustomers', customers.length);
+    set('newCustomers', newCustomers);
+    set('avgDeliveryTime', Number(avgDeliveryTime.toFixed(1)));
+    set('deliverySuccessRate', Number(successRate.toFixed(1)));
+    set('totalReceipts', receipts.length);
+    set('totalMessages', messages.length);
+    set('outstandingBalance', Math.round(totalDue * 100) / 100);
 
     return this.metrics;
   }
 
   async generateRevenueReport() {
-    const supabase = this.client;
-    if (!supabase) return null;
-
-    const { data: shipments, error } = await supabase
-      .from('shipments')
-      .select('created_at,total_amount,origin_key,dest_key,type')
-      .gte('created_at', this.startDate.toISOString())
-      .lte('created_at', this.endDate.toISOString());
-
-    if (error) throw error;
-
+    const data = await this.fetchDashboardData();
+    if (!data) return null;
     const byRoute = {};
     const byDay = {};
     let totalRevenue = 0;
 
-    (shipments || []).forEach((s) => {
+    for (const s of data.shipments) {
       const amount = Number(s.total_amount || 0);
       totalRevenue += amount;
       const route = `${s.origin_key || '—'} → ${s.dest_key || '—'}`;
       byRoute[route] = (byRoute[route] || 0) + amount;
-      const day = new Date(s.created_at).toISOString().slice(0, 10);
-      byDay[day] = (byDay[day] || 0) + amount;
-    });
+      if (s.created_at) {
+        const day = new Date(s.created_at).toISOString().slice(0, 10);
+        byDay[day] = (byDay[day] || 0) + amount;
+      }
+    }
 
-    return { totalRevenue: Math.round(totalRevenue * 100) / 100, byRoute, byDay, generatedAt: new Date().toISOString() };
+    return {
+      totalRevenue: Math.round(totalRevenue * 100) / 100,
+      byRoute,
+      byDay,
+      generatedAt: new Date().toISOString(),
+    };
   }
 
   async generatePerformanceReport() {
     const data = await this.fetchDashboardData();
     if (!data) return null;
 
-    const { shipments } = data;
-    const byStatus = {};
+    const byProgress = {};
     const routePerformance = {};
-
-    shipments.forEach((s) => {
-      const status = String(s.status || 'unknown');
-      byStatus[status] = (byStatus[status] || 0) + 1;
+    for (const s of data.shipments) {
+      const progress = this.isDelivered(s) ? 'delivered' : `step-${Number(s.current_step_index || 0)}`;
+      byProgress[progress] = (byProgress[progress] || 0) + 1;
       const route = `${s.origin_key || '—'} → ${s.dest_key || '—'}`;
-      if (!routePerformance[route]) routePerformance[route] = { count: 0, delivered: 0, delayed: 0 };
+      if (!routePerformance[route]) routePerformance[route] = { count: 0, delivered: 0 };
       routePerformance[route].count += 1;
-      if (status === 'delivered') routePerformance[route].delivered += 1;
-      if (status === 'delayed') routePerformance[route].delayed += 1;
-    });
+      if (this.isDelivered(s)) routePerformance[route].delivered += 1;
+    }
 
-    return { totalShipments: shipments.length, byStatus, routePerformance, generatedAt: new Date().toISOString() };
+    return {
+      totalShipments: data.shipments.length,
+      byProgress,
+      routePerformance,
+      generatedAt: new Date().toISOString(),
+    };
   }
 
   async generateCustomerInsights() {
-    const supabase = this.client;
-    if (!supabase) return null;
+    const data = await this.fetchDashboardData();
+    if (!data) return null;
 
-    const [{ data: customers, error: cErr }, { data: shipments, error: sErr }] = await Promise.all([
-      supabase.from('customer_directory').select('id,name,phone,email,created_at,city,delivery_location'),
-      supabase.from('shipments').select('id,customer_name,customer_phone,customer_email,total_amount,directory_customer_id,customer_user_id,created_at,status'),
-    ]);
-
-    if (cErr) throw cErr;
-    if (sErr) throw sErr;
-
-    const shipmentRows = shipments || [];
     const customerStats = {};
-
-    customers.forEach((c) => {
-      const linked = shipmentRows.filter((s) => s.directory_customer_id === c.id || s.customer_phone === c.phone);
+    for (const c of data.customers) {
+      const linked = data.shipments.filter((s) => s.directory_customer_id === c.id || s.customer_phone === c.phone);
       customerStats[c.id] = {
         name: c.name,
         phone: c.phone,
@@ -218,18 +207,28 @@ class AdminDashboard {
         deliveryLocation: c.delivery_location,
         orderCount: linked.length,
         totalSpent: linked.reduce((sum, s) => sum + Number(s.total_amount || 0), 0),
+        outstanding: linked.reduce((sum, s) => sum + Math.max(0, Number(s.total_amount || 0) - Number(s.paid_amount || 0)), 0),
         joinDate: c.created_at,
       };
-    });
+    }
 
-    const topCustomers = Object.entries(customerStats).sort((a, b) => b[1].totalSpent - a[1].totalSpent).slice(0, 10);
+    const topCustomers = Object.entries(customerStats)
+      .sort((a, b) => b[1].totalSpent - a[1].totalSpent)
+      .slice(0, 10);
 
-    return { totalCustomers: customers.length, topCustomers, customerStats, generatedAt: new Date().toISOString() };
+    return {
+      totalCustomers: data.customers.length,
+      topCustomers,
+      customerStats,
+      generatedAt: new Date().toISOString(),
+    };
   }
 
   startAutoRefresh() {
     if (this._refreshTimer) clearInterval(this._refreshTimer);
-    this._refreshTimer = setInterval(() => this.calculateMetrics(), this.refreshInterval);
+    this._refreshTimer = setInterval(() => {
+      this.calculateMetrics().catch((error) => console.debug('Analytics refresh skipped:', error?.message || error));
+    }, this.refreshInterval);
   }
 
   stopAutoRefresh() {
@@ -238,10 +237,5 @@ class AdminDashboard {
   }
 }
 
-if (typeof window !== 'undefined') {
-  window.AdminDashboard = AdminDashboard;
-}
-
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { AdminDashboard };
-}
+if (typeof window !== 'undefined') window.AdminDashboard = AdminDashboard;
+if (typeof module !== 'undefined' && module.exports) module.exports = { AdminDashboard };
