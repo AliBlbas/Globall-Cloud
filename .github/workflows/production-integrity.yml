@@ -36,10 +36,11 @@ jobs:
           set -euo pipefail
           grep -q "ahslifnthiwfkmaswjno.supabase.co" production-bridge.js
           grep -q "account-admin" accounts-console-script.js
-          grep -q "gc-v28" sw.js
+          grep -q "gc-v29" sw.js
+          grep -q "operations-control-v2.html" sw.js
+          grep -q "operations-events.js" sw.js
           grep -q "customer-portal.html" sw.js
           grep -q "warehouse-os.html" sw.js
-          grep -q "operations-control-v2.html" sw.js
           grep -q "production-bridge.js" sw.js
           grep -q "operations-exception-engine.js" sw.js
           grep -q "no-store" _headers
@@ -69,8 +70,10 @@ jobs:
           test -f production-bridge.js
           test -f staff-auth-fix.js
           test -f operations-exception-engine.js
+          test -f operations-events.js
           test -f customer-portal.html
           test -f warehouse-os.html
+          test -f operations-control.html
           test -f operations-control-v2.html
           test -f accounts-console.html
           test -f staff-os.html
