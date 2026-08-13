@@ -47,10 +47,30 @@
       document.head?.appendChild(style);
     }
   };
+  const injectOperationsPolish = () => {
+    if (!document.getElementById('gc-operations-polish')) {
+      const style = document.createElement('style');
+      style.id = 'gc-operations-polish';
+      style.textContent = `
+        body:has(#kShip){overflow-x:hidden}
+        body:has(#kShip) .card,body:has(#kShip) .hero-card,body:has(#kShip) .identity{min-width:0}
+        body:has(#kShip) h1,body:has(#kShip) h2,body:has(#kShip) h3,body:has(#kShip) p,body:has(#kShip) span,body:has(#kShip) button,body:has(#kShip) label,body:has(#kShip) small{writing-mode:horizontal-tb!important;word-break:normal!important;overflow-wrap:anywhere}
+        body:has(#kShip) .kpi{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+        body:has(#kShip) .kpi:focus-within,body:has(#kShip) .feature:focus-within,body:has(#kShip) .rowitem:focus-within{border-color:rgba(88,229,239,.42);box-shadow:0 0 0 3px rgba(0,194,217,.10)}
+        body:has(#kShip) .btn{writing-mode:horizontal-tb!important;white-space:normal!important;min-width:0;max-width:100%;line-height:1.35;text-align:center}
+        @media(max-width:1050px){body:has(#kShip) .grid4{grid-template-columns:repeat(2,minmax(0,1fr))}body:has(#kShip) .grid3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+        @media(max-width:680px){body:has(#kShip) .wrap{padding-inline:12px}body:has(#kShip) .hero{grid-template-columns:1fr!important}body:has(#kShip) .grid4,body:has(#kShip) .grid3{grid-template-columns:minmax(0,1fr)!important}body:has(#kShip) .section-head{align-items:stretch;flex-direction:column}body:has(#kShip) .toolbar{width:100%}body:has(#kShip) .mini{max-width:none;width:100%}body:has(#kShip) .rowitem{grid-template-columns:minmax(0,1fr)!important;gap:7px}body:has(#kShip) .modal{padding:12px}body:has(#kShip) .modalbox{max-height:calc(100dvh - 24px - env(safe-area-inset-bottom));border-radius:20px;padding:16px}}
+        @media(max-width:430px){body:has(#kShip) h1{font-size:31px!important}body:has(#kShip) .hero-card,body:has(#kShip) .identity,body:has(#kShip) .card{padding:15px}body:has(#kShip) .btn{min-height:46px}body:has(#kShip) .toast{left:12px;right:12px;max-width:none}}
+        @media(prefers-reduced-motion:reduce){body:has(#kShip) .kpi{transition:none}}
+      `;
+      document.head?.appendChild(style);
+    }
+  };
   const injectMobileStyles = () => {
     injectStyle('/admin-webkit-polish.css?v=20260813', 'admin-webkit');
     injectStyle('/mobile-elite-v3.css?v=20260813', 'mobile-elite');
     injectCustomerPortalPolish();
+    injectOperationsPolish();
   };
   setViewport();
   window.addEventListener('resize', setViewport, { passive: true });
