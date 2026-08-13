@@ -1,11 +1,11 @@
 /* Globall Cloud — production runtime guard
- * Defensive client bootstrap for public pages. Never exposes service-role
+ * Cross-browser defensive bootstrap for public pages. Never exposes service-role
  * credentials; it only loads the existing publishable-key bridge once.
  */
 (() => {
   'use strict';
 
-  const BRIDGE = '/production-bridge.js?v=20260812';
+  const BRIDGE = '/production-bridge.js?v=20260813-3';
   const LEGACY_MESSAGE = 'Supabase هێشتا پەیوەست نەکراوە';
   const READY_MESSAGE = 'پەیوەندیی پارێزراو بە Supabase چالاکە و سیستەمەکە ئامادەیە.';
   const FAIL_MESSAGE = 'پەیوەندیی خزمەتگوزاری بە شێوەی پارێزراو دەتاقیکرێتەوە.';
