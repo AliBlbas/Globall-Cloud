@@ -1,10 +1,11 @@
 /* Globall Cloud — canonical logo rendering
- * Safari/WebKit-safe: use the real <img> source and keep a background fallback.
+ * Safari/WebKit-safe: prefer the SVG asset and keep a stable image fallback.
  */
 .brand-logo,
 .logo-icon,
 img[src*="logo-icon.png"],
-img[src*="logo-icon-original.png"]{
+img[src*="logo-icon-original.png"],
+img[src*="logo-icon.svg"]{
   width:40px;
   height:40px;
   max-width:40px;
@@ -18,7 +19,7 @@ img[src*="logo-icon-original.png"]{
   flex:0 0 40px;
   border-radius:12px;
   background-color:#0b1b31;
-  background-image:linear-gradient(145deg, rgba(0,194,217,.10), rgba(255,255,255,.02)), url('/logo-icon-original.png');
+  background-image:linear-gradient(145deg, rgba(0,194,217,.10), rgba(255,255,255,.02)), url('/logo-icon.svg');
   background-repeat:no-repeat;
   background-position:center;
   background-size:cover, contain;
@@ -30,7 +31,8 @@ img[src*="logo-icon-original.png"]{
 
 /* Keep broken-image fallback visually stable in WebKit. */
 img[src*="logo-icon.png"],
-img[src*="logo-icon-original.png"]{
+img[src*="logo-icon-original.png"],
+img[src*="logo-icon.svg"]{
   color:transparent;
   font-size:0;
 }
@@ -39,7 +41,8 @@ img[src*="logo-icon-original.png"]{
   .brand-logo,
   .logo-icon,
   img[src*="logo-icon.png"],
-  img[src*="logo-icon-original.png"]{
+  img[src*="logo-icon-original.png"],
+  img[src*="logo-icon.svg"]{
     width:38px!important;
     height:38px!important;
     min-width:38px!important;
@@ -56,7 +59,8 @@ img[src*="logo-icon-original.png"]{
   .brand-logo,
   .logo-icon,
   img[src*="logo-icon.png"],
-  img[src*="logo-icon-original.png"]{
+  img[src*="logo-icon-original.png"],
+  img[src*="logo-icon.svg"]{
     width:36px!important;
     height:36px!important;
     min-width:36px!important;
