@@ -1,22 +1,24 @@
-const CACHE_VERSION = 'gc-v21';
+const CACHE_VERSION = 'gc-v22';
 const STATIC_CACHE = `gc-static-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/', '/index.html', '/management.html', '/staff-os.html', '/staff-portal.html',
   '/accounts-console.html', '/operations-suite.html', '/logistics-os.html', '/operations-command-center.html',
-  '/customer-portal.html', '/warehouse-os.html', '/styles.css', '/tracking-styles.css', '/mobile-final.css',
-  '/mobile-polish.css', '/mobile-elite.css', '/live-logistics-map.css', '/live-logistics-map.js', '/logo-fix.css',
-  '/production-bridge.js', '/runtime-guard.js', '/staff-auth-fix.js', '/superadmin.css', '/tracking-enhanced.js',
-  '/tracking-integration.html', '/translations.js', '/form-validation.js', '/form-validation-styles.css',
-  '/whatsapp-messenger.js', '/webhook-handler.js', '/admin-dashboard.js', '/price-calculator.js',
-  '/logo-icon-original.png', '/logo-icon.png', '/og-image.jpg', '/manifest.json', '/operations-exception-engine.js'
+  '/customer-portal.html', '/warehouse-os.html', '/styles.css', '/tracking-styles.css', '/site-polish.css',
+  '/browser-compat.css', '/mobile-final.css', '/mobile-polish.css', '/mobile-elite.css', '/live-logistics-map.css',
+  '/live-logistics-map.js', '/logo-fix.css', '/production-bridge.js', '/runtime-guard.js', '/staff-auth-fix.js',
+  '/superadmin.css', '/tracking-enhanced.js', '/tracking-integration.html', '/translations.js', '/form-validation.js',
+  '/form-validation-styles.css', '/whatsapp-messenger.js', '/webhook-handler.js', '/admin-dashboard.js',
+  '/price-calculator.js', '/logo-icon-original.png', '/logo-icon.png', '/og-image.jpg', '/manifest.json',
+  '/operations-exception-engine.js'
 ];
 
+const BROWSER_COMPAT_CSS = '/browser-compat.css?v=20260813-1';
 const MOBILE_CSS = '/mobile-final.css?v=20260812-12';
 const MOBILE_POLISH_CSS = '/mobile-polish.css?v=20260812-3';
 const MOBILE_ELITE_CSS = '/mobile-elite.css?v=20260812-1';
 const LIVE_MAP_CSS = '/live-logistics-map.css?v=20260812-1';
 const LIVE_MAP_JS = '/live-logistics-map.js?v=20260812-1';
-const LOGO_CSS = '/logo-fix.css?v=20260812-7';
+const LOGO_CSS = '/logo-fix.css?v=20260813-1';
 const SUPERADMIN_CSS = '/superadmin.css?v=20260811-1';
 const PINGDOM_SCRIPT = '<script src="//rum-static.pingdom.net/pa-6a7b6dd8a6e49b001200002c.js" async></script>';
 const RUNTIME_GUARD_SCRIPT = '<script src="/runtime-guard.js?v=20260813-4" defer></script>';
@@ -45,6 +47,7 @@ function injectSiteAssets(response) {
     if (!injected.includes('rum-static.pingdom.net/pa-6a7b6dd8a6e49b001200002c.js')) injected = injected.replace(/<head([^>]*)>/i, `<head$1>${PINGDOM_SCRIPT}`);
     if (!injected.includes('/runtime-guard.js')) injected = injected.replace(/<head([^>]*)>/i, `<head$1>${RUNTIME_GUARD_SCRIPT}`);
     if (!injected.includes('/production-bridge.js')) injected = injected.replace(/<head([^>]*)>/i, `<head$1>${PRODUCTION_BRIDGE_SCRIPT}`);
+    if (!injected.includes('/browser-compat.css')) injected = injected.replace(/<head([^>]*)>/i, `<head$1><link rel="stylesheet" href="${BROWSER_COMPAT_CSS}"></head>`);
     if (/\/staff-os\.html$/.test(path) && !injected.includes('/staff-auth-fix.js')) injected = injected.replace(/<head([^>]*)>/i, `<head$1>${STAFF_AUTH_SCRIPT}`);
     if (/\/staff-os\.html$/.test(path) && !injected.includes('/superadmin.css')) injected = injected.replace(/<\/head>/i, `<link rel="stylesheet" href="${SUPERADMIN_CSS}"></head>`);
     if (!injected.includes('/logo-fix.css')) injected = injected.replace(/<\/head>/i, `<link rel="stylesheet" href="${LOGO_CSS}"></head>`);
