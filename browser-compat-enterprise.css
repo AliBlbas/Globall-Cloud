@@ -1,0 +1,193 @@
+/* Globall Cloud — cross-browser enterprise compatibility layer
+ * Targets Safari/WebKit, Chrome, iOS/iPadOS, RTL, safe-area and narrow admin layouts.
+ * Additive only: no business logic or data access changes.
+ */
+
+html {
+  min-height: 100%;
+  min-height: -webkit-fill-available;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  scrollbar-gutter: stable;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  margin: 0;
+  overscroll-behavior-x: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*, *::before, *::after { min-width: 0; }
+
+img, svg, video, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+button, a, input, select, textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, input, select, textarea {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input, select, textarea {
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration { display: none; }
+
+/* WebKit blur support */
+.nav, .topbar, .mobile-menu, .modal, .toast, .notification,
+[data-backdrop], .backdrop {
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+/* iOS fixed/sticky surfaces: reserve the home-indicator area. */
+.nav,
+.topbar,
+.mobile-menu,
+[data-bottom-nav],
+.bottom-nav,
+.app-bottom-nav,
+.mobile-bottom-nav {
+  padding-bottom: max(var(--gc-safe-bottom, 0px), env(safe-area-inset-bottom));
+}
+
+[data-bottom-nav],
+.bottom-nav,
+.app-bottom-nav,
+.mobile-bottom-nav {
+  min-height: calc(64px + env(safe-area-inset-bottom));
+}
+
+/* Avoid Safari fixed-background rendering glitches. */
+body {
+  background-attachment: scroll !important;
+}
+
+@supports (background-attachment: fixed) and (not (-webkit-touch-callout: none)) {
+  body { background-attachment: fixed !important; }
+}
+
+/* RTL correctness: never let narrow flex/grid children become vertical glyph columns. */
+[dir="rtl"] .tab,
+[dir="rtl"] .btn,
+[dir="rtl"] button,
+[dir="rtl"] .card,
+[dir="rtl"] .panel,
+[dir="rtl"] .stat,
+[dir="rtl"] .value,
+[dir="rtl"] .label,
+[dir="rtl"] .hero,
+[dir="rtl"] .toolbar,
+[dir="rtl"] .top-actions,
+[dir="rtl"] .row,
+[dir="rtl"] .field,
+[dir="rtl"] a {
+  writing-mode: horizontal-tb !important;
+  word-break: normal !important;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+/* Admin/mobile: prevent the narrow two-column collapse seen in WebKit screenshots. */
+@media (max-width: 760px) {
+  .grid, .form-grid, .stats-grid, .cards-grid, .feature-grid, .services-grid,
+  .admin-grid, .command-grid, .dashboard-grid, .content-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .tabs {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 8px;
+    overflow-x: auto !important;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs > * { flex: 0 0 auto; min-width: max-content; }
+
+  table {
+    max-width: 100%;
+  }
+
+  .table-wrap,
+  .table-scroll,
+  .overflow-x-auto {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .toolbar,
+  .top-actions,
+  .actions,
+  .hero-actions {
+    flex-wrap: wrap !important;
+    min-width: 0;
+  }
+
+  .toolbar .btn,
+  .top-actions .btn,
+  .actions .btn,
+  .hero-actions .btn {
+    flex: 1 1 auto;
+    min-width: min(100%, 150px);
+  }
+
+  .hero h1,
+  .hero p,
+  .page-head h1,
+  .page-head p {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 430px) {
+  .container { padding-inline: 14px !important; }
+  .panel, .hero, .card, .auth-box { border-radius: 18px; }
+  .btn { min-height: 48px; }
+  .btn, button { max-width: 100%; }
+
+  .gc-tracking-card { border-radius: 18px !important; }
+  .gc-tracking-facts { grid-template-columns: 1fr !important; }
+  .gc-track-actions { width: 100%; }
+  .gc-track-action { flex: 1 1 100%; }
+}
+
+/* iOS keyboard and viewport changes: avoid full-height panels jumping under the keyboard. */
+@supports (height: 100dvh) {
+  .min-screen,
+  .screen,
+  .full-screen,
+  .app-screen {
+    min-height: 100dvh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
