@@ -1,30 +1,49 @@
-/* Globall Cloud — canonical brand asset + responsive-safe logo rendering */
+/* Globall Cloud — canonical logo rendering
+ * Safari/WebKit-safe: use the real <img> source and keep a background fallback.
+ */
 .brand-logo,
 .logo-icon,
-img[src*="logo-icon.png"]{
-  content:url('/logo-icon-original.png');
+img[src*="logo-icon.png"],
+img[src*="logo-icon-original.png"]{
   width:40px;
   height:40px;
   max-width:40px;
   max-height:40px;
   min-width:40px;
+  min-height:40px;
+  aspect-ratio:1 / 1;
   object-fit:contain;
   object-position:center;
   display:block;
   flex:0 0 40px;
   border-radius:12px;
-  background:linear-gradient(145deg, rgba(0,194,217,.10), rgba(255,255,255,.02));
+  background-color:#0b1b31;
+  background-image:linear-gradient(145deg, rgba(0,194,217,.10), rgba(255,255,255,.02)), url('/logo-icon-original.png');
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:cover, contain;
   border:1px solid rgba(79,227,240,.18);
   padding:3px;
   box-shadow:0 6px 18px rgba(0,0,0,.14), 0 0 0 1px rgba(255,255,255,.025) inset;
+  -webkit-user-drag:none;
 }
+
+/* Keep broken-image fallback visually stable in WebKit. */
+img[src*="logo-icon.png"],
+img[src*="logo-icon-original.png"]{
+  color:transparent;
+  font-size:0;
+}
+
 @media (max-width:760px){
   .brand-logo,
   .logo-icon,
-  img[src*="logo-icon.png"]{
+  img[src*="logo-icon.png"],
+  img[src*="logo-icon-original.png"]{
     width:38px!important;
     height:38px!important;
     min-width:38px!important;
+    min-height:38px!important;
     max-width:38px!important;
     max-height:38px!important;
     flex-basis:38px!important;
@@ -32,13 +51,16 @@ img[src*="logo-icon.png"]{
     padding:3px!important;
   }
 }
+
 @media (max-width:390px){
   .brand-logo,
   .logo-icon,
-  img[src*="logo-icon.png"]{
+  img[src*="logo-icon.png"],
+  img[src*="logo-icon-original.png"]{
     width:36px!important;
     height:36px!important;
     min-width:36px!important;
+    min-height:36px!important;
     max-width:36px!important;
     max-height:36px!important;
     flex-basis:36px!important;
