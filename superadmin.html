@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#06101f">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>Globall Cloud — Super Admin Center</title>
+  <link rel="icon" type="image/png" href="logo-icon.png">
+  <link rel="stylesheet" href="superadmin.css?v=20260813-1">
+  <script src="production-bridge.js?v=20260813-4" defer></script>
+  <script src="runtime-guard.js?v=20260813-4" defer></script>
+</head>
+<body>
+  <div id="boot" class="boot"><div class="boot-card"><div class="brand-mark">GC</div><div class="mono">GLOBAL CLOUD · SUPER ADMIN</div><h1>کۆنسۆڵی بەڕێوەبردنی سەرەکی</h1><p>سیستەمی کۆنترۆڵی ئاستی سەرەوە بۆ هەموو عملیاتەکانی لۆجستیک.</p><div class="pulse"></div></div></div>
+
+  <div id="loginGate" class="gate hidden">
+    <div class="gate-card">
+      <div class="brand-row"><div class="brand-mark">GC</div><div><div class="mono">SUPER ADMIN</div><strong>دەستڕاگەیشتن سنووردارە</strong></div></div>
+      <p class="muted">ئەم پەڕەیە تەنها بۆ <b>admin</b> و <b>super_admin</b> ـی چالاکە.</p>
+      <a class="btn btn-primary full" href="./staff-os.html">گەڕانەوە بۆ Staff OS</a>
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <aside class="sidebar">
+      <div class="side-brand"><div class="brand-mark">GC</div><div><div class="mono">GLOBALL CLOUD</div><strong>SUPER ADMIN</strong></div></div>
+      <nav id="nav" class="nav">
+        <button class="nav-item active" data-tab="overview"><span>◈</span> Overview</button>
+        <button class="nav-item" data-tab="staff"><span>◎</span> Staff & Roles</button>
+        <button class="nav-item" data-tab="operations"><span>◇</span> Operations</button>
+        <button class="nav-item" data-tab="exceptions"><span>!</span> Exceptions</button>
+        <button class="nav-item" data-tab="customers"><span>◌</span> Customers</button>
+        <button class="nav-item" data-tab="warehouse"><span>▦</span> Warehouse</button>
+        <button class="nav-item" data-tab="audit"><span>≡</span> Audit Trail</button>
+        <button class="nav-item" data-tab="settings"><span>⚙</span> System Settings</button>
+      </nav>
+      <div class="side-footer"><a href="./staff-os.html" class="btn full">Staff OS</a><a href="./index.html" class="btn full">Public Website</a><button id="logout" class="btn danger full">دەرچوون</button></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div><div class="mono">CONTROL PLANE · LIVE</div><h1 id="pageTitle">Overview</h1><p id="pageSub" class="muted">وێنەی گشتی لە دۆخی سیستەم و عملیات.</p></div>
+        <div class="top-actions"><div class="live-chip"><span class="live-dot"></span> Supabase Connected</div><button id="refresh" class="btn">نوێکردنەوە</button><div class="profile-chip"><div id="avatar" class="avatar">GC</div><div><strong id="meName">—</strong><small id="meRole">—</small></div></div></div>
+      </header>
+
+      <section id="overview" class="tab-panel active">
+        <div class="hero-grid">
+          <div class="hero-card"><div class="hero-badge">EXECUTIVE CONTROL</div><h2>هەموو سیستەمەکە لە یەک شوێن</h2><p>کۆنترۆڵی ستاف، کڕیار، بار، warehouse، هەڵەکان و ڕێکخستنەکانی Global Cloud بە شێوەیەکی یەکگرتوو.</p><div class="hero-actions"><button class="btn btn-primary" data-jump="staff">بەڕێوەبردنی ستاف</button><button class="btn" data-jump="settings">ڕێکخستنەکان</button></div></div>
+          <div class="signal-card"><div class="mono">SYSTEM SIGNAL</div><div class="signal-row"><span>Database</span><b class="ok">HEALTHY</b></div><div class="signal-row"><span>Auth</span><b class="ok">ACTIVE</b></div><div class="signal-row"><span>RLS</span><b class="ok">ENFORCED</b></div><div class="signal-row"><span>Open Exceptions</span><b id="signalExceptions">—</b></div></div>
+        </div>
+        <div class="metric-grid">
+          <div class="metric-card"><span>Shipments</span><strong id="kShipments">—</strong><small>ڕاستەوخۆ</small></div>
+          <div class="metric-card"><span>Customers</span><strong id="kCustomers">—</strong><small>directory</small></div>
+          <div class="metric-card"><span>Active Staff</span><strong id="kStaff">—</strong><small>online system</small></div>
+          <div class="metric-card"><span>Warehouse Receipts</span><strong id="kReceipts">—</strong><small>records</small></div>
+          <div class="metric-card accent"><span>Open Exceptions</span><strong id="kExceptions">—</strong><small>needs attention</small></div>
+          <div class="metric-card"><span>Unpaid Balance</span><strong id="kBalance">—</strong><small>USD</small></div>
+        </div>
+        <div class="grid-2">
+          <section class="card"><div class="card-head"><div><div class="mono">LIVE ACTIVITY</div><h3>دواین چالاکییەکان</h3></div><button class="btn small" data-jump="audit">هەموو ببینە</button></div><div id="recentActivity" class="activity-list"></div></section>
+          <section class="card"><div class="card-head"><div><div class="mono">ATTENTION QUEUE</div><h3>پێویستی بە سەرنجدان</h3></div><button class="btn small" data-jump="exceptions">Exceptions</button></div><div id="attention" class="attention-list"></div></section>
+        </div>
+      </section>
+
+      <section id="staff" class="tab-panel"><div class="section-tools"><div><div class="mono">IDENTITY & ACCESS</div><h2>Staff & Roles</h2><p class="muted">ڕێکخستنی role، branch و چالاکیی ستاف.</p></div><div class="tool-actions"><select id="staffBranchFilter" class="select"><option value="all">هەموو branch ـەکان</option><option value="all">all</option><option value="erbil">Erbil</option><option value="dubai">Dubai</option><option value="china">China</option></select><input id="staffSearch" class="input" placeholder="گەڕان بە ناو..."/></div></div><div class="table-card"><table><thead><tr><th>ناو</th><th>Role</th><th>Branch</th><th>Status</th><th>Updated</th></tr></thead><tbody id="staffRows"></tbody></table></div></section>
+
+      <section id="operations" class="tab-panel"><div class="section-tools"><div><div class="mono">LOGISTICS CONTROL</div><h2>Operations</h2><p class="muted">دۆخی بار و پارە و شوێنکەوتن.</p></div><div class="tool-actions"><select id="opsFilter" class="select"><option value="all">هەموو</option><option value="unpaid">پارە ماوە</option><option value="late">ETA تێپەڕیوە</option></select></div></div><div class="table-card"><table><thead><tr><th>Tracking</th><th>Customer</th><th>Route</th><th>ETA</th><th>Amount</th><th>Status</th></tr></thead><tbody id="opsRows"></tbody></table></div></section>
+
+      <section id="exceptions" class="tab-panel"><div class="section-tools"><div><div class="mono">RISK & EXCEPTIONS</div><h2>Exception Center</h2><p class="muted">هەموو کێشە و مەترسییەکانی عملیات.</p></div></div><div id="exceptionCards" class="exception-grid"></div></section>
+
+      <section id="customers" class="tab-panel"><div class="section-tools"><div><div class="mono">CUSTOMER INTELLIGENCE</div><h2>Customers</h2><p class="muted">دۆخی کڕیار، city و manager assignment.</p></div><input id="customerSearch" class="input" placeholder="گەڕان بە ناو/کۆد/تەلەفۆن..."/></div><div class="table-card"><table><thead><tr><th>کۆد</th><th>ناو</th><th>تەلەفۆن</th><th>شار</th><th>Manager</th><th>Status</th></tr></thead><tbody id="customerRows"></tbody></table></div></section>
+
+      <section id="warehouse" class="tab-panel"><div class="section-tools"><div><div class="mono">WAREHOUSE CONTROL</div><h2>Warehouse</h2><p class="muted">دواین receipt و batch ـەکان.</p></div></div><div class="table-card"><table><thead><tr><th>Batch</th><th>Location</th><th>Customer</th><th>Received</th><th>Created by</th><th>Consolidated</th></tr></thead><tbody id="warehouseRows"></tbody></table></div></section>
+
+      <section id="audit" class="tab-panel"><div class="section-tools"><div><div class="mono">GOVERNANCE</div><h2>Audit Trail</h2><p class="muted">کێ چی کردووە و کەی.</p></div></div><div class="table-card"><table><thead><tr><th>کات</th><th>Staff</th><th>Action</th><th>Target</th><th>Details</th></tr></thead><tbody id="auditRows"></tbody></table></div></section>
+
+      <section id="settings" class="tab-panel"><div class="settings-grid"><section class="card"><div class="card-head"><div><div class="mono">BUSINESS CONFIG</div><h3>System Settings</h3></div><span class="badge">Admin write</span></div><label class="field-label">USD / IQD Rate</label><div class="inline-form"><input id="usdRate" class="input" type="number" min="0" step="0.01" placeholder="—"><button id="saveRate" class="btn btn-primary">پاشەکەوتکردن</button></div><p id="settingsMsg" class="hint"></p></section><section class="card"><div class="card-head"><div><div class="mono">SECURITY POSTURE</div><h3>Access Rules</h3></div></div><div class="rules"><div><span>Super Admin</span><b>Full Control</b></div><div><span>Admin</span><b>Operational Control</b></div><div><span>Accountant</span><b>Finance Focus</b></div><div><span>Inactive</span><b>Blocked by RLS</b></div></div></section></div></section>
+    </main>
+  </div>
+  <script src="superadmin.js?v=20260813-1" defer></script>
+</body>
+</html>
