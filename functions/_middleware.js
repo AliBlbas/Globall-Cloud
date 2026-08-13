@@ -15,6 +15,7 @@ export async function onRequest(context){
       element.append('<link rel="preload" as="image" href="/logo-icon-original.png" fetchpriority="high">',{html:true});
       element.append('<link rel="preload" as="image" href="/logo-icon.svg" fetchpriority="high">',{html:true});
       element.append('<link rel="stylesheet" href="/browser-compat.css?v=20260813-7" data-gc-browser-compat="1">',{html:true});
+      element.append('<link rel="stylesheet" href="/safari-compat-elite.css?v=20260813-1" data-gc-safari-elite="1">',{html:true});
       element.append('<link rel="stylesheet" href="/logo-fix.css?v=20260813-8" data-gc-logo-fix="1">',{html:true});
       element.append('<link rel="stylesheet" href="/site-polish.css?v=20260813-4" data-gc-premium-polish="1">',{html:true});
       element.append('<script src="/runtime-guard.js?v=20260813-7" defer data-gc-runtime-guard="1"></script>',{html:true});
