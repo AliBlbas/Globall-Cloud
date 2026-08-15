@@ -5,12 +5,20 @@
 (() => {
   'use strict';
 
-  const BRIDGE = '/production-bridge.js?v=20260815-1';
+  const BRIDGE = '/production-bridge.js?v=20260815-2';
   const LEGACY_MESSAGE = 'Supabase هێشتا پەیوەست نەکراوە';
   const READY_MESSAGE = 'پەیوەندیی پارێزراو بە Supabase چالاکە و سیستەمەکە ئامادەیە.';
   const FAIL_MESSAGE = 'پەیوەندیی خزمەتگوزاری بە شێوەی پارێزراو دەتاقیکرێتەوە.';
 
-  function replaceLegacyText(text) {
+  function updateConnectionNotice(text) {
+    const notice = document.getElementById('adminNotConfigured');
+    if (notice) {
+      notice.textContent = text;
+      notice.dataset.gcRuntimeState = text === READY_MESSAGE ? 'ready' : 'guarded';
+      notice.hidden = text === READY_MESSAGE;
+      notice.setAttribute('aria-live', 'polite');
+    }
+
     document.querySelectorAll('body *').forEach((node) => {
       if (node.children.length) return;
       const current = (node.textContent || '').trim();
@@ -50,15 +58,14 @@
   }
 
   async function boot() {
-    // Replace stale static copy immediately so server-rendered text never claims
-    // that Supabase is disconnected while the real connection check is running.
-    replaceLegacyText(FAIL_MESSAGE);
+    // Never present stale "not configured" copy as the initial UI state.
+    updateConnectionNotice(FAIL_MESSAGE);
     try {
       const client = await loadBridgeOnce();
-      replaceLegacyText(client || window.gcSupabaseConfig?.publishableKeyPresent ? READY_MESSAGE : FAIL_MESSAGE);
+      updateConnectionNotice(client || window.gcSupabaseConfig?.publishableKeyPresent ? READY_MESSAGE : FAIL_MESSAGE);
     } catch (error) {
       console.warn('[Globall Cloud] runtime guard:', error);
-      replaceLegacyText(FAIL_MESSAGE);
+      updateConnectionNotice(FAIL_MESSAGE);
     }
   }
 
