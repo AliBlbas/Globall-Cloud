@@ -5,18 +5,18 @@
 (() => {
   'use strict';
 
-  const BRIDGE = '/production-bridge.js?v=20260813-3';
+  const BRIDGE = '/production-bridge.js?v=20260815-1';
   const LEGACY_MESSAGE = 'Supabase هێشتا پەیوەست نەکراوە';
   const READY_MESSAGE = 'پەیوەندیی پارێزراو بە Supabase چالاکە و سیستەمەکە ئامادەیە.';
   const FAIL_MESSAGE = 'پەیوەندیی خزمەتگوزاری بە شێوەی پارێزراو دەتاقیکرێتەوە.';
 
-  function updateLegacyMessage(text) {
+  function replaceLegacyText(text) {
     document.querySelectorAll('body *').forEach((node) => {
       if (node.children.length) return;
-      if ((node.textContent || '').includes(LEGACY_MESSAGE)) {
-        node.textContent = text;
-        node.setAttribute('data-gc-runtime-state', text === READY_MESSAGE ? 'ready' : 'guarded');
-      }
+      const current = (node.textContent || '').trim();
+      if (!current.includes(LEGACY_MESSAGE)) return;
+      node.textContent = text;
+      node.setAttribute('data-gc-runtime-state', text === READY_MESSAGE ? 'ready' : 'guarded');
     });
   }
 
@@ -50,14 +50,15 @@
   }
 
   async function boot() {
-    updateLegacyMessage(FAIL_MESSAGE);
+    // Replace stale static copy immediately so server-rendered text never claims
+    // that Supabase is disconnected while the real connection check is running.
+    replaceLegacyText(FAIL_MESSAGE);
     try {
       const client = await loadBridgeOnce();
-      if (client || window.gcSupabaseConfig?.publishableKeyPresent) {
-        updateLegacyMessage(READY_MESSAGE);
-      }
+      replaceLegacyText(client || window.gcSupabaseConfig?.publishableKeyPresent ? READY_MESSAGE : FAIL_MESSAGE);
     } catch (error) {
       console.warn('[Globall Cloud] runtime guard:', error);
+      replaceLegacyText(FAIL_MESSAGE);
     }
   }
 
