@@ -1,0 +1,13 @@
+{
+  "name": "globall-cloud",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production logistics platform for China/UAE to Iraq shipping",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node tests/validate.mjs",
+    "test:syntax": "node tests/validate.mjs"
+  }
+}

@@ -115,3 +115,21 @@ Whichever you pick, decide deliberately — don't just flip the header.
 - Production Supabase status: ACTIVE_HEALTHY.
 - Remaining Supabase Advisor findings are intentionally left for a separate controlled pass because some require product-level decisions (GraphQL exposure, public extension placement, Auth OTP policy, leaked-password protection, and other existing policies).
 
+
+## 2026-08-16 Backend source recovery and release hardening
+
+- Recovered the source of all 10 active production Edge Functions from the authenticated Supabase project into `supabase/functions/`, including the retired `lg-track-shipment` compatibility function.
+- Fixed the archive drift in `public-config`: the repository source now imports `createClient` and uses the production function contract.
+- Added the production project reference and explicit `verify_jwt` settings for every Edge Function to `supabase/config.toml`.
+- Added a dependency-free `npm test` harness that validates JavaScript syntax, required files, Edge Function coverage, migration filenames, client-side secret exposure, and critical endpoint invariants.
+- Added `package.json` and `package-lock.json` so GitHub Actions npm caching is deterministic rather than failing on a missing manifest.
+- Confirmed through read-only production inspection that the Supabase project is `ACTIVE_HEALTHY`, the public site is reachable, and the public USD/IQD configuration bridge returns a valid response.
+- No production database migration, user data, payment setting, secret rotation, or live deployment was changed in this pass. Deployment remains a deliberate release-gate action after authenticated role-by-role regression testing.
+
+## Live verification after the system-health fix
+
+The initial live probe exposed a real operational defect: `system-health` returned HTTP 503 because its database check used the wrong access path for the current `app_settings` policy. The function was corrected to validate the public configuration bridge and to use the server-side key only for the shipment schema probe. The corrected function was deployed as version 2 and now returns HTTP 200 with `database=true`, `shipments=true`, and `configuration_bridge=true`.
+
+The live public tracking endpoint was exercised with a real shipment identifier without exposing that identifier in this document. It returned HTTP 200, included both the shipment projection and event list, and passed the privacy check for anonymous contact fields. Invalid tracking input returns HTTP 400, and an unsupported method on the public message endpoint returns HTTP 405.
+
+Supabase Security Advisor still reports policy and configuration warnings that require deliberate product decisions rather than blind automated changes, including the public `supabase-dbdev` extension, anonymous-role policy visibility, OTP expiry, and leaked-password protection. Performance Advisor reports many unused indexes as informational candidates. These are recorded for a controlled database-policy pass; no destructive migration was applied automatically.
