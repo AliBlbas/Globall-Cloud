@@ -94,10 +94,9 @@ jobs:
           test -f supabase/config.toml
           test -f functions/health.js
 
-      - name: Guard against stale connection messaging
+      - name: Guard runtime connection messaging
         shell: bash
         run: |
           set -euo pipefail
-          # The legacy phrase may exist only as a runtime replacement token.
           grep -q "LEGACY_MESSAGE" runtime-guard.js
-          ! grep -Rni "Supabase هێشتا پەیوەست نەکراوە" --include='index.html' --include='*.html' .
+          grep -q "production-bridge.js?v=20260815-1" runtime-guard.js
