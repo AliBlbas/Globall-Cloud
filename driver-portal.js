@@ -1,5 +1,13 @@
 (() => {
   'use strict';
+  const MOBILE_CSS = 'driver-portal-mobile.css';
+  if (!document.querySelector(`link[href="${MOBILE_CSS}"]`)) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = MOBILE_CSS;
+    document.head.appendChild(link);
+  }
+
   const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
   const DRIVER_GPS_URL = `${SUPABASE_URL}/functions/v1/driver-gps`;
