@@ -5,14 +5,10 @@
 (() => {
   'use strict';
 
-  const BRIDGE = '/production-bridge.js?v=20260815-2';
+  const BRIDGE = '/production-bridge.js?v=20260815-3';
   const LEGACY_MESSAGE = 'Supabase هێشتا پەیوەست نەکراوە';
   const READY_MESSAGE = 'پەیوەندیی پارێزراو بە Supabase چالاکە و سیستەمەکە ئامادەیە.';
   const FAIL_MESSAGE = 'پەیوەندیی خزمەتگوزاری بە شێوەی پارێزراو دەتاقیکرێتەوە.';
-
-  function isReady(client) {
-    return Boolean(client || window.gcSupabaseConfig?.publishableKeyPresent);
-  }
 
   function replaceLegacyLeafText(text) {
     document.querySelectorAll('body *').forEach((node) => {
@@ -40,6 +36,23 @@
     const observer = new MutationObserver(() => replaceLegacyLeafText(FAIL_MESSAGE));
     observer.observe(document.documentElement, { subtree: true, childList: true, characterData: true });
     window.setTimeout(() => observer.disconnect(), 15000);
+  }
+
+  function waitForHealth(timeoutMs = 9000) {
+    if (window.gcSupabaseHealth?.state === 'ready') return Promise.resolve(true);
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (value) => {
+        if (settled) return;
+        settled = true;
+        window.removeEventListener('gc:supabase-health', onHealth);
+        window.clearTimeout(timer);
+        resolve(value);
+      };
+      const onHealth = (event) => finish(event.detail?.state === 'ready');
+      const timer = window.setTimeout(() => finish(window.gcSupabaseHealth?.state === 'ready'), timeoutMs);
+      window.addEventListener('gc:supabase-health', onHealth);
+    });
   }
 
   function loadBridgeOnce() {
@@ -75,8 +88,9 @@
     startLegacyTextGuard();
     updateConnectionNotice(FAIL_MESSAGE);
     try {
-      const client = await loadBridgeOnce();
-      updateConnectionNotice(isReady(client) ? READY_MESSAGE : FAIL_MESSAGE);
+      await loadBridgeOnce();
+      const healthy = await waitForHealth();
+      updateConnectionNotice(healthy ? READY_MESSAGE : FAIL_MESSAGE);
     } catch (error) {
       console.warn('[Globall Cloud] runtime guard:', error);
       updateConnectionNotice(FAIL_MESSAGE);
