@@ -20,7 +20,7 @@ export async function onRequest(context){
       element.append('<link rel="stylesheet" href="/site-polish.css?v=20260813-4" data-gc-premium-polish="1">',{html:true});
       element.append('<link rel="stylesheet" href="/production-mobile-hotfix.css?v=20260813-1" data-gc-production-mobile-hotfix="1">',{html:true});
       element.append('<script src="/production-brand-repair.js?v=20260813-1" defer data-gc-production-brand-repair="1"></script>',{html:true});
-      element.append('<script src="/runtime-guard.js?v=20260813-7" defer data-gc-runtime-guard="1"></script>',{html:true});
+      element.append('<script src="/runtime-guard.js?v=20260815-2" defer data-gc-runtime-guard="1"></script>',{html:true});
       element.append('<link rel="stylesheet" href="/admin-console-enhanced.css?v=20260813-2" data-gc-admin-polish="1">',{html:true});
       element.append('<script src="/admin-console-enhanced.js?v=20260813-2" defer data-gc-admin-recovery="1"></script>',{html:true});
       if(path==='/super-admin-command-center.html'){
