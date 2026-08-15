@@ -10,6 +10,20 @@
   const READY_MESSAGE = 'پەیوەندیی پارێزراو بە Supabase چالاکە و سیستەمەکە ئامادەیە.';
   const FAIL_MESSAGE = 'پەیوەندیی خزمەتگوزاری بە شێوەی پارێزراو دەتاقیکرێتەوە.';
 
+  function isReady(client) {
+    return Boolean(client || window.gcSupabaseConfig?.publishableKeyPresent);
+  }
+
+  function replaceLegacyLeafText(text) {
+    document.querySelectorAll('body *').forEach((node) => {
+      if (node.children.length) return;
+      const current = (node.textContent || '').trim();
+      if (!current.includes(LEGACY_MESSAGE)) return;
+      node.textContent = text;
+      node.setAttribute('data-gc-runtime-state', text === READY_MESSAGE ? 'ready' : 'guarded');
+    });
+  }
+
   function updateConnectionNotice(text) {
     const notice = document.getElementById('adminNotConfigured');
     if (notice) {
@@ -18,14 +32,14 @@
       notice.hidden = text === READY_MESSAGE;
       notice.setAttribute('aria-live', 'polite');
     }
+    replaceLegacyLeafText(text);
+  }
 
-    document.querySelectorAll('body *').forEach((node) => {
-      if (node.children.length) return;
-      const current = (node.textContent || '').trim();
-      if (!current.includes(LEGACY_MESSAGE)) return;
-      node.textContent = text;
-      node.setAttribute('data-gc-runtime-state', text === READY_MESSAGE ? 'ready' : 'guarded');
-    });
+  function startLegacyTextGuard() {
+    replaceLegacyLeafText(FAIL_MESSAGE);
+    const observer = new MutationObserver(() => replaceLegacyLeafText(FAIL_MESSAGE));
+    observer.observe(document.documentElement, { subtree: true, childList: true, characterData: true });
+    window.setTimeout(() => observer.disconnect(), 15000);
   }
 
   function loadBridgeOnce() {
@@ -58,11 +72,11 @@
   }
 
   async function boot() {
-    // Never present stale "not configured" copy as the initial UI state.
+    startLegacyTextGuard();
     updateConnectionNotice(FAIL_MESSAGE);
     try {
       const client = await loadBridgeOnce();
-      updateConnectionNotice(client || window.gcSupabaseConfig?.publishableKeyPresent ? READY_MESSAGE : FAIL_MESSAGE);
+      updateConnectionNotice(isReady(client) ? READY_MESSAGE : FAIL_MESSAGE);
     } catch (error) {
       console.warn('[Globall Cloud] runtime guard:', error);
       updateConnectionNotice(FAIL_MESSAGE);
