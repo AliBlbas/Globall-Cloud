@@ -47,6 +47,9 @@ jobs:
           grep -q "operations-exception-engine.js" sw.js
           grep -q "no-store" _headers
           grep -q "Content-Security-Policy" _headers
+          grep -q "wss://ahslifnthiwfkmaswjno.supabase.co" _headers
+          grep -q "camera=(self)" _headers
+          grep -q "geolocation=(self)" _headers
           grep -q 'project_id = "ahslifnthiwfkmaswjno"' supabase/config.toml
           grep -q '\[functions.account-admin\]' supabase/config.toml
           grep -q 'verify_jwt = true' supabase/config.toml
@@ -70,6 +73,12 @@ jobs:
           test -f index.html
           test -f sw.js
           test -f production-bridge.js
+          test -f runtime-guard.js
+          test -f tracking-enhanced.js
+          test -f mobile-final.css
+          test -f driver-portal.html
+          test -f driver-portal.js
+          test -f driver-portal-mobile.css
           test -f staff-auth-fix.js
           test -f operations-exception-engine.js
           test -f operations-events.js
@@ -84,3 +93,11 @@ jobs:
           test -f operations-command-center.html
           test -f supabase/config.toml
           test -f functions/health.js
+
+      - name: Guard against stale connection messaging
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The legacy phrase may exist only as a runtime replacement token.
+          grep -q "LEGACY_MESSAGE" runtime-guard.js
+          ! grep -Rni "Supabase هێشتا پەیوەست نەکراوە" --include='index.html' --include='*.html' .
