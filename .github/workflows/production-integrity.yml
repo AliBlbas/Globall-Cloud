@@ -70,29 +70,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f index.html
-          test -f sw.js
-          test -f production-bridge.js
-          test -f runtime-guard.js
-          test -f tracking-enhanced.js
-          test -f mobile-final.css
-          test -f driver-portal.html
-          test -f driver-portal.js
-          test -f driver-portal-mobile.css
-          test -f staff-auth-fix.js
-          test -f operations-exception-engine.js
-          test -f operations-events.js
-          test -f driver-workspace.html
-          test -f customer-portal.html
-          test -f warehouse-os.html
-          test -f operations-control.html
-          test -f operations-control-v2.html
-          test -f accounts-console.html
-          test -f staff-os.html
-          test -f logistics-os.html
-          test -f operations-command-center.html
-          test -f supabase/config.toml
-          test -f functions/health.js
+          for file in \
+            index.html sw.js production-bridge.js runtime-guard.js tracking-enhanced.js \
+            mobile-final.css driver-portal.html driver-portal.js driver-portal-mobile.css \
+            staff-auth-fix.js operations-exception-engine.js operations-events.js \
+            driver-workspace.html customer-portal.html warehouse-os.html \
+            operations-control.html operations-control-v2.html accounts-console.html \
+            staff-os.html logistics-os.html operations-command-center.html \
+            supabase/config.toml functions/health.js
+          do
+            test -f "$file"
+          done
 
       - name: Guard runtime connection messaging
         shell: bash
@@ -101,3 +89,35 @@ jobs:
           grep -q "LEGACY_MESSAGE" runtime-guard.js
           grep -q "production-bridge.js?v=20260815-2" runtime-guard.js
           grep -q "runtime-guard.js?v=20260815-2" functions/_middleware.js
+
+      - name: Live smoke test — public site and config API
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, urllib.request
+
+          site = "https://globall-cloud.pages.dev/"
+          config = "https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/public-config?key=usd_iqd_rate"
+
+          with urllib.request.urlopen(site, timeout=20) as response:
+              html = response.read().decode("utf-8", "replace")
+              assert response.status == 200, response.status
+              assert "Globall Cloud" in html
+
+          req = urllib.request.Request(
+              config,
+              headers={
+                  "Origin": "https://globall-cloud.pages.dev",
+                  "Accept": "application/json",
+                  "apikey": "${SUPABASE_PUBLISHABLE_KEY}",
+              },
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=20) as response:
+                  body = json.loads(response.read().decode("utf-8", "replace"))
+                  assert response.status == 200, response.status
+                  assert body.get("key") == "usd_iqd_rate"
+          except Exception as exc:
+              raise SystemExit(f"public-config smoke test failed: {exc}")
+          PY
