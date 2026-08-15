@@ -15,6 +15,11 @@
 
   const ready = () => Boolean(window.supabase && typeof window.supabase.createClient === 'function');
 
+  const setHealthState = (state, detail = '') => {
+    window.gcSupabaseHealth = { state, detail, checkedAt: new Date().toISOString() };
+    window.dispatchEvent(new CustomEvent('gc:supabase-health', { detail: window.gcSupabaseHealth }));
+  };
+
   const updateConnectionMessage = (connected) => {
     document.querySelectorAll('[data-gc-supabase-status]').forEach((node) => {
       node.textContent = connected ? 'Supabase connected' : 'Connecting to Supabase…';
@@ -64,6 +69,7 @@
   const verifyPublicConnection = async () => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
+    setHealthState('checking');
     try {
       const response = await fetch(PUBLIC_CONFIG, {
         method: 'GET',
@@ -76,15 +82,23 @@
       });
       if (!response.ok) throw new Error(`Supabase public-config health ${response.status}`);
       const body = await response.json();
-      if (!body || body.key !== 'usd_iqd_rate') throw new Error('Supabase public-config returned an invalid payload');
+      if (!body || body.key !== 'usd_iqd_rate' || body.value === null || body.value === undefined) {
+        throw new Error('Supabase public-config returned an invalid payload');
+      }
+      setHealthState('ready');
       updateConnectionMessage(true);
       return true;
+    } catch (error) {
+      const detail = String(error?.message || error);
+      setHealthState('degraded', detail);
+      throw error;
     } finally {
       clearTimeout(timeout);
     }
   };
 
   const boot = async () => {
+    setHealthState('checking');
     updateConnectionMessage(false);
     try {
       await ensureClient();
@@ -97,6 +111,7 @@
   };
 
   window.gcEnsureSupabase = ensureClient;
+  window.gcVerifySupabaseHealth = verifyPublicConnection;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot, { once: true });
