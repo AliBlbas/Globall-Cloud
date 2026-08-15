@@ -99,4 +99,5 @@ jobs:
         run: |
           set -euo pipefail
           grep -q "LEGACY_MESSAGE" runtime-guard.js
-          grep -q "production-bridge.js?v=20260815-1" runtime-guard.js
+          grep -q "production-bridge.js?v=20260815-2" runtime-guard.js
+          grep -q "runtime-guard.js?v=20260815-2" functions/_middleware.js
