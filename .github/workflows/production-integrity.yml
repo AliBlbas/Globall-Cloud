@@ -95,7 +95,7 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import json, urllib.request
+          import json, re, urllib.request
 
           site = "https://globall-cloud.pages.dev/"
           config = "https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/public-config?key=usd_iqd_rate"
@@ -105,19 +105,22 @@ jobs:
               assert response.status == 200, response.status
               assert "Globall Cloud" in html
 
+          bridge = open("production-bridge.js", encoding="utf-8").read()
+          match = re.search(r"SUPABASE_PUBLISHABLE_KEY\s*=\s*['\"]([^'\"]+)['\"]", bridge)
+          if not match:
+              raise SystemExit("publishable key was not found in production-bridge.js")
+
           req = urllib.request.Request(
               config,
               headers={
                   "Origin": "https://globall-cloud.pages.dev",
                   "Accept": "application/json",
-                  "apikey": "${SUPABASE_PUBLISHABLE_KEY}",
+                  "apikey": match.group(1),
               },
           )
-          try:
-              with urllib.request.urlopen(req, timeout=20) as response:
-                  body = json.loads(response.read().decode("utf-8", "replace"))
-                  assert response.status == 200, response.status
-                  assert body.get("key") == "usd_iqd_rate"
-          except Exception as exc:
-              raise SystemExit(f"public-config smoke test failed: {exc}")
+          with urllib.request.urlopen(req, timeout=20) as response:
+              body = json.loads(response.read().decode("utf-8", "replace"))
+              assert response.status == 200, response.status
+              assert body.get("key") == "usd_iqd_rate"
+              assert body.get("value") not in (None, ""), body
           PY
