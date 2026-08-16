@@ -1,5 +1,87 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
-const ORIGINS=new Set(['https://globall-cloud.pages.dev','https://globall-cloud.netlify.app'])
-function headers(req:Request){const origin=req.headers.get('origin')||'';return {'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...(ORIGINS.has(origin)?{'Access-Control-Allow-Origin':origin}:{}),'Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'GET,OPTIONS','Vary':'Origin'}}
-function json(req:Request,body:Record<string,unknown>,status=200){return new Response(JSON.stringify(body),{status,headers:headers(req)})}
-Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{status:204,headers:headers(req)});if(req.method!=='GET')return json(req,{error:'Method not allowed'},405);const started=performance.now();const url=Deno.env.get('SUPABASE_URL');const publicKey=Deno.env.get('SUPABASE_ANON_KEY')||Deno.env.get('SUPABASE_PUBLISHABLE_KEY');const serviceKey=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||Deno.env.get('SUPABASE_SECRET_KEY');if(!url||!publicKey)return json(req,{status:'down',service:'globall-cloud',error:'public server configuration is missing',total_ms:Math.round(performance.now()-started)},503);const checks={database:false,shipments:false,configuration_bridge:false,timestamp:new Date().toISOString()};let configError=null;let shipmentError=null;try{const response=await fetch(`${url}/functions/v1/public-config?key=usd_iqd_rate`,{headers:{apikey:publicKey,Accept:'application/json'},cache:'no-store'});const configBody=await response.json().catch(()=>({})) as Record<string,unknown>;checks.configuration_bridge=response.ok&&configBody.key==='usd_iqd_rate'&&configBody.value!==null&&configBody.value!==undefined;checks.database=checks.configuration_bridge;if(!checks.configuration_bridge)configError=`public-config returned ${response.status}`}catch(error){configError=error instanceof Error?error.message:'configuration bridge request failed'}if(serviceKey){try{const db=createClient(url,serviceKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});const probe=await db.from('shipments').select('id').limit(1);checks.shipments=!probe.error;if(probe.error)shipmentError=probe.error.message}catch(error){shipmentError=error instanceof Error?error.message:'shipment probe failed'}}else shipmentError='server shipment probe key is not configured';const ok=checks.database&&checks.shipments;return json(req,{status:ok?'ok':'degraded',service:'globall-cloud',checks,...(configError||shipmentError?{diagnostics:{configuration:configError,shipments:shipmentError}}:{}),latency_ms:Math.round(performance.now()-started),total_ms:Math.round(performance.now()-started)},ok?200:503)})
+
+const ORIGINS = new Set([
+  'https://globall-cloud.pages.dev',
+  'https://globall-cloud.netlify.app',
+])
+
+function headers(req: Request) {
+  const origin = req.headers.get('origin') || ''
+  return {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
+    ...(ORIGINS.has(origin) ? { 'Access-Control-Allow-Origin': origin } : {}),
+    'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info',
+    'Access-Control-Allow-Methods': 'GET,OPTIONS',
+    'Vary': 'Origin',
+  }
+}
+
+function json(req: Request, body: Record<string, unknown>, status = 200) {
+  return new Response(JSON.stringify(body), { status, headers: headers(req) })
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { status: 204, headers: headers(req) })
+  if (req.method !== 'GET') return json(req, { error: 'Method not allowed' }, 405)
+
+  const started = performance.now()
+  const url = Deno.env.get('SUPABASE_URL')
+  const publicKey = Deno.env.get('SUPABASE_ANON_KEY') || Deno.env.get('SUPABASE_PUBLISHABLE_KEY')
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_SECRET_KEY')
+
+  if (!url || !publicKey) {
+    return json(req, {
+      status: 'down',
+      service: 'globall-cloud',
+      error: 'public server configuration is missing',
+      total_ms: Math.round(performance.now() - started),
+    }, 503)
+  }
+
+  const checks = {
+    database: false,
+    shipments: false,
+    configuration_bridge: false,
+    timestamp: new Date().toISOString(),
+  }
+  let configError: string | null = null
+  let shipmentError: string | null = null
+
+  try {
+    const configResponse = await fetch(`${url}/functions/v1/public-config?key=usd_iqd_rate`, {
+      headers: { apikey: publicKey, Accept: 'application/json' },
+      cache: 'no-store',
+    })
+    const configBody = await configResponse.json().catch(() => ({})) as Record<string, unknown>
+    checks.configuration_bridge = configResponse.ok && configBody.key === 'usd_iqd_rate' && configBody.value !== null && configBody.value !== undefined
+    checks.database = checks.configuration_bridge
+    if (!checks.configuration_bridge) configError = `public-config returned ${configResponse.status}`
+  } catch (error) {
+    configError = error instanceof Error ? error.message : 'configuration bridge request failed'
+  }
+
+  if (serviceKey) {
+    try {
+      const db = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } })
+      const shipmentProbe = await db.from('shipments').select('id').limit(1)
+      checks.shipments = !shipmentProbe.error
+      if (shipmentProbe.error) shipmentError = shipmentProbe.error.message
+    } catch (error) {
+      shipmentError = error instanceof Error ? error.message : 'shipment probe failed'
+    }
+  } else {
+    shipmentError = 'server shipment probe key is not configured'
+  }
+
+  const ok = checks.database && checks.shipments
+  return json(req, {
+    status: ok ? 'ok' : 'degraded',
+    service: 'globall-cloud',
+    checks,
+    ...(configError || shipmentError ? { diagnostics: { configuration: configError, shipments: shipmentError } } : {}),
+    latency_ms: Math.round(performance.now() - started),
+    total_ms: Math.round(performance.now() - started),
+  }, ok ? 200 : 503)
+})
