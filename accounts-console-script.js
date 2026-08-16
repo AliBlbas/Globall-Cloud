@@ -65,7 +65,7 @@ function renderList() {
         <td>${esc(manager?.full_name || '—')}<div class="muted">${esc(manager?.role || '')}</div></td>
         <td><b>${r.shipment_count || 0}</b><div class="muted">${money(r.outstanding_amount || 0)} due</div></td>
         <td>${badge(r.is_active)}</td>
-        <td><div class="toolbar"><button class="btn btn-outline" onclick='editCustomer(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button><button class="btn btn-danger" onclick="archiveCustomerAccount('${esc(r.id)}')">Archive</button></div></td>
+        <td><div class="toolbar"><button class="btn btn-outline" data-gc-onclick='editCustomer(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button><button class="btn btn-danger" data-gc-onclick="archiveCustomerAccount('${esc(r.id)}')">Archive</button></div></td>
       </tr>`;
     }).join('') || '<tr><td colspan="8">No customers found.</td></tr>';
   } else if (state.tab === 'staff') {
@@ -77,7 +77,7 @@ function renderList() {
       <td><span class="ok">${esc(r.role || '')}</span></td>
       <td>${esc(r.branch || '')}</td>
       <td>${badge(r.is_active)}</td>
-      <td><div class="toolbar"><button class="btn btn-outline" onclick='editStaff(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button><button class="btn btn-danger" onclick="archiveStaffAccount('${esc(r.id)}')">Deactivate</button></div></td>
+      <td><div class="toolbar"><button class="btn btn-outline" data-gc-onclick='editStaff(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button><button class="btn btn-danger" data-gc-onclick="archiveStaffAccount('${esc(r.id)}')">Deactivate</button></div></td>
     </tr>`).join('') || '<tr><td colspan="6">No staff found.</td></tr>';
   } else if (state.tab === 'receipts') {
     const rows = state.receipts.filter((r) => !q || JSON.stringify(r).toLowerCase().includes(q));

@@ -1,0 +1,13 @@
+Globall Cloud Payment Production Package
+
+Providers: Qicard + FIB
+Currency contract: IQD
+Frontend entry: payment-checkout.html
+Authenticated API: supabase/functions/payment-checkout
+Provider callbacks: supabase/functions/payment-webhook
+Reconciliation worker: supabase/functions/payment-reconcile
+Schema migration: supabase/migrations/20260816120000_qicard_fib_payment_sessions.sql
+Security: provider secrets are server-side only; Qicard webhook uses RSA signature verification; FIB callback re-queries provider status; settlement checks amount and currency.
+Validation: JavaScript syntax, TypeScript parsing, PostgreSQL parsing, CSP/inline checks, secret scan, browser smoke all passed.
+Live transaction validation: pending merchant sandbox credentials and post-deploy sandbox execution.
+External SHA-256: see payment-package-manifest.txt delivered alongside the ZIP.

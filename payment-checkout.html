@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ku" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Globall Cloud secure IQD payment checkout">
+  <title>پارەدان — Globall Cloud</title>
+  <link rel="stylesheet" href="/payment-checkout.css?v=20260816-1">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="/payment-checkout.js?v=20260816-1" defer></script>
+</head>
+<body>
+  <main class="checkout-shell">
+    <header class="brand-bar">
+      <a class="brand" href="/" aria-label="Globall Cloud"><span class="brand-mark">GC</span><span><strong>Globall Cloud</strong><small>پارەدانی پارێزراوی بار</small></span></a>
+      <span class="secure-chip">پارەدان بە IQD</span>
+    </header>
+    <section class="checkout-grid" aria-labelledby="pageTitle">
+      <div class="checkout-card">
+        <div class="eyebrow">SECURE PAYMENT</div>
+        <h1 id="pageTitle">پارەدان بۆ invoice</h1>
+        <p class="muted">پارەدان لە ڕێگەی Qicard یان FIB بە شێوەی server-side پشتڕاست دەکرێتەوە. هیچ نهێنییەکی payment لەم پەڕەیەدا هەڵناگیرێت.</p>
+        <div class="alert hidden" id="alert" role="alert"></div>
+        <div class="loading" id="loading">دۆخی invoice دەخوێندرێتەوە…</div>
+        <div class="invoice-summary hidden" id="invoiceSummary">
+          <div><span>ژمارەی invoice</span><strong id="invoiceNumber">—</strong></div>
+          <div><span>بار</span><strong id="shipmentId">—</strong></div>
+          <div><span>کۆی invoice</span><strong id="invoiceTotal">—</strong></div>
+          <div><span>پارەی ماوە</span><strong class="accent" id="invoiceBalance">—</strong></div>
+        </div>
+        <form id="paymentForm" class="hidden">
+          <label for="amount">بڕی پارەدان بە دیناری عێراقی</label>
+          <div class="amount-field"><input id="amount" name="amount" type="number" inputmode="decimal" min="0.01" step="0.01" required><span>IQD</span></div>
+          <div class="provider-picker" role="group" aria-label="هەڵبژاردنی payment provider">
+            <button class="provider active" type="button" data-provider="qicard"><strong>QiCard</strong><small>کارت و gateway ـی Qi</small></button>
+            <button class="provider" type="button" data-provider="fib"><strong>FIB</strong><small>QR و FIB app</small></button>
+          </div>
+          <button class="primary-button" id="payButton" type="submit">دروستکردنی پارەدان</button>
+          <p class="fine-print">لە دوای دروستکردن، بەستەر یان QR ـی provider نیشان دەدرێت. دۆخی پارەدان تەنها دوای پشتڕاستکردنەوەی provider دەگۆڕێت.</p>
+        </form>
+        <section class="payment-result hidden" id="paymentResult" aria-live="polite">
+          <div class="result-head"><div><span class="eyebrow">PAYMENT SESSION</span><h2 id="resultTitle">پارەدان ئامادەیە</h2></div><span class="status-pill" id="statusPill">pending</span></div>
+          <div class="result-content" id="resultContent"></div>
+          <div class="result-actions"><a class="primary-button link-button hidden" id="checkoutLink" target="_blank" rel="noopener noreferrer">کردنەوەی payment</a><button class="secondary-button" id="refreshStatus" type="button">نوێکردنەوەی دۆخ</button><button class="danger-button" id="cancelPayment" type="button">هەڵوەشاندنەوە</button></div>
+        </section>
+      </div>
+      <aside class="trust-card"><div class="trust-icon">✓</div><h2>پارەدانێکی شفاف و پارێزراو</h2><p>پارەدانەکان بە invoice ـی دیاریکراو پەیوەستن و بڕ و currency لەسەر server پشکنین دەکرێت.</p><dl><div><dt>Provider</dt><dd id="providerLabel">QiCard</dd></div><div><dt>Currency</dt><dd>IQD</dd></div><div><dt>Mode</dt><dd>Server verified</dd></div></dl><div class="help-box">ئەگەر پارەدانەکە لە app ـدا تەواو بوو، بگەڕێوە بۆ ئەم پەڕەیە و <strong>نوێکردنەوەی دۆخ</strong> دابگرە.</div></aside>
+    </section>
+    <footer>© Globall Cloud · سیستمێکی لۆجستیک بۆ چین، دوبەی و هەولێر</footer>
+  </main>
+</body>
+</html>
