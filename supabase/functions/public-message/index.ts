@@ -1,7 +1,10 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
-type Payload={name?:unknown;email?:unknown;message?:unknown;company?:unknown;request_type?:unknown;company_website?:unknown}
-const ALLOWED_ORIGINS=new Set(['https://globall-cloud.pages.dev','https://globall-cloud.netlify.app'])
-const WINDOW_MS=10*60*1000;const MAX_PER_WINDOW=5;const buckets=new Map<string,{start:number;count:number}>()
+
+type Payload = { name?: unknown; email?: unknown; message?: unknown; company?: unknown; request_type?: unknown; company_website?: unknown }
+const ALLOWED_ORIGINS = new Set(['https://globall-cloud.pages.dev','https://globall-cloud.netlify.app'])
+const WINDOW_MS=10*60*1000
+const MAX_PER_WINDOW=5
+const buckets=new Map<string,{start:number;count:number}>()
 function originAllowed(req:Request){const o=req.headers.get('origin');return !o||ALLOWED_ORIGINS.has(o)}
 function cors(req:Request){const o=req.headers.get('origin')||'';return {...(ALLOWED_ORIGINS.has(o)?{'Access-Control-Allow-Origin':o}:{}),'Access-Control-Allow-Headers':'content-type, apikey, x-client-info','Access-Control-Allow-Methods':'POST,OPTIONS','Cache-Control':'no-store','Vary':'Origin'}}
 function json(req:Request,body:Record<string,unknown>,status=200){return new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8',...cors(req)}})}
