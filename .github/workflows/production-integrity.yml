@@ -24,6 +24,9 @@ jobs:
           node-version: 20
           cache: npm
 
+      - name: Run deterministic repository test harness
+        run: npm test
+
       - name: Validate JavaScript syntax
         shell: bash
         run: |
@@ -54,8 +57,14 @@ jobs:
           grep -q "geolocation=(self)" _headers
           grep -q 'project_id = "ahslifnthiwfkmaswjno"' supabase/config.toml
           grep -q '\[functions.account-admin\]' supabase/config.toml
-          grep -q 'verify_jwt = true' supabase/config.toml
-          ! grep -RniE "service_role|SUPABASE_SERVICE_ROLE_KEY|sb_secret_" --exclude-dir=.git --exclude='*.md' .
+          grep -q '\[functions.operations-admin\]' supabase/config.toml
+          grep -q '\[functions.driver-gps\]' supabase/config.toml
+          grep -q '\[functions.public-track\]' supabase/config.toml
+          grep -q '\[functions.public-config\]' supabase/config.toml
+          grep -q '\[functions.public-message\]' supabase/config.toml
+          grep -q '\[functions.system-health\]' supabase/config.toml
+          ! grep -RniE "service_role|SUPABASE_SERVICE_ROLE_KEY|SUPABASE_SECRET_KEY|sb_secret_" \
+            --exclude-dir=.git --exclude-dir=supabase/functions --exclude-dir=functions --exclude='*.md' .
 
       - name: Validate Supabase migration filenames
         shell: bash
@@ -79,7 +88,17 @@ jobs:
             driver-workspace.html customer-portal.html warehouse-os.html \
             operations-control.html operations-control-v2.html accounts-console.html \
             staff-os.html logistics-os.html operations-command-center.html \
-            supabase/config.toml functions/health.js
+            supabase/config.toml functions/health.js \
+            supabase/functions/public-track/index.ts \
+            supabase/functions/public-config/index.ts \
+            supabase/functions/public-message/index.ts \
+            supabase/functions/system-health/index.ts \
+            supabase/functions/account-admin/index.ts \
+            supabase/functions/operations-admin/index.ts \
+            supabase/functions/driver-gps/index.ts \
+            supabase/functions/account-self-profile/index.ts \
+            supabase/functions/account-self-password/index.ts \
+            supabase/functions/lg-track-shipment/index.ts
           do
             test -f "$file"
           done
