@@ -37,3 +37,21 @@ verify_jwt = true
 
 [functions.system-health]
 verify_jwt = false
+
+[functions.logistics-control-plane]
+verify_jwt = true
+
+[functions.document-access]
+verify_jwt = true
+
+[functions.integration-webhook]
+verify_jwt = false
+
+[functions.payment-checkout]
+verify_jwt = false
+
+[functions.payment-webhook]
+verify_jwt = false
+
+[functions.payment-reconcile]
+verify_jwt = false
