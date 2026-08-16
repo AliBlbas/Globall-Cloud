@@ -11,5 +11,29 @@ additional_redirect_urls = [
 [functions.account-admin]
 verify_jwt = true
 
+[functions.operations-admin]
+verify_jwt = true
+
+[functions.driver-gps]
+verify_jwt = true
+
+[functions.account-self-profile]
+verify_jwt = true
+
+[functions.account-self-password]
+verify_jwt = true
+
 [functions.lg-track-shipment]
 verify_jwt = true
+
+[functions.public-track]
+verify_jwt = false
+
+[functions.public-config]
+verify_jwt = false
+
+[functions.public-message]
+verify_jwt = false
+
+[functions.system-health]
+verify_jwt = false
