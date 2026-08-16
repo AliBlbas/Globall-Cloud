@@ -11,18 +11,6 @@ additional_redirect_urls = [
 [functions.account-admin]
 verify_jwt = true
 
-[functions.operations-admin]
-verify_jwt = true
-
-[functions.driver-gps]
-verify_jwt = true
-
-[functions.account-self-profile]
-verify_jwt = true
-
-[functions.account-self-password]
-verify_jwt = true
-
 [functions.lg-track-shipment]
 verify_jwt = true
 
@@ -34,6 +22,18 @@ verify_jwt = false
 
 [functions.public-message]
 verify_jwt = false
+
+[functions.account-self-password]
+verify_jwt = true
+
+[functions.account-self-profile]
+verify_jwt = true
+
+[functions.operations-admin]
+verify_jwt = true
+
+[functions.driver-gps]
+verify_jwt = true
 
 [functions.system-health]
 verify_jwt = false
