@@ -44,10 +44,17 @@ Deno.serve(async (req) => {
     database: false,
     shipments: false,
     configuration_bridge: false,
+    control_plane: false,
+    notification_outbox: false,
+    integration_inbox: false,
+    payment_sessions: false,
+    payment_webhook_events: false,
     timestamp: new Date().toISOString(),
   }
   let configError: string | null = null
   let shipmentError: string | null = null
+  let controlPlaneError: string | null = null
+  let paymentError: string | null = null
 
   try {
     const configResponse = await fetch(`${url}/functions/v1/public-config?key=usd_iqd_rate`, {
@@ -68,6 +75,22 @@ Deno.serve(async (req) => {
       const shipmentProbe = await db.from('shipments').select('id').limit(1)
       checks.shipments = !shipmentProbe.error
       if (shipmentProbe.error) shipmentError = shipmentProbe.error.message
+      const [historyProbe, packagesProbe, customsProbe, outboxProbe, inboxProbe, paymentSessionsProbe, paymentEventsProbe] = await Promise.all([
+        db.from('shipment_status_history').select('id').limit(1),
+        db.from('shipment_packages').select('id').limit(1),
+        db.from('shipment_customs_cases').select('id').limit(1),
+        db.from('notification_outbox').select('id').limit(1),
+        db.from('integration_inbox').select('id').limit(1),
+        db.from('payment_sessions').select('id').limit(1),
+        db.from('payment_webhook_events').select('id').limit(1),
+      ])
+      checks.control_plane = !historyProbe.error && !packagesProbe.error && !customsProbe.error
+      checks.notification_outbox = !outboxProbe.error
+      checks.integration_inbox = !inboxProbe.error
+      checks.payment_sessions = !paymentSessionsProbe.error
+      checks.payment_webhook_events = !paymentEventsProbe.error
+      if (!checks.control_plane) controlPlaneError = 'control-plane migration is missing or inaccessible'
+      if (!checks.payment_sessions || !checks.payment_webhook_events) paymentError = 'payment migration is missing or inaccessible'
     } catch (error) {
       shipmentError = error instanceof Error ? error.message : 'shipment probe failed'
     }
@@ -75,12 +98,12 @@ Deno.serve(async (req) => {
     shipmentError = 'server shipment probe key is not configured'
   }
 
-  const ok = checks.database && checks.shipments
+  const ok = checks.database && checks.shipments && checks.control_plane && checks.notification_outbox && checks.integration_inbox && checks.payment_sessions && checks.payment_webhook_events
   return json(req, {
     status: ok ? 'ok' : 'degraded',
     service: 'globall-cloud',
     checks,
-    ...(configError || shipmentError ? { diagnostics: { configuration: configError, shipments: shipmentError } } : {}),
+    ...(configError || shipmentError || controlPlaneError || paymentError ? { diagnostics: { configuration: configError, shipments: shipmentError, control_plane: controlPlaneError, payment: paymentError } } : {}),
     latency_ms: Math.round(performance.now() - started),
     total_ms: Math.round(performance.now() - started),
   }, ok ? 200 : 503)
