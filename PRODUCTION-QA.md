@@ -116,20 +116,97 @@ Whichever you pick, decide deliberately — don't just flip the header.
 - Remaining Supabase Advisor findings are intentionally left for a separate controlled pass because some require product-level decisions (GraphQL exposure, public extension placement, Auth OTP policy, leaked-password protection, and other existing policies).
 
 
-## 2026-08-16 Backend source recovery and release hardening
+## 2026-08-16 Repo/Production Sync + Consistency Pass
 
-- Recovered the source of all 10 active production Edge Functions from the authenticated Supabase project into `supabase/functions/`, including the retired `lg-track-shipment` compatibility function.
-- Fixed the archive drift in `public-config`: the repository source now imports `createClient` and uses the production function contract.
-- Added the production project reference and explicit `verify_jwt` settings for every Edge Function to `supabase/config.toml`.
-- Added a dependency-free `npm test` harness that validates JavaScript syntax, required files, Edge Function coverage, migration filenames, client-side secret exposure, and critical endpoint invariants.
-- Added `package.json` and `package-lock.json` so GitHub Actions npm caching is deterministic rather than failing on a missing manifest.
-- Confirmed through read-only production inspection that the Supabase project is `ACTIVE_HEALTHY`, the public site is reachable, and the public USD/IQD configuration bridge returns a valid response.
-- No production database migration, user data, payment setting, secret rotation, or live deployment was changed in this pass. Deployment remains a deliberate release-gate action after authenticated role-by-role regression testing.
+The uploaded repo snapshot had drifted significantly from the live Supabase
+project (which had continued receiving direct migrations and Edge Function
+deploys). This pass re-grounded the repo in the actual live system and fixed
+what it found. Live Supabase project confirmed: `ahslifnthiwfkmaswjno`,
+status ACTIVE_HEALTHY.
 
-## Live verification after the system-health fix
+### Applied safely
+- **Migrations**: the repo had only 5 migration files (using a non-standard
+  8-digit date prefix that didn't match this project's own CI naming rule).
+  The live database had 99 applied migrations. Pulled every migration's
+  actual SQL from `supabase_migrations.schema_migrations` and replaced the
+  repo's migrations folder with all 99, correctly named
+  `<14-digit-timestamp>_<name>.sql`.
+- **Edge Functions**: the repo had source for only 1 of 10 live functions.
+  Pulled the real deployed source for all 10 (`account-admin`,
+  `public-track`, `public-config`, `public-message`, `account-self-password`,
+  `account-self-profile`, `operations-admin`, `driver-gps`, `system-health`,
+  and the retired `lg-track-shipment` tombstone) and registered all of them
+  in `supabase/config.toml` with the correct `verify_jwt` per function (the
+  repo previously only declared 2 of 10). Note: the live `public-config` had
+  already been narrowed to use the anon key + RLS instead of the service-role
+  key the repo's old copy used — the repo now reflects that improvement.
+- **CI workflow drift**: `.github/workflows/production-integrity.yml` was
+  actually failing against the current site — `sw.js`'s cache version had
+  moved to `gc-v34` (CI still checked for `gc-v32`), and `runtime-guard.js` /
+  `functions/_middleware.js` had moved to `?v=20260815-3` (CI still checked
+  for `-2`). Updated the CI assertions to match current reality.
+- **CI secret-scan false positives**: the old check (`grep ... "service_role|
+  SUPABASE_SERVICE_ROLE_KEY|sb_secret_"`) flagged the correct, required
+  `Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')` pattern inside every Edge
+  Function, plus a defensive comment in `index.html` warning developers not
+  to hardcode that key. Neither is an actual leaked secret. Replaced it with
+  a pattern that only flags a real hardcoded key-shaped *value* assigned to
+  one of those names — verified it stays silent on the current (clean) repo
+  and correctly catches a synthetic hardcoded leak.
+- **Inconsistent cache-buster versions** (a real bug class — some pages could
+  hand returning visitors a stale cached copy of a fixed file): found 6
+  shared assets referenced with different `?v=` values in different files —
+  `production-bridge.js`, `runtime-guard.js`, `super-admin-command-center.css`,
+  `super-admin-command-center.js`, `superadmin.css`, `superadmin.js` — across
+  `sw.js`, `superadmin.html`, and `super-admin-command-center.html`.
+  Standardized every reference to each asset's most recent version.
+- **README**: documented the 4 live Edge Functions that existed in
+  production but were missing from the README (`public-message`,
+  `account-self-password`, `account-self-profile`, `lg-track-shipment`).
 
-The initial live probe exposed a real operational defect: `system-health` returned HTTP 503 because its database check used the wrong access path for the current `app_settings` policy. The function was corrected to validate the public configuration bridge and to use the server-side key only for the shipment schema probe. The corrected function was deployed as version 2 and now returns HTTP 200 with `database=true`, `shipments=true`, and `configuration_bridge=true`.
+### Verified, no action needed
+- Security Advisor: no ERROR-level findings. WARN-level findings are the
+  expected anonymous-read policies a public tracking site needs (customer
+  directory lookup, public tracking, app_settings public read, etc.) —
+  narrowly scoped by the prior hardening passes, not re-opened here.
+- Performance Advisor: all findings are INFO-level "unused index" — expected
+  for a low-traffic production system; these indexes back real FK/query
+  patterns and should not be dropped.
+- Internal links: checked all 333 local `href`/`src` references across
+  every HTML page — zero broken links.
+- JS syntax: all files (including the newly-synced Edge Functions) pass
+  `node --check` / TypeScript-shaped review.
+- No actual secret values (JWT-shaped or `sb_secret_`-prefixed) found
+  anywhere in the repo.
+- `operations-control.html` is an intentional redirect stub to
+  `operations-control-v2.html` — not a bug.
+- `payment-gateway.js` and the two TODOs in `webhook-handler.js` are
+  deliberate, clearly-labeled placeholders (no fake payment/webhook logic
+  was added) — left untouched.
 
-The live public tracking endpoint was exercised with a real shipment identifier without exposing that identifier in this document. It returned HTTP 200, included both the shipment projection and event list, and passed the privacy check for anonymous contact fields. Invalid tracking input returns HTTP 400, and an unsupported method on the public message endpoint returns HTTP 405.
-
-Supabase Security Advisor still reports policy and configuration warnings that require deliberate product decisions rather than blind automated changes, including the public `supabase-dbdev` extension, anonymous-role policy visibility, OTP expiry, and leaked-password protection. Performance Advisor reports many unused indexes as informational candidates. These are recorded for a controlled database-policy pass; no destructive migration was applied automatically.
+### Flagged for a decision, not changed
+- **Two different Supabase publishable keys are in use.** Every file uses
+  the `default` publishable key except `operations-command-center.html` and
+  `logistics-os.html`, which use a second key named `globall_cloud`. Both
+  are currently valid for this project, so nothing is broken today — but
+  this wasn't changed here because it's not possible to confirm from outside
+  the Supabase dashboard whether that second key has its own restrictions
+  (rate limits, allowed origins) intentionally attached to it. Worth a
+  deliberate decision: standardize on one key, or confirm the split is
+  intentional.
+- **Auth settings** (Supabase dashboard, not code): OTP expiry is currently
+  set above 1 hour; leaked-password protection is currently disabled. Both
+  are dashboard toggles under Authentication, not something a migration can
+  change.
+- **`operations-command-center.html`, `operations-suite.html`, and
+  `logistics-os.html`** are substantial, real pages (cached by the service
+  worker) that aren't linked from any other page's navigation — only
+  reachable by direct URL (`operations-suite.html` is at least linked from
+  `system-status.html`). This may be intentional (internal tools reached by
+  bookmark), but is worth confirming rather than assuming.
+- Live HTTP smoke test against `https://globall-cloud.pages.dev/` was not
+  run in this pass — the sandbox this audit ran in has no network path to
+  that domain. Everything above was verified against the live Supabase
+  project directly (migrations, Edge Functions, advisors) and against the
+  repo's own static files; the CI workflow (which does run the live smoke
+  test) will cover that gap on the next push.
