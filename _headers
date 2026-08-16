@@ -50,7 +50,7 @@
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
 /warehouse-os.html
-  X-Robots-Tag: noindex, nofollow, noarchive
+  X-Robots-Tag: noindex, nofollow, max-age=0, must-revalidate
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
 /tracking-integration.html
@@ -91,11 +91,17 @@
 /logo-fix.css
   Cache-Control: public, max-age=300, must-revalidate
 
+/logistics-home.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/gc-runtime.css
+  Cache-Control: public, max-age=300, must-revalidate
+
 /*.css
-  Cache-Control: public, max-age=3600
+  Cache-Control: public, max-age=300, must-revalidate
 
 /*.js
-  Cache-Control: public, max-age=3600
+  Cache-Control: public, max-age=300, must-revalidate
 
 /*.png
   Cache-Control: public, max-age=86400
