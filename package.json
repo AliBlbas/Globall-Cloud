@@ -1,10 +1,13 @@
 {
   "name": "globall-cloud",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Production logistics platform for China/UAE to Iraq shipping",
+  "description": "Production logistics platform for China/UAE to Iraq shipping — control plane, payments (QiCard/FIB), notifications",
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
   },
   "scripts": {
     "test": "node tests/validate.mjs",
