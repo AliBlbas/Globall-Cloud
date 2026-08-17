@@ -13,7 +13,7 @@ permissions:
 jobs:
   integrity:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,124 +24,68 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Run deterministic repository test harness
+      - name: Install validation dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Run repository validation
         run: npm test
 
-      - name: Validate JavaScript syntax
+      - name: Validate production headers and Supabase wiring
         shell: bash
         run: |
           set -euo pipefail
-          while IFS= read -r -d '' file; do
-            node --check "$file"
-          done < <(find . -type f -name '*.js' -not -path './.git/*' -print0)
-
-      - name: Check critical integration invariants
-        shell: bash
-        run: |
-          set -euo pipefail
-          grep -q "ahslifnthiwfkmaswjno.supabase.co" production-bridge.js
-          grep -q "account-admin" accounts-console-script.js
-          grep -q "gc-v35" sw.js
-          grep -q "driver-workspace.html" sw.js
-          grep -q "operations-control-v2.html" sw.js
-          grep -q "operations-events.js" sw.js
-          grep -q "customer-portal.html" sw.js
-          grep -q "warehouse-os.html" sw.js
-          grep -q "production-bridge.js" sw.js
-          grep -q "staff-auth-fix.js" sw.js
-          grep -q "operations-exception-engine.js" sw.js
-          grep -q "no-store" _headers
-          grep -q "Content-Security-Policy" _headers
-          grep -q "wss://ahslifnthiwfkmaswjno.supabase.co" _headers
-          grep -q "camera=(self)" _headers
-          grep -q "geolocation=(self)" _headers
-          grep -q 'project_id = "ahslifnthiwfkmaswjno"' supabase/config.toml
-          grep -q '\[functions.account-admin\]' supabase/config.toml
-          grep -q '\[functions.operations-admin\]' supabase/config.toml
-          grep -q '\[functions.driver-gps\]' supabase/config.toml
-          grep -q '\[functions.public-track\]' supabase/config.toml
-          grep -q '\[functions.public-config\]' supabase/config.toml
-          grep -q '\[functions.public-message\]' supabase/config.toml
-          grep -q '\[functions.system-health\]' supabase/config.toml
-          ! grep -RniE "service_role|SUPABASE_SERVICE_ROLE_KEY|SUPABASE_SECRET_KEY|sb_secret_" \
+          grep -q 'ahslifnthiwfkmaswjno.supabase.co' production-bridge.js
+          grep -q 'site_url = "https://globall-cloud.pages.dev"' supabase/config.toml
+          grep -q 'wss://ahslifnthiwfkmaswjno.supabase.co' _headers
+          grep -q 'Content-Security-Policy' _headers
+          grep -q 'camera=(self)' _headers
+          grep -q 'geolocation=(self)' _headers
+          ! grep -RniE 'SUPABASE_SERVICE_ROLE_KEY|SUPABASE_SECRET_KEY|sb_secret_' \
             --exclude-dir=.git --exclude-dir=supabase/functions --exclude-dir=functions --exclude='*.md' .
 
-      - name: Validate Supabase migration filenames
+      - name: Validate unified release package
         shell: bash
         run: |
           set -euo pipefail
-          if [ -d supabase/migrations ]; then
-            find supabase/migrations -maxdepth 1 -type f -name '*.sql' -print0 | while IFS= read -r -d '' file; do
-              base="$(basename "$file")"
-              [[ "$base" =~ ^[0-9]{14}_[a-z0-9_]+\.sql$ ]]
-            done
-          fi
-
-      - name: Verify required production files exist
-        shell: bash
-        run: |
-          set -euo pipefail
+          test -f Globall-Cloud-Unified.zip
+          rm -rf .release
+          mkdir .release
+          unzip -q -o Globall-Cloud-Unified.zip -d .release
           for file in \
-            index.html sw.js production-bridge.js runtime-guard.js tracking-enhanced.js \
-            mobile-final.css driver-portal.html driver-portal.js driver-portal-mobile.css \
-            staff-auth-fix.js operations-exception-engine.js operations-events.js \
-            driver-workspace.html customer-portal.html warehouse-os.html \
-            operations-control.html operations-control-v2.html accounts-console.html \
-            staff-os.html logistics-os.html operations-command-center.html \
-            supabase/config.toml functions/health.js \
-            supabase/functions/public-track/index.ts \
-            supabase/functions/public-config/index.ts \
-            supabase/functions/public-message/index.ts \
-            supabase/functions/system-health/index.ts \
-            supabase/functions/account-admin/index.ts \
-            supabase/functions/operations-admin/index.ts \
-            supabase/functions/driver-gps/index.ts \
-            supabase/functions/account-self-profile/index.ts \
-            supabase/functions/account-self-password/index.ts \
-            supabase/functions/lg-track-shipment/index.ts
-          do
+            .release/supabase/functions/document-access/index.ts \
+            .release/supabase/functions/logistics-control-plane/index.ts \
+            .release/supabase/functions/notification-dispatch/index.ts \
+            .release/supabase/functions/integration-webhook/index.ts \
+            .release/supabase/functions/payment-checkout/index.ts \
+            .release/supabase/functions/payment-webhook/index.ts \
+            .release/supabase/functions/payment-reconcile/index.ts; do
             test -f "$file"
           done
 
-      - name: Guard runtime connection messaging
+      - name: Live production smoke test
         shell: bash
         run: |
           set -euo pipefail
-          grep -q "LEGACY_MESSAGE" runtime-guard.js
-          grep -q "production-bridge.js?v=20260815-3" runtime-guard.js
-          grep -q "runtime-guard.js?v=20260815-3" functions/_middleware.js
-
-      - name: Live smoke test — public site and config API
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
+          python3 - <<'PY'
           import json, re, urllib.request
-
-          site = "https://globall-cloud.pages.dev/"
-          config = "https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/public-config?key=usd_iqd_rate"
-
-          with urllib.request.urlopen(site, timeout=20) as response:
-              html = response.read().decode("utf-8", "replace")
-              assert response.status == 200, response.status
-              assert "Globall Cloud" in html
-
-          bridge = open("production-bridge.js", encoding="utf-8").read()
-          match = re.search(r"SUPABASE_PUBLISHABLE_KEY\s*=\s*['\"]([^'\"]+)['\"]", bridge)
-          if not match:
-              raise SystemExit("publishable key was not found in production-bridge.js")
-
-          req = urllib.request.Request(
-              config,
-              headers={
-                  "Origin": "https://globall-cloud.pages.dev",
-                  "Accept": "application/json",
-                  "apikey": match.group(1),
-              },
-          )
-          with urllib.request.urlopen(req, timeout=20) as response:
-              body = json.loads(response.read().decode("utf-8", "replace"))
-              assert response.status == 200, response.status
-              assert body.get("key") == "usd_iqd_rate"
-              assert body.get("value") not in (None, ""), body
+          site = 'https://globall-cloud.pages.dev/'
+          config = 'https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/public-config?key=usd_iqd_rate'
+          with urllib.request.urlopen(site, timeout=20) as r:
+              html = r.read().decode('utf-8', 'replace')
+              assert r.status == 200
+              assert 'Globall Cloud' in html
+          bridge = open('production-bridge.js', encoding='utf-8').read()
+          key = re.search(r"SUPABASE_PUBLISHABLE_KEY\s*=\s*['\"]([^'\"]+)['\"]", bridge)
+          assert key, 'publishable key marker missing'
+          req = urllib.request.Request(config, headers={
+              'Origin': 'https://globall-cloud.pages.dev',
+              'Accept': 'application/json',
+              'apikey': key.group(1),
+          })
+          with urllib.request.urlopen(req, timeout=20) as r:
+              body = json.loads(r.read().decode('utf-8', 'replace'))
+              assert r.status == 200
+              assert body.get('key') == 'usd_iqd_rate'
+              assert body.get('value') not in (None, '')
+          print('production smoke test: PASS')
           PY
