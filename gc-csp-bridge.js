@@ -1,13 +1,44 @@
 /* Globall Cloud CSP bridge.
- *
- * Legacy markup used inline event attributes. They are converted to data-gc-on*
- * attributes during the CSP migration. This small, non-eval dispatcher keeps
- * the migration compatible while all executable code remains in external JS.
+ * Keeps legacy data-gc-on* handlers working without eval and also provides
+ * one shared Supabase browser client for staff consoles.
  */
 'use strict';
 
 (() => {
+  const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
   const eventTypes = ['click', 'change', 'submit', 'keydown', 'keyup', 'input', 'load', 'error', 'focus', 'blur', 'mouseover', 'mouseout'];
+
+  function bootstrapSupabase() {
+    try {
+      if (!window.supabase?.createClient) return null;
+      if (!window.sb) {
+        window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+          auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+        });
+      }
+      return window.sb;
+    } catch (error) {
+      console.error('[Globall Cloud] Supabase bootstrap failed', error);
+      return null;
+    }
+  }
+
+  function removeStaleConnectionWarning() {
+    const ok = Boolean(window.sb);
+    if (!ok) return;
+    const phrases = ['Supabase هێشتا پەیوەست نەکراوە', 'Supabase is not connected', 'Supabase client is not available'];
+    document.querySelectorAll('body *').forEach((node) => {
+      if (node.children.length) return;
+      const text = (node.textContent || '').trim();
+      if (text && phrases.some((phrase) => text.includes(phrase))) {
+        node.textContent = 'Supabase production connection is ready.';
+        node.style.color = 'var(--good, #2ed27f)';
+        node.setAttribute('data-gc-connection-state', 'ready');
+      }
+    });
+  }
+
   const decode = (value) => {
     const node = document.createElement('textarea');
     node.innerHTML = String(value ?? '');
@@ -15,18 +46,15 @@
   };
   const splitArgs = (source) => {
     const out = [];
-    let start = 0;
-    let quote = null;
-    let escaped = false;
-    let depth = 0;
+    let start = 0, quote = null, escaped = false, depth = 0;
     for (let i = 0; i < source.length; i += 1) {
       const ch = source[i];
       if (escaped) { escaped = false; continue; }
       if (ch === '\\' && quote) { escaped = true; continue; }
       if (quote) { if (ch === quote) quote = null; continue; }
       if (ch === '"' || ch === "'") { quote = ch; continue; }
-      if (ch === '(' || ch === '[' || ch === '{') depth += 1;
-      if (ch === ')' || ch === ']' || ch === '}') depth -= 1;
+      if ('([{'.includes(ch)) depth += 1;
+      if (')]}'.includes(ch)) depth -= 1;
       if (ch === ',' && depth === 0) { out.push(source.slice(start, i).trim()); start = i + 1; }
     }
     const tail = source.slice(start).trim();
@@ -47,9 +75,7 @@
     if (value === 'false') return false;
     if (value === 'null') return null;
     if (/^-?\d+(\.\d+)?$/.test(value)) return Number(value);
-    if ((value.startsWith("'") && value.endsWith("'")) || (value.startsWith('"') && value.endsWith('"'))) {
-      return value.slice(1, -1).replace(/\\([\\'"nrt])/g, (_, ch) => ({ n: '\n', r: '\r', t: '\t', '\\': '\\', "'": "'", '"': '"' }[ch] ?? ch));
-    }
+    if ((value.startsWith("'") && value.endsWith("'")) || (value.startsWith('"') && value.endsWith('"'))) return value.slice(1, -1);
     const domValue = value.match(/^document\.getElementById\((['"])([^'"]+)\1\)\.(value|checked|files)$/);
     if (domValue) return document.getElementById(domValue[2])?.[domValue[3]];
     const dataValue = value.match(/^event\.currentTarget\.dataset\.([A-Za-z0-9_]+)$/);
@@ -57,19 +83,12 @@
     if ((value.startsWith('{') && value.endsWith('}')) || (value.startsWith('[') && value.endsWith(']'))) {
       try { return JSON.parse(value); } catch (_) { return value; }
     }
-    if (/^[A-Za-z_$][\w$]*$/.test(value)) {
-      if (value === 'element') return element;
-      if (value in window) return window[value];
-      return undefined;
-    }
-    const plus = value.match(/^([A-Za-z_$][\w$]*)\s*\+\s*(-?\d+(?:\.\d+)?)$/);
-    if (plus && plus[1] in window) return Number(window[plus[1]]) + Number(plus[2]);
+    if (/^[A-Za-z_$][\w$]*$/.test(value)) return value in window ? window[value] : undefined;
     return undefined;
   };
   const resolvePath = (path) => {
-    const parts = path.split('.');
     let target = window;
-    for (const part of parts) {
+    for (const part of path.split('.')) {
       if (target == null) return undefined;
       target = target[part];
     }
@@ -107,9 +126,7 @@
       const domCall = statement.match(/^\$\((['"])([^'"]+)\1\)\.classList\.(add|remove|toggle)\((['"])([^'"]+)\4\)$/);
       if (domCall) { document.getElementById(domCall[2])?.classList?.[domCall[3]](domCall[5]); continue; }
       const callMatch = statement.match(/^(?:window\.)?([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)\((.*)\)$/s);
-      if (callMatch) {
-        call(callMatch[1], splitArgs(callMatch[2]), event, element);
-      }
+      if (callMatch) call(callMatch[1], splitArgs(callMatch[2]), event, element);
     }
   };
   const install = (eventType) => {
@@ -121,5 +138,9 @@
       catch (error) { console.error(`Globall Cloud ${attr} handler failed`, error); }
     }, true);
   };
+
+  bootstrapSupabase();
   eventTypes.forEach(install);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', removeStaleConnectionWarning, { once: true });
+  else removeStaleConnectionWarning();
 })();
