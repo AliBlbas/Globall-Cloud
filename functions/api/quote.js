@@ -50,34 +50,34 @@ export async function onRequestPost({ request }) {
     if (body.volume_cbm !== '' && body.volume_cbm != null && volumeCbm === null) return fail('Invalid volume value', 400);
     if (body.items_count !== '' && body.items_count != null && itemsCount === null) return fail('Invalid item count', 400);
 
-    const clean = {
-      customer_name: customerName,
-      customer_phone: customerPhone || null,
-      origin_key: originKey,
-      dest_key: destKey,
-      transport_mode: transportMode,
-      weight_kg: weightKg,
-      volume_cbm: volumeCbm,
-      items_count: itemsCount,
-      notes: notes || null,
-      status: 'new',
-      currency: 'USD'
-    };
-
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/quote_requests`, {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/public-quote`, {
       method: 'POST',
       headers: {
         apikey: SUPABASE_KEY,
         Authorization: `Bearer ${SUPABASE_KEY}`,
         'Content-Type': 'application/json',
-        Prefer: 'return=minimal'
+        Origin: 'https://globall-cloud.pages.dev'
       },
-      body: JSON.stringify(clean),
+      body: JSON.stringify({
+        name: customerName,
+        email: cleanText(body.email, 160),
+        phone: customerPhone,
+        origin_key: originKey,
+        dest_key: destKey,
+        transport_mode: transportMode,
+        weight_kg: weightKg,
+        volume_cbm: volumeCbm,
+        items_count: itemsCount,
+        service_level: cleanText(body.service_level, 30) || 'standard',
+        incoterm: cleanText(body.incoterm, 12) || 'EXW',
+        notes
+      }),
       cf: { cacheTtl: 0, cacheEverything: false }
     });
 
-    if (!response.ok) return fail('Production quote service rejected the request', 502);
-    return Response.json({ ok: true, status: 'received' }, { headers: JSON_HEADERS });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) return fail(result.error || 'Production quote service rejected the request', response.status >= 400 && response.status < 500 ? response.status : 502);
+    return Response.json({ ok: true, status: 'received', request: result.request || null }, { headers: JSON_HEADERS });
   } catch {
     return fail('Quote service unavailable', 503);
   }

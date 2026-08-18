@@ -66,9 +66,25 @@ const requiredFiles = [
   'warehouse-os.html', 'staff-os.html', 'superadmin.html',
   'super-admin-command-center.html', 'supabase/config.toml',
   'functions/_middleware.js', 'functions/health.js',
+  'gc-csp-scripts/customer-portal-inline-1.js', 'gc-csp-scripts/accounts-console-inline-1.js',
+  'gc-csp-scripts/command-center-inline-1.js', 'gc-csp-scripts/operations-command-center-inline-1.js',
 ];
 for (const file of requiredFiles) if (!existsSync(join(ROOT, file))) fail(`missing required file: ${file}`);
 if (failures === 0) ok(`${requiredFiles.length} required files present`);
+
+console.log('Public and protected flow contract');
+const homepage = readFileSync(join(ROOT, 'index.html'), 'utf8');
+const homepageRuntime = readFileSync(join(ROOT, 'logistics-home.js'), 'utf8');
+const quoteFunction = readFileSync(join(ROOT, 'functions/api/quote.js'), 'utf8');
+const customerPortal = readFileSync(join(ROOT, 'customer-portal.html'), 'utf8');
+const customerScript = readFileSync(join(ROOT, 'gc-csp-scripts/customer-portal-inline-1.js'), 'utf8');
+if (!homepage.includes('id="gcQuote"') || !homepage.includes('name="email"')) fail('public quote form is missing required contact fields');
+if (!homepage.includes('logistics-home.js')) fail('homepage runtime is not loaded');
+if (!homepageRuntime.includes("fetch('/api/quote'")) fail('homepage quote form is not connected to the Pages API route');
+if (!quoteFunction.includes('/functions/v1/public-quote')) fail('Pages quote API is not connected to the Supabase public quote endpoint');
+if (!customerPortal.includes('id="loginBtn"') || !customerPortal.includes('id="password"')) fail('customer portal email/password login boundary is missing');
+if (!customerScript.includes('signInWithPassword') || !customerScript.includes(".eq('customer_user_id', uid)")) fail('customer portal does not enforce authenticated customer data loading');
+if (failures === 0) ok('public quote and protected customer account boundaries present');
 
 console.log('Unified release package');
 const archive = join(ROOT, 'Globall-Cloud-Unified.zip');
@@ -108,7 +124,7 @@ if (failures === 0) ok('no server-secret markers found in browser JS');
 const config = readFileSync(join(ROOT, 'supabase/config.toml'), 'utf8');
 if (!config.includes('project_id = "ahslifnthiwfkmaswjno"')) fail('Supabase project reference is wrong');
 if (!config.includes('site_url = "https://globall-cloud.pages.dev"')) fail('Supabase site_url is not the production Cloudflare Pages site');
-for (const name of ['public-track','public-config','public-message','system-health','logistics-control-plane','document-access','notification-dispatch','integration-webhook','payment-checkout','payment-webhook','payment-reconcile']) {
+for (const name of ['public-track','public-config','public-message','public-quote','system-health','logistics-control-plane','document-access','notification-dispatch','integration-webhook','payment-checkout','payment-webhook','payment-reconcile']) {
   if (!config.includes(`[functions.${name}]`)) fail(`Supabase function ${name} is missing from config`);
 }
 if (failures === 0) ok('Supabase production configuration is aligned');
