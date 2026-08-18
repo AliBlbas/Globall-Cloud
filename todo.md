@@ -35,3 +35,17 @@
 
 - [x] Restore all release assets referenced by HTML files but missing from the Git tree, starting with customer portal and CSP external scripts
 - [x] Re-run package validation after restoring missing runtime assets
+
+- [ ] Deploy the new Supabase `public-quote` Edge Function to project `ahslifnthiwfkmaswjno`
+- [ ] Run live public quote smoke tests after the Edge Function is deployed
+- [ ] Provide or connect Supabase deployment credentials without placing secrets in the repository
+
+# Production-Ready Expansion Acceptance Criteria
+
+- [x] Define measurable acceptance criteria for availability, correctness, security, performance, and recovery
+- [ ] Complete backend deployment so live endpoints are not dependent on local files or unavailable runners
+- [ ] Verify database migrations and RLS policies against real Supabase data access paths
+- [ ] Verify public quote creation, customer login, staff login, and account-scoped data access end to end
+- [ ] Verify operations, CRM, shipment, finance, document, messaging, and notification workflows with real integrations
+- [ ] Add failure handling, idempotency, rate limiting, audit logs, backups, monitoring, and rollback procedures
+- [ ] Run release gates with no known failing tests, missing assets, undeployed functions, or broken production routes

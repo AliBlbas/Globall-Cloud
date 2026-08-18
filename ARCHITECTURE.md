@@ -37,3 +37,12 @@ Anonymous users may create a quote request but may not read operational data. Cu
 ## Delivery sequence
 
 The implementation will proceed in vertical slices. First, the public/private boundary and account authentication are made correct. Second, quote intake and customer history are made durable. Third, internal operations and CRM surfaces are connected to the same database model. Fourth, finance, documents, notifications, and integrations are hardened. Each slice must pass local validation, focused tests, and a production smoke check before the next slice begins.
+
+
+## Production acceptance criteria
+
+A release is accepted only when the public homepage, quote request, tracking surface, customer account, staff portal, and operational APIs respond through their intended production routes. Anonymous quote submission must validate input, reject abuse patterns, persist a server-side record, and return a stable request identifier without exposing privileged credentials. Customer sessions must use email/password authentication, and a customer must be unable to read or mutate another customer's quotes, shipments, invoices, documents, messages, or notifications.
+
+Staff actions must be role-checked on the server, finance mutations must be auditable, and privileged endpoints must never trust a browser-only role flag. Every external webhook must be signature-validated, idempotent, and safe to retry. Production release gates require JavaScript and TypeScript syntax validation, schema and RLS checks, browser secret scanning, focused endpoint tests, public and authenticated smoke tests, and a documented rollback path. A failed deployment must not be presented as complete.
+
+The platform is delivered in vertical releases. Each release has a Git commit, a migration or configuration record when applicable, a test result, a live endpoint check, and an explicit list of remaining blockers. Secrets are provisioned through managed secret configuration and are never committed to GitHub.
