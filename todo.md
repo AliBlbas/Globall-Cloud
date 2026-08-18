@@ -36,9 +36,9 @@
 - [x] Restore all release assets referenced by HTML files but missing from the Git tree, starting with customer portal and CSP external scripts
 - [x] Re-run package validation after restoring missing runtime assets
 
-- [ ] Deploy the new Supabase `public-quote` Edge Function to project `ahslifnthiwfkmaswjno`
-- [ ] Run live public quote smoke tests after the Edge Function is deployed
-- [ ] Provide or connect Supabase deployment credentials without placing secrets in the repository
+- [x] Deploy the new Supabase `public-quote` Edge Function to project `ahslifnthiwfkmaswjno`
+- [x] Run live public quote smoke tests after the Edge Function is deployed
+- [x] Provide or connect Supabase deployment credentials without placing secrets in the repository
 
 # Production-Ready Expansion Acceptance Criteria
 
