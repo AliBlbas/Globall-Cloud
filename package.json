@@ -11,6 +11,8 @@
   },
   "scripts": {
     "test": "node tests/validate.mjs",
-    "test:syntax": "node tests/validate.mjs"
+    "test:syntax": "node tests/validate.mjs",
+    "test:notification": "node tests/notification-dispatch.test.mjs",
+    "test:all": "node tests/validate.mjs && node tests/notification-dispatch.test.mjs"
   }
 }

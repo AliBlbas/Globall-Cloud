@@ -49,3 +49,20 @@
 - [ ] Verify operations, CRM, shipment, finance, document, messaging, and notification workflows with real integrations
 - [ ] Add failure handling, idempotency, rate limiting, audit logs, backups, monitoring, and rollback procedures
 - [ ] Run release gates with no known failing tests, missing assets, undeployed functions, or broken production routes
+- [x] Inspect uploaded Globall-Cloud-Unified(3).zip archive contents and release structure
+- [x] Compare uploaded archive against the GitHub main branch and production architecture
+- [x] Run static security, secret-leak, asset, and deployment validation on the uploaded archive
+- [x] Report archive findings and any required corrections
+- [x] Compare uploaded ZIP and current release capabilities across frontend, backend, auth, data, security, and deployment
+- [x] Produce a weighted production-readiness comparison and recommend the safer baseline
+- [x] Identify ZIP-only modules with the largest project-relevant differences
+- [x] Rank ZIP modules by integration value, dependency risk, and recommended sequence
+- [x] Inspect notification-dispatch function and notification outbox/RPC contracts
+- [x] Design an isolated notification integration boundary without changing public quote or customer auth
+- [x] Define notification migration, worker secrets, trigger, idempotency tests, and rollback checks
+- [x] Implement isolated notification-dispatch integration slice without changing public quote or customer auth
+- [x] Add notification schema/RPC migration and server-only worker boundary
+- [x] Add notification idempotency/concurrency tests and run repository validation
+- [ ] Apply notification worker migration to the target Supabase project after review and backup
+- [ ] Configure NOTIFICATION_WORKER_SECRET and deploy notification-dispatch worker
+- [ ] Run a live in-app notification claim/complete smoke test
