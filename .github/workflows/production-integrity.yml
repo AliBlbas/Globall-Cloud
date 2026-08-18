@@ -106,7 +106,7 @@ jobs:
           if [ -d supabase/migrations ]; then
             find supabase/migrations -maxdepth 1 -type f -name '*.sql' -print0 | while IFS= read -r -d '' file; do
               base="$(basename "$file")"
-              [[ "$base" =~ ^[0-9]{14}_[a-z0-9_]+\.sql$ ]]
+              [[ "$base" =~ ^([0-9]{8}|[0-9]{14})_[a-z0-9_]+\.sql$ ]]
             done
           fi
 

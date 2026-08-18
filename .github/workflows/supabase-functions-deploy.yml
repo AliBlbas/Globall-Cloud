@@ -4,7 +4,6 @@ on:
   push:
     branches: [main]
     paths:
-      - 'Globall-Cloud-Unified.zip'
       - 'supabase/functions/**'
       - 'supabase/config.toml'
       - '.github/workflows/supabase-functions-deploy.yml'
@@ -25,18 +24,6 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-
-      - name: Expand unified release package
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -f Globall-Cloud-Unified.zip
-          rm -rf .release
-          mkdir -p .release
-          unzip -q -o Globall-Cloud-Unified.zip -d .release
-          if [ -d .release/supabase ]; then
-            cp -a .release/supabase/. supabase/
-          fi
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@46f7f98c7f948ad727d22c1e67fab04c223a0520 # v3
