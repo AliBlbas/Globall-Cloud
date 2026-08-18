@@ -48,7 +48,7 @@
   async function loadNotifications() {
     if (!state.user) return empty('notifications', 'بۆ بینینی ئاگادارکردنەوەکان بچۆ ژوورەوە.');
     let query = state.client.from('customer_notifications').select('*').order('created_at', {ascending:false}).limit(8);
-    if (!state.isStaff) query = query.eq('user_id', state.user.id);
+    if (!state.isStaff) query = query.eq('customer_user_id', state.user.id);
     const { data, error } = await query;
     if (error) throw error;
     const rows = data || [];
@@ -64,17 +64,18 @@
     if (error) throw error;
     const rows = data || [];
     if (!rows.length) return empty('quotes', 'هیچ داواکاریی نرخێکی نوێ نییە.');
-    set('quotes', rows.map(r => `<div class="alert ${r.status === 'quoted' ? 'green' : ''}"><strong>${esc(r.origin_key || '—')} → ${esc(r.dest_key || '—')}</strong><div class="muted">${esc(r.mode || '—')} · ${esc(r.status || 'pending')} · ${money(r.estimated_total || r.quoted_total)} USD</div></div>`).join(''));
+    set('quotes', rows.map(r => `<div class="alert ${r.status === 'quoted' ? 'green' : ''}"><strong>${esc(r.origin_key || '—')} → ${esc(r.dest_key || '—')}</strong><div class="muted">${esc(r.transport_mode || '—')} · ${esc(r.status || 'pending')} · ${money(r.quoted_amount)} ${esc(r.currency || 'USD')}</div></div>`).join(''));
   }
 
   async function loadDocs() {
     if (!state.user && !state.isStaff) return empty('docs', 'بۆ بەڵگەنامەکان بچۆ ژوورەوە.');
     let query = state.client.from('shipment_documents').select('*').order('created_at', {ascending:false}).limit(12);
+    if (!state.isStaff && state.user) query = query.eq('customer_user_id', state.user.id);
     const { data, error } = await query;
     if (error) throw error;
     const rows = data || [];
     if (!rows.length) return empty('docs', 'هێشتا بەڵگەنامەیەک تۆمار نەکراوە.');
-    const counts = rows.reduce((a,r) => { const k = String(r.status || 'uploaded'); a[k] = (a[k] || 0) + 1; return a; }, {});
+    const counts = rows.reduce((a,r) => { const k = String(r.document_status || 'uploaded'); a[k] = (a[k] || 0) + 1; return a; }, {});
     set('docs', Object.entries(counts).map(([k,v]) => `<div class="alert ${k === 'verified' || k === 'approved' ? 'green' : k === 'rejected' ? 'red' : ''}"><strong>${esc(k)}</strong><div class="muted">${v} document(s)</div></div>`).join(''));
   }
 
@@ -112,7 +113,7 @@
       state.isStaff = false;
       if (state.user) {
         const staff = await state.client.from('staff').select('id,full_name,role,is_active').eq('id',state.user.id).maybeSingle();
-        state.isStaff = !!staff.data && staff.data.is_active !== false;
+        state.isStaff = !!staff.data && staff.data.is_active === true;
         const who = staff.data?.full_name || state.user.email || 'User';
         set('who', esc(who)); set('rolePill', esc(state.isStaff ? (staff.data?.role || 'Staff') : 'Customer')); set('sessionText', state.isStaff ? 'Staff session ـی پشتڕاستکراو.' : 'Customer session ـی پشتڕاستکراو.');
       } else { set('rolePill','Guest'); set('who','Guest'); }

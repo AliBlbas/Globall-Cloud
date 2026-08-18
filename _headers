@@ -1,5 +1,4 @@
 /*
-  X-Global-Cloud-Deployment: 2026-08-17
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
@@ -51,7 +50,7 @@
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
 /warehouse-os.html
-  X-Robots-Tag: noindex, nofollow, max-age=0, must-revalidate
+  X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
 /tracking-integration.html
@@ -92,17 +91,11 @@
 /logo-fix.css
   Cache-Control: public, max-age=300, must-revalidate
 
-/logistics-home.js
-  Cache-Control: no-store, max-age=0, must-revalidate
-
-/gc-runtime.css
-  Cache-Control: public, max-age=300, must-revalidate
-
 /*.css
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: public, max-age=3600
 
 /*.js
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: public, max-age=3600
 
 /*.png
   Cache-Control: public, max-age=86400

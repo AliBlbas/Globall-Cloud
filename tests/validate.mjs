@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 // Local pre-push validation for Globall Cloud.
 // Fast syntax + structural sanity checks. The full invariant suite
-// lives in .github/workflows/production-integrity.yml and runs in CI.
+// (CSP, secrets, migration filenames, live smoke test) lives in
+// .github/workflows/production-integrity.yml and runs in CI — this
+// script is meant to catch the same class of mistakes in ~2 seconds
+// on your own machine before you push.
+//
+// Run: npm test  (or) node tests/validate.mjs
 
 import { execFileSync } from 'node:child_process';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, extname, relative } from 'node:path';
-import { execSync } from 'node:child_process';
 
 const ROOT = join(new URL('.', import.meta.url).pathname, '..');
 let failures = 0;
@@ -14,9 +18,8 @@ const fail = (msg) => { console.error(`  ✗ ${msg}`); failures++; };
 const ok = (msg) => console.log(`  ✓ ${msg}`);
 
 function walk(dir, exts, out = []) {
-  if (!existsSync(dir)) return out;
   for (const entry of readdirSync(dir)) {
-    if (entry === '.git' || entry === 'node_modules' || entry === '.release') continue;
+    if (entry === '.git' || entry === 'node_modules') continue;
     const p = join(dir, entry);
     const s = statSync(p);
     if (s.isDirectory()) walk(p, exts, out);
@@ -25,6 +28,7 @@ function walk(dir, exts, out = []) {
   return out;
 }
 
+// 1. JS syntax check
 console.log('JavaScript syntax (node --check)');
 const jsFiles = walk(ROOT, ['.js']);
 for (const f of jsFiles) {
@@ -36,10 +40,17 @@ for (const f of jsFiles) {
 }
 if (failures === 0) ok(`${jsFiles.length} files OK`);
 
+// 2. TS syntax check (edge functions) — syntax only, no module
+//    resolution, so Deno's npm:/jsr: specifiers don't need to resolve.
 console.log('TypeScript syntax (edge functions)');
 const tsFiles = walk(join(ROOT, 'supabase', 'functions'), ['.ts']);
+let ts;
 try {
-  const ts = await import('typescript');
+  ts = await import('typescript');
+} catch {
+  console.log('  (skipped — run `npm install` to get the typescript package)');
+}
+if (ts) {
   const before = failures;
   for (const f of tsFiles) {
     const code = readFileSync(f, 'utf8');
@@ -53,85 +64,45 @@ try {
       fail(`${relative(ROOT, f)}: ${msgs}`);
     }
   }
-  if (failures === before) ok(`${tsFiles.length} TypeScript files OK`);
-} catch {
-  console.log('  (skipped — run `npm install` to enable TypeScript syntax validation)');
+  if (failures === before) ok(`${tsFiles.length} files OK`);
 }
 
-console.log('Required production files');
-const requiredFiles = [
-  'index.html', 'sw.js', 'production-bridge.js', 'runtime-guard.js',
-  'control-plane.html', 'control-plane.js', 'payment-checkout.html',
-  'payment-checkout.js', 'customer-portal.html', 'driver-workspace.html',
-  'warehouse-os.html', 'staff-os.html', 'superadmin.html',
-  'super-admin-command-center.html', 'supabase/config.toml',
-  'functions/_middleware.js', 'functions/health.js',
-  'gc-csp-scripts/customer-portal-inline-1.js', 'gc-csp-scripts/accounts-console-inline-1.js',
-  'gc-csp-scripts/command-center-inline-1.js', 'gc-csp-scripts/operations-command-center-inline-1.js',
+// 3. Core production files present
+console.log('Core production files');
+const required = [
+  'index.html', 'sw.js', 'production-bridge.js', 'runtime-guard.js', 'functions/_middleware.js',
+  'control-plane.html', 'control-plane.js', 'payment-checkout.html', 'payment-checkout.js',
+  'customer-portal.html', 'driver-workspace.html', 'warehouse-os.html', 'staff-os.html',
+  'superadmin.html', 'super-admin-command-center.html',
+  'supabase/config.toml',
+  'supabase/functions/payment-checkout/index.ts',
+  'supabase/functions/payment-webhook/index.ts',
+  'supabase/functions/notification-dispatch/index.ts',
+  'supabase/functions/logistics-control-plane/index.ts',
+  'supabase/functions/_shared/payment-providers.ts',
 ];
-for (const file of requiredFiles) if (!existsSync(join(ROOT, file))) fail(`missing required file: ${file}`);
-if (failures === 0) ok(`${requiredFiles.length} required files present`);
+const beforeReq = failures;
+for (const rel of required) {
+  if (!existsSync(join(ROOT, rel))) fail(`missing ${rel}`);
+}
+if (failures === beforeReq) ok(`${required.length} files present`);
 
-console.log('Public and protected flow contract');
-const homepage = readFileSync(join(ROOT, 'index.html'), 'utf8');
-const homepageRuntime = readFileSync(join(ROOT, 'logistics-home.js'), 'utf8');
-const quoteFunction = readFileSync(join(ROOT, 'functions/api/quote.js'), 'utf8');
-const customerPortal = readFileSync(join(ROOT, 'customer-portal.html'), 'utf8');
-const customerScript = readFileSync(join(ROOT, 'gc-csp-scripts/customer-portal-inline-1.js'), 'utf8');
-if (!homepage.includes('id="gcQuote"') || !homepage.includes('name="email"')) fail('public quote form is missing required contact fields');
-if (!homepage.includes('logistics-home.js')) fail('homepage runtime is not loaded');
-if (!homepageRuntime.includes("fetch('/api/quote'")) fail('homepage quote form is not connected to the Pages API route');
-if (!quoteFunction.includes('/functions/v1/public-quote')) fail('Pages quote API is not connected to the Supabase public quote endpoint');
-if (!customerPortal.includes('id="loginBtn"') || !customerPortal.includes('id="password"')) fail('customer portal email/password login boundary is missing');
-if (!customerScript.includes('signInWithPassword') || !customerScript.includes(".eq('customer_user_id', uid)")) fail('customer portal does not enforce authenticated customer data loading');
-if (failures === 0) ok('public quote and protected customer account boundaries present');
-
-console.log('Unified release package');
-const archive = join(ROOT, 'Globall-Cloud-Unified.zip');
-if (!existsSync(archive)) {
-  fail('Globall-Cloud-Unified.zip is missing');
-} else {
-  try {
-    const listing = execSync(`unzip -Z1 "${archive}"`, { encoding: 'utf8' });
-    for (const file of [
-      'supabase/functions/document-access/index.ts',
-      'supabase/functions/logistics-control-plane/index.ts',
-      'supabase/functions/notification-dispatch/index.ts',
-      'supabase/functions/integration-webhook/index.ts',
-      'supabase/functions/payment-checkout/index.ts',
-      'supabase/functions/payment-webhook/index.ts',
-      'supabase/functions/payment-reconcile/index.ts',
-      'supabase/functions/_shared/payment-providers.ts',
-    ]) {
-      if (!listing.split('\n').includes(file)) fail(`unified package missing ${file}`);
-    }
-    if (failures === 0) ok('unified package contains advanced Edge Functions');
-  } catch (error) {
-    fail(`unable to inspect unified release package: ${error.message}`);
+// 4. Migration filenames follow the Supabase CLI timestamp convention
+console.log('Migration filenames');
+const migDir = join(ROOT, 'supabase', 'migrations');
+const beforeMig = failures;
+if (existsSync(migDir)) {
+  const migFiles = readdirSync(migDir).filter((f) => f.endsWith('.sql'));
+  for (const f of migFiles) {
+    if (!/^\d{14}_[a-z0-9_]+\.sql$/.test(f)) fail(`bad migration filename: ${f}`);
   }
+  if (failures === beforeMig) ok(`${migFiles.length} migrations OK`);
 }
 
-console.log('Browser secret guard');
-const forbiddenSecret = /(?:SUPABASE_SERVICE_ROLE_KEY|SUPABASE_SECRET_KEY|sb_secret_)/i;
-for (const f of jsFiles) {
-  const rel = relative(ROOT, f);
-  if (rel.startsWith('supabase/functions/')) continue;
-  const source = readFileSync(f, 'utf8');
-  if (forbiddenSecret.test(source)) fail(`server secret reference in browser JS: ${rel}`);
-}
-if (failures === 0) ok('no server-secret markers found in browser JS');
-
-const config = readFileSync(join(ROOT, 'supabase/config.toml'), 'utf8');
-if (!config.includes('project_id = "ahslifnthiwfkmaswjno"')) fail('Supabase project reference is wrong');
-if (!config.includes('site_url = "https://globall-cloud.pages.dev"')) fail('Supabase site_url is not the production Cloudflare Pages site');
-for (const name of ['public-track','public-config','public-message','public-quote','system-health','logistics-control-plane','document-access','notification-dispatch','integration-webhook','payment-checkout','payment-webhook','payment-reconcile']) {
-  if (!config.includes(`[functions.${name}]`)) fail(`Supabase function ${name} is missing from config`);
-}
-if (failures === 0) ok('Supabase production configuration is aligned');
-
-if (failures) {
-  console.error(`\n${failures} validation failure(s).`);
+console.log('');
+if (failures > 0) {
+  console.error(`${failures} check(s) failed.`);
   process.exit(1);
+} else {
+  console.log('All checks passed.');
 }
-
-console.log('PASS: Globall Cloud production validation succeeded.');

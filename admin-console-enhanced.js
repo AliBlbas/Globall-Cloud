@@ -57,21 +57,6 @@
     return data;
   }
 
-  function clearLegacySupabaseWarning() {
-    const needles = [
-      'Supabase هێشتا پەیوەست نەکراوە',
-      'URL و publishable key لە کۆدەکەدا زیادبکە',
-      'Supabase connection is not configured',
-      'Supabase is not connected'
-    ];
-    document.querySelectorAll('body *').forEach((node) => {
-      if (node.children.length === 0 && needles.some((needle) => (node.textContent || '').includes(needle))) {
-        node.textContent = '';
-        node.hidden = true;
-      }
-    });
-  }
-
   async function recoverSession() {
     const client = ensureClient();
     if (!client) return false;
@@ -114,7 +99,6 @@
         status.style.display = 'inline-flex';
       }
     }
-    clearLegacySupabaseWarning();
     return true;
   }
 
@@ -125,7 +109,6 @@
     if (who) who.textContent = 'Secure staff workspace';
     const sub = qs('whoamiSub');
     if (sub) sub.textContent = 'Sign in to open the operational control center';
-    clearLegacySupabaseWarning();
   }
 
   function enhanceLabels() {
@@ -203,7 +186,6 @@
     } else {
       showLoginShell();
     }
-    setTimeout(clearLegacySupabaseWarning, 250);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
