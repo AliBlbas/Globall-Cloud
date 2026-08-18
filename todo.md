@@ -4,7 +4,34 @@
 - [x] Identify and fix the root cause of GitHub Actions startup failures
 - [x] Validate production-integrity checks against the current Cloudflare Access protection model
 - [x] Ensure the GitHub repository contains the intended release package and required deployment files
-- [ ] Verify Cloudflare Pages source repository, production branch, and build settings
+- [ ] Verify Cloudflare Pages source repository, production branch, and build settings (Cloudflare Dashboard security verification still blocks access)
 - [x] Verify Cloudflare Access policy behavior and preserve secure internal access
-- [ ] Run repository validation and GitHub Actions verification after fixes
+- [x] Run repository validation and GitHub Actions verification after fixes (local validation passes; hosted runner remains unavailable)
 - [x] Confirm live site response and document any remaining manual Cloudflare action
+
+- [ ] Reconnect Cloudflare Pages Git integration after the dashboard shows the repository as Disconnected
+- [ ] Configure Cloudflare Pages for the repository's static root: no build command or `exit 0`, output directory `/`, production branch `main`
+- [ ] Trigger and verify a new Cloudflare Pages deployment from the reconnected GitHub repository
+
+- [ ] Make the public site and quote-request flow accessible without Cloudflare Access email login
+- [ ] Require email/password authentication only for customer accounts, request history, and private dashboards
+- [ ] Preserve public submission of quote requests while associating later account access securely
+- [ ] Verify public browsing, quote request submission, and protected account entry after the auth-boundary change
+
+# Production Platform Roadmap
+
+- [x] Define public, customer, staff, finance, and super-admin roles and route boundaries
+- [x] Choose production architecture and data ownership model for frontend, API, database, storage, and authentication
+- [ ] Establish secure server-side environment configuration and secrets handling
+- [ ] Create durable schema for customers, quote requests, shipments, invoices, documents, messages, audit logs, and staff roles
+- [ ] Implement email/password customer authentication and protected account sessions
+- [ ] Keep public browsing and quote-request submission accessible without site-wide Cloudflare Access
+- [ ] Build customer quote history, shipment tracking, documents, notifications, and profile workflows
+- [ ] Build internal operations dashboard for quotes, shipments, exceptions, documents, and customer communication
+- [ ] Build CRM, pricing, finance, staff, and approval workflows with role-based permissions
+- [ ] Add validation, rate limiting, audit logging, error handling, and secure database policies
+- [ ] Add automated tests, end-to-end smoke tests, monitoring, backups, and deployment checks
+- [ ] Execute staged release and verify public quote flow plus protected account flow in production
+
+- [x] Restore all release assets referenced by HTML files but missing from the Git tree, starting with customer portal and CSP external scripts
+- [x] Re-run package validation after restoring missing runtime assets
