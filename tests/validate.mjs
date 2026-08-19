@@ -87,16 +87,14 @@ for (const rel of required) {
 }
 if (failures === beforeReq) ok(`${required.length} files present`);
 
-// 4. Migration filenames follow the Supabase CLI timestamp convention.
-// Supabase accepts both legacy 8-digit versions already applied remotely and
-// the current 14-digit timestamp format for new migrations.
+// 4. Migration filenames follow the Supabase CLI timestamp convention
 console.log('Migration filenames');
 const migDir = join(ROOT, 'supabase', 'migrations');
 const beforeMig = failures;
 if (existsSync(migDir)) {
   const migFiles = readdirSync(migDir).filter((f) => f.endsWith('.sql'));
   for (const f of migFiles) {
-    if (!/^(?:\d{8}|\d{14})_[a-z0-9_]+\.sql$/.test(f)) fail(`bad migration filename: ${f}`);
+    if (!/^\d{14}_[a-z0-9_]+\.sql$/.test(f)) fail(`bad migration filename: ${f}`);
   }
   if (failures === beforeMig) ok(`${migFiles.length} migrations OK`);
 }
