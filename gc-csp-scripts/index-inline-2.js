@@ -2747,27 +2747,39 @@ function calcQuote(){
   const origin = document.getElementById('quoteOrigin')?.value || 'china';
   const originLabels = { china:'چین', uae:'دوبەی / ئیمارات', usa:'ئەمریکا' };
   const destLabels = { hawler:'هەولێر', slimani:'سلێمانی', duhok:'دهۆک', bakhdad:'بەغدا', kerkuk:'کەرکووک', mosul:'موسڵ', basra:'بەسرە' };
-  const type = document.getElementById('quoteType').value;
-  const weight = Number(document.getElementById('quoteWeight').value);
-  const dest = document.getElementById('quoteDest').value;
+  const type = document.getElementById('quoteType')?.value || 'air';
+  const weightEl = document.getElementById('quoteWeight');
+  const weight = Number(weightEl?.value);
+  const dest = document.getElementById('quoteDest')?.value || 'hawler';
   const resultEl = document.getElementById('quoteResult');
-  if(!weight || weight <= 0){
-    resultEl.innerHTML = `<p class="admin-error" style="display:block; margin-top:12px;">${t('services.quote.needWeight')}</p>`;
+  const calcBtn = document.getElementById('quoteCalcBtn');
+  const invalidMessage = t('services.quote.needWeight');
+  if(!Number.isFinite(weight) || weight <= 0 || weight > 50000){
+    if(weightEl) weightEl.focus();
+    if(resultEl) resultEl.innerHTML = `<p class="admin-error" style="display:block; margin-top:12px;" role="alert">${invalidMessage}</p>`;
     return;
   }
-  const base = weight * QUOTE_RATES[type] * QUOTE_CITY_FACTOR[dest];
-  const est = Math.max(base, QUOTE_MIN_CHARGE[type]);
-  const low = Math.round(est * 0.9);
-  const high = Math.round(est * 1.15);
-  const lowIqd = Math.round(low * getExchangeRate());
-  const highIqd = Math.round(high * getExchangeRate());
-  resultEl.innerHTML = `
-    <div style="margin-top:16px; padding:16px; background:var(--surface-2); border-radius:var(--radius-m); text-align:center;">
-      <span class="hint">${t('services.quote.resultLabel')} · ${escapeHtml(originLabels[origin] || originLabels.china)} → ${escapeHtml(destLabels[dest] || dest)}</span>
-      <div style="font-size:26px; font-weight:800; color:var(--teal-l); margin:6px 0;">$${low} – $${high}</div>
-      <div class="hint">≈ ${lowIqd.toLocaleString()} – ${highIqd.toLocaleString()} د.ع</div>
-      <a class="btn btn-primary" style="margin-top:8px;" data-gc-onclick="route('request')">${t('services.quote.cta')}</a>
-    </div>`;
+  if(calcBtn){ calcBtn.disabled = true; calcBtn.classList.add('is-loading'); calcBtn.setAttribute('aria-busy','true'); }
+  if(resultEl) resultEl.innerHTML = `<p class="hint" style="margin-top:14px;">${currentLang === 'ku' ? 'خەملاندن لە ئامادەکردندایە...' : 'Preparing your estimate…'}</p>`;
+  window.setTimeout(()=>{
+    const base = weight * QUOTE_RATES[type] * QUOTE_CITY_FACTOR[dest];
+    const est = Math.max(base, QUOTE_MIN_CHARGE[type]);
+    const low = Math.round(est * 0.9);
+    const high = Math.round(est * 1.15);
+    const lowIqd = Math.round(low * getExchangeRate());
+    const highIqd = Math.round(high * getExchangeRate());
+    if(resultEl) resultEl.innerHTML = `
+      <div class="quote-result-card">
+        <div class="quote-route">${escapeHtml(originLabels[origin] || originLabels.china)} → ${escapeHtml(destLabels[dest] || dest)} · ${weight.toLocaleString()} kg</div>
+        <div class="quote-price">$${low} – $${high}</div>
+        <div class="hint">≈ ${lowIqd.toLocaleString()} – ${highIqd.toLocaleString()} د.ع</div>
+        <div class="quote-result-actions">
+          <button class="btn btn-primary" data-gc-onclick="route('request')">${t('services.quote.cta')}</button>
+          <button class="btn btn-outline" data-gc-onclick="route('track')">${currentLang === 'ku' ? 'شوێنکەوتنی بار' : 'Track shipment'}</button>
+        </div>
+      </div>`;
+    if(calcBtn){ calcBtn.disabled = false; calcBtn.classList.remove('is-loading'); calcBtn.removeAttribute('aria-busy'); }
+  }, 180);
 }
 
 let batchLookupTimer = null;
