@@ -91,6 +91,14 @@ ku:{
       warehouse:{title:'کۆگاداری',desc:'کۆگای پارێزراو و چاودێریکراو لە ئیمارات و عێراق.',features:['چاودێری ٢٤/٧','سیستەمی بەڕێوەبردنی کۆگا','بیمەی گونجاو بۆ کاڵاکان']},
       door:{title:'گەیاندن بۆ بەردەرگا',desc:'گەیاندنی کۆتایی بارەکەت ڕاستەوخۆ بۆ ماڵ یان کۆمپانیاکەت.',features:['گەیاندن بۆ هەموو شارەکانی عێراق','ڕێکخستنی کاتی گەیاندن','پشتڕاستکردنەوەی وەرگرتن']}
     },
+    details:{
+      air:{audience:'بارە پەلە و بەنرخەکان',timing:'١-٣ ڕۆژ',faqQ:'کەی گەیاندنی ئاسمانی باشترە؟',faqA:'کاتێک بارەکەت پەلەیە یان بەنرخە، گەیاندنی ئاسمانی ڕێگای خێراتر و گونجاوترە.'},
+      sea:{audience:'بارە قورس و کۆنتەینەرەکان',timing:'١٢-١٨ ڕۆژ',faqQ:'ئایا دەریایی بۆ بارە گەورەکان گونجاوە؟',faqA:'بەڵێ، بەتایبەتی بۆ بارە قورسەکان و کۆنتەینەرە تەواو یان هاوبەشەکان.'},
+      land:{audience:'بارە مامناوەندەکان',timing:'٧-١٠ ڕۆژ',faqQ:'ڕێڕەوی گەیاندنی وشکانی چییە؟',faqA:'بارەکان لە دوبەیەوە بە ڕێگەی سعودیە بەرەو عێراق و پاشان شارەکەی مەبەست دەگوازنەوە.'},
+      customs:{audience:'کۆمپانیا و بازرگانەکان',timing:'بەپێی بەڵگەکان',faqQ:'ئایا بەڵگەنامەکانتان ئامادە دەکەن؟',faqA:'تیمەکەمان بەڵگەنامە سەرەکییەکان پشکنین و ڕێکدەخات و ڕێنماییی گومرگی پێشکەش دەکات.'},
+      warehouse:{audience:'بارە چاوەڕوانەکان',timing:'کاتی گونجاو',faqQ:'بارەکەم لە کوێ پارێزراو دەبێت؟',faqA:'کۆگا و هابەکانمان لە ئیمارات و عێراق چاودێری کراون و بۆ کاتی چاوەڕوانی بارەکەت ئامادەن.'},
+      door:{audience:'کڕیارانی کۆتایی',timing:'بەپێی شار',faqQ:'ئایا بۆ هەموو شارەکانی عێراق دەگەیەنن؟',faqA:'بەڵێ، گەیاندنی کۆتایی بۆ هەموو شارە سەرەکییەکان و زۆربەی ناوچەکانی عێراق ڕێکدەخەین.'}
+    },
     faqEyebrow:'پرسیارە باوەکان',faqHeading:'پرسیار و وەڵام',faq:[
       {q:'چەند کات دەخایەنێت لە دوبەی بۆ هەولێر؟',a:'گەیاندنی ئاسمانی ١-٣ ڕۆژ، وشکانی ٧-١٠ ڕۆژ (بەڕێکەوتن بە سعودیە)، دەریایی ١٢-١٨ ڕۆژ بەپێی جۆری بار.'},
       {q:'کام جۆر بار دەگوازرێتەوە؟',a:'هەموو جۆرە بارێک لە پارچەی بچووکەوە تا کۆنتەینەری تەواو، بۆ بارگەی بازرگانی و کەسی.'},
@@ -222,6 +230,14 @@ en:{
       customs:{title:'Customs Clearance',desc:'Complete customs handling at Iraqi ports of entry.',features:['Documentation handling','Duty and tax payment','Customs legal consultation']},
       warehouse:{title:'Warehousing',desc:'Secure, monitored storage in the UAE and Iraq.',features:['24/7 monitoring','Warehouse management system','Optional cargo insurance']},
       door:{title:'Door-to-Door Delivery',desc:'Final-mile delivery straight to your home or business.',features:['Delivery to every city in Iraq','Scheduled delivery windows','Delivery confirmation']}
+    },
+    details:{
+      air:{audience:'Urgent and high-value cargo',timing:'1–3 days',faqQ:'When is air freight the best choice?',faqA:'Choose air freight when delivery speed matters or the shipment is high-value and time-sensitive.'},
+      sea:{audience:'Heavy cargo and containers',timing:'12–18 days',faqQ:'Is sea freight suitable for large shipments?',faqA:'Yes. It is designed for heavy cargo and full-container or shared-container shipments.'},
+      land:{audience:'Mid-sized shipments',timing:'7–10 days',faqQ:'What is the land-freight route?',faqA:'Cargo travels from Dubai through Saudi Arabia into Iraq, then continues to the destination city.'},
+      customs:{audience:'Importers and businesses',timing:'Document-dependent',faqQ:'Can you prepare the customs documents?',faqA:'Our team reviews the required documents, guides the process, and supports duty and customs handling.'},
+      warehouse:{audience:'Cargo awaiting dispatch',timing:'Flexible storage',faqQ:'Where is cargo stored securely?',faqA:'Our UAE and Iraq hubs provide monitored storage while cargo waits for the next route or final delivery.'},
+      door:{audience:'End customers and businesses',timing:'City-dependent',faqQ:'Do you deliver across Iraq?',faqA:'Yes. We coordinate final-mile delivery across major Iraqi cities and many surrounding areas.'}
     },
     faqEyebrow:'FAQ',faqHeading:'Frequently Asked Questions',faq:[
       {q:'How long does shipping take from Dubai to Erbil?',a:'Air freight takes 1-3 days, land freight (via Saudi Arabia) takes 7-10 days, sea freight takes 12-18 days depending on cargo type.'},
@@ -947,8 +963,11 @@ function renderServicesDetail(){
   };
   wrap.innerHTML = SERVICE_ORDER.map((key,index)=>{
     const item = t('services.items.'+key);
+    const detail = t('services.details.'+key) || {};
     const lane = routes[key] || routes.air;
     const number = String(index + 1).padStart(2,'0');
+    const metaAudience = ku ? 'گونجاو بۆ' : 'Best for';
+    const metaTiming = ku ? 'کاتی گەیشتن' : 'Typical timing';
     return `<article class="service-detail reveal in-view" data-service="${key}">
       <div class="service-detail-main">
         <div class="service-detail-kicker"><span class="service-detail-index">${number}</span><span>${copy.eyebrow}</span></div>
@@ -957,8 +976,13 @@ function renderServicesDetail(){
         <div class="service-detail-route" aria-label="${ku ? 'ڕێڕەوی خزمەتگوزاری' : 'Service route'}">
           <span>${lane[0]}</span><span class="route-arrow" aria-hidden="true">→</span><span>${lane[1]}</span>
         </div>
+        <div class="service-detail-meta">
+          <div class="service-meta-item"><small>${metaAudience}</small><b>${detail.audience || ''}</b></div>
+          <div class="service-meta-item"><small>${metaTiming}</small><b>${detail.timing || ''}</b></div>
+        </div>
         <div class="service-detail-benefit-title">${copy.benefits}</div>
         <ul class="feature-list">${item.features.map(f=>`<li><svg class="icon-sm"><use href="#i-check"></use></svg><span>${f}</span></li>`).join('')}</ul>
+        ${detail.faqQ ? `<details class="service-inline-faq"><summary>${detail.faqQ}</summary><p>${detail.faqA || ''}</p></details>` : ''}
       </div>
       <aside class="service-detail-side">
         <div>
