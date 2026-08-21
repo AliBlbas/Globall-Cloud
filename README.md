@@ -87,3 +87,9 @@ bash scripts/validate-production.sh
 ```
 
 The validation suite now treats the TypeScript parser as mandatory and checks all Supabase Edge Function files instead of silently skipping TypeScript syntax validation when dependencies are unavailable. The GitHub Actions production-integrity workflow runs the same dependency installation step before its release gates.
+
+## GitHub Actions and Cloudflare Pages status
+
+Cloudflare Pages is the production frontend host for this repository. The repository does not require GitHub Pages or a Jekyll build; production deploy status is reported by the Cloudflare Pages check on each `main` commit. GitHub Actions checks such as Production Integrity and CodeQL require the GitHub account to be eligible to run Actions. If GitHub reports that the account is locked due to a billing issue, resolve that account-level issue in GitHub Billing & licensing and rerun the failed workflows; this does not indicate a Cloudflare Pages deployment failure.
+
+After billing is cleared, verify the latest commit with `gh run list --repo AliBlbas/Globall-Cloud --branch main` and confirm the Cloudflare Pages check is successful before treating the release as complete.
