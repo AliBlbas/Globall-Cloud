@@ -915,16 +915,62 @@ function renderFooterServices(){
 }
 function renderServicesDetail(){
   const wrap = document.getElementById('servicesDetailWrap');
-  wrap.innerHTML = SERVICE_ORDER.map(key=>{
+  if(!wrap) return;
+  const ku = currentLang === 'ku';
+  const copy = ku ? {
+    eyebrow:'خزمەتگوزاریی تایبەت',
+    benefits:'سوودە سەرەکییەکان',
+    trust:'ڕوونی، شوێنکەوتن و پشتگیری لە هەموو هەنگاوێکدا.',
+    quote:'داواکردنی نرخ',
+    track:'شوێنکەوتنی بار'
+  } : {
+    eyebrow:'SPECIALIZED SERVICE',
+    benefits:'KEY BENEFITS',
+    trust:'Clear updates, live tracking and support at every step.',
+    quote:'Request a quote',
+    track:'Track shipment'
+  };
+  const routes = ku ? {
+    air:['چین / دوبەی','هەولێر و هەموو عێراق'],
+    sea:['چین / دوبەی','هەولێر و هەموو عێراق'],
+    land:['دوبەی','سعودیە ← عێراق'],
+    customs:['بەندر و سنوور','ناوخۆی عێراق'],
+    warehouse:['ئیمارات / عێراق','کۆگا و هابەکان'],
+    door:['هابە سەرەکییەکان','بەردەری ماڵ یان کۆمپانیا']
+  } : {
+    air:['China / UAE','Erbil & Iraq'],
+    sea:['China / UAE','Erbil & Iraq'],
+    land:['Dubai','Saudi Arabia → Iraq'],
+    customs:['Ports & borders','Iraq inland'],
+    warehouse:['UAE / Iraq','Warehouses & hubs'],
+    door:['Main hubs','Home or business door']
+  };
+  wrap.innerHTML = SERVICE_ORDER.map((key,index)=>{
     const item = t('services.items.'+key);
-    return `<div class="service-detail reveal in-view">
-      <div class="service-icon"><svg class="icon-lg"><use href="#${SERVICE_ICONS[key]}"></use></svg></div>
-      <div>
+    const lane = routes[key] || routes.air;
+    const number = String(index + 1).padStart(2,'0');
+    return `<article class="service-detail reveal in-view" data-service="${key}">
+      <div class="service-detail-main">
+        <div class="service-detail-kicker"><span class="service-detail-index">${number}</span><span>${copy.eyebrow}</span></div>
         <h3>${item.title}</h3>
         <p class="desc">${item.desc}</p>
-        <ul class="feature-list">${item.features.map(f=>`<li><svg class="icon-sm"><use href="#i-check"></use></svg>${f}</li>`).join('')}</ul>
+        <div class="service-detail-route" aria-label="${ku ? 'ڕێڕەوی خزمەتگوزاری' : 'Service route'}">
+          <span>${lane[0]}</span><span class="route-arrow" aria-hidden="true">→</span><span>${lane[1]}</span>
+        </div>
+        <div class="service-detail-benefit-title">${copy.benefits}</div>
+        <ul class="feature-list">${item.features.map(f=>`<li><svg class="icon-sm"><use href="#i-check"></use></svg><span>${f}</span></li>`).join('')}</ul>
       </div>
-    </div>`;
+      <aside class="service-detail-side">
+        <div>
+          <div class="service-icon"><svg class="icon-lg"><use href="#${SERVICE_ICONS[key]}"></use></svg></div>
+          <p>${copy.trust}</p>
+        </div>
+        <div style="display:grid; gap:8px; width:100%;">
+          <button class="btn btn-primary" data-gc-onclick="route('request')">${copy.quote}</button>
+          <button class="btn btn-outline" data-gc-onclick="route('track')">${copy.track}</button>
+        </div>
+      </aside>
+    </article>`;
   }).join('');
   renderServicesFaq();
 }
