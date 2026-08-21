@@ -25,6 +25,15 @@
 .gate{min-height:100vh;display:grid;place-items:center;padding:20px}.gate-card{width:min(520px,100%);padding:28px;border-radius:28px;background:linear-gradient(155deg,#102844,#081727);border:1px solid rgba(85,229,242,.18);box-shadow:var(--shadow)}.gate-card h1{font-size:32px;margin:10px 0}.field{width:100%;margin:7px 0 12px;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:#061428;color:var(--text);outline:none}.field:focus{border-color:var(--cyan)}.msg{min-height:22px;color:#ffb9c0;font-size:12px;line-height:1.7}.hidden{display:none!important}
 @media(max-width:900px){.hero{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:repeat(2,1fr)}.security{grid-template-columns:1fr}}
 @media(max-width:600px){.wrap{width:min(100% - 20px,1240px)}.top{align-items:flex-start}.top-actions .btn{padding:9px 12px;font-size:12px}.hero-card{padding:21px}.metrics{grid-template-columns:repeat(2,1fr);gap:8px}.metric{padding:14px}.metric b{font-size:22px}.grid{grid-template-columns:1fr}.action{min-height:135px}.footer{padding-bottom:30px}}
+
+  :focus-visible{outline:3px solid var(--cyan2);outline-offset:3px}
+  section[id]{scroll-margin-top:84px}
+  .panel,.metric{transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+  .panel:hover,.metric:hover{transform:translateY(-2px);border-color:rgba(85,229,242,.34);box-shadow:0 28px 70px rgba(0,0,0,.28)}
+  .metric{position:relative;overflow:hidden}.metric::after{content:'';position:absolute;inset-inline-end:-35px;top:-35px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(85,229,242,.12),transparent 70%);pointer-events:none}.metric b{color:var(--cyan2)}
+  .action small{letter-spacing:1.1px}.action .icon{transition:transform .2s ease,background .2s ease}.action:hover .icon{transform:translateY(-2px);background:rgba(0,194,217,.18)}
+  .status{box-shadow:0 0 0 4px rgba(88,230,176,.05)}
+  @media(max-width:600px){.top{position:sticky;top:0;z-index:20;padding:10px 0;background:rgba(5,13,26,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}.top-actions{width:100%}.top-actions .btn{flex:1;min-width:0;text-align:center;padding:10px 8px;font-size:11px}.hero-card{padding:20px}.hero h1{font-size:34px}.metric span{font-size:11px;line-height:1.5}.section-head{align-items:flex-start;flex-direction:column}}
 </style>
 <script src="/gc-csp-bridge.js?v=20260816-1" defer data-gc-csp-bridge="1"></script></head>
 <body>
