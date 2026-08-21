@@ -75,3 +75,15 @@ The intended release path is:
 **GitHub `main` → Cloudflare Pages production deployment → Supabase production backend.**
 
 Live deployment verification is a release gate; source code being present on GitHub alone is not treated as proof that the live site is updated. Production release order is: apply the migrations, deploy `logistics-control-plane`, `document-access`, `notification-dispatch`, `payment-checkout`, `payment-webhook`, `payment-reconcile` and `system-health`, set server-side provider secrets, configure the notification worker to run from a protected scheduler/heartbeat, configure public HTTPS callback URLs in Qicard/FIB, then deploy the Pages frontend and run a sandbox transaction and notification test for each enabled provider.
+
+## Local validation
+
+Use Node.js 20 or newer. Install the locked dependency set before running the integrity checks:
+
+```bash
+npm ci --ignore-scripts
+npm test
+bash scripts/validate-production.sh
+```
+
+The validation suite now treats the TypeScript parser as mandatory and checks all Supabase Edge Function files instead of silently skipping TypeScript syntax validation when dependencies are unavailable. The GitHub Actions production-integrity workflow runs the same dependency installation step before its release gates.

@@ -23,6 +23,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
       - name: Validate JavaScript syntax
         shell: bash
         run: |

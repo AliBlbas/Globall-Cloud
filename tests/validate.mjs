@@ -47,8 +47,8 @@ const tsFiles = walk(join(ROOT, 'supabase', 'functions'), ['.ts']);
 let ts;
 try {
   ts = await import('typescript');
-} catch {
-  console.log('  (skipped — run `npm install` to get the typescript package)');
+} catch (error) {
+  fail('TypeScript validator unavailable; run `npm ci` before validation');
 }
 if (ts) {
   const before = failures;
