@@ -2672,6 +2672,9 @@ const QUOTE_CITY_FACTOR = {                                    // distance/acces
   hawler:1, slimani:1.05, duhok:1.1, bakhdad:1.2, kerkuk:1.1, mosul:1.15, basra:1.35
 };
 function calcQuote(){
+  const origin = document.getElementById('quoteOrigin')?.value || 'china';
+  const originLabels = { china:'چین', uae:'دوبەی / ئیمارات', usa:'ئەمریکا' };
+  const destLabels = { hawler:'هەولێر', slimani:'سلێمانی', duhok:'دهۆک', bakhdad:'بەغدا', kerkuk:'کەرکووک', mosul:'موسڵ', basra:'بەسرە' };
   const type = document.getElementById('quoteType').value;
   const weight = Number(document.getElementById('quoteWeight').value);
   const dest = document.getElementById('quoteDest').value;
@@ -2688,7 +2691,7 @@ function calcQuote(){
   const highIqd = Math.round(high * getExchangeRate());
   resultEl.innerHTML = `
     <div style="margin-top:16px; padding:16px; background:var(--surface-2); border-radius:var(--radius-m); text-align:center;">
-      <span class="hint">${t('services.quote.resultLabel')}</span>
+      <span class="hint">${t('services.quote.resultLabel')} · ${escapeHtml(originLabels[origin] || originLabels.china)} → ${escapeHtml(destLabels[dest] || dest)}</span>
       <div style="font-size:26px; font-weight:800; color:var(--teal-l); margin:6px 0;">$${low} – $${high}</div>
       <div class="hint">≈ ${lowIqd.toLocaleString()} – ${highIqd.toLocaleString()} د.ع</div>
       <a class="btn btn-primary" style="margin-top:8px;" data-gc-onclick="route('request')">${t('services.quote.cta')}</a>
