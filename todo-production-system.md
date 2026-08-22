@@ -1,0 +1,54 @@
+# Globall Cloud Production System TODO
+
+- [x] Confirm production architecture, hosting boundary, roles, and critical business assumptions
+- [x] Audit current Supabase schema, Edge Functions, RLS, authentication, and deployment configuration
+- [x] Define canonical shipment, quote, invoice, package, warehouse, delivery, and audit data contracts
+- [x] Harden role-based access and staff/customer authorization paths
+- [x] Build and verify core shipment and operations workflows — existing control-plane and operations workflows audited and role-scoped
+- [x] Build customer and staff application surfaces around real production data — customer/staff surfaces exist; driver workspace hardening published, warehouse/finance/admin review remains
+- [ ] Verify payment, notification, document, and external-event integrations
+- [ ] Add idempotency, retries, background processing, logging, monitoring, and alerts
+- [ ] Add backup, recovery, migration, and release safeguards
+- [ ] Run end-to-end security, functional, performance, and deployment validation
+- [ ] Publish the production system and document remaining account-level actions
+
+## Confirmed architecture decisions
+
+- [x] Use the existing Supabase project as the production backend foundation
+- [x] Support both Qicard and FIB payment providers through server-side adapters
+- [x] Support Customer, Driver, Warehouse, Operations, Finance, and Admin roles
+- [x] Complete the production architecture and locked business-assumption review
+- [x] Add a canonical role policy shared by operations functions, preserving legacy role aliases
+- [x] Restrict operations read/write paths by role and keep shipment mutations auditable
+- [x] Add tests for role authorization and legacy-role compatibility via production integrity/static guard validation
+- [x] Fix the operations function’s internal shipment-write guard to use the canonical role policy
+- [x] Scope driver reads to assigned shipments and prevent unrelated customer/staff data access
+- [x] Scope driver event reads and event creation to assigned shipments
+- [x] Re-run production validation after the final authorization hardening
+- [x] Define shared TypeScript contracts for shipments, events, packages, quotes, invoices, payments, deliveries, and audit records
+- [x] Document canonical status vocabularies, ownership fields, and idempotency rules
+- [x] Validate the contracts against the existing Supabase migration and function surface
+- [x] Add a deterministic role-policy regression test to the repository validation command
+- [x] Verify shipment lifecycle transitions and status-history persistence
+- [x] Verify package/barcode, warehouse movement, consolidation, customs, delivery, and POD workflows
+- [x] Verify audit-log coverage for privileged operational writes
+- [x] Add regression guards for core workflow entry points
+- [x] Correct the delivery-proof regression guard to use the authoritative migration/control-plane sources
+- [x] Add mobile driver accessibility and proof-of-delivery validation guards
+- [ ] Collect production Supabase service configuration and Qicard/FIB credentials through a secure channel
+- [ ] Confirm webhook URLs, signing secrets, merchant IDs, and callback environments for both payment providers
+- [ ] Activate provider-backed payment and notification integrations only after credentials are configured
+- [x] Define provider-neutral payment adapter and normalized payment-state contract
+- [x] Add webhook idempotency and signature-verification scaffolding without live credentials
+- [x] Add notification and document integration guards for customer/staff workflows
+- [x] Add sandbox-safe integration tests and publish the scaffolding milestone
+- [x] Add provider-neutral payment adapter and webhook replay-safety regression guards
+- [x] Audit idempotency and retry behavior across payments, notifications, and shipment transitions
+- [x] Verify scheduled worker and heartbeat configuration for periodic logistics processing
+- [x] Add structured observability and safe operational failure reporting
+- [x] Document backup, recovery, migration, and release safeguards
+- [x] Validate and publish the reliability hardening milestone
+- [x] Run full JavaScript and TypeScript validation with production integrity checks
+- [x] Verify public site, customer portal, payment checkout, and tracking endpoints
+- [x] Confirm the latest main commit and Cloudflare Pages reachability
+- [x] Record remaining account-level actions for live provider activation
