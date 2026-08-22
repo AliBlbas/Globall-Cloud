@@ -52,3 +52,6 @@
 - [x] Verify public site, customer portal, payment checkout, and tracking endpoints
 - [x] Confirm the latest main commit and Cloudflare Pages reachability
 - [x] Record remaining account-level actions for live provider activation
+- [x] Diagnose the Supabase Preview failure caused by remote migration versions missing locally
+- [x] Reconcile migration history safely without destructive database changes
+- [x] Re-run Supabase Preview and production integrity validation after reconciliation
