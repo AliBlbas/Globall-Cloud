@@ -1,7 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
-type Kind = 'customer' | 'staff' | 'receipt' | 'log' | 'shipment'
-type Action = 'list' | 'create' | 'update' | 'archive' | 'delete'
+type Kind = 'customer' | 'staff' | 'receipt' | 'log' | 'shipment' | 'task'
+type Action = 'list' | 'create' | 'update' | 'archive' | 'delete' | 'claim' | 'complete'
 type JsonRecord = Record<string, unknown>
 
 const ALLOWED_ORIGINS = new Set([
@@ -85,13 +85,13 @@ function bool(value: unknown, fallback = false): boolean {
 
 function normalizeKind(value: unknown): Kind {
   const kind = String(value || 'customer').toLowerCase()
-  if (kind === 'staff' || kind === 'receipt' || kind === 'log' || kind === 'shipment') return kind
+  if (kind === 'staff' || kind === 'receipt' || kind === 'log' || kind === 'shipment' || kind === 'task') return kind
   return 'customer'
 }
 
 function normalizeAction(value: unknown): Action {
   const action = String(value || 'list').toLowerCase()
-  if (action === 'create' || action === 'update' || action === 'archive' || action === 'delete') return action
+  if (action === 'create' || action === 'update' || action === 'archive' || action === 'delete' || action === 'claim' || action === 'complete') return action
   return 'list'
 }
 
@@ -178,6 +178,69 @@ async function listStaff(client: ReturnType<typeof createClient>) {
   const { data, error } = await client.from('staff').select('id,full_name,role,branch,is_active,created_at,updated_at').order('created_at', { ascending: false })
   if (error) throw error
   return { items: data ?? [], kind: 'staff' }
+}
+
+async function listTasks(client: ReturnType<typeof createClient>, actor: { id: string, role: string, branch: string | null }) {
+  const { data, error } = await client.from('staff_tasks').select('id,title,description,status,priority,branch,assignee_id,created_by,entity_type,entity_id,due_at,blocked_reason,completed_at,created_at,updated_at').order('due_at', { ascending: true, nullsFirst: false }).order('created_at', { ascending: false }).limit(200)
+  if (error) throw error
+  const staffIds = [...new Set((data ?? []).flatMap((task: any) => [task.assignee_id, task.created_by].filter(Boolean)))]
+  const { data: staff, error: staffErr } = staffIds.length ? await client.from('staff').select('id,full_name,role,branch').in('id', staffIds) : { data: [], error: null }
+  if (staffErr) throw staffErr
+  const staffMap = new Map((staff ?? []).map((row: any) => [String(row.id), row]))
+  const isAdmin = actor.role === 'admin' || actor.role === 'super_admin'
+  const visible = (data ?? []).filter((task: any) => isAdmin || task.assignee_id === actor.id || task.created_by === actor.id || task.branch === 'all' || task.branch === (actor.branch || 'all'))
+  return { items: visible.map((task: any) => ({ ...task, assignee: task.assignee_id ? staffMap.get(String(task.assignee_id)) ?? null : null, creator: staffMap.get(String(task.created_by)) ?? null })), kind: 'task' }
+}
+
+function taskStatus(value: unknown, fallback = 'todo'): string {
+  const status = txt(value) || fallback
+  if (!['todo','in_progress','blocked','review','done','cancelled'].includes(status)) throw responseError('Invalid task status', 400)
+  return status
+}
+function taskPriority(value: unknown, fallback = 'normal'): string {
+  const priority = txt(value) || fallback
+  if (!['critical','high','normal','low'].includes(priority)) throw responseError('Invalid task priority', 400)
+  return priority
+}
+async function createTask(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, role: string, branch: string | null }) {
+  if (!['admin','super_admin','accountant'].includes(actor.role)) throw responseError('Task creation is not allowed for this staff role', 403)
+  const title = txt(payload.title)
+  if (!title || title.length < 2 || title.length > 180) throw responseError('Task title must be between 2 and 180 characters', 400)
+  const assigneeId = txt(payload.assignee_id)
+  const branch = txt(payload.branch) || actor.branch || 'all'
+  const row = { title, description: txt(payload.description), status: taskStatus(payload.status), priority: taskPriority(payload.priority), branch, assignee_id: assigneeId, created_by: actor.id, entity_type: txt(payload.entity_type), entity_id: txt(payload.entity_id), due_at: txt(payload.due_at), blocked_reason: txt(payload.blocked_reason), completed_at: null }
+  const { data, error } = await client.from('staff_tasks').insert(row).select('id,title,description,status,priority,branch,assignee_id,created_by,entity_type,entity_id,due_at,blocked_reason,completed_at,created_at,updated_at').single()
+  if (error) throw error
+  await logActivity(client, actor.id, actor.name, 'create_staff_task', String(data.id), { title, priority: row.priority, assignee_id: assigneeId, due_at: row.due_at })
+  return { task: data }
+}
+async function updateTask(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, role: string, branch: string | null }, action: Action) {
+  const id = txt(payload.id)
+  if (!id) throw responseError('Missing task id', 400)
+  const { data: current, error: currentErr } = await client.from('staff_tasks').select('id,title,description,status,priority,branch,assignee_id,created_by,entity_type,entity_id,due_at,blocked_reason,completed_at').eq('id', id).maybeSingle()
+  if (currentErr) throw currentErr
+  if (!current) throw responseError('Task not found', 404)
+  const isAdmin = actor.role === 'admin' || actor.role === 'super_admin'
+  if (!isAdmin && current.assignee_id !== actor.id && current.created_by !== actor.id) throw responseError('You are not allowed to update this task', 403)
+  const updates: JsonRecord = {}
+  if (action === 'claim') { updates.assignee_id = actor.id; updates.status = current.status === 'todo' ? 'in_progress' : current.status }
+  else if (action === 'complete') { updates.status = 'done'; updates.completed_at = new Date().toISOString(); updates.blocked_reason = null }
+  else {
+    if (payload.title !== undefined) { const title = txt(payload.title); if (!title || title.length < 2 || title.length > 180) throw responseError('Invalid task title', 400); updates.title = title }
+    if (payload.description !== undefined) updates.description = txt(payload.description)
+    if (payload.status !== undefined) updates.status = taskStatus(payload.status, current.status)
+    if (payload.priority !== undefined) updates.priority = taskPriority(payload.priority, current.priority)
+    if (payload.assignee_id !== undefined) updates.assignee_id = txt(payload.assignee_id)
+    if (payload.branch !== undefined) updates.branch = txt(payload.branch) || actor.branch || 'all'
+    if (payload.due_at !== undefined) updates.due_at = txt(payload.due_at)
+    if (payload.blocked_reason !== undefined) updates.blocked_reason = txt(payload.blocked_reason)
+    if (updates.status === 'done') updates.completed_at = new Date().toISOString()
+    if (updates.status && updates.status !== 'blocked') updates.blocked_reason = null
+  }
+  const { data: saved, error } = await client.from('staff_tasks').update(updates).eq('id', id).select('id,title,description,status,priority,branch,assignee_id,created_by,entity_type,entity_id,due_at,blocked_reason,completed_at,created_at,updated_at').single()
+  if (error) throw error
+  await logActivity(client, actor.id, actor.name, `${action}_staff_task`, id, { from_status: current.status, to_status: saved.status, updates })
+  return { task: saved }
 }
 
 async function listReceipts(client: ReturnType<typeof createClient>) {
@@ -445,10 +508,10 @@ Deno.serve(async (req) => {
       if (kind === 'receipt') return json(await listReceipts(serviceClient), {}, req)
       if (kind === 'log') return json(await listLogs(serviceClient), {}, req)
       if (kind === 'shipment') return json(await listShipments(serviceClient), {}, req)
+      if (kind === 'task') return json(await listTasks(serviceClient, { id: staffRow.id, role: String(staffRow.role || ''), branch: staffRow.branch }), {}, req)
       return json(await listCustomers(serviceClient), {}, req)
     }
     if (req.method !== 'POST') return json({ error: 'Method not allowed' }, { status: 405 }, req)
-    if (!canWrite) return json({ error: 'Forbidden' }, { status: 403 }, req)
     const contentType = req.headers.get('content-type') || ''
     let body: JsonRecord = {}
     let files: File[] = []
@@ -467,6 +530,14 @@ Deno.serve(async (req) => {
     const kind = normalizeKind(body.kind)
     const action = normalizeAction(body.action)
     const data = body.data && typeof body.data === 'object' ? (body.data as JsonRecord) : body
+    if (kind === 'task') {
+      if (!canRead) return json({ error: 'Forbidden' }, { status: 403 }, req)
+      const taskActor = { id: staffRow.id, name: staffRow.full_name, role: String(staffRow.role || ''), branch: staffRow.branch }
+      if (action === 'create') return json(await createTask(serviceClient, data, taskActor), {}, req)
+      if (action === 'update' || action === 'claim' || action === 'complete') return json(await updateTask(serviceClient, data, taskActor, action), {}, req)
+      return json({ error: 'Unsupported task action' }, { status: 400 }, req)
+    }
+    if (!canWrite) return json({ error: 'Forbidden' }, { status: 403 }, req)
     if ((kind === 'customer' || kind === 'staff') && action === 'create' && !isSuperAdmin) return json({ error: 'Only Super Admin can create accounts' }, { status: 403 }, req)
     if (kind === 'customer') {
       if (action === 'create') return json(await upsertCustomer(serviceClient, data, { id: staffRow.id, name: staffRow.full_name, isSuperAdmin }), {}, req)

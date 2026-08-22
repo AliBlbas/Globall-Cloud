@@ -84,3 +84,10 @@
 - [x] Redesign staff header, authenticated status, metrics, quick actions, and operational navigation
 - [x] Validate role safety, RTL mobile behavior, accessibility, and production integrity
 - [x] Publish the Staff OS redesign and document the delivered improvements
+- [x] Audit existing staff task surfaces, data contracts, and role boundaries
+- [x] Define task priorities, ownership, statuses, SLA rules, filters, and audit expectations
+- [x] Add a role-aware Task Management workspace to Staff OS
+- [x] Add actionable queues, task detail interactions, and mobile-first RTL surfaces
+- [x] Validate task workflows, security, accessibility, and production integrity
+- [x] Publish the Task Management upgrade and document the operating model
+- [x] Implement the approved production Task Management scope: schema/RLS, authenticated API, Operations Queue, filters, SLA indicators, quick actions, audit logging, and responsive RTL UI
