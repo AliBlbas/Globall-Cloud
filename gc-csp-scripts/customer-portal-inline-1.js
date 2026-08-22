@@ -28,10 +28,12 @@ const load = async () => {
   if (!session) {
     $('loginBtn').classList.remove('hidden');
     $('logoutBtn').classList.add('hidden');
+    $('portalStatus')?.classList.remove('hidden');
     return;
   }
   $('loginBtn').classList.add('hidden');
   $('logoutBtn').classList.remove('hidden');
+  $('portalStatus')?.classList.add('hidden');
   const uid = session.user.id;
   $('hello').textContent = `بەخێربێیت — ${session.user.email || 'Customer'}`;
   const [shipments, notifications, quotes, documents, pods, invoices, payments] = await Promise.all([
@@ -112,6 +114,7 @@ const acceptQuote = async (quoteId) => {
 };
 
 $('loginBtn').addEventListener('click', () => $('auth').classList.remove('hidden'));
+$('loginPromptBtn')?.addEventListener('click', () => $('auth').classList.remove('hidden'));
 $('close').addEventListener('click', () => $('auth').classList.add('hidden'));
 $('signIn').addEventListener('click', async () => { $('msg').textContent = '…'; const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('password').value }); $('msg').textContent = error ? error.message : 'سەرکەوتوو'; if (!error) { $('auth').classList.add('hidden'); await load(); } });
 $('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
@@ -120,4 +123,4 @@ $('quoteBtn').addEventListener('click', () => { $('quoteForm').scrollIntoView({ 
 $('quoteForm').addEventListener('submit', (event) => submitQuote(event).catch((error) => showMessage(error.message, 'error')));
 document.addEventListener('click', (event) => { const documentLink = event.target.closest('[data-document-id]'); if (documentLink) { event.preventDefault(); downloadDocument(documentLink).then(() => window.open(documentLink.href, '_blank', 'noopener,noreferrer')).catch((error) => showMessage(error.message, 'error')); return; } const button = event.target.closest('[data-accept-quote]'); if (button) acceptQuote(button.dataset.acceptQuote).catch((error) => showMessage(error.message, 'error')); });
 sb.auth.onAuthStateChange(() => window.setTimeout(() => load().catch((error) => showMessage(error.message, 'error')), 100));
-load().catch((error) => { console.error(error); setHtml('notifications', '<div class="alert">هەڵە لە هێنانی داتا؛ تکایە دواتر هەوڵ بدەرەوە.</div>'); });
+load().catch((error) => { console.error(error); $('portalStatus')?.classList.remove('hidden'); setHtml('notifications', '<div class="alert">هەڵە لە هێنانی داتا؛ تکایە دواتر هەوڵ بدەرەوە.</div>'); });
