@@ -104,3 +104,9 @@
 - [x] Build mobile-first customer dashboard and shipment detail screens
 - [x] Validate customer isolation, photo authorization, accessibility, responsive UX, and production integrity
 - [x] Publish the customer dashboard and document the customer operating flow
+- [x] Audit invoice, payment, expense, document, and customer ownership contracts
+- [x] Define customer finance privacy, balance, expense, and invoice presentation rules
+- [x] Implement customer-scoped invoice, expense, balance, download, and payment data flows
+- [x] Build customer finance summary and invoice-detail surfaces in Customer Portal
+- [x] Validate financial accuracy, customer isolation, accessibility, and production integrity
+- [x] Publish the customer finance workspace and document the customer operating flow
