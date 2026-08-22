@@ -79,3 +79,8 @@
 - [x] Compact the truck message and support-hours chips while preserving readable RTL text
 - [x] Validate the compact header layout and production integrity
 - [x] Publish the compact announcement-bar refinement
+- [x] Audit staff OS pages, styles, scripts, and role-sensitive surfaces against the supplied references
+- [x] Define the enterprise Staff OS visual hierarchy and responsive information architecture
+- [x] Redesign staff header, authenticated status, metrics, quick actions, and operational navigation
+- [x] Validate role safety, RTL mobile behavior, accessibility, and production integrity
+- [x] Publish the Staff OS redesign and document the delivered improvements
