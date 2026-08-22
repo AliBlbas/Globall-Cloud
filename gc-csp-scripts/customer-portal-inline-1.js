@@ -55,9 +55,14 @@ const load = async () => {
 
 const submitQuote = async (event) => {
   event.preventDefault();
+  const form = event.currentTarget;
+  const submitButton = form.querySelector('button[type="submit"]');
+  if (submitButton?.disabled) return;
   const { data: userResult } = await sb.auth.getUser();
   const user = userResult.user;
   if (!user) { showMessage('تکایە سەرەتا login بکە', 'error'); return; }
+  if (!form.reportValidity()) return;
+  if (submitButton) { submitButton.disabled = true; submitButton.setAttribute('aria-busy', 'true'); submitButton.dataset.originalLabel = submitButton.textContent; submitButton.textContent = 'لە ناردندایە…'; }
   showMessage('داواکاری نێردراوە…');
   const payload = {
     customer_user_id: user.id,
@@ -75,9 +80,15 @@ const submitQuote = async (event) => {
     status: 'pending',
   };
   const { data, error } = await sb.from('quote_requests').insert(payload).select('id').single();
-  if (error) { showMessage(error.message, 'error'); return; }
+  if (error) {
+    showMessage(error.message, 'error');
+    if (submitButton) { submitButton.disabled = false; submitButton.removeAttribute('aria-busy'); submitButton.textContent = submitButton.dataset.originalLabel || 'ناردنی داواکاری نرخ'; }
+    return;
+  }
   showMessage(`سەرکەوتوو بوو؛ ژمارەی داواکاری ${String(data.id).slice(0, 8).toUpperCase()} ـە.`, 'success');
-  event.target.reset(); await load();
+  form.reset();
+  if (submitButton) { submitButton.disabled = false; submitButton.removeAttribute('aria-busy'); submitButton.textContent = submitButton.dataset.originalLabel || 'ناردنی داواکاری نرخ'; }
+  await load();
 };
 
 const downloadDocument = async (link) => {
