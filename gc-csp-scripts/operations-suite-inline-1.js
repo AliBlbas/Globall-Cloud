@@ -6,7 +6,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
 });
 window.sb = sb;
 const dashboard = new AdminDashboard(sb);
-const state = { session: null, role: 'guest', tab: 'overview', customers: [], staff: [], receipts: [], logs: [], settings: [], errors: [] };
+const state = { session: null, role: 'guest', tab: 'overview', customers: [], staff: [], receipts: [], logs: [], settings: [], pricing: null, errors: [] };
 const $ = (id) => document.getElementById(id);
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const money = (v) => `$${Number(v || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
@@ -111,6 +111,9 @@ function renderTable() {
     return;
   }
 }
+function renderPricing(pricing) { const consoleEl = $('pricingConsole'); if (!consoleEl) return; const allowed = ['admin','super_admin','accountant'].includes(state.role); consoleEl.classList.toggle('hidden', !allowed); if (!allowed || !pricing) return; const rows = (pricing.rates || []).map((r) => `<div class="rate-row"><label>${esc(r.product_type)}<small>${esc(`${r.origin_key} → ${r.destination_key} · ${r.transport_mode.toUpperCase()}`)}</small></label><input class="rate-input" type="number" min="0" step="0.01" value="${esc(r.amount)}" data-rate-id="${esc(r.id)}" aria-label="${esc(r.product_type)} rate"><span class="mono">${esc(r.currency)} / ${esc(r.unit)}</span><span class="rate-window">${esc(r.transit_min_days ?? '—')}–${esc(r.transit_max_days ?? '—')} days</span><button class="btn btn-primary rate-save" type="button" data-rate-save="${esc(r.id)}">Save</button></div>`).join(''); const fx = (pricing.exchange_rates || [])[0]; const fxRow = fx ? `<div class="rate-row"><label>USD → IQD exchange rate<small>${esc(fx.source_note || 'Current exchange rate')}</small></label><input class="rate-input" type="number" min="0.000001" step="0.000001" value="${esc(fx.rate)}" data-fx-id="${esc(fx.id)}" aria-label="USD to IQD rate"><span class="mono">IQD / USD</span><span class="rate-window">Effective ${esc(fx.effective_from || 'today')}</span><button class="btn btn-primary rate-save" type="button" data-fx-save="${esc(fx.id)}">Save</button></div>` : ''; $('rateList').innerHTML = fxRow + rows || '<div class="setting-card">No active rates found.</div>'; }
+async function savePricing(kind, id, input) { const amount = Number(input.value); if (!Number.isFinite(amount) || amount <= 0) { setMsg('Enter a valid positive rate.', 'warn'); return; } input.disabled = true; try { await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'pricing', action: 'update', data: kind === 'exchange' ? { id, rate_type: 'exchange', rate: amount } : { id, amount } }) }); setMsg('Rate updated and audit logged.', 'ok'); await loadData(); } catch (err) { setMsg(err.message || 'Rate update failed.', 'warn'); } finally { input.disabled = false; } }
+
 async function refreshAnalytics() {
   const metrics = await dashboard.calculateMetrics().catch(() => null);
   if (!metrics) return;
@@ -131,21 +134,24 @@ async function loadData() {
     authFetch('/?kind=staff'),
     authFetch('/?kind=receipt'),
     authFetch('/?kind=log'),
+    authFetch('/?kind=pricing'),
     sb.from('app_settings').select('key,value,updated_at,updated_by').order('key'),
   ]);
-  const [customers, staff, receipts, logs, settings] = settled;
+  const [customers, staff, receipts, logs, pricing, settings] = settled;
   state.customers = customers.status === 'fulfilled' ? (customers.value.items || []) : [];
   state.staff = staff.status === 'fulfilled' ? (staff.value.items || []) : [];
   state.receipts = receipts.status === 'fulfilled' ? (receipts.value.items || []) : [];
   state.logs = logs.status === 'fulfilled' ? (logs.value.items || []) : [];
+  state.pricing = pricing.status === 'fulfilled' ? pricing.value : null;
   state.settings = settings.status === 'fulfilled' && !settings.value.error ? (settings.value.data || []) : [];
+  renderPricing(state.pricing);
   $('rateValue').textContent = state.settings.find((r) => r.key === 'usd_iqd_rate')?.value ? `${Number(state.settings.find((r) => r.key === 'usd_iqd_rate').value).toLocaleString()} IQD` : 'Not set';
   $('sessionLine').innerHTML = `<span class="badge ${roleClass(state.role)}">${roleLabel[state.role] || state.role || 'Guest'}</span><span>Signed in as <span class="mono">${esc(state.session.user.email || '')}</span></span>`;
   $('avatar').textContent = (state.session.user.user_metadata?.full_name || state.session.user.email || 'GC').slice(0, 2).toUpperCase();
   $('heroName').textContent = state.session.user.user_metadata?.full_name || state.session.user.email || 'Staff member';
   $('heroSub').textContent = `${roleLabel[state.role] || state.role} access active · Live data loaded from Supabase`;
   $('logoutBtn').classList.remove('hidden');
-  const errors = [customers, staff, receipts, logs, settings].filter((r) => r.status === 'rejected').map((r) => r.reason?.message || 'load failure');
+  const errors = [customers, staff, receipts, logs, pricing, settings].filter((r) => r.status === 'rejected').map((r) => r.reason?.message || 'load failure');
   state.errors = errors;
   setMsg(errors.length ? `Loaded with ${errors.length} panel warning(s).` : 'Live data loaded successfully.', errors.length ? 'warn' : 'ok');
   await refreshAnalytics();
@@ -189,6 +195,7 @@ function exportCurrentView() {
   setMsg(`Exported ${state.tab} as CSV.`, 'ok');
 }
 
+$('rateList')?.addEventListener('click', (e) => { const serviceButton = e.target.closest('[data-rate-save]'); const fxButton = e.target.closest('[data-fx-save]'); if (serviceButton) savePricing('service', serviceButton.dataset.rateSave, document.querySelector(`[data-rate-id="${CSS.escape(serviceButton.dataset.rateSave)}"]`)); if (fxButton) savePricing('exchange', fxButton.dataset.fxSave, document.querySelector(`[data-fx-id="${CSS.escape(fxButton.dataset.fxSave)}"]`)); });
 $('tabsRow').addEventListener('click', (e) => {
   const btn = e.target.closest('[data-tab]');
   if (!btn) return;

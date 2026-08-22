@@ -1,6 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
-type Kind = 'customer' | 'customer_match' | 'staff' | 'receipt' | 'log' | 'shipment' | 'task' | 'finance'
+type Kind = 'customer' | 'customer_match' | 'staff' | 'receipt' | 'log' | 'shipment' | 'task' | 'finance' | 'pricing'
 type Action = 'list' | 'create' | 'update' | 'archive' | 'delete' | 'claim' | 'complete'
 type JsonRecord = Record<string, unknown>
 
@@ -85,7 +85,7 @@ function bool(value: unknown, fallback = false): boolean {
 
 function normalizeKind(value: unknown): Kind {
   const kind = String(value || 'customer').toLowerCase()
-  if (kind === 'customer_match' || kind === 'staff' || kind === 'receipt' || kind === 'log' || kind === 'shipment' || kind === 'task' || kind === 'finance') return kind
+  if (kind === 'customer_match' || kind === 'staff' || kind === 'receipt' || kind === 'log' || kind === 'shipment' || kind === 'task' || kind === 'finance' || kind === 'pricing') return kind
   return 'customer'
 }
 
@@ -194,6 +194,10 @@ async function listTasks(client: ReturnType<typeof createClient>, actor: { id: s
 }
 
 function addAmount(target: Record<string, number>, currency: unknown, amount: unknown) { const key = String(currency || 'USD').toUpperCase(); target[key] = Math.round(((target[key] || 0) + Number(amount || 0)) * 100) / 100 }
+async function listPricing(client: ReturnType<typeof createClient>) { const [rates, fx] = await Promise.all([client.from('pricing_rates').select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from,effective_to,is_active,notes,updated_at').eq('is_active', true).order('origin_key').order('transport_mode').order('product_type'), client.from('exchange_rates').select('id,base_currency,quote_currency,rate,effective_from,effective_to,is_active,source_note,updated_at').eq('is_active', true).order('base_currency').order('quote_currency')]); if (rates.error) throw rates.error; if (fx.error) throw fx.error; return { kind: 'pricing', rates: rates.data ?? [], exchange_rates: fx.data ?? [] } }
+async function updatePricing(client: ReturnType<typeof createClient>, data: JsonRecord, actor: { id: string, name: string | null }) { const id = txt(data.id); if (!id) throw responseError('Pricing rate id is required', 400); const amount = Number(data.amount); if (!Number.isFinite(amount) || amount < 0) throw responseError('Valid non-negative amount is required', 400); const transitMin = data.transit_min_days === '' || data.transit_min_days == null ? null : Number(data.transit_min_days); const transitMax = data.transit_max_days === '' || data.transit_max_days == null ? null : Number(data.transit_max_days); if ((transitMin != null && (!Number.isInteger(transitMin) || transitMin < 0)) || (transitMax != null && (!Number.isInteger(transitMax) || transitMax < (transitMin ?? 0)))) throw responseError('Invalid transit days', 400); const { data: row, error } = await client.from('pricing_rates').update({ amount, transit_min_days: transitMin, transit_max_days: transitMax, notes: txt(data.notes), updated_by: actor.id, updated_at: new Date().toISOString() }).eq('id', id).select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from,effective_to,is_active,notes,updated_at').single(); if (error) throw error; await logActivity(client, actor.id, actor.name, 'update_pricing_rate', id, { amount, transit_min_days: transitMin, transit_max_days: transitMax }); return { rate: row } }
+async function updateExchangeRate(client: ReturnType<typeof createClient>, data: JsonRecord, actor: { id: string, name: string | null }) { const id = txt(data.id); if (!id) throw responseError('Exchange rate id is required', 400); const rate = Number(data.rate); if (!Number.isFinite(rate) || rate <= 0) throw responseError('Valid positive exchange rate is required', 400); const { data: row, error } = await client.from('exchange_rates').update({ rate, source_note: txt(data.source_note), updated_by: actor.id, updated_at: new Date().toISOString() }).eq('id', id).select('id,base_currency,quote_currency,rate,effective_from,effective_to,is_active,source_note,updated_at').single(); if (error) throw error; await logActivity(client, actor.id, actor.name, 'update_exchange_rate', id, { rate }); return { exchange_rate: row } }
+
 async function listFinance(client: ReturnType<typeof createClient>) {
   const [invoiceResult, costResult] = await Promise.all([
     client.from('shipment_invoices').select('id,invoice_number,shipment_id,total,paid_total,currency,status,due_at,issued_at,created_at').order('created_at', { ascending: false }).limit(1000),
@@ -527,6 +531,7 @@ Deno.serve(async (req) => {
       if (kind === 'customer_match' && canReadOperations) { const code = txt(url.searchParams.get('code')); if (!code) return json({ customer: null }, {}, req); return json({ customer: await lookupCustomer(serviceClient, { customer_code: code }) }, {}, req) }
       if (kind === 'task' && canReadOperations) return json(await listTasks(serviceClient, { id: staffRow.id, role: String(staffRow.role || ''), branch: staffRow.branch }), {}, req)
       if (kind === 'finance' && canRead) return json(await listFinance(serviceClient), {}, req)
+      if (kind === 'pricing' && canRead) return json(await listPricing(serviceClient), {}, req)
       if (!canRead) return json({ error: 'Forbidden' }, { status: 403 }, req)
       if (kind === 'staff') return json(await listStaff(serviceClient), {}, req)
       if (kind === 'log') return json(await listLogs(serviceClient), {}, req)
@@ -556,6 +561,7 @@ Deno.serve(async (req) => {
       if (!canReadOperations) return json({ error: 'Forbidden' }, { status: 403 }, req)
       return json(await createReceipt(serviceClient, data, files, { id: staffRow.id, name: staffRow.full_name }), {}, req)
     }
+    if (kind === 'pricing') { const financeRole = ['admin','super_admin','accountant'].includes(String(staffRow.role || '')); if (!financeRole) return json({ error: 'Finance role required' }, { status: 403 }, req); const pricingActor = { id: staffRow.id, name: staffRow.full_name }; if (action === 'update') return json(data.rate_type === 'exchange' ? await updateExchangeRate(serviceClient, data, pricingActor) : await updatePricing(serviceClient, data, pricingActor), {}, req); return json({ error: 'Unsupported pricing action' }, { status: 400 }, req) }
     if (kind === 'task') {
       if (!canRead && !canReadOperations) return json({ error: 'Forbidden' }, { status: 403 }, req)
       const taskActor = { id: staffRow.id, name: staffRow.full_name, role: String(staffRow.role || ''), branch: staffRow.branch }

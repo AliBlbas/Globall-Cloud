@@ -91,7 +91,7 @@
     .mini b{display:block;margin-bottom:4px;font-size:14px}
     .mini span{color:var(--muted);font-size:13px;line-height:1.6}
     .status-line{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:13px}
-    .settings-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .settings-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.pricing-console{margin-top:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,.08)}.pricing-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}.pricing-header h3{margin:0;font-size:18px}.pricing-header p{margin:5px 0 0;color:var(--muted);font-size:13px;line-height:1.6}.rate-list{display:grid;gap:10px;margin-top:12px}.rate-row{display:grid;grid-template-columns:minmax(190px,1.4fr) 110px 110px minmax(150px,1fr) auto;gap:10px;align-items:center;padding:12px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.025)}.rate-row label{font-size:13px;font-weight:800}.rate-row small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.rate-input{width:100%;padding:10px;border-radius:11px;border:1px solid var(--line);background:rgba(0,0,0,.18);color:var(--text)}.rate-save{min-height:40px;padding:9px 13px}.pricing-note{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.7}@media (max-width:760px){.rate-row{grid-template-columns:1fr 1fr}.rate-row label{grid-column:1/-1}.rate-row .rate-window{grid-column:1/-1}.rate-row .rate-save{grid-column:1/-1;width:100%}}
     .setting-card{padding:16px;border-radius:20px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
     .setting-card b{display:block;font-size:14px;margin-bottom:6px}
     .setting-card span{display:block;font-size:13px;color:var(--muted);line-height:1.7}
@@ -234,10 +234,15 @@
             <p>Live values used by the platform.</p>
           </div>
         </div>
-        <div class="settings-grid" id="settingsGrid">
+          <div class="settings-grid" id="settingsGrid">
           <div class="setting-card"><b>USD→IQD rate</b><span id="rateValue">Waiting for data…</span></div>
           <div class="setting-card"><b>Pacing / wellness</b><span>Keep a small running routine handy for staff wellness and pacing imports.</span></div>
           <div class="setting-card"><b>Security posture</b><span>RLS, publishable keys, and staff-only access keep operations safe.</span></div>
+        </div>
+        <div class="pricing-console" id="pricingConsole">
+          <div class="pricing-header"><div><div class="eyebrow">RATE CONTROL</div><h3>نرخی ئەمڕۆی خزمەتگوزاری</h3><p>گۆڕانکارییەکان تەنها لە quote ـە نوێکان کاریگەری دەکەن؛ invoice ـە کۆنەکان ناگۆڕدرێن.</p></div><span class="badge badge-accountant">Admin · Accountant</span></div>
+          <div class="rate-list" id="rateList"><div class="setting-card">Loading rate catalog…</div></div>
+          <div class="pricing-note">نرخی دۆلار: 100 USD = 154,000 IQD. هەر update ـێک بە actor، کات و بەهای نوێ لە activity log تۆمار دەکرێت.</div>
         </div>
       </div>
     </section>

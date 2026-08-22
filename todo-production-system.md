@@ -116,3 +116,9 @@
 - [x] Build executive finance cards, trends, breakdowns, and drill-downs
 - [x] Validate financial accuracy, access control, currency handling, accessibility, and production integrity
 - [x] Publish the executive finance dashboard and document reporting assumptions
+- [x] Audit existing quote pricing, currency, service, and manager authorization contracts
+- [x] Define pricing catalog, effective-date, audit, and historical-invoice rules
+- [x] Implement editable rate storage, current supplied rates, and quote calculation integration
+- [x] Build manager pricing console with rate editing, publishing, and audit visibility
+- [x] Validate price accuracy, role security, currency handling, quote behavior, and production integrity
+- [x] Publish pricing management and document the current rate card
