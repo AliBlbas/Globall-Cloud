@@ -933,6 +933,14 @@ body{background-color:var(--ink); background-image:radial-gradient(ellipse 700px
   .route-dot,.route-pulse,.seal-badge{animation:none!important;}
   .btn-primary::after{display:none;}
 }
+/* ---------- Safari visibility fallback ---------- */
+@supports (-webkit-touch-callout:none){
+  .reveal,.reveal.in-view{opacity:1; transform:none;}
+  .hero .eyebrow,.hero h1,.hero .sub,.hero-ctas,.route-map,.trust-item,.live-track,.corridor-strip,.hero-status-card,.route-chip{animation:none!important; opacity:1!important; transform:none!important;}
+  .corridor-strip .corridor-item,.corridor-strip.in-view .corridor-item{opacity:1; animation:none!important; transform:none!important;}
+  .reveal.in-view .service-card,.reveal.in-view .hub-card,.reveal.in-view .warehouse-card,.reveal.in-view .ops-card,.reveal.in-view .testimonial-card{animation:none!important; opacity:1!important; transform:none!important;}
+  .route-dot,.route-pulse,.seal-badge{animation:none!important;}
+}
 </style>
 <script src="/gc-csp-bridge.js?v=20260816-1" defer data-gc-csp-bridge="1"></script></head>
 <body>
