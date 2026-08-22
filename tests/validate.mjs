@@ -99,6 +99,24 @@ if (existsSync(migDir)) {
   if (failures === beforeMig) ok(`${migFiles.length} migrations OK`);
 }
 
+// 5. Role-policy regression guards
+console.log('Role-policy guards');
+const roleSource = readFileSync(join(ROOT, 'supabase', 'functions', '_shared', 'roles.ts'), 'utf8');
+const operationsSource = readFileSync(join(ROOT, 'supabase', 'functions', 'operations-admin', 'index.ts'), 'utf8');
+const roleGuards = [
+  ['canonical role list', /CANONICAL_ROLES\s*=.*customer.*driver.*warehouse.*operations.*finance.*admin/s],
+  ['legacy super_admin alias', /super_admin:\s*'admin'/],
+  ['legacy accountant alias', /accountant:\s*'finance'/],
+  ['driver shipment scope', /assigned_staff_id/],
+  ['driver non-shipment denial', /a\.role==='driver'&&!\['shipments','events'\]\.includes\(kind\)/],
+  ['event role guard', /canWriteEvents/],
+];
+const beforeRoles = failures;
+for (const [label, pattern] of roleGuards) {
+  if (!pattern.test(label === 'canonical role list' || label.includes('alias') ? roleSource : operationsSource)) fail(`missing role guard: ${label}`);
+}
+if (failures === beforeRoles) ok(`${roleGuards.length} role guards OK`);
+
 console.log('');
 if (failures > 0) {
   console.error(`${failures} check(s) failed.`);
