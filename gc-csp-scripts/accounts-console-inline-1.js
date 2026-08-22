@@ -49,22 +49,21 @@ function setActiveTab(tab) {
    calcQuote() (see price-calculator.js header comment) — this is for a
    staff member to sanity-check a price internally, not the customer-facing
    quote form. */
-function runQuickQuote() {
-  if (!window.priceCalculator) { $('quoteResult').textContent = 'price-calculator.js failed to load.'; return; }
+async function runQuickQuote() {
+  const resultEl = $('quoteResult');
+  const breakdownEl = $('quoteWeightBreakdown');
   const type = $('quoteType').value;
-  const weight = Number($('quoteWeight').value) || 0;
-  const origin = $('quoteOrigin').value;
-  const destination = $('quoteDest').value;
-  const useSeasonal = $('quoteSeasonal').checked;
-  const result = window.priceCalculator.calculateShippingCost(type, weight, origin, destination, { useSeasonal });
-  const time = window.priceCalculator.calculateDeliveryTime(type);
-  if (!result) { $('quoteResult').textContent = 'Could not calculate — check inputs.'; return; }
-  $('quoteResult').innerHTML = `
-    <div class="stats">
-      <div class="stat"><b>${money(result.totalCost)}</b><span>Estimated total (USD)</span></div>
-      <div class="stat"><b>${money(result.baseCost)}</b><span>Base cost</span></div>
-      <div class="stat"><b>${time ? `${time.min}–${time.max} ${time.unit}` : '—'}</b><span>Est. delivery time</span></div>
-    </div>`;
+  const actual = Number($('quoteWeight').value);
+  const length = Number($('quoteLength').value || 0);
+  const width = Number($('quoteWidth').value || 0);
+  const height = Number($('quoteHeight').value || 0);
+  if (!Number.isFinite(actual) || actual < 0 || [length, width, height].some((v) => !Number.isFinite(v) || v < 0)) { resultEl.textContent = 'Enter valid non-negative weight and dimensions.'; return; }
+  resultEl.textContent = 'Calculating from the live rate catalog…';
+  try {
+    const quote = await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'quote', action: 'calculate', data: { transport_mode: type, actual_weight: actual, length_cm: length, width_cm: width, height_cm: height, product_type: $('quoteProduct').value, origin: $('quoteOrigin').value, destination: $('quoteDest').value } }) });
+    breakdownEl.innerHTML = `<b>Billing basis</b><br>Actual: ${quote.actual_weight_kg} kg · Volumetric: ${quote.volumetric_weight_kg} kg · Billable: ${quote.billable_weight_kg} kg · Volume: ${quote.volume_cbm} CBM<br><span class="muted">${esc(quote.formula)}</span>`;
+    resultEl.innerHTML = `<div class="stats"><div class="stat"><b>${money(quote.total)} ${esc(quote.currency)}</b><span>Estimated total</span></div><div class="stat"><b>${quote.billable_units} ${quote.rate_snapshot.unit}</b><span>Billable units</span></div><div class="stat"><b>${quote.transit_min_days ?? '—'}–${quote.transit_max_days ?? '—'} days</b><span>Estimated delivery</span></div></div><div class="small" style="margin-top:10px">Rate snapshot: ${esc(quote.rate_snapshot.rate_key)} · ${esc(quote.rate_snapshot.amount)} ${esc(quote.currency)} / ${esc(quote.rate_snapshot.unit)}</div>`;
+  } catch (err) { resultEl.textContent = err.message || 'Could not calculate — check route and rate inputs.'; }
 }
 function loadManagerOptions() {
   $('customerManager').innerHTML = '<option value="">Unassigned</option>' + state.staff.map((s) => `<option value="${esc(s.id)}">${esc(s.full_name)} (${esc(s.role)})</option>`).join('');

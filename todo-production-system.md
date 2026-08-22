@@ -122,3 +122,9 @@
 - [x] Build manager pricing console with rate editing, publishing, and audit visibility
 - [x] Validate price accuracy, role security, currency handling, quote behavior, and production integrity
 - [x] Publish pricing management and document the current rate card
+- [x] Audit quote schemas, calculator routes, units, and existing pricing catalog
+- [x] Define the 1:6000 volumetric-weight and billable-weight contract
+- [x] Implement server calculation, quote snapshot, and pricing integration
+- [x] Add air and sea calculator controls with transparent calculation details
+- [x] Validate weight math, boundary cases, permissions, currency, accessibility, and production integrity
+- [x] Publish the volumetric-weight feature and document the billing rule

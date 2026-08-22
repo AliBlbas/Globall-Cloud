@@ -95,7 +95,7 @@
     .auth-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:18px}
     .muted-box{padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
     @media (max-width: 1080px){.hero-grid,.layout{grid-template-columns:1fr}}
-    @media (max-width: 640px){body{padding:12px}.hero,.panel{padding:16px}.title{font-size:19px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}.search{min-width:100%;max-width:100%}.top-actions{width:100%}.top-actions .btn{flex:1}}
+    @media (max-width: 640px){body{padding:12px}.hero,.panel{padding:16px}.title{font-size:19px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.quote-dimensions{grid-template-columns:1fr 1fr}.search{min-width:100%;max-width:100%}.top-actions{width:100%}.top-actions .btn{flex:1}}
   </style>
 <script src="/gc-csp-bridge.js?v=20260816-1" defer data-gc-csp-bridge="1"></script></head>
 <body>
@@ -273,14 +273,21 @@
               <div class="form-row"><label class="label">Shipment type</label>
                 <select class="field" id="quoteType"><option value="air">Air</option><option value="sea">Sea</option><option value="land">Land</option></select>
               </div>
-              <div class="form-row"><label class="label">Weight (kg)</label><input class="field" type="number" id="quoteWeight" value="100" min="1"></div>
+              <div class="form-row"><label class="label">Weight (kg)</label><input class="field" type="number" id="quoteWeight" value="100" min="0.01" step="0.01"></div>
             </div>
+            <div class="grid quote-dimensions">
+              <div class="form-row"><label class="label">Length (cm)</label><input class="field" type="number" id="quoteLength" min="0" step="0.1" placeholder="Optional"></div>
+              <div class="form-row"><label class="label">Width (cm)</label><input class="field" type="number" id="quoteWidth" min="0" step="0.1" placeholder="Optional"></div>
+              <div class="form-row"><label class="label">Height (cm)</label><input class="field" type="number" id="quoteHeight" min="0" step="0.1" placeholder="Optional"></div>
+              <div class="form-row"><label class="label">Product category</label><select class="field" id="quoteProduct"><option value="General goods / no battery / no screen">General goods</option><option value="Screen">Screen</option><option value="Battery">Battery</option><option value="Accessories">Accessories</option><option value="Camera">Camera</option><option value="Tablet">Tablet</option><option value="Used iPhone">Used iPhone</option><option value="Android phone">Android phone</option><option value="iPhone 17 / Samsung S25-S26">iPhone 17 / Samsung S25-S26</option><option value="PlayStation">PlayStation</option><option value="Laptop">Laptop</option><option value="Shein / clothing">Shein / clothing</option><option value="Cosmetics / electronics">Cosmetics / electronics</option><option value="Air fryer / perfume">Air fryer / perfume</option></select></div>
+            </div>
+            <div class="muted-box" id="quoteWeightBreakdown" style="margin-top:10px">For Air and Sea: volumetric weight = L × W × H ÷ 6000. Billable weight uses the greater of actual and volumetric weight.</div>
             <div class="grid">
               <div class="form-row"><label class="label">Origin</label>
-                <select class="field" id="quoteOrigin"><option value="China">China</option><option value="UAE">UAE</option><option value="Erbil">Erbil</option><option value="Baghdad">Baghdad</option></select>
+                <select class="field" id="quoteOrigin"><option value="China">China</option><option value="UAE">UAE</option><option value="USA">USA</option><option value="Erbil">Erbil</option><option value="Baghdad">Baghdad</option></select>
               </div>
               <div class="form-row"><label class="label">Destination</label>
-                <select class="field" id="quoteDest"><option value="Iraq">Iraq</option><option value="UAE">UAE</option><option value="Baghdad">Baghdad</option><option value="Basra">Basra</option></select>
+                <select class="field" id="quoteDest"><option value="Erbil">Erbil</option><option value="Iraq">Iraq</option><option value="UAE">UAE</option><option value="Baghdad">Baghdad</option><option value="Basra">Basra</option></select>
               </div>
             </div>
             <div class="form-row"><label class="label"><input type="checkbox" id="quoteSeasonal" style="width:auto; margin-inline-end:6px;">Apply seasonal multiplier</label></div>
