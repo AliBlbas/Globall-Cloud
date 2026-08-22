@@ -153,6 +153,25 @@ for (const [label, pattern] of surfaceGuards) {
 }
 if (failures === beforeSurface) ok(`${surfaceGuards.length} role-surface guards OK`);
 
+// 8. Provider integration guards
+console.log('Provider integration guards');
+const paymentAdapterSource = readFileSync(join(ROOT, 'supabase', 'functions', '_shared', 'payment-providers.ts'), 'utf8');
+const webhookSource = readFileSync(join(ROOT, 'supabase', 'functions', 'payment-webhook', 'index.ts'), 'utf8');
+const providerGuards = [
+  ['QiCard adapter', /qicardCreate/],
+  ['FIB adapter', /fibCreate/],
+  ['normalized provider status', /normalizeProviderStatus/],
+  ['QiCard signature verification', /verifyQiCardSignature/],
+  ['webhook event persistence', /payment_webhook_events/],
+  ['webhook status requery', /status_requeried/],
+];
+const beforeProviders = failures;
+for (const [label, pattern] of providerGuards) {
+  const source = label.includes('adapter') || label === 'normalized provider status' ? paymentAdapterSource : webhookSource;
+  if (!pattern.test(source)) fail(`missing provider guard: ${label}`);
+}
+if (failures === beforeProviders) ok(`${providerGuards.length} provider guards OK`);
+
 console.log('');
 if (failures > 0) {
   console.error(`${failures} check(s) failed.`);
