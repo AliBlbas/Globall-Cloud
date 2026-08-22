@@ -837,6 +837,39 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
 @media (min-width:761px){
   .hero-ctas .btn{min-height:50px;}
 }
+/* ---------- premium cinematic logistics direction ---------- */
+:root{
+  --ink:#030914; --ink-2:#07172B; --surface:#0B2340; --surface-2:#102F52;
+  --line:#274A70; --line-soft:rgba(103,154,198,.22);
+  --teal:#19BBDD; --teal-l:#8BEAF6; --teal-dark:#031820;
+  --amber:#D9932E; --amber-l:#FFD37A; --mint:#43D89A;
+  --text:#F8FBFF; --muted:#A8BCD5; --muted-2:#7290B2;
+  --shadow:0 24px 70px rgba(0,0,0,.42);
+}
+body{background-color:var(--ink); background-image:radial-gradient(ellipse 700px 560px at 10% 0%,rgba(26,92,153,.22),transparent 64%),radial-gradient(ellipse 640px 500px at 100% 16%,rgba(207,137,39,.08),transparent 68%),linear-gradient(var(--grain-line) 1px,transparent 1px),linear-gradient(90deg,var(--grain-line) 1px,transparent 1px); background-size:auto,auto,56px 56px,56px 56px;}
+.nav{background:rgba(2,10,22,.9); border-bottom-color:rgba(255,211,122,.16);}
+.nav::after{background:linear-gradient(90deg,transparent,var(--teal) 28%,var(--amber-l) 68%,transparent);}
+.brand-logo{filter:drop-shadow(0 0 12px rgba(255,211,122,.22));}
+.btn-primary{background:linear-gradient(135deg,#FFE29B 0%,#F4B94F 48%,#C87B20 100%); color:#15100A; box-shadow:0 10px 28px rgba(236,166,58,.28),0 1px 0 rgba(255,255,255,.35) inset;}
+.btn-primary:hover{box-shadow:0 16px 36px rgba(236,166,58,.42),0 0 0 1px rgba(255,231,169,.35);}
+.hero{background:radial-gradient(ellipse 540px 380px at 78% 26%,rgba(18,88,141,.18),transparent 70%);}
+.hero h1{background:linear-gradient(120deg,#FFFFFF 5%,#B9F5FF 44%,#FFD37A 96%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;}
+.route-map{overflow:hidden; background-image:linear-gradient(90deg,rgba(2,10,22,.12),rgba(2,10,22,.68)),url('/manus-storage/globall-cloud-premium-hero_d0d57e5c.jpg'); background-size:cover; background-position:center; border-color:rgba(255,211,122,.28);}
+.route-map::before{background:linear-gradient(180deg,rgba(2,10,22,.08),rgba(2,10,22,.64));}
+.route-map > svg{mix-blend-mode:screen;}
+.seal-badge{filter:drop-shadow(0 0 15px rgba(255,199,104,.25));}
+.hero-status-card,.route-chip{background:rgba(3,14,29,.76); border-color:rgba(255,211,122,.18); box-shadow:0 18px 40px rgba(0,0,0,.28);}
+.route-chip-num{background:linear-gradient(135deg,#FFF0B0,#D99835);}
+.corridor-strip{background:linear-gradient(145deg,rgba(12,44,76,.94),rgba(4,15,30,.96)); border-color:rgba(255,211,122,.18);}
+.corridor-badge{background:rgba(255,198,92,.1); border-color:rgba(255,211,122,.25); color:var(--amber-l);}
+.trust-item{background:linear-gradient(145deg,rgba(13,43,74,.82),rgba(6,20,39,.9)); border-color:rgba(255,211,122,.13);}
+.trust-item b{background:linear-gradient(135deg,#DFFBFF,#FFD37A); -webkit-background-clip:text; background-clip:text;}
+@media(max-width:760px){
+  .hero{background:radial-gradient(ellipse 380px 260px at 50% 3%,rgba(18,88,141,.24),transparent 72%);}
+  .route-map{background-position:58% center; box-shadow:0 25px 60px rgba(0,0,0,.34),0 0 0 1px rgba(255,211,122,.08) inset;}
+  .route-map::after{color:#FFD37A; text-shadow:0 0 14px rgba(255,211,122,.42);}
+  .trust-item{background:linear-gradient(145deg,rgba(14,48,82,.92),rgba(5,20,39,.96));}
+}
 </style>
 <script src="/gc-csp-bridge.js?v=20260816-1" defer data-gc-csp-bridge="1"></script></head>
 <body>
