@@ -60,3 +60,9 @@
 - [x] Refine header, bottom navigation, live-corridor card, and responsive interactions
 - [x] Validate the refined UI at mobile and desktop breakpoints with accessibility and production checks (mobile rules audited in source; public desktop render verified; protected preview requires authenticated access)
 - [x] Publish the refined UI milestone and document the changes
+- [x] Audit the current homepage assets and composition against the supplied premium logistics reference
+- [x] Define the navy-gold cinematic visual system and production-safe asset strategy
+- [x] Add premium global logistics imagery and app-style visual surfaces without hardcoded customer data
+- [x] Restyle the homepage for RTL mobile and desktop with premium hierarchy and accessible CTAs
+- [x] Validate asset loading, responsive behavior, accessibility, and production integrity
+- [x] Publish the premium redesign and document the exact changes
