@@ -55,3 +55,8 @@
 - [x] Diagnose the Supabase Preview failure caused by remote migration versions missing locally
 - [x] Reconcile migration history safely without destructive database changes
 - [x] Re-run Supabase Preview and production integrity validation after reconciliation
+- [x] Audit the provided mobile landing-screen direction against the current Globall-Cloud frontend
+- [x] Improve mobile RTL hierarchy, typography, spacing, and CTA clarity
+- [x] Refine header, bottom navigation, live-corridor card, and responsive interactions
+- [x] Validate the refined UI at mobile and desktop breakpoints with accessibility and production checks (mobile rules audited in source; public desktop render verified; protected preview requires authenticated access)
+- [x] Publish the refined UI milestone and document the changes

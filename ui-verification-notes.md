@@ -1,0 +1,3 @@
+# UI verification notes
+
+The Cloudflare preview hostname `2cb77081.globall-cloud.pages.dev` is protected by Cloudflare Access and therefore cannot be visually inspected without an authenticated session. The public production hostname `globall-cloud.pages.dev` remains reachable and renders the current homepage with the existing Kurdish RTL hero, route visualization, CTAs, trust metrics, tracking form, and WhatsApp affordance. The production homepage was inspected after the UI refinement deployment; mobile-specific CSS is included in the published commit `092be23`, while the browser inspection viewport was desktop-sized.
