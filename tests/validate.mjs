@@ -117,6 +117,23 @@ for (const [label, pattern] of roleGuards) {
 }
 if (failures === beforeRoles) ok(`${roleGuards.length} role guards OK`);
 
+// 6. Core logistics workflow guards
+console.log('Core workflow guards');
+const controlPlaneSource = [readFileSync(join(ROOT, 'supabase', 'functions', 'logistics-control-plane', 'index.ts'), 'utf8'), ...walk(join(ROOT, 'supabase', 'migrations'), ['.sql']).map((file) => readFileSync(file, 'utf8'))].join('\n');
+const workflowGuards = [
+  ['shipment transition RPC', /transition_shipment|shipment_status_history/],
+  ['package traceability', /shipment_packages/],
+  ['warehouse movement ledger', /warehouse_movements|movement/],
+  ['customs workflow', /customs/],
+  ['delivery proof', /delivery_proofs|proof_of_delivery/],
+  ['staff audit trail', /staff_activity_log/],
+];
+const beforeWorkflow = failures;
+for (const [label, pattern] of workflowGuards) {
+  if (!pattern.test(controlPlaneSource)) fail(`missing core workflow guard: ${label}`);
+}
+if (failures === beforeWorkflow) ok(`${workflowGuards.length} core workflow guards OK`);
+
 console.log('');
 if (failures > 0) {
   console.error(`${failures} check(s) failed.`);
