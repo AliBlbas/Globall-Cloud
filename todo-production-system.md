@@ -98,3 +98,9 @@
 - [x] Build mobile camera intake, review, confirmation, and receipt history surfaces
 - [x] Validate photo access, customer isolation, input-safety, mobile UX, and production integrity
 - [x] Publish the photo-intake workflow and document warehouse operations; automatic image OCR provider remains pending
+- [x] Audit existing customer portal, shipment data, photo access, tracking, and auth boundaries
+- [x] Define customer-scoped dashboard privacy and shipment-detail contract
+- [x] Implement secure customer shipment, photo, location, timeline, and payment views
+- [x] Build mobile-first customer dashboard and shipment detail screens
+- [x] Validate customer isolation, photo authorization, accessibility, responsive UX, and production integrity
+- [x] Publish the customer dashboard and document the customer operating flow
