@@ -888,6 +888,51 @@ body{background-color:var(--ink); background-image:radial-gradient(ellipse 700px
   .portal-bottom-nav-inner{padding-inline:10px;}
   .pbn-item{font-size:10px;}
 }
+/* ---------- premium motion system ---------- */
+:root{--ease-out:cubic-bezier(.23,1,.32,1);--ease-in-out:cubic-bezier(.77,0,.175,1);}
+.btn,.service-card,.hub-card,.warehouse-card,.trust-item,.route-chip,.corridor-item,.pbn-item,.pbn-fab,.theme-toggle-btn,.burger{transition:transform .22s var(--ease-out),opacity .22s ease,box-shadow .28s var(--ease-out),border-color .22s ease,background-color .22s ease;}
+.btn-primary{isolation:isolate; overflow:hidden;}
+.btn-primary::after{content:''; position:absolute; inset:-40% auto -40% -65%; width:42%; transform:translateX(-180%) skewX(-18deg); background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent); pointer-events:none; transition:transform .6s var(--ease-out);}
+.btn-primary:hover::after{transform:translateX(500%) skewX(-18deg);}
+.hero .eyebrow,.hero h1,.hero .sub,.hero-ctas,.route-map,.trust-item,.live-track,.corridor-strip{animation:gcRiseIn .72s var(--ease-out) both;}
+.hero .eyebrow{animation-delay:.04s;}
+.hero h1{animation-delay:.1s;}
+.hero .sub{animation-delay:.16s;}
+.hero-ctas{animation-delay:.22s;}
+.route-map{animation-delay:.18s;}
+.trust-item:nth-child(1){animation-delay:.25s;}.trust-item:nth-child(2){animation-delay:.31s;}.trust-item:nth-child(3){animation-delay:.37s;}.trust-item:nth-child(4){animation-delay:.43s;}
+@keyframes gcRiseIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.route-dot{animation:gcDotPulse 2.8s ease-in-out infinite;}
+.route-dot:nth-of-type(2){animation-delay:.65s;}.route-dot:nth-of-type(3){animation-delay:1.3s;}
+@keyframes gcDotPulse{0%,100%{transform:scale(1);opacity:.72;}50%{transform:scale(1.32);opacity:1;}}
+.route-pulse{animation:gcRoutePulse 2.6s ease-out infinite;}
+@keyframes gcRoutePulse{0%{opacity:.75;transform:scale(.82);}70%,100%{opacity:0;transform:scale(1.8);}}
+.seal-badge{animation:gcFloat 5s ease-in-out infinite;}
+@keyframes gcFloat{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-5px) rotate(2deg);}}
+.hero-status-card{animation:gcCardIn .8s var(--ease-out) .32s both;}
+.route-chip{animation:gcCardIn .65s var(--ease-out) both;}
+.route-chip:nth-child(1){animation-delay:.44s;}.route-chip:nth-child(2){animation-delay:.52s;}.route-chip:nth-child(3){animation-delay:.60s;}
+@keyframes gcCardIn{from{opacity:0;transform:translateY(12px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+.corridor-strip .corridor-item{opacity:0;}
+.corridor-strip.in-view .corridor-item{animation:gcCardIn .55s var(--ease-out) both;}
+.corridor-strip.in-view .corridor-item:nth-child(1){animation-delay:.08s;}.corridor-strip.in-view .corridor-item:nth-child(2){animation-delay:.15s;}.corridor-strip.in-view .corridor-item:nth-child(3){animation-delay:.22s;}
+.reveal.in-view .service-card,.reveal.in-view .hub-card,.reveal.in-view .warehouse-card,.reveal.in-view .ops-card,.reveal.in-view .testimonial-card{animation:gcCardIn .55s var(--ease-out) both;}
+.service-card:hover,.hub-card:hover,.warehouse-card:hover,.trust-item:hover{transform:translateY(-5px);}
+.service-card:active,.hub-card:active,.warehouse-card:active,.trust-item:active{transform:translateY(-1px) scale(.985);}
+.pbn-item:hover{color:var(--amber-l);transform:translateY(-2px);}
+.pbn-fab:hover{transform:translateY(-4px) scale(1.04);}
+.pbn-fab svg{transition:transform .24s var(--ease-out);}.pbn-fab:hover svg{transform:rotate(90deg);}
+.whatsapp-float{transition:transform .24s var(--ease-out),box-shadow .24s var(--ease-out);}
+.whatsapp-float:hover{transform:translateY(-4px) scale(1.06);}
+@media(max-width:760px){
+  .hero .eyebrow,.hero h1,.hero .sub,.hero-ctas,.route-map,.trust-item,.live-track,.corridor-strip{animation-duration:.58s;}
+  .service-card:hover,.hub-card:hover,.warehouse-card:hover,.trust-item:hover{transform:translateY(-3px);}
+}
+@media (prefers-reduced-motion:reduce){
+  .hero .eyebrow,.hero h1,.hero .sub,.hero-ctas,.route-map,.trust-item,.live-track,.corridor-strip,.hero-status-card,.route-chip,.corridor-strip.in-view .corridor-item,.reveal.in-view .service-card,.reveal.in-view .hub-card,.reveal.in-view .warehouse-card,.reveal.in-view .ops-card,.reveal.in-view .testimonial-card{animation:none!important; opacity:1!important; transform:none!important;}
+  .route-dot,.route-pulse,.seal-badge{animation:none!important;}
+  .btn-primary::after{display:none;}
+}
 </style>
 <script src="/gc-csp-bridge.js?v=20260816-1" defer data-gc-csp-bridge="1"></script></head>
 <body>
