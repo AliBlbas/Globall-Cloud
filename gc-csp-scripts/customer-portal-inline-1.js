@@ -9,7 +9,7 @@ const date = (value) => value ? new Date(value).toLocaleString() : '—';
 const showMessage = (message, kind = 'muted') => { $('quoteMessage').textContent = message; $('quoteMessage').className = kind; };
 
 const renderShipments = (items) => setHtml('shipments', items.map((item) => `<div class="item"><div class="row"><strong>${esc(item.id)}</strong><span class="pill">${esc(item.operational_status || item.current_step_index || 0)}</span></div><div class="muted">${esc(item.origin_key)} → ${esc(item.dest_key)}</div><small>${esc(item.current_location_label || '—')} · ETA ${esc(date(item.eta))}</small></div>`).join('') || '<div class="muted">هیچ shipment نییە.</div>');
-const renderNotifications = (items) => setHtml('notifications', items.map((item) => `<div class="item"><strong>${esc(item.title)}</strong><div class="muted">${esc(item.body)}</div><small>${esc(date(item.created_at))}</small></div>`).join('') || '<div class="muted">هیچ notification نییە.</div>');
+const renderNotifications = (items) => setHtml('notifications', items.map((item) => `<div class="item"><div class="row"><strong>${esc(item.title)}</strong>${item.read_at ? '<span class="pill">خوێندراوە</span>' : `<button class="btn notification-action" type="button" data-read-notification="${esc(item.id)}">خوێندراوە بکە</button>`}</div><div class="muted">${esc(item.body)}</div><small>${esc(date(item.created_at))}</small></div>`).join('') || '<div class="muted">هیچ notification نییە.</div>');
 const renderQuotes = (items) => setHtml('quotes', items.map((item) => {
   const canAccept = item.status === 'quoted' && item.valid_until && new Date(item.valid_until) > new Date();
   return `<div class="item"><div class="row"><strong>${esc(item.origin_key)} → ${esc(item.dest_key)}</strong><span class="pill">${esc(item.status)}</span></div><div class="muted">${esc(item.transport_mode)} · ${esc(item.weight_kg)} kg · ${esc(item.volume_cbm || 0)} CBM</div><div>${item.quoted_amount == null ? 'لەژێر پێداچوونەوە' : money(item.quoted_amount, item.currency)}</div><small>${item.valid_until ? `کاریگەر تا ${esc(date(item.valid_until))}` : ''}</small>${canAccept ? `<div class="actions"><button class="btn primary" type="button" data-accept-quote="${esc(item.id)}">پەسەندکردنی quote</button></div>` : ''}</div>`;
@@ -17,7 +17,7 @@ const renderQuotes = (items) => setHtml('quotes', items.map((item) => {
 const renderDocuments = (items) => setHtml('docs', items.map((item) => `<div class="item"><div class="row"><strong>${esc(item.title || item.document_type)}</strong><span class="pill">${item.is_public ? 'Public' : 'Private'}</span></div><div class="muted">${esc(item.shipment_id)} · ${esc(item.document_status || 'uploaded')}</div><small>${esc(date(item.created_at))}</small>${item.file_url ? ` <a class="download" href="${esc(item.file_url)}" data-document-id="${esc(item.id)}" target="_blank" rel="noopener noreferrer" download>داگرتن</a>` : ''}</div>`).join('') || '<div class="muted">هیچ document نییە.</div>');
 const renderPods = (items) => setHtml('pods', items.map((item) => `<div class="item"><strong>${esc(item.shipment_id)}</strong><div class="muted">${item.delivered_at ? `گەیەنراو ${esc(date(item.delivered_at))}` : 'Pending'} · ${esc(item.receiver_name || '—')}</div><small>${esc(item.note || '')}</small></div>`).join('') || '<div class="muted">POD نییە.</div>');
 const renderPayments = (invoices, payments) => {
-  const invoiceRows = invoices.map((item) => `<div class="item"><div class="row"><strong>${esc(item.invoice_number)}</strong><span class="pill">${esc(item.status)}</span></div><div class="muted">${esc(item.shipment_id)} · ${money(item.total, item.currency)}</div><small>Paid: ${money(item.paid_total, item.currency)} · Due: ${money(Math.max(0, Number(item.total || 0) - Number(item.paid_total || 0)), item.currency)}</small></div>`);
+  const invoiceRows = invoices.map((item) => { const due = Math.max(0, Number(item.total || 0) - Number(item.paid_total || 0)); const paymentAction = due > 0 && item.status !== 'paid' ? `<a class="btn primary payment-action" href="./payment-checkout.html?invoice_id=${encodeURIComponent(item.id)}">پارەدان</a>` : ''; return `<div class="item"><div class="row"><strong>${esc(item.invoice_number)}</strong><span class="pill">${esc(item.status)}</span></div><div class="muted">${esc(item.shipment_id)} · ${money(item.total, item.currency)}</div><small>Paid: ${money(item.paid_total, item.currency)} · Due: ${money(due, item.currency)}</small>${paymentAction ? `<div class="actions">${paymentAction}</div>` : ''}</div>`; });
   const paymentRows = payments.map((item) => `<div class="item"><div class="row"><strong>${money(item.amount, item.currency)}</strong><span class="pill">${esc(item.status)}</span></div><div class="muted">${esc(item.provider)} · ${esc(item.method || '—')}</div><small>${esc(date(item.paid_at || item.created_at))}</small></div>`);
   setHtml('payments', [...invoiceRows, ...paymentRows].join('') || '<div class="muted">هیچ payment history نییە.</div>');
 };
@@ -38,7 +38,7 @@ const load = async () => {
   $('hello').textContent = `بەخێربێیت — ${session.user.email || 'Customer'}`;
   const [shipments, notifications, quotes, documents, pods, invoices, payments] = await Promise.all([
     sb.from('shipments').select('id,origin_key,dest_key,current_step_index,operational_status,current_location_label,total_amount,paid_amount,eta').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(30),
-    sb.from('customer_notifications').select('title,body,read_at,created_at').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(12),
+    sb.from('customer_notifications').select('id,title,body,read_at,created_at').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(12),
     sb.from('quote_requests').select('id,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,status,quoted_amount,currency,valid_until,created_at').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(12),
     sb.from('shipment_documents').select('id,shipment_id,document_type,title,file_url,is_public,document_status,created_at').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(12),
     sb.from('delivery_proofs').select('shipment_id,delivered_at,receiver_name,note,created_at').order('created_at', { ascending: false }).limit(12),
@@ -105,6 +105,14 @@ const downloadDocument = async (link) => {
   throw new Error(body.error || 'Document access failed');
 };
 
+const markNotificationRead = async (notificationId) => {
+  const { data: userResult } = await sb.auth.getUser();
+  if (!userResult.user || !notificationId) return;
+  const { error } = await sb.from('customer_notifications').update({ read_at: new Date().toISOString() }).eq('id', notificationId).eq('customer_user_id', userResult.user.id);
+  if (error) { showMessage(error.message, 'error'); return; }
+  await load();
+};
+
 const acceptQuote = async (quoteId) => {
   const { data: userResult } = await sb.auth.getUser();
   if (!userResult.user) return;
@@ -121,6 +129,6 @@ $('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); 
 $('trackBtn').addEventListener('click', () => { location.href = './index.html#track'; });
 $('quoteBtn').addEventListener('click', () => { $('quoteForm').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('quoteOrigin').focus(); });
 $('quoteForm').addEventListener('submit', (event) => submitQuote(event).catch((error) => showMessage(error.message, 'error')));
-document.addEventListener('click', (event) => { const documentLink = event.target.closest('[data-document-id]'); if (documentLink) { event.preventDefault(); downloadDocument(documentLink).then(() => window.open(documentLink.href, '_blank', 'noopener,noreferrer')).catch((error) => showMessage(error.message, 'error')); return; } const button = event.target.closest('[data-accept-quote]'); if (button) acceptQuote(button.dataset.acceptQuote).catch((error) => showMessage(error.message, 'error')); });
+document.addEventListener('click', (event) => { const notificationButton = event.target.closest('[data-read-notification]'); if (notificationButton) { notificationButton.disabled = true; markNotificationRead(notificationButton.dataset.readNotification).catch((error) => { notificationButton.disabled = false; showMessage(error.message, 'error'); }); return; } const documentLink = event.target.closest('[data-document-id]'); if (documentLink) { event.preventDefault(); downloadDocument(documentLink).then(() => window.open(documentLink.href, '_blank', 'noopener,noreferrer')).catch((error) => showMessage(error.message, 'error')); return; } const button = event.target.closest('[data-accept-quote]'); if (button) acceptQuote(button.dataset.acceptQuote).catch((error) => showMessage(error.message, 'error')); });
 sb.auth.onAuthStateChange(() => window.setTimeout(() => load().catch((error) => showMessage(error.message, 'error')), 100));
 load().catch((error) => { console.error(error); $('portalStatus')?.classList.remove('hidden'); setHtml('notifications', '<div class="alert">هەڵە لە هێنانی داتا؛ تکایە دواتر هەوڵ بدەرەوە.</div>'); });
