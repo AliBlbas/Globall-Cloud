@@ -108,9 +108,9 @@
     .switches{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .switch{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:8px 12px;background:rgba(255,255,255,.03);font-weight:800;font-size:12px;color:#d7ebff}
     .switch strong{font-family:var(--mono);font-size:11px;letter-spacing:1px}
-    .footer{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:12.5px;line-height:1.6;margin-top:4px}
+    .footer{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:12.5px;line-height:1.6;margin-top:4px}.finance-panel{border-color:rgba(240,168,58,.36);background:linear-gradient(145deg,rgba(23,52,87,.98),rgba(11,26,48,.98))}.finance-stats{grid-template-columns:repeat(5,minmax(0,1fr))}.finance-stats .stat:first-child b,.finance-stats .stat:last-child b{color:#ffd182}.finance-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.finance-panel .table-wrap{margin-top:10px}.finance-panel th{color:#ffd182}.finance-panel.hidden{display:none!important}
     @media (max-width: 1080px){.hero-grid,.layout{grid-template-columns:1fr}}
-    @media (max-width: 760px){.profile{grid-template-columns:1fr}.avatar{width:86px;height:86px;border-radius:22px}.hero-name{font-size:22px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid,.split,.mini-grid{grid-template-columns:1fr}.search{min-width:100%;max-width:100%}}
+    @media (max-width: 760px){.profile{grid-template-columns:1fr}.avatar{width:86px;height:86px;border-radius:22px}.hero-name{font-size:22px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.finance-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.finance-grid{grid-template-columns:1fr}.grid,.split,.mini-grid{grid-template-columns:1fr}.search{min-width:100%;max-width:100%}}
     @media (max-width: 640px){body{padding:12px}.hero,.panel{padding:16px}.title{font-size:19px}.top-actions{width:100%}.top-actions .btn{flex:1}}
   </style>
 <script src="/gc-csp-bridge.js?v=20260816-1" defer data-gc-csp-bridge="1"></script></head>
@@ -187,6 +187,14 @@
           </div>
         </div>
       </div>
+    </section>
+
+    <section class="panel finance-panel hidden" id="financePanel" aria-labelledby="financeTitle">
+      <div class="section-title"><div><div class="eyebrow">EXECUTIVE FINANCE</div><h2 id="financeTitle">ڕاپۆرتی داهات و قازانج</h2><p>تەنها invoice، collection و company cost ـی ڕاستەقینەی تۆمارکراو لەوێیە.</p></div><div class="status-line"><span class="badge badge-accountant" id="financeScope">Finance access</span><span class="switch"><strong>LIVE</strong> Supabase</span></div></div>
+      <div class="stats finance-stats" id="financeStats" aria-live="polite"><div class="stat"><b>—</b><span>Revenue</span></div><div class="stat"><b>—</b><span>Collected</span></div><div class="stat"><b>—</b><span>Outstanding</span></div><div class="stat"><b>—</b><span>Recorded costs</span></div><div class="stat"><b>—</b><span>Operating profit</span></div></div>
+      <div class="finance-grid"><div class="mini"><b>Collection health</b><span id="collectionHealth">—</span></div><div class="mini"><b>Reporting basis</b><span id="financeBasis">Invoice totals less recorded company costs; currencies stay separate.</span></div></div>
+      <div class="section-title spaced"><div><h2>Revenue by shipment</h2><p>ئەو route ـانەی داهاتی زۆرتریان هەیە.</p></div></div><div class="table-wrap"><table><thead><tr><th>Shipment</th><th>Revenue</th><th>Collected</th><th>Outstanding</th></tr></thead><tbody id="financeRouteBody"><tr><td colspan="4">Loading finance data…</td></tr></tbody></table></div>
+      <div class="dashboard-note">تێبینی: قازانج تەنها لەسەر ئەو company cost ـانە هەژمار دەکرێت کە بە شێوەی فەرمی تۆمارکراون؛ ئەگەر cost ـی تۆمارکراو نەبێت، ژمارەکە بە ڕوونی لەگەڵ بنەمای هەژمارکردن پیشان دەدرێت.</div>
     </section>
 
     <section class="layout">

@@ -110,3 +110,9 @@
 - [x] Build customer finance summary and invoice-detail surfaces in Customer Portal
 - [x] Validate financial accuracy, customer isolation, accessibility, and production integrity
 - [x] Publish the customer finance workspace and document the customer operating flow
+- [x] Audit company finance schema, ledger semantics, and executive role boundaries
+- [x] Define revenue, cost, profit, cash, currency, and period reporting rules
+- [x] Implement role-restricted executive finance queries and aggregation views
+- [x] Build executive finance cards, trends, breakdowns, and drill-downs
+- [x] Validate financial accuracy, access control, currency handling, accessibility, and production integrity
+- [x] Publish the executive finance dashboard and document reporting assumptions

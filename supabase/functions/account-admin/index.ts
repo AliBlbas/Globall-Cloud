@@ -1,6 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
-type Kind = 'customer' | 'customer_match' | 'staff' | 'receipt' | 'log' | 'shipment' | 'task'
+type Kind = 'customer' | 'customer_match' | 'staff' | 'receipt' | 'log' | 'shipment' | 'task' | 'finance'
 type Action = 'list' | 'create' | 'update' | 'archive' | 'delete' | 'claim' | 'complete'
 type JsonRecord = Record<string, unknown>
 
@@ -85,7 +85,7 @@ function bool(value: unknown, fallback = false): boolean {
 
 function normalizeKind(value: unknown): Kind {
   const kind = String(value || 'customer').toLowerCase()
-  if (kind === 'customer_match' || kind === 'staff' || kind === 'receipt' || kind === 'log' || kind === 'shipment' || kind === 'task') return kind
+  if (kind === 'customer_match' || kind === 'staff' || kind === 'receipt' || kind === 'log' || kind === 'shipment' || kind === 'task' || kind === 'finance') return kind
   return 'customer'
 }
 
@@ -191,6 +191,25 @@ async function listTasks(client: ReturnType<typeof createClient>, actor: { id: s
   const isAdmin = actor.role === 'admin' || actor.role === 'super_admin'
   const visible = (data ?? []).filter((task: any) => isAdmin || task.assignee_id === actor.id || task.created_by === actor.id || task.branch === 'all' || task.branch === (actor.branch || 'all'))
   return { items: visible.map((task: any) => ({ ...task, assignee: task.assignee_id ? staffMap.get(String(task.assignee_id)) ?? null : null, creator: staffMap.get(String(task.created_by)) ?? null })), kind: 'task' }
+}
+
+function addAmount(target: Record<string, number>, currency: unknown, amount: unknown) { const key = String(currency || 'USD').toUpperCase(); target[key] = Math.round(((target[key] || 0) + Number(amount || 0)) * 100) / 100 }
+async function listFinance(client: ReturnType<typeof createClient>) {
+  const [invoiceResult, costResult] = await Promise.all([
+    client.from('shipment_invoices').select('id,invoice_number,shipment_id,total,paid_total,currency,status,due_at,issued_at,created_at').order('created_at', { ascending: false }).limit(1000),
+    client.from('company_cost_entries').select('id,category,description,amount,currency,branch,route_key,occurred_at,created_at').order('occurred_at', { ascending: false }).limit(1000),
+  ])
+  if (invoiceResult.error) throw invoiceResult.error
+  if (costResult.error) throw costResult.error
+  const revenue: Record<string, number> = {}, collected: Record<string, number> = {}, outstanding: Record<string, number> = {}, costs: Record<string, number> = {}
+  const byRoute: Record<string, { revenue: number, collected: number, outstanding: number, currency: string }> = {}
+  for (const row of invoiceResult.data ?? []) {
+    addAmount(revenue, row.currency, row.total); addAmount(collected, row.currency, row.paid_total); addAmount(outstanding, row.currency, Math.max(0, Number(row.total || 0) - Number(row.paid_total || 0)))
+    const routeKey = String(row.shipment_id || '—'); const currency = String(row.currency || 'USD').toUpperCase(); const route = byRoute[routeKey] || { revenue: 0, collected: 0, outstanding: 0, currency }; route.revenue += Number(row.total || 0); route.collected += Number(row.paid_total || 0); route.outstanding += Math.max(0, Number(row.total || 0) - Number(row.paid_total || 0)); byRoute[routeKey] = route
+  }
+  for (const row of costResult.data ?? []) addAmount(costs, row.currency, row.amount)
+  const profit: Record<string, number> = {}; for (const currency of new Set([...Object.keys(revenue), ...Object.keys(costs)])) profit[currency] = Math.round(((revenue[currency] || 0) - (costs[currency] || 0)) * 100) / 100
+  return { kind: 'finance', period: 'all_available_records', invoices: invoiceResult.data ?? [], costs: costResult.data ?? [], summary: { revenue, collected, outstanding, costs, profit }, byRoute: Object.entries(byRoute).map(([route, values]) => ({ route, ...values })).sort((a, b) => b.revenue - a.revenue) }
 }
 
 function taskStatus(value: unknown, fallback = 'todo'): string {
@@ -507,6 +526,7 @@ Deno.serve(async (req) => {
       if (kind === 'receipt' && canReadOperations) return json(await listReceipts(serviceClient), {}, req)
       if (kind === 'customer_match' && canReadOperations) { const code = txt(url.searchParams.get('code')); if (!code) return json({ customer: null }, {}, req); return json({ customer: await lookupCustomer(serviceClient, { customer_code: code }) }, {}, req) }
       if (kind === 'task' && canReadOperations) return json(await listTasks(serviceClient, { id: staffRow.id, role: String(staffRow.role || ''), branch: staffRow.branch }), {}, req)
+      if (kind === 'finance' && canRead) return json(await listFinance(serviceClient), {}, req)
       if (!canRead) return json({ error: 'Forbidden' }, { status: 403 }, req)
       if (kind === 'staff') return json(await listStaff(serviceClient), {}, req)
       if (kind === 'log') return json(await listLogs(serviceClient), {}, req)

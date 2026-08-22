@@ -6,7 +6,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, 
 });
 window.sb = sb;
 const adminDashboard = typeof AdminDashboard !== 'undefined' ? new AdminDashboard(sb) : null;
-const state = { tab: 'dashboard', session: null, role: 'guest', customers: [], staff: [], receipts: [], logs: [], theme: localStorage.getItem('gc-theme') || 'dark' };
+const state = { tab: 'dashboard', session: null, role: 'guest', customers: [], staff: [], receipts: [], logs: [], finance: null, theme: localStorage.getItem('gc-theme') || 'dark' };
 const $ = (id) => document.getElementById(id);
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const money = (v) => `$${Number(v || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
@@ -116,6 +116,8 @@ function renderList() {
     }).join('') || '<tr><td colspan="6">No customer accounts loaded yet.</td></tr>';
   }
 }
+function formatFinanceBuckets(buckets) { return Object.entries(buckets || {}).map(([currency, amount]) => `${currency} ${Number(amount || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`).join(' · ') || '0'; }
+function renderExecutiveFinance(finance) { const panel = $('financePanel'); if (!panel) return; const allowed = ['admin','super_admin','accountant'].includes(state.role); panel.classList.toggle('hidden', !allowed); if (!allowed || !finance) return; const s = finance.summary || {}; const collectionRate = Object.entries(s.revenue || {}).map(([currency, value]) => { const revenue = Number(value || 0); const collected = Number(s.collected?.[currency] || 0); return `${currency} ${revenue ? ((collected / revenue) * 100).toFixed(1) : '0.0'}%`; }).join(' · ') || 'No invoice revenue recorded'; $('financeScope').textContent = `${roleLabel[state.role] || state.role} finance access`; $('financeStats').innerHTML = `<div class="stat"><b>${esc(formatFinanceBuckets(s.revenue))}</b><span>Revenue</span></div><div class="stat"><b>${esc(formatFinanceBuckets(s.collected))}</b><span>Collected</span></div><div class="stat"><b>${esc(formatFinanceBuckets(s.outstanding))}</b><span>Outstanding</span></div><div class="stat"><b>${esc(formatFinanceBuckets(s.costs))}</b><span>Recorded costs</span></div><div class="stat"><b>${esc(formatFinanceBuckets(s.profit))}</b><span>Operating profit</span></div>`; $('collectionHealth').textContent = collectionRate; $('financeBasis').textContent = `${finance.period === 'all_available_records' ? 'All available invoice and cost records' : 'Selected reporting period'} · currencies remain separate`; $('financeRouteBody').innerHTML = (finance.byRoute || []).slice(0, 12).map((row) => `<tr><td class="mono">${esc(row.route)}</td><td><b>${esc(`${row.currency} ${Number(row.revenue || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`)}</b></td><td>${esc(`${row.currency} ${Number(row.collected || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`)}</td><td>${esc(`${row.currency} ${Number(row.outstanding || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`)}</td></tr>`).join('') || '<tr><td colspan="4">No invoice records available.</td></tr>'; }
 async function refreshAnalytics() {
   if (!adminDashboard || !$('analyticsStatsRow')) return;
   const metrics = await adminDashboard.calculateMetrics().catch(() => null);
@@ -163,14 +165,16 @@ async function refreshAll() {
       authFetch('/?kind=staff'),
       authFetch('/?kind=receipt'),
       authFetch('/?kind=log'),
+      authFetch('/?kind=finance'),
     ]);
-    const [customers, staff, receipts, logs] = settled;
+    const [customers, staff, receipts, logs, finance] = settled;
     if (customers.status === 'fulfilled') state.customers = customers.value.items || []; else console.error(customers.reason);
     if (staff.status === 'fulfilled') state.staff = staff.value.items || []; else console.error(staff.reason);
     if (receipts.status === 'fulfilled') state.receipts = receipts.value.items || []; else console.error(receipts.reason);
     if (logs.status === 'fulfilled') state.logs = logs.value.items || []; else console.error(logs.reason);
+    if (finance.status === 'fulfilled') { state.finance = finance.value; renderExecutiveFinance(finance.value); } else { state.finance = null; renderExecutiveFinance(null); console.error(finance.reason); }
 
-    const failed = settled.map((r, i) => (r.status === 'rejected' ? ['customers','staff','receipts','logs'][i] : null)).filter(Boolean);
+    const failed = settled.map((r, i) => (r.status === 'rejected' ? ['customers','staff','receipts','logs','finance'][i] : null)).filter(Boolean);
     if (failed.length) setLoadError(`Some panels failed to load: ${failed.join(', ')}`);
 
     loadManagerOptions();
