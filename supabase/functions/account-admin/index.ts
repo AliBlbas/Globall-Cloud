@@ -77,6 +77,17 @@ function txt(value: unknown): string | null {
   return str.length ? str : null
 }
 
+function normalizeGcCode(value: unknown): string | null {
+  const raw = txt(value)
+  if (!raw) return null
+  const normalized = raw
+    .normalize('NFKC')
+    .toUpperCase()
+    .replace(/[–—−]/g, '-')
+    .replace(/\s+/g, '')
+  return /^GC-[A-Z0-9-]{2,30}$/.test(normalized) ? normalized : null
+}
+
 function bool(value: unknown, fallback = false): boolean {
   if (typeof value === 'boolean') return value
   if (typeof value === 'string') return ['true', '1', 'yes', 'on'].includes(value.toLowerCase())
@@ -488,9 +499,13 @@ async function deleteStaff(client: ReturnType<typeof createClient>, payload: Jso
 async function lookupCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord) {
   const id = txt(payload.directory_customer_id)
   const phone = txt(payload.customer_phone)
-  const code = txt(payload.customer_code)
+  const code = normalizeGcCode(payload.customer_code)
   if (id) { const { data, error } = await client.from('customer_directory').select('id,name,code,phone').eq('id', id).maybeSingle(); if (error) throw error; return data ?? null }
-  if (code) { const { data, error } = await client.from('customer_directory').select('id,name,code,phone').eq('code', code).maybeSingle(); if (error) throw error; if (data) return data }
+  if (code) {
+    const { data, error } = await client.from('customer_directory').select('id,name,code,phone').ilike('code', code).maybeSingle()
+    if (error) throw error
+    if (data) return data
+  }
   if (phone) { const { data, error } = await client.from('customer_directory').select('id,name,code,phone').or(`phone.eq.${phone},phone2.eq.${phone}`).maybeSingle(); if (error) throw error; return data ?? null }
   return null
 }
@@ -529,7 +544,7 @@ Deno.serve(async (req) => {
     if (req.method === 'GET') {
       const kind = normalizeKind(url.searchParams.get('kind'))
       if (kind === 'receipt' && canReadOperations) return json(await listReceipts(serviceClient), {}, req)
-      if (kind === 'customer_match' && canReadOperations) { const code = txt(url.searchParams.get('code')); if (!code) return json({ customer: null }, {}, req); return json({ customer: await lookupCustomer(serviceClient, { customer_code: code }) }, {}, req) }
+      if (kind === 'customer_match' && canReadOperations) { const code = normalizeGcCode(url.searchParams.get('code')); if (!code) return json({ customer: null, error: 'Invalid GC code' }, { status: 400 }, req); return json({ customer: await lookupCustomer(serviceClient, { customer_code: code }), normalized_code: code }, {}, req) }
       if (kind === 'task' && canReadOperations) return json(await listTasks(serviceClient, { id: staffRow.id, role: String(staffRow.role || ''), branch: staffRow.branch }), {}, req)
       if (kind === 'finance' && canRead) return json(await listFinance(serviceClient), {}, req)
       if (kind === 'pricing' && canRead) return json(await listPricing(serviceClient), {}, req)
