@@ -9,7 +9,7 @@
 | CSP bridge | allowlist ـی action ـەکانی legacy بۆ ڕێگری لە arbitrary `window` dispatch |
 | Service worker | cache version `gc-v38`؛ 76 asset ـی پشکنراو؛ broken `super-admin-elite` reference چاککرا |
 | Notifications | `notification-dispatch` بە secret، Resend، Meta WhatsApp Cloud API، Twilio و retry-aware outbox |
-| Outbox security | `20260818090000_notification_dispatch_hardening.sql`؛ staff تەنها `in_app` claim دەکات |
+| Outbox security | `20260817222344_notification_dispatch_hardening.sql`؛ staff تەنها `in_app` claim دەکات |
 | Health | advanced workflow، document vault و private storage checks زیادکران |
 | Documents | JWT ownership/staff check و one-hour signed URL refresh بە `document-access` |
 | QA | production validation، full Edge Function compile، asset integrity و browser smoke PASS |
@@ -20,6 +20,6 @@
 
 ## Release order
 
-Backup بگرە؛ migration ـەکانی `20260816090000_production_logistics_control_plane.sql`، `20260817090000_logistics_advanced_workflows.sql` و `20260818090000_notification_dispatch_hardening.sql` لە staging و پاشان production جێبەجێ بکە. Edge Function ـەکانی control plane، document access، notification dispatcher، payment/webhook و health deploy بکە. Scheduler/heartbeat ـێکی server-side و protected بۆ `notification-dispatch` دابین بکە، Cloudflare Pages deploy بکە، `gc-v38` activate بکە و authenticated role-based/provider sandbox E2E تاقی بکەرەوە.
+Backup بگرە؛ migration ـەکانی `20260817165537_production_logistics_control_plane.sql`، `20260817222324_logistics_advanced_workflows.sql` و `20260817222344_notification_dispatch_hardening.sql` لە staging و پاشان production جێبەجێ بکە. Edge Function ـەکانی control plane، document access، notification dispatcher، payment/webhook و health deploy بکە. Scheduler/heartbeat ـێکی server-side و protected بۆ `notification-dispatch` دابین بکە، Cloudflare Pages deploy بکە، `gc-v38` activate بکە و authenticated role-based/provider sandbox E2E تاقی بکەرەوە.
 
 > ZIP ـەکە source ـی deploy-ready ـە؛ بە خۆکارانە بۆ live Supabase deploy ناکرێت و پێویستی بە secrets، scheduler و E2E ـی staging/live هەیە.

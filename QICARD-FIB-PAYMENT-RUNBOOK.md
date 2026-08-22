@@ -34,7 +34,7 @@ PAYMENT_WORKER_SECRET=...
 
 ## Deploy order
 
-یەکەم backup ـی داتابەیس بگرە و migration ـی `20260816120000_qicard_fib_payment_sessions.sql` جێبەجێ بکە. دووەم، ئەم function ـانە deploy بکە: `payment-checkout`، `payment-webhook`، `payment-reconcile` و `system-health`. سێیەم، secret ـەکان دابنێ. چوارەم، URL ـی webhook ـەکان لە panel ـی Qicard و FIB ڕێکبخە و پشکنە کە بە HTTPS و accessible ـن. پێنجەم، Cloudflare Pages ـی frontend deploy بکە و sandbox transaction ـی هەر دوو provider جێبەجێ بکە.
+یەکەم backup ـی داتابەیس بگرە و migration ـی `20260817222119_qicard_fib_payment_sessions.sql` جێبەجێ بکە. دووەم، ئەم function ـانە deploy بکە: `payment-checkout`، `payment-webhook`، `payment-reconcile` و `system-health`. سێیەم، secret ـەکان دابنێ. چوارەم، URL ـی webhook ـەکان لە panel ـی Qicard و FIB ڕێکبخە و پشکنە کە بە HTTPS و accessible ـن. پێنجەم، Cloudflare Pages ـی frontend deploy بکە و sandbox transaction ـی هەر دوو provider جێبەجێ بکە.
 
 ## Security و reconciliation
 

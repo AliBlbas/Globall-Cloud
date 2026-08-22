@@ -6,7 +6,7 @@
 
 Middleware ـی Cloudflare ئێستا admin-only assets تەنها لە admin surfaces ـەکان inject دەکات، duplicate injection ڕێگری لێکراوە و version ـی یەکگرتوو `20260816-4` بەکاردێت. CSP bridge بە allowlist ـی action ـە پشکنراوەکان سنووردار کراوە. Service worker بۆ `gc-v38` نوێکرایەوە و هەموو 76 asset ـی تێدا بە filesystem پشکنراون؛ broken `super-admin-elite` reference چاککراوە.
 
-Notification workflow ـی server-only بە `notification-dispatch` زیادکراوە. Worker بە `NOTIFICATION_WORKER_SECRET` دەچێت، outbox row ـەکان claim و retry دەکات، in-app بە idempotency دەنێرێت، و provider ـەکانی Resend، Meta WhatsApp Cloud API و Twilio پشتیوانی دەکات. Staff control plane بە migration ـی `20260818090000_notification_dispatch_hardening.sql` تەنها in-app rows claim دەکات، بۆ ئەوەی external notification بە اشتباه لە staff UI ـەوە نەبێت.
+Notification workflow ـی server-only بە `notification-dispatch` زیادکراوە. Worker بە `NOTIFICATION_WORKER_SECRET` دەچێت، outbox row ـەکان claim و retry دەکات، in-app بە idempotency دەنێرێت، و provider ـەکانی Resend، Meta WhatsApp Cloud API و Twilio پشتیوانی دەکات. Staff control plane بە migration ـی `20260817222344_notification_dispatch_hardening.sql` تەنها in-app rows claim دەکات، بۆ ئەوەی external notification بە اشتباه لە staff UI ـەوە نەبێت.
 
 Health endpoint ـی `system-health` ئێستا advanced workflows، document vault و private storage bucket ـیش پشکنین دەکات. Document access بە JWT ownership/staff check signed URL ـی نوێی یەک کاتژمێر دروست دەکات.
 
@@ -16,10 +16,10 @@ Health endpoint ـی `system-health` ئێستا advanced workflows، document va
 
 ## Logistics and notification contract review
 
-پاش release ـی v5، audit ـێکی تایبەت بۆ logistics و Notifications کرا. Migration ـی `20260818130000_logistics_notifications_contract_hardening.sql` event key، external fan-out، stale worker recovery، RLS ـی channel، ETA exception hardening و schema-consistent legacy surfaces زیاد دەکات. `notification-dispatch` تەنها external channels claim دەکات و staff control-plane تەنها `in_app` rows بەڕێوەدەبات. Browser smoke و regression QA دووبارە سەرکەوتووانە تەواو بوون.
+پاش release ـی v5، audit ـێکی تایبەت بۆ logistics و Notifications کرا. Migration ـی `20260817222449_logistics_notifications_contract_hardening.sql` event key، external fan-out، stale worker recovery، RLS ـی channel، ETA exception hardening و schema-consistent legacy surfaces زیاد دەکات. `notification-dispatch` تەنها external channels claim دەکات و staff control-plane تەنها `in_app` rows بەڕێوەدەبات. Browser smoke و regression QA دووبارە سەرکەوتووانە تەواو بوون.
 
 ## Deployment gate
 
-پێش deploy backup بگرە، migration ـەکانی `20260816090000_production_logistics_control_plane.sql`، `20260817090000_logistics_advanced_workflows.sql`، `20260818090000_notification_dispatch_hardening.sql` و `20260818130000_logistics_notifications_contract_hardening.sql` لە staging replay بکە، Edge Function ـەکان deploy بکە، private bucket و server-only secrets دابین بکە، scheduler/heartbeat ـی protected بۆ notification dispatcher دابین بکە، پاشان Cloudflare Pages deploy و `system-health` و role-based/provider sandbox E2E test جێبەجێ بکە.
+پێش deploy backup بگرە، migration ـەکانی `20260817165537_production_logistics_control_plane.sql`، `20260817222324_logistics_advanced_workflows.sql`، `20260817222344_notification_dispatch_hardening.sql` و `20260817222449_logistics_notifications_contract_hardening.sql` لە staging replay بکە، Edge Function ـەکان deploy بکە، private bucket و server-only secrets دابین بکە، scheduler/heartbeat ـی protected بۆ notification dispatcher دابین بکە، پاشان Cloudflare Pages deploy و `system-health` و role-based/provider sandbox E2E test جێبەجێ بکە.
 
 > ئەم ZIP ـە source ـی production ـە؛ بە خۆکارانە بۆ live Supabase deploy ناکرێت و هیچ provider secret ـێکی تێدا نییە.

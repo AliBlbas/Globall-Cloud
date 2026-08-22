@@ -20,6 +20,6 @@
 
 ## Deploy order
 
-سەرەتا backup بگرە، migration ـەکانی `20260816090000_production_logistics_control_plane.sql` و `20260817090000_logistics_advanced_workflows.sql` لە staging تاقی بکەرەوە و پاشان لە production جێبەجێیان بکە. دواتر `logistics-control-plane`، `document-access`، `integration-webhook` و function ـە پەیوەندیدارەکانی payment deploy بکە، bucket ـی private و server-only secrets دابین بکە، Cloudflare Pages deploy بکە، service worker ـی `gc-v37` activate بکە و E2E test بە staff role ـە جیاوازەکان و customer account جێبەجێ بکە.
+سەرەتا backup بگرە، migration ـەکانی `20260817165537_production_logistics_control_plane.sql` و `20260817222324_logistics_advanced_workflows.sql` لە staging تاقی بکەرەوە و پاشان لە production جێبەجێیان بکە. دواتر `logistics-control-plane`، `document-access`، `integration-webhook` و function ـە پەیوەندیدارەکانی payment deploy بکە، bucket ـی private و server-only secrets دابین بکە، Cloudflare Pages deploy بکە، service worker ـی `gc-v37` activate بکە و E2E test بە staff role ـە جیاوازەکان و customer account جێبەجێ بکە.
 
 > ئەم ZIP ـە migration یان function بە خۆکارانە بۆ live Supabase جێبەجێ ناکات. Deploy ـی production پێویستی backup، staging verification، server secrets و provider sandbox test هەیە.

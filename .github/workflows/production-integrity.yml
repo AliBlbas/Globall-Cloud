@@ -136,11 +136,11 @@ jobs:
             supabase/functions/system-health/index.ts \
             supabase/functions/_shared/payment-providers.ts \
             payment-checkout.html payment-checkout.css payment-checkout.js payment-gateway.js \
-            supabase/migrations/20260816090000_production_logistics_control_plane.sql \
-            supabase/migrations/20260817090000_logistics_advanced_workflows.sql \
-            supabase/migrations/20260818090000_notification_dispatch_hardening.sql \
-            supabase/migrations/20260818130000_logistics_notifications_contract_hardening.sql \
-            supabase/migrations/20260816120000_qicard_fib_payment_sessions.sql
+            supabase/migrations/20260817165537_production_logistics_control_plane.sql \
+            supabase/migrations/20260817222324_logistics_advanced_workflows.sql \
+            supabase/migrations/20260817222344_notification_dispatch_hardening.sql \
+            supabase/migrations/20260817222449_logistics_notifications_contract_hardening.sql \
+            supabase/migrations/20260817222119_qicard_fib_payment_sessions.sql
           do
             test -f "$file"
           done

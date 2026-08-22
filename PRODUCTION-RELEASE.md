@@ -10,7 +10,7 @@
 
 | قۆناغ | کار | دڵنیابوون |
 |---|---|---|
-| ١ | `20260816090000_production_logistics_control_plane.sql`، `20260817090000_logistics_advanced_workflows.sql`، `20260818090000_notification_dispatch_hardening.sql` و `20260818130000_logistics_notifications_contract_hardening.sql` لە Supabase production جێبەجێ بکە | هەموو table، view، policy و RPC ـەکان بەبێ error دروست بن؛ claim ـی notification channel-safe بێت |
+| ١ | `20260817165537_production_logistics_control_plane.sql`، `20260817222324_logistics_advanced_workflows.sql`، `20260817222344_notification_dispatch_hardening.sql` و `20260817222449_logistics_notifications_contract_hardening.sql` لە Supabase production جێبەجێ بکە | هەموو table، view، policy و RPC ـەکان بەبێ error دروست بن؛ claim ـی notification channel-safe بێت |
 | ٢ | Edge Function ـەکانی `logistics-control-plane`، `document-access`، `notification-dispatch`، `integration-webhook` و `system-health` deploy بکە | action ـەکانی `approve_quote`، `record_warehouse_movement`، `upload_document` و `get_report` لە logs ـدا بەبێ error بن؛ document-access signed URL نوێ بکاتەوە و notification-dispatch retry ـی دروست هەبێت |
 | ٣ | bucket ـی private ـی `shipment-documents` و server-only secret ـەکان دابین بکە | `NOTIFICATION_WORKER_SECRET`، Resend/WhatsApp/Twilio credentials و payment secrets تەنها لە Edge Function secret store بن؛ هیچ secret ـێک لە browser bundle نەبێت |
 | ٤ | ناوەڕۆکی `Globall-Cloud-main` بۆ Cloudflare Pages deploy بکە | `control-plane.html`، `customer-portal.html` و asset ـە versioned ـەکان 200 بن |

@@ -11,7 +11,7 @@
 | Severity | Finding | Correction |
 |---|---|---|
 | High | Service worker دوو asset ـی هەڵەی `/superadmin-elite.css/js` هەبوو، بەڵام ناوی فایلە ڕاستەقینەکە `super-admin-elite` بوو. | ناوی reference چاککرا و asset-integrity gate زیادکرا. |
-| High | Staff `process_outbox` بە RPC ـی گشتی claim دەکرد و دەتوانی external channel ـەکانیش بگرێت، پاشان بە هەڵە وەک provider not configured retry بکات. | Migration ـی `20260818090000_notification_dispatch_hardening.sql` و `claim_notification_outbox_channel` زیادکرا؛ staff UI تەنها `in_app` claim دەکات. |
+| High | Staff `process_outbox` بە RPC ـی گشتی claim دەکرد و دەتوانی external channel ـەکانیش بگرێت، پاشان بە هەڵە وەک provider not configured retry بکات. | Migration ـی `20260817222344_notification_dispatch_hardening.sql` و `claim_notification_outbox_channel` زیادکرا؛ staff UI تەنها `in_app` claim دەکات. |
 | High | CSP bridge هەر function ـێکی `window` ـی ڕێپێدەدا ئەگەر لە `data-gc-on*` ـدا بانگ بکرێت. | allowlist ـی action ـە پشکنراوەکان زیادکرا و dynamic dispatch سنووردار کرا. |
 | Medium | Middleware ـەکە admin enhancement ـەکانی بە شێوەی گشتی inject دەکرد و version ـە stale ـەکانی هەبوو. | Middleware بازنووس کرا بە asset injection ـی idempotent و admin-surface scoped؛ version ـی `20260816-4`. |
 | Medium | Notification pipeline بۆ email/WhatsApp/SMS adapter ـی کارا نەبوو. | `notification-dispatch` server-only زیادکرا بە Resend، Meta WhatsApp Cloud API، Twilio و in-app idempotency/retry. |

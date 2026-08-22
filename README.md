@@ -55,7 +55,7 @@ The notification pipeline uses `notification-dispatch`, a server-only worker pro
 
 ## v3 advanced logistics workflows
 
-The v3 migration `20260817090000_logistics_advanced_workflows.sql` adds multi-leg routing (`shipment_route_legs`), a warehouse chain-of-custody ledger (`warehouse_movements`), physical consolidation manifests, quote approval and customer acceptance RPCs, standardized dimensional-weight calculation, document-vault metadata with SHA-256 integrity, private `shipment-documents` storage, and server-side reporting. Quote changes, warehouse scans, route-leg updates, and document registration are actor-bound to `auth.uid()` and audited through `staff_activity_log`.
+The v3 migration `20260817222324_logistics_advanced_workflows.sql` adds multi-leg routing (`shipment_route_legs`), a warehouse chain-of-custody ledger (`warehouse_movements`), physical consolidation manifests, quote approval and customer acceptance RPCs, standardized dimensional-weight calculation, document-vault metadata with SHA-256 integrity, private `shipment-documents` storage, and server-side reporting. Quote changes, warehouse scans, route-leg updates, and document registration are actor-bound to `auth.uid()` and audited through `staff_activity_log`.
 
 The staff control plane now exposes `quotes`, `documents`, `movements`, and `route_legs` list views, together with `approve_quote`, `record_warehouse_movement`, `upsert_route_leg`, `upload_document`, and `get_report` actions. The customer portal supports a richer quote submission form, quote acceptance, document download links, invoice balances, and payment history. The browser never receives a service-role key or provider credential.
 

@@ -26,7 +26,7 @@
 
 | فایل | جۆری گۆڕانکاری |
 |---|---|
-| `supabase/migrations/20260818130000_logistics_notifications_contract_hardening.sql` | event key، notification fan-out، external claim، stale recovery، RLS، preferences/opt-in، ETA hardening و transition/quote RPC replacement |
+| `supabase/migrations/20260817222449_logistics_notifications_contract_hardening.sql` | event key، notification fan-out، external claim، stale recovery، RLS، preferences/opt-in، ETA hardening و transition/quote RPC replacement |
 | `supabase/functions/notification-dispatch/index.ts` | external-only claim، provider/ack separation، attempts output و email idempotency |
 | `operations-exception-engine.js` | notification/document owner filter و schema field alignment |
 | `gc-csp-scripts/logistics-os-inline-1.js` | publishable key، owner filter، quote contract، safe escaping و guest boundary |

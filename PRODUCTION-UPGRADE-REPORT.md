@@ -29,7 +29,7 @@
 
 ## پەیکەری پەکەج
 
-وەشانی source ـی چاککراو لە root ـی ئەم پەکیجەیە. migration ـە سەرەکییەکان `20260816090000_production_logistics_control_plane.sql`، `20260817090000_logistics_advanced_workflows.sql` و `20260818090000_notification_dispatch_hardening.sql` ـن. API ـە گرنگەکان لە `logistics-control-plane`، `document-access`، `notification-dispatch`، `integration-webhook` و `system-health` ـدان.
+وەشانی source ـی چاککراو لە root ـی ئەم پەکیجەیە. migration ـە سەرەکییەکان `20260817165537_production_logistics_control_plane.sql`، `20260817222324_logistics_advanced_workflows.sql` و `20260817222344_notification_dispatch_hardening.sql` ـن. API ـە گرنگەکان لە `logistics-control-plane`، `document-access`، `notification-dispatch`، `integration-webhook` و `system-health` ـدان.
 
 ## کەلێنەکانی پێویستی deploy ـی ڕاستەقینە
 
