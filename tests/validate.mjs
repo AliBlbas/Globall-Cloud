@@ -134,6 +134,21 @@ for (const [label, pattern] of workflowGuards) {
 }
 if (failures === beforeWorkflow) ok(`${workflowGuards.length} core workflow guards OK`);
 
+// 7. Role-surface accessibility guards
+console.log('Role-surface accessibility guards');
+const driverSurface = readFileSync(join(ROOT, 'driver-workspace.html'), 'utf8');
+const surfaceGuards = [
+  ['driver status live region', /id="msg"[^>]*role="status"[^>]*aria-live="polite"/],
+  ['POD status live region', /id="podMsg"[^>]*role="status"[^>]*aria-live="polite"/],
+  ['receiver name required', /id="receiver"[^>]*required/],
+  ['driver mobile focus styles', /button:focus-visible,input:focus-visible,textarea:focus-visible/],
+];
+const beforeSurface = failures;
+for (const [label, pattern] of surfaceGuards) {
+  if (!pattern.test(driverSurface)) fail(`missing role-surface guard: ${label}`);
+}
+if (failures === beforeSurface) ok(`${surfaceGuards.length} role-surface guards OK`);
+
 console.log('');
 if (failures > 0) {
   console.error(`${failures} check(s) failed.`);
