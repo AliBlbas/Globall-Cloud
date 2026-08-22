@@ -128,3 +128,12 @@
 - [x] Add air and sea calculator controls with transparent calculation details
 - [x] Validate weight math, boundary cases, permissions, currency, accessibility, and production integrity
 - [x] Publish the volumetric-weight feature and document the billing rule
+- [ ] Audit warehouse photo intake, customer-code lookup, storage, and existing receipt authorization
+- [ ] Define barcode/OCR extraction, confidence thresholds, privacy, and manual-review rules
+- [ ] Implement client barcode scanning, server OCR extraction, customer matching, and audit events
+- [ ] Build the Warehouse OS scan-and-review interface with camera and fallback flows
+- [ ] Validate recognition accuracy safeguards, customer isolation, mobile camera behavior, and production integrity
+- [ ] Publish the package recognition workflow and document operational review rules
+- [x] Add Warehouse OS camera barcode detection and GC-code extraction with customer confirmation fallback
+- [x] Validate barcode recognition, customer isolation, mobile camera behavior, and production integrity
+- [ ] Connect a production OCR/vision provider to read printed GC-* text when no barcode is present
