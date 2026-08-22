@@ -40,7 +40,7 @@
     .eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);font-weight:900}
     .title{font-size:22px;font-weight:900;line-height:1.15;margin-top:3px}
     .subtitle{color:var(--muted);font-size:14px;margin-top:4px}
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.nav-toggle{display:none} .drawer-close{display:none} .drawer-backdrop{display:none}
     .btn{border:1px solid transparent;border-radius:999px;padding:12px 16px;cursor:pointer;font-weight:800;background:transparent;transition:.2s;min-height:46px}
     .btn:hover{transform:translateY(-1px)} .btn:active{transform:translateY(0) scale(.99)}
     .btn-primary{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#03181d}
@@ -65,7 +65,7 @@
     .chips,.tabs,.toolbar{display:flex;gap:8px;flex-wrap:wrap}
     .chips{margin-top:14px}
     .chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:12px;font-weight:800;color:#d7ebff}
-    .tabs{margin:16px 0 12px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+    .tabs{margin:16px 0 12px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none} .tab{transition:transform .2s ease,background .2s ease,border-color .2s ease}
     .tabs::-webkit-scrollbar{display:none}
     .tab{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.02);cursor:pointer;font-weight:800;color:var(--muted);white-space:nowrap}
     .tab.active{background:var(--accent);border-color:transparent;color:#03181d}
@@ -95,7 +95,7 @@
     .auth-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:18px}
     .muted-box{padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
     @media (max-width: 1080px){.hero-grid,.layout{grid-template-columns:1fr}}
-    @media (max-width: 640px){body{padding:12px}.hero,.panel{padding:16px}.title{font-size:19px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.quote-dimensions{grid-template-columns:1fr 1fr}.search{min-width:100%;max-width:100%}.top-actions{width:100%}.top-actions .btn{flex:1}}
+    @media (max-width: 640px){body{padding:12px}.shell{gap:12px}.topbar{align-items:center;gap:10px}.brand{width:100%;align-items:flex-start}.mark{width:46px;height:46px;border-radius:15px}.eyebrow{font-size:9px;letter-spacing:1.5px}.title{font-size:17px;line-height:1.35}.subtitle{font-size:11px}.hero,.panel{padding:16px;border-radius:22px}.hero{padding:12px}.hero-grid{gap:12px}.section-title h2{font-size:18px}.section-title p{font-size:12px}.stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.stat{padding:13px;border-radius:15px}.stat b{font-size:23px}.stat span{font-size:11px}.quote-dimensions{grid-template-columns:1fr 1fr}.search{min-width:100%;max-width:100%}.top-actions{width:auto;margin-inline-start:auto}.top-actions .btn{flex:0 0 auto;min-height:42px;padding:9px 12px;font-size:11px}.nav-toggle{display:grid;place-items:center;width:44px;height:42px;padding:0;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.04);cursor:pointer;font-size:20px}.tabs{position:fixed;inset-block:0;inset-inline-end:0;z-index:60;width:min(86vw,340px);margin:0;padding:76px 18px 22px;overflow-y:auto;display:flex;flex-direction:column;align-items:stretch;gap:9px;background:linear-gradient(180deg,#0d2a49,#061428 72%);border-inline-start:1px solid rgba(79,227,240,.25);box-shadow:-24px 0 70px rgba(0,0,0,.42);transform:translateX(110%);transition:transform .24s cubic-bezier(.23,1,.32,1);visibility:hidden}.tabs.drawer-open{transform:translateX(0);visibility:visible}.tabs .tab{width:100%;text-align:start;border-radius:14px;padding:13px 14px;font-size:13px}.drawer-close{display:block;position:absolute;inset-inline-end:16px;top:18px;width:40px;height:40px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.04);color:var(--text);cursor:pointer;font-size:20px}.drawer-backdrop{display:block;position:fixed;inset:0;z-index:55;background:rgba(1,7,15,.62);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .2s ease}.drawer-backdrop.open{opacity:1;pointer-events:auto}.chips{gap:6px}.chip{font-size:10px;padding:7px 9px}.layout{gap:12px}.list-head{align-items:stretch}.list-head .search{order:2}.table-wrap{border-radius:15px}body.drawer-locked{overflow:hidden}}
   </style>
 <script src="/gc-csp-bridge.js?v=20260816-1" defer data-gc-csp-bridge="1"></script></head>
 <body>
@@ -110,7 +110,7 @@
         </div>
       </div>
       <div class="toolbar top-actions">
-        <button class="btn btn-outline" id="refreshBtn">Refresh</button>
+        <button class="nav-toggle" id="navToggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button><button class="btn btn-outline" id="refreshBtn">Refresh</button>
         <button class="btn btn-danger hidden" id="logoutBtn">Sign out</button>
       </div>
     </header>
@@ -135,7 +135,7 @@
             <span class="chip">Activity logs</span>
             <span class="chip">Invite / reset flows</span>
           </div>
-          <div class="tabs">
+          <div class="drawer-backdrop" id="drawerBackdrop"></div><div class="tabs" id="consoleTabs"><button class="drawer-close" id="drawerClose" type="button" aria-label="Close navigation">×</button>
             <button class="tab active" data-tab="dashboard">Dashboard</button>
             <button class="tab" data-tab="customers">Customers</button>
             <button class="tab" data-tab="staff">Staff</button>

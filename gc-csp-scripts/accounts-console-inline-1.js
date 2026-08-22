@@ -231,7 +231,11 @@ $('staffLoginForm').addEventListener('submit', async (e) => {
 $('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); await syncSessionUI(); });
 $('refreshBtn').addEventListener('click', refreshAll);
 $('searchBox').addEventListener('input', renderList);
-document.querySelectorAll('.tab').forEach((btn) => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
+function setDrawer(open){const tabs=$('consoleTabs');const backdrop=$('drawerBackdrop');const toggle=$('navToggle');if(!tabs)return;tabs.classList.toggle('drawer-open',open);backdrop?.classList.toggle('open',open);document.body.classList.toggle('drawer-locked',open);toggle?.setAttribute('aria-expanded',String(open));toggle?.setAttribute('aria-label',open?'Close navigation':'Open navigation');}
+document.querySelectorAll('.tab').forEach((btn) => btn.addEventListener('click', () => { setActiveTab(btn.dataset.tab); setDrawer(false); }));
+$('navToggle')?.addEventListener('click',()=>setDrawer(!$('consoleTabs')?.classList.contains('drawer-open')));
+$('drawerClose')?.addEventListener('click',()=>setDrawer(false));
+$('drawerBackdrop')?.addEventListener('click',()=>setDrawer(false));
 $('customerClearBtn').addEventListener('click', resetCustomerForm);
 $('staffClearBtn').addEventListener('click', resetStaffForm);
 $('receiptClearBtn').addEventListener('click', resetReceiptForm);
