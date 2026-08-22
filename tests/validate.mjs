@@ -172,6 +172,25 @@ for (const [label, pattern] of providerGuards) {
 }
 if (failures === beforeProviders) ok(`${providerGuards.length} provider guards OK`);
 
+// 9. Reliability and release-safety guards
+console.log('Reliability guards');
+const dispatchSource = readFileSync(join(ROOT, 'supabase', 'functions', 'notification-dispatch', 'index.ts'), 'utf8');
+const readmeSource = readFileSync(join(ROOT, 'README.md'), 'utf8');
+const reliabilityGuards = [
+  ['protected worker secret', /NOTIFICATION_WORKER_SECRET/],
+  ['external outbox claim', /claim_notification_outbox_external/],
+  ['retry-aware completion', /complete_notification_outbox/],
+  ['recovery runbook', /Reliability and recovery runbook/],
+  ['backup guidance', /Supabase backup|point-in-time recovery/],
+  ['secret-manager guidance', /platform secret manager/],
+];
+const beforeReliability = failures;
+for (const [label, pattern] of reliabilityGuards) {
+  const source = label.includes('runbook') || label.includes('backup') || label.includes('secret-manager') ? readmeSource : dispatchSource;
+  if (!pattern.test(source)) fail(`missing reliability guard: ${label}`);
+}
+if (failures === beforeReliability) ok(`${reliabilityGuards.length} reliability guards OK`);
+
 console.log('');
 if (failures > 0) {
   console.error(`${failures} check(s) failed.`);

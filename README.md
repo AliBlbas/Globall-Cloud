@@ -93,3 +93,9 @@ The validation suite now treats the TypeScript parser as mandatory and checks al
 Cloudflare Pages is the production frontend host for this repository. The repository does not require GitHub Pages or a Jekyll build; production deploy status is reported by the Cloudflare Pages check on each `main` commit. GitHub Actions checks such as Production Integrity and CodeQL require the GitHub account to be eligible to run Actions. If GitHub reports that the account is locked due to a billing issue, resolve that account-level issue in GitHub Billing & licensing and rerun the failed workflows; this does not indicate a Cloudflare Pages deployment failure.
 
 After billing is cleared, verify the latest commit with `gh run list --repo AliBlbas/Globall-Cloud --branch main` and confirm the Cloudflare Pages check is successful before treating the release as complete.
+
+## Reliability and recovery runbook
+
+The production release must run the notification-dispatch worker from a protected scheduler or Heartbeat with `NOTIFICATION_WORKER_SECRET`; it must never be exposed as an unauthenticated public job. Payment callbacks and integration events are replay-safe through provider event identifiers and idempotency keys, while outbox deliveries are claimed and completed through retry-aware server-side RPCs.
+
+Before a migration or release, take a Supabase backup or verify the project’s point-in-time recovery window, apply migrations in timestamp order, deploy Edge Functions, run authenticated smoke tests for customer and staff flows, and only then publish the Pages frontend. Recovery should restore the database first, redeploy the matching function commit, and replay only unprocessed outbox or inbox events. Provider credentials, signing keys, and scheduler secrets must be rotated through the platform secret manager rather than committed to this repository.
