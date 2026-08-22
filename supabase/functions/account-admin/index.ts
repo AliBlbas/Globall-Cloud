@@ -1,6 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
-type Kind = 'customer' | 'staff' | 'receipt' | 'log' | 'shipment' | 'task'
+type Kind = 'customer' | 'customer_match' | 'staff' | 'receipt' | 'log' | 'shipment' | 'task'
 type Action = 'list' | 'create' | 'update' | 'archive' | 'delete' | 'claim' | 'complete'
 type JsonRecord = Record<string, unknown>
 
@@ -85,7 +85,7 @@ function bool(value: unknown, fallback = false): boolean {
 
 function normalizeKind(value: unknown): Kind {
   const kind = String(value || 'customer').toLowerCase()
-  if (kind === 'staff' || kind === 'receipt' || kind === 'log' || kind === 'shipment' || kind === 'task') return kind
+  if (kind === 'customer_match' || kind === 'staff' || kind === 'receipt' || kind === 'log' || kind === 'shipment' || kind === 'task') return kind
   return 'customer'
 }
 
@@ -131,9 +131,10 @@ async function getActor(req: Request) {
   const role = String(staffRow.role || '')
   const isSuperAdmin = role === 'super_admin'
   const canRead = ['admin', 'super_admin', 'accountant'].includes(role)
+  const canReadOperations = ['admin', 'super_admin', 'accountant', 'warehouse', 'operations'].includes(role)
   const canWrite = ['admin', 'super_admin'].includes(role)
 
-  return { serviceClient, staffRow, role, isSuperAdmin, canRead, canWrite }
+  return { serviceClient, staffRow, role, isSuperAdmin, canRead, canReadOperations, canWrite }
 }
 
 async function logActivity(client: ReturnType<typeof createClient>, staffId: string, staffName: string | null, action: string, targetId: string | null, details: JsonRecord | null = null) {
@@ -499,16 +500,17 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(req) })
   try {
     const actor = await getActor(req)
-    const { serviceClient, staffRow, canRead, canWrite, isSuperAdmin } = actor
+    const { serviceClient, staffRow, canRead, canReadOperations, canWrite, isSuperAdmin } = actor
     const url = new URL(req.url)
     if (req.method === 'GET') {
-      if (!canRead) return json({ error: 'Forbidden' }, { status: 403 }, req)
       const kind = normalizeKind(url.searchParams.get('kind'))
+      if (kind === 'receipt' && canReadOperations) return json(await listReceipts(serviceClient), {}, req)
+      if (kind === 'customer_match' && canReadOperations) { const code = txt(url.searchParams.get('code')); if (!code) return json({ customer: null }, {}, req); return json({ customer: await lookupCustomer(serviceClient, { customer_code: code }) }, {}, req) }
+      if (kind === 'task' && canReadOperations) return json(await listTasks(serviceClient, { id: staffRow.id, role: String(staffRow.role || ''), branch: staffRow.branch }), {}, req)
+      if (!canRead) return json({ error: 'Forbidden' }, { status: 403 }, req)
       if (kind === 'staff') return json(await listStaff(serviceClient), {}, req)
-      if (kind === 'receipt') return json(await listReceipts(serviceClient), {}, req)
       if (kind === 'log') return json(await listLogs(serviceClient), {}, req)
       if (kind === 'shipment') return json(await listShipments(serviceClient), {}, req)
-      if (kind === 'task') return json(await listTasks(serviceClient, { id: staffRow.id, role: String(staffRow.role || ''), branch: staffRow.branch }), {}, req)
       return json(await listCustomers(serviceClient), {}, req)
     }
     if (req.method !== 'POST') return json({ error: 'Method not allowed' }, { status: 405 }, req)
@@ -530,8 +532,12 @@ Deno.serve(async (req) => {
     const kind = normalizeKind(body.kind)
     const action = normalizeAction(body.action)
     const data = body.data && typeof body.data === 'object' ? (body.data as JsonRecord) : body
+    if (kind === 'receipt' && action === 'create') {
+      if (!canReadOperations) return json({ error: 'Forbidden' }, { status: 403 }, req)
+      return json(await createReceipt(serviceClient, data, files, { id: staffRow.id, name: staffRow.full_name }), {}, req)
+    }
     if (kind === 'task') {
-      if (!canRead) return json({ error: 'Forbidden' }, { status: 403 }, req)
+      if (!canRead && !canReadOperations) return json({ error: 'Forbidden' }, { status: 403 }, req)
       const taskActor = { id: staffRow.id, name: staffRow.full_name, role: String(staffRow.role || ''), branch: staffRow.branch }
       if (action === 'create') return json(await createTask(serviceClient, data, taskActor), {}, req)
       if (action === 'update' || action === 'claim' || action === 'complete') return json(await updateTask(serviceClient, data, taskActor, action), {}, req)
@@ -549,7 +555,6 @@ Deno.serve(async (req) => {
       if (action === 'update') return json(await updateStaff(serviceClient, data, { id: staffRow.id, name: staffRow.full_name, isSuperAdmin }), {}, req)
       if (action === 'archive' || action === 'delete') return json(await deleteStaff(serviceClient, data, { id: staffRow.id, name: staffRow.full_name, isSuperAdmin }), {}, req)
     }
-    if (kind === 'receipt' && action === 'create') return json(await createReceipt(serviceClient, data, files, { id: staffRow.id, name: staffRow.full_name }), {}, req)
     return json({ error: 'Unsupported action' }, { status: 400 }, req)
   } catch (error) {
     if (error instanceof Response) return error

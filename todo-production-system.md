@@ -91,3 +91,10 @@
 - [x] Validate task workflows, security, accessibility, and production integrity
 - [x] Publish the Task Management upgrade and document the operating model
 - [x] Implement the approved production Task Management scope: schema/RLS, authenticated API, Operations Queue, filters, SLA indicators, quick actions, audit logging, and responsive RTL UI
+- [x] Audit warehouse receipt creation, photo storage, customer-code fields, and role boundaries
+- [x] Define OCR code extraction, confidence thresholds, location capture, and manual confirmation rules
+- [x] Implement secure photo storage and GC-code to customer matching with manual confirmation gate
+- [x] Link confirmed intake photos and location to the warehouse receipt/customer record
+- [x] Build mobile camera intake, review, confirmation, and receipt history surfaces
+- [x] Validate photo access, customer isolation, input-safety, mobile UX, and production integrity
+- [x] Publish the photo-intake workflow and document warehouse operations; automatic image OCR provider remains pending
