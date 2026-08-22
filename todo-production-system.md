@@ -75,3 +75,7 @@
 - [x] Add Safari-safe visible-content fallback while preserving supported-browser motion
 - [x] Validate Safari compatibility, reduced-motion behavior, and production integrity
 - [x] Publish the Safari compatibility fix and document the result
+- [x] Audit the mobile announcement bar height and chip wrapping
+- [x] Compact the truck message and support-hours chips while preserving readable RTL text
+- [x] Validate the compact header layout and production integrity
+- [x] Publish the compact announcement-bar refinement

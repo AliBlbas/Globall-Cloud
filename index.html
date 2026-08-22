@@ -941,6 +941,21 @@ body{background-color:var(--ink); background-image:radial-gradient(ellipse 700px
   .reveal.in-view .service-card,.reveal.in-view .hub-card,.reveal.in-view .warehouse-card,.reveal.in-view .ops-card,.reveal.in-view .testimonial-card{animation:none!important; opacity:1!important; transform:none!important;}
   .route-dot,.route-pulse,.seal-badge{animation:none!important;}
 }
+/* ---------- compact mobile announcement bar ---------- */
+@media(max-width:760px){
+  .top-announcement-inner{padding:5px 12px; gap:5px; flex-wrap:nowrap; min-height:34px; font-size:9.5px; line-height:1.2; overflow:hidden;}
+  .announcement-pill,.announcement-chip{padding:5px 8px; gap:4px; min-height:25px; box-shadow:0 5px 14px rgba(0,0,0,.1); white-space:nowrap;}
+  .announcement-pill{min-width:0; flex:1 1 auto; justify-content:center; overflow:hidden;}
+  .announcement-pill > span{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .announcement-chip{flex:0 0 auto;}
+  .announcement-pill svg,.announcement-chip svg{width:14px; height:14px; flex:0 0 auto;}
+}
+@media(max-width:390px){
+  .top-announcement-inner{padding:4px 9px; gap:4px; min-height:31px; font-size:8.5px;}
+  .announcement-pill,.announcement-chip{padding:4px 6px; min-height:23px;}
+  .announcement-chip{display:inline-flex;}
+  .announcement-pill svg,.announcement-chip svg{width:13px; height:13px;}
+}
 </style>
 <script src="/gc-csp-bridge.js?v=20260816-1" defer data-gc-csp-bridge="1"></script></head>
 <body>
