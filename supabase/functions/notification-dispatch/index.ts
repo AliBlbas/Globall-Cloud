@@ -21,36 +21,38 @@ const serviceClient = () => {
 }
 const payloadText = (item: OutboxItem) => String(item.payload?.body || item.payload?.text || item.payload?.note || 'Your Globall Cloud shipment has a new update.').slice(0, 4000)
 const payloadTitle = (item: OutboxItem) => String(item.payload?.title || item.payload?.subject || 'Globall Cloud shipment update').slice(0, 180)
+const base64Url = (value: string) => btoa(value).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
+
+const gmailAccessToken = async () => {
+  const clientId = Deno.env.get('GOOGLE_CLIENT_ID')
+  const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET')
+  const refreshToken = Deno.env.get('GOOGLE_REFRESH_TOKEN')
+  if (!clientId || !clientSecret || !refreshToken) throw new Error('Gmail provider is not configured')
+  const tokenResponse = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ client_id: clientId, client_secret: clientSecret, refresh_token: refreshToken, grant_type: 'refresh_token' }) })
+  const tokenBody = await tokenResponse.json()
+  if (!tokenResponse.ok || !tokenBody.access_token) throw new Error(`Gmail OAuth returned ${tokenResponse.status}`)
+  return String(tokenBody.access_token)
+}
 
 const deliverEmail = async (item: OutboxItem) => {
-  const apiKey = Deno.env.get('RESEND_API_KEY')
-  const from = Deno.env.get('RESEND_FROM_EMAIL')
-  if (!apiKey || !from) throw new Error('Email provider is not configured')
+  const from = Deno.env.get('GOOGLE_SENDER_EMAIL')
+  if (!from) throw new Error('Gmail sender is not configured')
   if (!item.recipient) throw new Error('Email recipient is missing')
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'Idempotency-Key': `globall-cloud-${item.id}` },
-    body: JSON.stringify({
-      from,
-      to: [item.recipient],
-      subject: payloadTitle(item),
-      text: payloadText(item),
-      html: String(item.payload?.html || `<p>${payloadText(item).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] || c))}</p>`),
-    }),
-  })
-  if (!response.ok) throw new Error(`Email provider returned ${response.status}`)
+  const subject = payloadTitle(item)
+  const body = payloadText(item)
+  const mime = [`From: ${from}`, `To: ${item.recipient}`, `Subject: ${subject}`, 'MIME-Version: 1.0', 'Content-Type: text/plain; charset=UTF-8', '', body].join('\\r\\n')
+  const response = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', { method: 'POST', headers: { Authorization: `Bearer ${await gmailAccessToken()}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ raw: base64Url(mime) }) })
+  if (!response.ok) throw new Error(`Gmail provider returned ${response.status}`)
 }
 
 const deliverWhatsApp = async (item: OutboxItem) => {
-  const token = Deno.env.get('WHATSAPP_ACCESS_TOKEN')
-  const phoneNumberId = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID')
+  const token = Deno.env.get('META_ACCESS_TOKEN') || Deno.env.get('WHATSAPP_ACCESS_TOKEN')
+  const phoneNumberId = Deno.env.get('META_PHONE_NUMBER_ID') || Deno.env.get('WHATSAPP_PHONE_NUMBER_ID')
+  const templateName = String(item.payload?.template_name || Deno.env.get('WHATSAPP_TEMPLATE_NAME') || 'globall_notification')
+  const language = String(item.payload?.template_language || Deno.env.get('WHATSAPP_TEMPLATE_LANGUAGE') || 'en_US')
   if (!token || !phoneNumberId) throw new Error('WhatsApp provider is not configured')
   if (!item.recipient) throw new Error('WhatsApp recipient is missing')
-  const response = await fetch(`https://graph.facebook.com/v20.0/${encodeURIComponent(phoneNumberId)}/messages`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messaging_product: 'whatsapp', to: item.recipient, type: 'text', text: { preview_url: false, body: `${payloadTitle(item)}\n\n${payloadText(item)}` } }),
-  })
+  const response = await fetch(`https://graph.facebook.com/v23.0/${encodeURIComponent(phoneNumberId)}/messages`, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'Idempotency-Key': `globall-cloud-${item.id}` }, body: JSON.stringify({ messaging_product: 'whatsapp', to: item.recipient, type: 'template', template: { name: templateName, language: { code: language }, components: [{ type: 'body', parameters: [{ type: 'text', text: payloadTitle(item).slice(0, 1024) }, { type: 'text', text: payloadText(item).slice(0, 1024) }] }] } }) })
   if (!response.ok) throw new Error(`WhatsApp provider returned ${response.status}`)
 }
 
