@@ -47,6 +47,9 @@ verify_jwt = true
 [functions.notification-dispatch]
 verify_jwt = false
 
+[functions.notification-webhook]
+verify_jwt = false
+
 [functions.integration-webhook]
 verify_jwt = false
 
