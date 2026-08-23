@@ -5,7 +5,12 @@ Disallow: /management.html
 Disallow: /accounts-console.html
 Disallow: /staff-os.html
 Disallow: /staff-portal.html
+Disallow: /superadmin.html
 Disallow: /operations-suite.html
+Disallow: /operations-command-center.html
+Disallow: /customer-portal.html
+Disallow: /warehouse-os.html
 Disallow: /tracking-integration.html
+Disallow: /driver-portal.html
 
 Sitemap: https://globall-cloud.pages.dev/sitemap.xml
