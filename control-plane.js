@@ -5,6 +5,7 @@
   const SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
   const FUNCTION_URL = `${SUPABASE_URL}/functions/v1/logistics-control-plane`;
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+  window.gcSupabaseClient = client;
   const $ = (id) => document.getElementById(id);
   const state = { session: null, staff: null, activeView: 'overview', lists: { shipments: [], packages: [], customs: [], consolidations: [], invoices: [], exceptions: [], outbox: [], quotes: [], documents: [], movements: [], route_legs: [], manifests: [] } };
   const text = (value) => String(value ?? '—');
@@ -82,10 +83,10 @@
     state.activeView = view;
     document.querySelectorAll('[data-view]').forEach((button) => button.classList.toggle('active', button.dataset.view === view));
     document.querySelectorAll('.view').forEach((panel) => panel.classList.toggle('hidden', panel.id !== `view-${view}`));
-    const titles = { overview: ['کورتەی عملیات', 'دۆخی زیندووی چین → دوبەی → هەولێر و عێراق.'], shipments: ['بارەکان', 'State version و SLA ـی هەر بار بە ڕوونی.'], packages: ['پەکەج و بارکۆد', 'Traceability لە package ـی تاکەوە تا shipment.'], customs: ['گومرگ', 'Declaration، HS codes و duty.'], consolidations: ['کۆکردنەوەی بار', 'Batch، seal، hub و package count.'], finance: ['دارایی و invoice', 'Invoice، paid total و balance.'], exceptions: ['کێشە و SLA', 'ETA breach و stale tracking.'], quotes: ['نرخی بارەکان', 'Quote lifecycle و approval بە audit trail.'], documents: ['بەڵگەنامەکان', 'Document vault، hash و storage status.'], movements: ['گواستنەوەی کۆگا', 'Chain-of-custody ledger بۆ هەر package و shipment.'], route_legs: ['Route legs', 'Multi-leg ڕێڕەوی چین → دوبەی → هەولێر.'], outbox: ['Notification outbox', 'Queue و retry state.'] };
+    const titles = { overview: ['کورتەی عملیات', 'دۆخی زیندووی چین → دوبەی → هەولێر و عێراق.'], shipments: ['بارەکان', 'State version و SLA ـی هەر بار بە ڕوونی.'], packages: ['پەکەج و بارکۆد', 'Traceability لە package ـی تاکەوە تا shipment.'], customs: ['گومرگ', 'Declaration، HS codes و duty.'], consolidations: ['کۆکردنەوەی بار', 'Batch، seal، hub و package count.'], finance: ['دارایی و invoice', 'Invoice، paid total و balance.'], exceptions: ['کێشە و SLA', 'ETA breach و stale tracking.'], quotes: ['نرخی بارەکان', 'Quote lifecycle و approval بە audit trail.'], documents: ['بەڵگەنامەکان', 'Document vault، hash و storage status.'], movements: ['گواستنەوەی کۆگا', 'Chain-of-custody ledger بۆ هەر package و shipment.'], route_legs: ['Route legs', 'Multi-leg ڕێڕەوی چین → دوبەی → هەولێر.'], outbox: ['Notification outbox', 'Queue و retry state.'], data_hub: ['هەموو خشتەکانی Supabase', 'خوێندنەوەی read-only لەگەڵ publishable client و RLS.'] };
     $('viewTitle').textContent = titles[view]?.[0] || titles.overview[0];
     $('viewSubtitle').textContent = titles[view]?.[1] || titles.overview[1];
-    if (view !== 'overview') { try { await load(view === 'outbox' ? 'outbox' : view); renderAll(); } catch (error) { showNotice(error.message, 'bad'); } }
+    if (view !== 'overview' && view !== 'data_hub') { try { await load(view === 'outbox' ? 'outbox' : view); renderAll(); } catch (error) { showNotice(error.message, 'bad'); } }
   };
 
   const signIn = async (event) => {
