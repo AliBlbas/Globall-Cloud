@@ -4,7 +4,7 @@
  * off public/customer/payment surfaces.
  */
 const HTML_ACCEPT = 'text/html'
-const VERSION = '20260824-1'
+const VERSION = '20260824-4'
 const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`)
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`)
 
@@ -31,8 +31,12 @@ export async function onRequest(context) {
   ]
   for (const [needle, fragment] of headAssets) html = addHeadAsset(html, needle, fragment)
 
-  const adminSurface = /^\/(management|accounts-console|operations-suite|operations-command-center|operations-control|operations-control-v2|staff-os|staff-portal|warehouse-os|superadmin|super-admin-command-center)\.html$/.test(path) || path === '/staff' || path === '/staff/'
-  if (adminSurface) {
+  if (path === '/staff-os.html' || path === '/staff' || path === '/staff/') {
+    html = addHeadAsset(html, 'src="/staff-os-compat.js', `<script src="/staff-os-compat.js?v=${VERSION}" data-gc-staff-compat="1"></script>`)
+  }
+
+  const legacyAdminSurface = /^\/(management|accounts-console|operations-suite|operations-command-center|operations-control|operations-control-v2|staff-portal|warehouse-os|superadmin|super-admin-command-center)\.html$/.test(path)
+  if (legacyAdminSurface) {
     html = addHeadAsset(html, 'href="/admin-console-enhanced.css', `<link rel="stylesheet" href="/admin-console-enhanced.css?v=${VERSION}" data-gc-admin-polish="1">`)
     html = addHeadAsset(html, 'src="/admin-console-enhanced.js', `<script src="/admin-console-enhanced.js?v=${VERSION}" defer data-gc-admin-recovery="1"></script>`)
   }
@@ -43,9 +47,6 @@ export async function onRequest(context) {
   if (path === '/superadmin.html') html = addBodyAsset(html, 'src="/superadmin-staff-actions.js', `<script src="/superadmin-staff-actions.js?v=${VERSION}" defer data-gc-superadmin-staff-actions="1"></script>`)
   if (path === '/operations-control-v2.html') html = addBodyAsset(html, 'src="/operations-events.js', `<script src="/operations-events.js?v=${VERSION}" defer data-gc-operations-events="1"></script>`)
   if (path === '/operations-command-center.html') html = addBodyAsset(html, 'src="/operations-exception-engine.js', `<script src="/operations-exception-engine.js?v=${VERSION}" defer data-gc-exception-engine="1"></script>`)
-  if ((path === '/staff-os.html' || path === '/staff' || path === '/staff/') && !html.includes('gc-superadmin-entry')) {
-    html = addBodyAsset(html, 'gc-superadmin-entry', '<div class="gc-superadmin-entry"><a href="./super-admin-command-center.html">GC · Super Admin</a></div>')
-  }
 
   const headers = new Headers(response.headers)
   headers.delete('content-encoding')
