@@ -91,20 +91,36 @@
       throw new Error('Session ـی دروست نەدۆزرایەوە.');
     }
 
-    const { data, error } = await client
-      .from('staff')
-      .select('id,email,full_name,role,branch,is_active,active')
-      .eq('id', sessionUser.id)
-      .maybeSingle();
+    const { data: sessionData, error: sessionError } = await client.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+    if (sessionError || !accessToken) {
+      throw new Error('Session ـی دروست نەدۆزرایەوە.');
+    }
 
-    if (error) throw error;
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/account-admin?kind=staff`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        apikey: SUPABASE_PUBLISHABLE_KEY,
+        Accept: 'application/json',
+      },
+      cache: 'no-store',
+    });
+    const raw = await response.text();
+    let payload = {};
+    try { payload = raw ? JSON.parse(raw) : {}; } catch { payload = {}; }
+    if (!response.ok) {
+      if (response.status === 401) throw new Error('Session ـی دروست نەدۆزرایەوە.');
+      if (response.status === 403) throw new Error('ئەم بەکارهێنەرە لە staff access ـدا نییە.');
+      throw new Error(payload?.error || `Staff authorization failed (${response.status}).`);
+    }
+
+    const data = (Array.isArray(payload?.items) ? payload.items : [])
+      .find((row) => String(row?.id || '') === String(sessionUser.id));
     if (!data) throw new Error('ئەم بەکارهێنەرە لە staff access ـدا نییە.');
 
-    const active = data.is_active !== false && data.active !== false;
-    if (!active) throw new Error('دەستڕاگەیشتنی ئەم staff ـە ناچالاکە.');
-
-    if (data.email && data.email.trim() && data.email.trim().toLowerCase() !== sessionUser.email.trim().toLowerCase()) {
-      throw new Error('ئیمەیڵی Auth لەگەڵ staff record یەکسان نییە.');
+    if (data.is_active !== true) {
+      throw new Error('دەستڕاگەیشتنی ئەم staff ـە ناچالاکە.');
     }
 
     if (!ALLOWED_ROLES.has(data.role)) {
