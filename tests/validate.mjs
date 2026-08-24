@@ -79,6 +79,7 @@ const required = [
   'supabase/functions/payment-webhook/index.ts',
   'supabase/functions/notification-dispatch/index.ts',
   'supabase/functions/logistics-control-plane/index.ts',
+  'supabase/functions/customer-self/index.ts',
   'supabase/functions/_shared/payment-providers.ts',
 ];
 const beforeReq = failures;
@@ -87,7 +88,23 @@ for (const rel of required) {
 }
 if (failures === beforeReq) ok(`${required.length} files present`);
 
-// 4. Migration filenames follow the Supabase CLI timestamp convention
+// 4. Public form integration guards: public writes must go through the
+// rate-limited, service-role-backed Edge Functions rather than direct tables.
+console.log('Public integration guards');
+const publicIndexSource = readFileSync(join(ROOT, 'gc-csp-scripts', 'index-inline-2.js'), 'utf8');
+const requestBlock = publicIndexSource.match(/async function handleRequestSubmit\(e\)\{[\s\S]*?\n\}\nfunction resetRequestForm/)?.[0] || '';
+const contactBlock = publicIndexSource.match(/async function handleContactSubmit\(e\)\{[\s\S]*?\n\}\n\n\/\* ================= I18N APPLY/)?.[0] || '';
+const publicGuards = [
+  ['quote form uses public-quote function', requestBlock.includes('functions/v1/public-quote')],
+  ['quote form has no direct shipment write', !requestBlock.includes('saveShipment') && !requestBlock.includes("from('shipments')")],
+  ['contact form uses public-message function', contactBlock.includes('functions/v1/public-message')],
+  ['contact form has no direct messages insert', !contactBlock.includes("from('messages').insert")],
+];
+const beforePublic = failures;
+for (const [label, passed] of publicGuards) if (!passed) fail(`missing public integration guard: ${label}`);
+if (failures === beforePublic) ok(`${publicGuards.length} public integration guards OK`);
+
+// 5. Migration filenames follow the Supabase CLI timestamp convention
 console.log('Migration filenames');
 const migDir = join(ROOT, 'supabase', 'migrations');
 const beforeMig = failures;

@@ -183,9 +183,10 @@ ku:{
     type:{air:'گەیاندنی ئاسمانی',sea:'گەیاندنی دەریایی',land:'گەیاندنی وشکانی'},
     weight:'کێش',volume:'قەبارە',items:'ژمارەی کاڵا',total:'کۆی گشتی',paid:'دراوە',due:'ماوە',eta:'خەمڵێنراو:',pendingValue:'دوای پێداچوونەوە'},
   invoice:{downloadBtn:'دابەزاندنی وەسڵ (PDF)',generating:'خەریکی ئامادەکردنە...',title:'وەسڵی گەیاندن',trackingId:'ژمارەی شوێنکەوتن',dateIssued:'بەرواری دەرکردن',billTo:'کڕیار',route:'ڕێگا',serviceType:'جۆری خزمەتگوزاری',statusLabel:'دۆخ',thanks:'سوپاس بۆ باوەڕپێکردنتان بە Globall Cloud',failMsg:'دروستکردنی وەسڵ سەرکەوتوو نەبوو، تکایە دووبارە هەوڵبدەرەوە.'},
-  request:{heading:'داواکردنی نرخ / بارکردنی نوێ',sub:'وردەکاری بارەکەت پڕبکەرەوە، ڕاستەوخۆ ژمارەی شوێنکەوتن وەردەگریت.',
+      request:{heading:'داواکردنی نرخ / بارکردنی نوێ',sub:'وردەکاری بارەکەت پڕبکەرەوە و ژمارەی داواکارییەکەت بۆ پێداچوونەوە وەربگرە.',
+
     name:'ناوی تەواو',phone:'ژمارەی مۆبایل',email:'ئیمەیل (ئارەزوومەندانە)',origin:'لە کوێوە',destination:'بۆ کوێ',type:'جۆری گەیاندن',weight:'کێشی خەمڵێنراو (کیلۆگرام)',notes:'تێبینی زیاتر',
-    submit:'ناردنی داواکاری',sending:'دەنێردرێت...',successTitle:'داواکاریەکەت وەرگیرا 🎉',successBody:'ژمارەی شوێنکەوتنت ئەمەیە، هەڵیبگرە بۆ داهاتوو:',trackNow:'ئێستا شوێنی بکەوە',backHome:'گەڕانەوە بۆ سەرەکی',waConfirm:'پشتڕاستکردنەوە بە واتساپ',waPrefix:'سڵاو، داواکارییەکم ناردووە — ژمارەی شوێنکەوتن:'},
+    submit:'ناردنی داواکاری',sending:'دەنێردرێت...',successTitle:'داواکاریەکەت وەرگیرا 🎉',successBody:'ژمارەی داواکارییەکەت ئەمەیە، هەڵیبگرە بۆ پێداچوونەوەی داهاتوو:',trackNow:'شوێنکەوتنی بار',backHome:'گەڕانەوە بۆ سەرەکی',waConfirm:'پشتڕاستکردنەوە بە واتساپ',waPrefix:'سڵاو، داواکارییەکم ناردووە — ژمارەی داواکاری:'},
   portal:{signInH:'چوونەژوورەوە',signInSub:'ناو و ئیمەیلت بنووسە بۆ بینینی بارەکانت',dashboardSub:'داشبۆردی هەژمارەکەت',name:'ناو',email:'ئیمەیل',phone:'ژمارەی مۆبایل (ئارەزوومەندانە)',continueBtn:'بەردەوامبە',trustNote:'زانیارییەکانت تایبەتن و لەگەڵ کەس هاوبەش ناکرێن',
     hi:'سڵاو',myShipments:'بارەکانم',emptyTitle:'هێشتا هیچ بارێکت نییە',emptyBody:'بارێک بشوێنەوە یان داواکارییەکی نوێ بکە بۆ ئەوەی لێرە دەربکەوێت.',
     qTrack:'شوێنکەوتنی بار',qRequest:'داواکاری نوێ',qEdit:'دەستکاری پرۆفایل',save:'پاشکەوتکردن',cancel:'پاشگەزبوونەوە',signOut:'چوونەدەرەوە'},
@@ -322,9 +323,9 @@ en:{
     type:{air:'Air Freight',sea:'Sea Freight',land:'Land Freight'},
     weight:'Weight',volume:'Volume',items:'Items',total:'Total',paid:'Paid',due:'Due',eta:'Expected:',pendingValue:'To be confirmed'},
   invoice:{downloadBtn:'Download Invoice (PDF)',generating:'Generating...',title:'Shipping Invoice',trackingId:'Tracking ID',dateIssued:'Date Issued',billTo:'Bill To',route:'Route',serviceType:'Service Type',statusLabel:'Status',thanks:'Thank you for trusting Globall Cloud',failMsg:'Invoice generation failed, please try again.'},
-  request:{heading:'Get a Quote / New Shipment',sub:'Fill in your shipment details and get a tracking ID instantly.',
+  request:{heading:'Get a Quote / New Shipment',sub:'Fill in your shipment details and receive a request number for review.',
     name:'Full Name',phone:'Phone Number',email:'Email (optional)',origin:'Origin',destination:'Destination',type:'Shipping Type',weight:'Estimated Weight (kg)',notes:'Additional Notes',
-    submit:'Submit Request',sending:'Sending...',successTitle:'Request received 🎉',successBody:'Your tracking number is — save it for later:',trackNow:'Track It Now',backHome:'Back to Home',waConfirm:'Confirm via WhatsApp',waPrefix:'Hi, I just submitted a request — tracking number:'},
+    submit:'Submit Request',sending:'Sending...',successTitle:'Request received 🎉',successBody:'Your request number is — save it for follow-up:',trackNow:'Track Shipment',backHome:'Back to Home',waConfirm:'Confirm via WhatsApp',waPrefix:'Hi, I just submitted a request — request number:'},
   portal:{signInH:'Sign In',signInSub:'Enter your name and email to see your shipments',dashboardSub:'Your account dashboard',name:'Name',email:'Email',phone:'Phone (optional)',continueBtn:'Continue',trustNote:'Your info stays private and is never shared',
     hi:'Hi',myShipments:'My Shipments',emptyTitle:'No shipments yet',emptyBody:'Track a shipment or submit a new request to see it here.',
     qTrack:'Track Shipment',qRequest:'New Request',qEdit:'Edit Profile',save:'Save',cancel:'Cancel',signOut:'Sign Out'},
@@ -1048,6 +1049,14 @@ async function copyTrackingId(id){
     showToast(currentLang==='ku' ? 'کۆپیکردن سەرکەوتوو نەبوو.' : 'Copy failed.', 'error');
   }
 }
+async function copyRequestId(id){
+  try{
+    await navigator.clipboard.writeText(id);
+    showToast(currentLang==='ku' ? 'ژمارەی داواکاری کۆپی کرا.' : 'Request number copied.', 'success');
+  }catch(e){
+    showToast(currentLang==='ku' ? 'کۆپیکردن سەرکەوتوو نەبوو.' : 'Copy failed.', 'error');
+  }
+}
 async function shipmentCardHTML(s){
   const status = statusOf(s);
   const hasFinance = s.totalAmount !== null && s.totalAmount !== undefined;
@@ -1339,34 +1348,40 @@ async function handleRequestSubmit(e){
   const type = document.getElementById('reqType').value;
   const weightKg = Number(document.getElementById('reqWeight').value) || 0;
   const notes = document.getElementById('reqNotes').value.trim();
-
-  const id = await generateUniqueTrackingId();
-  const session = sb ? (await sb.auth.getSession()).data.session : null;
-  const directoryCustomerId = await lookupDirectoryCustomerId(phone);
-  const shipment = {
-    id, originKey, destKey, type, weightKg,
-    volumeCbm: Math.round((weightKg/500)*10)/10,
-    itemsCount: null, totalAmount: null, paidAmount: 0,
-    currentStepIndex: 0, stepDates:{placed: new Date().toISOString()},
-    requester:{name, phone, email, notes},
-    customerUserId: session ? session.user.id : null,
-    directoryCustomerId
+  const payload = {
+    name, phone, email, origin_key: originKey, dest_key: destKey,
+    transport_mode: type, weight_kg: weightKg,
+    volume_cbm: Math.round((weightKg / 500) * 10) / 10,
+    items_count: null, service_level: 'standard', incoterm: 'EXW', notes
   };
-  const {error} = await saveShipment(shipment);
-  btn.disabled = false; btn.textContent = originalLabel;
-  if(error){
-    const friendly = (error.message||'').includes('Too many')
+
+  let requestId = '';
+  try {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/public-quote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_PUBLISHABLE_KEY },
+      body: JSON.stringify(payload)
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.error || 'Unable to submit quote request right now.');
+    requestId = String(body.request?.id || '').trim();
+    if (!requestId) throw new Error('Quote request was accepted without a request number.');
+  } catch (error) {
+    btn.disabled = false; btn.textContent = originalLabel;
+    const message = (error?.message || '').includes('Too many')
       ? 'داواکاری زۆر لە کاتێکی کورتدا نێردراوە. تکایە چەند خولەکێک چاوەڕێبە و دووبارە هەوڵبدەرەوە.'
-      : 'هەڵەیەک ڕوویدا، داواکارییەکە پاشەکەوت نەکرا. تکایە دووبارە هەوڵبدەرەوە یان پەیوەندیمان پێوە بکە.';
-    showToast(friendly, 'error');
+      : 'هەڵەیەک ڕوویدا، داواکارییەکە نەنێردرا. تکایە دووبارە هەوڵبدەرەوە یان پەیوەندیمان پێوە بکە.';
+    showToast(message, 'error');
     return;
   }
-  notifyOwner('داواکاریی نوێی بارکردن — '+id, {
-    'ژمارەی شوێنکەوتن':id, 'ناو':name, 'مۆبایل':phone, 'ئیمەیل':(email||'—'),
+  btn.disabled = false; btn.textContent = originalLabel;
+  notifyOwner('داواکاریی نوێی نرخ — '+requestId, {
+    'ژمارەی داواکاری':requestId, 'ناو':name, 'مۆبایل':phone, 'ئیمەیل':(email||'—'),
     'لە':placeLabel(originKey), 'بۆ':placeLabel(destKey),
     'جۆر':t('track.type.'+type), 'کێش (kg)':weightKg, 'تێبینی':(notes||'—')
   });
 
+  const safeRequestId = requestId.replace(/'/g, "\\'");
   const successWrap = document.getElementById('requestSuccessWrap');
   document.getElementById('requestFormWrap').style.display = 'none';
   successWrap.style.display = 'block';
@@ -1374,12 +1389,11 @@ async function handleRequestSubmit(e){
     <svg class="icon-lg"><use href="#i-check"></use></svg>
     <h3 style="font-size:19px; font-weight:800;">${t('request.successTitle')}</h3>
     <p style="color:var(--muted); margin-top:8px;">${t('request.successBody')}</p>
-    <div class="success-id mono" data-gc-onclick="copyTrackingId('${id}')" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;" title="Copy">${id} <svg class="icon-sm" style="width:15px; height:15px;"><use href="#i-copy"></use></svg></div>
+    <div class="success-id mono" data-gc-onclick="copyRequestId('${safeRequestId}')" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;" title="Copy">${escapeHtml(requestId)} <svg class="icon-sm" style="width:15px; height:15px;"><use href="#i-copy"></use></svg></div>
     <div class="success-actions">
-      <button class="btn btn-primary" data-gc-onclick="resetRequestForm(); goTrack('${id}')">${t('request.trackNow')}</button>
       <button class="btn btn-outline" data-gc-onclick="resetRequestForm(); route('home')">${t('request.backHome')}</button>
     </div>
-    <a class="btn btn-ghost btn-block" style="margin-top:12px;" target="_blank" rel="noopener" href="https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(t('request.waPrefix')+' '+id)}">
+    <a class="btn btn-ghost btn-block" style="margin-top:12px;" target="_blank" rel="noopener" href="https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(t('request.waPrefix')+' '+requestId)}">
       <svg class="icon-sm"><use href="#i-chat"></use></svg> ${t('request.waConfirm')}
     </a>
   </div>`;
@@ -1582,9 +1596,18 @@ async function handleContactSubmit(e){
   const requestType = document.getElementById('cType').value;
   const email = document.getElementById('cEmail').value.trim();
   const message = document.getElementById('cMsg').value.trim();
-  await safeSet('message:'+Date.now(), JSON.stringify({name,company,requestType,email,message,at:new Date().toISOString()}), true);
   let insertError = null;
-  if(sb){ const {error} = await sb.from('messages').insert({name, email, message, company, request_type:requestType}); insertError = error; }
+  try {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/public-message`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_PUBLISHABLE_KEY },
+      body: JSON.stringify({ name, company, request_type: requestType, email, message })
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) insertError = new Error(body.error || 'Unable to send message right now.');
+  } catch (error) {
+    insertError = error;
+  }
   btn.disabled = false; btn.textContent = original;
   if(insertError){
     const friendly = (insertError.message||'').includes('Too many')

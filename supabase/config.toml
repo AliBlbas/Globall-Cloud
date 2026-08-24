@@ -29,6 +29,9 @@ verify_jwt = true
 [functions.account-self-profile]
 verify_jwt = true
 
+[functions.customer-self]
+verify_jwt = true
+
 [functions.operations-admin]
 verify_jwt = true
 

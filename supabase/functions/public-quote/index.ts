@@ -1,6 +1,6 @@
 const ALLOWED_ORIGINS = new Set(['https://globall-cloud.pages.dev','https://globall-cloud.netlify.app'])
-const ALLOWED_ROUTE_ORIGINS = new Set(['china', 'uae', 'usa'])
-const ALLOWED_ROUTE_DESTINATIONS = new Set(['hawler', 'slimani', 'duhok', 'bakhdad', 'kerkuk', 'mosul', 'basra'])
+const ALLOWED_ROUTE_ORIGINS = new Set(['guangzhou', 'shenzhen', 'dubai', 'sharjah', 'china', 'uae', 'usa'])
+const ALLOWED_ROUTE_DESTINATIONS = new Set(['erbil', 'sulaymaniyah', 'duhok', 'baghdad', 'basra', 'kirkuk', 'mosul', 'hawler', 'slimani', 'bakhdad', 'kerkuk'])
 const WINDOW_MS = 10 * 60 * 1000
 const MAX_PER_WINDOW = 5
 const buckets = new Map<string, { start: number; count: number }>()
@@ -42,9 +42,9 @@ Deno.serve(async (req) => {
     const originKey = text(body.origin_key, 100), destKey = text(body.dest_key, 100), mode = text(body.transport_mode, 30)
     const level = text(body.service_level, 30) || 'standard', incoterm = text(body.incoterm, 12) || 'EXW', notes = text(body.notes, 2000)
     const weight = numberOrNull(body.weight_kg, 100000), volume = numberOrNull(body.volume_cbm, 100000), items = numberOrNull(body.items_count, 1000000)
-    if (name.length < 2 || !/^\S+@\S+\.\S+$/.test(email) || !ALLOWED_ROUTE_ORIGINS.has(originKey) || !ALLOWED_ROUTE_DESTINATIONS.has(destKey) || !['air','sea','land','multimodal'].includes(mode) || !['standard','express','priority'].includes(level) || !['EXW','FOB','CIF','DDP'].includes(incoterm) || weight === null || weight <= 0) return reply(req, {error:'Please check the required quote fields.'}, 400)
+    if (name.length < 2 || (email && !/^\S+@\S+\.\S+$/.test(email)) || !ALLOWED_ROUTE_ORIGINS.has(originKey) || !ALLOWED_ROUTE_DESTINATIONS.has(destKey) || !['air','sea','land','multimodal'].includes(mode) || !['standard','express','priority'].includes(level) || !['EXW','FOB','CIF','DDP'].includes(incoterm) || weight === null || weight <= 0) return reply(req, {error:'Please check the required quote fields.'}, 400)
     const url = env('SUPABASE_URL'), key = env('SUPABASE_SERVICE_ROLE_KEY')
-    const response = await fetch(url + '/rest/v1/quote_requests', {method:'POST', headers:{apikey:key, Authorization:'Bearer ' + key, 'Content-Type':'application/json', Prefer:'return=representation'}, body:JSON.stringify({customer_name:name, customer_email:email, customer_phone:phone || null, origin_key:originKey, dest_key:destKey, transport_mode:mode, weight_kg:weight, volume_cbm:volume, items_count:items, service_level:level, incoterm, notes:notes || null, status:'pending'})})
+    const response = await fetch(url + '/rest/v1/quote_requests', {method:'POST', headers:{apikey:key, Authorization:'Bearer ' + key, 'Content-Type':'application/json', Prefer:'return=representation'}, body:JSON.stringify({customer_name:name, customer_email:email || null, customer_phone:phone || null, origin_key:originKey, dest_key:destKey, transport_mode:mode, weight_kg:weight, volume_cbm:volume, items_count:items, service_level:level, incoterm, notes:notes || null, status:'pending'})})
     if (!response.ok) { console.error('[public-quote] insert failed', response.status); return reply(req, {error:'Unable to submit quote request right now.'}, 500) }
     const rows = await response.json()
     return reply(req, {ok:true, request:rows[0] || null}, 201)

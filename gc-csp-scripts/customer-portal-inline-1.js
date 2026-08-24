@@ -1,6 +1,22 @@
 const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
+const CUSTOMER_SELF = `${SUPABASE_URL}/functions/v1/customer-self`;
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+
+const customerApi = async ({ method = 'GET', body } = {}) => {
+  const { data: sessionResult } = await sb.auth.getSession();
+  const token = sessionResult.session?.access_token;
+  if (!token) throw new Error('تکایە سەرەتا login بکە');
+  const response = await fetch(CUSTOMER_SELF, {
+    method,
+    headers: { Authorization: `Bearer ${token}`, apikey: SUPABASE_KEY, 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+    cache: 'no-store',
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.error || `Customer API ${response.status}`);
+  return payload;
+};
 const $ = (id) => document.getElementById(id);
 const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const setHtml = (id, html) => { const element = $(id); if (element) element.innerHTML = html; };
@@ -40,30 +56,16 @@ const load = async () => {
   $('loginBtn').classList.add('hidden');
   $('logoutBtn').classList.remove('hidden');
   $('portalStatus')?.classList.add('hidden');
-  const uid = session.user.id;
   $('hello').textContent = `بەخێربێیت — ${session.user.email || 'Customer'}`;
-  const [shipments, notifications, quotes, documents, pods, invoices, payments] = await Promise.all([
-    sb.from('shipments').select('id,origin_key,dest_key,current_step_index,operational_status,current_location_label,current_lat,current_lng,tracking_updated_at,total_amount,paid_amount,eta').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(30),
-    sb.from('customer_notifications').select('id,title,body,read_at,created_at').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(12),
-    sb.from('quote_requests').select('id,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,status,quoted_amount,currency,valid_until,created_at').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(12),
-    sb.from('shipment_documents').select('id,shipment_id,document_type,title,file_url,is_public,document_status,created_at').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(12),
-    sb.from('delivery_proofs').select('shipment_id,delivered_at,receiver_name,note,photo_urls,latitude,longitude,created_at').order('created_at', { ascending: false }).limit(12),
-    sb.from('shipment_invoices').select('id,invoice_number,shipment_id,total,paid_total,currency,status,due_at,created_at').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(20),
-    sb.from('payment_transactions').select('id,invoice_id,shipment_id,provider,status,amount,currency,method,paid_at,created_at').order('created_at', { ascending: false }).limit(20),
-  ]);
-  if (shipments.error) throw shipments.error;
-  const rows = shipments.data || [];
-  const invoicesRows = invoices.data || [];
-  const shipmentIds = rows.map((item) => item.id).filter(Boolean);
-  const trackingEventsResult = shipmentIds.length ? await sb.from('shipment_tracking_events').select('id,shipment_id,status_key,title,note,location_label,lat,lng,occurred_at,photos').in('shipment_id', shipmentIds).order('occurred_at', { ascending: false }).limit(100) : { data: [], error: null };
-  if (trackingEventsResult.error) throw trackingEventsResult.error;
+  const dashboard = await customerApi();
+  const rows = dashboard.shipments || [];
+  const invoicesRows = dashboard.invoices || [];
   $('shipKpi').textContent = rows.length;
   $('movingKpi').textContent = rows.filter((item) => Number(item.current_step_index || 0) > 0 && Number(item.current_step_index || 0) < 5).length;
   $('dueKpi').textContent = `${rows.reduce((sum, item) => sum + Math.max(0, Number(item.total_amount || 0) - Number(item.paid_amount || 0)), 0).toLocaleString('en-US')} USD`;
-  $('notifKpi').textContent = (notifications.data || []).filter((item) => !item.read_at).length;
-  const ledgerResult = shipmentIds.length ? await sb.from('shipment_financial_ledger').select('shipment_id,entry_type,amount,currency,reference,note,created_at').in('shipment_id', shipmentIds).order('created_at', { ascending: false }).limit(100) : { data: [], error: null }; if (ledgerResult.error) throw ledgerResult.error;
-  renderShipments(rows); renderNotifications(notifications.data || []); renderQuotes(quotes.data || []); renderDocuments(documents.data || []); renderPods(pods.data || []); renderPayments(invoicesRows, payments.data || []); renderFinance(invoicesRows, payments.data || [], ledgerResult.data || []);
-  window.__customerShipments = rows; window.__customerEvents = trackingEventsResult.data || []; window.__customerPods = pods.data || [];
+  $('notifKpi').textContent = (dashboard.notifications || []).filter((item) => !item.read_at).length;
+  renderShipments(rows); renderNotifications(dashboard.notifications || []); renderQuotes(dashboard.quotes || []); renderDocuments(dashboard.documents || []); renderPods(dashboard.pods || []); renderPayments(invoicesRows, dashboard.payments || []); renderFinance(invoicesRows, dashboard.payments || [], dashboard.ledger || []);
+  window.__customerShipments = rows; window.__customerEvents = dashboard.events || []; window.__customerPods = dashboard.pods || [];
 };
 
 const submitQuote = async (event) => {
@@ -92,13 +94,14 @@ const submitQuote = async (event) => {
     notes: $('quoteNotes').value.trim() || null,
     status: 'pending',
   };
-  const { data, error } = await sb.from('quote_requests').insert(payload).select('id').single();
-  if (error) {
+  try {
+    const result = await customerApi({ method: 'POST', body: { action: 'request_quote', data: payload } });
+    showMessage(`سەرکەوتوو بوو؛ ژمارەی داواکاری ${String(result.request?.id || '').slice(0, 8).toUpperCase()} ـە.`, 'success');
+  } catch (error) {
     showMessage(error.message, 'error');
     if (submitButton) { submitButton.disabled = false; submitButton.removeAttribute('aria-busy'); submitButton.textContent = submitButton.dataset.originalLabel || 'ناردنی داواکاری نرخ'; }
     return;
   }
-  showMessage(`سەرکەوتوو بوو؛ ژمارەی داواکاری ${String(data.id).slice(0, 8).toUpperCase()} ـە.`, 'success');
   form.reset();
   if (submitButton) { submitButton.disabled = false; submitButton.removeAttribute('aria-busy'); submitButton.textContent = submitButton.dataset.originalLabel || 'ناردنی داواکاری نرخ'; }
   await load();
@@ -119,16 +122,16 @@ const downloadDocument = async (link) => {
 const markNotificationRead = async (notificationId) => {
   const { data: userResult } = await sb.auth.getUser();
   if (!userResult.user || !notificationId) return;
-  const { error } = await sb.from('customer_notifications').update({ read_at: new Date().toISOString() }).eq('id', notificationId).eq('customer_user_id', userResult.user.id);
-  if (error) { showMessage(error.message, 'error'); return; }
+  try { await customerApi({ method: 'POST', body: { action: 'mark_notification_read', data: { id: notificationId } } }); }
+  catch (error) { showMessage(error.message, 'error'); return; }
   await load();
 };
 
 const acceptQuote = async (quoteId) => {
   const { data: userResult } = await sb.auth.getUser();
   if (!userResult.user) return;
-  const { error } = await sb.rpc('accept_quote_request', { p_customer_id: userResult.user.id, p_quote_id: quoteId });
-  if (error) { showMessage(error.message, 'error'); return; }
+  try { await customerApi({ method: 'POST', body: { action: 'accept_quote', data: { id: quoteId } } }); }
+  catch (error) { showMessage(error.message, 'error'); return; }
   showMessage('Quote پەسەندکرا.', 'success'); await load();
 };
 
