@@ -32,3 +32,18 @@ button,a,.btn{touch-action:manipulation;}
 @supports (color:color-mix(in srgb,black 50%,white)){
   .hero .sub{color:color-mix(in srgb,var(--muted) 90%,var(--text));}
 }
+
+/* WhatsApp-first conversion affordance */
+.btn-whatsapp{background:linear-gradient(135deg,#3be38b,#1fae6c);color:#032218;border-color:rgba(255,255,255,.18);box-shadow:0 10px 24px rgba(31,174,108,.22);}
+.btn-whatsapp:hover{background:linear-gradient(135deg,#56ef9d,#25c77c);color:#021b13;}
+.btn-whatsapp:focus-visible{box-shadow:0 0 0 3px rgba(79,227,240,.32),0 10px 24px rgba(31,174,108,.22);}
+.cta-actions .btn-whatsapp{min-width:190px;}
+@media(max-width:760px){
+  .hero-ctas{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .hero-ctas .btn-whatsapp{grid-column:1 / -1;}
+  .cta-actions .btn-whatsapp{width:100%;}
+}
+@media(max-width:390px){
+  .hero-ctas{grid-template-columns:1fr;}
+  .hero-ctas .btn-whatsapp{grid-column:auto;}
+}
