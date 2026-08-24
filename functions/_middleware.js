@@ -37,7 +37,7 @@ export async function onRequest(context) {
     html = addHeadAsset(html, 'src="/admin-console-enhanced.js', `<script src="/admin-console-enhanced.js?v=${VERSION}" defer data-gc-admin-recovery="1"></script>`)
   }
   if (path === '/super-admin-command-center.html') {
-    html = addHeadAsset(html, 'href="/super-admin-elite.css', `<link rel="stylesheet" href="/super-admin-elite.css?v=${VERSION}" data-gc-superadmin-elite="1"></script>`)
+    html = addHeadAsset(html, 'href="/super-admin-elite.css', `<link rel="stylesheet" href="/super-admin-elite.css?v=${VERSION}" data-gc-superadmin-elite="1">`)
     html = addBodyAsset(html, 'src="/super-admin-elite.js', `<script src="/super-admin-elite.js?v=${VERSION}" defer data-gc-superadmin-elite="1"></script>`)
   }
   if (path === '/superadmin.html') html = addBodyAsset(html, 'src="/superadmin-staff-actions.js', `<script src="/superadmin-staff-actions.js?v=${VERSION}" defer data-gc-superadmin-staff-actions="1"></script>`)
