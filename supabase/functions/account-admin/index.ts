@@ -1,7 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
-type Kind = 'customer' | 'customer_match' | 'staff' | 'receipt' | 'log' | 'shipment' | 'task' | 'finance' | 'pricing' | 'quote' | 'quote_requests' | 'notification' | 'notification_delivery'
-type Action = 'list' | 'create' | 'update' | 'archive' | 'delete' | 'claim' | 'complete'
+type Kind = 'customer' | 'customer_match' | 'staff' | 'receipt' | 'log' | 'shipment' | 'task' | 'finance' | 'pricing' | 'quote' | 'quote_requests' | 'notification' | 'notification_delivery' | 'chat'
+type Action = 'list' | 'create' | 'update' | 'archive' | 'delete' | 'claim' | 'complete' | 'send' | 'mark_read'
 type JsonRecord = Record<string, unknown>
 
 const ALLOWED_ORIGINS = new Set([
@@ -96,13 +96,13 @@ function bool(value: unknown, fallback = false): boolean {
 
 function normalizeKind(value: unknown): Kind {
   const kind = String(value || 'customer').toLowerCase()
-  if (kind === 'customer_match' || kind === 'staff' || kind === 'receipt' || kind === 'log' || kind === 'shipment' || kind === 'task' || kind === 'finance' || kind === 'pricing' || kind === 'quote' || kind === 'quote_requests' || kind === 'notification' || kind === 'notification_delivery') return kind
+  if (kind === 'customer_match' || kind === 'staff' || kind === 'receipt' || kind === 'log' || kind === 'shipment' || kind === 'task' || kind === 'finance' || kind === 'pricing' || kind === 'quote' || kind === 'quote_requests' || kind === 'notification' || kind === 'notification_delivery' || kind === 'chat') return kind
   return 'customer'
 }
 
 function normalizeAction(value: unknown): Action {
   const action = String(value || 'list').toLowerCase()
-  if (action === 'create' || action === 'update' || action === 'archive' || action === 'delete' || action === 'claim' || action === 'complete') return action
+  if (action === 'create' || action === 'update' || action === 'archive' || action === 'delete' || action === 'claim' || action === 'complete' || action === 'send' || action === 'mark_read') return action
   return 'list'
 }
 
@@ -144,8 +144,9 @@ async function getActor(req: Request) {
   const canRead = ['admin', 'super_admin', 'accountant'].includes(role)
   const canReadOperations = ['admin', 'super_admin', 'accountant', 'warehouse', 'operations'].includes(role)
   const canWrite = ['admin', 'super_admin'].includes(role)
+  const canChat = ['admin', 'super_admin', 'accountant', 'finance', 'warehouse', 'operations', 'driver'].includes(role)
 
-  return { serviceClient, staffRow, role, isSuperAdmin, canRead, canReadOperations, canWrite }
+  return { serviceClient, staffRow, role, isSuperAdmin, canRead, canReadOperations, canWrite, canChat }
 }
 
 async function logActivity(client: ReturnType<typeof createClient>, staffId: string, staffName: string | null, action: string, targetId: string | null, details: JsonRecord | null = null) {
@@ -209,6 +210,51 @@ async function calculateQuote(client: ReturnType<typeof createClient>, data: Jso
 async function listQuoteRequests(client: ReturnType<typeof createClient>) { const { data, error } = await client.from('quote_requests').select('id,customer_user_id,customer_name,customer_email,customer_phone,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,dimensional_weight_kg,billable_weight_kg,status,quoted_amount,currency,valid_until,decision_note,created_at,updated_at').order('created_at', { ascending: false }).limit(300); if (error) throw error; return { kind: 'quote_requests', items: data ?? [] } }
 async function listStaffNotifications(client: ReturnType<typeof createClient>, staffId: string) { const { data, error } = await client.from('staff_notifications').select('id,kind,title,body,action_url,entity_type,entity_id,read_at,created_at').eq('staff_id', staffId).order('created_at', { ascending: false }).limit(50); if (error) throw error; return { kind: 'notification', items: data ?? [], unread_count: (data ?? []).filter((row: any) => !row.read_at).length } }
 async function listNotificationDelivery(client: ReturnType<typeof createClient>) { const { data, error } = await client.from('notification_delivery_events').select('id,provider,provider_message_id,provider_event_id,status,recipient,occurred_at,received_at').order('occurred_at', { ascending: false }).limit(40); if (error) throw error; return { kind: 'notification_delivery', items: data ?? [] } }
+async function listChat(client: ReturnType<typeof createClient>, staffId: string) {
+  const { data: memberships, error: membershipError } = await client.from('staff_chat_members').select('room_id,last_read_at').eq('staff_id', staffId)
+  if (membershipError) throw membershipError
+  const roomIds = (memberships ?? []).map((row: any) => String(row.room_id))
+  if (!roomIds.length) return { kind: 'chat', rooms: [] }
+  const [{ data: rooms, error: roomError }, { data: members, error: membersError }, { data: messages, error: messagesError }] = await Promise.all([
+    client.from('staff_chat_rooms').select('id,slug,name,description,updated_at').eq('is_active', true).in('id', roomIds).order('updated_at', { ascending: false }),
+    client.from('staff_chat_members').select('room_id,staff_id,last_read_at').in('room_id', roomIds),
+    client.from('staff_chat_messages').select('id,room_id,sender_id,body,client_message_id,created_at,edited_at').in('room_id', roomIds).is('deleted_at', null).order('created_at', { ascending: true }).limit(300),
+  ])
+  if (roomError) throw roomError
+  if (membersError) throw membersError
+  if (messagesError) throw messagesError
+  const staffIds = [...new Set((members ?? []).map((row: any) => String(row.staff_id)))]
+  const { data: staff, error: staffError } = staffIds.length ? await client.from('staff').select('id,full_name,role,branch,is_active').in('id', staffIds) : { data: [], error: null }
+  if (staffError) throw staffError
+  const staffMap = new Map((staff ?? []).map((row: any) => [String(row.id), row]))
+  const membersByRoom = new Map<string, any[]>()
+  for (const row of members ?? []) { const key = String(row.room_id); if (!membersByRoom.has(key)) membersByRoom.set(key, []); membersByRoom.get(key)!.push({ ...row, staff: staffMap.get(String(row.staff_id)) ?? null }) }
+  const messagesByRoom = new Map<string, any[]>()
+  for (const row of messages ?? []) { const key = String(row.room_id); if (!messagesByRoom.has(key)) messagesByRoom.set(key, []); messagesByRoom.get(key)!.push({ ...row, sender: staffMap.get(String(row.sender_id)) ?? null }) }
+  const membershipMap = new Map((memberships ?? []).map((row: any) => [String(row.room_id), row]))
+  return { kind: 'chat', rooms: (rooms ?? []).map((room: any) => { const membership = membershipMap.get(String(room.id)); const roomMessages = messagesByRoom.get(String(room.id)) ?? []; const lastRead = membership?.last_read_at ? new Date(membership.last_read_at).getTime() : 0; return { ...room, members: membersByRoom.get(String(room.id)) ?? [], messages: roomMessages, unread_count: roomMessages.filter((message: any) => String(message.sender_id) !== staffId && new Date(message.created_at).getTime() > lastRead).length } }) }
+}
+async function sendChatMessage(client: ReturnType<typeof createClient>, staffId: string, staffName: string | null, data: JsonRecord, req: Request) {
+  const roomId = txt(data.room_id)
+  const body = txt(data.body)
+  if (!roomId) throw responseError('Chat room is required', 400, req)
+  if (!body || body.length > 4000) throw responseError('Message must be between 1 and 4000 characters', 400, req)
+  const { data: membership, error: membershipError } = await client.from('staff_chat_members').select('room_id').eq('room_id', roomId).eq('staff_id', staffId).maybeSingle()
+  if (membershipError) throw membershipError
+  if (!membership) throw responseError('Chat room access denied', 403, req)
+  const clientMessageId = txt(data.client_message_id)
+  const { data: row, error } = await client.from('staff_chat_messages').insert({ room_id: roomId, sender_id: staffId, body, client_message_id: clientMessageId }).select('id,room_id,sender_id,body,client_message_id,created_at,edited_at').single()
+  if (error) throw error
+  await client.from('staff_chat_rooms').update({ updated_at: new Date().toISOString() }).eq('id', roomId)
+  return { kind: 'chat', message: { ...row, sender: { id: staffId, full_name: staffName } } }
+}
+async function markChatRead(client: ReturnType<typeof createClient>, staffId: string, data: JsonRecord, req: Request) {
+  const roomId = txt(data.room_id)
+  if (!roomId) throw responseError('Chat room is required', 400, req)
+  const { data: row, error } = await client.from('staff_chat_members').update({ last_read_at: new Date().toISOString() }).eq('room_id', roomId).eq('staff_id', staffId).select('room_id,staff_id,last_read_at').single()
+  if (error) throw error
+  return { kind: 'chat', membership: row }
+}
 async function markStaffNotificationRead(client: ReturnType<typeof createClient>, staffId: string, data: JsonRecord) { const id = txt(data.id); if (!id) throw responseError('Notification id is required', 400); const { data: row, error } = await client.from('staff_notifications').update({ read_at: new Date().toISOString() }).eq('id', id).eq('staff_id', staffId).select('id,read_at').single(); if (error) throw error; return { notification: row } }
 async function listPricing(client: ReturnType<typeof createClient>) { const [rates, fx] = await Promise.all([client.from('pricing_rates').select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from,effective_to,is_active,notes,updated_at').eq('is_active', true).order('origin_key').order('transport_mode').order('product_type'), client.from('exchange_rates').select('id,base_currency,quote_currency,rate,effective_from,effective_to,is_active,source_note,updated_at').eq('is_active', true).order('base_currency').order('quote_currency')]); if (rates.error) throw rates.error; if (fx.error) throw fx.error; return { kind: 'pricing', rates: rates.data ?? [], exchange_rates: fx.data ?? [] } }
 async function updatePricing(client: ReturnType<typeof createClient>, data: JsonRecord, actor: { id: string, name: string | null }) { const id = txt(data.id); if (!id) throw responseError('Pricing rate id is required', 400); const amount = Number(data.amount); if (!Number.isFinite(amount) || amount < 0) throw responseError('Valid non-negative amount is required', 400); const transitMin = data.transit_min_days === '' || data.transit_min_days == null ? null : Number(data.transit_min_days); const transitMax = data.transit_max_days === '' || data.transit_max_days == null ? null : Number(data.transit_max_days); if ((transitMin != null && (!Number.isInteger(transitMin) || transitMin < 0)) || (transitMax != null && (!Number.isInteger(transitMax) || transitMax < (transitMin ?? 0)))) throw responseError('Invalid transit days', 400); const { data: row, error } = await client.from('pricing_rates').update({ amount, transit_min_days: transitMin, transit_max_days: transitMax, notes: txt(data.notes), updated_by: actor.id, updated_at: new Date().toISOString() }).eq('id', id).select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from,effective_to,is_active,notes,updated_at').single(); if (error) throw error; await logActivity(client, actor.id, actor.name, 'update_pricing_rate', id, { amount, transit_min_days: transitMin, transit_max_days: transitMax }); return { rate: row } }
@@ -543,7 +589,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(req) })
   try {
     const actor = await getActor(req)
-    const { serviceClient, staffRow, canRead, canReadOperations, canWrite, isSuperAdmin } = actor
+    const { serviceClient, staffRow, canRead, canReadOperations, canWrite, canChat, isSuperAdmin } = actor
     const url = new URL(req.url)
     if (req.method === 'GET') {
       const kind = normalizeKind(url.searchParams.get('kind'))
@@ -555,6 +601,7 @@ Deno.serve(async (req) => {
       if (kind === 'quote_requests' && canReadOperations) return json(await listQuoteRequests(serviceClient), {}, req)
       if (kind === 'notification' && canReadOperations) return json(await listStaffNotifications(serviceClient, staffRow.id), {}, req)
       if (kind === 'notification_delivery' && canReadOperations) return json(await listNotificationDelivery(serviceClient), {}, req)
+      if (kind === 'chat' && canChat) return json(await listChat(serviceClient, staffRow.id), {}, req)
       if (!canRead) return json({ error: 'Forbidden' }, { status: 403 }, req)
       if (kind === 'staff') return json(await listStaff(serviceClient), {}, req)
       if (kind === 'log') return json(await listLogs(serviceClient), {}, req)
@@ -587,6 +634,11 @@ Deno.serve(async (req) => {
     if (kind === 'quote' && action === 'calculate') { if (!canReadOperations) return json({ error: 'Operations access required' }, { status: 403 }, req); return json(await calculateQuote(serviceClient, data), {}, req) }
     if (kind === 'pricing') { const financeRole = ['admin','super_admin','accountant'].includes(String(staffRow.role || '')); if (!financeRole) return json({ error: 'Finance role required' }, { status: 403 }, req); const pricingActor = { id: staffRow.id, name: staffRow.full_name }; if (action === 'update') return json(data.rate_type === 'exchange' ? await updateExchangeRate(serviceClient, data, pricingActor) : await updatePricing(serviceClient, data, pricingActor), {}, req); return json({ error: 'Unsupported pricing action' }, { status: 400 }, req) }
     if (kind === 'notification' && action === 'update' && canReadOperations) return json(await markStaffNotificationRead(serviceClient, staffRow.id, data), {}, req)
+    if (kind === 'chat' && canChat) {
+      if (action === 'send') return json(await sendChatMessage(serviceClient, staffRow.id, staffRow.full_name, data, req), {}, req)
+      if (action === 'mark_read') return json(await markChatRead(serviceClient, staffRow.id, data, req), {}, req)
+      return json({ error: 'Unsupported chat action' }, { status: 400 }, req)
+    }
     if (kind === 'task') {
       if (!canRead && !canReadOperations) return json({ error: 'Forbidden' }, { status: 403 }, req)
       const taskActor = { id: staffRow.id, name: staffRow.full_name, role: String(staffRow.role || ''), branch: staffRow.branch }
