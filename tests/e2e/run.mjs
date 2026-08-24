@@ -9,7 +9,7 @@ const configuredSupabaseUrl = process.env.E2E_SUPABASE_URL || process.env.SUPABA
 const SUPABASE = (/^https?:\/\//i.test(configuredSupabaseUrl) ? configuredSupabaseUrl : 'https://ahslifnthiwfkmaswjno.supabase.co').replace(/\/$/, '')
 const ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || ''
 const ACCOUNT_ADMIN = `${SUPABASE}/functions/v1/account-admin`
-const mode = process.argv[2] || 'public'
+const mode = process.argv[2] || process.env.E2E_MODE || 'smoke'
 const failures = []
 const results = []
 
@@ -195,16 +195,16 @@ async function staffSuite(emailEnv = 'E2E_STAFF_EMAIL', passwordEnv = 'E2E_STAFF
 }
 
 async function main() {
-  if (mode === 'public') await publicSuite()
-  else if (mode === 'staff') await staffSuite()
-  else if (mode === 'staff-2') {
+  if (mode === 'smoke' || mode === 'public') await publicSuite()
+  else if (mode === 'staff' || mode === 'production-readonly' || mode === 'staging') await staffSuite()
+  else if (mode === 'staff-2' || mode === 'two-staff') {
     await staffSuite('E2E_STAFF_EMAIL', 'E2E_STAFF_PASSWORD', 'staff-1')
     await staffSuite('E2E_STAFF_2_EMAIL', 'E2E_STAFF_2_PASSWORD', 'staff-2')
     record('two-session Realtime boundary', true, 'API sessions verified; browser-level delivery requires Playwright/provider contexts')
   } else if (mode === 'mutations') {
     throw new Error('Mutation E2E is intentionally disabled: the current production API has no safe delete/reset contract for chat and quote fixtures. Use a disposable staging project and add an explicit cleanup endpoint before enabling writes.')
   } else {
-    throw new Error(`Unknown mode: ${mode}. Use public, staff, staff-2, or mutations.`)
+    throw new Error(`Unknown mode: ${mode}. Use smoke, production-readonly, staging, two-staff, or mutations.`)
   }
   console.log(`\n${results.length - failures.length}/${results.length} assertions passed`)
   if (failures.length) process.exitCode = 1

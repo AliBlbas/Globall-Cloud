@@ -12,6 +12,7 @@
   "scripts": {
     "test": "node tests/validate.mjs",
     "test:syntax": "node tests/validate.mjs",
+    "test:e2e": "node tests/e2e/run.mjs ${E2E_MODE:-smoke}",
     "test:e2e:public": "node tests/e2e/run.mjs public",
     "test:e2e:staff": "node tests/e2e/run.mjs staff",
     "test:e2e:staff:two": "node tests/e2e/run.mjs staff-2",

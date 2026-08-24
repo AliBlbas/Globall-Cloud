@@ -6,9 +6,10 @@
 
 | Mode | Credential | Write | Scope |
 |---|---|---:|---|
-| `public` | هیچ | نەخێر | public routes، assets، public Edge Functions، system health، API 401 و anonymous table denial |
-| `staff` | یەک staff test user | نەخێر | Supabase password login، self-profile، role gates، dashboard lists، quotes calculate، finance read، notifications، chat read |
-| `staff-2` | دوو staff test user | نەخێر | هەمان read suite بۆ هەردوو session و هەڵسەنگاندنی role access؛ message realtime بە browser/provider credentials پێویستی هەیە |
+| `smoke` / `public` | هیچ | نەخێر | public routes، assets، public Edge Functions، system health، API 401 و anonymous table denial |
+| `production-readonly` / `staff` | یەک staff test user | نەخێر | Supabase password login، self-profile، role gates، dashboard lists، quote validation، finance read، notifications، chat read |
+| `staging` | یەک dedicated staging staff test user | نەخێر | هەمان authenticated read contract لە project ـی disposable/staging |
+| `two-staff` / `staff-2` | دوو staff test user | نەخێر | هەمان read suite بۆ هەردوو session و هەڵسەنگاندنی role access؛ message realtime بە browser/provider credentials پێویستی هەیە |
 | `mutations` | هیچ | نەخێر | بە ئەنقەست disabled ـە تا staging fixture reset/cleanup contract زیاد بکرێت |
 
 ## Environment
@@ -30,13 +31,17 @@ export E2E_STAFF_2_PASSWORD='use-a-dedicated-test-password'
 ## Run
 
 ```bash
-npm run test:e2e:public
-npm run test:e2e:staff
-npm run test:e2e:staff:two
-npm run test:e2e:mutations
+npm run test:e2e                 # smoke؛ هەمانە وەک E2E_MODE=smoke
+E2E_MODE=production-readonly npm run test:e2e
+E2E_MODE=staging npm run test:e2e
+E2E_MODE=two-staff npm run test:e2e
+npm run test:e2e:public          # alias ـی smoke
+npm run test:e2e:staff           # alias ـی production-readonly
+npm run test:e2e:staff:two       # alias ـی two-staff
+npm run test:e2e:mutations       # fail-fast؛ هیچ write ـێک ناکات
 ```
 
-`staff` mode بە default تەنها read-only ـە. بۆ login ـی دوو staff، هەردوو credential ـەکان دابین بکە. ئەگەر test user ـێک role ـی بەرپرسیار نەبێت، harness بە شێوەی چاوەڕوانکراو `403` بۆ feature ـە role-gated ـەکان وەک finance یان administration قبوڵ دەکات و `500` بە failure دادەنێت.
+`production-readonly` و `staging` بە default تەنها read-only ـن. بۆ login ـی دوو staff، هەردوو credential ـەکان دابین بکە. ئەگەر test user ـێک role ـی بەرپرسیار نەبێت، harness بە شێوەی چاوەڕوانکراو `403` بۆ feature ـە role-gated ـەکان وەک finance یان administration قبوڵ دەکات و `500` بە failure دادەنێت.
 
 ## Safety contract
 
