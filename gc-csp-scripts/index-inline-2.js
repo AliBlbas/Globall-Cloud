@@ -7,10 +7,17 @@
    schema file, not by hiding this key. Never put your "service_role" key here. */
 const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
-const sb = (SUPABASE_URL.startsWith('http') && window.supabase)
+let sb = (SUPABASE_URL.startsWith('http') && window.supabase)
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
-  : null;
+  : window.gcSupabase || null;
 if (sb) window.sb = sb;
+window.addEventListener('gc:supabase-ready', (event) => {
+  sb = event.detail?.client || window.gcSupabase || sb;
+  if (sb) {
+    window.sb = sb;
+    if (typeof renderAdminGate === 'function') void renderAdminGate();
+  }
+}, { once: true });
 const STEP_KEYS = ['placed','pickedUp','transit','customs','outForDelivery','delivered'];
 
 /* ================= OWNER NOTIFICATIONS =================
