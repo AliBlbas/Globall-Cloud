@@ -4,7 +4,7 @@
  * off public/customer/payment surfaces.
  */
 const HTML_ACCEPT = 'text/html'
-const VERSION = '20260824-3'
+const VERSION = '20260824-4'
 const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`)
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`)
 
@@ -30,6 +30,10 @@ export async function onRequest(context) {
     ['src="/runtime-guard.js', `<script src="/runtime-guard.js?v=${VERSION}" defer data-gc-runtime-guard="1"></script>`],
   ]
   for (const [needle, fragment] of headAssets) html = addHeadAsset(html, needle, fragment)
+
+  if (path === '/staff-os.html' || path === '/staff' || path === '/staff/') {
+    html = addHeadAsset(html, 'src="/staff-os-compat.js', `<script src="/staff-os-compat.js?v=${VERSION}" data-gc-staff-compat="1"></script>`)
+  }
 
   const legacyAdminSurface = /^\/(management|accounts-console|operations-suite|operations-command-center|operations-control|operations-control-v2|staff-portal|warehouse-os|superadmin|super-admin-command-center)\.html$/.test(path)
   if (legacyAdminSurface) {
