@@ -144,8 +144,8 @@ jobs:
         run: |
           set -euo pipefail
           grep -q "LEGACY_MESSAGE" runtime-guard.js
-          grep -q "production-bridge.js?v=20260815-3" runtime-guard.js
-          grep -q "runtime-guard.js?v=20260816-4" functions/_middleware.js
+          grep -q "production-bridge.js?v=20260824-2" runtime-guard.js
+          grep -q "const VERSION = '20260824-4'" functions/_middleware.js
 
       - name: Live smoke test — public site and config API
         shell: bash
