@@ -5,10 +5,10 @@
 (() => {
   'use strict';
 
-  const BRIDGE = '/production-bridge.js?v=20260824-1';
+  const BRIDGE = '/production-bridge.js?v=20260824-2';
   const LEGACY_MESSAGE = 'Supabase هێشتا پەیوەست نەکراوە';
   const READY_MESSAGE = 'پەیوەندیی پارێزراو بە Supabase چالاکە و سیستەمەکە ئامادەیە.';
-  const FAIL_MESSAGE = 'پەیوەندیی خزمەتگوزاری بە شێوەی پارێزراو دەتاقیکرێتەوە.';
+  const FAIL_MESSAGE = 'پەیوەندیی خزمەتگوزاری بە شێوەیەکی پارێزراو دەتاقیکرێتەوە.';
 
   function replaceLegacyLeafText(text) {
     document.querySelectorAll('body *').forEach((node) => {
@@ -25,15 +25,28 @@
     if (notice) {
       notice.textContent = text;
       notice.dataset.gcRuntimeState = text === READY_MESSAGE ? 'ready' : 'guarded';
-      notice.hidden = text === READY_MESSAGE;
+      notice.hidden = text !== READY_MESSAGE;
       notice.setAttribute('aria-live', 'polite');
     }
     replaceLegacyLeafText(text);
   }
 
+  function hideLegacyNoticeImmediately() {
+    const notice = document.getElementById('adminNotConfigured');
+    if (notice) {
+      notice.hidden = true;
+      notice.dataset.gcRuntimeState = 'checking';
+      notice.setAttribute('aria-live', 'polite');
+    }
+  }
+
   function startLegacyTextGuard() {
+    hideLegacyNoticeImmediately();
     replaceLegacyLeafText(FAIL_MESSAGE);
-    const observer = new MutationObserver(() => replaceLegacyLeafText(FAIL_MESSAGE));
+    const observer = new MutationObserver(() => {
+      hideLegacyNoticeImmediately();
+      replaceLegacyLeafText(FAIL_MESSAGE);
+    });
     observer.observe(document.documentElement, { subtree: true, childList: true, characterData: true });
     window.setTimeout(() => observer.disconnect(), 15000);
   }
