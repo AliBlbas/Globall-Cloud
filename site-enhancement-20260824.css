@@ -1,0 +1,34 @@
+/* Globall Cloud — safe UI/UX hardening layer, 2026-08-24 */
+html{scroll-padding-top:84px;}
+body{min-width:0;}
+img,svg,video,canvas{max-width:100%;}
+button,a,.btn{touch-action:manipulation;}
+.btn:focus-visible,.nav-auth:focus-visible,.lang-toggle button:focus-visible,.theme-toggle-btn:focus-visible,.burger:focus-visible{box-shadow:0 0 0 3px rgba(0,194,217,.22);}
+.field:-webkit-autofill{box-shadow:0 0 0 1000px var(--surface-2) inset!important;-webkit-text-fill-color:var(--text)!important;}
+[dir="rtl"] input,[dir="rtl"] textarea,[dir="rtl"] select{text-align:right;}
+.table-wrap,.data-table-wrap,.table-responsive{width:100%;overflow-x:auto;overscroll-behavior-inline:contain;-webkit-overflow-scrolling:touch;}
+.table-wrap table,.data-table-wrap table,.table-responsive table{min-width:620px;}
+.modal,.dialog,.drawer{max-height:min(88vh,760px);overflow:auto;overscroll-behavior:contain;}
+.toast,.alert,.status-message{max-width:min(100%,560px);}
+.is-loading,.loading{cursor:progress;}
+.skeleton{background:linear-gradient(90deg,rgba(255,255,255,.04),rgba(255,255,255,.1),rgba(255,255,255,.04));background-size:220% 100%;animation:gcSkeleton 1.35s ease-in-out infinite;}
+@keyframes gcSkeleton{0%{background-position:120% 0}100%{background-position:-120% 0}}
+@media(prefers-reduced-motion:reduce){.skeleton{animation:none;}}
+@media(max-width:760px){
+  .form-grid{grid-template-columns:minmax(0,1fr);}
+  .hero-ctas{display:grid;grid-template-columns:1fr;}
+  .hero-ctas .btn{width:100%;}
+  .section-head{margin-bottom:36px;}
+  .table-wrap table,.data-table-wrap table,.table-responsive table{min-width:560px;}
+}
+@media(max-width:430px){
+  .container{padding-inline:16px;}
+  .nav-links{display:none;}
+  .nav-right{gap:6px;}
+  .nav-auth{font-size:12px;padding:8px 10px;}
+  .brand b{font-size:16px;}
+  .brand small{font-size:9px;}
+}
+@supports (color:color-mix(in srgb,black 50%,white)){
+  .hero .sub{color:color-mix(in srgb,var(--muted) 90%,var(--text));}
+}
