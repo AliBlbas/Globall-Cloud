@@ -34,7 +34,7 @@
   });
 
   const setMessage = (text, tone = 'error') => {
-    const node = document.getElementById('loginMsg');
+    const node = document.getElementById('loginError') || document.getElementById('loginMsg');
     if (!node) return;
     node.textContent = text || '';
     node.style.color = tone === 'success' ? '#9ff3d0' : '#ffb9c0';
@@ -50,14 +50,14 @@
   };
 
   const showApp = () => {
-    const gate = document.getElementById('gate');
+    const gate = document.getElementById('loginGate') || document.getElementById('gate');
     const app = document.getElementById('app');
     if (gate) gate.classList.add('hidden');
     if (app) app.classList.remove('hidden');
   };
 
   const showGate = () => {
-    const gate = document.getElementById('gate');
+    const gate = document.getElementById('loginGate') || document.getElementById('gate');
     const app = document.getElementById('app');
     if (app) app.classList.add('hidden');
     if (gate) gate.classList.remove('hidden');
