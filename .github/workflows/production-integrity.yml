@@ -44,7 +44,7 @@ jobs:
           set -euo pipefail
           grep -q "ahslifnthiwfkmaswjno.supabase.co" production-bridge.js
           grep -q "account-admin" accounts-console-script.js
-          grep -q "gc-v43" sw.js
+          grep -q "gc-v45" sw.js
           grep -q "site-enhancement-20260824.css" sw.js
           grep -q "driver-workspace.html" sw.js
           grep -q "operations-control-v2.html" sw.js
@@ -122,7 +122,7 @@ jobs:
             driver-workspace.html customer-portal.html warehouse-os.html \
             operations-control.html operations-control-v2.html accounts-console.html \
             staff-os.html logistics-os.html operations-command-center.html \
-            control-plane.html control-plane.js control-plane.css \
+            control-plane.html control-plane.js control-plane.css control-plane-data-hub.js \
             supabase/config.toml functions/health.js \
             supabase/functions/logistics-control-plane/index.ts \
             supabase/functions/document-access/index.ts \
