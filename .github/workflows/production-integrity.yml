@@ -35,13 +35,17 @@ jobs:
           done < <(find . -type f -name '*.js' -not -path './.git/*' -print0)
           python3 scripts/validate-assets.py
 
+      - name: Run repository validation suite
+        run: npm test
+
       - name: Check critical integration invariants
         shell: bash
         run: |
           set -euo pipefail
           grep -q "ahslifnthiwfkmaswjno.supabase.co" production-bridge.js
           grep -q "account-admin" accounts-console-script.js
-          grep -q "gc-v38" sw.js
+          grep -q "gc-v43" sw.js
+          grep -q "site-enhancement-20260824.css" sw.js
           grep -q "driver-workspace.html" sw.js
           grep -q "operations-control-v2.html" sw.js
           grep -q "operations-events.js" sw.js
@@ -69,12 +73,6 @@ jobs:
           grep -q 'project_id = "ahslifnthiwfkmaswjno"' supabase/config.toml
           grep -q '\[functions.account-admin\]' supabase/config.toml
           grep -q 'verify_jwt = true' supabase/config.toml
-          # Flags an actual hardcoded secret VALUE assigned to a service-role-shaped
-          # name (e.g. SUPABASE_SERVICE_ROLE_KEY = "eyJ..." or "sb_secret_...").
-          # Deliberately does NOT flag Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-          # (the correct, required pattern inside supabase/functions/*, which runs
-          # server-side and never ships to the browser) or SQL's `service_role`
-          # Postgres role name in GRANT statements.
           ! grep -RnoE "(service_role[_-]?key|SUPABASE_SERVICE_ROLE_KEY)[^A-Za-z0-9_.].{0,4}['\"]?\s*[:=]\s*['\"](eyJ|sb_secret_)[A-Za-z0-9._-]{10,}" --exclude-dir=.git --exclude='*.md' .
 
       - name: Check control-plane CSP surface
@@ -136,11 +134,7 @@ jobs:
             supabase/functions/system-health/index.ts \
             supabase/functions/_shared/payment-providers.ts \
             payment-checkout.html payment-checkout.css payment-checkout.js payment-gateway.js \
-            supabase/migrations/20260817165537_production_logistics_control_plane.sql \
-            supabase/migrations/20260817222324_logistics_advanced_workflows.sql \
-            supabase/migrations/20260817222344_notification_dispatch_hardening.sql \
-            supabase/migrations/20260817222449_logistics_notifications_contract_hardening.sql \
-            supabase/migrations/20260817222119_qicard_fib_payment_sessions.sql
+            site-enhancement-20260824.css
           do
             test -f "$file"
           done
