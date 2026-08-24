@@ -6,11 +6,11 @@
 (() => {
   'use strict';
 
-  if (!/\/staff-os\.html(?:$|[?#])/.test(window.location.pathname)) return;
+  if (!/^\/staff(?:-os)?(?:\.html)?\/?$/.test(window.location.pathname)) return;
 
   const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
-  const ALLOWED_ROLES = new Set(['admin', 'super_admin', 'accountant']);
+  const ALLOWED_ROLES = new Set(['admin', 'super_admin', 'accountant', 'finance', 'warehouse', 'operations', 'driver']);
 
   const waitFor = (getter, timeoutMs = 10000, intervalMs = 100) => new Promise((resolve, reject) => {
     const started = Date.now();
@@ -103,7 +103,7 @@
     const active = data.is_active !== false && data.active !== false;
     if (!active) throw new Error('دەستڕاگەیشتنی ئەم staff ـە ناچالاکە.');
 
-    if (!data.email || data.email.trim().toLowerCase() !== sessionUser.email.trim().toLowerCase()) {
+    if (data.email && data.email.trim() && data.email.trim().toLowerCase() !== sessionUser.email.trim().toLowerCase()) {
       throw new Error('ئیمەیڵی Auth لەگەڵ staff record یەکسان نییە.');
     }
 
@@ -111,11 +111,7 @@
       throw new Error('ڕۆڵی ئەم staff ـە بۆ Staff OS ڕێگەپێدراو نییە.');
     }
 
-    if (!data.branch) {
-      throw new Error('Branch ـی staff دیاری نەکراوە.');
-    }
-
-    return data;
+    return { ...data, branch: data.branch || 'all' };
   };
 
   const denyAndSignOut = async (client, reason) => {

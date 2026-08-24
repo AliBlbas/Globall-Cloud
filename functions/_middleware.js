@@ -31,8 +31,9 @@ export async function onRequest(context) {
   ]
   for (const [needle, fragment] of headAssets) html = addHeadAsset(html, needle, fragment)
 
-  if (path === '/staff-os.html' || path === '/staff' || path === '/staff/') {
+  if (/^\/staff(?:-os)?(?:\.html)?\/?$/.test(path)) {
     html = addHeadAsset(html, 'src="/staff-os-compat.js', `<script src="/staff-os-compat.js?v=${VERSION}" data-gc-staff-compat="1"></script>`)
+    html = addHeadAsset(html, 'src="/staff-auth-fix.js', `<script src="/staff-auth-fix.js?v=${VERSION}" data-gc-staff-auth-fix="1"></script>`)
   }
 
   const legacyAdminSurface = /^\/(management|accounts-console|operations-suite|operations-command-center|operations-control|operations-control-v2|staff-portal|warehouse-os|superadmin|super-admin-command-center)\.html$/.test(path)
