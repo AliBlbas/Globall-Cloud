@@ -27,7 +27,7 @@ check "customer portal has no executable inline script" bash -c '! grep -qE "<sc
 check "customer portal has no inline event attributes" bash -c '! grep -qiE "\s(on(click|change|submit|keydown|keyup|input|load|error|focus|blur|mouseover|mouseout))\s*=" customer-portal.html'
 check "CSP has same-origin script policy" grep -q "script-src 'self'" _headers
 check "CSP script policy excludes unsafe-inline" bash -c '! grep -qE "script-src[^;]*unsafe-inline" _headers'
-check "service worker contains control-plane, customer and payment assets" bash -c 'grep -q "control-plane.html" sw.js && grep -q "control-plane.js" sw.js && grep -q "customer-portal.html" sw.js && grep -q "payment-checkout.html" sw.js && grep -q "payment-checkout.js" sw.js && grep -q "gc-v46" sw.js'
+check "service worker contains control-plane, customer and payment assets" bash -c 'grep -q "control-plane.html" sw.js && grep -q "control-plane.js" sw.js && grep -q "customer-portal.html" sw.js && grep -q "payment-checkout.html" sw.js && grep -q "payment-checkout.js" sw.js && grep -q "gc-v47" sw.js'
 check "Supabase customer and logistics functions are JWT-protected" bash -c 'grep -q "\[functions.logistics-control-plane\]" supabase/config.toml && grep -q "\[functions.customer-self\]" supabase/config.toml && grep -q "verify_jwt = true" supabase/config.toml'
 check "payment functions and public callback config exist" bash -c 'grep -q "\[functions.payment-checkout\]" supabase/config.toml && grep -q "\[functions.payment-webhook\]" supabase/config.toml && grep -q "QICARD_WEBHOOK_PUBLIC_KEY" supabase/functions/payment-webhook/index.ts'
 check "control-plane migration exists" test -f supabase/migrations/20260817165537_production_logistics_control_plane.sql
