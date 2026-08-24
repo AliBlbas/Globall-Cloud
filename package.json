@@ -11,6 +11,10 @@
   },
   "scripts": {
     "test": "node tests/validate.mjs",
-    "test:syntax": "node tests/validate.mjs"
+    "test:syntax": "node tests/validate.mjs",
+    "test:e2e:public": "node tests/e2e/run.mjs public",
+    "test:e2e:staff": "node tests/e2e/run.mjs staff",
+    "test:e2e:staff:two": "node tests/e2e/run.mjs staff-2",
+    "test:e2e:mutations": "node tests/e2e/run.mjs mutations"
   }
 }
