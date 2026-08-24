@@ -14,6 +14,8 @@
     "test:syntax": "node tests/validate.mjs",
     "test:e2e": "node tests/e2e/run.mjs ${E2E_MODE:-smoke}",
     "test:e2e:public": "node tests/e2e/run.mjs public",
+    "test:e2e:international": "node tests/e2e/run.mjs international",
+    "test:e2e:customer": "node tests/e2e/run.mjs customer",
     "test:e2e:staff": "node tests/e2e/run.mjs staff",
     "test:e2e:staff:two": "node tests/e2e/run.mjs staff-2",
     "test:e2e:mutations": "node tests/e2e/run.mjs mutations"

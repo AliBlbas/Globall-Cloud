@@ -9,6 +9,7 @@ const configuredSupabaseUrl = process.env.E2E_SUPABASE_URL || process.env.SUPABA
 const SUPABASE = (/^https?:\/\//i.test(configuredSupabaseUrl) ? configuredSupabaseUrl : 'https://ahslifnthiwfkmaswjno.supabase.co').replace(/\/$/, '')
 const ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || ''
 const ACCOUNT_ADMIN = `${SUPABASE}/functions/v1/account-admin`
+const CUSTOMER_SELF = `${SUPABASE}/functions/v1/customer-self`
 const mode = process.argv[2] || process.env.E2E_MODE || 'smoke'
 const failures = []
 const results = []
@@ -97,6 +98,62 @@ async function publicSuite() {
 
   const health = await assertHttp('system-health is ok', `${SUPABASE}/functions/v1/system-health?e2e=1`, 200, { headers: jsonHeaders() }, (body) => body?.status === 'ok' && Object.entries(body.checks || {}).filter(([key]) => key !== 'timestamp').every(([, value]) => value === true))
   if (health?.body?.status === 'ok') record('system-health all checks true', true, `${health.body.total_ms}ms`)
+}
+
+async function internationalSuite() {
+  requireEnv(['SUPABASE_ANON_KEY'])
+  const validBase = {name: 'E2E Synthetic', phone: '+9647000000000', email: '', origin_key: 'guangzhou', dest_key: 'erbil', transport_mode: 'air', service_level: 'standard', incoterm: 'EXW', weight_kg: 1}
+  for (const [label, patch] of [
+    ['unsupported origin', {origin_key: 'unknown-hub'}],
+    ['unsupported destination', {dest_key: 'unknown-city'}],
+    ['unsupported transport', {transport_mode: 'rail'}],
+  ]) {
+    await assertHttp(`international validation ${label}`, `${SUPABASE}/functions/v1/public-quote`, 400, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify({...validBase, ...patch}),
+    }, (body) => typeof body?.error === 'string')
+  }
+  await assertHttp('international supported route no-op guangzhou -> erbil', `${SUPABASE}/functions/v1/public-quote`, 201, {
+    method: 'POST',
+    headers: jsonHeaders(),
+    body: JSON.stringify({...validBase, company_website: 'e2e-honeypot'}),
+  }, (body) => body?.ok === true)
+  await assertHttp('international multimodal mode no-op', `${SUPABASE}/functions/v1/public-quote`, 201, {
+    method: 'POST',
+    headers: jsonHeaders(),
+    body: JSON.stringify({...validBase, transport_mode: 'multimodal', company_website: 'e2e-honeypot'}),
+  }, (body) => body?.ok === true)
+  for (const requestType of ['shipping', 'info', 'support']) {
+    await assertHttp(`international contact type ${requestType}`, `${SUPABASE}/functions/v1/public-message`, 200, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify({company_website: 'e2e-honeypot', name: 'E2E Synthetic', email: 'e2e@example.com', message: `Synthetic ${requestType}`, request_type: requestType}),
+    }, (body) => body?.ok === true)
+  }
+}
+
+function customerShape(body) {
+  return body?.ok === true && body.profile && typeof body.profile === 'object' && boundedArray(body.shipments, 30) && boundedArray(body.notifications, 12) && boundedArray(body.quotes, 12) && boundedArray(body.documents, 12) && boundedArray(body.pods, 12) && boundedArray(body.invoices, 20) && boundedArray(body.payments, 20) && boundedArray(body.events, 100) && boundedArray(body.ledger, 100)
+}
+
+async function customerSuite() {
+  requireEnv(['SUPABASE_ANON_KEY', 'E2E_CUSTOMER_EMAIL', 'E2E_CUSTOMER_PASSWORD'])
+  let session
+  try {
+    session = await signIn(process.env.E2E_CUSTOMER_EMAIL, process.env.E2E_CUSTOMER_PASSWORD)
+    record('customer Supabase Auth login', true)
+  } catch (error) {
+    record('customer Supabase Auth login', false, error instanceof Error ? error.message : String(error))
+    return null
+  }
+  const dashboard = await assertHttp('customer portal dashboard contract', CUSTOMER_SELF, 200, {headers: jsonHeaders(session.access_token)}, customerShape)
+  const profile = await assertHttp('customer self-profile contract', `${SUPABASE}/functions/v1/account-self-profile`, 200, {headers: jsonHeaders(session.access_token)}, (body) => body?.profile?.kind === 'customer' && typeof body.profile.email === 'string')
+  if (dashboard?.body?.profile?.id) record('customer dashboard ownership marker', true, 'profile returned for authenticated customer')
+  await assertHttp('customer quote validation without write', CUSTOMER_SELF, 400, {method: 'POST', headers: jsonHeaders(session.access_token), body: JSON.stringify({action: 'request_quote', data: {}})}, (body) => typeof body?.error === 'string')
+  await assertHttp('customer notification action validation without write', CUSTOMER_SELF, 400, {method: 'POST', headers: jsonHeaders(session.access_token), body: JSON.stringify({action: 'mark_notification_read', data: {}})}, (body) => typeof body?.error === 'string')
+  await assertHttp('customer quote acceptance validation without write', CUSTOMER_SELF, 400, {method: 'POST', headers: jsonHeaders(session.access_token), body: JSON.stringify({action: 'accept_quote', data: {}})}, (body) => typeof body?.error === 'string')
+  return {session, dashboard, profile}
 }
 
 async function signIn(email, password) {
@@ -199,6 +256,8 @@ async function staffSuite(emailEnv = 'E2E_STAFF_EMAIL', passwordEnv = 'E2E_STAFF
 
 async function main() {
   if (mode === 'smoke' || mode === 'public') await publicSuite()
+  else if (mode === 'international') await internationalSuite()
+  else if (mode === 'customer' || mode === 'customer-portal' || mode === 'portal') await customerSuite()
   else if (mode === 'staff' || mode === 'production-readonly' || mode === 'staging') await staffSuite()
   else if (mode === 'staff-2' || mode === 'two-staff') {
     await staffSuite('E2E_STAFF_EMAIL', 'E2E_STAFF_PASSWORD', 'staff-1')
@@ -207,7 +266,7 @@ async function main() {
   } else if (mode === 'mutations') {
     throw new Error('Mutation E2E is intentionally disabled: the current production API has no safe delete/reset contract for chat and quote fixtures. Use a disposable staging project and add an explicit cleanup endpoint before enabling writes.')
   } else {
-    throw new Error(`Unknown mode: ${mode}. Use smoke, production-readonly, staging, two-staff, or mutations.`)
+    throw new Error(`Unknown mode: ${mode}. Use smoke, international, customer, production-readonly, staging, two-staff, or mutations.`)
   }
   console.log(`\n${results.length - failures.length}/${results.length} assertions passed`)
   if (failures.length) process.exitCode = 1
