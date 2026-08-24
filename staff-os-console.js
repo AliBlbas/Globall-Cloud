@@ -40,8 +40,17 @@
     $('#staffRole').textContent=state.staff.role||'staff';
     $('#staffBranch').textContent=state.staff.branch||'all';
   }
+  function visibleTabs(){
+    const allowed = new Set(['overview']);
+    if(isAdmin()) ['shipments','customers','finance','staff','activity'].forEach(id=>allowed.add(id));
+    if(canOperate()) ['tasks','quotes','notifications','warehouse'].forEach(id=>allowed.add(id));
+    if(canChat()) allowed.add('chat');
+    return tabs.filter(([id])=>allowed.has(id));
+  }
   function renderNav(){
-    $('#nav').innerHTML=tabs.map(([id,label,icon])=>`<button class="nav-item ${id===state.tab?'active':''}" data-tab="${id}" type="button"><span>${icon}</span>${label}<b data-count="${id}"></b></button>`).join('');
+    const available = new Set(visibleTabs().map(([id])=>id));
+    if(!available.has(state.tab)) state.tab='overview';
+    $('#nav').innerHTML=visibleTabs().map(([id,label,icon])=>`<button class="nav-item ${id===state.tab?'active':''}" data-tab="${id}" type="button"><span>${icon}</span>${label}<b data-count="${id}"></b></button>`).join('');
     $$('#nav .nav-item').forEach(b=>b.addEventListener('click',()=>{state.tab=b.dataset.tab;renderNav();renderTab();}));
   }
   function shell(title,subtitle,actions=''){ return `<div class="section-head"><div><div class="kicker">STAFF COMMAND CENTER</div><h2>${title}</h2><p>${subtitle}</p></div><div class="head-actions">${actions}</div></div><div id="viewBody"></div>`; }
@@ -49,7 +58,15 @@
   function metric(label,value,detail=''){ return `<div class="metric"><span>${label}</span><strong>${value}</strong><small>${detail}</small></div>`; }
 
   async function dashboard(){
-    const data=await Promise.allSettled(['shipment','customer','receipt','task','quote_requests','notification','chat'].map(api));
+    const data=await Promise.allSettled([
+      isAdmin()?api('shipment'):Promise.resolve({}),
+      isAdmin()?api('customer'):Promise.resolve({}),
+      canOperate()?api('receipt'):Promise.resolve({}),
+      canOperate()?api('task'):Promise.resolve({}),
+      canOperate()?api('quote_requests'):Promise.resolve({}),
+      canOperate()?api('notification'):Promise.resolve({}),
+      canChat()?api('chat'):Promise.resolve({}),
+    ]);
     const get=(i)=>data[i].status==='fulfilled'?data[i].value:{};
     const shipments=get(0).items||[], customers=get(1).items||[], receipts=get(2).items||[], tasks=get(3).items||[], quotes=get(4).items||[], notes=get(5).items||[], chat=get(6).rooms||[];
     const active=shipments.filter(x=>!x.step_dates?.delivered && Number(x.current_step_index||0)<5).length;

@@ -72,7 +72,7 @@ console.log('Core production files');
 const required = [
   'index.html', 'sw.js', 'production-bridge.js', 'runtime-guard.js', 'functions/_middleware.js',
   'control-plane.html', 'control-plane.js', 'payment-checkout.html', 'payment-checkout.js',
-  'customer-portal.html', 'driver-workspace.html', 'warehouse-os.html', 'staff-os.html',
+  'customer-portal.html', 'driver-workspace.html', 'warehouse-os.html', 'staff-os.html', 'staff-os-compat.js',
   'superadmin.html', 'super-admin-command-center.html',
   'supabase/config.toml',
   'supabase/functions/payment-checkout/index.ts',
@@ -120,8 +120,12 @@ if (existsSync(migDir)) {
 console.log('Role-policy guards');
 const roleSource = readFileSync(join(ROOT, 'supabase', 'functions', '_shared', 'roles.ts'), 'utf8');
 const operationsSource = readFileSync(join(ROOT, 'supabase', 'functions', 'operations-admin', 'index.ts'), 'utf8');
+const staffConsoleSource = readFileSync(join(ROOT, 'staff-os-console.js'), 'utf8');
+const staffCompatSource = readFileSync(join(ROOT, 'staff-os-compat.js'), 'utf8');
 const roleGuards = [
   ['canonical role list', /CANONICAL_ROLES\s*=.*customer.*driver.*warehouse.*operations.*finance.*admin/s],
+  ['Staff Console role-filtered navigation', /function visibleTabs\(\)[\s\S]*allowed\.add\('chat'\)/],
+  ['Staff self-only compatibility response', /self_only:true/],
   ['legacy super_admin alias', /super_admin:\s*'admin'/],
   ['legacy accountant alias', /accountant:\s*'finance'/],
   ['driver shipment scope', /assigned_staff_id/],
@@ -130,7 +134,8 @@ const roleGuards = [
 ];
 const beforeRoles = failures;
 for (const [label, pattern] of roleGuards) {
-  if (!pattern.test(label === 'canonical role list' || label.includes('alias') ? roleSource : operationsSource)) fail(`missing role guard: ${label}`);
+  const source = label.includes('Staff Console') ? staffConsoleSource : label.includes('self-only') ? staffCompatSource : label === 'canonical role list' || label.includes('alias') ? roleSource : operationsSource;
+  if (!pattern.test(source)) fail(`missing role guard: ${label}`);
 }
 if (failures === beforeRoles) ok(`${roleGuards.length} role guards OK`);
 

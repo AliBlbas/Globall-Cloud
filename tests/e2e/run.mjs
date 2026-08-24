@@ -79,9 +79,10 @@ async function publicSuite() {
   for (const route of routes) {
     await assertHttp(`public route ${route}`, `${SITE}${route}?e2e=1`, 200, {}, (body) => typeof body === 'string' && body.length > 200)
   }
-  for (const asset of ['/robots.txt', '/sitemap.xml', '/manifest.json', '/premium-brand-overrides.css', '/staff-os-premium.css', '/staff-os-console.js', '/production-bridge.js', '/sw.js']) {
+  for (const asset of ['/robots.txt', '/sitemap.xml', '/manifest.json', '/premium-brand-overrides.css', '/staff-os-premium.css', '/staff-os-console.js', '/staff-os-compat.js', '/production-bridge.js', '/sw.js']) {
     await assertHttp(`public asset ${asset}`, `${SITE}${asset}?e2e=1`, 200, {}, (body) => (typeof body === 'string' && body.length > 20) || (body && typeof body === 'object'))
   }
+  await assertHttp('staff shell includes protected controller and compatibility layer', `${SITE}/staff-os?e2e=1`, 200, {}, (body) => typeof body === 'string' && body.includes('staff-os-console.js') && body.includes('staff-os-compat.js') && body.includes('Protected by Supabase Auth'))
 
   await assertHttp('public-config works', `${SUPABASE}/functions/v1/public-config?key=usd_iqd_rate`, 200, { headers: jsonHeaders() }, (body) => body?.key === 'usd_iqd_rate' && body.value !== undefined)
   await assertHttp('public-track validates missing id', `${SUPABASE}/functions/v1/public-track?id=`, 400, { headers: jsonHeaders() }, (body) => body?.error === 'Invalid tracking id')
