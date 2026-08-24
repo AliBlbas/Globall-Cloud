@@ -1824,7 +1824,7 @@ async function handleStaffSignIn(e){
   setStaffAttempts(0);
   setStaffLockoutUntil(0);
   document.getElementById('attemptsHint').style.display = 'none';
-  await renderAdminGate();
+  window.location.assign('/staff-os');
 }
 async function handleStaffSignOut(){ await sb.auth.signOut(); await renderAdminGate(); stopInactivityTimer(); }
 
