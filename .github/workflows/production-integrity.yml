@@ -53,9 +53,9 @@ jobs:
           grep -q "warehouse-os.html" sw.js
           grep -q "production-bridge.js" sw.js
           grep -q "staff-auth-fix.js" sw.js
-          grep -q "staff-os-console.js?v=20260825-6" sw.js
-          grep -q "staff-os-ultra.css?v=20260825-3" sw.js
-          grep -q "staff-os-ultra.css?v=20260825-3" staff-os.html
+          grep -q "staff-os-console.js?v=20260825-7" sw.js
+          grep -q "staff-os-ultra.css?v=20260825-4" sw.js
+          grep -q "staff-os-ultra.css?v=20260825-4" staff-os.html
           grep -q "customer-portal-inline-1.js?v=20260825-1" sw.js
           grep -q "operations-exception-engine.js" sw.js
           grep -q "staff-auth-fix.js" sw.js
