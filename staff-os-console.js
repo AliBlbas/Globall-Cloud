@@ -111,7 +111,7 @@
     ]);
     const get=(i)=>data[i].status==='fulfilled'?data[i].value:{};
     const count=(i,value)=>data[i].status==='fulfilled'?value:'—';
-    const failedLabels=[['shipment','بارەکان'],['customer','کڕیاران'],['receipt','کۆگا'],['task','ئەرکەکان'],['quote_requests','داواکاریی نرخ'],['notification','ئاگاداری'],['chat','چات']];
+    const failedLabels=[['shipment','بارەکان'],['customer','کڕیاران'],['receipt','کۆگا'],['task','ئەرکەکان'],['quote_requests','داواکاریی نرخ'],['notification','ئاگاداری'],['chat','چات'],['alerts','alerts']];
     const unavailable=failedLabels.filter(([,label],index)=>data[index].status==='rejected').map(([,label])=>label);
     const partialNotice=unavailable.length?`<div class="notice warn dashboard-partial"><strong>هەندێک داتا کاتییەکان بەردەست نییە</strong><p>${esc(unavailable.join('، '))} لە ئێستادا وەڵامی تەواوی نەدا؛ ژمارەکەی ئەو بەشە بە «—» نیشان دراوە تا لەگەڵ zero تێکەڵ نەکرێت. دووبارەکردنەوە لەسەر هەمان protected API دەکرێت.</p></div>`:'';
     const shipments=get(0).items||[], customers=get(1).items||[], receipts=get(2).items||[], tasks=get(3).items||[], quotes=get(4).items||[], notes=get(5).items||[], chat=get(6).rooms||[], alerts=get(7).items||[];
