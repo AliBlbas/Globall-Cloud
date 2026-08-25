@@ -112,3 +112,8 @@ body{
   .nav{grid-template-columns:repeat(3,minmax(0,1fr));}
   .nav-item{letter-spacing:-.15px}
 }
+
+/* Shipment health summary: compact operational signal, derived only from visible rows. */
+.logistics-insights{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}.logistics-insights>div{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 12px;border:1px solid rgba(151,205,239,.12);border-radius:13px;background:rgba(255,255,255,.025)}.logistics-insights span{color:#88a6bf;font-size:10px}.logistics-insights b{font:900 15px var(--mono);color:#d8fbff}.logistics-insights .ok-text{color:var(--gc-mint)}.logistics-insights .warn-text{color:var(--gc-gold)}.logistics-insights .bad-text{color:var(--gc-red)}
+@media(max-width:760px){.logistics-insights{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:400px){.logistics-insights{gap:6px}.logistics-insights>div{padding:9px 10px}.logistics-insights span{font-size:9px}.logistics-insights b{font-size:14px}}
