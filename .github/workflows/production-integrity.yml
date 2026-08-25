@@ -44,7 +44,7 @@ jobs:
           set -euo pipefail
           grep -q "ahslifnthiwfkmaswjno.supabase.co" production-bridge.js
           grep -q "account-admin" accounts-console-script.js
-          grep -q "gc-v52" sw.js
+          grep -q "gc-v54" sw.js
           grep -q "site-enhancement-20260824.css" sw.js
           grep -q "driver-workspace.html" sw.js
           grep -q "operations-control-v2.html" sw.js

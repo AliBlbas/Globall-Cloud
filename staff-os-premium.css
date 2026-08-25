@@ -75,3 +75,5 @@ body{
   .messages{max-height:54vh;}
 }
 @media(prefers-reduced-motion:reduce){.quick{transition:none;}}
+.inline-field{min-width:130px;padding:8px 9px;font-size:11px;border-radius:9px}.inline-check{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;color:var(--muted);font-size:11px}.inline-check input{accent-color:var(--cyan)}
+@media(max-width:720px){.inline-field{min-width:118px}.table-wrap table{min-width:920px}}

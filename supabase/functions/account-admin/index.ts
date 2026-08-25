@@ -504,7 +504,7 @@ async function updateStaff(client: ReturnType<typeof createClient>, payload: Jso
   if (!actor.isSuperAdmin && (txt(payload.email) !== null || txt(payload.password) !== null)) {
     throw responseError('Email and password are managed by Super Admin only', 403)
   }
-  const { data: current, error: currentErr } = await client.from('staff').select('id,role,is_active').eq('id', id).maybeSingle()
+  const { data: current, error: currentErr } = await client.from('staff').select('id,full_name,role,branch,is_active').eq('id', id).maybeSingle()
   if (currentErr) throw currentErr
   if (!current) throw responseError('Staff member not found', 404)
   if (current.role === 'super_admin' && !actor.isSuperAdmin) throw responseError('Only Super Admin can modify a Super Admin', 403)
@@ -527,7 +527,7 @@ async function updateStaff(client: ReturnType<typeof createClient>, payload: Jso
   }
   const { data: row, error } = await client.from('staff').update(updates).eq('id', id).select('id,full_name,role,branch,is_active,created_at,updated_at').single()
   if (error) throw error
-  await logActivity(client, actor.id, actor.name, 'update_staff_account', id, updates)
+  await logActivity(client, actor.id, actor.name, 'update_staff_account', id, { old: { full_name: current.full_name, role: current.role, branch: current.branch, is_active: current.is_active }, new: row })
   return row
 }
 
