@@ -34,3 +34,9 @@ All write operations must remain behind JWT-authenticated Edge Functions. Browse
 6. Chat/notification realtime UX and two-session validation.
 7. Reporting, cleanup, and responsive regression coverage.
 
+
+## Fresh baseline evidence — 2026-08-25
+
+The live public smoke suite completed **39/39 assertions** using the existing publishable Supabase key. Public routes, assets, public-config, input validation, honeypot no-op quote/contact flows, unauthenticated protected-function denial, anonymous sensitive-table denial, and system-health all passed. The system-health endpoint now reports `status: ok` with database, control-plane, notification outbox, integration inbox, payment, advanced workflow, document vault, and document storage checks all true.
+
+Two production security corrections were verified and recorded in repository commit `8765f7f`: the server-side health probes regained least-privilege `service_role` SELECT access on their existing operational tables, and anonymous direct CRUD access to `public.quote_requests` was revoked while the public quote Edge Function contract remained intact. The current Cloudflare Pages production deployment for that commit completed successfully. Authenticated customer, staff, driver, two-session realtime, payment-provider callback, OCR-provider, map-tile, push-notification, and external WhatsApp delivery tests remain credential- or multi-session-dependent and are not claimed as fully certified by the public suite.

@@ -572,6 +572,7 @@ async function createReceipt(client: ReturnType<typeof createClient>, payload: J
   const location = txt(payload.location) || 'Dubai'
   const notes = txt(payload.notes)
   const shipmentId = txt(payload.shipment_id)
+  const idempotencyKey = txt(payload.idempotency_key)
   const stage = txt(payload.stage) || 'received'
   const stageValues = ['received', 'china_received', 'uae_arrived', 'erbil_arrived', 'delivery_proof']
   const latitude = decimal(payload.latitude)
@@ -585,6 +586,11 @@ async function createReceipt(client: ReturnType<typeof createClient>, payload: J
   if ((latitude === null) !== (longitude === null) || (latitude !== null && (latitude < -90 || latitude > 90 || longitude! < -180 || longitude! > 180))) throw responseError('Invalid receipt coordinates', 400)
   if (ocrConfidence !== null && (ocrConfidence < 0 || ocrConfidence > 100)) throw responseError('Invalid OCR confidence', 400)
   if (files.length > 8) throw responseError('Maximum 8 photos per receipt', 400)
+  if (idempotencyKey) {
+    const { data: existing, error: existingError } = await client.from('warehouse_receipts').select('id,batch_code,location,stage,latitude,longitude,photo_taken_at,gc_code_detected,ocr_text,ocr_confidence,ai_detected_items,auto_assigned,notes,received_at,created_by_name,directory_customer_id,directory_phone,consolidated,photos,shipment_id,scan_code,scan_type,verification_status,created_at').eq('idempotency_key', idempotencyKey).maybeSingle()
+    if (existingError) throw existingError
+    if (existing) return { receipt: existing, customer: null, uploaded_urls: existing.photos || [], notification_created: false, reused: true }
+  }
   const customer = await lookupCustomer(client, payload)
   const bucket = 'warehouse-receipts'
   const uploadedUrls: string[] = []
@@ -598,7 +604,7 @@ async function createReceipt(client: ReturnType<typeof createClient>, payload: J
     const { data: publicUrl } = client.storage.from(bucket).getPublicUrl(path)
     uploadedUrls.push(publicUrl.publicUrl)
   }
-  const { data: row, error } = await client.from('warehouse_receipts').insert({ batch_code: batchCode, location, stage, latitude, longitude, photo_taken_at: photoTakenAt, gc_code_detected: gcCode, ocr_text: ocrText, ocr_confidence: ocrConfidence, ai_detected_items: [], auto_assigned: Boolean(gcCode && customer), shipment_id: shipmentId, scan_code: gcCode, scan_type: gcCode ? 'barcode' : 'qr', notes, directory_customer_id: customer?.id ?? null, directory_phone: customer?.phone ?? txt(payload.customer_phone) ?? null, created_by: actor.id, created_by_name: actor.name, photos: uploadedUrls, consolidated: false }).select('id,batch_code,location,stage,latitude,longitude,photo_taken_at,gc_code_detected,ocr_text,ocr_confidence,ai_detected_items,auto_assigned,notes,received_at,created_by_name,directory_customer_id,directory_phone,consolidated,photos,shipment_id,scan_code,scan_type,verification_status,created_at').single()
+  const { data: row, error } = await client.from('warehouse_receipts').insert({ batch_code: batchCode, location, stage, latitude, longitude, photo_taken_at: photoTakenAt, gc_code_detected: gcCode, ocr_text: ocrText, ocr_confidence: ocrConfidence, ai_detected_items: [], auto_assigned: Boolean(gcCode && customer), idempotency_key: idempotencyKey, shipment_id: shipmentId, scan_code: gcCode, scan_type: gcCode ? 'barcode' : 'qr', notes, directory_customer_id: customer?.id ?? null, directory_phone: customer?.phone ?? txt(payload.customer_phone) ?? null, created_by: actor.id, created_by_name: actor.name, photos: uploadedUrls, consolidated: false }).select('id,batch_code,location,stage,latitude,longitude,photo_taken_at,gc_code_detected,ocr_text,ocr_confidence,ai_detected_items,auto_assigned,notes,received_at,created_by_name,directory_customer_id,directory_phone,consolidated,photos,shipment_id,scan_code,scan_type,verification_status,created_at').single()
   if (error) throw error
   let notificationCreated = false
   if (customer?.auth_user_id) {
