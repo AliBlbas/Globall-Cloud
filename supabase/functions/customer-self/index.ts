@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
     const shipments = shipmentRows || []
     const shipmentIds = shipments.map((item) => item.id).filter(Boolean)
 
-    const [notifications, quotes, documents, pods, invoices, payments, events, ledger, receipts] = await Promise.all([
+    const [notifications, quotes, documents, pods, invoices, payments, events, ledger, receipts, packages] = await Promise.all([
       service.from('customer_notifications').select('id,title,body,read_at,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(12),
       service.from('quote_requests').select('id,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,status,quoted_amount,currency,valid_until,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(12),
       service.from('shipment_documents').select('id,shipment_id,document_type,title,file_url,is_public,document_status,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(12),
@@ -122,8 +122,9 @@ Deno.serve(async (req) => {
       shipmentIds.length ? service.from('shipment_tracking_events').select('id,shipment_id,status_key,title,note,location_label,lat,lng,occurred_at,photos').in('shipment_id', shipmentIds).order('occurred_at', {ascending: false}).limit(100) : Promise.resolve({data: [], error: null}),
       shipmentIds.length ? service.from('shipment_financial_ledger').select('shipment_id,entry_type,amount,currency,reference,note,created_at').in('shipment_id', shipmentIds).order('created_at', {ascending: false}).limit(100) : Promise.resolve({data: [], error: null}),
       service.from('warehouse_receipts').select('id,batch_code,location,stage,photo_taken_at,gc_code_detected,verification_status,photos,shipment_id,received_at,created_at').eq('directory_customer_id', customer.id).order('received_at', {ascending: false}).limit(30),
+      shipmentIds.length ? service.from('shipment_packages').select('id,shipment_id,package_code,barcode,package_type,description,weight_kg,length_cm,width_cm,height_cm,declared_value,declared_currency,current_hub,status,created_at,updated_at').in('shipment_id', shipmentIds).order('created_at', {ascending: false}).limit(100) : Promise.resolve({data: [], error: null}),
     ])
-    const results = [notifications, quotes, documents, pods, invoices, payments, events, ledger, receipts]
+    const results = [notifications, quotes, documents, pods, invoices, payments, events, ledger, receipts, packages]
     const failed = results.find((result) => result?.error)
     if (failed?.error) throw failed.error
 
@@ -140,6 +141,7 @@ Deno.serve(async (req) => {
       events: events.data || [],
       ledger: ledger.data || [],
       receipts: receipts.data || [],
+      packages: packages.data || [],
     })
   } catch (error) {
     console.error('customer-self error', error instanceof Error ? error.message : String(error))
