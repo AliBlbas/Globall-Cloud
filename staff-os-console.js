@@ -64,7 +64,7 @@
     const u = new URL(FN); u.searchParams.set('kind','receipt')
     const res = await fetch(u,{method:'POST',headers:{Authorization:`Bearer ${state.session.access_token}`,apikey:SUPABASE_KEY},body:form,cache:'no-store'})
     const text = await res.text(); let data={}; try{ data=text?JSON.parse(text):{}; }catch{ data={error:text}; }
-    if(!res.ok) throw new Error(data?.error || `API ${res.status}`)
+    if(!res.ok) { const error=new Error(safeError(data,res.status)); error.status=res.status; console.error('Receipt API request failed',res.status,data?.error||data?.message||'unknown'); throw error; }
     return data
   }
   async function loadStaffIdentity(){
@@ -108,11 +108,15 @@
       canChat()?api('chat'):Promise.resolve({}),
     ]);
     const get=(i)=>data[i].status==='fulfilled'?data[i].value:{};
+    const count=(i,value)=>data[i].status==='fulfilled'?value:'—';
+    const failedLabels=[['shipment','بارەکان'],['customer','کڕیاران'],['receipt','کۆگا'],['task','ئەرکەکان'],['quote_requests','داواکاریی نرخ'],['notification','ئاگاداری'],['chat','چات']];
+    const unavailable=failedLabels.filter(([,label],index)=>data[index].status==='rejected').map(([,label])=>label);
+    const partialNotice=unavailable.length?`<div class="notice warn dashboard-partial"><strong>هەندێک داتا کاتییەکان بەردەست نییە</strong><p>${esc(unavailable.join('، '))} لە ئێستادا وەڵامی تەواوی نەدا؛ ژمارەکەی ئەو بەشە بە «—» نیشان دراوە تا لەگەڵ zero تێکەڵ نەکرێت. دووبارەکردنەوە لەسەر هەمان protected API دەکرێت.</p></div>`:'';
     const shipments=get(0).items||[], customers=get(1).items||[], receipts=get(2).items||[], tasks=get(3).items||[], quotes=get(4).items||[], notes=get(5).items||[], chat=get(6).rooms||[];
     const active=shipments.filter(x=>!x.step_dates?.delivered && Number(x.current_step_index||0)<5).length;
     const outstanding=shipments.reduce((s,x)=>s+Math.max(0,Number(x.total_amount||0)-Number(x.paid_amount||0)),0);
     $('#view').innerHTML=`${shell('کۆنتڕۆڵ پانێڵی ستاف','هەموو کارە ڕاستەوخۆکان لە یەک شوێن؛ data ـی پارێزراو لە Supabase و Edge Function ـەکانەوە دێت.','<button class="btn primary" id="refreshBtn">نوێکردنەوە</button>')}
-      <div class="metrics-grid">${metric('بارە چالاکەکان',active,'shipment')}${metric('کڕیاران',customers.length,'customer_directory')}${metric('ئەرکەکان',tasks.length,'staff tasks')}${metric('داواکاری نرخ',quotes.length,'quote requests')}${metric('وەسڵی کۆگا',receipts.length,'warehouse receipts')}${metric('ئاگاداری',notes.length,'staff notifications')}${metric('ژووری چات',chat.length,'team chat')}${metric('قەرزی بارەکان',outstanding.toFixed(2),'balance')}</div>
+      ${partialNotice}<div class="metrics-grid">${metric('بارە چالاکەکان',count(0,active),'shipment')}${metric('کڕیاران',count(1,customers.length),'customer_directory')}${metric('ئەرکەکان',count(3,tasks.length),'staff tasks')}${metric('داواکاری نرخ',count(4,quotes.length),'quote requests')}${metric('وەسڵی کۆگا',count(2,receipts.length),'warehouse receipts')}${metric('ئاگاداری',count(5,notes.length),'staff notifications')}${metric('ژووری چات',count(6,chat.length),'team chat')}${metric('قەرزی بارەکان',data[0].status==='fulfilled'?outstanding.toFixed(2):'—','balance')}</div>
       <div class="dashboard-grid"><div class="card"><div class="card-head"><h3>کارە پێویستەکان</h3><span class="muted">Priority</span></div><div class="quick-grid"><button class="quick" data-go="shipments">شوێنکەوتنی بار<span>بینینی بارە نوێکان</span></button><button class="quick" data-go="alerts">Alerts<span>کێشە و دواکەوتنەکان</span></button><button class="quick" data-go="tasks">ئەرکی نوێ<span>کار بە تیم بسپێرە</span></button><button class="quick" data-go="quotes">نرخی چاوەڕوان<span>داواکاری نرخەکان</span></button><button class="quick" data-go="warehouse">کۆگا<span>وەسڵ و بەڵگە</span></button><button class="quick" data-go="chat">چات<span>گفتوگۆی ناوخۆ</span></button><button class="quick" data-go="finance">دارایی<span>پارە و outstanding</span></button></div></div><div class="card"><div class="card-head"><h3>دۆخی سیستەم</h3><span class="live">● LIVE</span></div><div class="health-list"><div><b>Supabase</b><span class="ok">Connected</span></div><div><b>Account Admin</b><span class="ok">Authenticated</span></div><div><b>Role</b><span>${esc(state.staff.role)}</span></div><div><b>Branch</b><span>${esc(state.staff.branch||'all')}</span></div></div></div></div>`;
     $('#refreshBtn').onclick=()=>renderTab(true); $$('.quick').forEach(b=>b.onclick=()=>{state.tab=b.dataset.go;renderNav();renderTab();});
   }
@@ -142,7 +146,9 @@
       const {data,error}=await state.client.auth.getSession(); if(error)throw error;
       state.session=data.session;
       if(!state.session){ $('#loginGate').classList.remove('hidden'); return; }
-      const {data:ud,error:ue}=await state.client.auth.getUser(); if(ue)throw ue; state.user=ud.user;
+      let {data:ud,error:ue}=await state.client.auth.getUser();
+      if(ue && state.session.refresh_token){ const refreshed=await state.client.auth.refreshSession({refresh_token:state.session.refresh_token}); if(refreshed.error||!refreshed.data.session) throw ue; state.session=refreshed.data.session; ({data:ud,error:ue}=await state.client.auth.getUser()); }
+      if(ue||!ud?.user)throw ue||new Error('Staff session could not be verified'); state.user=ud.user;
       await loadStaffIdentity();
       $('#loginGate').classList.add('hidden'); $('#app').classList.remove('hidden');
       const requestedTab=new URLSearchParams(location.search).get('tab'); if(requestedTab&&visibleTabs().some(([id])=>id===requestedTab))state.tab=requestedTab;
