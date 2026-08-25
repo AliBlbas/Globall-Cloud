@@ -26,3 +26,15 @@ Cloudflare Pages deployment `0ded4699-579b-4524-9573-7e66e8345f38` for commit `6
 Cloudflare Pages deployment `3c7d16d9-ac53-4230-ab95-63bc6e71a962` for commit `fef8067` completed successfully. The live route `https://globall-cloud.pages.dev/staff-os?tab=shipments&ui=health-v1` returned the protected Staff OS shell. Browser inspection confirmed `staff-os-console.js?v=20260825-11`, `staff-os-ultra.css?v=20260825-9`, `loginGateVisible: true`, and no raw permission or internal-server error text before authentication. No credentials were entered and no protected shipment data was exposed.
 
 The shipment workspace now derives an operational health label and filter summary from the bounded protected shipment response: priority/ETA risk becomes Critical, high priority or tracking older than 24 hours becomes Attention, and remaining visible rows become On track. No fictional business values were added.
+
+## Global Operations Control Tower release
+
+The read-only Global Operations Control Tower was added to the protected Staff OS overview. It derives regional shipment references, active-scope totals, alert severity counts, and top alert summaries only from protected shipment and alert responses; it does not invent operational values or create writes. The overview now also reports a degraded-data notice for all eight requests, including the protected logistics alert feed, so a failed alert request is not silently rendered as an empty state.
+
+Staff OS controller `v12`, Ultra stylesheet `v10`, and service-worker cache `gc-v67` were synchronized with `scripts/validate-production.sh` and `.github/workflows/production-integrity.yml`. Local checks passed: `npm test`, JavaScript and Edge Function syntax checks, production validation, asset integrity, role-surface guards, provider guards, reliability guards, and `git diff --check`.
+
+Commits pushed to `main`: `20bf943` (`feat: add global operations control tower`) and `108a7cb` (`fix: surface control tower alert degradation`). Cloudflare Pages production deployment for `108a7cb` completed successfully; deployment preview: `https://5235a8e4.globall-cloud.pages.dev`.
+
+The live unauthenticated Staff OS shell at `https://globall-cloud.pages.dev/staff-os` returned the protected login gate and loaded `staff-os-console.js?v=20260825-12` and `staff-os-ultra.css?v=20260825-10`. No credentials were entered and no production write was performed. Authenticated Control Tower rendering remains credential-dependent and was not certified without a dedicated synthetic staff account.
+
+The broader MCP request remains unimplemented because the supplied attachment is a product brief rather than an MCP server specification; target host/client, transport, auth, tool schemas, data scope, and deployment target are still required before creating one.
