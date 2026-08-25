@@ -97,3 +97,18 @@ body{
 @media(max-width:360px){.nav{gap:3px}.nav-item{min-height:51px;font-size:9px}.nav-item span{width:21px;height:21px}.nav-group{font-size:7px}.side-foot{font-size:10px}}
 
 .dashboard-partial{display:grid;gap:4px;margin:0 0 14px;padding:13px 15px;border-color:rgba(243,199,108,.28);background:linear-gradient(110deg,rgba(243,199,108,.09),rgba(255,255,255,.02))}.dashboard-partial strong{color:#f8d88c;font-size:12px}.dashboard-partial p{margin:0;color:#b7c9d8;font-size:11px;line-height:1.7}
+
+/* Ultra mobile command-center correction: the nav must be a real grid, not a flex column with grid hints. */
+@media(max-width:560px){
+  main{min-width:0}
+  .shell{min-height:0}
+  .sidebar{min-height:0}
+  .nav{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;grid-auto-flow:row}
+  .nav-group{grid-column:1/-1;display:block;min-height:0}
+  .nav-item{width:100%;min-width:0}
+  .view{min-height:0}
+}
+@media(max-width:360px){
+  .nav{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .nav-item{letter-spacing:-.15px}
+}
