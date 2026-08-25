@@ -94,6 +94,12 @@ function bool(value: unknown, fallback = false): boolean {
   return fallback
 }
 
+function decimal(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null
+  const n = Number(value)
+  return Number.isFinite(n) ? n : null
+}
+
 function normalizeKind(value: unknown): Kind {
   const kind = String(value || 'customer').toLowerCase()
   if (kind === 'customer_match' || kind === 'staff' || kind === 'receipt' || kind === 'log' || kind === 'shipment' || kind === 'task' || kind === 'finance' || kind === 'pricing' || kind === 'quote' || kind === 'quote_requests' || kind === 'notification' || kind === 'notification_delivery' || kind === 'chat') return kind
@@ -330,7 +336,7 @@ async function updateTask(client: ReturnType<typeof createClient>, payload: Json
 }
 
 async function listReceipts(client: ReturnType<typeof createClient>) {
-  const { data, error } = await client.from('warehouse_receipts').select('id,batch_code,location,notes,received_at,created_by_name,directory_customer_id,directory_phone,consolidated,photos,created_at').order('received_at', { ascending: false }).limit(100)
+  const { data, error } = await client.from('warehouse_receipts').select('id,batch_code,location,stage,latitude,longitude,photo_taken_at,gc_code_detected,ocr_text,ocr_confidence,ai_detected_items,auto_assigned,notes,received_at,created_by_name,directory_customer_id,directory_phone,consolidated,photos,shipment_id,scan_code,scan_type,verification_status,created_at').order('received_at', { ascending: false }).limit(100)
   if (error) throw error
   return { items: data ?? [], kind: 'receipt' }
 }
@@ -551,13 +557,13 @@ async function lookupCustomer(client: ReturnType<typeof createClient>, payload: 
   const id = txt(payload.directory_customer_id)
   const phone = txt(payload.customer_phone)
   const code = normalizeGcCode(payload.customer_code)
-  if (id) { const { data, error } = await client.from('customer_directory').select('id,name,code,phone').eq('id', id).maybeSingle(); if (error) throw error; return data ?? null }
+  if (id) { const { data, error } = await client.from('customer_directory').select('id,name,code,phone,auth_user_id').eq('id', id).maybeSingle(); if (error) throw error; return data ?? null }
   if (code) {
-    const { data, error } = await client.from('customer_directory').select('id,name,code,phone').ilike('code', code).maybeSingle()
+    const { data, error } = await client.from('customer_directory').select('id,name,code,phone,auth_user_id').ilike('code', code).maybeSingle()
     if (error) throw error
     if (data) return data
   }
-  if (phone) { const { data, error } = await client.from('customer_directory').select('id,name,code,phone').or(`phone.eq.${phone},phone2.eq.${phone}`).maybeSingle(); if (error) throw error; return data ?? null }
+  if (phone) { const { data, error } = await client.from('customer_directory').select('id,name,code,phone,auth_user_id').or(`phone.eq.${phone},phone2.eq.${phone}`).maybeSingle(); if (error) throw error; return data ?? null }
   return null
 }
 
@@ -565,7 +571,19 @@ async function createReceipt(client: ReturnType<typeof createClient>, payload: J
   const batchCode = txt(payload.batch_code)
   const location = txt(payload.location) || 'Dubai'
   const notes = txt(payload.notes)
+  const shipmentId = txt(payload.shipment_id)
+  const stage = txt(payload.stage) || 'received'
+  const stageValues = ['received', 'china_received', 'uae_arrived', 'erbil_arrived', 'delivery_proof']
+  const latitude = decimal(payload.latitude)
+  const longitude = decimal(payload.longitude)
+  const ocrConfidence = decimal(payload.ocr_confidence)
+  const gcCode = normalizeGcCode(payload.gc_code_detected || payload.scan_code)
+  const ocrText = txt(payload.ocr_text)
+  const photoTakenAt = txt(payload.photo_taken_at) || new Date().toISOString()
   if (!batchCode) throw responseError('Missing batch_code', 400)
+  if (!stageValues.includes(stage)) throw responseError('Unsupported receipt stage', 400)
+  if ((latitude === null) !== (longitude === null) || (latitude !== null && (latitude < -90 || latitude > 90 || longitude! < -180 || longitude! > 180))) throw responseError('Invalid receipt coordinates', 400)
+  if (ocrConfidence !== null && (ocrConfidence < 0 || ocrConfidence > 100)) throw responseError('Invalid OCR confidence', 400)
   if (files.length > 8) throw responseError('Maximum 8 photos per receipt', 400)
   const customer = await lookupCustomer(client, payload)
   const bucket = 'warehouse-receipts'
@@ -574,16 +592,22 @@ async function createReceipt(client: ReturnType<typeof createClient>, payload: J
     if (!file.type.startsWith('image/')) throw responseError('Only image uploads are allowed', 400)
     if (file.size > 10 * 1024 * 1024) throw responseError('Each receipt photo must be 10MB or smaller', 400)
     const safeName = (file.name || 'photo').replace(/[^a-zA-Z0-9._-]+/g, '_')
-    const path = `${batchCode}/${crypto.randomUUID()}-${safeName}`
+    const path = `${batchCode}/${stage}/${crypto.randomUUID()}-${safeName}`
     const { error: uploadErr } = await client.storage.from(bucket).upload(path, file, { contentType: file.type, upsert: false })
     if (uploadErr) throw uploadErr
     const { data: publicUrl } = client.storage.from(bucket).getPublicUrl(path)
     uploadedUrls.push(publicUrl.publicUrl)
   }
-  const { data: row, error } = await client.from('warehouse_receipts').insert({ batch_code: batchCode, location, notes, directory_customer_id: customer?.id ?? null, directory_phone: customer?.phone ?? txt(payload.customer_phone) ?? null, created_by: actor.id, created_by_name: actor.name, photos: uploadedUrls, consolidated: false }).select('id,batch_code,location,notes,received_at,created_by_name,directory_customer_id,directory_phone,consolidated,photos,created_at').single()
+  const { data: row, error } = await client.from('warehouse_receipts').insert({ batch_code: batchCode, location, stage, latitude, longitude, photo_taken_at: photoTakenAt, gc_code_detected: gcCode, ocr_text: ocrText, ocr_confidence: ocrConfidence, ai_detected_items: [], auto_assigned: Boolean(gcCode && customer), shipment_id: shipmentId, scan_code: gcCode, scan_type: gcCode ? 'barcode' : 'qr', notes, directory_customer_id: customer?.id ?? null, directory_phone: customer?.phone ?? txt(payload.customer_phone) ?? null, created_by: actor.id, created_by_name: actor.name, photos: uploadedUrls, consolidated: false }).select('id,batch_code,location,stage,latitude,longitude,photo_taken_at,gc_code_detected,ocr_text,ocr_confidence,ai_detected_items,auto_assigned,notes,received_at,created_by_name,directory_customer_id,directory_phone,consolidated,photos,shipment_id,scan_code,scan_type,verification_status,created_at').single()
   if (error) throw error
-  await logActivity(client, actor.id, actor.name, 'create_warehouse_receipt', String(row.id), { batch_code: batchCode, location, photo_count: uploadedUrls.length })
-  return { receipt: row, customer, uploaded_urls: uploadedUrls }
+  let notificationCreated = false
+  if (customer?.auth_user_id) {
+    const { error: notificationError } = await client.from('customer_notifications').insert({ customer_user_id: customer.auth_user_id, shipment_id: shipmentId, kind: 'warehouse_received', title: 'کارگۆکەت لە کۆگا وەرگیرا', body: `کارگۆکەت ${gcCode || batchCode} لە ${location} وەرگیرا. ${uploadedUrls.length} وێنە بەردەستە.`, action_url: shipmentId ? `/tracking.html?id=${encodeURIComponent(shipmentId)}` : null, event_key: `warehouse_received:${row.id}` })
+    if (notificationError) console.error('warehouse receipt notification failed', notificationError.message)
+    else notificationCreated = true
+  }
+  await logActivity(client, actor.id, actor.name, 'create_warehouse_receipt', String(row.id), { batch_code: batchCode, location, stage, photo_count: uploadedUrls.length, gc_code_detected: gcCode, notification_created: notificationCreated })
+  return { receipt: row, customer, uploaded_urls: uploadedUrls, notification_created: notificationCreated }
 }
 
 Deno.serve(async (req) => {
