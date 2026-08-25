@@ -173,10 +173,38 @@ async function listCustomers(client: ReturnType<typeof createClient>) {
     .select('id,code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at')
     .order('created_at', { ascending: false })
   if (error) throw error
-  const { data: stats, error: statsErr } = await client.from('customer_directory_stats').select('directory_customer_id,shipment_count,total_amount,outstanding,last_shipment_at')
-  if (statsErr) throw statsErr
+
+  let stats: any[] = []
+  const { data: viewStats, error: statsErr } = await client
+    .from('customer_directory_stats')
+    .select('directory_customer_id,shipment_count,total_amount,outstanding,last_shipment_at')
+    .limit(2000)
+  if (!statsErr) {
+    stats = viewStats ?? []
+  } else {
+    // Some production Postgres view grants can lag behind the service-role
+    // function deployment. Keep the customer surface usable with a bounded,
+    // server-side fallback rather than returning raw database errors.
+    const { data: shipmentRows } = await client
+      .from('shipments')
+      .select('directory_customer_id,total_amount,paid_amount,created_at')
+      .not('directory_customer_id', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(2000)
+    const aggregate = new Map<string, any>()
+    for (const shipment of shipmentRows ?? []) {
+      const key = String((shipment as any).directory_customer_id)
+      const current = aggregate.get(key) ?? { directory_customer_id: key, shipment_count: 0, total_amount: 0, outstanding: 0, last_shipment_at: null }
+      current.shipment_count += 1
+      current.total_amount += Number((shipment as any).total_amount ?? 0)
+      current.outstanding += Math.max(0, Number((shipment as any).total_amount ?? 0) - Number((shipment as any).paid_amount ?? 0))
+      if (!current.last_shipment_at || new Date(String((shipment as any).created_at)).getTime() > new Date(String(current.last_shipment_at)).getTime()) current.last_shipment_at = (shipment as any).created_at
+      aggregate.set(key, current)
+    }
+    stats = [...aggregate.values()]
+  }
   const statsMap = new Map<string, any>()
-  for (const row of stats ?? []) statsMap.set(String((row as any).directory_customer_id), row)
+  for (const row of stats) statsMap.set(String((row as any).directory_customer_id), row)
   return {
     items: (customers ?? []).map((row: any) => {
       const stat = statsMap.get(String(row.id)) || {}
