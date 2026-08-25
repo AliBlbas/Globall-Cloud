@@ -67,9 +67,11 @@
     return tabs.filter(([id])=>allowed.has(id));
   }
   function renderNav(){
-    const available = new Set(visibleTabs().map(([id])=>id));
+    const items=visibleTabs();
+    const available=new Set(items.map(([id])=>id));
     if(!available.has(state.tab)) state.tab='overview';
-    $('#nav').innerHTML=visibleTabs().map(([id,label,icon])=>`<button class="nav-item ${id===state.tab?'active':''}" data-tab="${id}" type="button"><span>${icon}</span>${label}<b data-count="${id}"></b></button>`).join('');
+    const groups=[['CORE CONTROL',['overview','shipments','customers']],['LOGISTICS',['tasks','quotes','warehouse']],['FINANCE',['finance']],['COLLABORATION',['chat','notifications']],['GOVERNANCE',['staff','activity']]];
+    $('#nav').innerHTML=groups.map(([title,ids])=>{const group=items.filter(([id])=>ids.includes(id));if(!group.length)return '';return `<div class="nav-group" role="presentation">${title}</div>${group.map(([id,label,icon])=>`<button class="nav-item ${id===state.tab?'active':''}" data-tab="${id}" type="button"><span>${icon}</span>${label}<b data-count="${id}"></b></button>`).join('')}`}).join('');
     $$('#nav .nav-item').forEach(b=>b.addEventListener('click',()=>{state.tab=b.dataset.tab;renderNav();renderTab();}));
   }
   function shell(title,subtitle,actions=''){ return `<div class="section-head"><div><div class="kicker">STAFF COMMAND CENTER</div><h2>${title}</h2><p>${subtitle}</p></div><div class="head-actions">${actions}</div></div><div id="viewBody"></div>`; }

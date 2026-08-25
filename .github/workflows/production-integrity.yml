@@ -44,7 +44,7 @@ jobs:
           set -euo pipefail
           grep -q "ahslifnthiwfkmaswjno.supabase.co" production-bridge.js
           grep -q "account-admin" accounts-console-script.js
-          grep -q "gc-v58" sw.js
+          grep -q "gc-v59" sw.js
           grep -q "site-enhancement-20260824.css" sw.js
           grep -q "driver-workspace.html" sw.js
           grep -q "operations-control-v2.html" sw.js
@@ -53,7 +53,9 @@ jobs:
           grep -q "warehouse-os.html" sw.js
           grep -q "production-bridge.js" sw.js
           grep -q "staff-auth-fix.js" sw.js
-          grep -q "staff-os-console.js?v=20260825-4" sw.js
+          grep -q "staff-os-console.js?v=20260825-5" sw.js
+          grep -q "staff-os-ultra.css?v=20260825-2" sw.js
+          grep -q "staff-os-ultra.css?v=20260825-2" staff-os.html
           grep -q "customer-portal-inline-1.js?v=20260825-1" sw.js
           grep -q "operations-exception-engine.js" sw.js
           grep -q "staff-auth-fix.js" sw.js
