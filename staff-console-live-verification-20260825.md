@@ -16,3 +16,7 @@ The live route `https://globall-cloud.pages.dev/staff-os?tab=shipments&release=9
 After commit `d2f97f2`, Cloudflare Pages deployment `59bc470d-84d1-4170-b7c9-315eb9a16e20` completed successfully. The live route `https://globall-cloud.pages.dev/staff-os?tab=shipments&release=d2f97f2` returned the protected Staff OS shell. Browser inspection confirmed controller `staff-os-console.js?v=20260825-11`, Ultra stylesheet `staff-os-ultra.css?v=20260825-8`, `loginGateVisible: true`, and `rawErrorVisible: false`. No credentials were entered and no shipment data was exposed before authentication.
 
 The public smoke suite completed 39/39 assertions, including public routes/assets, validation behavior, unauthenticated protected API rejection, anonymous sensitive-table denial, and system health. Authenticated timeline data loading remains dependent on a dedicated synthetic staff account.
+
+## Mobile command-matrix release verification
+
+Cloudflare Pages deployment `0ded4699-579b-4524-9573-7e66e8345f38` for commit `6be85ae` completed successfully. The live route `https://globall-cloud.pages.dev/staff-os?ui=mobile-grid-v9` returned the protected login shell. Browser inspection confirmed `staff-os-console.js?v=20260825-11`, `staff-os-ultra.css?v=20260825-9`, `loginGateVisible: true`, and no raw `permission denied for view` or `Internal server error` text before authentication. The initial console probe had a syntax typo; a corrected probe succeeded. No credentials were entered and no protected shipment/staff data was exposed.
