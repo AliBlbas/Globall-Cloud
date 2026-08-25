@@ -458,6 +458,13 @@ const list = async (service: ReturnType<typeof serviceClient>, staff: Staff, req
   const offset = Math.max(0, Number(requestUrl.searchParams.get('offset') || 0))
   const allowed = new Set(['shipments', 'events', 'packages', 'customs', 'consolidations', 'invoices', 'payments', 'exceptions', 'outbox', 'status_history', 'quotes', 'documents', 'movements', 'route_legs', 'manifests', 'alerts'])
   if (!allowed.has(kind)) throw new Error('Unsupported list kind')
+  const scopedKinds = new Set(['packages', 'customs', 'invoices', 'payments', 'exceptions', 'status_history', 'documents', 'movements', 'route_legs', 'manifests'])
+  const shipmentId = text(requestUrl.searchParams.get('shipment_id'), 128)
+  if (shipmentId && scopedKinds.has(kind)) {
+    const shipment = await service.from('shipments').select('id,branch,archived_at').eq('id', shipmentId).maybeSingle()
+    if (shipment.error) throw shipment.error
+    if (!shipment.data || shipment.data.archived_at || (staff.branch !== 'all' && shipment.data.branch && String(shipment.data.branch) !== String(staff.branch))) return { kind, items: [], offset: 0, limit: 0 }
+  }
   const from = offset
   const to = offset + limit - 1
   let query: any
@@ -493,6 +500,7 @@ const list = async (service: ReturnType<typeof serviceClient>, staff: Staff, req
   } else {
     query = service.from('shipment_status_history').select('*').order('occurred_at', { ascending: false })
   }
+  if (shipmentId && scopedKinds.has(kind)) query = query.eq('shipment_id', shipmentId)
   const result = await query.range(from, to)
   if (result.error) throw result.error
   return { kind, items: result.data || [], offset, limit }
