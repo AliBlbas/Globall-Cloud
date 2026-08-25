@@ -442,9 +442,21 @@ const listOperationalAlerts = async (service: ReturnType<typeof serviceClient>, 
 const list = async (service: ReturnType<typeof serviceClient>, staff: Staff, requestUrl: URL) => {
   const kind = requestUrl.searchParams.get('kind') || 'shipments'
   if (kind === 'alerts') return listOperationalAlerts(service, staff)
+  if (kind === 'events') {
+    const shipmentId = text(requestUrl.searchParams.get('shipment_id'), 128)
+    if (!shipmentId) throw new Error('shipment_id is required')
+    const shipment = await service.from('shipments').select('id,branch,archived_at').eq('id', shipmentId).maybeSingle()
+    if (shipment.error) throw shipment.error
+    if (!shipment.data || shipment.data.archived_at || (staff.branch !== 'all' && shipment.data.branch && String(shipment.data.branch) !== String(staff.branch))) return { kind, items: [], offset: 0, limit: 0 }
+    const limit = Math.min(200, Math.max(1, Number(requestUrl.searchParams.get('limit') || 100)))
+    const offset = Math.max(0, Number(requestUrl.searchParams.get('offset') || 0))
+    const result = await service.from('shipment_events').select('id,shipment_id,event_type,status,location,note,occurred_at,created_by,created_by_name,metadata').eq('shipment_id', shipmentId).order('occurred_at', { ascending: false }).range(offset, offset + limit - 1)
+    if (result.error) throw result.error
+    return { kind, items: result.data || [], offset, limit }
+  }
   const limit = Math.min(200, Math.max(1, Number(requestUrl.searchParams.get('limit') || 50)))
   const offset = Math.max(0, Number(requestUrl.searchParams.get('offset') || 0))
-  const allowed = new Set(['shipments', 'packages', 'customs', 'consolidations', 'invoices', 'payments', 'exceptions', 'outbox', 'status_history', 'quotes', 'documents', 'movements', 'route_legs', 'manifests', 'alerts'])
+  const allowed = new Set(['shipments', 'events', 'packages', 'customs', 'consolidations', 'invoices', 'payments', 'exceptions', 'outbox', 'status_history', 'quotes', 'documents', 'movements', 'route_legs', 'manifests', 'alerts'])
   if (!allowed.has(kind)) throw new Error('Unsupported list kind')
   const from = offset
   const to = offset + limit - 1
