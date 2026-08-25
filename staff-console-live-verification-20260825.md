@@ -20,3 +20,9 @@ The public smoke suite completed 39/39 assertions, including public routes/asset
 ## Mobile command-matrix release verification
 
 Cloudflare Pages deployment `0ded4699-579b-4524-9573-7e66e8345f38` for commit `6be85ae` completed successfully. The live route `https://globall-cloud.pages.dev/staff-os?ui=mobile-grid-v9` returned the protected login shell. Browser inspection confirmed `staff-os-console.js?v=20260825-11`, `staff-os-ultra.css?v=20260825-9`, `loginGateVisible: true`, and no raw `permission denied for view` or `Internal server error` text before authentication. The initial console probe had a syntax typo; a corrected probe succeeded. No credentials were entered and no protected shipment/staff data was exposed.
+
+## Shipment health workspace verification
+
+Cloudflare Pages deployment `3c7d16d9-ac53-4230-ab95-63bc6e71a962` for commit `fef8067` completed successfully. The live route `https://globall-cloud.pages.dev/staff-os?tab=shipments&ui=health-v1` returned the protected Staff OS shell. Browser inspection confirmed `staff-os-console.js?v=20260825-11`, `staff-os-ultra.css?v=20260825-9`, `loginGateVisible: true`, and no raw permission or internal-server error text before authentication. No credentials were entered and no protected shipment data was exposed.
+
+The shipment workspace now derives an operational health label and filter summary from the bounded protected shipment response: priority/ETA risk becomes Critical, high priority or tracking older than 24 hours becomes Attention, and remaining visible rows become On track. No fictional business values were added.
