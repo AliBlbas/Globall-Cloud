@@ -10,7 +10,7 @@
 
   const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
-  const ALLOWED_ROLES = new Set(['admin', 'super_admin', 'accountant', 'finance', 'warehouse', 'operations', 'driver']);
+  const ALLOWED_ROLES = new Set(['admin', 'super_admin', 'accountant', 'finance', 'warehouse', 'warehouse_china', 'warehouse_uae', 'warehouse_erbil', 'operations', 'driver', 'delivery']);
 
   const waitFor = (getter, timeoutMs = 10000, intervalMs = 100) => new Promise((resolve, reject) => {
     const started = Date.now();

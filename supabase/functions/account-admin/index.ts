@@ -142,9 +142,9 @@ async function getActor(req: Request) {
   const role = String(staffRow.role || '')
   const isSuperAdmin = role === 'super_admin'
   const canRead = ['admin', 'super_admin', 'accountant'].includes(role)
-  const canReadOperations = ['admin', 'super_admin', 'accountant', 'warehouse', 'operations'].includes(role)
+  const canReadOperations = ['admin', 'super_admin', 'accountant', 'warehouse', 'warehouse_china', 'warehouse_uae', 'warehouse_erbil', 'operations', 'delivery'].includes(role)
   const canWrite = ['admin', 'super_admin'].includes(role)
-  const canChat = ['admin', 'super_admin', 'accountant', 'finance', 'warehouse', 'operations', 'driver'].includes(role)
+  const canChat = ['admin', 'super_admin', 'accountant', 'finance', 'warehouse', 'warehouse_china', 'warehouse_uae', 'warehouse_erbil', 'operations', 'driver', 'delivery'].includes(role)
 
   return { serviceClient, staffRow, role, isSuperAdmin, canRead, canReadOperations, canWrite, canChat }
 }
@@ -478,7 +478,7 @@ async function createStaff(client: ReturnType<typeof createClient>, payload: Jso
   const password = txt(payload.password) || randomPassword()
   const invite = bool(payload.send_invite, Boolean(email))
   if (!email) throw responseError('Staff email is required', 400)
-  if (!['admin','accountant','super_admin'].includes(role)) throw responseError('Invalid staff role', 400)
+  if (!['admin','accountant','super_admin','finance','warehouse','warehouse_china','warehouse_uae','warehouse_erbil','operations','driver','delivery'].includes(role)) throw responseError('Invalid staff role', 400)
   let userId: string | null = txt(payload.id)
   if (!userId) {
     if (invite) {
@@ -510,7 +510,8 @@ async function updateStaff(client: ReturnType<typeof createClient>, payload: Jso
   if (current.role === 'super_admin' && !actor.isSuperAdmin) throw responseError('Only Super Admin can modify a Super Admin', 403)
   if (id === actor.id && payload.is_active === false) throw responseError('You cannot deactivate your own Super Admin session', 400)
   const nextRole = txt(payload.role)
-  if (nextRole && !['admin','accountant','super_admin'].includes(nextRole)) throw responseError('Invalid staff role', 400)
+  if (nextRole && !['admin','accountant','super_admin','finance','warehouse','warehouse_china','warehouse_uae','warehouse_erbil','operations','driver','delivery'].includes(nextRole)) throw responseError('Invalid staff role', 400)
+  if (id === actor.id && nextRole && nextRole !== current.role) throw responseError('You cannot change your own role', 400)
   if (nextRole === 'super_admin' && !actor.isSuperAdmin) throw responseError('Only Super Admin can grant Super Admin role', 403)
   const updates: JsonRecord = {}
   for (const key of ['full_name', 'role', 'branch'] as const) { const value = txt(payload[key]); if (value !== null) updates[key] = value }
