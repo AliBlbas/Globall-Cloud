@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
 
     return json(req, {
       ok: true,
-      profile: {id: customer.id, code: customer.code || customer.gc_code || null, name: customer.name || user.user_metadata?.full_name || user.email || 'Customer', email: customer.email || user.email || null},
+      profile: {id: customer.id, code: customer.gc_code || customer.code || null, name: customer.name || user.user_metadata?.full_name || user.email || 'Customer', email: customer.email || user.email || null},
       shipments,
       notifications: notifications.data || [],
       quotes: quotes.data || [],

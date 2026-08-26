@@ -88,6 +88,11 @@ function normalizeGcCode(value: unknown): string | null {
   return /^GC-[A-Z0-9-]{2,30}$/.test(normalized) ? normalized : null
 }
 
+function canonicalCustomerIdentity<T extends Record<string, unknown>>(row: T): T & { code: string | null, gc_code: string | null } {
+  const canonical = normalizeGcCode(row.gc_code) ?? normalizeGcCode(row.code) ?? txt(row.gc_code) ?? txt(row.code)
+  return { ...row, code: canonical, gc_code: canonical }
+}
+
 function bool(value: unknown, fallback = false): boolean {
   if (typeof value === 'boolean') return value
   if (typeof value === 'string') return ['true', '1', 'yes', 'on'].includes(value.toLowerCase())
@@ -170,7 +175,7 @@ async function logActivity(client: ReturnType<typeof createClient>, staffId: str
 async function listCustomers(client: ReturnType<typeof createClient>) {
   const { data: customers, error } = await client
     .from('customer_directory')
-    .select('id,code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at')
+    .select('id,code,gc_code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at')
     .order('created_at', { ascending: false })
   if (error) throw error
 
@@ -208,7 +213,7 @@ async function listCustomers(client: ReturnType<typeof createClient>) {
   return {
     items: (customers ?? []).map((row: any) => {
       const stat = statsMap.get(String(row.id)) || {}
-      return { ...row, shipment_count: Number(stat.shipment_count ?? 0), total_amount: Number(stat.total_amount ?? 0), outstanding_amount: Number(stat.outstanding ?? 0), last_shipment_at: stat.last_shipment_at ?? null }
+      return { ...canonicalCustomerIdentity(row), shipment_count: Number(stat.shipment_count ?? 0), total_amount: Number(stat.total_amount ?? 0), outstanding_amount: Number(stat.outstanding ?? 0), last_shipment_at: stat.last_shipment_at ?? null }
     }),
     kind: 'customer',
   }
@@ -379,8 +384,14 @@ async function findCustomerRow(client: ReturnType<typeof createClient>, payload:
   const id = txt(payload.id)
   const phone = txt(payload.phone)
   const email = txt(payload.email)
+  const code = normalizeGcCode(payload.gc_code ?? payload.code)
   if (id) {
     const { data, error } = await client.from('customer_directory').select('*').eq('id', id).maybeSingle()
+    if (error) throw error
+    if (data) return data as any
+  }
+  if (code) {
+    const { data, error } = await client.from('customer_directory').select('*').or(`code.ilike.${code},gc_code.ilike.${code}`).limit(1).maybeSingle()
     if (error) throw error
     if (data) return data as any
   }
@@ -434,13 +445,20 @@ async function upsertCustomer(client: ReturnType<typeof createClient>, payload: 
   const note = txt(payload.note)
   const managerStaffId = txt(payload.manager_staff_id)
   const existing = await findCustomerRow(client, payload)
+  const requestedCode = payload.gc_code !== undefined || payload.code !== undefined ? normalizeGcCode(payload.gc_code ?? payload.code) : null
+  if ((payload.gc_code !== undefined || payload.code !== undefined) && !requestedCode) throw responseError('GC code must match GC-### or GC-* format', 400)
+  if (existing?.id && requestedCode) {
+    const currentCode = normalizeGcCode(existing.code ?? existing.gc_code)
+    if (currentCode && currentCode !== requestedCode) throw responseError('GC code is immutable after customer creation', 409)
+  }
   const authResult = await createCustomerAuth(client, payload, existing?.auth_user_id ?? null)
-  const base = { name, email, phone, phone2, city, delivery_location: deliveryLocation, note, manager_staff_id: managerStaffId, is_active: typeof payload.is_active === 'boolean' ? payload.is_active : true }
+  const identity = requestedCode && !existing?.id ? { code: requestedCode, gc_code: requestedCode } : {}
+  const base = { name, email, phone, phone2, city, delivery_location: deliveryLocation, note, manager_staff_id: managerStaffId, is_active: typeof payload.is_active === 'boolean' ? payload.is_active : true, ...identity }
   const write = existing?.id ? client.from('customer_directory').update({ ...base, auth_user_id: authResult.userId ?? null }).eq('id', existing.id) : client.from('customer_directory').insert({ ...base, auth_user_id: authResult.userId ?? null })
-  const { data: saved, error } = await write.select('id,code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
+  const { data: saved, error } = await write.select('id,code,gc_code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
   if (error) throw error
-  await logActivity(client, actor.id, actor.name, existing?.id ? 'update_customer_account' : 'create_customer_account', String(saved.id), { email, phone, manager_staff_id: managerStaffId, auth_user_created: Boolean(authResult.userId && !existing?.auth_user_id) })
-  return { customer: saved, auth_user_id: authResult.userId, warning: authResult.warning, status: authResult.userId ? 'linked' : 'saved_without_auth' }
+  await logActivity(client, actor.id, actor.name, existing?.id ? 'update_customer_account' : 'create_customer_account', String(saved.id), { email, phone, gc_code: saved.gc_code || saved.code || null, manager_staff_id: managerStaffId, auth_user_created: Boolean(authResult.userId && !existing?.auth_user_id) })
+  return { customer: canonicalCustomerIdentity(saved), auth_user_id: authResult.userId, warning: authResult.warning, status: authResult.userId ? 'linked' : 'saved_without_auth' }
 }
 
 async function updateCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, isSuperAdmin: boolean }) {
@@ -456,12 +474,19 @@ async function updateCustomer(client: ReturnType<typeof createClient>, payload: 
     if (value !== null) updates[key] = value
   }
   if (typeof payload.is_active === 'boolean') updates.is_active = payload.is_active
-  if (actor.isSuperAdmin && payload.gc_code !== undefined) updates.gc_code = txt(payload.gc_code)
-  if (actor.isSuperAdmin && payload.code !== undefined) updates.code = txt(payload.code)
+  let requestedCode: string | null = null
+  if (actor.isSuperAdmin && (payload.gc_code !== undefined || payload.code !== undefined)) {
+    requestedCode = normalizeGcCode(payload.gc_code ?? payload.code)
+    if (!requestedCode) throw responseError('GC code must match GC-### or GC-* format', 400)
+  }
 
-  const { data: current, error: currentErr } = await client.from('customer_directory').select('id,auth_user_id').eq('id', id).maybeSingle()
+  const { data: current, error: currentErr } = await client.from('customer_directory').select('id,auth_user_id,code,gc_code').eq('id', id).maybeSingle()
   if (currentErr) throw currentErr
   if (!current) throw responseError('Customer not found', 404)
+  if (requestedCode) {
+    const currentCode = normalizeGcCode(current.code ?? current.gc_code)
+    if (currentCode && currentCode !== requestedCode) throw responseError('GC code is immutable after customer creation', 409)
+  }
 
   if (current.auth_user_id && actor.isSuperAdmin) {
     const authUpdate: Record<string, unknown> = {}
@@ -480,10 +505,10 @@ async function updateCustomer(client: ReturnType<typeof createClient>, payload: 
     }
   }
 
-  const { data: updated, error } = await client.from('customer_directory').update(updates).eq('id', id).select('id,code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
+  const { data: updated, error } = await client.from('customer_directory').update(updates).eq('id', id).select('id,code,gc_code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
   if (error) throw error
   await logActivity(client, actor.id, actor.name, 'update_customer_account', id, updates)
-  return updated
+  return canonicalCustomerIdentity(updated)
 }
 
 async function archiveCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, staffId: string, staffName: string | null) {
@@ -585,13 +610,13 @@ async function lookupCustomer(client: ReturnType<typeof createClient>, payload: 
   const id = txt(payload.directory_customer_id)
   const phone = txt(payload.customer_phone)
   const code = normalizeGcCode(payload.customer_code)
-  if (id) { const { data, error } = await client.from('customer_directory').select('id,name,code,phone,auth_user_id').eq('id', id).maybeSingle(); if (error) throw error; return data ?? null }
+  if (id) { const { data, error } = await client.from('customer_directory').select('id,name,code,gc_code,phone,auth_user_id').eq('id', id).maybeSingle(); if (error) throw error; return data ? canonicalCustomerIdentity(data) : null }
   if (code) {
-    const { data, error } = await client.from('customer_directory').select('id,name,code,phone,auth_user_id').ilike('code', code).maybeSingle()
+    const { data, error } = await client.from('customer_directory').select('id,name,code,gc_code,phone,auth_user_id').or(`code.ilike.${code},gc_code.ilike.${code}`).limit(1).maybeSingle()
     if (error) throw error
-    if (data) return data
+    if (data) return canonicalCustomerIdentity(data)
   }
-  if (phone) { const { data, error } = await client.from('customer_directory').select('id,name,code,phone,auth_user_id').or(`phone.eq.${phone},phone2.eq.${phone}`).maybeSingle(); if (error) throw error; return data ?? null }
+  if (phone) { const { data, error } = await client.from('customer_directory').select('id,name,code,gc_code,phone,auth_user_id').or(`phone.eq.${phone},phone2.eq.${phone}`).maybeSingle(); if (error) throw error; return data ? canonicalCustomerIdentity(data) : null }
   return null
 }
 
@@ -606,7 +631,7 @@ async function createReceipt(client: ReturnType<typeof createClient>, payload: J
   const latitude = decimal(payload.latitude)
   const longitude = decimal(payload.longitude)
   const ocrConfidence = decimal(payload.ocr_confidence)
-  const gcCode = normalizeGcCode(payload.gc_code_detected || payload.scan_code)
+  const gcCode = normalizeGcCode(payload.gc_code_detected || payload.scan_code || payload.customer_code)
   const ocrText = txt(payload.ocr_text)
   const photoTakenAt = txt(payload.photo_taken_at) || new Date().toISOString()
   if (!batchCode) throw responseError('Missing batch_code', 400)
@@ -636,7 +661,7 @@ async function createReceipt(client: ReturnType<typeof createClient>, payload: J
   if (error) throw error
   let notificationCreated = false
   if (customer?.auth_user_id) {
-    const { error: notificationError } = await client.from('customer_notifications').insert({ customer_user_id: customer.auth_user_id, shipment_id: shipmentId, kind: 'warehouse_received', title: 'کارگۆکەت لە کۆگا وەرگیرا', body: `کارگۆکەت ${gcCode || batchCode} لە ${location} وەرگیرا. ${uploadedUrls.length} وێنە بەردەستە.`, action_url: shipmentId ? `/tracking.html?id=${encodeURIComponent(shipmentId)}` : null, event_key: `warehouse_received:${row.id}` })
+    const { error: notificationError } = await client.from('customer_notifications').insert({ customer_user_id: customer.auth_user_id, shipment_id: shipmentId, kind: 'warehouse_received', title: 'کارگۆکەت لە کۆگا وەرگیرا', body: `کارگۆکەت ${gcCode || batchCode} لە ${location} وەرگیرا. ${uploadedUrls.length} وێنە بەردەستە.`, action_url: shipmentId ? `/tracking-integration.html?id=${encodeURIComponent(shipmentId)}` : null, event_key: `warehouse_received:${row.id}` })
     if (notificationError) console.error('warehouse receipt notification failed', notificationError.message)
     else notificationCreated = true
   }

@@ -8,6 +8,7 @@
   const healthText = document.getElementById('gcHealthText');
   const notificationButton = document.getElementById('enableNotificationsBtn');
   let toastTimer;
+  let deepLinkStarted = false;
 
   window.showToast = (message, kind = 'info') => {
     if (!toast) return;
@@ -19,6 +20,8 @@
   };
 
   const normalizeSearchValue = (value) => String(value || '').trim().replace(/\s+/g, '').toUpperCase();
+  const query = new URLSearchParams(window.location.search);
+  const deepLinkId = normalizeSearchValue(query.get('id') || query.get('track'));
 
   const setHealth = (state, message) => {
     if (!health || !healthText) return;
@@ -63,6 +66,21 @@
         if (button) button.disabled = false;
       }
     });
+  }
+
+  const startDeepLinkSearch = async () => {
+    if (!deepLinkId || deepLinkStarted || !input) return;
+    input.value = deepLinkId;
+    await waitForSupabase();
+    if (typeof window.doTrackSearch !== 'function') return;
+    deepLinkStarted = true;
+    window.doTrackSearch();
+  };
+
+  if (deepLinkId && input) {
+    input.value = deepLinkId;
+    window.addEventListener('load', () => { void startDeepLinkSearch(); }, { once: true });
+    setTimeout(() => { void startDeepLinkSearch(); }, 0);
   }
 
   if (notificationButton) {
