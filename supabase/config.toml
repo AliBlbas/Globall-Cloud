@@ -38,6 +38,9 @@ verify_jwt = true
 [functions.warehouse-receipt-proof]
 verify_jwt = true
 
+[functions.warehouse-receiving]
+verify_jwt = true
+
 [functions.operations-admin]
 verify_jwt = true
 
