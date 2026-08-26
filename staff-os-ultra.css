@@ -123,3 +123,96 @@ body{
 @media(max-width:560px){.control-tower .card-head{display:grid;gap:10px}.control-tower .card-head .btn{justify-self:start}.tower-regions{gap:6px}.tower-regions>div{padding:10px}.tower-regions b{font-size:19px}.tower-regions span{font-size:10px}.tower-grid{gap:6px}.tower-signal{padding:9px}.tower-signal b{font-size:17px}.tower-signal small{line-height:1.4}}
 /* Shipment 360: dense, responsive operational detail without inventing values. */
 .shipment360-summary{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:0 0 14px}.shipment360-summary>div{display:grid;gap:4px;min-width:0;padding:10px 11px;border:1px solid rgba(151,205,239,.12);border-radius:12px;background:rgba(255,255,255,.025)}.shipment360-summary span{color:#88a6bf;font-size:9px;text-transform:uppercase;letter-spacing:.6px}.shipment360-summary b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#d8fbff;font:800 12px var(--mono)}.shipment360-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.shipment360-section{min-width:0;padding-top:12px;border-top:1px solid rgba(151,205,239,.12)}.shipment360-section:first-child{grid-column:1/-1}.shipment360-section .card-head{margin-bottom:8px}.shipment360-section h4{margin:0;color:#d9f6ff;font-size:13px}.shipment360-section .table-wrap{max-height:300px;overflow:auto}.shipment360-section .table-wrap table{min-width:560px}@media(max-width:760px){.shipment360-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.shipment360-grid{grid-template-columns:1fr}.shipment360-section:first-child{grid-column:auto}}@media(max-width:420px){.shipment360-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.shipment360-summary>div{padding:9px}.shipment360-summary b{font-size:11px}.shipment360-section .table-wrap table{min-width:500px}}
+
+
+/* Photo Proof Receipt — mobile-first evidence workflow */
+.receipt-proof-form{
+  position:relative;
+  overflow:hidden;
+  border-color:rgba(194,235,255,.34);
+  background:linear-gradient(145deg,rgba(12,45,75,.9),rgba(3,16,30,.98));
+  box-shadow:0 20px 55px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.08);
+}
+.receipt-proof-form::before{
+  content:'GC PHOTO PROOF';
+  position:absolute;
+  inset-inline-start:17px;
+  top:17px;
+  color:#69e8c1;
+  font:800 9px var(--mono);
+  letter-spacing:1.5px;
+}
+.receipt-proof-form .card-head{padding-top:17px}
+.receipt-proof-form .card-head>div{min-width:0}
+.receipt-proof-form .card-head h3{margin:6px 0 4px;font-size:20px}
+.receipt-proof-form .card-head .muted{display:block;max-width:680px;line-height:1.75}
+.receipt-flow-rail{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin:0 0 16px;
+  padding:10px;
+  border:1px solid rgba(151,205,239,.13);
+  border-radius:15px;
+  background:rgba(1,10,19,.3);
+}
+.receipt-flow-step{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  min-height:46px;
+  padding:9px 10px;
+  border:1px solid rgba(151,205,239,.13);
+  border-radius:12px;
+  background:rgba(255,255,255,.025);
+  color:#9db8ce;
+  font-size:10px;
+  font-weight:800;
+}
+.receipt-flow-step b{
+  display:grid;
+  place-items:center;
+  width:25px;
+  height:25px;
+  flex:0 0 25px;
+  border-radius:8px;
+  background:rgba(139,234,246,.08);
+  color:#9deff6;
+  font:800 10px var(--mono);
+}
+.receipt-flow-step.is-active{
+  border-color:rgba(24,210,237,.46);
+  background:linear-gradient(100deg,rgba(24,210,237,.15),rgba(24,210,237,.035));
+  color:#effdff;
+}
+.receipt-flow-step.is-active b{background:rgba(24,210,237,.18);color:#d8fbff}
+.receipt-proof-form .form-grid{gap:12px}
+.receipt-proof-form label{display:grid;gap:6px;color:#a9c4d8;font-size:11px;font-weight:800;line-height:1.5}
+.receipt-proof-form label .field{margin:0}
+.receipt-proof-form label>.btn{justify-self:start;margin-top:-1px}
+.receipt-proof-form #receiptPhotos{padding:10px;background:rgba(1,10,19,.45);border-style:dashed}
+.receipt-proof-form #receiptPhotos::file-selector-button{margin-inline-end:8px;border:1px solid rgba(139,234,246,.28);border-radius:9px;padding:8px 10px;background:rgba(139,234,246,.1);color:#d8fbff;font-weight:800;cursor:pointer}
+.receipt-proof-form #receiptGps{display:inline-block;margin-inline-start:8px;line-height:1.6}
+.receipt-proof-form #receiptMatch{margin-top:4px;border-color:rgba(139,234,246,.18);background:rgba(139,234,246,.05)}
+.receipt-proof-form .head-actions{align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid rgba(151,205,239,.12)}
+.receipt-proof-form #saveReceipt{min-width:190px;min-height:48px}
+.receipt-proof-form+#receiptList{margin-top:14px}
+@media(max-width:560px){
+  .receipt-proof-form{padding:14px}
+  .receipt-proof-form::before{position:static;display:block;margin-bottom:4px}
+  .receipt-proof-form .card-head{padding-top:0}
+  .receipt-proof-form .card-head h3{font-size:19px}
+  .receipt-flow-rail{gap:6px;padding:7px;margin-bottom:13px}
+  .receipt-flow-step{min-height:54px;display:grid;justify-items:center;align-content:center;gap:3px;padding:7px 4px;text-align:center;font-size:9px}
+  .receipt-flow-step b{width:23px;height:23px;flex-basis:23px}
+  .receipt-proof-form .head-actions{display:grid;grid-template-columns:1fr;align-items:stretch}
+  .receipt-proof-form #saveReceipt{width:100%;min-width:0}
+  .receipt-proof-form #receiptGps{margin:7px 0 0;display:block}
+}
+@media(max-width:360px){
+  .receipt-flow-step{font-size:8px}
+  .receipt-proof-form .card-head h3{font-size:17px}
+}
+.receipt-flow-step.is-complete{border-color:rgba(85,230,178,.38);background:rgba(85,230,178,.07);color:#c9f9e7}.receipt-flow-step.is-complete b{background:rgba(85,230,178,.16);color:#9af2c9}
+.receipt-flow-step{direction:ltr}.receipt-flow-step span{display:block;white-space:nowrap}
