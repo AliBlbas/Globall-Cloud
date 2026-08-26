@@ -71,13 +71,13 @@
       </div>
       <section class="gc-track-panel" aria-labelledby="lookup-title">
         <h2 id="lookup-title">شوێنکەوتنی بار</h2>
-        <p>ژمارەی شوێنکەوتن یان ID ـی shipment ـەکەت بنووسە.</p>
+        <p>کۆدی کڕیاری GC یان ID ـی shipment ـەکەت بنووسە.</p>
         <form class="gc-track-form" id="gcTrackingForm">
           <label class="sr-only" for="trackInput">ژمارەی شوێنکەوتن</label>
-          <input id="trackInput" name="tracking_id" inputmode="text" autocomplete="off" spellcheck="false" maxlength="128" placeholder="وەک GC10052341" aria-describedby="gcCodeHelp" required>
+          <input id="trackInput" name="tracking_id" inputmode="text" autocomplete="off" spellcheck="false" maxlength="128" placeholder="وەک GC-338 یان shipment ID" aria-describedby="gcCodeHelp" required>
           <button type="submit">شوێنکەوتن</button>
         </form>
-        <div class="gc-code-help" id="gcCodeHelp"><strong>تێبینی:</strong> کۆدی customer ـەکەت وەک <strong>GC-338</strong> ـە؛ بۆ tracking ـی گشتی، ئەو shipment ID ـە بەکاربهێنە کە بۆ هەمان بار دروست کراوە. لە Customer Portal و Warehouse OS ـدا GC code بۆ ownership و receipt matching بەکاردهێنرێت.</div>
+        <div class="gc-code-help" id="gcCodeHelp"><strong>تێبینی:</strong> کۆدی customer ـەکەت وەک <strong>GC-338</strong> ـە و دەتوانیت ڕاستەوخۆ بۆ دۆزینەوەی نوێترین بارە چالاکەکەت بەکاریبهێنیت. بۆ بینینی یەک باری دیاریکراو، shipment ID ـی هەمان بار بنووسە. لە Customer Portal و Warehouse OS ـدا هەمان GC code بۆ ownership و receipt matching بەکاردهێنرێت.</div>
         <div class="gc-health" id="gcHealth" data-state="checking" aria-live="polite"><span class="gc-health-dot" aria-hidden="true"></span><span id="gcHealthText">پەیوەندی بە سیستەمەکە لە پشکنینە…</span></div>
       </section>
     </section>
@@ -85,7 +85,7 @@
     <section class="gc-track-sections" aria-label="وردەکارییەکانی شوێنکەوتن">
       <div class="gc-track-section">
         <h2>📍 نەخشەی زیندووی ڕێگا</h2>
-        <div id="liveMapContainer"><div class="gc-placeholder">دوای داخڵکردنی shipment ID، نەخشە و شوێنی نوێ دەردەکەوێت.</div></div>
+        <div id="liveMapContainer"><div class="gc-placeholder">دوای داخڵکردنی GC code یان shipment ID، نەخشە و شوێنی نوێ دەردەکەوێت.</div></div>
       </div>
       <div class="gc-track-section">
         <h2>📦 هەنگاوەکانی بار</h2>
@@ -97,7 +97,7 @@
   </main>
   <div class="gc-toast" id="gcToast" role="status" aria-live="polite"></div>
   <script src="/production-bridge.js?v=20260824-1" defer></script>
-  <script src="/tracking-enhanced.js?v=20260826-1" defer></script>
+  <script src="/tracking-enhanced.js?v=20260826-2" defer></script>
   <script src="/gc-csp-scripts/tracking-integration-inline-1.js?v=20260826-2" defer data-gc-externalized="1"></script>
   <script src="/tracking-route-controller.js?v=20260826-2" defer></script>
 </body>

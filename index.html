@@ -1306,9 +1306,19 @@ body{background-color:var(--ink); background-image:radial-gradient(ellipse 700px
         </select>
       </div>
       <div class="form-row">
-        <label class="field-label" data-i18n="services.quote.weight"></label>
+        <label class="field-label" for="quoteProduct">جۆری کاڵا</label>
+        <select class="field" id="quoteProduct"></select>
+        <small id="quoteProductHint" class="field-hint">نرخەکە بە جۆری کاڵا و ڕێگای گواستنەوە دیاری دەکرێت.</small>
+      </div>
+      <div class="form-row">
+        <label class="field-label" id="quoteWeightLabel" data-i18n="services.quote.weight"></label>
         <input class="field" type="number" id="quoteWeight" min="0.1" max="50000" step="0.1" inputmode="decimal" required aria-describedby="quoteWeightHint" data-i18n-ph="services.quote.weightPh">
         <small id="quoteWeightHint" class="field-hint">0.1–50,000 kg</small>
+      </div>
+      <div class="form-row" id="quoteVolumeRow" style="display:none;">
+        <label class="field-label" for="quoteVolume">حەجم</label>
+        <input class="field" type="number" id="quoteVolume" min="0.01" max="100000" step="0.01" inputmode="decimal" aria-describedby="quoteVolumeHint" placeholder="بۆ نموونە 1.5">
+        <small id="quoteVolumeHint" class="field-hint">مەتری سێگۆشە (CBM) ـی کاڵاکە بنووسە.</small>
       </div>
       <div class="form-row">
         <label class="field-label" data-i18n="services.quote.dest"></label>
@@ -1385,7 +1395,9 @@ body{background-color:var(--ink); background-image:radial-gradient(ellipse 700px
             <option value="land" data-i18n="track.type.land"></option>
           </select>
         </div>
-        <div class="form-row"><label class="field-label" data-i18n="request.weight"></label><input class="field" type="number" min="1" id="reqWeight" required></div>
+        <div class="form-row"><label class="field-label" for="reqProduct">جۆری کاڵا</label><select class="field" id="reqProduct"></select></div>
+        <div class="form-row"><label class="field-label" data-i18n="request.weight"></label><input class="field" type="number" min="0.1" max="50000" step="0.1" id="reqWeight" required><small id="reqWeightHint" class="field-hint">0.1–50,000 kg</small></div>
+        <div class="form-row" id="reqVolumeRow" style="display:none;"><label class="field-label" for="reqVolume">حەجم (CBM)</label><input class="field" type="number" min="0.01" max="100000" step="0.01" id="reqVolume"><small class="field-hint">بڕی مەتری سێگۆشەی کاڵاکە.</small></div>
       </div>
       <div class="form-row"><label class="field-label" data-i18n="request.notes"></label><textarea class="field" id="reqNotes"></textarea></div>
       <button class="btn btn-primary btn-block" type="submit" id="reqSubmitBtn" data-i18n="request.submit"></button>
@@ -1821,8 +1833,8 @@ body{background-color:var(--ink); background-image:radial-gradient(ellipse 700px
 <script src="site-analytics.js?v=20260824-1" defer></script>
 <script src="whatsapp-messenger.js"></script>
 <script src="webhook-handler.js"></script>
-<script src="tracking-enhanced.js"></script>
-<script src="/gc-csp-scripts/index-inline-2.js?v=20260824-5" defer data-gc-externalized="1"></script>
+<script src="tracking-enhanced.js?v=20260826-2"></script>
+<script src="/gc-csp-scripts/index-inline-2.js?v=20260826-1" defer data-gc-externalized="1"></script>
 <div id="printLabelArea"></div>
 </body>
 </html>

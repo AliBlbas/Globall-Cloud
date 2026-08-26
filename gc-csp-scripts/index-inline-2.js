@@ -175,7 +175,7 @@ ku:{
       {h:'٦. گۆڕانکاری مەرجەکان', p:'Globall Cloud مافی خۆی هەیە ئەم مەرجانە لە هەر کاتێکدا نوێ بکاتەوە. بەردەوامبوون لە بەکارهێنانی خزمەتگوزارییەکانمان دوای نوێکردنەوە بە واتای قبوڵکردنی مەرجە نوێیەکانە.'}
     ]
   },
-  track:{heading:'شوێنکەوتنی بار',sub:'ژمارەی شوێنکەوتنی بارەکەت بنووسە بۆ زانینی دۆخی ئێستا',searchPh:'وەک GC10052341',searchBtn:'بگەڕێ',
+  track:{heading:'شوێنکەوتنی بار',sub:'کۆدی کڕیاری GC-### یان shipment ID ـەکەت بنووسە بۆ زانینی دۆخی ئێستا',searchPh:'وەک GC-338 یان shipment ID',searchBtn:'بگەڕێ',
     notFoundTitle:'هیچ بارێک نەدۆزرایەوە',notFoundBody:'تکایە ژمارەی شوێنکەوتن بپشکنە، یان داواکارییەکی نوێ تۆمار بکە.',requestInstead:'داواکاری نوێ بکە',
     detailsH:'زانیاری بارکردن',timelineH:'هێڵی کات',save:'زیادکردن بۆ بارەکانم',saved:'زیادکرا ✓',signInToSave:'چوونەژوورەوە بۆ هەڵگرتن',
     status:{pending:'چاوەڕوانە',transit:'لە ڕێگادایە',delivered:'گەیشت'},
@@ -202,7 +202,7 @@ en:{
   nav:{home:'Home',about:'About Us',services:'Services',track:'Track',contact:'Contact',signIn:'Sign In',dashboard:'Dashboard',quote:'Get a Quote'},
   hero:{eyebrow:'CHINA  ·  UAE  ·  IRAQ',title:'Delivering Trust Across Borders',subtitle:'Globall Cloud moves your cargo safely and quickly from China and the United Arab Emirates to every city in Iraq — with live tracking, clear milestones, and 24/7 support.',ctaTrack:'Track Shipment',ctaQuote:'Get a Quote',ctaWhatsApp:'Chat on WhatsApp',route:{a:'Guangzhou, China',b:'Dubai, UAE',c:'Erbil, Iraq'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'Your cargo is moving through our China → Dubai → Erbil network with live updates.',routeOrigin:'Origin Hub',routeTransit:'Transit Hub',routeDestination:'Delivery Hub'},
   trust:{s1v:'25K+',s1l:'Delivered shipments',s2v:'12+',s2l:'Connected markets',s3v:'24/7',s3l:'Live support',s4v:'98%',s4l:'On-time delivery'},
-  liveTrack:{heading:'Track in seconds',sub:'Enter your tracking number to see the latest shipment status instantly.',placeholder:'e.g. GC10052341',button:'Track Shipment'},
+  liveTrack:{heading:'Track in seconds',sub:'Enter your GC customer code or exact shipment ID to see the latest status.',placeholder:'e.g. GC-338 or shipment ID',button:'Track Shipment'},
   business:{eyebrow:'BUSINESS PAGES',heading:'Everything customers need is one tap away',sub:'Jump straight to services, pricing, dashboard tools, warehouses, and support.',
     items:{
       services:{title:'Services',desc:'Air, sea, land, customs, and door-to-door delivery.',action:'View services',icon:'i-box',route:'services'},
@@ -315,7 +315,7 @@ en:{
       {h:'6. Changes to These Terms', p:'Globall Cloud reserves the right to update these terms at any time. Continued use of our services after an update constitutes acceptance of the revised terms.'}
     ]
   },
-  track:{heading:'Track Shipment',sub:'Enter your tracking ID to see its current status',searchPh:'e.g. GC10052341',searchBtn:'Track',
+  track:{heading:'Track Shipment',sub:'Enter your GC customer code or exact shipment ID to see its current status',searchPh:'e.g. GC-338 or shipment ID',searchBtn:'Track',
     notFoundTitle:'No shipment found',notFoundBody:'Please check the tracking ID, or submit a new request.',requestInstead:'Request a Shipment',
     detailsH:'Shipment Details',timelineH:'Timeline',save:'Add to My Shipments',saved:'Saved ✓',signInToSave:'Sign in to save',
     status:{pending:'Pending',transit:'In Transit',delivered:'Delivered'},
@@ -569,7 +569,13 @@ async function getShipment(id){
       if(!error && data) return rowToShipment(data);
     }
     const {data} = await sb.rpc('track_shipment', {p_id:id});
-    return (data && data[0]) ? rowToShipment(data[0]) : null;
+    if(data && data[0]) return rowToShipment(data[0]);
+    try{
+      const projectUrl = window.gcSupabaseConfig?.url || SUPABASE_URL;
+      const response = await fetch(`${projectUrl}/functions/v1/public-track?id=${encodeURIComponent(id)}`, { method:'GET', headers:{Accept:'application/json',apikey:SUPABASE_PUBLISHABLE_KEY}, cache:'no-store' });
+      const body = await response.json().catch(()=>({}));
+      return response.ok && body?.shipment ? rowToShipment(body.shipment) : null;
+    }catch(_error){ return null; }
   }
   const val = await safeGet('shipment:'+id, true);
   return val ? JSON.parse(val) : null;
@@ -1329,9 +1335,37 @@ function selectRouteCard(wrapId, hiddenInputId, key){
   document.getElementById(hiddenInputId).value = key;
   document.querySelectorAll('#'+wrapId+' .route-card').forEach(el=>el.classList.toggle('active', el.dataset.key===key));
 }
+function requestRatesForForm(){
+  const origin = String(document.getElementById('reqOrigin')?.value || 'china').toLowerCase();
+  const mode = document.getElementById('reqType')?.value || 'air';
+  const destination = String(document.getElementById('reqDestination')?.value || 'hawler').toLowerCase();
+  return quoteCatalogState.rates.filter(rate => String(rate.origin_key||'').toLowerCase() === quoteOriginKey(origin).toLowerCase() && String(rate.transport_mode||'').toLowerCase() === mode && String(rate.destination_key||'').toLowerCase() === (destination === 'hawler' ? 'erbil' : destination));
+}
+function syncRequestQuoteFields(){
+  const type = document.getElementById('reqType')?.value || 'air';
+  const productEl = document.getElementById('reqProduct');
+  const weightEl = document.getElementById('reqWeight');
+  const volumeEl = document.getElementById('reqVolume');
+  const volumeRow = document.getElementById('reqVolumeRow');
+  if(!productEl) return;
+  const rows = requestRatesForForm();
+  const previous = productEl.value;
+  productEl.innerHTML = rows.length ? rows.map(rate => `<option value="${escapeHtml(rate.product_type)}">${escapeHtml(rate.product_type)}</option>`).join('') : `<option value="">${currentLang === 'ku' ? 'جۆری کاڵا هەڵبژێرە' : 'Select a product type'}</option>`;
+  if(rows.some(row => row.product_type === previous)) productEl.value = previous;
+  const sea = type === 'sea';
+  if(volumeRow) volumeRow.style.display = sea ? '' : 'none';
+  if(volumeEl) volumeEl.required = sea;
+  if(weightEl) weightEl.required = !sea;
+}
 function populateRequestSelects(){
   renderRoutePicker('reqOriginPicker', 'reqOrigin', ORIGIN_KEYS);
   renderRoutePicker('reqDestPicker', 'reqDestination', DEST_KEYS);
+  syncRequestQuoteFields();
+  const type = document.getElementById('reqType');
+  if(type && type.dataset.gcRequestWired !== '1'){
+    type.dataset.gcRequestWired = '1';
+    type.addEventListener('change', syncRequestQuoteFields);
+  }
 }
 
 async function handleRequestSubmit(e){
@@ -1346,12 +1380,28 @@ async function handleRequestSubmit(e){
   const originKey = document.getElementById('reqOrigin').value;
   const destKey = document.getElementById('reqDestination').value;
   const type = document.getElementById('reqType').value;
-  const weightKg = Number(document.getElementById('reqWeight').value) || 0;
+  const product = document.getElementById('reqProduct')?.value || '';
+  const weightRaw = Number(document.getElementById('reqWeight').value);
+  const volumeRaw = Number(document.getElementById('reqVolume')?.value);
+  const weightKg = Number.isFinite(weightRaw) && weightRaw > 0 ? weightRaw : null;
+  const volumeCbm = Number.isFinite(volumeRaw) && volumeRaw > 0 ? volumeRaw : null;
   const notes = document.getElementById('reqNotes').value.trim();
+  if(type === 'sea' && !volumeCbm){
+    btn.disabled = false; btn.textContent = originalLabel;
+    showToast('تکایە حەجمی CBM ـی کاڵاکە بنووسە.', 'error');
+    document.getElementById('reqVolume')?.focus();
+    return;
+  }
+  if(type !== 'sea' && !weightKg){
+    btn.disabled = false; btn.textContent = originalLabel;
+    showToast(t('services.quote.needWeight'), 'error');
+    document.getElementById('reqWeight')?.focus();
+    return;
+  }
   const payload = {
     name, phone, email, origin_key: originKey, dest_key: destKey,
-    transport_mode: type, weight_kg: weightKg,
-    volume_cbm: Math.round((weightKg / 500) * 10) / 10,
+    transport_mode: type, product_type: product, weight_kg: weightKg,
+    volume_cbm: type === 'sea' ? volumeCbm : (weightKg ? Math.round((weightKg / 500) * 10) / 10 : null),
     items_count: null, service_level: 'standard', incoterm: 'EXW', notes
   };
 
@@ -1378,7 +1428,7 @@ async function handleRequestSubmit(e){
   notifyOwner('داواکاریی نوێی نرخ — '+requestId, {
     'ژمارەی داواکاری':requestId, 'ناو':name, 'مۆبایل':phone, 'ئیمەیل':(email||'—'),
     'لە':placeLabel(originKey), 'بۆ':placeLabel(destKey),
-    'جۆر':t('track.type.'+type), 'کێش (kg)':weightKg, 'تێبینی':(notes||'—')
+    'جۆر':t('track.type.'+type), 'جۆری کاڵا':(product||'—'), 'کێش (kg)':(weightKg||'—'), 'حەجم (CBM)':(volumeCbm||'—'), 'تێبینی':(notes||'—')
   });
 
   const safeRequestId = requestId.replace(/'/g, "\\'");
@@ -2765,51 +2815,110 @@ function printShipmentLabel(shipmentId){
   setTimeout(()=>window.print(), 250);
 }
 
-/* ================= QUOTE ESTIMATOR =================
-   Configurable per-kg base rates and per-city multipliers.
-   Ali: edit QUOTE_RATES / QUOTE_CITY_FACTOR below to match real pricing. */
-const QUOTE_RATES = { air: 6.5, sea: 1.8, land: 3.2 };       // $ per kg, base rate from China/UAE
-const QUOTE_MIN_CHARGE = { air: 35, sea: 60, land: 25 };      // minimum charge per shipment ($)
-const QUOTE_CITY_FACTOR = {                                    // distance/access multiplier from Erbil hub
-  hawler:1, slimani:1.05, duhok:1.1, bakhdad:1.2, kerkuk:1.1, mosul:1.15, basra:1.35
-};
-function calcQuote(){
-  const origin = document.getElementById('quoteOrigin')?.value || 'china';
-  const originLabels = { china:'چین', uae:'دوبەی / ئیمارات', usa:'ئەمریکا' };
-  const destLabels = { hawler:'هەولێر', slimani:'سلێمانی', duhok:'دهۆک', bakhdad:'بەغدا', kerkuk:'کەرکووک', mosul:'موسڵ', basra:'بەسرە' };
-  const type = document.getElementById('quoteType')?.value || 'air';
+/* ================= VERIFIED QUOTE ESTIMATOR =================
+   The public calculator reads the active, staff-managed pricing catalog from
+   public-quote?catalog=1. It never invents a number for an unconfigured route
+   or product; customers are directed to the request/WhatsApp path instead. */
+let quoteCatalogState = { rates: [], loaded: false, loading: null };
+const quoteOriginKey = (value) => ({ china:'China', uae:'UAE', usa:'USA' }[value] || value);
+const quoteOriginLabels = { china:'چین', uae:'دوبەی / ئیمارات', usa:'ئەمریکا' };
+const quoteDestLabels = { hawler:'هەولێر', slimani:'سلێمانی', duhok:'دهۆک', bakhdad:'بەغدا', kerkuk:'کەرکووک', mosul:'موسڵ', basra:'بەسرە' };
+const quoteModeLabels = { air:'ئاسمانی', sea:'دەریایی', land:'وشکانی / زمینی' };
+
+async function loadQuoteCatalog(){
+  if(quoteCatalogState.loaded) return quoteCatalogState.rates;
+  if(quoteCatalogState.loading) return quoteCatalogState.loading;
+  quoteCatalogState.loading = (async()=>{
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/public-quote?catalog=1`, { method:'GET', headers:{Accept:'application/json', apikey:SUPABASE_PUBLISHABLE_KEY}, cache:'no-store' });
+    const body = await response.json().catch(()=>({}));
+    if(!response.ok || !Array.isArray(body.rates)) throw new Error(body.error || 'Verified pricing is unavailable');
+    quoteCatalogState.rates = body.rates.filter(row => row && row.is_active !== false);
+    quoteCatalogState.loaded = true;
+    syncQuoteForm();
+    return quoteCatalogState.rates;
+  })().finally(()=>{ quoteCatalogState.loading = null; });
+  return quoteCatalogState.loading;
+}
+
+function quoteRatesForForm(){
+  const origin = quoteOriginKey(document.getElementById('quoteOrigin')?.value || 'china');
+  const mode = document.getElementById('quoteType')?.value || 'air';
+  const destination = String(document.getElementById('quoteDest')?.value || 'hawler').toLowerCase();
+  return quoteCatalogState.rates.filter(rate => String(rate.origin_key||'').toLowerCase() === origin.toLowerCase() && String(rate.transport_mode||'').toLowerCase() === mode && String(rate.destination_key||'').toLowerCase() === (destination === 'hawler' ? 'erbil' : destination));
+}
+
+function syncQuoteForm(){
+  const mode = document.getElementById('quoteType')?.value || 'air';
+  const productEl = document.getElementById('quoteProduct');
+  const weightLabel = document.getElementById('quoteWeightLabel');
+  const weightHint = document.getElementById('quoteWeightHint');
+  const volumeRow = document.getElementById('quoteVolumeRow');
   const weightEl = document.getElementById('quoteWeight');
-  const weight = Number(weightEl?.value);
+  if(!productEl) return;
+  const rows = quoteRatesForForm();
+  const previous = productEl.value;
+  productEl.innerHTML = rows.length ? rows.map(rate => `<option value="${escapeHtml(rate.product_type)}">${escapeHtml(rate.product_type)} · $${Number(rate.amount).toLocaleString('en-US',{maximumFractionDigits:2})}/${escapeHtml(rate.unit)}</option>`).join('') : `<option value="">${currentLang === 'ku' ? 'نرخی پشتڕاستکراو بۆ ئەم ڕێگایە نییە' : 'No verified rate for this route'}</option>`;
+  if(rows.some(row => row.product_type === previous)) productEl.value = previous;
+  const sea = mode === 'sea';
+  if(volumeRow) volumeRow.style.display = sea ? '' : 'none';
+  if(weightEl) weightEl.required = !sea;
+  if(weightLabel) weightLabel.textContent = sea ? 'کێشی کاڵا (kg)' : 'کێش (kg)';
+  if(weightHint) weightHint.textContent = sea ? 'بۆ زانیاری؛ بڕی نرخ بە CBM ـە.' : '0.1–50,000 kg';
+  const hint = document.getElementById('quoteProductHint');
+  if(hint) hint.textContent = rows.length ? (currentLang === 'ku' ? 'نرخەکان لە catalog ـی چالاکی سیستەمەوە دێن.' : 'Rates are loaded from the active system catalog.') : (currentLang === 'ku' ? 'بۆ نرخی ئەم ڕێگا/جۆرە تکایە داواکاری بنێرە.' : 'Request a quote for this route or product.');
+}
+
+function quoteUnavailableHTML(origin, dest, mode){
+  return `<div class="quote-result-card quote-result-card--notice"><div class="quote-route">${escapeHtml(quoteOriginLabels[origin] || origin)} → ${escapeHtml(quoteDestLabels[dest] || dest)} · ${escapeHtml(quoteModeLabels[mode] || mode)}</div><div class="quote-price">${currentLang === 'ku' ? 'نرخ بەردەست نییە' : 'Quote required'}</div><div class="hint">${currentLang === 'ku' ? 'نرخی پشتڕاستکراو بۆ ئەم route/product ـە لە catalog ـدا نییە. داواکارییەکە بنێرە یان لە WhatsApp پەیوەندی بکە.' : 'There is no verified catalog rate for this route/product. Send a quote request or contact WhatsApp.'}</div><div class="quote-result-actions"><button class="btn btn-primary" data-gc-onclick="route('request')">${t('services.quote.cta')}</button><a class="btn btn-outline" href="https://wa.me/message/4P6O3FXDR4HUA1" target="_blank" rel="noopener">WhatsApp</a></div></div>`;
+}
+
+async function calcQuote(){
+  const origin = document.getElementById('quoteOrigin')?.value || 'china';
+  const type = document.getElementById('quoteType')?.value || 'air';
+  const product = document.getElementById('quoteProduct')?.value || '';
   const dest = document.getElementById('quoteDest')?.value || 'hawler';
+  const weightEl = document.getElementById('quoteWeight');
+  const volumeEl = document.getElementById('quoteVolume');
+  const weight = Number(weightEl?.value);
+  const volume = Number(volumeEl?.value);
   const resultEl = document.getElementById('quoteResult');
   const calcBtn = document.getElementById('quoteCalcBtn');
-  const invalidMessage = t('services.quote.needWeight');
-  if(!Number.isFinite(weight) || weight <= 0 || weight > 50000){
-    if(weightEl) weightEl.focus();
-    if(resultEl) resultEl.innerHTML = `<p class="admin-error" style="display:block; margin-top:12px;" role="alert">${invalidMessage}</p>`;
-    return;
-  }
   if(calcBtn){ calcBtn.disabled = true; calcBtn.classList.add('is-loading'); calcBtn.setAttribute('aria-busy','true'); }
-  if(resultEl) resultEl.innerHTML = `<p class="hint" style="margin-top:14px;">${currentLang === 'ku' ? 'خەملاندن لە ئامادەکردندایە...' : 'Preparing your estimate…'}</p>`;
-  window.setTimeout(()=>{
-    const base = weight * QUOTE_RATES[type] * QUOTE_CITY_FACTOR[dest];
-    const est = Math.max(base, QUOTE_MIN_CHARGE[type]);
-    const low = Math.round(est * 0.9);
-    const high = Math.round(est * 1.15);
-    const lowIqd = Math.round(low * getExchangeRate());
-    const highIqd = Math.round(high * getExchangeRate());
-    if(resultEl) resultEl.innerHTML = `
-      <div class="quote-result-card">
-        <div class="quote-route">${escapeHtml(originLabels[origin] || originLabels.china)} → ${escapeHtml(destLabels[dest] || dest)} · ${weight.toLocaleString()} kg</div>
-        <div class="quote-price">$${low} – $${high}</div>
-        <div class="hint">≈ ${lowIqd.toLocaleString()} – ${highIqd.toLocaleString()} د.ع</div>
-        <div class="quote-result-actions">
-          <button class="btn btn-primary" data-gc-onclick="route('request')">${t('services.quote.cta')}</button>
-          <button class="btn btn-outline" data-gc-onclick="route('track')">${currentLang === 'ku' ? 'شوێنکەوتنی بار' : 'Track shipment'}</button>
-        </div>
-      </div>`;
+  if(resultEl) resultEl.innerHTML = `<p class="hint" style="margin-top:14px;">${currentLang === 'ku' ? 'نرخی پشتڕاستکراو لە سیستەمەوە وەردەگیرێت...' : 'Loading verified rates…'}</p>`;
+  try{
+    await loadQuoteCatalog();
+    syncQuoteForm();
+    const rows = quoteRatesForForm();
+    const rate = rows.find(row => row.product_type === product) || rows[0];
+    if(!rate){ if(resultEl) resultEl.innerHTML = quoteUnavailableHTML(origin,dest,type); return; }
+    const units = type === 'sea' ? volume : weight;
+    const max = type === 'sea' ? 100000 : 50000;
+    if(!Number.isFinite(units) || units <= 0 || units > max){
+      const field = type === 'sea' ? volumeEl : weightEl;
+      if(field) field.focus();
+      if(resultEl) resultEl.innerHTML = `<p class="admin-error" style="display:block; margin-top:12px;" role="alert">${type === 'sea' ? (currentLang === 'ku' ? 'تکایە حەجمی CBM ـی دروست بنووسە.' : 'Enter a valid CBM volume.') : t('services.quote.needWeight')}</p>`;
+      return;
+    }
+    const total = Math.round(units * Number(rate.amount) * 100) / 100;
+    const iqd = Math.round(total * getExchangeRate());
+    const transit = rate.transit_min_days != null ? `${rate.transit_min_days}${rate.transit_max_days != null && rate.transit_max_days !== rate.transit_min_days ? `–${rate.transit_max_days}` : ''} ${currentLang === 'ku' ? 'ڕۆژ' : 'days'}` : '';
+    if(resultEl) resultEl.innerHTML = `<div class="quote-result-card"><div class="quote-route">${escapeHtml(quoteOriginLabels[origin] || origin)} → ${escapeHtml(quoteDestLabels[dest] || dest)} · ${escapeHtml(rate.product_type)}</div><div class="quote-price">$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div class="hint">≈ ${iqd.toLocaleString()} د.ع · ${units.toLocaleString('en-US',{maximumFractionDigits:4})} ${escapeHtml(rate.unit)} × $${Number(rate.amount).toLocaleString('en-US',{maximumFractionDigits:2})}</div>${transit ? `<div class="hint">${currentLang === 'ku' ? 'ماوەی خەملێنراو' : 'Estimated transit'}: ${escapeHtml(transit)}</div>` : ''}<div class="quote-result-actions"><button class="btn btn-primary" data-gc-onclick="route('request')">${t('services.quote.cta')}</button><button class="btn btn-outline" data-gc-onclick="route('track')">${currentLang === 'ku' ? 'شوێنکەوتنی بار' : 'Track shipment'}</button></div></div>`;
+  }catch(error){
+    if(resultEl) resultEl.innerHTML = `<div class="quote-result-card quote-result-card--notice"><div class="quote-price">${currentLang === 'ku' ? 'نرخی کاتیی بەردەست نییە' : 'Verified rate unavailable'}</div><div class="hint">${currentLang === 'ku' ? 'سیستەمی نرخەکان ئێستا وەڵام ناداتەوە؛ داواکاری نرخ بنێرە بۆ پێداچوونەوەی ستاف.' : 'The rate catalog is temporarily unavailable; send a quote request for staff review.'}</div><div class="quote-result-actions"><button class="btn btn-primary" data-gc-onclick="route('request')">${t('services.quote.cta')}</button></div></div>`;
+  }finally{
     if(calcBtn){ calcBtn.disabled = false; calcBtn.classList.remove('is-loading'); calcBtn.removeAttribute('aria-busy'); }
-  }, 180);
+  }
+}
+
+function initQuotePricingUI(){
+  const origin = document.getElementById('quoteOrigin');
+  const type = document.getElementById('quoteType');
+  const dest = document.getElementById('quoteDest');
+  if(!origin || !type || !dest || origin.dataset.gcQuoteWired === '1') return;
+  origin.dataset.gcQuoteWired = '1';
+  [origin,type,dest].forEach(el => el.addEventListener('change', ()=>{ syncQuoteForm(); const result=document.getElementById('quoteResult'); if(result) result.innerHTML=''; }));
+  syncQuoteForm();
+  loadQuoteCatalog().catch(()=>syncQuoteForm());
 }
 
 let batchLookupTimer = null;
@@ -3256,6 +3365,7 @@ async function init(){
   setThemeIcon();
 
   await loadExchangeRate();
+  initQuotePricingUI();
   await initShipments();
   applyI18n();
   await updateNavAuthState();
