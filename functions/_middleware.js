@@ -4,7 +4,7 @@
  * off public/customer/payment surfaces.
  */
 const HTML_ACCEPT = 'text/html'
-const VERSION = '20260824-4'
+const VERSION = '20260826-5'
 const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`)
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`)
 
@@ -40,6 +40,14 @@ export async function onRequest(context) {
   if (legacyAdminSurface) {
     html = addHeadAsset(html, 'href="/admin-console-enhanced.css', `<link rel="stylesheet" href="/admin-console-enhanced.css?v=${VERSION}" data-gc-admin-polish="1">`)
     html = addHeadAsset(html, 'src="/admin-console-enhanced.js', `<script src="/admin-console-enhanced.js?v=${VERSION}" defer data-gc-admin-recovery="1"></script>`)
+  }
+  if (path === '/warehouse-os.html') {
+    html = addHeadAsset(html, 'href="/warehouse-receipt-proof.css', `<link rel="stylesheet" href="/warehouse-receipt-proof.css?v=${VERSION}" data-gc-warehouse-receipt-proof="1">`)
+    html = addBodyAsset(html, 'src="/warehouse-receipt-proof-enhancement.js', `<script src="/gc-csp-scripts/warehouse-receipt-proof-enhancement.js?v=${VERSION}" defer data-gc-warehouse-receipt-proof="1"></script>`)
+  }
+  if (path === '/customer-portal.html') {
+    html = addHeadAsset(html, 'href="/customer-receipt-evidence.css', `<link rel="stylesheet" href="/customer-receipt-evidence.css?v=${VERSION}" data-gc-customer-receipt-evidence="1">`)
+    html = addBodyAsset(html, 'src="/customer-receipt-evidence-enhancement.js', `<script src="/gc-csp-scripts/customer-receipt-evidence-enhancement.js?v=${VERSION}" defer data-gc-customer-receipt-evidence="1"></script>`)
   }
   if (path === '/super-admin-command-center.html') {
     html = addHeadAsset(html, 'href="/super-admin-elite.css', `<link rel="stylesheet" href="/super-admin-elite.css?v=${VERSION}" data-gc-superadmin-elite="1">`)
