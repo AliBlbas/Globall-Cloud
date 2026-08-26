@@ -43,12 +43,12 @@ export async function onRequest(context) {
   }
   if (path === '/warehouse-os.html') {
     html = addHeadAsset(html, 'href="/warehouse-receipt-proof.css', `<link rel="stylesheet" href="/warehouse-receipt-proof.css?v=${VERSION}" data-gc-warehouse-receipt-proof="1">`)
-    html = addBodyAsset(html, 'src="/warehouse-receipt-proof-enhancement.js', `<script src="/gc-csp-scripts/warehouse-receipt-proof-enhancement.js?v=${VERSION}" defer data-gc-warehouse-receipt-proof="1"></script>`)
-    html = addBodyAsset(html, 'src="/warehouse-receiving-chain-bridge.js', `<script src="/gc-csp-scripts/warehouse-receiving-chain-bridge.js?v=${VERSION}" defer data-gc-warehouse-receiving-chain="1"></script>`)
+    html = addBodyAsset(html, 'src="/gc-csp-scripts/warehouse-receipt-proof-enhancement.js', `<script src="/gc-csp-scripts/warehouse-receipt-proof-enhancement.js?v=${VERSION}" defer data-gc-warehouse-receipt-proof="1"></script>`)
+    html = addBodyAsset(html, 'src="/gc-csp-scripts/warehouse-receiving-chain-bridge.js', `<script src="/gc-csp-scripts/warehouse-receiving-chain-bridge.js?v=${VERSION}" defer data-gc-warehouse-receiving-chain="1"></script>`)
   }
   if (path === '/customer-portal.html') {
     html = addHeadAsset(html, 'href="/customer-receipt-evidence.css', `<link rel="stylesheet" href="/customer-receipt-evidence.css?v=${VERSION}" data-gc-customer-receipt-evidence="1">`)
-    html = addBodyAsset(html, 'src="/customer-receipt-evidence-enhancement.js', `<script src="/gc-csp-scripts/customer-receipt-evidence-enhancement.js?v=${VERSION}" defer data-gc-customer-receipt-evidence="1"></script>`)
+    html = addBodyAsset(html, 'src="/gc-csp-scripts/customer-receipt-evidence-enhancement.js', `<script src="/gc-csp-scripts/customer-receipt-evidence-enhancement.js?v=${VERSION}" defer data-gc-customer-receipt-evidence="1"></script>`)
   }
   if (path === '/super-admin-command-center.html') {
     html = addHeadAsset(html, 'href="/super-admin-elite.css', `<link rel="stylesheet" href="/super-admin-elite.css?v=${VERSION}" data-gc-superadmin-elite="1">`)
