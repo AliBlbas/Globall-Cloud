@@ -19,9 +19,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Patch secret-key resolution and CORS
-        shell: python
+      - name: Patch source
+        shell: bash
         run: |
+          set -euo pipefail
+          python3 - <<'PY'
           from pathlib import Path
 
           path = Path('supabase/functions/logistics-control-plane/index.ts')
@@ -74,6 +76,8 @@ jobs:
           source = source.replace(old_headers, new_headers, 1)
 
           path.write_text(source, encoding='utf-8')
+          print('Patched logistics-control-plane')
+          PY
 
       - name: Remove one-shot workflow
         shell: bash
