@@ -5,7 +5,7 @@
 (() => {
   'use strict';
 
-  const BRIDGE = '/production-bridge.js?v=20260828-1';
+  const BRIDGE = '/production-bridge.js?v=20260828-2';
   const LEGACY_MESSAGE = 'Supabase هێشتا پەیوەست نەکراوە';
   const READY_MESSAGE = 'پەیوەندیی پارێزراو بە Supabase چالاکە و سیستەمەکە ئامادەیە.';
   const FAIL_MESSAGE = 'پەیوەندیی خزمەتگوزاری بە شێوەیەکی پارێزراو دەتاقیکرێتەوە.';
