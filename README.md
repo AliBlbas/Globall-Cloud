@@ -61,6 +61,12 @@ The staff control plane now exposes `quotes`, `documents`, `movements`, and `rou
 
 Document uploads are size-limited and hashed in the Edge Function before registration. The storage bucket is private, and the JWT-protected `document-access` endpoint verifies staff/customer ownership before issuing a fresh one-hour signed URL, so expired links do not become a permanent download failure.
 
+## Super Admin staff control
+
+`super-admin-command-center.html` is the privileged staff-management surface. A Super Admin can create staff accounts, change full name, email, role, branch, password, and active state, reactivate inactive staff, and deactivate/delete staff accounts across the `china`, `dubai`, `erbil`, and `all` branches. The UI is provided by `super-admin-staff-manager.js` with responsive styling in `super-admin-staff-manager.css`.
+
+All staff mutations are routed through the existing JWT-protected `account-admin` Edge Function. The function creates or updates Supabase Auth users and the corresponding `staff` row, writes an audit record, prevents self-deactivation, and only allows the `super_admin` role to create accounts or grant the `super_admin` role. A staff deletion request deactivates the staff record and attempts to remove the linked Auth user; any Auth deletion warning is surfaced instead of being hidden.
+
 ## Qicard and FIB payments
 Qicard and FIB payments use separate server-side provider adapters. The browser opens `payment-checkout.html?invoice_id=...`, while `payment-checkout` creates and reads payment sessions through Supabase Edge Functions. Qicard uses the documented merchant terminal/API credentials and RSA public key for signed webhook verification. FIB uses the documented OAuth2 client-credentials flow, IQD payment creation, QR/app links, status lookup, and callback URL.
 
