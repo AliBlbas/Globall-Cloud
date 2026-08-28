@@ -1,1 +1,19 @@
 .proof-panel{margin:12px 0 14px;padding:14px;border:1px solid rgba(88,229,239,.22);border-radius:16px;background:linear-gradient(145deg,rgba(12,48,76,.58),rgba(5,19,34,.72))}.proof-panel h3{margin:0 0 4px;font-size:15px}.proof-panel .proof-note{margin:0 0 11px;color:#92aac7;font-size:11px;line-height:1.7}.proof-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.proof-grid .full{grid-column:1/-1}.proof-label{display:grid;gap:4px;color:#a8c0d4;font-size:11px}.proof-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.proof-actions .btn{min-height:42px}.proof-result{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(85,230,178,.07);border:1px solid rgba(85,230,178,.2);color:#a4edd1;font-size:12px;white-space:pre-wrap}.proof-result.error{background:rgba(255,113,128,.08);border-color:rgba(255,113,128,.22);color:#ffc3c9}@media(max-width:600px){.proof-grid{grid-template-columns:1fr}.proof-grid .full{grid-column:auto}.proof-actions{display:grid;grid-template-columns:1fr}.proof-actions .btn{width:100%}}
+
+/* Printed receipt reference: document context, not live map telemetry. */
+.receipt-reference{margin:12px 0 14px;padding:16px;border:1px solid rgba(255,193,92,.38);border-radius:18px;background:linear-gradient(145deg,#f4f1e8 0%,#e8edf0 100%);color:#142b3f;box-shadow:0 12px 28px rgba(0,0,0,.18)}
+.receipt-reference-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:1px dashed rgba(20,43,63,.30);padding-bottom:12px}
+.receipt-reference-kicker{display:block;color:#28738a;font:800 10px/1.2 ui-monospace,monospace;letter-spacing:1.4px}
+.receipt-reference h2{margin:5px 0 1px;font-size:18px;line-height:1.35}
+.receipt-reference p{margin:0;color:#557083;font-size:11px;line-height:1.7}
+.receipt-reference-badge{flex:none;padding:7px 10px;border:1px solid rgba(40,115,138,.32);border-radius:999px;color:#28738a;font:800 10px/1 ui-monospace,monospace}
+.receipt-reference-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 14px;padding:14px 0}
+.receipt-reference-grid div{min-width:0;border-bottom:1px dotted rgba(20,43,63,.30);padding-bottom:7px}
+.receipt-reference-grid span{display:block;color:#718795;font:800 9px/1.2 ui-monospace,monospace;letter-spacing:.5px}
+.receipt-reference-grid b{display:block;min-height:22px;margin-top:4px;color:#1c3b52;font-size:13px;overflow-wrap:anywhere}
+.receipt-reference-route{display:flex;align-items:center;justify-content:flex-start;gap:10px;flex-wrap:wrap;padding-top:10px;border-top:1px solid rgba(20,43,63,.12);font-size:12px;font-weight:800}
+.receipt-reference-route strong{color:#c07828;font-size:18px}
+.receipt-reference-route em{width:100%;color:#718795;font-size:10px;font-style:normal;font-weight:500}
+@media(max-width:600px){.receipt-reference{padding:13px}.receipt-reference-head{gap:10px}.receipt-reference-badge{font-size:8px;padding:6px 8px}.receipt-reference-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 11px}.receipt-reference h2{font-size:16px}}
+@media(max-width:390px){.receipt-reference-grid{grid-template-columns:1fr}.receipt-reference-route{gap:7px}}
+@media print{.top,.grid,.grid2{display:none!important}.receipt-reference{box-shadow:none;border-color:#999;background:#fff;color:#111}.receipt-reference p,.receipt-reference-grid span,.receipt-reference-route em{color:#555}}
