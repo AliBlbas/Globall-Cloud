@@ -20,7 +20,7 @@ const cors = (req: Request) => {
   return {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': ORIGINS.has(origin) ? origin : 'https://globall-cloud.pages.dev',
-    'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info, x-idempotency-key',
+    'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info, x-idempotency-key, x-supabase-auth-token, traceparent, tracestate, baggage',
     'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
     'Cache-Control': 'no-store',
     'Vary': 'Origin',
@@ -46,9 +46,25 @@ const numberOrNull = (value: unknown) => {
   return number
 }
 
+const resolveServiceKey = () => {
+  const direct = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (direct) return direct
+  const raw = Deno.env.get('SUPABASE_SECRET_KEYS')
+  if (!raw) return null
+  try {
+    const parsed = JSON.parse(raw)
+    if (typeof parsed === 'string') return parsed
+    if (parsed?.default) return String(parsed.default)
+    const first = Object.values(parsed ?? {})[0]
+    return first ? String(first) : null
+  } catch {
+    return null
+  }
+}
+
 const serviceClient = () => {
   const url = Deno.env.get('SUPABASE_URL')
-  const secret = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_SECRET_KEY')
+  const secret = resolveServiceKey()
   if (!url || !secret) throw new Error('Supabase service configuration is unavailable')
   return createClient(url, secret, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
