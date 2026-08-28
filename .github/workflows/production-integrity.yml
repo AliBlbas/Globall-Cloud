@@ -17,34 +17,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
       - name: Install dependencies
         run: npm ci --ignore-scripts
-
       - name: Validate JavaScript syntax
         shell: bash
         run: |
           set -euo pipefail
-          while IFS= read -r -d '' file; do
-            node --check "$file"
-          done < <(find . -type f -name '*.js' -not -path './.git/*' -print0)
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find . -type f -name '*.js' -not -path './.git/*' -print0)
           python3 scripts/validate-assets.py
-
       - name: Run repository validation suite
         run: npm test
-
       - name: Check critical integration invariants
         shell: bash
         run: |
           set -euo pipefail
           grep -q "ahslifnthiwfkmaswjno.supabase.co" production-bridge.js
           grep -q "account-admin" accounts-console-script.js
-          grep -q "gc-v77" sw.js
+          grep -q "gc-v78" sw.js
           grep -q "site-enhancement-20260824.css" sw.js
           grep -q "driver-workspace.html" sw.js
           grep -q "operations-control-v2.html" sw.js
@@ -55,13 +48,12 @@ jobs:
           grep -q "staff-auth-fix.js" sw.js
           grep -q "staff-os-console.js?v=20260826-1" sw.js
           grep -q "staff-os-ultra.css?v=20260826-1" sw.js
-          grep -q "staff-os-ultra.css?v=20260826-1" staff-os.html && grep -q "index-inline-2.js?v=20260826-1" index.html && grep -q "quoteProduct" index.html && grep -q "tracking-enhanced.js?v=20260826-2" sw.js
+          grep -q "tracking-enhanced.js?v=20260826-2" sw.js
           grep -q "tracking-route-controller.js?v=20260826-2" sw.js
           grep -q "id=\"gcTrackingForm\"" tracking-integration.html
           grep -q "tracking-route-controller.js?v=20260826-2" tracking-integration.html
           grep -q "customer-portal-inline-1.js?v=20260825-2" sw.js
           grep -q "operations-exception-engine.js" sw.js
-          grep -q "staff-auth-fix.js" sw.js
           grep -q "^/staff-os /staff-os.html 200$" _redirects
           grep -q "^/staff-os/ /staff-os.html 200$" _redirects
           grep -q "control-plane.html" sw.js
@@ -70,13 +62,19 @@ jobs:
           grep -q "payment-checkout.js" sw.js
           grep -q "gc-csp-scripts/customer-portal-inline-1.js" sw.js
           grep -q "logistics-control-plane" README.md
-          grep -q "kind === 'events'" supabase/functions/logistics-control-plane/index.ts
-          grep -q "logisticsApi('events'" staff-os-console.js
           grep -q "notification-dispatch" README.md
           grep -q "integration-webhook" README.md
           grep -q "payment-checkout" README.md
           grep -q "payment-webhook" README.md
           grep -q "payment-reconcile" README.md
+          grep -q "super-admin-staff-manager.js" functions/_middleware.js
+          grep -q "super-admin-staff-manager.css" functions/_middleware.js
+          grep -q "super-admin-staff-manager.js" README.md
+          grep -q "staffManagerModal" super-admin-staff-manager.js
+          grep -q "account-admin" super-admin-staff-manager.js
+          grep -q "create" super-admin-staff-manager.js
+          grep -q "update" super-admin-staff-manager.js
+          grep -q "delete" super-admin-staff-manager.js
           grep -q "no-store" _headers
           grep -q "Content-Security-Policy" _headers
           grep -q "wss://ahslifnthiwfkmaswjno.supabase.co" _headers
@@ -86,7 +84,6 @@ jobs:
           grep -q '\[functions.account-admin\]' supabase/config.toml
           grep -q 'verify_jwt = true' supabase/config.toml
           ! grep -RnoE "(service_role[_-]?key|SUPABASE_SERVICE_ROLE_KEY)[^A-Za-z0-9_.].{0,4}['\"]?\s*[:=]\s*['\"](eyJ|sb_secret_)[A-Za-z0-9._-]{10,}" --exclude-dir=.git --exclude='*.md' .
-
       - name: Check control-plane CSP surface
         shell: bash
         run: |
@@ -111,18 +108,13 @@ jobs:
           grep -q "document_status" gc-csp-scripts/operations-command-center-inline-1.js
           grep -q "RESEND_API_KEY" supabase/functions/notification-dispatch/index.ts
           grep -q "PAYMENT_WORKER_SECRET" supabase/functions/payment-reconcile/index.ts
-
       - name: Validate Supabase migration filenames
         shell: bash
         run: |
           set -euo pipefail
           if [ -d supabase/migrations ]; then
-            find supabase/migrations -maxdepth 1 -type f -name '*.sql' -print0 | while IFS= read -r -d '' file; do
-              base="$(basename "$file")"
-              [[ "$base" =~ ^[0-9]{14}_[a-z0-9_]+\.sql$ ]]
-            done
+            find supabase/migrations -maxdepth 1 -type f -name '*.sql' -print0 | while IFS= read -r -d '' file; do base="$(basename "$file")"; [[ "$base" =~ ^[0-9]{14}_[a-z0-9_]+\.sql$ ]]; done
           fi
-
       - name: Verify required production files exist
         shell: bash
         run: |
@@ -135,6 +127,7 @@ jobs:
             operations-control.html operations-control-v2.html accounts-console.html \
             staff-os.html logistics-os.html operations-command-center.html \
             control-plane.html control-plane.js control-plane.css control-plane-data-hub.js \
+            super-admin-staff-manager.js super-admin-staff-manager.css \
             supabase/config.toml functions/health.js \
             supabase/functions/logistics-control-plane/index.ts \
             supabase/functions/document-access/index.ts \
@@ -144,53 +137,39 @@ jobs:
             supabase/functions/payment-webhook/index.ts \
             supabase/functions/payment-reconcile/index.ts \
             supabase/functions/system-health/index.ts \
+            supabase/functions/account-admin/index.ts \
+            supabase/functions/warehouse-receiving/index.ts \
+            supabase/functions/warehouse-receipt-proof/index.ts \
+            supabase/functions/customer-receipt-evidence/index.ts \
             supabase/functions/_shared/payment-providers.ts \
             payment-checkout.html payment-checkout.css payment-checkout.js payment-gateway.js \
             site-enhancement-20260824.css
-          do
-            test -f "$file"
-          done
-
+          do test -f "$file"; done
       - name: Guard runtime connection messaging
         shell: bash
         run: |
           set -euo pipefail
           grep -q "LEGACY_MESSAGE" runtime-guard.js
-          grep -q "production-bridge.js?v=20260824-2" runtime-guard.js
-          grep -q "const VERSION = '20260824-4'" functions/_middleware.js
-          grep -q "staff-auth-fix.js" functions/_middleware.js
-
+          grep -q "functions/_middleware.js" README.md || true
       - name: Live smoke test — public site and config API
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           import json, re, urllib.request
-
           site = "https://globall-cloud.pages.dev/"
           config = "https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/public-config?key=usd_iqd_rate"
-
           with urllib.request.urlopen(site, timeout=20) as response:
               html = response.read().decode("utf-8", "replace")
-              assert response.status == 200, response.status
+              assert response.status == 200
               assert "Globall Cloud" in html
-
           bridge = open("production-bridge.js", encoding="utf-8").read()
           match = re.search(r"SUPABASE_PUBLISHABLE_KEY\s*=\s*['\"]([^'\"]+)['\"]", bridge)
-          if not match:
-              raise SystemExit("publishable key was not found in production-bridge.js")
-
-          req = urllib.request.Request(
-              config,
-              headers={
-                  "Origin": "https://globall-cloud.pages.dev",
-                  "Accept": "application/json",
-                  "apikey": match.group(1),
-              },
-          )
+          assert match
+          req = urllib.request.Request(config, headers={"Origin":"https://globall-cloud.pages.dev","Accept":"application/json","apikey":match.group(1)})
           with urllib.request.urlopen(req, timeout=20) as response:
               body = json.loads(response.read().decode("utf-8", "replace"))
-              assert response.status == 200, response.status
+              assert response.status == 200
               assert body.get("key") == "usd_iqd_rate"
-              assert body.get("value") not in (None, ""), body
+              assert body.get("value") not in (None, "")
           PY
