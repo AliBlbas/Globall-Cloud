@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   repair:
@@ -18,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Patch source
         shell: bash
@@ -76,20 +79,20 @@ jobs:
           source = source.replace(old_headers, new_headers, 1)
 
           path.write_text(source, encoding='utf-8')
-          print('Patched logistics-control-plane')
           PY
 
-      - name: Remove one-shot workflow
-        shell: bash
-        run: rm -f .github/workflows/repair-logistics-control-plane.yml
-
-      - name: Commit repair
+      - name: Open repair PR
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
+          branch="repair/logistics-control-plane-secret-key"
+          git switch -c "$branch"
+          rm -f .github/workflows/repair-logistics-control-plane.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add supabase/functions/logistics-control-plane/index.ts .github/workflows/repair-logistics-control-plane.yml
-          git diff --cached --quiet && exit 0
           git commit -m 'fix: align control-plane Supabase secret key resolution'
-          git push origin HEAD:main
+          git push --set-upstream origin "$branch"
+          gh pr create --base main --head "$branch" --title 'fix: align control-plane Supabase secret key resolution' --body 'Fix control-plane server-key resolution to support the project secret-key storage format and include modern browser CORS headers. The one-shot repair workflow removes itself in this PR.'
