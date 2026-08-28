@@ -1,4 +1,4 @@
-name: Deploy Supabase Edge Functions
+name: Supabase source consistency
 
 on:
   push:
@@ -14,20 +14,19 @@ permissions:
   contents: write
 
 jobs:
-  deploy:
+  normalize:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    env:
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      SUPABASE_PROJECT_ID: ahslifnthiwfkmaswjno
+    timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
 
-      - name: Normalize service-key compatibility
+      - name: Normalize Supabase service-key compatibility
         run: node scripts/normalize-supabase-secrets.mjs
 
-      - name: Persist normalized function sources
+      - name: Commit normalized sources
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash
@@ -42,11 +41,3 @@ jobs:
           git commit -m 'fix: normalize Supabase service-key resolution [skip ci]'
           git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git push origin HEAD:main
-
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@46f7f98c7f948ad727d22c1e67fab04c223a0520 # v3
-        with:
-          version: 2.1.1
-
-      - name: Deploy Edge Functions
-        run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_ID"
