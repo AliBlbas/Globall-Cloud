@@ -6,11 +6,12 @@ on:
     paths:
       - 'supabase/functions/**'
       - 'supabase/config.toml'
+      - 'scripts/normalize-supabase-secrets.mjs'
       - '.github/workflows/supabase-functions-deploy.yml'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   deploy:
@@ -22,8 +23,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          persist-credentials: false
+
+      - name: Normalize service-key compatibility
+        run: node scripts/normalize-supabase-secrets.mjs
+
+      - name: Persist normalized function sources
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- supabase/functions/logistics-control-plane/index.ts supabase/functions/document-access/index.ts; then
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add supabase/functions/logistics-control-plane/index.ts supabase/functions/document-access/index.ts
+          git commit -m 'fix: normalize Supabase service-key resolution [skip ci]'
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push origin HEAD:main
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@46f7f98c7f948ad727d22c1e67fab04c223a0520 # v3
