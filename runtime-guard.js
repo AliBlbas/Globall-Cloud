@@ -5,7 +5,7 @@
 (() => {
   'use strict';
 
-  const BRIDGE = '/production-bridge.js?v=20260824-2';
+  const BRIDGE = '/production-bridge.js?v=20260828-1';
   const LEGACY_MESSAGE = 'Supabase هێشتا پەیوەست نەکراوە';
   const READY_MESSAGE = 'پەیوەندیی پارێزراو بە Supabase چالاکە و سیستەمەکە ئامادەیە.';
   const FAIL_MESSAGE = 'پەیوەندیی خزمەتگوزاری بە شێوەیەکی پارێزراو دەتاقیکرێتەوە.';
@@ -76,6 +76,8 @@
     const existing = document.querySelector('script[data-gc-runtime-bridge], script[src*="production-bridge.js"]');
     if (existing) {
       return new Promise((resolve) => {
+        const readyClient = window.gcSupabase || null;
+        if (readyClient) return resolve(readyClient);
         const finish = () => resolve(window.gcSupabase || null);
         window.addEventListener('gc:supabase-ready', finish, { once: true });
         setTimeout(finish, 7000);
@@ -109,6 +111,8 @@
       updateConnectionNotice(FAIL_MESSAGE);
     }
   }
+
+  window.gcEnsureSupabase = window.gcEnsureSupabase || (() => loadBridgeOnce());
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot, { once: true });
