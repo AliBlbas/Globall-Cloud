@@ -37,7 +37,7 @@ jobs:
           set -euo pipefail
           grep -q "ahslifnthiwfkmaswjno.supabase.co" production-bridge.js
           grep -q "account-admin" accounts-console-script.js
-          grep -q "gc-v78" sw.js
+          grep -q "gc-v79" sw.js
           grep -q "site-enhancement-20260824.css" sw.js
           grep -q "driver-workspace.html" sw.js
           grep -q "operations-control-v2.html" sw.js
@@ -150,7 +150,6 @@ jobs:
         run: |
           set -euo pipefail
           grep -q "LEGACY_MESSAGE" runtime-guard.js
-          grep -q "functions/_middleware.js" README.md || true
       - name: Live smoke test — public site and config API
         shell: bash
         run: |
