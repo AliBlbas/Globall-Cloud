@@ -1,10 +1,10 @@
 # Globall Cloud → Discord
 
-This project now includes a Supabase Edge Function at `supabase/functions/discord-notify` for the Discord server `1515534446122762420`.
+This project includes a Supabase Edge Function at `supabase/functions/discord-notify` for the Discord server `1540898219075043388`.
 
 ## Architecture
 
-- Browser/staff console runs on `https://globall-cloud.pages.dev/`.
+- Browser/staff console runs at `https://globall-cloud.pages.dev/`.
 - Staff authentication is handled by Supabase Auth.
 - `production-bridge.js` observes successful staff control-plane mutations and sends a structured event to the `discord-notify` Edge Function.
 - The Edge Function keeps the Discord webhook URL server-side and posts an embed to the configured Discord channel.
@@ -12,13 +12,13 @@ This project now includes a Supabase Edge Function at `supabase/functions/discor
 
 ## Required secret
 
-Create one Discord webhook in the target server/channel and store it only as a Supabase Edge Function secret:
+Create one Discord webhook in the target server/channel and store it only as the Supabase Edge Function secret:
 
 `DISCORD_WEBHOOK_URL=<your Discord webhook URL>`
 
 Do not put the webhook URL in GitHub, frontend JavaScript, or browser local storage.
 
-The Edge Function verifies the webhook's Discord server ID during `health` checks and expects server ID `1515534446122762420`.
+The Edge Function verifies the webhook's Discord server ID during `health` checks and expects server ID `1540898219075043388`.
 
 ## Supported staff events
 
@@ -26,4 +26,4 @@ The Edge Function verifies the webhook's Discord server ID during `health` check
 
 ## Test
 
-After the secret is configured, an authenticated staff console action should generate a Discord embed automatically. The Edge Function also exposes an authenticated `health` action that confirms the webhook is attached to the expected server.
+After the secret is configured, an authenticated staff console action should generate a Discord embed automatically. The Edge Function also exposes an authenticated `health` action that confirms the webhook is attached to the expected Discord server.
