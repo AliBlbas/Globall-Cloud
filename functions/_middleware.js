@@ -4,7 +4,7 @@
  * off public/customer/payment surfaces.
  */
 const HTML_ACCEPT = 'text/html'
-const VERSION = '20260829-1'
+const VERSION = '20260829-2'
 const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`)
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`)
 
@@ -51,10 +51,7 @@ export async function onRequest(context) {
     html = addBodyAsset(html, 'src="/gc-csp-scripts/customer-receipt-evidence-enhancement.js', `<script src="/gc-csp-scripts/customer-receipt-evidence-enhancement.js?v=${VERSION}" defer data-gc-customer-receipt-evidence="1"></script>`)
   }
   if (path === '/super-admin-command-center.html') {
-    html = addHeadAsset(html, 'href="/super-admin-elite.css', `<link rel="stylesheet" href="/super-admin-elite.css?v=${VERSION}" data-gc-superadmin-elite="1">`)
-    html = addHeadAsset(html, 'href="/super-admin-staff-manager.css', `<link rel="stylesheet" href="/super-admin-staff-manager.css?v=${VERSION}" data-gc-superadmin-staff-manager="1">`)
-    html = addBodyAsset(html, 'src="/super-admin-elite.js', `<script src="/super-admin-elite.js?v=${VERSION}" defer data-gc-superadmin-elite="1"></script>`)
-    html = addBodyAsset(html, 'src="/super-admin-staff-manager.js', `<script src="/super-admin-staff-manager.js?v=${VERSION}" defer data-gc-superadmin-staff-manager="1"></script>`)
+    html = addHeadAsset(html, 'src="/super-admin-live-control-v2.js', `<script src="/super-admin-live-control-v2.js?v=${VERSION}" defer data-gc-superadmin-live-control="1"></script>`)
   }
   if (path === '/superadmin.html') html = addBodyAsset(html, 'src="/superadmin-staff-actions.js', `<script src="/superadmin-staff-actions.js?v=${VERSION}" defer data-gc-superadmin-staff-actions="1"></script>`)
   if (path === '/operations-control-v2.html') html = addBodyAsset(html, 'src="/operations-events.js', `<script src="/operations-events.js?v=${VERSION}" defer data-gc-operations-events="1"></script>`)
