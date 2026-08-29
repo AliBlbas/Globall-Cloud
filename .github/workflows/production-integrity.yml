@@ -37,7 +37,7 @@ jobs:
           set -euo pipefail
           grep -q "ahslifnthiwfkmaswjno.supabase.co" production-bridge.js
           grep -q "account-admin" accounts-console-script.js
-          grep -q "gc-v79" sw.js
+          grep -q "gc-v81" sw.js
           grep -q "site-enhancement-20260824.css" sw.js
           grep -q "driver-workspace.html" sw.js
           grep -q "operations-control-v2.html" sw.js
@@ -67,14 +67,14 @@ jobs:
           grep -q "payment-checkout" README.md
           grep -q "payment-webhook" README.md
           grep -q "payment-reconcile" README.md
-          grep -q "super-admin-staff-manager.js" functions/_middleware.js
-          grep -q "super-admin-staff-manager.css" functions/_middleware.js
-          grep -q "super-admin-staff-manager.js" README.md
-          grep -q "staffManagerModal" super-admin-staff-manager.js
-          grep -q "account-admin" super-admin-staff-manager.js
-          grep -q "create" super-admin-staff-manager.js
-          grep -q "update" super-admin-staff-manager.js
-          grep -q "delete" super-admin-staff-manager.js
+          grep -q "super-admin-live-control-v2.js" functions/_middleware.js
+          grep -q "super-admin-live-control-v2.js?v=20260829-2" super-admin-command-center.html
+          grep -q "super-admin-live-control-v2.js?v=20260829-2" sw.js
+          grep -q "customerRows" super-admin-command-center.html
+          grep -q "gcAddCustomer" super-admin-live-control-v2.js
+          grep -q "data-save-price" super-admin-live-control-v2.js
+          grep -q "updateExchangeRate" supabase/functions/account-admin/index.ts
+          grep -q "updatePricing" supabase/functions/account-admin/index.ts
           grep -q "no-store" _headers
           grep -q "Content-Security-Policy" _headers
           grep -q "wss://ahslifnthiwfkmaswjno.supabase.co" _headers
@@ -127,7 +127,7 @@ jobs:
             operations-control.html operations-control-v2.html accounts-console.html \
             staff-os.html logistics-os.html operations-command-center.html \
             control-plane.html control-plane.js control-plane.css control-plane-data-hub.js \
-            super-admin-staff-manager.js super-admin-staff-manager.css \
+            super-admin-live-control-v2.js super-admin-staff-manager.js super-admin-staff-manager.css \
             supabase/config.toml functions/health.js \
             supabase/functions/logistics-control-plane/index.ts \
             supabase/functions/document-access/index.ts \
