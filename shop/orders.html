@@ -3,7 +3,7 @@
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Orders | Global Cloud</title><link rel="stylesheet" href="/assets/css/shop.css"></head>
 <body>
 <main class="container" style="max-width:1000px">
-  <h1>📋 My Orders</h1><p>هەموو داواکارییەکانی کڕین و دۆخی shipment ـەکانت لێرە دەبینیت.</p>
+  <div class="page-header"><div><div class="eyebrow">GLOBAL CLOUD SHOP</div><h1>📋 My Orders</h1><p>هەموو داواکارییەکانی کڕین و دۆخی shipment ـەکانت لێرە دەبینیت.</p></div><a class="secondary" href="/shop/" style="padding:11px 15px;border-radius:12px">🛍️ Shop</a></div>
   <div id="ordersList">Loading...</div>
 </main>
 <script type="module">
@@ -16,6 +16,6 @@ const statusLabel={pending_payment:'چاوەڕێی پارەدان',paid:'پار�
 const {data:orders,error}=await supabase.from('shopping_orders').select('id,created_at,final_price_iqd,status,shipment_id,tracking_number,shopping_order_items(product_url,product_price_usd,product_shipping_usd,quantity),payment_sessions(status)').order('created_at',{ascending:false});
 if(error){list.innerHTML=`<div class="page-note">هەڵە: ${error.message}</div>`;}
 else if(!orders?.length){list.innerHTML='<div class="page-note">هێشتا هیچ order ـێکت نییە.</div>';}
-else{list.innerHTML=orders.map(o=>{const item=o.shopping_order_items?.[0];const tracking=o.tracking_number||o.shipment_id;return `<article class="order-card"><strong>Order #${o.id.slice(0,8)}</strong><div class="order-meta">${new Date(o.created_at).toLocaleString('ku-IQ')}</div><div class="status ${o.status}">${statusLabel[o.status]||o.status}</div><div style="margin-top:10px">نرخی کۆتایی: <strong>${Number(o.final_price_iqd||0).toLocaleString()} IQD</strong></div><div class="order-meta">کاڵا: ${item?.product_price_usd??0}$ + ${item?.product_shipping_usd??0}$ × ${item?.quantity??1}</div>${tracking?`<div style="margin-top:10px"><a href="/tracking.html?id=${encodeURIComponent(tracking)}">📍 Tracking: ${tracking}</a></div>`:'<div class="order-meta">📦 هێشتا shipment ـی گەشتکردن تۆمار نەکراوە.</div>'}</article>`}).join('');}
+else{list.innerHTML=orders.map(o=>{const item=o.shopping_order_items?.[0];const tracking=o.tracking_number||o.shipment_id;return `<article class="order-card"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><strong>Order #${o.id.slice(0,8)}</strong><span class="order-meta">${new Date(o.created_at).toLocaleString('ku-IQ')}</span></div><div class="status ${o.status}">${statusLabel[o.status]||o.status}</div><div style="margin-top:10px">نرخی کۆتایی: <strong>${Number(o.final_price_iqd||0).toLocaleString()} IQD</strong></div><div class="order-meta">کاڵا: ${item?.product_price_usd??0}$ + ${item?.product_shipping_usd??0}$ × ${item?.quantity??1}</div><div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap"><a href="/shop/order.html?id=${encodeURIComponent(o.id)}">🔎 وردەکاری order</a>${tracking?`<a href="/tracking.html?id=${encodeURIComponent(tracking)}">📍 Tracking</a>`:''}</div></article>`}).join('');}
 </script>
 </body></html>
