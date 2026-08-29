@@ -48,12 +48,12 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.system-health]
-verify_jwt = false
+verify_jwt = true
 
 [functions.logistics-control-plane]
 verify_jwt = true
 
-[functions/document-access]
+[functions.document-access]
 verify_jwt = true
 
 [functions/notification-dispatch]
