@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     name: Deploy frontend to Cloudflare Pages
     steps:
@@ -24,8 +24,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install Wrangler
-        run: npm install --global wrangler@latest
+      - name: Setup Node.js
+        uses: actions/setup-node@1e60f620b9541dca9a0e5d5a5d8a4d3eb9ad3f1f # v4
+        with:
+          node-version: 20
+          cache: npm
 
       - name: Verify Cloudflare credentials are configured
         env:
@@ -34,6 +37,9 @@ jobs:
         run: |
           test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$CLOUDFLARE_ACCOUNT_ID"
+
+      - name: Install pinned Wrangler
+        run: npm install --global wrangler@4
 
       - name: Deploy to Cloudflare Pages
         env:
