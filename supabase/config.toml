@@ -11,6 +11,9 @@ additional_redirect_urls = [
 [functions.account-admin]
 verify_jwt = true
 
+[functions.staff-directory]
+verify_jwt = true
+
 [functions.lg-track-shipment]
 verify_jwt = true
 
@@ -74,5 +77,5 @@ verify_jwt = false
 [functions/payment-reconcile]
 verify_jwt = false
 
-[functions.discord-notify]
+[functions/discord-notify]
 verify_jwt = true
