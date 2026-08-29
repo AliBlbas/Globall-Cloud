@@ -4,7 +4,7 @@
  * off public/customer/payment surfaces.
  */
 const HTML_ACCEPT = 'text/html'
-const VERSION = '20260829-5'
+const VERSION = '20260829-6'
 const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`)
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`)
 
@@ -54,7 +54,9 @@ export async function onRequest(context) {
     html = addHeadAsset(html, 'src="/super-admin-live-control-v2.js', `<script src="/super-admin-live-control-v2.js?v=${VERSION}" defer data-gc-superadmin-live-control="1"></script>`)
   }
   if (path === '/superadmin.html') {
+    html = addHeadAsset(html, 'href="/superadmin-server.css', `<link rel="stylesheet" href="/superadmin-server.css?v=${VERSION}" data-gc-superadmin-server-css="1">`)
     html = addBodyAsset(html, 'src="/superadmin-enhancements.js', `<script src="/superadmin-enhancements.js?v=${VERSION}" defer data-gc-superadmin-enhancements="1"></script>`)
+    html = addBodyAsset(html, 'src="/superadmin-server.js', `<script src="/superadmin-server.js?v=${VERSION}" defer data-gc-superadmin-server="1"></script>`)
   }
   if (path === '/operations-control-v2.html') html = addBodyAsset(html, 'src="/operations-events.js', `<script src="/operations-events.js?v=${VERSION}" defer data-gc-operations-events="1"></script>`)
   if (path === '/operations-command-center.html') html = addBodyAsset(html, 'src="/operations-exception-engine.js', `<script src="/operations-exception-engine.js?v=${VERSION}" defer data-gc-exception-engine="1"></script>`)
