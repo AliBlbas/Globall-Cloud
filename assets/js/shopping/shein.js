@@ -1,38 +1,87 @@
 import { supabase } from '../supabase.js';
-import { calculateFinalPrice } from './pricing.js';
+import { initLayout } from '../layout.js';
+import '/assets/js/auth-guard.js';
 
 const $ = (id) => document.getElementById(id);
-const urlInput = $('productUrl'), priceInput = $('priceUsd'), shipInput = $('shippingUsd');
-const quoteBox = $('quoteBox'), orderBtn = $('orderBtn');
-let exchangeRate = 1320, marginPercent = 15, currentQuote = null;
+const urlInput = $('productUrl');
+const priceInput = $('priceUsd');
+const shipInput = $('shippingUsd');
+const qtyInput = $('quantity');
+const quoteBox = $('quoteBox');
+const orderBtn = $('orderBtn');
+let currentQuote = null;
+let quoteTimer = null;
+let requestSerial = 0;
 
-async function loadRates() {
-  const { data: ex } = await supabase.from('exchange_rates').select('rate').eq('from_currency','USD').eq('to_currency','IQD').order('created_at',{ascending:false}).limit(1).maybeSingle();
-  const { data: pr } = await supabase.from('pricing_rates').select('margin_percent').eq('service','shopping').limit(1).maybeSingle();
-  if (ex?.rate) exchangeRate = Number(ex.rate);
-  if (pr?.margin_percent != null) marginPercent = Number(pr.margin_percent);
-  $('exRate').textContent = `${exchangeRate.toLocaleString()} IQD`;
-  $('marginText').textContent = marginPercent;
-  recalc();
+await initLayout('shein');
+
+function validSheinUrl(value) {
+  try {
+    const u = new URL(value.trim());
+    return u.protocol === 'https:' && /(^|\.)shein\.[a-z]{2,}$/i.test(u.hostname);
+  } catch { return false; }
 }
-function recalc() {
-  const p = Number(priceInput.value), s = Number(shipInput.value || 0);
-  const validUrl = /^https?:\/\/(www\.)?shein\.[^/]+\//i.test(urlInput.value.trim());
-  if (!(p > 0) || !validUrl || !(exchangeRate > 0)) { quoteBox.classList.add('hidden'); orderBtn.disabled = true; currentQuote = null; return; }
-  const result = calculateFinalPrice({productPriceUSD:p, shippingUSD:s, quantity:1, usdToIqdRate:exchangeRate, marginPercent});
-  quoteBox.classList.remove('hidden');
-  $('totalUsd').textContent = `$${result.totalUSD.toFixed(2)}`;
-  $('marginAmount').textContent = `${Math.ceil(result.margin).toLocaleString()} IQD`;
-  $('finalIqd').textContent = `${result.final.toLocaleString()} IQD`;
-  orderBtn.textContent = `Order Now - ${result.final.toLocaleString()} IQD`;
-  orderBtn.disabled = false; currentQuote = result;
+
+function clearQuote() {
+  currentQuote = null;
+  quoteBox.hidden = true;
+  orderBtn.disabled = true;
+  orderBtn.textContent = 'Order Now';
 }
-[urlInput,priceInput,shipInput].forEach(el => el.addEventListener('input', recalc));
+
+async function refreshQuote() {
+  const price = Number(priceInput.value);
+  const shipping = Number(shipInput.value || 0);
+  const quantity = Math.max(1, Number(qtyInput?.value || 1));
+  if (!(price > 0) || shipping < 0 || !validSheinUrl(urlInput.value)) { clearQuote(); return; }
+
+  const serial = ++requestSerial;
+  orderBtn.disabled = true;
+  orderBtn.textContent = 'حیسابکردن...';
+  const { data, error } = await supabase.rpc('get_shein_quote', {
+    p_product_price_usd: price,
+    p_shipping_usd: shipping,
+    p_quantity: quantity
+  });
+  if (serial !== requestSerial) return;
+  if (error) { console.error('[SHEIN quote]', error); clearQuote(); return; }
+
+  currentQuote = data;
+  quoteBox.hidden = false;
+  $('totalUsd').textContent = `$${Number(data.total_usd).toFixed(2)}`;
+  $('exRate').textContent = `${Number(data.exchange_rate).toLocaleString()} IQD`;
+  $('marginText').textContent = Number(data.margin_percent).toString();
+  $('marginAmount').textContent = `${Number(data.margin_iqd).toLocaleString()} IQD`;
+  $('finalIqd').textContent = `${Number(data.final_price_iqd).toLocaleString()} IQD`;
+  orderBtn.textContent = `Order Now - ${Number(data.final_price_iqd).toLocaleString()} IQD`;
+  orderBtn.disabled = false;
+}
+
+function scheduleQuote() {
+  clearTimeout(quoteTimer);
+  quoteTimer = setTimeout(refreshQuote, 250);
+}
+[urlInput, priceInput, shipInput, qtyInput].filter(Boolean).forEach((el) => el.addEventListener('input', scheduleQuote));
+
 orderBtn.addEventListener('click', async () => {
-  if (!currentQuote) return;
-  orderBtn.disabled = true; orderBtn.textContent = 'دروستکردنی داواکاری...';
-  const { data, error } = await supabase.rpc('create_shein_order', { p_product_url:urlInput.value.trim(), p_product_price_usd:Number(priceInput.value), p_product_shipping_usd:Number(shipInput.value || 0), p_quantity:1 });
-  if (error) { console.error(error); alert('نەتوانرا داواکاری دروست بکرێت. تکایە Login بکە و دووبارە هەوڵ بدە.'); orderBtn.disabled=false; recalc(); return; }
-  window.location.href = `/payment.html?session_id=${encodeURIComponent(data.payment_session_id)}`;
+  if (!currentQuote || !validSheinUrl(urlInput.value)) return;
+  orderBtn.disabled = true;
+  orderBtn.textContent = 'دروستکردنی داواکاری...';
+  const idempotencyKey = crypto.randomUUID();
+  const { data, error } = await supabase.rpc('create_shein_order', {
+    p_product_url: urlInput.value.trim(),
+    p_product_price_usd: Number(priceInput.value),
+    p_product_shipping_usd: Number(shipInput.value || 0),
+    p_quantity: Math.max(1, Number(qtyInput?.value || 1)),
+    p_variant_info: null,
+    p_idempotency_key: idempotencyKey
+  });
+  if (error) {
+    console.error('[SHEIN order]', error);
+    alert(error.message || 'نەتوانرا داواکاری دروست بکرێت.');
+    orderBtn.disabled = false;
+    orderBtn.textContent = `Order Now - ${Number(currentQuote.final_price_iqd).toLocaleString()} IQD`;
+    return;
+  }
+  window.location.href = `/payment-checkout.html?invoice_id=${encodeURIComponent(data.invoice_id)}`;
 });
-loadRates();
