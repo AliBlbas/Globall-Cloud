@@ -6,6 +6,7 @@
   const HEALTH_FN = `${SUPABASE_URL}/functions/v1/system-health`;
   const state = { client: null, session: null, me: null, health: null, timer: null };
   const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = (v) => String(v ?? '').replace(/[&<>\"']/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '\"':'&quot;', "'":'&#39;' }[c]));
   const fmtTime = (v) => v ? new Date(v).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'medium' }) : '—';
 
@@ -67,8 +68,10 @@
     const statusLabel = $('.sa-server-status-label', root);
     if (statusLabel) statusLabel.textContent = statusText;
     $('.sa-server-pulse', root)?.style.setProperty('color', status === 'ok' ? 'var(--sa-green)' : status === 'degraded' ? 'var(--sa-amber)' : 'var(--sa-red)');
-    $('.sa-server-latency', root) && ($('.sa-server-latency', root).textContent = `${Number(data.latency_ms ?? 0)} ms`);
-    $('.sa-server-checked', root) && ($('.sa-server-checked', root).textContent = fmtTime(checks.timestamp));
+    const latency = $('.sa-server-latency', root);
+    if (latency) latency.textContent = `${Number(data.latency_ms ?? 0)} ms`;
+    const checked = $('.sa-server-checked', root);
+    if (checked) checked.textContent = fmtTime(checks.timestamp);
     const list = $('.sa-check-list', root);
     if (list) {
       list.innerHTML = Object.entries(checks).filter(([k,v]) => k !== 'timestamp' && typeof v === 'boolean').map(([key,value]) => `<div class="sa-check ${value ? 'ok' : 'bad'}"><div class="sa-check-main"><span class="sa-check-dot"></span><span class="sa-check-name">${esc(checkLabel(key))}</span></div><span class="sa-check-value">${value ? 'READY' : 'FAIL'}</span></div>`).join('');
@@ -166,14 +169,16 @@
     ];
     function render(filter='') {
       const rows = commands.filter(([label]) => label.toLowerCase().includes(filter.toLowerCase()));
-      $('#saCommandList').innerHTML = rows.map(([label,tab,key],i) => `<button class="sa-command-item ${i===0?'active':''}" type="button" data-tab="${tab}"><span>${esc(label)}<small>${tab}</small></span><span class="sa-command-key">${key}</span></button>`).join('');
+      const list = $('#saCommandList');
+      if (!list) return;
+      list.innerHTML = rows.map(([label,tab,key],i) => `<button class="sa-command-item ${i===0?'active':''}" type="button" data-tab="${tab}"><span>${esc(label)}<small>${tab}</small></span><span class="sa-command-key">${key}</span></button>`).join('');
       $$('.sa-command-item', palette).forEach(b => b.addEventListener('click', () => { palette.hidden=true; openTab(b.dataset.tab); if(b.dataset.tab==='server') setActiveTab('server'); }));
     }
     render();
-    $('#saCommandInput').addEventListener('input', e => render(e.target.value));
+    $('#saCommandInput')?.addEventListener('input', e => render(e.target.value));
     palette.addEventListener('click', e => { if(e.target === palette) palette.hidden=true; });
     document.addEventListener('keydown', e => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='k') { e.preventDefault(); palette.hidden=false; $('#saCommandInput').value=''; render(); $('#saCommandInput').focus(); }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='k') { e.preventDefault(); palette.hidden=false; const input=$('#saCommandInput'); if(input){input.value='';render();input.focus();} }
       if (e.key==='Escape' && !palette.hidden) palette.hidden=true;
     });
   }
@@ -182,7 +187,6 @@
     try {
       if (location.pathname !== '/superadmin.html') return;
       await auth();
-      const style = document.createElement('link'); style.rel='stylesheet'; style.href='/superadmin-server.css?v=20260829-1'; document.head.appendChild(style);
       installPanel();
       installCommandPalette();
       await loadHealth();
