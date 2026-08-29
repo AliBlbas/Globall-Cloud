@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="ku" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Shop from SHEIN | Global Cloud</title><link rel="stylesheet" href="/assets/css/style.css"></head>
+<body>
+<main class="container" style="max-width:720px;margin:40px auto;padding:24px">
+<h1>🛍️ Shop from SHEIN</h1><p>لینکی کاڵاکە دابنێ، نرخی کاڵا و گەیاندن بنووسە و نرخی کۆتایی بە IQD ببینە.</p>
+<section class="card" style="padding:20px;display:grid;gap:16px">
+<label for="productUrl">Product URL</label><input id="productUrl" type="url" placeholder="https://www.shein.com/..." style="padding:12px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><label for="priceUsd">نرخی کاڵا ($)</label><input id="priceUsd" type="number" min="0.01" step="0.01" style="width:100%;padding:12px"></div><div><label for="shippingUsd">گەیاندن ($)</label><input id="shippingUsd" type="number" min="0" step="0.01" value="3" style="width:100%;padding:12px"></div></div>
+<div id="quoteBox" hidden style="padding:16px;background:#f5f5f5;display:grid;gap:8px"><div><span>کۆی USD: </span><strong id="totalUsd">-</strong></div><div><span>نرخی دۆلار: </span><strong id="exRate">1320 IQD</strong></div><div><span>خزمەتگوزاری (<span id="marginText">15</span>%): </span><strong id="marginAmount">-</strong></div><div style="border-top:1px solid #ddd;padding-top:10px"><span>نرخی کۆتایی: </span><strong id="finalIqd">0 IQD</strong></div></div>
+<button id="orderBtn" disabled style="padding:14px;font-weight:700">Order Now</button>
+</section>
+</main><script type="module" src="/assets/js/shopping/shein.js"></script>
+</body></html>
