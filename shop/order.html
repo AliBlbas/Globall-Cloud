@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Global Cloud shopping order details and tracking">
+<title>Order Details | Global Cloud</title><link rel="stylesheet" href="/assets/css/shop.css">
+</head>
+<body>
+<main class="container" style="max-width:980px">
+  <div class="page-header"><div><div class="eyebrow">GLOBAL CLOUD SHOP</div><h1 id="title">Order Details</h1><p id="subtitle">دۆخی داواکارییەکەت لێرە بە وردی دەبینیت.</p></div><a class="secondary" href="/shop/orders.html" style="padding:11px 15px;border-radius:12px">← هەموو order ـەکان</a></div>
+  <div id="message"></div>
+  <section id="content" class="card hidden">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div><div class="order-meta">Order</div><strong id="orderId">—</strong></div>
+      <div><div class="order-meta">Status</div><span id="orderStatus" class="status">—</span></div>
+      <div><div class="order-meta">کۆی کۆتایی</div><strong id="finalPrice">—</strong></div>
+      <div><div class="order-meta">Payment</div><span id="paymentStatus" class="status">—</span></div>
+    </div>
+    <div style="margin-top:22px;padding-top:18px;border-top:1px solid #d0d5dd">
+      <div class="order-meta">SHEIN Product</div><a id="productLink" href="#" target="_blank" rel="noopener noreferrer">کردنەوەی بەستەر</a>
+      <div id="productMeta" class="order-meta" style="margin-top:6px">—</div>
+    </div>
+    <div id="invoiceBox" style="margin-top:22px;padding-top:18px;border-top:1px solid #d0d5dd"></div>
+    <div style="margin-top:22px;padding-top:18px;border-top:1px solid #d0d5dd"><div class="order-meta">Shipment Timeline</div><div id="timeline" style="margin-top:12px"></div></div>
+  </section>
+</main>
+<script type="module">
+import '/assets/js/auth-guard.js';
+import {supabase} from '/assets/js/supabase.js';
+import {initLayout} from '/assets/js/layout.js';
+await initLayout('orders');
+const params=new URLSearchParams(location.search), id=params.get('id');
+const message=document.getElementById('message'),content=document.getElementById('content');
+const statusLabel={pending_payment:'چاوەڕوانی پارەدان',paid:'پارە دراوە',ordered_from_platform:'لە پلاتفۆرم کڕدراوە',arrived_at_origin_warehouse:'گەیشتووە بە وەرهاوسی سەرچاوە',shipped_to_erbil:'نێردراوە بۆ هەولێر',delivered:'گەیشتووە',cancelled:'هەڵوەشێنراوەتەوە'};
+const paymentLabel={created:'ئامادەکراوە',pending:'چاوەڕوانی',succeeded:'سەرکەوتوو',failed:'سەرنەکەوت',cancelled:'هەڵوەشێنراوە',expired:'بەسەرچوو'};
+const steps=['pending_payment','paid','ordered_from_platform','arrived_at_origin_warehouse','shipped_to_erbil','delivered'];
+function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+async function load(){
+ if(!id){message.innerHTML='<div class="page-note">Order ID نەدراوە.</div>';return;}
+ const {data:o,error}=await supabase.from('shopping_orders').select('id,created_at,final_price_iqd,status,shipment_id,tracking_number,product_url,product_price,delivery_price,product_currency,delivery_currency,payment_session_id,shopping_order_items(product_url,product_price_usd,product_shipping_usd,quantity,variant_info),payment_sessions(status,provider,amount,currency),shipments(id,operational_status,current_location_label,eta,current_step_index,step_dates)').eq('id',id).maybeSingle();
+ if(error||!o){message.innerHTML=`<div class="page-note">Order نەدۆزرایەوە.</div>`;return;}
+ document.getElementById('title').textContent=`Order #${o.id.slice(0,8)}`;
+ document.getElementById('orderId').textContent=o.id;
+ document.getElementById('orderStatus').textContent=statusLabel[o.status]||o.status;
+ document.getElementById('orderStatus').className=`status ${o.status}`;
+ document.getElementById('finalPrice').textContent=`${Number(o.final_price_iqd||0).toLocaleString()} IQD`;
+ const ps=o.payment_sessions;
+ document.getElementById('paymentStatus').textContent=paymentLabel[ps?.status]||ps?.status||'No payment yet';
+ document.getElementById('paymentStatus').className=`status ${ps?.status||''}`;
+ const item=o.shopping_order_items?.[0];
+ const url=item?.product_url||o.product_url||'#';
+ document.getElementById('productLink').href=url;document.getElementById('productMeta').textContent=`${item?.product_price_usd??o.product_price??0}$ + ${item?.product_shipping_usd??o.delivery_price??0}$ × ${item?.quantity??1}`;
+ if(ps?.status!=='succeeded'&&o.status==='pending_payment'&&o.payment_session_id){document.getElementById('invoiceBox').innerHTML=`<a class="primary" href="/payment-checkout.html?invoice_id=${encodeURIComponent((await supabase.from('shipment_invoices').select('id').eq('shipment_id',o.shipment_id).order('created_at',{ascending:false}).limit(1).maybeSingle()).data?.id||'')}">بچۆ بۆ Payment Checkout</a>`;}
+ const s=o.shipments;const current=steps.indexOf(o.status);const timeline=document.getElementById('timeline');timeline.innerHTML=steps.map((st,i)=>{const done=i<=current;return `<div style="display:flex;gap:12px;align-items:flex-start;padding:9px 0"><span style="font-size:18px">${done?'✓':'○'}</span><div><strong>${esc(statusLabel[st]||st)}</strong>${i===current&&s?`<div class="order-meta">${esc(s.current_location_label||'—')}${s.eta?` · ETA ${new Date(s.eta).toLocaleString('ku-IQ')}`:''}</div>`:''}</div></div>`}).join('');
+ content.classList.remove('hidden');
+}
+load();
+</script>
+</body></html>
