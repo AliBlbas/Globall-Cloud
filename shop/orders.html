@@ -1,1 +1,21 @@
-<!doctype html><html lang="ku" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Orders | Global Cloud</title><link rel="stylesheet" href="/assets/css/style.css"></head><body><main class="container" style="max-width:1000px;margin:40px auto;padding:24px"><h1>📋 My Orders</h1><div id="ordersList">Loading...</div></main><script type="module">import '/assets/js/auth-guard.js';import {supabase} from '/assets/js/supabase.js';import {initLayout} from '/assets/js/layout.js';await initLayout('orders');const list=document.getElementById('ordersList');const {data:orders,error}=await supabase.from('shopping_orders').select('*, shopping_order_items(*), shipments(id,tracking_number), payment_sessions(status)').order('created_at',{ascending:false});if(error){list.textContent='نەتوانرا order ـەکان بار بکرێن.';}else if(!orders?.length){list.textContent='هێشتا هیچ order ـێکت نییە.';}else{list.innerHTML=orders.map(o=>{const item=o.shopping_order_items?.[0];const safeUrl=item?.product_url||'#';return `<article class="order-card" style="padding:18px;margin:12px 0"><strong>Order #${o.id.slice(0,8)}</strong><div>Status: ${o.status}</div><div>Final: ${Number(o.final_price_iqd||0).toLocaleString()} IQD</div><div><a href="${safeUrl}" target="_blank" rel="noopener">Product</a></div>${o.shipment_id?`<a href="/tracking.html?id=${encodeURIComponent(o.shipment_id)}">📍 Tracking: ${o.shipments?.tracking_number||'View tracking'}</a>`:'<span>📦 چاوەڕێی shipment ـە.</span>'}</article>`}).join('');}</script></body></html>
+<!doctype html>
+<html lang="ku" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Orders | Global Cloud</title><link rel="stylesheet" href="/assets/css/shop.css"></head>
+<body>
+<main class="container" style="max-width:1000px">
+  <h1>📋 My Orders</h1><p>هەموو داواکارییەکانی کڕین و دۆخی shipment ـەکانت لێرە دەبینیت.</p>
+  <div id="ordersList">Loading...</div>
+</main>
+<script type="module">
+import '/assets/js/auth-guard.js';
+import { supabase } from '/assets/js/supabase.js';
+import { initLayout } from '/assets/js/layout.js';
+await initLayout('orders');
+const list=document.getElementById('ordersList');
+const statusLabel={pending_payment:'چاوەڕێی پارەدان',paid:'پارە دراوە',ordered_from_platform:'لە پلاتفۆرم کڕدراوە',arrived_at_origin_warehouse:'گەیشتووە بە وەرهاوسی سەرچاوە',shipped_to_erbil:'نێردراوە بۆ هەولێر',delivered:'گەیشتووە',cancelled:'هەڵوەشێنراوەتەوە'};
+const {data:orders,error}=await supabase.from('shopping_orders').select('id,created_at,final_price_iqd,status,shipment_id,tracking_number,shopping_order_items(product_url,product_price_usd,product_shipping_usd,quantity),payment_sessions(status)').order('created_at',{ascending:false});
+if(error){list.innerHTML=`<div class="page-note">هەڵە: ${error.message}</div>`;}
+else if(!orders?.length){list.innerHTML='<div class="page-note">هێشتا هیچ order ـێکت نییە.</div>';}
+else{list.innerHTML=orders.map(o=>{const item=o.shopping_order_items?.[0];const tracking=o.tracking_number||o.shipment_id;return `<article class="order-card"><strong>Order #${o.id.slice(0,8)}</strong><div class="order-meta">${new Date(o.created_at).toLocaleString('ku-IQ')}</div><div class="status ${o.status}">${statusLabel[o.status]||o.status}</div><div style="margin-top:10px">نرخی کۆتایی: <strong>${Number(o.final_price_iqd||0).toLocaleString()} IQD</strong></div><div class="order-meta">کاڵا: ${item?.product_price_usd??0}$ + ${item?.product_shipping_usd??0}$ × ${item?.quantity??1}</div>${tracking?`<div style="margin-top:10px"><a href="/tracking.html?id=${encodeURIComponent(tracking)}">📍 Tracking: ${tracking}</a></div>`:'<div class="order-meta">📦 هێشتا shipment ـی گەشتکردن تۆمار نەکراوە.</div>'}</article>`}).join('');}
+</script>
+</body></html>
