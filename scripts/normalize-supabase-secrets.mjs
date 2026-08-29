@@ -3,7 +3,7 @@ import path from 'node:path'
 
 const root = process.cwd()
 const functionsDir = path.join(root, 'supabase', 'functions')
-const targets = ['logistics-control-plane', 'document-access']
+const targets = ['logistics-control-plane', 'document-access', 'account-admin', 'operations-admin']
 
 const helper = `const resolveServiceKey = () => {
   const direct = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
