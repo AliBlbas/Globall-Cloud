@@ -72,6 +72,15 @@
     document.body.appendChild(script);
   };
 
+  const loadEnterpriseLayer = () => {
+    if (document.querySelector('script[data-gc-enterprise-layer="1"]')) return;
+    const script = document.createElement('script');
+    script.src = '/staff-os-enterprise.js?v=20260830-1';
+    script.async = true;
+    script.dataset.gcEnterpriseLayer = '1';
+    document.body.appendChild(script);
+  };
+
   const getClient = async () => {
     if (typeof window.gcEnsureSupabase === 'function') {
       const client = await window.gcEnsureSupabase();
@@ -207,6 +216,7 @@
         };
         showApp();
         loadProductionLayer();
+        loadEnterpriseLayer();
       } catch (error) {
         await denyAndSignOut(client, error?.message);
         return;
@@ -231,6 +241,7 @@
             };
             showApp();
             loadProductionLayer();
+            loadEnterpriseLayer();
           } catch (error) {
             await denyAndSignOut(client, error?.message);
           }
