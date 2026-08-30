@@ -63,6 +63,15 @@
     if (gate) gate.classList.remove('hidden');
   };
 
+  const loadProductionLayer = () => {
+    if (document.querySelector('script[data-gc-production-layer="1"]')) return;
+    const script = document.createElement('script');
+    script.src = '/staff-os-production-layer.js?v=20260830-1';
+    script.async = true;
+    script.dataset.gcProductionLayer = '1';
+    document.body.appendChild(script);
+  };
+
   const getClient = async () => {
     if (typeof window.gcEnsureSupabase === 'function') {
       const client = await window.gcEnsureSupabase();
@@ -197,6 +206,7 @@
           fullName: staff.full_name,
         };
         showApp();
+        loadProductionLayer();
       } catch (error) {
         await denyAndSignOut(client, error?.message);
         return;
@@ -220,6 +230,7 @@
               fullName: staff.full_name,
             };
             showApp();
+            loadProductionLayer();
           } catch (error) {
             await denyAndSignOut(client, error?.message);
           }
