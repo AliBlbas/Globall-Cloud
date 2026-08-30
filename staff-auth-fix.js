@@ -8,6 +8,7 @@
 
   const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
+  const STAFF_VERIFY_URL = `${SUPABASE_URL}/functions/v1/staff-auth-verify`;
 
   const waitFor = (getter, timeoutMs = 10000, intervalMs = 100) => new Promise((resolve, reject) => {
     const started = Date.now();
@@ -109,7 +110,7 @@
       throw error;
     }
 
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/staff-auth-verify`, {
+    const response = await fetch(STAFF_VERIFY_URL, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -138,6 +139,57 @@
     return payload.staff;
   };
 
+  const installLegacyStaffApiBridge = (client) => {
+    if (window.__gcLegacyStaffApiBridge) return;
+    window.__gcLegacyStaffApiBridge = true;
+
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = async (input, init) => {
+      const url = typeof input === 'string' ? input : input?.url || '';
+      const isStaffList = url.includes('/functions/v1/account-admin')
+        && /[?&]kind=staff(?:&|$)/.test(url)
+        && !/[?&]action=/.test(url);
+
+      if (!isStaffList) return originalFetch(input, init);
+
+      const response = await originalFetch(input, init);
+      if (response.ok || response.status !== 403) return response;
+
+      try {
+        const session = (await client.auth.getSession()).data?.session;
+        if (!session?.access_token || !session?.user?.id) return response;
+
+        const verifyResponse = await originalFetch(STAFF_VERIFY_URL, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            apikey: SUPABASE_PUBLISHABLE_KEY,
+            Accept: 'application/json',
+          },
+          cache: 'no-store',
+        });
+        if (!verifyResponse.ok) return response;
+
+        const payload = await verifyResponse.json().catch(() => null);
+        const staff = payload?.authorized === true ? payload.staff : null;
+        if (!staff || String(staff.id) !== String(session.user.id)) return response;
+
+        return new Response(
+          JSON.stringify({ items: [staff], kind: 'staff', self_only: true }),
+          {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json; charset=utf-8',
+              'Cache-Control': 'no-store',
+            },
+          },
+        );
+      } catch {
+        return response;
+      }
+    };
+  };
+
   const applyStaffIdentity = (staff) => {
     window.gcStaffIdentity = {
       id: staff.id,
@@ -156,6 +208,8 @@
   const boot = async () => {
     try {
       const client = await getClient();
+      installLegacyStaffApiBridge(client);
+
       const form = document.getElementById('loginForm');
       if (!form) return;
 
@@ -178,6 +232,7 @@
           showApp();
           loadStaffApp();
           setMessage('بە سەرکەوتوویی چوویتە ناو Staff OS.', 'success');
+          setBusy(false);
         } catch (error) {
           console.error('[Globall Cloud] Staff login:', error);
           const message = /invalid login credentials/i.test(error?.message || '')
@@ -223,7 +278,6 @@
             showApp();
             loadStaffApp();
           } catch (error) {
-            // Do not sign the user out on a transient server/network failure.
             if (error?.status === 401 || error?.status === 403) {
               await client.auth.signOut().catch(() => undefined);
               window.gcStaffIdentity = null;
