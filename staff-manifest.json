@@ -1,0 +1,16 @@
+{
+  "name":"Globall Cloud Staff OS",
+  "short_name":"GC Staff",
+  "start_url":"/staff-os.html",
+  "scope":"/",
+  "display":"standalone",
+  "background_color":"#020914",
+  "theme_color":"#061428",
+  "orientation":"portrait-primary",
+  "lang":"ckb",
+  "dir":"rtl",
+  "icons":[
+    {"src":"/logo-icon.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"/logo-icon.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}
