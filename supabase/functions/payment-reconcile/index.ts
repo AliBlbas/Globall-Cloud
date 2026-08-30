@@ -13,10 +13,13 @@ const serviceClient = () => {
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return response({ error: 'Method not allowed' }, 405)
   try {
-    const workerSecret = Deno.env.get('PAYMENT_WORKER_SECRET')?.trim()
-    if (!workerSecret || req.headers.get('x-payment-worker-secret') !== workerSecret) return response({ error: 'Unauthorized worker' }, 401)
+    const suppliedSecret = req.headers.get('x-payment-worker-secret') || ''
     const service = serviceClient()
-    const limit = Math.min(100, Math.max(1, Number((await req.clone().json().catch(() => ({})) as Json).limit || 50)))
+    const check = await service.rpc('verify_payment_reconcile_secret', { p_secret: suppliedSecret })
+    if (check.error || check.data !== true) return response({ error: 'Unauthorized worker' }, 401)
+
+    const payload = await req.clone().json().catch(() => ({})) as Json
+    const limit = Math.min(100, Math.max(1, Number(payload.limit || 50)))
     const pending = await service.from('payment_sessions').select('id,provider,provider_payment_id,status,amount,currency,expires_at').in('status', ['created', 'pending']).not('provider_payment_id', 'is', null).order('created_at', { ascending: true }).limit(limit)
     if (pending.error) throw pending.error
     const summary = { checked: 0, succeeded: 0, failed: 0, pending: 0, expired: 0, errors: [] as string[] }
