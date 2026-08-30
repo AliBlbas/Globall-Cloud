@@ -7,7 +7,7 @@
   const SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
   const FN = `${SUPABASE_URL}/functions/v1/account-admin`;
   const OPS_FN = `${SUPABASE_URL}/functions/v1/logistics-control-plane`;
-  const state = { cache:null, cacheAt:0, open:false, timer:null };
+  const state = { cache:null, cacheAt:0, timer:null };
   const $ = (s, r=document) => r.querySelector(s);
   const $$ = (s, r=document) => [...r.querySelectorAll(s)];
   const esc = (v) => String(v ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
@@ -55,13 +55,10 @@
     const outstanding=d.shipments.reduce((sum,x)=>sum+Math.max(0,Number(x.total_amount||0)-Number(x.paid_amount||0)),0);
     const critical=d.exceptions.filter(x=>String(x.severity||'').toLowerCase()==='critical').length;
     const attention=d.exceptions.filter(x=>['critical','high','medium'].includes(String(x.severity||'').toLowerCase())).length;
-    const today=Date.now()-86400000;
-    const recentActivity=d.logs.filter(x=>new Date(x.created_at||0).getTime()>=today).length;
-    const staffMap=new Map(d.staff.map(x=>[String(x.id),x]));
     const loads=new Map(); d.shipments.forEach(x=>{if(x.assigned_staff_id)loads.set(String(x.assigned_staff_id),(loads.get(String(x.assigned_staff_id))||0)+1)});
     const workload=d.staff.filter(x=>x.is_active).map(x=>({...x,load:loads.get(String(x.id))||0})).sort((a,b)=>b.load-a.load).slice(0,6);
     const topExceptions=[...d.exceptions].sort((a,b)=>{const w={critical:4,high:3,medium:2,low:1};return (w[String(b.severity||'').toLowerCase()]||0)-(w[String(a.severity||'').toLowerCase()]||0)}).slice(0,5);
-    return {activeStaff,activeShipments,unassigned,outstanding,critical,attention,recentActivity,workload,topExceptions,staffMap};
+    return {activeStaff,activeShipments,unassigned,outstanding,critical,attention,workload,topExceptions};
   }
 
   function injectCss(){
@@ -76,7 +73,7 @@
       #gcCommand{position:fixed;inset:0;z-index:1000;display:none;place-items:start center;padding:12vh 16px;background:rgba(0,0,0,.68);backdrop-filter:blur(10px)}#gcCommand.open{display:grid}.gc-command-box{width:min(680px,100%);background:#061727;border:1px solid rgba(139,234,246,.3);border-radius:18px;box-shadow:0 30px 90px rgba(0,0,0,.55);overflow:hidden}.gc-command-top{display:flex;gap:8px;padding:11px;border-bottom:1px solid rgba(151,205,239,.1)}.gc-command-top input{flex:1;min-height:42px;border:1px solid rgba(151,205,239,.15);border-radius:11px;background:#03101c;padding:10px 12px;outline:none;color:#fff}.gc-command-list{max-height:55vh;overflow:auto;padding:8px}.gc-command-item{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:right;padding:11px;border:1px solid transparent;border-radius:10px;background:transparent;color:#e6f2fb}.gc-command-item:hover{background:rgba(139,234,246,.07);border-color:rgba(139,234,246,.15)}.gc-command-item small{color:#6f90aa;font-size:9px}
       .gc-mobile-bar{display:none}
       @keyframes gcPulse{0%,100%{opacity:.9}50%{opacity:.45}}
-      @media(max-width:1100px){.gc-prod-grid{grid-template-columns:repeat(3,minmax(0,1fr));.gc-prod-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.gc-prod-columns{grid-template-columns:1fr}}
+      @media(max-width:1100px){.gc-prod-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.gc-prod-columns{grid-template-columns:1fr}}
       @media(max-width:650px){#gcOpsBar{grid-template-columns:1fr}.gc-prod-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.gc-prod-head{align-items:flex-start;flex-direction:column}.gc-ops-actions{width:100%}.gc-ops-btn{flex:1}.gc-mobile-bar{display:flex;position:fixed;left:8px;right:8px;bottom:8px;z-index:80;padding:7px;border:1px solid rgba(151,205,239,.14);border-radius:15px;background:rgba(4,17,30,.95);backdrop-filter:blur(14px);gap:5px;box-shadow:0 18px 40px rgba(0,0,0,.35)}.gc-mobile-bar button{flex:1;min-height:40px;border:1px solid transparent;border-radius:10px;background:transparent;color:#8eacc6;font-size:9px;font-weight:800}.gc-mobile-bar button.active{background:rgba(22,199,229,.11);color:#d9fbff;border-color:rgba(22,199,229,.18)}body{padding-bottom:62px}}
       @media(max-width:380px){.gc-prod-grid{grid-template-columns:1fr}.gc-prod-kpi{min-height:78px}.gc-ops-chip:nth-child(n+3){display:none}}
     `;
@@ -134,7 +131,7 @@
   }
   function updateNavBadges(d){
     const stats=derive(d); const counts={alerts:stats.attention,shipments:stats.activeShipments,customers:d.customers.length,staff:stats.activeStaff};
-    Object.entries(counts).forEach(([id,value])=>{const b=$(`#nav .nav-item[data-tab="${id}"] [data-count]`)||$(`#nav .nav-item[data-tab="${id}"] b`); if(b)b.textContent=value?String(value):'';});
+    Object.entries(counts).forEach(([id,value])=>{const b=$(`#nav .nav-item[data-tab="${id}"] b`); if(b)b.textContent=value?String(value):'';});
   }
   function ensureMobileBar(){
     if($('.gc-mobile-bar'))return; const m=document.createElement('div');m.className='gc-mobile-bar';m.innerHTML=`<button type="button" data-m="overview">Dashboard</button><button type="button" data-m="shipments">Shipments</button><button type="button" data-m="alerts">Alerts</button><button type="button" data-m="customers">Customers</button><button type="button" data-m="staff">Staff</button>`;document.body.appendChild(m);$$('[data-m]',m).forEach(b=>b.onclick=()=>{navTo(b.dataset.m);syncMobile()});
