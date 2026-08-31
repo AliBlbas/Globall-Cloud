@@ -8,6 +8,7 @@
 
   const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
+  const SUPABASE_CDN = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
   const STAFF_VERIFY_URL = `${SUPABASE_URL}/functions/v1/staff-auth-verify`;
 
   const waitFor = (getter, timeoutMs = 10000, intervalMs = 100) => new Promise((resolve, reject) => {
@@ -61,10 +62,28 @@
     gate?.classList.remove('hidden');
   };
 
+  const loadScript = (src, dataKey) => new Promise((resolve, reject) => {
+    const selector = dataKey ? `script[data-${dataKey}="1"]` : `script[src="${src}"]`;
+    const existing = document.querySelector(selector);
+    if (existing) {
+      if (existing.dataset.gcLoaded === '1') { resolve(); return; }
+      existing.addEventListener('load', () => resolve(), { once: true });
+      existing.addEventListener('error', reject, { once: true });
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    if (dataKey) script.dataset[dataKey] = '1';
+    script.addEventListener('load', () => { script.dataset.gcLoaded = '1'; resolve(); }, { once: true });
+    script.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), { once: true });
+    document.head.appendChild(script);
+  });
+
   const loadLayer = (path, key) => {
     if (document.querySelector(`script[data-${key}="1"]`)) return;
     const script = document.createElement('script');
-    script.src = `/${path}?v=20260830-1`;
+    script.src = `/${path}?v=20260831-1`;
     script.async = true;
     script.dataset[key] = '1';
     document.body.appendChild(script);
@@ -72,9 +91,14 @@
 
   const getClient = async () => {
     if (typeof window.gcEnsureSupabase === 'function') {
-      const client = await window.gcEnsureSupabase();
-      window.sb = client;
-      return client;
+      try {
+        const client = await window.gcEnsureSupabase();
+        window.sb = client;
+        return client;
+      } catch (_) {
+        // Fall through to a direct client bootstrap so Staff OS is not blank/broken
+        // when the shared production bridge is delayed or unavailable.
+      }
     }
 
     if (window.gcSupabase) {
@@ -82,15 +106,33 @@
       return window.gcSupabase;
     }
 
-    const supabaseLib = await waitFor(() => window.supabase || null);
-    window.gcSupabase = supabaseLib.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-      },
-      global: { headers: { 'x-gc-client': 'staff-os' } },
-    });
+    if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+      try {
+        await loadScript('/production-bridge.js?v=20260831-1', 'gc-production-bridge');
+      } catch (_) {
+        try {
+          await loadScript(SUPABASE_CDN, 'gc-supabase-cdn');
+        } catch (error) {
+          throw new Error('Supabase client failed to load.');
+        }
+      }
+    }
+
+    const supabaseLib = window.supabase?.createClient
+      ? window.supabase
+      : await waitFor(() => window.supabase || null, 8000, 100);
+
+    if (!window.gcSupabase) {
+      window.gcSupabase = supabaseLib.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+        },
+        global: { headers: { 'x-gc-client': 'staff-os' } },
+      });
+    }
+
     window.sb = window.gcSupabase;
     return window.gcSupabase;
   };
@@ -297,9 +339,15 @@
     }
   };
 
+  // Never leave the Staff page visually empty while auth/Supabase is booting.
+  // staff-os.html marks the gate hidden by default, so reveal it immediately.
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot, { once: true });
+    document.addEventListener('DOMContentLoaded', () => {
+      showGate();
+      void boot();
+    }, { once: true });
   } else {
-    boot();
+    showGate();
+    void boot();
   }
 })();
