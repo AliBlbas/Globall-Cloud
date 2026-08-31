@@ -2,9 +2,10 @@
 (() => {
   'use strict';
 
-  if (!/^\/staff(?:-os)?(?:\.html)?\/?$/.test(window.location.pathname)) return;
   // The current Staff OS shell owns its auth lifecycle in staff-os-console.js.
-  // The meta marker is available even when this legacy script is injected before <body>.
+  // Runtime injection can happen before DOM parsing, so guard the route itself first.
+  if (/^\/staff-os(?:\.html)?\/?$/.test(window.location.pathname)) return;
+  if (!/^\/staff(?:\.html)?\/?$/.test(window.location.pathname)) return;
   if (document.querySelector('meta[name="gc-staff-core"]') || document.getElementById('nav')) return;
   if (window.__gcStaffAuthBooted) return;
   window.__gcStaffAuthBooted = true;
