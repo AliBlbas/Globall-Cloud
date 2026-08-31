@@ -10,27 +10,7 @@
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
   const SUPABASE_CDN = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
   const STAFF_VERIFY_URL = `${SUPABASE_URL}/functions/v1/staff-auth-verify`;
-
-  const waitFor = (getter, timeoutMs = 10000, intervalMs = 100) => new Promise((resolve, reject) => {
-    const started = Date.now();
-    const timer = setInterval(() => {
-      try {
-        const value = getter();
-        if (value) {
-          clearInterval(timer);
-          resolve(value);
-          return;
-        }
-        if (Date.now() - started > timeoutMs) {
-          clearInterval(timer);
-          reject(new Error('Authentication client did not initialize in time.'));
-        }
-      } catch (error) {
-        clearInterval(timer);
-        reject(error);
-      }
-    }, intervalMs);
-  });
+  const state = { client: null, binding: false, bridgeInstalled: false };
 
   const setMessage = (text, tone = 'error') => {
     const node = document.getElementById('loginError') || document.getElementById('loginMsg');
@@ -68,7 +48,7 @@
     if (existing) {
       if (existing.dataset.gcLoaded === '1') { resolve(); return; }
       existing.addEventListener('load', () => resolve(), { once: true });
-      existing.addEventListener('error', reject, { once: true });
+      existing.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), { once: true });
       return;
     }
     const script = document.createElement('script');
@@ -83,58 +63,57 @@
   const loadLayer = (path, key) => {
     if (document.querySelector(`script[data-${key}="1"]`)) return;
     const script = document.createElement('script');
-    script.src = `/${path}?v=20260831-1`;
+    script.src = `/${path}?v=20260831-2`;
     script.async = true;
     script.dataset[key] = '1';
     document.body.appendChild(script);
   };
 
   const getClient = async () => {
+    if (state.client) return state.client;
+
     if (typeof window.gcEnsureSupabase === 'function') {
       try {
-        const client = await window.gcEnsureSupabase();
-        window.sb = client;
-        return client;
+        state.client = await window.gcEnsureSupabase();
+        window.sb = state.client;
+        return state.client;
       } catch (_) {
-        // Fall through to a direct client bootstrap so Staff OS is not blank/broken
-        // when the shared production bridge is delayed or unavailable.
+        // Continue with a direct bootstrap below.
       }
     }
 
-    if (window.gcSupabase) {
-      window.sb = window.gcSupabase;
-      return window.gcSupabase;
+    if (window.gcSupabase?.auth) {
+      state.client = window.gcSupabase;
+      window.sb = state.client;
+      return state.client;
     }
 
-    if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+    if (!window.supabase?.createClient) {
       try {
-        await loadScript('/production-bridge.js?v=20260831-1', 'gc-production-bridge');
+        await loadScript('/production-bridge.js?v=20260831-2', 'gc-production-bridge');
       } catch (_) {
-        try {
-          await loadScript(SUPABASE_CDN, 'gc-supabase-cdn');
-        } catch (error) {
-          throw new Error('Supabase client failed to load.');
-        }
+        // Shared bridge is optional for Staff OS; load the SDK directly.
       }
     }
 
-    const supabaseLib = window.supabase?.createClient
-      ? window.supabase
-      : await waitFor(() => window.supabase || null, 8000, 100);
-
-    if (!window.gcSupabase) {
-      window.gcSupabase = supabaseLib.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true,
-        },
-        global: { headers: { 'x-gc-client': 'staff-os' } },
-      });
+    if (!window.supabase?.createClient) {
+      await loadScript(SUPABASE_CDN, 'gc-supabase-cdn');
     }
 
-    window.sb = window.gcSupabase;
-    return window.gcSupabase;
+    if (!window.supabase?.createClient) throw new Error('Supabase client failed to load.');
+
+    state.client = window.gcSupabase || window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+      global: { headers: { 'x-gc-client': 'staff-os' } },
+    });
+
+    window.gcSupabase = state.client;
+    window.sb = state.client;
+    return state.client;
   };
 
   const verifyStaff = async (client, user) => {
@@ -182,8 +161,8 @@
   };
 
   const installLegacyStaffApiBridge = (client) => {
-    if (window.__gcLegacyStaffApiBridge) return;
-    window.__gcLegacyStaffApiBridge = true;
+    if (state.bridgeInstalled) return;
+    state.bridgeInstalled = true;
 
     const originalFetch = window.fetch.bind(window);
     window.fetch = async (input, init) => {
@@ -247,107 +226,87 @@
     loadLayer('staff-os-enterprise.js', 'gc-enterprise-layer');
   };
 
-  const boot = async () => {
+  const ensureClientAndRestore = async () => {
+    const client = await getClient();
+    installLegacyStaffApiBridge(client);
+
+    const { data: sessionData, error: sessionError } = await client.auth.getSession();
+    if (sessionError) throw sessionError;
+    if (!sessionData?.session?.user?.id) return false;
+
     try {
-      const client = await getClient();
-      installLegacyStaffApiBridge(client);
-
-      const form = document.getElementById('loginForm');
-      if (!form) return;
-
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        setMessage('');
-        setBusy(true);
-
-        try {
-          const email = String(document.getElementById('email')?.value || '').trim().toLowerCase();
-          const password = String(document.getElementById('password')?.value || '');
-          if (!email || !password) throw new Error('ئیمەیڵ و وشەی نهێنی پڕبکەرەوە.');
-
-          const { data, error } = await client.auth.signInWithPassword({ email, password });
-          if (error) throw error;
-
-          const staff = await verifyStaff(client, data?.user);
-          applyStaffIdentity(staff);
-          showApp();
-          loadStaffApp();
-          setMessage('بە سەرکەوتوویی چوویتە ناو Staff OS.', 'success');
-          setBusy(false);
-        } catch (error) {
-          console.error('[Globall Cloud] Staff login:', error);
-          const message = /invalid login credentials/i.test(error?.message || '')
-            ? 'ئیمەیڵ یان وشەی نهێنی هەڵەیە.'
-            : error?.message || 'نەتوانرا login بکرێت.';
-          setMessage(message);
-          setBusy(false);
-        }
-      }, { capture: true });
-
-      const { data: sessionData, error: sessionError } = await client.auth.getSession();
-      if (sessionError) throw sessionError;
-
-      if (!sessionData?.session?.user?.id) {
-        showGate();
-        return;
-      }
-
-      try {
-        const staff = await verifyStaff(client, sessionData.session.user);
-        applyStaffIdentity(staff);
-        showApp();
-        loadStaffApp();
-      } catch (error) {
-        if (error?.status === 401 || error?.status === 403) {
-          await client.auth.signOut().catch(() => undefined);
-        }
+      const staff = await verifyStaff(client, sessionData.session.user);
+      applyStaffIdentity(staff);
+      showApp();
+      loadStaffApp();
+      return true;
+    } catch (error) {
+      if (error?.status === 401 || error?.status === 403) {
+        await client.auth.signOut().catch(() => undefined);
         showGate();
         setMessage(error?.message || 'پەیوەندیی ستاف پشتڕاست نەکرایەوە؛ تکایە دووبارە بچۆ ژوورەوە.');
+      } else {
+        throw error;
       }
-
-      client.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'SIGNED_OUT' || !session?.user?.id) {
-          window.gcStaffIdentity = null;
-          showGate();
-          return;
-        }
-
-        if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
-          try {
-            const staff = await verifyStaff(client, session.user);
-            applyStaffIdentity(staff);
-            showApp();
-            loadStaffApp();
-          } catch (error) {
-            if (error?.status === 401 || error?.status === 403) {
-              await client.auth.signOut().catch(() => undefined);
-              window.gcStaffIdentity = null;
-              showGate();
-              setMessage(error?.message || 'پەیوەندیی ستاف پشتڕاست نەکرایەوە؛ تکایە دووبارە بچۆ ژوورەوە.');
-            } else {
-              console.warn('[Globall Cloud] Temporary staff verification failure:', error);
-            }
-          }
-        }
-      });
-    } catch (error) {
-      console.error('[Globall Cloud] Staff auth bridge:', error);
-      showGate();
-      setMessage('پەیوەندیی Supabase ئامادە نەبوو. تکایە دووبارە هەوڵبدەرەوە.');
-      setBusy(false);
+      return false;
     }
   };
 
-  // Never leave the Staff page visually empty while auth/Supabase is booting.
-  // staff-os.html marks the gate hidden by default, so reveal it immediately.
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      showGate();
-      void boot();
-    }, { once: true });
-  } else {
+  const bindLogin = () => {
+    const form = document.getElementById('loginForm');
+    if (!form || state.binding) return;
+    state.binding = true;
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      setMessage('');
+      setBusy(true);
+
+      try {
+        const client = await getClient();
+        installLegacyStaffApiBridge(client);
+
+        const email = String(document.getElementById('email')?.value || '').trim().toLowerCase();
+        const password = String(document.getElementById('password')?.value || '');
+        if (!email || !password) throw new Error('ئیمەیڵ و وشەی نهێنی پڕبکەرەوە.');
+
+        const { data, error } = await client.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+
+        const staff = await verifyStaff(client, data?.user);
+        applyStaffIdentity(staff);
+        showApp();
+        loadStaffApp();
+        setMessage('بە سەرکەوتوویی چوویتە ناو Staff OS.', 'success');
+      } catch (error) {
+        console.error('[Globall Cloud] Staff login:', error);
+        const message = /invalid login credentials/i.test(error?.message || '')
+          ? 'ئیمەیڵ یان وشەی نهێنی هەڵەیە.'
+          : error?.message || 'نەتوانرا login بکرێت.';
+        setMessage(message);
+      } finally {
+        setBusy(false);
+      }
+    }, { capture: true });
+  };
+
+  const boot = async () => {
     showGate();
+    bindLogin();
+
+    try {
+      await ensureClientAndRestore();
+    } catch (error) {
+      console.error('[Globall Cloud] Staff auth bridge:', error);
+      showGate();
+      setMessage('پەیوەندیی سەرەتایی ئامادە نییە؛ دووبارە هەوڵبدەرەوە یان login بکە.');
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => void boot(), { once: true });
+  } else {
     void boot();
   }
 })();
