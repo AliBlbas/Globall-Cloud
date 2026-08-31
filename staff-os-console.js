@@ -68,10 +68,12 @@
     return data
   }
   async function loadStaffIdentity(){
-    const data = await api('staff');
-    state.cache.set('staff',data.items||[]);
-    state.staff = (data.items||[]).find(x=>String(x.id)===String(state.user?.id)) || null;
-    if(!state.staff) throw new Error('ئەم هەژمارە مۆڵەتی staff ـی نییە');
+    const verifyUrl = `${SUPABASE_URL}/functions/v1/staff-auth-verify`;
+    const response = await fetch(verifyUrl,{method:'GET',headers:{Authorization:`Bearer ${state.session.access_token}`,apikey:SUPABASE_KEY,Accept:'application/json'},cache:'no-store'});
+    const payload = await response.json().catch(()=>({}));
+    if(!response.ok || payload?.authorized !== true || !payload?.staff?.id) throw new Error(response.status===403?'ئەم هەژمارەیە ڕێگەی Staff OS نییە':'پەیوەندیی ستاف پشتڕاست نەکرایەوە');
+    state.staff = payload.staff;
+    state.cache.set('staff',[state.staff]);
     $('#staffName').textContent=state.staff.full_name||state.user.email||'Staff';
     $('#staffRole').textContent=state.staff.role||'staff';
     $('#staffBranch').textContent=state.staff.branch||'all';
