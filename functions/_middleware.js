@@ -4,7 +4,7 @@
  * off public/customer/payment surfaces.
  */
 const HTML_ACCEPT = 'text/html'
-const VERSION = '20260831-5'
+const VERSION = '20260831-6'
 const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`)
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`)
 
@@ -34,11 +34,9 @@ export async function onRequest(context) {
   }
 
   if (/^\/staff(?:-os)?(?:\.html)?\/?$/.test(path)) {
-    // Keep the compatibility layer and visual enhancements on every staff entry point.
     html = html.replace(/<script\b[^>]*src=["']\/staff-os-compat\.js\?v=[^"']+["'][^>]*><\/script>/gi,
       `<script src="/staff-os-compat.js?v=${VERSION}" defer data-gc-staff-compat="1"></script>`)
     html = addHeadAsset(html, 'src="/staff-os-compat.js', `<script src="/staff-os-compat.js?v=${VERSION}" defer data-gc-staff-compat="1"></script>`)
-    // The new core shell owns auth on /staff-os; only legacy /staff needs the bridge.
     if (!/^\/staff-os(?:\.html)?\/?$/.test(path)) {
       html = html.replace(/<script\b[^>]*src=["']\/staff-auth-fix\.js\?v=[^"']+["'][^>]*><\/script>/gi,
         `<script src="/staff-auth-fix.js?v=${VERSION}" defer data-gc-staff-auth-fix="1"></script>`)
