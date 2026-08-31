@@ -4,7 +4,7 @@
  * off public/customer/payment surfaces.
  */
 const HTML_ACCEPT = 'text/html'
-const VERSION = '20260830-1'
+const VERSION = '20260831-1'
 const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`)
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`)
 
@@ -30,6 +30,12 @@ export async function onRequest(context) {
   for (const [needle, fragment] of headAssets) html = addHeadAsset(html, needle, fragment)
 
   if (/^\/staff(?:-os)?(?:\.html)?\/?$/.test(path)) {
+    // Replace stale versioned staff assets already present in staff-os.html so
+    // previously cached HTML cannot keep loading an old auth bridge.
+    html = html.replace(/<script\b[^>]*src=["']\/staff-auth-fix\.js\?v=[^"']+["'][^>]*><\/script>/gi,
+      `<script src="/staff-auth-fix.js?v=${VERSION}" defer data-gc-staff-auth-fix="1"></script>`)
+    html = html.replace(/<script\b[^>]*src=["']\/staff-os-compat\.js\?v=[^"']+["'][^>]*><\/script>/gi,
+      `<script src="/staff-os-compat.js?v=${VERSION}" defer data-gc-staff-compat="1"></script>`)
     html = addHeadAsset(html, 'src="/staff-os-compat.js', `<script src="/staff-os-compat.js?v=${VERSION}" data-gc-staff-compat="1"></script>`)
     html = addHeadAsset(html, 'src="/staff-auth-fix.js', `<script src="/staff-auth-fix.js?v=${VERSION}" data-gc-staff-auth-fix="1"></script>`)
     html = addHeadAsset(html, 'href="/staff-command-center-pro.css', `<link rel="stylesheet" href="/staff-command-center-pro.css?v=${VERSION}" data-gc-staff-command-center-css="1">`)
