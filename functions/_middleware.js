@@ -4,7 +4,7 @@
  * off public/customer/payment surfaces.
  */
 const HTML_ACCEPT = 'text/html'
-const VERSION = '20260831-2'
+const VERSION = '20260831-3'
 const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`)
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`)
 
@@ -29,7 +29,7 @@ export async function onRequest(context) {
   ]
   for (const [needle, fragment] of headAssets) html = addHeadAsset(html, needle, fragment)
 
-  if (/^\/staff(?:-os)?(?:\.html)?\/?$/.test(path)) {
+  if (/^\/staff(?:-os)?(?:\.html)?\/?$/.test(path) && !/^\/staff-os(?:\.html)?\/?$/.test(path)) {
     // Replace stale versioned staff assets already present in staff-os.html so
     // previously cached HTML cannot keep loading an old auth bridge.
     html = html.replace(/<script\b[^>]*src=["']\/staff-auth-fix\.js\?v=[^"']+["'][^>]*><\/script>/gi,
