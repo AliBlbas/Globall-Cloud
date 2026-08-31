@@ -3,6 +3,9 @@
   'use strict';
 
   if (!/^\/staff(?:-os)?(?:\.html)?\/?$/.test(window.location.pathname)) return;
+  // The current Staff OS shell owns its auth lifecycle in staff-os-console.js.
+  // Keep this legacy bridge for older staff entry points, but never double-bind the new shell.
+  if (document.getElementById('nav')) return;
   if (window.__gcStaffAuthBooted) return;
   window.__gcStaffAuthBooted = true;
 

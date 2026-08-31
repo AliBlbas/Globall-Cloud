@@ -23,8 +23,12 @@
   function canChat(){ return ['admin','super_admin','accountant','finance','warehouse','warehouse_china','warehouse_uae','warehouse_erbil','operations','driver','delivery'].includes(String(state.staff?.role||'')); }
 
   async function bootstrapClient(){
-    if(window.gcEnsureSupabase){ await window.gcEnsureSupabase(); state.client=window.gcSupabase; return state.client; }
-    if(window.supabase?.createClient){ state.client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}); return state.client; }
+    if(window.gcEnsureSupabase){
+      const ensured=await window.gcEnsureSupabase().catch(()=>null);
+      if(ensured?.auth){ state.client=ensured; return state.client; }
+      if(window.gcSupabase?.auth){ state.client=window.gcSupabase; return state.client; }
+    }
+    if(window.supabase?.createClient){ state.client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}); window.gcSupabase=state.client; window.sb=state.client; return state.client; }
     throw new Error('Supabase client نەبارکراوە');
   }
   async function api(kind, options={}){
