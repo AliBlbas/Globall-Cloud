@@ -54,9 +54,23 @@
     const body = await response.json().catch(() => null);
     return response.ok && body?.authorized === true && body?.staff?.id ? body.staff : null;
   };
-  const redirectToStaff = () => {
-    sessionStorage.setItem('gc-staff-auth-ready', '1');
-    window.location.replace('/staff-os?gc_auth=1');
+  const revealStaffConsole = async (client) => {
+    const renderer = window.renderAdminGate;
+    if (typeof renderer === 'function') {
+      await renderer();
+    }
+    const page = el('page-admin');
+    page?.classList.add('active');
+    const loginView = el('adminLoginView');
+    const dashView = el('adminDashboardView') || el('adminDashView');
+    if (loginView && dashView) {
+      loginView.style.display = 'none';
+      dashView.style.display = 'block';
+    }
+    document.getElementById('staffEmail')?.blur();
+    document.getElementById('staffPassword')?.blur();
+    window.scrollTo({ top: Math.max(0, (page?.getBoundingClientRect().top || 0) + window.scrollY - 20), behavior: 'smooth' });
+    window.dispatchEvent(new CustomEvent('gc:staff-login-complete', { detail: { client } }));
   };
   const showMfa = async (client) => {
     const view = el('adminMfaView');
@@ -83,7 +97,7 @@
       await showMfa(client);
       return false;
     }
-    redirectToStaff();
+    await revealStaffConsole(client);
     return true;
   };
   const handleLogin = async (event) => {
@@ -100,7 +114,7 @@
     const btn = el('staffLoginBtn');
     const btnText = el('staffLoginBtnText');
     if (btn) btn.disabled = true;
-    if (btnText) btnText.textContent = '...';
+    if (btnText) btnText.textContent = 'چاوەڕوان بە…';
     setError('');
     try {
       const { data, error } = await client.auth.signInWithPassword({ email, password });
@@ -139,8 +153,10 @@
       if (verifyError) throw verifyError;
       const session = (await client.auth.getSession()).data?.session;
       const staff = await verifyStaff(session);
-      if (!staff) throw new Error('دوای 2FA هەژماری Staff پشتڕاست نەکرایەوە.');
-      redirectToStaff();
+      if (!staff || staff.is_active === false || !['admin', 'super_admin', 'accountant'].includes(String(staff.role))) {
+        throw new Error('دوای 2FA هەژماری Staff پشتڕاست نەکرایەوە.');
+      }
+      await revealStaffConsole(client);
     } catch (errorValue) {
       setMfaError(/code|otp|challenge|factor/i.test(String(errorValue?.message || '')) ? 'کۆدی 2FA هەڵەیە یان بەسەرچووە.' : String(errorValue?.message || '2FA سەرکەوتوو نەبوو.'));
     } finally {
