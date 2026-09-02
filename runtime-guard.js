@@ -6,6 +6,8 @@
   'use strict';
 
   const BRIDGE = '/production-bridge.js?v=20260828-2';
+  const STAFF_ENHANCEMENTS = '/staff-os-enhancements-v2.js?v=20260902-1';
+  const STAFF_FX_ENHANCEMENTS = '/staff-os-fx.js?v=20260902-1';
   const LEGACY_MESSAGE = 'Supabase هێشتا پەیوەست نەکراوە';
   const READY_MESSAGE = 'پەیوەندیی پارێزراو بە Supabase چالاکە و سیستەمەکە ئامادەیە.';
   const FAIL_MESSAGE = 'پەیوەندیی خزمەتگوزاری بە شێوەیەکی پارێزراو دەتاقیکرێتەوە.';
@@ -99,16 +101,36 @@
     });
   }
 
+  function loadOnce(src, marker) {
+    if (document.querySelector(`script[data-gc-${marker}]`)) return;
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = false;
+    script.defer = true;
+    script.dataset[`gc${marker.replace(/(^|-)([a-z])/g, (_, __, c) => c.toUpperCase())}`] = '1';
+    document.head.appendChild(script);
+  }
+
+  function loadStaffEnhancements() {
+    if (!/^\/staff(?:-os)?(?:\.html)?\/?$/.test(window.location.pathname)) return;
+    if (!window.gcStaffIdentity) return;
+    loadOnce(STAFF_ENHANCEMENTS, 'staff-enhancements');
+    loadOnce(STAFF_FX_ENHANCEMENTS, 'staff-fx-enhancements');
+  }
+
   async function boot() {
     startLegacyTextGuard();
     updateConnectionNotice(FAIL_MESSAGE);
+    window.addEventListener('gc:staff-auth-ready', loadStaffEnhancements);
     try {
       await loadBridgeOnce();
       const healthy = await waitForHealth();
       updateConnectionNotice(healthy ? READY_MESSAGE : FAIL_MESSAGE);
+      loadStaffEnhancements();
     } catch (error) {
       console.warn('[Globall Cloud] runtime guard:', error);
       updateConnectionNotice(FAIL_MESSAGE);
+      loadStaffEnhancements();
     }
   }
 
