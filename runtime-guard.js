@@ -8,6 +8,7 @@
   const BRIDGE = '/production-bridge.js?v=20260828-2';
   const STAFF_ENHANCEMENTS = '/staff-os-enhancements-v2.js?v=20260902-1';
   const STAFF_FX_ENHANCEMENTS = '/staff-os-fx.js?v=20260902-1';
+  const STAFF_WAREHOUSE_NOTIFY = '/staff-os-warehouse-notify.js?v=20260902-1';
   const LEGACY_MESSAGE = 'Supabase هێشتا پەیوەست نەکراوە';
   const READY_MESSAGE = 'پەیوەندیی پارێزراو بە Supabase چالاکە و سیستەمەکە ئامادەیە.';
   const FAIL_MESSAGE = 'پەیوەندیی خزمەتگوزاری بە شێوەیەکی پارێزراو دەتاقیکرێتەوە.';
@@ -116,6 +117,7 @@
     if (!window.gcStaffIdentity) return;
     loadOnce(STAFF_ENHANCEMENTS, 'staff-enhancements');
     loadOnce(STAFF_FX_ENHANCEMENTS, 'staff-fx-enhancements');
+    loadOnce(STAFF_WAREHOUSE_NOTIFY, 'staff-warehouse-notify');
   }
 
   async function boot() {
