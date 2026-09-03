@@ -1,0 +1,32 @@
+-- Least-privilege grants for server-side Edge Functions.
+-- These are intentionally granted only to service_role; browser roles keep RLS boundaries.
+grant select, insert, update on table public.shipments to service_role;
+grant select, insert, update on table public.warehouse_receipts to service_role;
+grant select, insert, update on table public.staff_alerts to service_role;
+grant select, insert, update on table public.finance_transactions to service_role;
+grant select, insert, update on table public.exchange_rates to service_role;
+grant select, insert, update on table public.company_costs to service_role;
+grant select, insert, update on table public.logistics_exceptions to service_role;
+grant select, insert, update on table public.customer_chat_threads to service_role;
+grant select, insert, update on table public.customer_chat_messages to service_role;
+grant select, insert, update on table public.quote_requests to service_role;
+grant select on table public.staff to service_role;
+grant select on table public.shipment_packages to service_role;
+grant select on table public.shipment_tracking_events to service_role;
+grant select on table public.shipment_insurance to service_role;
+grant select on table public.shipment_financial_ledger to service_role;
+grant select on table public.shipment_invoices to service_role;
+grant select on table public.payment_transactions to service_role;
+grant select on table public.shipment_events to service_role;
+grant select on table public.shipment_status_history to service_role;
+grant select on table public.shipment_route_legs to service_role;
+grant select on table public.shipment_customs_cases to service_role;
+grant select on table public.shipment_documents to service_role;
+grant select on table public.shipment_manifests to service_role;
+grant select on table public.warehouse_movements to service_role;
+grant select on table public.consolidation_batches to service_role;
+grant select on table public.consolidation_requests to service_role;
+grant select on table public.consolidation_items to service_role;
+grant select, insert, update on table public.customer_notifications to service_role;
+grant select, insert, update on table public.notification_outbox to service_role;
+grant select, insert, update on table public.staff_activity_log to service_role;
