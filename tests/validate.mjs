@@ -25,7 +25,7 @@ const required = [
   'index.html','sw.js','production-bridge.js','runtime-guard.js','functions/_middleware.js',
   'control-plane.html','control-plane.js','payment-checkout.html','payment-checkout.js','customer-portal.html','driver-workspace.html','warehouse-os.html','staff-os.html','staff-os-compat.js',
   'staff-os-enhancements-v2.js','staff-os-fx.js','staff-os-warehouse-notify.js','staff-os-dashboard.js','staff-os-ai-tools.js','warehouse-offline-sync.js','tracking-integration.html',
-  'supabase/config.toml','supabase/migrations/20260903010000_production_security_hardening.sql','supabase/migrations/20260903011000_lock_bootstrap_admin_rpc.sql','supabase/migrations/20260903012000_customer_account_created_notifications.sql','supabase/migrations/20260903013000_fix_shein_quote_fx_schema.sql',
+  'supabase/config.toml','supabase/migrations/20260903010000_production_security_hardening.sql','supabase/migrations/20260903005006_lock_bootstrap_admin_rpc.sql','supabase/migrations/20260903005417_customer_account_created_notifications.sql','supabase/migrations/20260903005518_fix_shein_quote_fx_schema_v2.sql',
   'supabase/functions/payment-checkout/index.ts','supabase/functions/payment-webhook/index.ts','supabase/functions/notification-dispatch/index.ts','supabase/functions/logistics-control-plane/index.ts','supabase/functions/customer-self/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/staff-ops-hub/index.ts','supabase/functions/warehouse-notify/index.ts','supabase/functions/invoice-ai/index.ts','supabase/functions/customer-debt-assistant/index.ts','supabase/functions/customer-receipt-evidence/index.ts','supabase/functions/fx-refresh/index.ts','supabase/functions/_shared/payment-providers.ts',
 ];
 const beforeReq = failures; for (const rel of required) if (!existsSync(join(ROOT, rel))) fail(`missing ${rel}`); if (failures === beforeReq) ok(`${required.length} files present`);
@@ -68,7 +68,7 @@ const beforeRel=failures; for(const [label,pattern,source] of relGuards) if(!pat
 
 console.log('Security hardening guards');
 const hardening=readFileSync(join(ROOT,'supabase','migrations','20260903010000_production_security_hardening.sql'),'utf8');
-const bootstrap=readFileSync(join(ROOT,'supabase','migrations','20260903011000_lock_bootstrap_admin_rpc.sql'),'utf8');
+const bootstrap=readFileSync(join(ROOT,'supabase','migrations','20260903005006_lock_bootstrap_admin_rpc.sql'),'utf8');
 const hardeningGuards=[['trigger RPC lock',/guard_payment_session_update\(\)[\s\S]*revoke all[\s\S]*grant execute[\s\S]*service_role/,hardening],['warehouse WhatsApp lock',/queue_warehouse_whatsapp\(\)[\s\S]*revoke all[\s\S]*grant execute[\s\S]*service_role/,hardening],['admin shopping lock',/admin_update_shopping_status\(uuid,text\)[\s\S]*revoke all[\s\S]*grant execute[\s\S]*service_role/,hardening],['super admin customer lock',/super_admin_update_customer\([\s\S]*?\)[\s\S]*revoke all[\s\S]*grant execute[\s\S]*service_role/,hardening],['search path pinned',/calculate_chargeable_weight\(numeric,numeric,numeric,numeric\)[\s\S]*set search_path = public, pg_temp/,hardening],['bootstrap lock',/bootstrap_first_admin\(\)[\s\S]*revoke all[\s\S]*grant execute[\s\S]*service_role/,bootstrap]];
 const beforeHard=failures; for(const [label,pattern,source] of hardeningGuards) if(!pattern.test(source)) fail(`missing security hardening: ${label}`); if(failures===beforeHard) ok(`${hardeningGuards.length} hardening guards OK`);
 
