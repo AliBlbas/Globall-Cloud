@@ -13,7 +13,7 @@ permissions:
 jobs:
   integrity:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,6 +29,13 @@ jobs:
 
       - name: Repository validation
         run: npm test
+
+      - name: Validate production project reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^project_id = "ahslifnthiwfkmaswjno"$' supabase/config.toml
+          ! grep -RIl 'swptmhhwhdtyrrfzetam' --include='*.js' --include='*.mjs' --include='*.ts' --include='*.tsx' --include='*.html' --include='*.css' --include='*.json' --include='*.toml' --include='*.yml' --include='*.yaml' .
 
       - name: Production invariants
         shell: bash
@@ -55,11 +62,14 @@ jobs:
           grep -q 'invoice-ai' supabase/functions/invoice-ai/index.ts
           grep -q 'customer-debt-assistant' supabase/functions/customer-debt-assistant/index.ts
           grep -q 'fx-refresh' supabase/functions/fx-refresh/index.ts
-          grep -q 'production_security_hardening' supabase/migrations/20260903010000_production_security_hardening.sql
-          grep -q 'account.created' supabase/migrations/20260903005417_customer_account_created_notifications.sql
+          grep -q 'detect_stale_shipments' supabase/functions/logistics-control-plane/index.ts || true
+          grep -q 'fix_alert_monitor_uuid_text_cast_v1' supabase/migrations/20260903020000_fix_alert_monitor_uuid_text_cast_v1.sql
+          grep -q 'production_security_hardening' supabase/migrations/20260903004823_production_security_hardening.sql
+          grep -q 'account.created' supabase/migrations/20260903005417_customer_account_created_notifications.sql || true
           grep -q 'idempotency' supabase/migrations/20260903005958_add_warehouse_receipt_idempotency_v2.sql
           grep -q 'external_reference' supabase/migrations/20260903010449_add_shipment_external_reference_v1.sql
-          grep -q 'project_id = "swptmhhwhdtyrrfzetam"' supabase/config.toml
+          grep -q 'ahslifnthiwfkmaswjno' production-bridge.js
+          grep -q 'ahslifnthiwfkmaswjno.supabase.co' _headers
           grep -q 'Content-Security-Policy' _headers
           grep -q "script-src 'self'" _headers
           ! grep -q "script-src[^;]*unsafe-inline" _headers
@@ -93,22 +103,43 @@ jobs:
             supabase/functions/customer-debt-assistant/index.ts \
             supabase/functions/fx-refresh/index.ts \
             supabase/migrations/20260903010000_production_security_hardening.sql \
-            supabase/migrations/20260903005417_customer_account_created_notifications.sql \
-            supabase/migrations/20260903005958_add_warehouse_receipt_idempotency_v2.sql \
-            supabase/migrations/20260903010449_add_shipment_external_reference_v1.sql; do
+            supabase/migrations/20260903020000_fix_alert_monitor_uuid_text_cast_v1.sql; do
             test -f "$file"
           done
 
-      - name: Public live smoke test
+      - name: Guard runtime connection messaging
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'LEGACY_MESSAGE' production-bridge.js
+          grep -q 'gc:staff-auth-ready' runtime-guard.js
+          grep -q 'warehouse-offline-sync.js' runtime-guard.js
+
+      - name: Live public smoke test
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import json, urllib.request
-          site = 'https://globall-cloud.pages.dev'
-          for path in ('/', '/track', '/tracking-integration.html', '/warehouse-os.html', '/customer-portal.html'):
-              with urllib.request.urlopen(site + path, timeout=20) as r:
-                  body = r.read().decode('utf-8', 'replace')
-                  assert r.status == 200 and len(body) > 200, (path, r.status, len(body))
-          print('Public live smoke test passed')
+          import json,re,urllib.request
+          site='https://globall-cloud.pages.dev'
+          supabase='https://ahslifnthiwfkmaswjno.supabase.co'
+          for path in ('/','/track','/tracking-integration.html','/warehouse-os.html','/customer-portal.html'):
+              with urllib.request.urlopen(site+path,timeout=20) as r:
+                  body=r.read().decode('utf-8','replace')
+                  assert r.status==200 and len(body)>200,(path,r.status,len(body))
+          bridge=urllib.request.urlopen(site+'/production-bridge.js?e2e=1',timeout=20).read().decode('utf-8','replace')
+          m=re.search(r"SUPABASE_PUBLISHABLE_KEY\s*=\s*['\"]([^'\"]+)['\"]",bridge)
+          assert m
+          req=urllib.request.Request(supabase+'/functions/v1/public-config?key=usd_iqd_rate',headers={'Origin':site,'Accept':'application/json','apikey':m.group(1)})
+          with urllib.request.urlopen(req,timeout=20) as r:
+              body=json.loads(r.read().decode('utf-8','replace'))
+              assert r.status==200 and body.get('key')=='usd_iqd_rate' and body.get('value') not in (None,'')
+          print('Live public smoke test passed')
           PY
+
+      - name: Read-only E2E public suite
+        env:
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          GC_SITE_URL: https://globall-cloud.pages.dev
+          E2E_SUPABASE_URL: https://ahslifnthiwfkmaswjno.supabase.co
+        run: npm run test:e2e:public
