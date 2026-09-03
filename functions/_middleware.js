@@ -4,9 +4,11 @@
  * off public/customer/payment surfaces.
  */
 const HTML_ACCEPT = 'text/html'
-const VERSION = '20260831-6'
+const VERSION = '20260903-1'
 const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`)
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`)
+
+const OPERATIONAL_PAGE = /^\/(staff(?:-os)?|warehouse(?:-os)?|customer-portal|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\.html)?\/?$/i
 
 export async function onRequest(context) {
   const accept = context.request.headers.get('accept') || ''
@@ -25,12 +27,16 @@ export async function onRequest(context) {
     ['href="/site-polish.css', `<link rel="stylesheet" href="/site-polish.css?v=${VERSION}" data-gc-premium-polish="1">`],
     ['href="/production-mobile-hotfix.css', `<link rel="stylesheet" href="/production-mobile-hotfix.css?v=${VERSION}" data-gc-production-mobile-hotfix="1">`],
     ['src="/production-brand-repair.js', `<script src="/production-brand-repair.js?v=${VERSION}" defer data-gc-production-brand-repair="1"></script>`],
-    ['src="/runtime-guard.js', `<script src="/runtime-guard.js?v=${VERSION}" defer data-gc-runtime-guard="1"></script>`],
   ]
   for (const [needle, fragment] of headAssets) html = addHeadAsset(html, needle, fragment)
 
+  if (OPERATIONAL_PAGE.test(path)) {
+    html = addHeadAsset(html, 'src="/runtime-guard.js', `<script src="/runtime-guard.js?v=${VERSION}" defer data-gc-runtime-guard="1"></script>`)
+  }
+
   if (path === '/' || path === '/index.html') {
     html = addHeadAsset(html, 'src="/staff-auth-runtime-fix.js', `<script src="/staff-auth-runtime-fix.js?v=${VERSION}" defer data-gc-staff-auth-runtime="1"></script>`)
+    html = addBodyAsset(html, 'src="/gc-csp-scripts/logistics-pricing-ui.js', `<script src="/gc-csp-scripts/logistics-pricing-ui.js?v=${VERSION}" defer data-gc-logistics-pricing-ui="1"></script>`)
   }
 
   if (/^\/staff(?:-os)?(?:\.html)?\/?$/.test(path)) {
@@ -48,6 +54,7 @@ export async function onRequest(context) {
     html = addBodyAsset(html, 'src="/staff-command-center-pro.js', `<script src="/staff-command-center-pro.js?v=${VERSION}" defer data-gc-staff-command-center="1"></script>`)
     html = addBodyAsset(html, 'src="/staff-directory-360.js', `<script src="/staff-directory-360.js?v=${VERSION}" defer data-gc-staff-directory-360="1"></script>`)
     html = addBodyAsset(html, 'src="/staff-profit-analytics.js', `<script src="/staff-profit-analytics.js?v=${VERSION}" defer data-gc-staff-profit-analytics="1"></script>`)
+    html = addBodyAsset(html, 'src="/gc-csp-scripts/staff-admin-panel.js', `<script src="/gc-csp-scripts/staff-admin-panel.js?v=${VERSION}" defer data-gc-staff-admin-panel="1"></script>`)
   }
 
   const legacyAdminSurface = /^\/(management|accounts-console|operations-suite|operations-command-center|operations-control|operations-control-v2|staff-portal|warehouse-os|superadmin|super-admin-command-center)\.html$/.test(path)
@@ -59,6 +66,9 @@ export async function onRequest(context) {
     html = addHeadAsset(html, 'href="/warehouse-receipt-proof.css', `<link rel="stylesheet" href="/warehouse-receipt-proof.css?v=${VERSION}" data-gc-warehouse-receipt-proof="1">`)
     html = addBodyAsset(html, 'src="/gc-csp-scripts/warehouse-receipt-proof-enhancement.js', `<script src="/gc-csp-scripts/warehouse-receipt-proof-enhancement.js?v=${VERSION}" defer data-gc-warehouse-receipt-proof="1"></script>`)
     html = addBodyAsset(html, 'src="/gc-csp-scripts/warehouse-receiving-chain-bridge.js', `<script src="/gc-csp-scripts/warehouse-receiving-chain-bridge.js?v=${VERSION}" defer data-gc-warehouse-receiving-chain="1"></script>`)
+  }
+  if (/^\/shop\/shein\.html$/i.test(path)) {
+    html = addBodyAsset(html, 'src="/gc-csp-scripts/shein-customer-identity.js', `<script src="/gc-csp-scripts/shein-customer-identity.js?v=${VERSION}" defer data-gc-shein-identity="1"></script>`)
   }
   if (/^\/customer-portal(?:\.html)?\/?$/.test(path)) {
     html = addHeadAsset(html, 'href="/customer-receipt-evidence.css', `<link rel="stylesheet" href="/customer-receipt-evidence.css?v=${VERSION}" data-gc-customer-receipt-evidence="1">`)
