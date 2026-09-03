@@ -28,7 +28,6 @@ function walk(dir, exts, out = []) {
   return out;
 }
 
-// 1. JS syntax check
 console.log('JavaScript syntax (node --check)');
 const jsFiles = walk(ROOT, ['.js']);
 for (const f of jsFiles) {
@@ -40,7 +39,6 @@ for (const f of jsFiles) {
 }
 if (failures === 0) ok(`${jsFiles.length} files OK`);
 
-// 2. TS syntax check (edge functions)
 console.log('TypeScript syntax (edge functions)');
 const tsFiles = walk(join(ROOT, 'supabase', 'functions'), ['.ts']);
 let ts;
@@ -66,35 +64,26 @@ if (ts) {
   if (failures === before) ok(`${tsFiles.length} files OK`);
 }
 
-// 3. Core production files present
 console.log('Core production files');
 const required = [
   'index.html', 'sw.js', 'production-bridge.js', 'runtime-guard.js', 'functions/_middleware.js',
   'control-plane.html', 'control-plane.js', 'payment-checkout.html', 'payment-checkout.js',
   'customer-portal.html', 'driver-workspace.html', 'warehouse-os.html', 'staff-os.html', 'staff-os-compat.js',
   'staff-os-enhancements-v2.js', 'staff-os-fx.js', 'staff-os-warehouse-notify.js', 'staff-os-dashboard.js', 'staff-os-ai-tools.js',
-  'tracking-integration.html', 'superadmin.html', 'super-admin-command-center.html',
+  'tracking-integration.html', 'warehouse-offline-sync.js', 'superadmin.html', 'super-admin-command-center.html',
   'supabase/config.toml', 'supabase/migrations/20260903010000_production_security_hardening.sql',
-  'supabase/functions/payment-checkout/index.ts',
-  'supabase/functions/payment-webhook/index.ts',
-  'supabase/functions/notification-dispatch/index.ts',
-  'supabase/functions/logistics-control-plane/index.ts',
-  'supabase/functions/customer-self/index.ts',
-  'supabase/functions/staff-analytics/index.ts',
-  'supabase/functions/staff-ops-hub/index.ts',
-  'supabase/functions/warehouse-notify/index.ts',
-  'supabase/functions/invoice-ai/index.ts',
-  'supabase/functions/customer-debt-assistant/index.ts',
-  'supabase/functions/customer-receipt-evidence/index.ts',
-  'supabase/functions/_shared/payment-providers.ts',
+  'supabase/migrations/20260903011000_lock_bootstrap_admin_rpc.sql',
+  'supabase/functions/payment-checkout/index.ts', 'supabase/functions/payment-webhook/index.ts',
+  'supabase/functions/notification-dispatch/index.ts', 'supabase/functions/logistics-control-plane/index.ts',
+  'supabase/functions/customer-self/index.ts', 'supabase/functions/staff-analytics/index.ts',
+  'supabase/functions/staff-ops-hub/index.ts', 'supabase/functions/warehouse-notify/index.ts',
+  'supabase/functions/invoice-ai/index.ts', 'supabase/functions/customer-debt-assistant/index.ts',
+  'supabase/functions/customer-receipt-evidence/index.ts', 'supabase/functions/_shared/payment-providers.ts',
 ];
 const beforeReq = failures;
-for (const rel of required) {
-  if (!existsSync(join(ROOT, rel))) fail(`missing ${rel}`);
-}
+for (const rel of required) if (!existsSync(join(ROOT, rel))) fail(`missing ${rel}`);
 if (failures === beforeReq) ok(`${required.length} files present`);
 
-// 4. Public form integration guards
 console.log('Public integration guards');
 const publicIndexSource = readFileSync(join(ROOT, 'gc-csp-scripts', 'index-inline-2.js'), 'utf8');
 const requestBlock = publicIndexSource.match(/async function handleRequestSubmit\(e\)\{[\s\S]*?\n\}\nfunction resetRequestForm/)?.[0] || '';
@@ -109,19 +98,15 @@ const beforePublic = failures;
 for (const [label, passed] of publicGuards) if (!passed) fail(`missing public integration guard: ${label}`);
 if (failures === beforePublic) ok(`${publicGuards.length} public integration guards OK`);
 
-// 5. Migration filenames
 console.log('Migration filenames');
 const migDir = join(ROOT, 'supabase', 'migrations');
 const beforeMig = failures;
 if (existsSync(migDir)) {
   const migFiles = readdirSync(migDir).filter((f) => f.endsWith('.sql'));
-  for (const f of migFiles) {
-    if (!/^\d{14}_[a-z0-9_]+\.sql$/.test(f)) fail(`bad migration filename: ${f}`);
-  }
+  for (const f of migFiles) if (!/^\d{14}_[a-z0-9_]+\.sql$/.test(f)) fail(`bad migration filename: ${f}`);
   if (failures === beforeMig) ok(`${migFiles.length} migrations OK`);
 }
 
-// 6. Role-policy regression guards
 console.log('Role-policy guards');
 const roleSource = readFileSync(join(ROOT, 'supabase', 'functions', '_shared', 'roles.ts'), 'utf8');
 const operationsSource = readFileSync(join(ROOT, 'supabase', 'functions', 'operations-admin', 'index.ts'), 'utf8');
@@ -144,7 +129,6 @@ for (const [label, pattern] of roleGuards) {
 }
 if (failures === beforeRoles) ok(`${roleGuards.length} role guards OK`);
 
-// 7. Core logistics workflow guards
 console.log('Core workflow guards');
 const controlPlaneSource = [readFileSync(join(ROOT, 'supabase', 'functions', 'logistics-control-plane', 'index.ts'), 'utf8'), ...walk(join(ROOT, 'supabase', 'migrations'), ['.sql']).map((file) => readFileSync(file, 'utf8'))].join('\n');
 const workflowGuards = [
@@ -159,12 +143,9 @@ const workflowGuards = [
   ['insurance', /shipment_insurance/],
 ];
 const beforeWorkflow = failures;
-for (const [label, pattern] of workflowGuards) {
-  if (!pattern.test(controlPlaneSource)) fail(`missing core workflow guard: ${label}`);
-}
+for (const [label, pattern] of workflowGuards) if (!pattern.test(controlPlaneSource)) fail(`missing core workflow guard: ${label}`);
 if (failures === beforeWorkflow) ok(`${workflowGuards.length} core workflow guards OK`);
 
-// 8. Role-surface accessibility guards
 console.log('Role-surface accessibility guards');
 const driverSurface = readFileSync(join(ROOT, 'driver-workspace.html'), 'utf8');
 const warehouseSurface = readFileSync(join(ROOT, 'warehouse-os.html'), 'utf8');
@@ -186,17 +167,12 @@ for (const [label, pattern] of surfaceGuards) {
 }
 if (failures === beforeSurface) ok(`${surfaceGuards.length} role-surface guards OK`);
 
-// 9. Provider integration guards
 console.log('Provider integration guards');
 const paymentAdapterSource = readFileSync(join(ROOT, 'supabase', 'functions', '_shared', 'payment-providers.ts'), 'utf8');
 const webhookSource = readFileSync(join(ROOT, 'supabase', 'functions', 'payment-webhook', 'index.ts'), 'utf8');
 const providerGuards = [
-  ['QiCard adapter', /qicardCreate/],
-  ['FIB adapter', /fibCreate/],
-  ['normalized provider status', /normalizeProviderStatus/],
-  ['QiCard signature verification', /verifyQiCardSignature/],
-  ['webhook event persistence', /payment_webhook_events/],
-  ['webhook status requery', /status_requeried/],
+  ['QiCard adapter', /qicardCreate/], ['FIB adapter', /fibCreate/], ['normalized provider status', /normalizeProviderStatus/],
+  ['QiCard signature verification', /verifyQiCardSignature/], ['webhook event persistence', /payment_webhook_events/], ['webhook status requery', /status_requeried/],
 ];
 const beforeProviders = failures;
 for (const [label, pattern] of providerGuards) {
@@ -205,41 +181,40 @@ for (const [label, pattern] of providerGuards) {
 }
 if (failures === beforeProviders) ok(`${providerGuards.length} provider guards OK`);
 
-// 10. Reliability and release-safety guards
 console.log('Reliability guards');
 const dispatchSource = readFileSync(join(ROOT, 'supabase', 'functions', 'notification-dispatch', 'index.ts'), 'utf8');
 const readmeSource = readFileSync(join(ROOT, 'README.md'), 'utf8');
 const runtimeSource = readFileSync(join(ROOT, 'runtime-guard.js'), 'utf8');
+const offlineSource = readFileSync(join(ROOT, 'warehouse-offline-sync.js'), 'utf8');
 const reliabilityGuards = [
-  ['protected worker secret', /NOTIFICATION_WORKER_SECRET/],
-  ['external outbox claim', /claim_notification_outbox_external/],
-  ['retry-aware completion', /complete_notification_outbox/],
-  ['recovery runbook', /Reliability and recovery runbook/],
-  ['backup guidance', /Supabase backup|point-in-time recovery/],
-  ['secret-manager guidance', /platform secret manager/],
-  ['staff enhancement hooks', /staff-os-enhancements-v2\.js/],
-  ['staff analytics hook', /staff-os-dashboard\.js/],
-  ['runtime staff gating', /gc:staff-auth-ready/],
+  ['protected worker secret', /NOTIFICATION_WORKER_SECRET/], ['external outbox claim', /claim_notification_outbox_external/], ['retry-aware completion', /complete_notification_outbox/],
+  ['recovery runbook', /Reliability and recovery runbook/], ['backup guidance', /Supabase backup|point-in-time recovery/], ['secret-manager guidance', /platform secret manager/],
+  ['staff enhancement hooks', /staff-os-enhancements-v2\.js/], ['staff analytics hook', /staff-os-dashboard\.js/], ['runtime staff gating', /gc:staff-auth-ready/],
+  ['offline queue persistence', /indexedDB.*globall-cloud-offline|globall-cloud-offline/], ['offline FormData replay', /entriesToForm/], ['offline idempotency preservation', /idempotency_key/],
 ];
 const beforeReliability = failures;
 for (const [label, pattern] of reliabilityGuards) {
-  const source = label.includes('runbook') || label.includes('backup') || label.includes('secret-manager') ? readmeSource : label.includes('staff') || label.includes('runtime') ? runtimeSource : dispatchSource;
+  const source = label.includes('runbook') || label.includes('backup') || label.includes('secret-manager') ? readmeSource : label.includes('staff') || label.includes('runtime') ? runtimeSource : label.startsWith('offline') ? offlineSource : dispatchSource;
   if (!pattern.test(source)) fail(`missing reliability guard: ${label}`);
 }
 if (failures === beforeReliability) ok(`${reliabilityGuards.length} reliability guards OK`);
 
-// 11. Security hardening guards
 console.log('Security hardening guards');
 const hardeningSource = readFileSync(join(ROOT, 'supabase', 'migrations', '20260903010000_production_security_hardening.sql'), 'utf8');
+const bootstrapHardeningSource = readFileSync(join(ROOT, 'supabase', 'migrations', '20260903011000_lock_bootstrap_admin_rpc.sql'), 'utf8');
 const hardeningGuards = [
   ['trigger functions locked to service_role', /guard_payment_session_update\(\)[\s\S]*revoke all[\s\S]*grant execute[\s\S]*service_role/],
   ['warehouse WhatsApp trigger locked down', /queue_warehouse_whatsapp\(\)[\s\S]*revoke all[\s\S]*grant execute[\s\S]*service_role/],
   ['admin shopping RPC locked down', /admin_update_shopping_status\(uuid,text\)[\s\S]*revoke all[\s\S]*grant execute[\s\S]*service_role/],
   ['super admin customer mutation locked down', /super_admin_update_customer\([\s\S]*?\)[\s\S]*revoke all[\s\S]*grant execute[\s\S]*service_role/],
   ['chargeable weight search path pinned', /calculate_chargeable_weight\(numeric,numeric,numeric,numeric\)[\s\S]*set search_path = public, pg_temp/],
+  ['first-admin bootstrap locked down', /bootstrap_first_admin\(\)[\s\S]*revoke all[\s\S]*grant execute[\s\S]*service_role/],
 ];
 const beforeHardening = failures;
-for (const [label, pattern] of hardeningGuards) if (!pattern.test(hardeningSource)) fail(`missing security hardening: ${label}`);
+for (const [label, pattern] of hardeningGuards) {
+  const source = label.includes('first-admin') ? bootstrapHardeningSource : hardeningSource;
+  if (!pattern.test(source)) fail(`missing security hardening: ${label}`);
+}
 if (failures === beforeHardening) ok(`${hardeningGuards.length} security hardening guards OK`);
 
 console.log('');
