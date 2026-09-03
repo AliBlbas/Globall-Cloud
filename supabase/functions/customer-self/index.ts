@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     const service = createClient(url, serviceKey, {auth: {persistSession: false, autoRefreshToken: false, detectSessionInUrl: false}})
     const {data: customer, error: customerError} = await service
       .from('customer_directory')
-      .select('id,code,gc_code,name,email,phone,auth_user_id,is_active')
+      .select('id,code,gc_code,name,email,phone,phone2,whatsapp_phone,whatsapp_group_name,purchase_first_name,purchase_last_name,auth_user_id,is_active')
       .eq('auth_user_id', user.id)
       .maybeSingle()
     if (customerError) throw customerError
@@ -130,7 +130,17 @@ Deno.serve(async (req) => {
 
     return json(req, {
       ok: true,
-      profile: {id: customer.id, code: customer.gc_code || customer.code || null, name: customer.name || user.user_metadata?.full_name || user.email || 'Customer', email: customer.email || user.email || null},
+      profile: {
+        id: customer.id,
+        code: customer.gc_code || customer.code || null,
+        name: customer.name || user.user_metadata?.full_name || user.email || 'Customer',
+        email: customer.email || user.email || null,
+        phone: customer.phone || customer.phone2 || user.phone || null,
+        whatsapp_phone: customer.whatsapp_phone || customer.phone || customer.phone2 || user.phone || null,
+        whatsapp_group_name: customer.whatsapp_group_name || (customer.gc_code ? String(customer.gc_code).replace(/^GC-/,'Gc-') : null),
+        purchase_first_name: customer.purchase_first_name || (customer.gc_code ? String(customer.gc_code).replace(/^GC-/,'Gc-') : null),
+        purchase_last_name: customer.purchase_last_name || customer.name || user.user_metadata?.full_name || user.email || 'Customer',
+      },
       shipments,
       notifications: notifications.data || [],
       quotes: quotes.data || [],
