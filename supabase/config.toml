@@ -26,6 +26,9 @@ verify_jwt = false
 [functions.public-message]
 verify_jwt = false
 
+[functions.public-quote]
+verify_jwt = false
+
 [functions.account-self-password]
 verify_jwt = true
 
@@ -36,9 +39,6 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.customer-receipt-evidence]
-verify_jwt = true
-
-[functions.warehouse-receipt-proof]
 verify_jwt = true
 
 [functions.warehouse-receiving]
