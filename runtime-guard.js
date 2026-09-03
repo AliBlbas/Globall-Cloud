@@ -7,7 +7,7 @@
 
   const BRIDGE = '/production-bridge.js?v=20260828-2';
   const STAFF_ENHANCEMENTS = '/staff-os-enhancements-v2.js?v=20260902-1';
-  const STAFF_FX_ENHANCEMENTS = '/staff-os-fx.js?v=20260902-1';
+  const STAFF_FX_ENHANCEMENTS = '/staff-os-fx.js?v=20260903-2';
   const STAFF_WAREHOUSE_NOTIFY = '/staff-os-warehouse-notify.js?v=20260902-1';
   const STAFF_DASHBOARD = '/staff-os-dashboard.js?v=20260902-1';
   const STAFF_AI_TOOLS = '/staff-os-ai-tools.js?v=20260902-1';
@@ -75,10 +75,7 @@
   }
 
   function loadBridgeOnce() {
-    if (typeof window.gcEnsureSupabase === 'function' || window.gcSupabase) {
-      return Promise.resolve(window.gcSupabase);
-    }
-
+    if (typeof window.gcEnsureSupabase === 'function' || window.gcSupabase) return Promise.resolve(window.gcSupabase);
     const existing = document.querySelector('script[data-gc-runtime-bridge], script[src*="production-bridge.js"]');
     if (existing) {
       return new Promise((resolve) => {
@@ -89,14 +86,12 @@
         setTimeout(finish, 7000);
       });
     }
-
     return new Promise((resolve) => {
       const script = document.createElement('script');
       script.src = BRIDGE;
       script.async = true;
       script.defer = true;
       script.dataset.gcRuntimeBridge = '1';
-
       const finish = () => resolve(window.gcSupabase || null);
       script.addEventListener('error', finish, { once: true });
       window.addEventListener('gc:supabase-ready', finish, { once: true });
@@ -149,9 +144,6 @@
 
   window.gcEnsureSupabase = window.gcEnsureSupabase || (() => loadBridgeOnce());
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot, { once: true });
-  } else {
-    void boot();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else void boot();
 })();
