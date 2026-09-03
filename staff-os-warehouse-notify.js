@@ -2,8 +2,8 @@
   'use strict';
   if (!/^\/staff(?:-os)?(?:\.html)?\/?$/.test(location.pathname)) return;
   if (window.__gcWarehouseNotifyBridgeInstalled) return;
-  const WH='https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/warehouse-receiving';
-  const NOTIFY='https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/warehouse-notify';
+  const WH='https://swptmhhwhdtyrrfzetam.supabase.co/functions/v1/warehouse-receiving';
+  const NOTIFY='https://swptmhhwhdtyrrfzetam.supabase.co/functions/v1/warehouse-notify';
   const KEY='sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
   const native=window.fetch.bind(window);
   window.__gcWarehouseNotifyBridgeInstalled=true;
