@@ -4,8 +4,7 @@
  */
 (() => {
   'use strict';
-
-  const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
+  const SUPABASE_URL = 'https://swptmhhwhdtyrrfzetam.supabase.co';
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
   const CDN = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
   const PUBLIC_CONFIG = `${SUPABASE_URL}/functions/v1/public-config?key=usd_iqd_rate`;
