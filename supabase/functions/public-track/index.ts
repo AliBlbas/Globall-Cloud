@@ -3,7 +3,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 type Json = Record<string, unknown>
 
 const ALLOWED_ORIGINS = new Set(['https://globall-cloud.pages.dev', 'https://globall-cloud.netlify.app'])
-const SHIPMENT_FIELDS = 'id,customer_user_id,customer_name,customer_phone,customer_email,notes,origin_key,dest_key,type,weight_kg,volume_cbm,items_count,total_amount,paid_amount,current_step_index,step_dates,eta,directory_customer_id,step_photos,batch_code,branch,created_at,origin_lat,origin_lng,dest_lat,dest_lng,current_lat,current_lng,current_location_label,transport_mode,tracking_updated_at'
+const SHIPMENT_FIELDS = 'id,tracking_id,customer_user_id,customer_name,customer_phone,customer_email,notes,origin_key,dest_key,type,weight_kg,volume_cbm,items_count,total_amount,paid_amount,current_step_index,step_dates,eta,directory_customer_id,step_photos,batch_code,branch,created_at,origin_lat,origin_lng,dest_lat,dest_lng,current_lat,current_lng,current_location_label,transport_mode,tracking_updated_at'
 
 const cors = (req: Request) => {
   const origin = req.headers.get('origin') || ''
@@ -46,6 +46,10 @@ async function resolveShipment(service: ReturnType<typeof createClient>, lookup:
   const byId = await service.from('shipments').select(SHIPMENT_FIELDS).eq('id', lookup).maybeSingle()
   if (byId.error) throw byId.error
   if (byId.data) return { shipment: byId.data, trackingKey: 'shipment_id', customerCode: null, matchingCount: 1 }
+
+  const byTracking = await service.from('shipments').select(SHIPMENT_FIELDS).eq('tracking_id', lookup).maybeSingle()
+  if (byTracking.error) throw byTracking.error
+  if (byTracking.data) return { shipment: byTracking.data, trackingKey: 'tracking_id', customerCode: null, matchingCount: 1 }
 
   const gcCode = normalizeGcCode(lookup)
   if (!isGcCode(gcCode)) return { shipment: null, trackingKey: 'shipment_id', customerCode: null, matchingCount: 0 }
@@ -119,6 +123,7 @@ Deno.serve(async (req) => {
       matching_shipments_count: resolved.matchingCount,
       shipment: {
         id: shipment.id,
+        tracking_id: shipment.tracking_id,
         customer_name: privileged ? shipment.customer_name : null,
         customer_phone: privileged ? shipment.customer_phone : null,
         customer_email: privileged ? shipment.customer_email : null,
