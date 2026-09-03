@@ -1,0 +1,61 @@
+name: Normalize Live Supabase Reference
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Replace stale runtime project reference
+        shell: python
+        run: |
+          from pathlib import Path
+          old = 'ahslifnthiwfkmaswjno.supabase.co'
+          new = 'swptmhhwhdtyrrfzetam.supabase.co'
+          exts = {'.js', '.mjs', '.ts', '.tsx', '.html', '.css', '.json', '.toml', '.yml', '.yaml'}
+          changed = []
+          for p in Path('.').rglob('*'):
+              if not p.is_file() or '.git' in p.parts or p.suffix.lower() not in exts:
+                  continue
+              try:
+                  text = p.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              if old in text:
+                  p.write_text(text.replace(old, new), encoding='utf-8')
+                  changed.append(str(p))
+          print('Updated runtime files:', *changed, sep='\n- ')
+
+      - name: Verify no stale runtime host remains
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RIl 'ahslifnthiwfkmaswjno\.supabase\.co' --include='*.js' --include='*.mjs' --include='*.ts' --include='*.tsx' --include='*.html' --include='*.css' --include='*.json' --include='*.toml' --include='*.yml' --include='*.yaml' .; then
+            echo 'Stale Supabase host remains in runtime files.'
+            exit 1
+          fi
+
+      - name: Commit normalized runtime references
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo 'No normalization changes required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'chore: normalize live Supabase runtime reference [skip ci]'
+          git push
