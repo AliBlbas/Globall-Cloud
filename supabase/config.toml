@@ -51,7 +51,7 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.system-health]
-verify_jwt = true
+verify_jwt = false
 
 [functions.logistics-control-plane]
 verify_jwt = true
@@ -85,3 +85,18 @@ verify_jwt = false
 
 [functions.fx-refresh]
 verify_jwt = false
+
+[functions.customer-debt-assistant]
+verify_jwt = true
+
+[functions.staff-auth-verify]
+verify_jwt = false
+
+[functions.operations-v4]
+verify_jwt = true
+
+[functions.staff-ops-hub]
+verify_jwt = true
+
+[functions.warehouse-notify]
+verify_jwt = true
