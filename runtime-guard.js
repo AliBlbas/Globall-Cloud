@@ -11,6 +11,7 @@
   const STAFF_WAREHOUSE_NOTIFY = '/staff-os-warehouse-notify.js?v=20260902-1';
   const STAFF_DASHBOARD = '/staff-os-dashboard.js?v=20260902-1';
   const STAFF_AI_TOOLS = '/staff-os-ai-tools.js?v=20260902-1';
+  const WAREHOUSE_OFFLINE = '/warehouse-offline-sync.js?v=20260903-1';
   const LEGACY_MESSAGE = 'Supabase هێشتا پەیوەست نەکراوە';
   const READY_MESSAGE = 'پەیوەندیی پارێزراو بە Supabase چالاکە و سیستەمەکە ئامادەیە.';
   const FAIL_MESSAGE = 'پەیوەندیی خزمەتگوزاری بە شێوەیەکی پارێزراو دەتاقیکرێتەوە.';
@@ -114,6 +115,11 @@
     document.head.appendChild(script);
   }
 
+  function loadWarehouseOffline() {
+    if (!/^\/warehouse(?:-os)?(?:\.html)?\/?$/.test(window.location.pathname)) return;
+    loadOnce(WAREHOUSE_OFFLINE, 'warehouse-offline');
+  }
+
   function loadStaffEnhancements() {
     if (!/^\/staff(?:-os)?(?:\.html)?\/?$/.test(window.location.pathname)) return;
     if (!window.gcStaffIdentity) return;
@@ -127,6 +133,7 @@
   async function boot() {
     startLegacyTextGuard();
     updateConnectionNotice(FAIL_MESSAGE);
+    loadWarehouseOffline();
     window.addEventListener('gc:staff-auth-ready', loadStaffEnhancements);
     try {
       await loadBridgeOnce();
