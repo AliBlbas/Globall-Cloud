@@ -40,8 +40,7 @@ for (const f of jsFiles) {
 }
 if (failures === 0) ok(`${jsFiles.length} files OK`);
 
-// 2. TS syntax check (edge functions) — syntax only, no module
-//    resolution, so Deno's npm:/jsr: specifiers don't need to resolve.
+// 2. TS syntax check (edge functions)
 console.log('TypeScript syntax (edge functions)');
 const tsFiles = walk(join(ROOT, 'supabase', 'functions'), ['.ts']);
 let ts;
@@ -73,13 +72,20 @@ const required = [
   'index.html', 'sw.js', 'production-bridge.js', 'runtime-guard.js', 'functions/_middleware.js',
   'control-plane.html', 'control-plane.js', 'payment-checkout.html', 'payment-checkout.js',
   'customer-portal.html', 'driver-workspace.html', 'warehouse-os.html', 'staff-os.html', 'staff-os-compat.js',
-  'superadmin.html', 'super-admin-command-center.html',
-  'supabase/config.toml',
+  'staff-os-enhancements-v2.js', 'staff-os-fx.js', 'staff-os-warehouse-notify.js', 'staff-os-dashboard.js', 'staff-os-ai-tools.js',
+  'tracking-integration.html', 'superadmin.html', 'super-admin-command-center.html',
+  'supabase/config.toml', 'supabase/migrations/20260903010000_production_security_hardening.sql',
   'supabase/functions/payment-checkout/index.ts',
   'supabase/functions/payment-webhook/index.ts',
   'supabase/functions/notification-dispatch/index.ts',
   'supabase/functions/logistics-control-plane/index.ts',
   'supabase/functions/customer-self/index.ts',
+  'supabase/functions/staff-analytics/index.ts',
+  'supabase/functions/staff-ops-hub/index.ts',
+  'supabase/functions/warehouse-notify/index.ts',
+  'supabase/functions/invoice-ai/index.ts',
+  'supabase/functions/customer-debt-assistant/index.ts',
+  'supabase/functions/customer-receipt-evidence/index.ts',
   'supabase/functions/_shared/payment-providers.ts',
 ];
 const beforeReq = failures;
@@ -88,8 +94,7 @@ for (const rel of required) {
 }
 if (failures === beforeReq) ok(`${required.length} files present`);
 
-// 4. Public form integration guards: public writes must go through the
-// rate-limited, service-role-backed Edge Functions rather than direct tables.
+// 4. Public form integration guards
 console.log('Public integration guards');
 const publicIndexSource = readFileSync(join(ROOT, 'gc-csp-scripts', 'index-inline-2.js'), 'utf8');
 const requestBlock = publicIndexSource.match(/async function handleRequestSubmit\(e\)\{[\s\S]*?\n\}\nfunction resetRequestForm/)?.[0] || '';
@@ -104,7 +109,7 @@ const beforePublic = failures;
 for (const [label, passed] of publicGuards) if (!passed) fail(`missing public integration guard: ${label}`);
 if (failures === beforePublic) ok(`${publicGuards.length} public integration guards OK`);
 
-// 5. Migration filenames follow the Supabase CLI timestamp convention
+// 5. Migration filenames
 console.log('Migration filenames');
 const migDir = join(ROOT, 'supabase', 'migrations');
 const beforeMig = failures;
@@ -116,7 +121,7 @@ if (existsSync(migDir)) {
   if (failures === beforeMig) ok(`${migFiles.length} migrations OK`);
 }
 
-// 5. Role-policy regression guards
+// 6. Role-policy regression guards
 console.log('Role-policy guards');
 const roleSource = readFileSync(join(ROOT, 'supabase', 'functions', '_shared', 'roles.ts'), 'utf8');
 const operationsSource = readFileSync(join(ROOT, 'supabase', 'functions', 'operations-admin', 'index.ts'), 'utf8');
@@ -139,7 +144,7 @@ for (const [label, pattern] of roleGuards) {
 }
 if (failures === beforeRoles) ok(`${roleGuards.length} role guards OK`);
 
-// 6. Core logistics workflow guards
+// 7. Core logistics workflow guards
 console.log('Core workflow guards');
 const controlPlaneSource = [readFileSync(join(ROOT, 'supabase', 'functions', 'logistics-control-plane', 'index.ts'), 'utf8'), ...walk(join(ROOT, 'supabase', 'migrations'), ['.sql']).map((file) => readFileSync(file, 'utf8'))].join('\n');
 const workflowGuards = [
@@ -149,6 +154,9 @@ const workflowGuards = [
   ['customs workflow', /customs/],
   ['delivery proof', /delivery_proofs|proof_of_delivery/],
   ['staff audit trail', /staff_activity_log/],
+  ['warehouse photo evidence', /warehouse-receipts|photos/],
+  ['consolidation', /consolidation/],
+  ['insurance', /shipment_insurance/],
 ];
 const beforeWorkflow = failures;
 for (const [label, pattern] of workflowGuards) {
@@ -156,10 +164,11 @@ for (const [label, pattern] of workflowGuards) {
 }
 if (failures === beforeWorkflow) ok(`${workflowGuards.length} core workflow guards OK`);
 
-// 7. Role-surface accessibility guards
+// 8. Role-surface accessibility guards
 console.log('Role-surface accessibility guards');
 const driverSurface = readFileSync(join(ROOT, 'driver-workspace.html'), 'utf8');
 const warehouseSurface = readFileSync(join(ROOT, 'warehouse-os.html'), 'utf8');
+const trackingSurface = readFileSync(join(ROOT, 'tracking-integration.html'), 'utf8');
 const surfaceGuards = [
   ['driver status live region', /id="msg"[^>]*role="status"[^>]*aria-live="polite"/],
   ['POD status live region', /id="podMsg"[^>]*role="status"[^>]*aria-live="polite"/],
@@ -167,15 +176,17 @@ const surfaceGuards = [
   ['driver mobile focus styles', /button:focus-visible,input:focus-visible,textarea:focus-visible/],
   ['warehouse live status', /id="msg"[^>]*role="status"[^>]*aria-live="polite"/],
   ['warehouse receipt batch required', /id="batch"[^>]*required/],
+  ['tracking lookup', /id="gcTrackingForm"/],
+  ['tracking live map', /id="liveMapContainer"/],
 ];
 const beforeSurface = failures;
 for (const [label, pattern] of surfaceGuards) {
-  const source = label.startsWith('warehouse') ? warehouseSurface : driverSurface;
+  const source = label.startsWith('warehouse') ? warehouseSurface : label.startsWith('tracking') ? trackingSurface : driverSurface;
   if (!pattern.test(source)) fail(`missing role-surface guard: ${label}`);
 }
 if (failures === beforeSurface) ok(`${surfaceGuards.length} role-surface guards OK`);
 
-// 8. Provider integration guards
+// 9. Provider integration guards
 console.log('Provider integration guards');
 const paymentAdapterSource = readFileSync(join(ROOT, 'supabase', 'functions', '_shared', 'payment-providers.ts'), 'utf8');
 const webhookSource = readFileSync(join(ROOT, 'supabase', 'functions', 'payment-webhook', 'index.ts'), 'utf8');
@@ -194,10 +205,11 @@ for (const [label, pattern] of providerGuards) {
 }
 if (failures === beforeProviders) ok(`${providerGuards.length} provider guards OK`);
 
-// 9. Reliability and release-safety guards
+// 10. Reliability and release-safety guards
 console.log('Reliability guards');
 const dispatchSource = readFileSync(join(ROOT, 'supabase', 'functions', 'notification-dispatch', 'index.ts'), 'utf8');
 const readmeSource = readFileSync(join(ROOT, 'README.md'), 'utf8');
+const runtimeSource = readFileSync(join(ROOT, 'runtime-guard.js'), 'utf8');
 const reliabilityGuards = [
   ['protected worker secret', /NOTIFICATION_WORKER_SECRET/],
   ['external outbox claim', /claim_notification_outbox_external/],
@@ -205,13 +217,30 @@ const reliabilityGuards = [
   ['recovery runbook', /Reliability and recovery runbook/],
   ['backup guidance', /Supabase backup|point-in-time recovery/],
   ['secret-manager guidance', /platform secret manager/],
+  ['staff enhancement hooks', /staff-os-enhancements-v2\.js/],
+  ['staff analytics hook', /staff-os-dashboard\.js/],
+  ['runtime staff gating', /gc:staff-auth-ready/],
 ];
 const beforeReliability = failures;
 for (const [label, pattern] of reliabilityGuards) {
-  const source = label.includes('runbook') || label.includes('backup') || label.includes('secret-manager') ? readmeSource : dispatchSource;
+  const source = label.includes('runbook') || label.includes('backup') || label.includes('secret-manager') ? readmeSource : label.includes('staff') || label.includes('runtime') ? runtimeSource : dispatchSource;
   if (!pattern.test(source)) fail(`missing reliability guard: ${label}`);
 }
 if (failures === beforeReliability) ok(`${reliabilityGuards.length} reliability guards OK`);
+
+// 11. Security hardening guards
+console.log('Security hardening guards');
+const hardeningSource = readFileSync(join(ROOT, 'supabase', 'migrations', '20260903010000_production_security_hardening.sql'), 'utf8');
+const hardeningGuards = [
+  ['trigger functions locked to service_role', /guard_payment_session_update\(\)[\s\S]*revoke all[\s\S]*grant execute[\s\S]*service_role/],
+  ['warehouse WhatsApp trigger locked down', /queue_warehouse_whatsapp\(\)[\s\S]*revoke all[\s\S]*grant execute[\s\S]*service_role/],
+  ['admin shopping RPC locked down', /admin_update_shopping_status\(uuid,text\)[\s\S]*revoke all[\s\S]*grant execute[\s\S]*service_role/],
+  ['super admin customer mutation locked down', /super_admin_update_customer\([\s\S]*?\)[\s\S]*revoke all[\s\S]*grant execute[\s\S]*service_role/],
+  ['chargeable weight search path pinned', /calculate_chargeable_weight\(numeric,numeric,numeric,numeric\)[\s\S]*set search_path = public, pg_temp/],
+];
+const beforeHardening = failures;
+for (const [label, pattern] of hardeningGuards) if (!pattern.test(hardeningSource)) fail(`missing security hardening: ${label}`);
+if (failures === beforeHardening) ok(`${hardeningGuards.length} security hardening guards OK`);
 
 console.log('');
 if (failures > 0) {
