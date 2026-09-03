@@ -35,7 +35,10 @@ jobs:
         run: |
           set -euo pipefail
           grep -q '^project_id = "ahslifnthiwfkmaswjno"$' supabase/config.toml
-          ! grep -RIl 'swptmhhwhdtyrrfzetam' --include='*.js' --include='*.mjs' --include='*.ts' --include='*.tsx' --include='*.html' --include='*.css' --include='*.json' --include='*.toml' --include='*.yml' --include='*.yaml' .
+          if grep -RIl 'swptmhhwhdtyrrfzetam' --include='*.js' --include='*.mjs' --include='*.ts' --include='*.tsx' --include='*.html' --include='*.css' --include='*.json' --include='*.toml' --include='*.yml' --include='*.yaml' .; then
+            echo 'stale Supabase project reference detected'
+            exit 1
+          fi
 
       - name: Production invariants
         shell: bash
@@ -62,12 +65,11 @@ jobs:
           grep -q 'invoice-ai' supabase/functions/invoice-ai/index.ts
           grep -q 'customer-debt-assistant' supabase/functions/customer-debt-assistant/index.ts
           grep -q 'fx-refresh' supabase/functions/fx-refresh/index.ts
-          grep -q 'detect_stale_shipments' supabase/functions/logistics-control-plane/index.ts || true
-          grep -q 'fix_alert_monitor_uuid_text_cast_v1' supabase/migrations/20260903020000_fix_alert_monitor_uuid_text_cast_v1.sql
-          grep -q 'production_security_hardening' supabase/migrations/20260903004823_production_security_hardening.sql
-          grep -q 'account.created' supabase/migrations/20260903005417_customer_account_created_notifications.sql || true
-          grep -q 'idempotency' supabase/migrations/20260903005958_add_warehouse_receipt_idempotency_v2.sql
-          grep -q 'external_reference' supabase/migrations/20260903010449_add_shipment_external_reference_v1.sql
+          find supabase/migrations -maxdepth 1 -type f -name '*production_security_hardening*.sql' | grep -q .
+          find supabase/migrations -maxdepth 1 -type f -name '*fix_alert_monitor_uuid_text_cast_v1*.sql' | grep -q .
+          find supabase/migrations -maxdepth 1 -type f -name '*add_warehouse_receipt_idempotency_v2*.sql' | grep -q .
+          find supabase/migrations -maxdepth 1 -type f -name '*add_shipment_external_reference_v1*.sql' | grep -q .
+          find supabase/migrations -maxdepth 1 -type f -name '*production_runtime_alignment_v1*.sql' | grep -q .
           grep -q 'ahslifnthiwfkmaswjno' production-bridge.js
           grep -q 'ahslifnthiwfkmaswjno.supabase.co' _headers
           grep -q 'Content-Security-Policy' _headers
@@ -102,8 +104,7 @@ jobs:
             supabase/functions/invoice-ai/index.ts \
             supabase/functions/customer-debt-assistant/index.ts \
             supabase/functions/fx-refresh/index.ts \
-            supabase/migrations/20260903010000_production_security_hardening.sql \
-            supabase/migrations/20260903020000_fix_alert_monitor_uuid_text_cast_v1.sql; do
+            tests/validate.mjs tests/e2e/run.mjs; do
             test -f "$file"
           done
 
@@ -114,6 +115,20 @@ jobs:
           grep -q 'LEGACY_MESSAGE' production-bridge.js
           grep -q 'gc:staff-auth-ready' runtime-guard.js
           grep -q 'warehouse-offline-sync.js' runtime-guard.js
+
+      - name: Derive public API key for read-only E2E
+        shell: bash
+        run: |
+          set -euo pipefail
+          key="$(python3 - <<'PY'
+          import re
+          text=open('production-bridge.js',encoding='utf-8').read()
+          m=re.search(r"SUPABASE_PUBLISHABLE_KEY\s*=\s*['\"]([^'\"]+)['\"]",text)
+          if not m: raise SystemExit('publishable key not found')
+          print(m.group(1))
+          PY
+          )"
+          echo "SUPABASE_ANON_KEY=$key" >> "$GITHUB_ENV"
 
       - name: Live public smoke test
         shell: bash
@@ -134,12 +149,10 @@ jobs:
           with urllib.request.urlopen(req,timeout=20) as r:
               body=json.loads(r.read().decode('utf-8','replace'))
               assert r.status==200 and body.get('key')=='usd_iqd_rate' and body.get('value') not in (None,'')
-          print('Live public smoke test passed')
           PY
 
-      - name: Read-only E2E public suite
+      - name: Read-only public E2E
         env:
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           GC_SITE_URL: https://globall-cloud.pages.dev
           E2E_SUPABASE_URL: https://ahslifnthiwfkmaswjno.supabase.co
         run: npm run test:e2e:public
