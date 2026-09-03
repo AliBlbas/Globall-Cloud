@@ -108,6 +108,9 @@
   async function queueForm(form, reason = 'offline') {
     const entries = await formToEntries(form);
     const idempotency = String(form.get('idempotency_key') || crypto.randomUUID());
+    if (!entries.some((entry) => entry.name === 'idempotency_key')) {
+      entries.push({ name: 'idempotency_key', kind: 'text', value: idempotency });
+    }
     const gcCode = String(form.get('customer_code') || form.get('batch_code') || 'GC').trim();
     const item = { id: idempotency, created_at: new Date().toISOString(), reason, attempts: 0, gc_code: gcCode, entries };
     await put(item);
@@ -137,6 +140,7 @@
             apikey: SUPABASE_KEY,
             Authorization: `Bearer ${token}`,
             'x-gc-offline-replay': '1',
+            'x-idempotency-key': String(item.id),
           },
           body: form,
           cache: 'no-store',
