@@ -1,9 +1,14 @@
 /* Globall Cloud — production runtime guard
- * Cross-browser defensive bootstrap for public pages. Never exposes service-role
- * credentials; it only loads the existing publishable-key bridge once.
+ * Cross-browser defensive bootstrap for operational pages.
+ * Public marketing/customer pages should not wait on Supabase health or load
+ * operational bridges before their visible content can render.
  */
 (() => {
   'use strict';
+
+  const path = window.location.pathname;
+  const operationalPage = /^\/(staff(?:-os)?|warehouse(?:-os)?|customer-portal|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\.html)?\/?$/i.test(path);
+  if (!operationalPage) return;
 
   const BRIDGE = '/production-bridge.js?v=20260828-2';
   const STAFF_ENHANCEMENTS = '/staff-os-enhancements-v2.js?v=20260902-1';
@@ -54,10 +59,10 @@
       replaceLegacyLeafText(FAIL_MESSAGE);
     });
     observer.observe(document.documentElement, { subtree: true, childList: true, characterData: true });
-    window.setTimeout(() => observer.disconnect(), 15000);
+    window.setTimeout(() => observer.disconnect(), 9000);
   }
 
-  function waitForHealth(timeoutMs = 9000) {
+  function waitForHealth(timeoutMs = 2500) {
     if (window.gcSupabaseHealth?.state === 'ready') return Promise.resolve(true);
     return new Promise((resolve) => {
       let settled = false;
@@ -79,23 +84,20 @@
     const existing = document.querySelector('script[data-gc-runtime-bridge], script[src*="production-bridge.js"]');
     if (existing) {
       return new Promise((resolve) => {
-        const readyClient = window.gcSupabase || null;
-        if (readyClient) return resolve(readyClient);
         const finish = () => resolve(window.gcSupabase || null);
         window.addEventListener('gc:supabase-ready', finish, { once: true });
-        setTimeout(finish, 7000);
+        setTimeout(finish, 4000);
       });
     }
     return new Promise((resolve) => {
       const script = document.createElement('script');
       script.src = BRIDGE;
       script.async = true;
-      script.defer = true;
       script.dataset.gcRuntimeBridge = '1';
       const finish = () => resolve(window.gcSupabase || null);
       script.addEventListener('error', finish, { once: true });
       window.addEventListener('gc:supabase-ready', finish, { once: true });
-      setTimeout(finish, 8000);
+      setTimeout(finish, 5000);
       document.head.appendChild(script);
     });
   }
