@@ -100,3 +100,6 @@ verify_jwt = true
 
 [functions.warehouse-notify]
 verify_jwt = true
+
+[functions.invoice-ai]
+verify_jwt = true
