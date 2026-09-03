@@ -23,7 +23,11 @@ const envRequired = (name: string) => {
   return value
 }
 
-const baseUrl = (name: string, fallback: string) => (Deno.env.get(name)?.trim() || fallback).replace(/\/$/, '')
+const baseUrlRequired = (name: string) => {
+  const value = envRequired(name)
+  if (!/^https:\/\//i.test(value)) throw new Error(`${name} must use HTTPS`)
+  return value.replace(/\/$/, '')
+}
 
 const readJson = async (response: Response) => {
   const raw = await response.text()
@@ -48,7 +52,7 @@ const qicardHeaders = () => ({
   'X-Terminal-Id': envRequired('QICARD_TERMINAL_ID'),
 })
 
-const qicardBase = () => baseUrl('QICARD_API_BASE_URL', 'https://uat-sandbox-3ds-api.qi.iq')
+const qicardBase = () => baseUrlRequired('QICARD_API_BASE_URL')
 
 export const qicardCreate = async (input: {
   requestId: string
@@ -114,7 +118,7 @@ export const qicardCancel = async (paymentId: string) => {
 }
 
 let fibTokenCache: { token: string; expiresAt: number } | null = null
-const fibBase = () => baseUrl('FIB_API_BASE_URL', 'https://fib.stage.fib.iq')
+const fibBase = () => baseUrlRequired('FIB_API_BASE_URL')
 
 const fibAccessToken = async () => {
   if (fibTokenCache && fibTokenCache.expiresAt > Date.now() + 10000) return fibTokenCache.token
