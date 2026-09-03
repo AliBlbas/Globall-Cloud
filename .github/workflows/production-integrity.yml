@@ -37,8 +37,10 @@ jobs:
           set -euo pipefail
           grep -q "ahslifnthiwfkmaswjno.supabase.co" production-bridge.js
           grep -q "account-admin" accounts-console-script.js
-          grep -q "gc-v84" sw.js
+          grep -q "gc-v85" sw.js
           grep -q "warehouse-offline-sync.js?v=20260903-1" sw.js
+          grep -q "runtime-guard.js?v=20260903-2" sw.js
+          grep -q "staff-os-fx.js?v=20260903-2" sw.js
           grep -q "site-enhancement-20260824.css" sw.js
           grep -q "driver-workspace.html" sw.js
           grep -q "operations-control-v2.html" sw.js
@@ -83,13 +85,17 @@ jobs:
           grep -q "staff-os-warehouse-notify.js" runtime-guard.js
           grep -q "staff-os-dashboard.js" sw.js
           grep -q "staff-os-ai-tools.js" sw.js
+          grep -q "warehouse-offline-sync.js" runtime-guard.js
           grep -q "staff-analytics" supabase/functions/staff-analytics/index.ts
           grep -q "warehouse-notify" supabase/functions/warehouse-notify/index.ts
           grep -q "invoice-ai" supabase/functions/invoice-ai/index.ts
           grep -q "customer-debt-assistant" supabase/functions/customer-debt-assistant/index.ts
           grep -q "customer-receipt-evidence" supabase/functions/customer-receipt-evidence/index.ts
+          grep -q "fx-refresh" supabase/functions/fx-refresh/index.ts
           grep -q "production_security_hardening" supabase/migrations/20260903010000_production_security_hardening.sql
           grep -q "lock_bootstrap_admin_rpc" supabase/migrations/20260903011000_lock_bootstrap_admin_rpc.sql
+          grep -q "customer_account_created_notifications" supabase/migrations/20260903012000_customer_account_created_notifications.sql
+          grep -q "fix_shein_quote_fx_schema" supabase/migrations/20260903013000_fix_shein_quote_fx_schema.sql
           grep -q "no-store" _headers
           grep -q "Content-Security-Policy" _headers
           grep -q "wss://ahslifnthiwfkmaswjno.supabase.co" _headers
@@ -127,6 +133,8 @@ jobs:
           grep -q "revoke all on function public.queue_warehouse_whatsapp" supabase/migrations/20260903010000_production_security_hardening.sql
           grep -q "alter function public.calculate_chargeable_weight" supabase/migrations/20260903010000_production_security_hardening.sql
           grep -q "revoke all on function public.bootstrap_first_admin" supabase/migrations/20260903011000_lock_bootstrap_admin_rpc.sql
+          grep -q "account.created" supabase/migrations/20260903012000_customer_account_created_notifications.sql
+          grep -q "er.usd_to_iqd" supabase/migrations/20260903013000_fix_shein_quote_fx_schema.sql
       - name: Validate Supabase migration filenames
         shell: bash
         run: |
@@ -167,9 +175,12 @@ jobs:
             supabase/functions/warehouse-notify/index.ts \
             supabase/functions/invoice-ai/index.ts \
             supabase/functions/customer-debt-assistant/index.ts \
+            supabase/functions/fx-refresh/index.ts \
             supabase/functions/_shared/payment-providers.ts \
             supabase/migrations/20260903010000_production_security_hardening.sql \
             supabase/migrations/20260903011000_lock_bootstrap_admin_rpc.sql \
+            supabase/migrations/20260903012000_customer_account_created_notifications.sql \
+            supabase/migrations/20260903013000_fix_shein_quote_fx_schema.sql \
             payment-checkout.html payment-checkout.css payment-checkout.js payment-gateway.js \
             site-enhancement-20260824.css
           do test -f "$file"; done
