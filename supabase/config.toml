@@ -59,23 +59,29 @@ verify_jwt = true
 [functions.document-access]
 verify_jwt = true
 
-[functions/notification-dispatch]
+[functions.notification-dispatch]
 verify_jwt = false
 
-[functions/notification-webhook]
+[functions.notification-webhook]
 verify_jwt = false
 
-[functions/integration-webhook]
+[functions.integration-webhook]
 verify_jwt = false
 
-[functions/payment-checkout]
+[functions.payment-checkout]
 verify_jwt = false
 
-[functions/payment-webhook]
+[functions.payment-webhook]
 verify_jwt = false
 
-[functions/payment-reconcile]
+[functions.payment-reconcile]
 verify_jwt = false
 
-[functions/discord-notify]
+[functions.discord-notify]
 verify_jwt = true
+
+[functions.staff-analytics]
+verify_jwt = false
+
+[functions.fx-refresh]
+verify_jwt = false
