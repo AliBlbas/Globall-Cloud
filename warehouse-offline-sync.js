@@ -13,6 +13,10 @@
   const originalFetch = window.fetch.bind(window);
 
   const emit = (name, detail = {}) => window.dispatchEvent(new CustomEvent(name, { detail }));
+  const notify = (text) => {
+    const el = document.getElementById('msg');
+    if (el) el.textContent = text;
+  };
   const isWarehouseRequest = (input, init = {}) => {
     const url = typeof input === 'string' ? input : input?.url || '';
     const method = String(init.method || (typeof input !== 'string' ? input?.method : '') || 'GET').toUpperCase();
@@ -104,18 +108,25 @@
   async function queueForm(form, reason = 'offline') {
     const entries = await formToEntries(form);
     const idempotency = String(form.get('idempotency_key') || crypto.randomUUID());
-    const item = { id: idempotency, created_at: new Date().toISOString(), reason, attempts: 0, entries };
+    const gcCode = String(form.get('customer_code') || form.get('batch_code') || 'GC').trim();
+    const item = { id: idempotency, created_at: new Date().toISOString(), reason, attempts: 0, gc_code: gcCode, entries };
     await put(item);
-    emit('gc:warehouse-offline-queued', { id: idempotency });
+    emit('gc:warehouse-offline-queued', { id: idempotency, gc_code: gcCode });
     return idempotency;
   }
 
   async function syncQueue() {
     let queue = [];
     try { queue = await all(); } catch (_) { return; }
-    if (!queue.length) return;
+    if (!queue.length) {
+      emit('gc:warehouse-offline-state', { pending: 0 });
+      return;
+    }
     const token = await getToken();
-    if (!token) return;
+    if (!token) {
+      emit('gc:warehouse-offline-state', { pending: queue.length, blocked: true });
+      return;
+    }
     let remaining = queue.length;
     for (const item of queue) {
       try {
@@ -133,14 +144,14 @@
         if (!response.ok) {
           if (response.status >= 400 && response.status < 500 && response.status !== 408 && response.status !== 429) {
             await remove(item.id);
-            emit('gc:warehouse-offline-rejected', { id: item.id, status: response.status });
+            emit('gc:warehouse-offline-rejected', { id: item.id, status: response.status, gc_code: item.gc_code });
             remaining -= 1;
           }
           continue;
         }
         await remove(item.id);
         remaining -= 1;
-        emit('gc:warehouse-offline-synced', { id: item.id });
+        emit('gc:warehouse-offline-synced', { id: item.id, gc_code: item.gc_code });
       } catch (_) {
         item.attempts = Number(item.attempts || 0) + 1;
         try { await put(item); } catch (_) {}
@@ -157,19 +168,32 @@
     if (!(body instanceof FormData)) return originalFetch(input, init);
     if (navigator.onLine === false) {
       await queueForm(body, 'offline');
-      return new Response(JSON.stringify({ ok: true, offline_queued: true, message: 'Warehouse receipt saved offline and will sync automatically.' }), { status: 202, headers: { 'Content-Type': 'application/json; charset=utf-8' } });
+      return new Response(JSON.stringify({ ok: true, offline_queued: true, customer: { code: String(body.get('customer_code') || body.get('batch_code') || 'GC') }, message: 'Warehouse receipt saved offline and will sync automatically.' }), { status: 202, headers: { 'Content-Type': 'application/json; charset=utf-8' } });
     }
     try {
       return await originalFetch(input, init);
     } catch (error) {
       try {
         const id = await queueForm(body, 'network_error');
-        return new Response(JSON.stringify({ ok: true, offline_queued: true, id, message: 'Network unavailable. Warehouse receipt saved locally for automatic sync.' }), { status: 202, headers: { 'Content-Type': 'application/json; charset=utf-8' } });
+        return new Response(JSON.stringify({ ok: true, offline_queued: true, id, customer: { code: String(body.get('customer_code') || body.get('batch_code') || 'GC') }, message: 'Network unavailable. Warehouse receipt saved locally for automatic sync.' }), { status: 202, headers: { 'Content-Type': 'application/json; charset=utf-8' } });
       } catch (_) {
         throw error;
       }
     }
   };
+
+  window.addEventListener('gc:warehouse-offline-queued', (event) => {
+    const code = event.detail?.gc_code || 'GC';
+    window.setTimeout(() => notify(`✓ ${code} ـی وەرگرتن لە مۆبایل هەڵگیراوە؛ دوای گەڕانەوەی ئینتەرنێت خۆکار sync دەبێت.`), 0);
+  });
+  window.addEventListener('gc:warehouse-offline-synced', (event) => {
+    const code = event.detail?.gc_code || 'GC';
+    window.setTimeout(() => notify(`✓ ${code} ـی وەرگرتن بۆ Supabase sync کرا.`), 0);
+  });
+  window.addEventListener('gc:warehouse-offline-rejected', (event) => {
+    const code = event.detail?.gc_code || 'GC';
+    notify(`⚠️ ${code} ـی وەرگرتن پاشکەوت نەکرا؛ تکایە زانیارییەکان پشکنە.`);
+  });
 
   window.addEventListener('online', () => { void syncQueue(); });
   window.addEventListener('load', () => { void syncQueue(); });
