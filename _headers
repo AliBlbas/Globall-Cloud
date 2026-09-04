@@ -4,10 +4,15 @@
   X-Frame-Options: DENY
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   Permissions-Policy: camera=(self), geolocation=(self), microphone=(), payment=()
-  Cross-Origin-Opener-Policy: same-origin-allow-popups
+  Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-site
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rum-static.pingdom.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://swptmhhwhdtyrrfzetam.supabase.co wss://swptmhhwhdtyrrfzetam.supabase.co https://formsubmit.co https://wa.me https://rum-static.pingdom.net https://router.project-osrm.org; frame-src 'self' https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://formsubmit.co; frame-ancestors 'none'; upgrade-insecure-requests
-
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; frame-ancestors 'none';
+    script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rum-static.pingdom.net;
+    style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+    img-src 'self' data: https:;
+    font-src 'self' https://fonts.gstatic.com;
+    connect-src 'self' https://ahslifnthiwfkmaswjno.supabase.co https://api.supabase.co https://rum-ingest.pingdom.net https://sentry.io;
+    object-src 'none';
 /
   Cache-Control: no-store, max-age=0, must-revalidate
 
