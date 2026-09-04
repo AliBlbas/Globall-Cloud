@@ -1,4 +1,4 @@
-/*
+/ 
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
@@ -6,8 +6,6 @@
   Permissions-Policy: camera=(self), geolocation=(self), microphone=(), payment=()
   Cross-Origin-Opener-Policy: same-origin
   Content-Security-Policy: default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rum-static.pingdom.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.supabase.co https://rum-ingest.pingdom.net https://*.sentry.io https://sentry.io; worker-src 'self' blob:
-
-/ 
   Cache-Control: no-store, max-age=0, must-revalidate
 
 /*.html
@@ -74,4 +72,3 @@
   Cache-Control: public, max-age=86400
 /*.webp
   Cache-Control: public, max-age=86400
-*/
