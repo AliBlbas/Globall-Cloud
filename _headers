@@ -2,21 +2,12 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
-  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
   Permissions-Policy: camera=(self), geolocation=(self), microphone=(), payment=()
   Cross-Origin-Opener-Policy: same-origin
-  Cross-Origin-Resource-Policy: same-site
-  Content-Security-Policy: default-src 'self'; base-uri 'self'; frame-ancestors 'none';
-    script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rum-static.pingdom.net;
-    style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
-    img-src 'self' data: https:;
-    font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' https://ahslifnthiwfkmaswjno.supabase.co https://api.supabase.co https://rum-ingest.pingdom.net https://sentry.io;
-    object-src 'none';
-/
-  Cache-Control: no-store, max-age=0, must-revalidate
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rum-static.pingdom.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.supabase.co https://rum-ingest.pingdom.net https://*.sentry.io https://sentry.io; worker-src 'self' blob:
 
-/index.html
+/ 
   Cache-Control: no-store, max-age=0, must-revalidate
 
 /*.html
@@ -66,50 +57,21 @@
   X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
-/logo-icon.png
-  Cache-Control: public, max-age=300, must-revalidate
-
-/logo-icon-original.png
-  Cache-Control: public, max-age=300, must-revalidate
-
 /sw.js
   Cache-Control: no-cache, no-store, must-revalidate
 
-/browser-compat.css
-  Cache-Control: public, max-age=300, must-revalidate
-
-/mobile-final.css
-  Cache-Control: public, max-age=300, must-revalidate
-
-/mobile-polish.css
-  Cache-Control: public, max-age=300, must-revalidate
-
-/mobile-elite.css
-  Cache-Control: public, max-age=300, must-revalidate
-
-/live-logistics-map.css
-  Cache-Control: public, max-age=300, must-revalidate
-
-/live-logistics-map.js
-  Cache-Control: public, max-age=300, must-revalidate
-
-/logo-fix.css
-  Cache-Control: public, max-age=300, must-revalidate
-
 /*.css
   Cache-Control: public, max-age=3600
-
 /*.js
   Cache-Control: public, max-age=3600
-
 /*.png
   Cache-Control: public, max-age=86400
-
 /*.jpg
   Cache-Control: public, max-age=86400
-
 /*.jpeg
   Cache-Control: public, max-age=86400
-
 /*.svg
   Cache-Control: public, max-age=86400
+/*.webp
+  Cache-Control: public, max-age=86400
+*/
