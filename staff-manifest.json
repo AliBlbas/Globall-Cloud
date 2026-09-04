@@ -1,7 +1,7 @@
 {
   "name":"Globall Cloud Staff OS",
   "short_name":"GC Staff",
-  "start_url":"/staff-os.html",
+  "start_url":"/staff",
   "scope":"/",
   "display":"standalone",
   "background_color":"#020914",
