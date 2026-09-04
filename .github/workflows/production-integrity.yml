@@ -1,0 +1,115 @@
+name: Production Integrity
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-integrity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integrity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Repository validation
+        run: npm test
+
+      - name: Production reference and security invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(grep -E '^project_id[[:space:]]*=' supabase/config.toml | head -n1 | sed -E 's/.*=[[:space:]]*"([^"]+)".*/\1/')" = "ahslifnthiwfkmaswjno"
+          ! grep -RIl 'swptmhhwhdtyrrfzetam' --include='*.js' --include='*.mjs' --include='*.ts' --include='*.tsx' --include='*.html' --include='*.css' --include='*.json' --include='*.toml' --include='*.yml' --include='*.yaml' .
+          ! grep -RnoE '(service_role[_-]?key|SUPABASE_SERVICE_ROLE_KEY)[^A-Za-z0-9_.].{0,4}["'"']?[[:space:]]*[:=][[:space:]]*["'"'](eyJ|sb_secret_)[A-Za-z0-9._-]{10,}' --exclude-dir=.git --exclude='*.md' .
+          grep -q "script-src 'self'" _headers
+          ! grep -q "script-src[^;]*unsafe-inline" _headers
+          grep -q 'ahslifnthiwfkmaswjno.supabase.co' production-bridge.js
+          grep -q '^/staff /staff-os-v5.html 200$' _redirects
+          grep -q '^/staff/ /staff-os-v5.html 200$' _redirects
+          grep -q '^/staff-os /staff-os-v5.html 200$' _redirects
+          grep -q '^/track /tracking-integration.html 200$' _redirects
+
+      - name: Critical production files
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in \
+            index.html sw.js production-bridge.js runtime-guard.js _headers _redirects \
+            tracking-integration.html customer-portal.html warehouse-os.html driver-workspace.html \
+            staff-os-v5.html staff-os-v5.css staff-os-v5.js \
+            staff-os-v5-shipment-create-fix.js staff-os-v5-integrations.js \
+            staff-os-v5-profile.js staff-os-production.js warehouse-offline-sync.js \
+            supabase/config.toml package.json package-lock.json \
+            supabase/functions/logistics-control-plane/index.ts \
+            supabase/functions/notification-dispatch/index.ts \
+            supabase/functions/warehouse-receiving/index.ts \
+            supabase/functions/warehouse-notify/index.ts \
+            supabase/functions/staff-ops-hub/index.ts \
+            supabase/functions/staff-analytics/index.ts \
+            supabase/functions/invoice-ai/index.ts \
+            supabase/functions/customer-debt-assistant/index.ts \
+            supabase/functions/fx-refresh/index.ts \
+            supabase/functions/staff-shipment-v5/index.ts \
+            tests/validate.mjs tests/e2e/run.mjs; do
+            test -f "$file"
+          done
+
+      - name: Service worker release invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "gc-v87" sw.js
+          grep -q "staff-os-v5.html" sw.js
+          grep -q "staff-os-production.js?v=20260905-1" sw.js
+          grep -q "staff-os-v5.js?v=20260904-1" sw.js
+          grep -q "staff-os-v5-integrations.js?v=20260904-2" sw.js
+          grep -q "staff-os-v5-profile.js?v=20260904-1" sw.js
+
+      - name: Public live smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,re,urllib.request
+          site='https://globall-cloud.pages.dev'
+          supabase='https://ahslifnthiwfkmaswjno.supabase.co'
+          for path in ('/','/track','/tracking-integration.html','/warehouse-os.html','/customer-portal.html'):
+              with urllib.request.urlopen(site+path,timeout=20) as r:
+                  body=r.read().decode('utf-8','replace')
+                  assert r.status==200 and len(body)>200,(path,r.status,len(body))
+          bridge=urllib.request.urlopen(site+'/production-bridge.js?e2e=1',timeout=20).read().decode('utf-8','replace')
+          m=re.search(r"SUPABASE_PUBLISHABLE_KEY\\s*=\\s*['\"]([^'\"]+)['\"]",bridge)
+          assert m,'publishable key not found'
+          req=urllib.request.Request(supabase+'/functions/v1/public-config?key=usd_iqd_rate',headers={'Origin':site,'Accept':'application/json','apikey':m.group(1)})
+          with urllib.request.urlopen(req,timeout=20) as r:
+              body=json.loads(r.read().decode('utf-8','replace'))
+              assert r.status==200 and body.get('key')=='usd_iqd_rate' and body.get('value') not in (None,'')
+          PY
+
+      - name: Read-only public E2E
+        env:
+          GC_SITE_URL: https://globall-cloud.pages.dev
+          E2E_SUPABASE_URL: https://ahslifnthiwfkmaswjno.supabase.co
+        run: npm run test:e2e:public
