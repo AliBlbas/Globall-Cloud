@@ -39,40 +39,33 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -q 'gc-v85' sw.js
-          grep -q 'warehouse-offline-sync.js?v=20260903-1' sw.js
-          grep -q 'runtime-guard.js?v=20260903-2' sw.js
-          grep -q 'staff-os-fx.js?v=20260903-2' sw.js
-          grep -q 'staff-os-enhancements-v2.js' runtime-guard.js
-          grep -q 'staff-os-fx.js' runtime-guard.js
-          grep -q 'staff-os-warehouse-notify.js' runtime-guard.js
-          grep -q 'warehouse-offline-sync.js' runtime-guard.js
-          grep -q 'staff-os-dashboard.js' sw.js
-          grep -q 'staff-os-ai-tools.js' sw.js
-          grep -q 'customer-portal.html' sw.js
-          grep -q 'warehouse-os.html' sw.js
-          grep -q 'tracking-integration.html' sw.js
-          grep -q '^/track /tracking-integration.html 200$' _redirects
-          grep -q '^/track/ /tracking-integration.html 200$' _redirects
-          grep -q 'id="gcTrackingForm"' tracking-integration.html
-          grep -q 'staff-analytics' supabase/functions/staff-analytics/index.ts
-          grep -q 'warehouse-notify' supabase/functions/warehouse-notify/index.ts
+          grep -q 'gc-v86' sw.js
+          grep -q 'staff-os-v5.html' sw.js
+          grep -q 'staff-os-v5.css?v=20260904-1' sw.js
+          grep -q 'staff-os-v5.js?v=20260904-1' sw.js
+          grep -q 'staff-os-v5-integrations.js?v=20260904-2' sw.js
+          grep -q 'staff-os-v5-profile.js?v=20260904-1' sw.js
+          grep -q 'staff-shipment-v5' staff-os-v5-shipment-create-fix.js
+          grep -q 'aiInvoiceModal' staff-os-v5-integrations.js
+          grep -q 'gcDebt' staff-os-v5-integrations.js
+          grep -q 'staff_profiles' staff-os-v5-profile.js
           grep -q 'invoice-ai' supabase/functions/invoice-ai/index.ts
           grep -q 'customer-debt-assistant' supabase/functions/customer-debt-assistant/index.ts
           grep -q 'fx-refresh' supabase/functions/fx-refresh/index.ts
-          find supabase/migrations -maxdepth 1 -type f -name '*production_security_hardening*.sql' | grep -q .
-          find supabase/migrations -maxdepth 1 -type f -name '*fix_alert_monitor_uuid_text_cast_v1*.sql' | grep -q .
-          find supabase/migrations -maxdepth 1 -type f -name '*fix_shopping_tracking_contract_v1*.sql' | grep -q .
-          find supabase/migrations -maxdepth 1 -type f -name '*add_warehouse_receipt_idempotency_v2*.sql' | grep -q .
-          find supabase/migrations -maxdepth 1 -type f -name '*add_shipment_external_reference_v1*.sql' | grep -q .
-          find supabase/migrations -maxdepth 1 -type f -name '*production_runtime_alignment_v1*.sql' | grep -q .
+          grep -q 'staff-shipment-v5' supabase/functions --exclude-dir=_shared
+          grep -q '^/staff /staff-os-v5.html 200$' _redirects
+          grep -q '^/staff/ /staff-os-v5.html 200$' _redirects
+          grep -q '^/staff-os /staff-os-v5.html 200$' _redirects
+          grep -q '^/track /tracking-integration.html 200$' _redirects
+          grep -q 'id="gcTrackingForm"' tracking-integration.html
           grep -q 'ahslifnthiwfkmaswjno' production-bridge.js
           grep -q 'ahslifnthiwfkmaswjno.supabase.co' _headers
           grep -q 'Content-Security-Policy' _headers
           grep -q "script-src 'self'" _headers
           ! grep -q "script-src[^;]*unsafe-inline" _headers
-          grep -q 'isUuid' supabase/functions/public-track/index.ts
-          grep -q 'tracking_id' supabase/functions/public-track/index.ts
+          find supabase/migrations -maxdepth 1 -type f -name '*staff_profile_bootstrap_v1*.sql' | grep -q .
+          find supabase/migrations -maxdepth 1 -type f -name '*align_live_shipment_contract_v1*.sql' | grep -q .
+          find supabase/migrations -maxdepth 1 -type f -name '*production_security_hardening*.sql' | grep -q .
           ! grep -RnoE '(service_role[_-]?key|SUPABASE_SERVICE_ROLE_KEY)[^A-Za-z0-9_.].{0,4}["'"']?[[:space:]]*[:=][[:space:]]*["'"'](eyJ|sb_secret_)[A-Za-z0-9._-]{10,}' --exclude-dir=.git --exclude='*.md' .
       - name: Validate migration names
         shell: bash
@@ -89,7 +82,8 @@ jobs:
           for file in \
             index.html sw.js production-bridge.js runtime-guard.js _headers _redirects \
             tracking-integration.html customer-portal.html warehouse-os.html driver-workspace.html \
-            staff-os.html super-admin-command-center.html warehouse-offline-sync.js \
+            staff-os.html staff-os-v5.html staff-os-v5.css staff-os-v5.js staff-os-v5-shipment-create-fix.js \
+            staff-os-v5-integrations.js staff-os-v5-profile.js staff-manifest.json warehouse-offline-sync.js \
             supabase/config.toml \
             supabase/functions/logistics-control-plane/index.ts \
             supabase/functions/notification-dispatch/index.ts \
@@ -101,6 +95,7 @@ jobs:
             supabase/functions/customer-debt-assistant/index.ts \
             supabase/functions/fx-refresh/index.ts \
             supabase/functions/public-track/index.ts \
+            supabase/functions/staff-shipment-v5/index.ts \
             tests/validate.mjs tests/e2e/run.mjs; do
             test -f "$file"
           done
