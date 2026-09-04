@@ -39,12 +39,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -q 'gc-v86' sw.js
+          grep -q 'gc-v87' sw.js
           grep -q 'staff-os-v5.html' sw.js
           grep -q 'staff-os-v5.css?v=20260904-1' sw.js
           grep -q 'staff-os-v5.js?v=20260904-1' sw.js
           grep -q 'staff-os-v5-integrations.js?v=20260904-2' sw.js
           grep -q 'staff-os-v5-profile.js?v=20260904-1' sw.js
+          grep -q 'staff-os-production.js?v=20260905-1' sw.js
+          grep -q 'staff-os-production.js?v=20260905-1' staff-os-v5.html
           grep -q 'staff-shipment-v5' staff-os-v5-shipment-create-fix.js
           grep -q 'aiInvoiceModal' staff-os-v5-integrations.js
           grep -q 'gcDebt' staff-os-v5-integrations.js
@@ -53,6 +55,7 @@ jobs:
           grep -q 'customer-debt-assistant' supabase/functions/customer-debt-assistant/index.ts
           grep -q 'fx-refresh' supabase/functions/fx-refresh/index.ts
           grep -q 'staff-shipment-v5' supabase/functions --exclude-dir=_shared
+          grep -q 'staff-production-api' staff-os-production.js supabase/functions/staff-production-api/index.ts
           grep -q '^/staff /staff-os-v5.html 200$' _redirects
           grep -q '^/staff/ /staff-os-v5.html 200$' _redirects
           grep -q '^/staff-os /staff-os-v5.html 200$' _redirects
@@ -83,7 +86,7 @@ jobs:
             index.html sw.js production-bridge.js runtime-guard.js _headers _redirects \
             tracking-integration.html customer-portal.html warehouse-os.html driver-workspace.html \
             staff-os.html staff-os-v5.html staff-os-v5.css staff-os-v5.js staff-os-v5-shipment-create-fix.js \
-            staff-os-v5-integrations.js staff-os-v5-profile.js staff-manifest.json warehouse-offline-sync.js \
+            staff-os-v5-integrations.js staff-os-v5-profile.js staff-os-production.js staff-manifest.json warehouse-offline-sync.js \
             supabase/config.toml \
             supabase/functions/logistics-control-plane/index.ts \
             supabase/functions/notification-dispatch/index.ts \
@@ -96,6 +99,7 @@ jobs:
             supabase/functions/fx-refresh/index.ts \
             supabase/functions/public-track/index.ts \
             supabase/functions/staff-shipment-v5/index.ts \
+            supabase/functions/staff-production-api/index.ts \
             tests/validate.mjs tests/e2e/run.mjs; do
             test -f "$file"
           done
@@ -127,7 +131,7 @@ jobs:
           import json,re,urllib.request
           site='https://globall-cloud.pages.dev'
           supabase='https://ahslifnthiwfkmaswjno.supabase.co'
-          for path in ('/','/track','/tracking-integration.html','/warehouse-os.html','/customer-portal.html'):
+          for path in ('/','/track','/tracking-integration.html','/warehouse-os.html','/customer-portal.html','/staff-os-v5.html'):
               with urllib.request.urlopen(site+path,timeout=20) as r:
                   body=r.read().decode('utf-8','replace')
                   assert r.status==200 and len(body)>200,(path,r.status,len(body))
