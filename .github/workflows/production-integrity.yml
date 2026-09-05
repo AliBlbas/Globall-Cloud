@@ -60,7 +60,7 @@ jobs:
             tracking-integration.html customer-portal.html warehouse-os.html driver-workspace.html \
             staff-os-v5.html staff-os-v5.css staff-os-v5.js \
             staff-os-v5-shipment-create-fix.js staff-os-v5-integrations.js \
-            staff-os-v5-profile.js staff-os-production.js warehouse-offline-sync.js \
+            staff-os-v5-profile.js staff-os-production-analytics-bridge.js staff-os-v5-stability.js warehouse-offline-sync.js \
             supabase/config.toml package.json package-lock.json \
             supabase/functions/logistics-control-plane/index.ts \
             supabase/functions/notification-dispatch/index.ts \
@@ -80,12 +80,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -q "gc-v87" sw.js
+          grep -q "gc-v88" sw.js
           grep -q "staff-os-v5.html" sw.js
-          grep -q "staff-os-production.js?v=20260905-1" sw.js
-          grep -q "staff-os-v5.js?v=20260904-1" sw.js
-          grep -q "staff-os-v5-integrations.js?v=20260904-2" sw.js
-          grep -q "staff-os-v5-profile.js?v=20260904-1" sw.js
+          grep -q "staff-os-v5.js?v=20260905-3" sw.js
+          grep -q "staff-os-v5-shipment-create-fix.js?v=20260905-3" sw.js
+          grep -q "staff-os-v5-integrations.js?v=20260905-3" sw.js
+          grep -q "staff-os-v5-profile.js?v=20260905-3" sw.js
+          grep -q "staff-os-production-analytics-bridge.js?v=20260905-3" sw.js
+          grep -q "staff-os-v5-stability.js?v=20260905-3" sw.js
+          ! grep -q "staff-os-production.js?v=" sw.js
 
       - name: Public live smoke test
         shell: bash
