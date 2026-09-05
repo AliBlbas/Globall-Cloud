@@ -8,18 +8,98 @@
   const KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
   const nativeFetch = window.fetch.bind(window);
 
+  const jsonFetch = async (url, headers) => {
+    const response = await nativeFetch(url, { headers, cache: 'no-store' });
+    const data = await response.json().catch(() => ({}));
+    return { response, data };
+  };
+
+  const asNumber = (value) => {
+    const n = Number(value ?? 0);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const fallbackAnalytics = async (headers) => {
+    const [shipmentsResult, financeResult, pricingResult] = await Promise.allSettled([
+      jsonFetch(`${API}?kind=shipments`, headers),
+      jsonFetch(`${API}?kind=finance`, headers),
+      jsonFetch(`${API}?kind=pricing`, headers)
+    ]);
+
+    const shipments = shipmentsResult.status === 'fulfilled' && shipmentsResult.value.response.ok
+      ? (shipmentsResult.value.data?.items || [])
+      : [];
+    const finance = financeResult.status === 'fulfilled' && financeResult.value.response.ok
+      ? (financeResult.value.data || {})
+      : {};
+    const pricing = pricingResult.status === 'fulfilled' && pricingResult.value.response.ok
+      ? (pricingResult.value.data || {})
+      : {};
+
+    const tx = Array.isArray(finance.transactions) ? finance.transactions : [];
+    const income = tx.filter(x => !['expense','cost','out'].includes(String(x.type || '').toLowerCase()))
+      .reduce((n, x) => n + asNumber(x.amount_usd), 0);
+    const expenses = tx.filter(x => ['expense','cost','out'].includes(String(x.type || '').toLowerCase()))
+      .reduce((n, x) => n + asNumber(x.amount_usd), 0);
+    const outstanding = tx.reduce((n, x) => {
+      const type = String(x.type || '').toLowerCase();
+      return ['charge','customer_charge'].includes(type) ? n + Math.max(0, asNumber(x.amount_usd)) : n;
+    }, 0) - tx.filter(x => ['payment','customer_payment','income'].includes(String(x.type || '').toLowerCase()))
+      .reduce((n, x) => n + asNumber(x.amount_usd), 0);
+
+    const routes = new Map();
+    for (const shipment of shipments) {
+      if (shipment.archived_at) continue;
+      const route = `${shipment.origin_key || shipment.origin || '—'} → ${shipment.dest_key || shipment.destination || '—'}`;
+      const row = routes.get(route) || { route, shipments: 0, revenue: 0, outstanding: 0 };
+      row.shipments += 1;
+      row.revenue += asNumber(shipment.total_amount);
+      row.outstanding += Math.max(0, asNumber(shipment.total_amount) - asNumber(shipment.paid_amount));
+      routes.set(route, row);
+    }
+
+    const fxRows = Array.isArray(pricing.exchange_rates) ? pricing.exchange_rates : [];
+    const fx = fxRows.find(x => asNumber(x.usd_to_iqd || x.rate) > 0);
+    const fxRate = fx ? asNumber(fx.usd_to_iqd || fx.rate) : null;
+
+    const active = shipments.filter(x => !['delivered','completed','cancelled','canceled']
+      .includes(String(x.operational_status || x.status || '').toLowerCase()) && !x.archived_at).length;
+
+    return {
+      ok: true,
+      summary: {
+        outstanding_usd: Math.max(0, outstanding),
+        revenue_usd: income,
+        collected_usd: Math.max(0, income - Math.max(0, outstanding)),
+        company_cost_usd: expenses,
+        company_cost_iqd: 0,
+        estimated_profit_usd: income - expenses,
+        active_shipments: active,
+        total_shipments: shipments.length,
+        fx_usd_iqd: fxRate
+      },
+      routes: [...routes.values()].sort((a, b) => b.revenue - a.revenue),
+      staff: [],
+      recent_costs: [],
+      generated_at: new Date().toISOString(),
+      fallback: true
+    };
+  };
+
   const latestFx = async (token) => {
     try {
-      const r = await nativeFetch(`${API}?kind=pricing`, {
-        headers: { apikey: KEY, Authorization: `Bearer ${token}`, Accept: 'application/json' },
-        cache: 'no-store'
+      const { response, data } = await jsonFetch(`${API}?kind=pricing`, {
+        apikey: KEY,
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json'
       });
-      if (!r.ok) return null;
-      const d = await r.json();
-      const rows = Array.isArray(d.exchange_rates) ? d.exchange_rates : [];
-      const first = rows.find(x => Number(x.usd_to_iqd || x.rate) > 0);
-      return first ? Number(first.usd_to_iqd || first.rate) : null;
-    } catch { return null; }
+      if (!response.ok) return null;
+      const rows = Array.isArray(data.exchange_rates) ? data.exchange_rates : [];
+      const first = rows.find(x => asNumber(x.usd_to_iqd || x.rate) > 0);
+      return first ? asNumber(first.usd_to_iqd || first.rate) : null;
+    } catch {
+      return null;
+    }
   };
 
   window.fetch = async (input, init = {}) => {
@@ -35,13 +115,21 @@
         latestFx(session.access_token)
       ]);
       const raw = await rawResponse.json().catch(() => ({}));
-      if (!rawResponse.ok) return new Response(JSON.stringify(raw), { status: rawResponse.status, headers: rawResponse.headers });
+
+      if (!rawResponse.ok) {
+        const fallback = await fallbackAnalytics(headers);
+        fallback.summary.fx_usd_iqd = fx || fallback.summary.fx_usd_iqd;
+        return new Response(JSON.stringify(fallback), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }
+        });
+      }
 
       const s = raw.summary || {};
-      const costIqd = Number(s.total_cost || 0);
-      const revenueUsd = Number(s.total_revenue || 0);
-      const collectedUsd = Number(s.total_collected || 0);
-      const outstandingUsd = Number(s.total_outstanding || 0);
+      const costIqd = asNumber(s.total_cost);
+      const revenueUsd = asNumber(s.total_revenue);
+      const collectedUsd = asNumber(s.total_collected);
+      const outstandingUsd = asNumber(s.total_outstanding);
       const costUsd = fx && fx > 0 ? costIqd / fx : 0;
       const body = {
         ok: true,
@@ -52,25 +140,27 @@
           company_cost_usd: costUsd,
           company_cost_iqd: costIqd,
           estimated_profit_usd: revenueUsd - costUsd,
-          active_shipments: Number(s.active_shipments || 0),
-          total_shipments: Number(s.total_shipments || 0),
+          active_shipments: asNumber(s.active_shipments),
+          total_shipments: asNumber(s.total_shipments),
           fx_usd_iqd: fx
         },
         routes: Array.isArray(raw.routes) ? raw.routes : [],
         staff: Array.isArray(raw.staff) ? raw.staff.map(x => ({
           ...x,
           active: true,
-          shipments: Number(x.assigned_shipments || 0),
-          delivered: Number(x.delivered || 0)
+          shipments: asNumber(x.assigned_shipments),
+          delivered: asNumber(x.delivered)
         })) : [],
         recent_costs: Array.isArray(raw.recent_costs) ? raw.recent_costs : [],
-        generated_at: new Date().toISOString()
+        generated_at: new Date().toISOString(),
+        fallback: false
       };
       return new Response(JSON.stringify(body), {
         status: 200,
         headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }
       });
-    } catch {
+    } catch (error) {
+      console.error('[Globall Cloud] analytics bridge:', error);
       return nativeFetch(input, init);
     }
   };
