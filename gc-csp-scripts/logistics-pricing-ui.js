@@ -4,8 +4,10 @@
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const text = (v) => String(v ?? '').trim();
   const money = (v) => Number(v || 0).toLocaleString('en-US', { maximumFractionDigits: 2 });
+  const PRICING_FN = 'https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/public-pricing';
+  const KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
 
-  const originMap = { china: 'China', cn: 'China', foshan: 'China', uae: 'UAE', dubai: 'UAE', usa: 'USA', us: 'USA' };
+  const originMap = { china: 'china', cn: 'china', foshan: 'china', uae: 'uae', dubai: 'dubai', usa: 'usa', us: 'usa' };
   const typeMap = {
     battery: 'battery', patry: 'battery', 'پاتری': 'battery',
     screen: 'screen', display: 'screen', monitor: 'screen', 'شاشە': 'screen',
@@ -16,24 +18,14 @@
     iphone: 'iphone', iphone17: 'iphone17', s25: 's25', s26: 's26'
   };
 
-  async function clientReady() {
-    for (let i = 0; i < 20; i++) {
-      if (window.sb?.rpc) return window.sb;
-      if (typeof window.gcEnsureSupabase === 'function') {
-        try { const client = await window.gcEnsureSupabase(); if (client?.rpc) return client; } catch {}
-      }
-      await sleep(150);
-    }
-    return null;
-  }
-
   function controls() {
-    const origin = document.getElementById('quoteOrigin');
-    const product = document.getElementById('quoteProduct');
-    const weight = document.getElementById('quoteWeight');
-    const volume = document.getElementById('quoteVolume');
-    const mode = document.getElementById('quoteType') || document.getElementById('quoteMode') || document.querySelector('[name="transport_mode"]');
-    return { origin, product, weight, volume, mode };
+    return {
+      origin: document.getElementById('quoteOrigin'),
+      product: document.getElementById('quoteProduct'),
+      weight: document.getElementById('quoteWeight'),
+      volume: document.getElementById('quoteVolume'),
+      mode: document.getElementById('quoteType') || document.getElementById('quoteMode') || document.querySelector('[name="transport_mode"]')
+    };
   }
 
   function installCompliance(c) {
@@ -79,7 +71,7 @@
     const state = document.getElementById('gcComplianceState');
     const status = document.getElementById('gcQuoteStatus');
     const rows = document.getElementById('gcQuoteRows');
-    const origin = originMap[text(c.origin.value).toLowerCase()] || text(c.origin.value);
+    const origin = originMap[text(c.origin.value).toLowerCase()] || text(c.origin.value).toLowerCase();
     const product = typeMap[text(c.product.value).toLowerCase()] || text(c.product.value).toLowerCase() || 'general';
     const mode = text(c.mode?.value || (text(c.volume?.value) ? 'sea' : 'air')).toLowerCase();
     const weight = Number(c.weight.value);
@@ -89,47 +81,35 @@
     const liquid = Boolean(document.getElementById('gcLiquid')?.checked);
     const msds = Boolean(document.getElementById('gcMsds')?.checked);
 
-    const client = await clientReady();
-    if (!client) return;
     if (!(weight > 0) && !(volume > 0)) return;
-    if (status) status.textContent = 'حسابکردن لە backend...';
+    if (status) status.textContent = 'حسابکردن لە سێرڤەری pricing...';
     try {
-      const compliance = await client.rpc('validate_logistics_cargo', {
-        p_product_type: product,
-        p_has_battery: battery,
-        p_has_liquid: liquid,
-        p_msds_provided: msds,
-        p_medical_device: medical,
+      const r = await fetch(PRICING_FN, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: KEY },
+        body: JSON.stringify({ origin_key: origin, destination_key: 'erbil', transport_mode: mode, product_type: product, weight_kg: Number.isFinite(weight) && weight > 0 ? weight : null, volume_cbm: Number.isFinite(volume) && volume > 0 ? volume : null, has_battery: battery, has_liquid: liquid, msds_provided: msds, medical_device: medical }),
+        cache: 'no-store'
       });
-      if (compliance.error) throw compliance.error;
-      if (!compliance.data?.allowed) {
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || 'Pricing service error');
+      if (!d.allowed) {
         rows.hidden = true;
-        status.textContent = compliance.data?.message_ku || 'کاڵاکە وەرناگیرێت.';
-        if (state) state.textContent = compliance.data?.message_ku || 'کاڵاکە وەرناگیرێت.';
+        status.textContent = d.message_ku || 'کاڵاکە وەرناگیرێت.';
+        if (state) state.textContent = d.message_ku || 'کاڵاکە وەرناگیرێت.';
         return;
       }
+      const q = d.quote || {};
       if (state) state.textContent = 'یاساکانی وەرگرتن تێپەڕین.';
-      const result = await client.rpc('calculate_logistics_price', {
-        p_origin_key: origin,
-        p_destination_key: 'Erbil',
-        p_transport_mode: mode === 'sea' ? 'sea' : 'air',
-        p_product_type: product,
-        p_weight_kg: Number.isFinite(weight) && weight > 0 ? weight : null,
-        p_volume_cbm: Number.isFinite(volume) && volume > 0 ? volume : null,
-        p_rate_key: null,
-      });
-      if (result.error) throw result.error;
-      const d = result.data;
       rows.hidden = false;
-      document.getElementById('gcRate').textContent = d.minimum_applied ? 'Minimum 5,000 IQD' : `$${money(d.rate_usd)} / ${d.unit || 'kg'}`;
-      document.getElementById('gcUnit').textContent = d.minimum_applied ? 'fixed' : d.unit;
-      document.getElementById('gcUsd').textContent = `$${money(d.usd)}`;
-      document.getElementById('gcIqd').textContent = `${Number(d.iqd || 0).toLocaleString('en-US')} IQD`;
-      status.textContent = `نرخی فەرمی: ${d.rate_key || 'minimum'}`;
+      document.getElementById('gcRate').textContent = q.minimum_applied ? 'Minimum' : `$${money(q.rate_usd)} / ${q.unit || 'kg'}`;
+      document.getElementById('gcUnit').textContent = q.minimum_applied ? 'fixed' : (q.unit || 'kg');
+      document.getElementById('gcUsd').textContent = `$${money(q.usd)}`;
+      document.getElementById('gcIqd').textContent = `${Number(q.iqd || 0).toLocaleString('en-US')} IQD`;
+      status.textContent = `نرخی فەرمی: ${q.rate_key || 'minimum'}`;
     } catch (error) {
       rows.hidden = true;
-      status.textContent = 'نەکرا نرخی فەرمی بۆ ئەم داواکارییە هەژمار بکرێت.';
-      console.warn('[Globall Cloud] authoritative pricing:', error);
+      status.textContent = 'نەکرا نرخی فەرمی هەژمار بکرێت.';
+      console.warn('[Globall Cloud] public pricing:', error);
     }
   }
 
@@ -138,8 +118,9 @@
       const c = controls();
       if (c.origin && c.product && c.weight) {
         installCompliance(c); installResult(c);
-        [c.origin,c.product,c.weight,c.volume,c.mode,document.getElementById('gcMedicalDevice'),document.getElementById('gcBattery'),document.getElementById('gcLiquid'),document.getElementById('gcMsds')].filter(Boolean).forEach((el)=>el.addEventListener('change',()=>void calculate()));
+        [c.origin,c.product,c.weight,c.volume,c.mode].filter(Boolean).forEach((el)=>el.addEventListener('change',()=>void calculate()));
         [c.weight,c.volume].filter(Boolean).forEach((el)=>el.addEventListener('input',()=>void calculate()));
+        ['gcMedicalDevice','gcBattery','gcLiquid','gcMsds'].forEach((id)=>document.getElementById(id)?.addEventListener('change',()=>void calculate()));
         return;
       }
       await sleep(200);
