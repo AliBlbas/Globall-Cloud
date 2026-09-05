@@ -3,9 +3,7 @@
   if (window.__gcStaffV5Stability) return;
   window.__gcStaffV5Stability = true;
 
-  const FUNCTION_PREFIXES = [
-    'https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/'
-  ];
+  const FUNCTION_PREFIXES = ['https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/'];
 
   const safeError = (value) => {
     if (value == null) return 'Unknown error';
@@ -31,19 +29,13 @@
     const url = typeof input === 'string' ? input : input?.url || '';
     const response = await nativeFetch(input, init);
     if (!isFunctionUrl(url)) return response;
-
-    const contentType = response.headers.get('content-type') || '';
-    if (!contentType.includes('application/json')) return response;
+    if (!(response.headers.get('content-type') || '').includes('application/json')) return response;
 
     try {
       const payload = await response.clone().json();
       if (!response.ok && payload && typeof payload === 'object') {
         const message = safeError(payload.error ?? payload.message ?? payload);
-        const normalized = {
-          ...payload,
-          error: message,
-          error_message: message
-        };
+        const normalized = { ...payload, error: message, error_message: message };
         const headers = new Headers(response.headers);
         headers.set('Content-Type', 'application/json; charset=utf-8');
         headers.set('Cache-Control', 'no-store');
@@ -59,14 +51,19 @@
 
   window.gcSafeError = safeError;
 
-  window.addEventListener('unhandledrejection', (event) => {
-    const message = safeError(event.reason);
-    console.error('[Globall Cloud] Unhandled rejection:', message, event.reason);
-  });
-
-  window.addEventListener('error', (event) => {
-    if (event?.error) console.error('[Globall Cloud] Runtime error:', safeError(event.error), event.error);
-  });
+  const scrubObjectErrors = () => {
+    const root = document.getElementById('view') || document.body;
+    if (!root) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    let node;
+    while ((node = walker.nextNode())) nodes.push(node);
+    for (const textNode of nodes) {
+      if (!textNode.nodeValue?.includes('[object Object]')) continue;
+      if (/^(SCRIPT|STYLE)$/i.test(textNode.parentElement?.tagName || '')) continue;
+      textNode.nodeValue = textNode.nodeValue.replace(/\[object Object\]/g, 'هەڵەی data service بە شێوەی نادیار ڕوویدا. تکایە دووبارە هەوڵ بدەوە.');
+    }
+  };
 
   const injectMobilePolish = () => {
     if (document.getElementById('gcStaffStabilityStyle')) return;
@@ -129,10 +126,17 @@
     document.head.appendChild(style);
   };
 
-  const start = () => {
-    try { injectMobilePolish(); } catch (e) { console.error('[Globall Cloud] stability init:', e); }
+  const boot = () => {
+    try {
+      injectMobilePolish();
+      scrubObjectErrors();
+      const observer = new MutationObserver(() => scrubObjectErrors());
+      observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    } catch (e) {
+      console.error('[Globall Cloud] stability init:', e);
+    }
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
-  else start();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 })();
