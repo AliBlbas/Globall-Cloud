@@ -3371,13 +3371,13 @@ async function init(){
   await updateNavAuthState();
   setupReveal();
   const initialRoute = location.hash.replace('#','');
-  // Supports a real, clickable tracking link from outside the app (e.g. a
-  // WhatsApp message): ?track=<ID>#track. Without this, goTrack(prefill)
-  // only works as an in-app JS call — there was no URL a customer could
-  // actually tap from their phone that would land pre-filled on their
-  // shipment. See getTrackingShareLink() near sendWhatsAppUpdate().
-  const trackParam = new URLSearchParams(location.search).get('track');
-  route(trackParam ? 'track' : (VALID_ROUTES.includes(initialRoute) ? initialRoute : 'home'));
+  const pathRoutes = {'/quote':'request','/request':'request','/dashboard':'portal','/portal':'portal','/services':'services','/about':'about','/contact':'contact'};
+  // Supports real, clickable links from outside the app. The query aliases
+  // keep QR/WhatsApp links compatible with the public tracking page.
+  const params = new URLSearchParams(location.search);
+  const trackParam = params.get('track') || params.get('id') || params.get('gc');
+  const pathRoute = pathRoutes[location.pathname.replace(/\/$/,'')];
+  route(trackParam ? 'track' : (VALID_ROUTES.includes(initialRoute) ? initialRoute : (pathRoute || 'home')));
   if(trackParam){
     document.getElementById('trackInput').value = trackParam;
     doTrackSearch();
