@@ -50,20 +50,28 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in index.html sw.js production-bridge.js runtime-guard.js _headers _redirects tracking-integration.html customer-portal.html warehouse-os.html driver-workspace.html staff-os-v5.html staff-os-v5.css staff-os-v5.js staff-os-v5-shipment-create-fix.js staff-os-v5-integrations.js staff-os-v5-profile.js staff-os-production-analytics-bridge.js staff-os-v5-stability.js warehouse-offline-sync.js supabase/config.toml package.json package-lock.json supabase/functions/logistics-control-plane/index.ts supabase/functions/notification-dispatch/index.ts supabase/functions/warehouse-receiving/index.ts supabase/functions/warehouse-notify/index.ts supabase/functions/staff-ops-hub/index.ts supabase/functions/staff-analytics/index.ts supabase/functions/invoice-ai/index.ts supabase/functions/customer-debt-assistant/index.ts supabase/functions/fx-refresh/index.ts supabase/functions/staff-shipment-v5/index.ts tests/validate.mjs tests/e2e/run.mjs; do test -f "$file"; done
+          for file in index.html sw.js production-bridge.js runtime-guard.js _headers _redirects tracking-integration.html customer-portal.html warehouse-os.html driver-workspace.html staff-os-v5.html staff-os-v5.css staff-os-v5.js staff-os-v5-shipment-create-fix.js staff-os-v5-shipment-control-bridge.js staff-os-v5-integrations.js staff-os-v5-profile.js staff-os-production-analytics-bridge.js staff-os-v5-stability.js warehouse-offline-sync.js gc-csp-scripts/logistics-pricing-ui.js supabase/config.toml package.json package-lock.json supabase/functions/logistics-control-plane/index.ts supabase/functions/notification-dispatch/index.ts supabase/functions/warehouse-receiving/index.ts supabase/functions/warehouse-notify/index.ts supabase/functions/staff-ops-hub/index.ts supabase/functions/staff-analytics/index.ts supabase/functions/invoice-ai/index.ts supabase/functions/customer-debt-assistant/index.ts supabase/functions/fx-refresh/index.ts supabase/functions/staff-shipment-v5/index.ts supabase/functions/staff-shipment-control/index.ts supabase/functions/public-pricing/index.ts supabase/functions/staff-data-health/index.ts tests/validate.mjs tests/e2e/run.mjs; do test -f "$file"; done
       - name: Service worker release invariants
         shell: bash
         run: |
           set -euo pipefail
-          grep -q "gc-v88" sw.js
+          grep -q "gc-v89" sw.js
           grep -q "staff-os-v5.html" sw.js
           grep -q "staff-os-v5.js?v=20260905-3" sw.js
           grep -q "staff-os-v5-shipment-create-fix.js?v=20260905-3" sw.js
+          grep -q "staff-os-v5-shipment-control-bridge.js?v=20260905-1" sw.js
           grep -q "staff-os-v5-integrations.js?v=20260905-3" sw.js
           grep -q "staff-os-v5-profile.js?v=20260905-3" sw.js
           grep -q "staff-os-production-analytics-bridge.js?v=20260905-3" sw.js
           grep -q "staff-os-v5-stability.js?v=20260905-3" sw.js
           ! grep -q "staff-os-production.js?v=" sw.js
+      - name: Pricing security invariant
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "functions/v1/public-pricing" gc-csp-scripts/logistics-pricing-ui.js
+          ! grep -q "rpc('calculate_logistics_price'" gc-csp-scripts/logistics-pricing-ui.js
+          ! grep -q "rpc('validate_logistics_cargo'" gc-csp-scripts/logistics-pricing-ui.js
       - name: Public live smoke test
         shell: bash
         run: |
