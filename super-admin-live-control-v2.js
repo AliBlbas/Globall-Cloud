@@ -30,5 +30,4 @@ $('saveRate')?.addEventListener('click',saveFx);
 document.addEventListener('click',e=>{const b=e.target.closest('[data-save-price]');if(b)savePrice(b.dataset.savePrice)});
 Promise.resolve(db.auth.getSession()).then(({data})=>{state.me=data.session?.user||null;return Promise.all([loadPricing(),refreshStaff(),loadCustomers()])}).catch(e=>console.warn('super admin control boot',e));
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire,{once:true});else wire();
-})();
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire,{once:true});else wire();};boot();})();

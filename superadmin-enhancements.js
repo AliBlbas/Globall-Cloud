@@ -206,7 +206,7 @@
       <label class="sa-field-label">Branch<select class="sa-field" name="branch">${branches.map((r) => `<option value="${r}" ${r === (row.branch || 'all') ? 'selected' : ''}>${r}</option>`).join('')}</select></label>
       <label class="sa-field-label">${row.id ? 'وشەی نهێنیی نوێ (ئارەزوومەندانە)' : 'وشەی نهێنی (بەجێبهێڵە بۆ Invite)'}<input class="sa-field" name="password" type="password" autocomplete="new-password" minlength="12"></label>
       ${row.id ? `<label class="sa-check"><input name="is_active" type="checkbox" ${row.is_active ? 'checked' : ''} ${row.id === state.user?.id ? 'disabled' : ''}> چالاک</label>` : `<label class="sa-check"><input name="send_invite" type="checkbox" checked> ناردنی Invite بۆ ئیمەیڵ</label>`}
-      <div class="sa-notice" style="grid-column:1/-1">هەموو گۆڕانکارییەک لەسەر staff بە `account-admin` ـی پارێزراو و audit trail ـەوە جێبەجێ دەکرێت.</div>
+      <div class="sa-notice" style="grid-column:1/-1">هەموو گۆڕانکارییەک لەسەر staff بە &quot;account-admin&quot; ـی پارێزراو و audit trail ـەوە جێبەجێ دەکرێت.</div>
     </div>`;
   }
 

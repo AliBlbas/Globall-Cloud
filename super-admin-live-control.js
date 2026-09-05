@@ -32,5 +32,4 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-save-price
 state.me=state.me||{};
 Promise.resolve(db.auth.getSession()).then(({data})=>{state.me={id:data.session?.user?.id||null};return Promise.all([loadPricing(),refreshStaff(),loadCustomers()])}).catch(e=>console.warn('super admin control boot',e));
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
-})();
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();};boot();})();
