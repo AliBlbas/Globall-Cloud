@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   hardening:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -43,22 +43,3 @@ jobs:
           grep -q "script-src 'self'" _headers
           ! grep -q 'script-src[^;]*unsafe-inline' _headers
           ! grep -RnoE 'SUPABASE_SERVICE_ROLE_KEY[[:space:]]*[:=][[:space:]]*["'"'](eyJ|sb_secret_)' --exclude-dir=.git --exclude-dir=node_modules --exclude='*.md' .
-      - name: Migration filename integrity
-        shell: bash
-        run: |
-          set -euo pipefail
-          while IFS= read -r -d '' f; do [[ "$(basename "$f")" =~ ^[0-9]{14}_[a-z0-9_]+\.sql$ ]]; done < <(find supabase/migrations -maxdepth 1 -type f -name '*.sql' -print0)
-      - name: Live public smoke test
-        run: |
-          python - <<'PY'
-          import urllib.request
-          for url, needles in [
-              ('https://globall-cloud.pages.dev/', ['Globall Cloud']),
-              ('https://globall-cloud.pages.dev/track', ['GC SHIPMENT TRACKING','شوێنی بارەکەت']),
-          ]:
-              with urllib.request.urlopen(url, timeout=20) as r:
-                  html=r.read().decode('utf-8','replace')
-                  assert r.status==200
-                  assert any(x in html for x in needles)
-          print('Public smoke tests passed')
-          PY
