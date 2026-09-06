@@ -100,7 +100,7 @@ async function build(service: ReturnType<typeof serviceClient>, staff: Staff) {
   const exceptions = (exceptionsQ.data as Row[] || []).filter(e => ids.has(String(e.shipment_id)))
   const allReceipts = (receiptsQ.data as Row[] || [])
   const receipts = allReceipts.filter(r => ids.has(String(r.shipment_id)))
-  const unlinkedReceipts = allReceipts.filter(r => !r.shipment_id)
+  const unlinkedReceipts = allReceipts.filter(r => !r.shipment_id || !ids.has(String(r.shipment_id)))
   const movements = (movementsQ.data as Row[] || []).filter(r => ids.has(String(r.shipment_id)))
   const docs = (docsQ.data as Row[] || []).filter(d => ids.has(String(d.shipment_id)))
   const invoices = (invoicesQ.data as Row[] || [])
@@ -133,11 +133,8 @@ async function build(service: ReturnType<typeof serviceClient>, staff: Staff) {
   for (const e of exceptions) alerts.push({ type: 'exception', severity: e.severity || 'medium', shipment_id: e.shipment_id, title: e.title || 'Logistics exception', note: e.note || '', occurred_at: e.updated_at || e.created_at, due_at: e.due_at })
   for (const s of highPriority) alerts.push({ type: 'priority', severity: s.priority, shipment_id: s.id, tracking_number: s.tracking_number, title: `${String(s.priority).toUpperCase()} priority shipment`, note: 'Active shipment requires attention.', occurred_at: s.tracking_updated_at || s.created_at })
   for (const s of missingMode) alerts.push({ type: 'missing_data', severity: 'medium', shipment_id: s.id, tracking_number: s.tracking_number, title: 'Transport mode missing', note: 'Assign air/sea/land before operational dispatch.', occurred_at: s.created_at })
-  for (const r of receiptWithoutMovement) {
-    const shipment = shipments.find(s => String(s.id) === String(r.shipment_id))
-    alerts.push({ type: 'warehouse_chain_gap', severity: 'high', shipment_id: r.shipment_id, tracking_number: shipment?.tracking_number, title: 'Warehouse receipt has no movement', note: 'Receipt exists but no warehouse movement has been recorded for this shipment.', occurred_at: r.created_at })
-  }
-  for (const r of unlinkedReceipts) alerts.push({ type: 'warehouse_unlinked_receipt', severity: 'high', receipt_id: r.id, gc_code: r.gc_code, batch_code: r.batch_code, title: 'Warehouse receipt is unlinked', note: 'Receipt has no shipment_id and cannot participate in shipment chain-of-custody.', occurred_at: r.created_at })
+  for (const r of receiptWithoutMovement) alerts.push({ type: 'warehouse_chain_gap', severity: 'high', shipment_id: r.shipment_id, tracking_number: shipments.find(s => String(s.id) === String(r.shipment_id))?.tracking_number, title: 'Warehouse receipt has no movement', note: 'Receipt exists but no warehouse movement has been recorded for this shipment.', occurred_at: r.created_at })
+  for (const r of unlinkedReceipts) alerts.push({ type: 'warehouse_unlinked_receipt', severity: 'high', receipt_id: r.id, gc_code: r.gc_code, batch_code: r.batch_code, title: 'Warehouse receipt is unlinked', note: 'Receipt has no valid shipment link. Manual verification is required; it will not be auto-linked.', occurred_at: r.created_at, warehouse: r.warehouse })
   if (admin) {
     const pending = outbox.filter(o => ['pending', 'retrying', 'processing'].includes(String(o.status || '').toLowerCase())).length
     if (pending > 0) alerts.push({ type: 'outbox_backlog', severity: pending > 25 ? 'high' : 'medium', title: 'Notification outbox backlog', note: `${pending} notification items require processing.`, occurred_at: new Date().toISOString() })
