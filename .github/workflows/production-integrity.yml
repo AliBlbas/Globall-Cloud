@@ -20,13 +20,13 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
       - name: Install locked dependencies
         run: npm ci --ignore-scripts
@@ -44,9 +44,9 @@ jobs:
           root = Path('.')
           blocked = {'.git', '.wrangler', 'node_modules'}
           patterns = [
-              re.compile(r'(?i)SUPABASE_SERVICE_ROLE_KEY\s*[:=]\s*["\'](?:eyJ|sb_secret_)[A-Za-z0-9._-]{10,}'),
-              re.compile(r'(?i)service_role[_-]?key\s*[:=]\s*["\'](?:eyJ|sb_secret_)[A-Za-z0-9._-]{10,}'),
-              re.compile(r'(?i)CLOUDFLARE_API_TOKEN\s*[:=]\s*["\'][A-Za-z0-9._-]{20,}'),
+              re.compile(r'''(?i)SUPABASE_SERVICE_ROLE_KEY\s*[:=]\s*["'](?:eyJ|sb_secret_)[A-Za-z0-9._-]{10,}'''),
+              re.compile(r'''(?i)service_role[_-]?key\s*[:=]\s*["'](?:eyJ|sb_secret_)[A-Za-z0-9._-]{10,}'''),
+              re.compile(r'''(?i)CLOUDFLARE_API_TOKEN\s*[:=]\s*["'][A-Za-z0-9._-]{20,}'''),
           ]
           allowed_suffixes = {'.js','.mjs','.ts','.tsx','.html','.css','.json','.toml','.yml','.yaml','.sh','.py'}
           for path in root.rglob('*'):
@@ -108,7 +108,7 @@ jobs:
                   body=r.read().decode('utf-8','replace')
                   assert r.status==200 and len(body)>200,(path,r.status,len(body))
           bridge=urllib.request.urlopen(site+'/production-bridge.js?e2e=1',timeout=20).read().decode('utf-8','replace')
-          m=re.search(r"SUPABASE_PUBLISHABLE_KEY\s*=\s*['\"]([^'\"]+)['\"]",bridge)
+          m=re.search(r"SUPABASE_PUBLISHABLE_KEY\\s*=\\s*['\"]([^'\"]+)['\"]",bridge)
           assert m,'publishable key not found'
           req=urllib.request.Request(supabase+'/functions/v1/public-config?key=usd_iqd_rate',headers={'Origin':site,'Accept':'application/json','apikey':m.group(1)})
           with urllib.request.urlopen(req,timeout=20) as r:
