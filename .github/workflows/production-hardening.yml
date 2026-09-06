@@ -7,6 +7,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: production-hardening-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   hardening:
     runs-on: ubuntu-latest
@@ -34,11 +37,11 @@ jobs:
           grep -q '^/track/ /tracking-integration.html 200$' _redirects
           grep -q 'warehouse-offline-sync.js?v=20260903-1' sw.js
           grep -q 'warehouse-offline-sync.js?v=20260903-1' warehouse-os.html
-          grep -q 'supabase/functions/fx-refresh/index.ts' <(printf '%s\n' "$(find supabase/functions -path '*/fx-refresh/index.ts')")
+          test -n "$(find supabase/functions -path '*/fx-refresh/index.ts' -print -quit)"
           grep -q '\[functions.staff-analytics\]' supabase/config.toml
           grep -q 'verify_jwt = false' supabase/config.toml
           grep -q '\[functions.fx-refresh\]' supabase/config.toml
-          grep -q 'production_security_hardening' supabase/migrations/20260903010000_production_security_hardening.sql
+          test -n "$(find supabase/migrations -type f -name '*production_security_hardening*.sql' -print -quit)"
           grep -q 'add_shipment_external_reference' <(printf '%s\n' "$(find supabase/migrations -type f -name '*external_reference*.sql')")
           grep -q 'server_runtime_privileges' <(printf '%s\n' "$(find supabase/migrations -type f -name '*server_runtime_privileges*.sql')")
           grep -q 'fx_worker_schedule' <(printf '%s\n' "$(find supabase/migrations -type f -name '*fx_worker_schedule*.sql')")
