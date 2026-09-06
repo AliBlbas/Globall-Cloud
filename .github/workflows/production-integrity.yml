@@ -38,7 +38,29 @@ jobs:
           set -euo pipefail
           test "$(grep -E '^project_id[[:space:]]*=' supabase/config.toml | head -n1 | sed -E 's/.*=[[:space:]]*"([^"]+)".*/\1/')" = "ahslifnthiwfkmaswjno"
           ! grep -RIl 'swptmhhwhdtyrrfzetam' --include='*.js' --include='*.mjs' --include='*.ts' --include='*.tsx' --include='*.html' --include='*.css' --include='*.json' --include='*.toml' --include='*.yml' --include='*.yaml' .
-          ! grep -RnoE '(service_role[_-]?key|SUPABASE_SERVICE_ROLE_KEY)[^A-Za-z0-9_.].{0,4}["'"']?[[:space:]]*[:=][[:space:]]*["'"'](eyJ|sb_secret_)[A-Za-z0-9._-]{10,}' --exclude-dir=.git --exclude='*.md' .
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, sys
+          root = Path('.')
+          blocked = {'.git', '.wrangler', 'node_modules'}
+          patterns = [
+              re.compile(r'(?i)SUPABASE_SERVICE_ROLE_KEY\s*[:=]\s*["\'](?:eyJ|sb_secret_)[A-Za-z0-9._-]{10,}'),
+              re.compile(r'(?i)service_role[_-]?key\s*[:=]\s*["\'](?:eyJ|sb_secret_)[A-Za-z0-9._-]{10,}'),
+              re.compile(r'(?i)CLOUDFLARE_API_TOKEN\s*[:=]\s*["\'][A-Za-z0-9._-]{20,}'),
+          ]
+          allowed_suffixes = {'.js','.mjs','.ts','.tsx','.html','.css','.json','.toml','.yml','.yaml','.sh','.py'}
+          for path in root.rglob('*'):
+              if not path.is_file() or any(part in blocked for part in path.parts) or path.suffix not in allowed_suffixes:
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8', errors='ignore')
+              except Exception:
+                  continue
+              for pattern in patterns:
+                  if pattern.search(text):
+                      print(f'secret-like value detected in {path}: {pattern.pattern}', file=sys.stderr)
+                      raise SystemExit(1)
+          PY
           grep -q "script-src 'self'" _headers
           ! grep -q "script-src[^;]*unsafe-inline" _headers
           grep -q 'ahslifnthiwfkmaswjno.supabase.co' production-bridge.js
@@ -86,7 +108,7 @@ jobs:
                   body=r.read().decode('utf-8','replace')
                   assert r.status==200 and len(body)>200,(path,r.status,len(body))
           bridge=urllib.request.urlopen(site+'/production-bridge.js?e2e=1',timeout=20).read().decode('utf-8','replace')
-          m=re.search(r"SUPABASE_PUBLISHABLE_KEY\\s*=\\s*['\"]([^'\"]+)['\"]",bridge)
+          m=re.search(r"SUPABASE_PUBLISHABLE_KEY\s*=\s*['\"]([^'\"]+)['\"]",bridge)
           assert m,'publishable key not found'
           req=urllib.request.Request(supabase+'/functions/v1/public-config?key=usd_iqd_rate',headers={'Origin':site,'Accept':'application/json','apikey':m.group(1)})
           with urllib.request.urlopen(req,timeout=20) as r:
