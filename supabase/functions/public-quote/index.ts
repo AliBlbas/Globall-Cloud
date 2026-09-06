@@ -58,7 +58,7 @@ async function applyRateLimit(db: ReturnType<typeof serviceClient>, req: Request
 async function listPublicRates(db: ReturnType<typeof serviceClient>) {
   const result = await db.from('pricing_rates')
     .select('rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from')
-    .eq('destination_key', 'Erbil')
+    .ilike('destination_key', 'erbil')
     .eq('is_active', true)
     .order('origin_key', { ascending: true })
     .order('transport_mode', { ascending: true })
@@ -90,11 +90,11 @@ Deno.serve(async (req) => {
     const name = text(body.name, 100)
     const email = text(body.email, 160).toLowerCase()
     const phone = text(body.phone, 40)
-    const originKey = text(body.origin_key, 100)
-    const destKey = text(body.dest_key, 100)
-    const mode = text(body.transport_mode, 30)
-    const level = text(body.service_level, 30) || 'standard'
-    const incoterm = text(body.incoterm, 12) || 'EXW'
+    const originKey = text(body.origin_key, 100).toLowerCase()
+    const destKey = text(body.dest_key, 100).toLowerCase()
+    const mode = text(body.transport_mode, 30).toLowerCase()
+    const level = text(body.service_level, 30).toLowerCase() || 'standard'
+    const incoterm = text(body.incoterm, 12).toUpperCase() || 'EXW'
     const notes = text(body.notes, 2000)
     const weight = numberOrNull(body.weight_kg, 100000)
     const volume = numberOrNull(body.volume_cbm, 100000)
@@ -136,10 +136,7 @@ Deno.serve(async (req) => {
         status: 'pending',
       }),
     })
-    if (!response.ok) {
-      console.error('[public-quote] insert failed', response.status)
-      return reply(req, { error: 'Unable to submit quote request right now.' }, 500)
-    }
+    if (!response.ok) return reply(req, { error: 'Unable to submit quote request right now.' }, 500)
     const rows = await response.json().catch(() => [])
     const created = Array.isArray(rows) ? rows[0] || null : null
     const requestId = created?.request_number || created?.request_id || created?.id || null
