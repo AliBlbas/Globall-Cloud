@@ -68,6 +68,10 @@ jobs:
           grep -q '^/staff/ /staff-os-v5.html 200$' _redirects
           grep -q '^/staff-os /staff-os-v5.html 200$' _redirects
           grep -q '^/track /tracking-integration.html 200$' _redirects
+          grep -q '^\[functions.public-pricing\]' supabase/config.toml
+          grep -A1 '^\[functions.public-pricing\]' supabase/config.toml | grep -q 'verify_jwt = false'
+          grep -A1 '^\[functions.customer-self\]' supabase/config.toml | grep -q 'verify_jwt = false'
+          grep -A1 '^\[functions.staff-directory\]' supabase/config.toml | grep -q 'verify_jwt = false'
       - name: Critical production files
         shell: bash
         run: |
@@ -86,10 +90,10 @@ jobs:
           grep -q 'SUPABASE_SERVICE_ROLE_KEY' supabase/functions/public-message/index.ts
           grep -q 'company_website' supabase/functions/public-message/index.ts
           grep -q 'company_website' supabase/functions/public-quote/index.ts
+          grep -q 'ilike.*destination_key' supabase/functions/public-quote/index.ts
           grep -q 'functions/v1/public-pricing' gc-csp-scripts/logistics-pricing-ui.js
           ! grep -q "rpc('calculate_logistics_price'" gc-csp-scripts/logistics-pricing-ui.js
           ! grep -q "rpc('validate_logistics_cargo'" gc-csp-scripts/logistics-pricing-ui.js
-          ! grep -RIn "from('messages').insert" --include='*.js' --include='*.ts' --exclude-dir='.git' --exclude='webhook-handler.js' . | grep -v 'supabase/functions/public-message/index.ts' || true
       - name: Service worker release invariants
         shell: bash
         run: |
