@@ -73,14 +73,15 @@ Deno.serve(async (req) => {
       if (action === 'request_quote') {
         const originKey = text(data.origin_key, 100)
         const destKey = text(data.dest_key, 100)
-        const transportMode = text(data.transport_mode, 30)
+        const transportMode = text(data.transport_mode, 30).toLowerCase()
         const weight = numberOrNull(data.weight_kg, 50000)
         const volume = numberOrNull(data.volume_cbm, 100000)
         const items = numberOrNull(data.items_count, 1000000)
         const serviceLevel = text(data.service_level, 30) || 'standard'
         const incoterm = text(data.incoterm, 12) || 'EXW'
         const notes = text(data.notes, 2000)
-        if (originKey.length < 2 || destKey.length < 2 || !['air', 'sea', 'land', 'multimodal'].includes(transportMode) || !['standard', 'express', 'priority'].includes(serviceLevel) || !['EXW', 'FOB', 'CIF', 'DDP'].includes(incoterm) || weight === null || weight <= 0) return json(req, {error: 'Please check the required quote fields.'}, 400)
+        const quantityValid = transportMode === 'sea' ? volume !== null && volume > 0 : weight !== null && weight > 0
+        if (originKey.length < 2 || destKey.length < 2 || !['air', 'sea', 'land', 'multimodal'].includes(transportMode) || !['standard', 'express', 'priority'].includes(serviceLevel) || !['EXW', 'FOB', 'CIF', 'DDP'].includes(incoterm) || !quantityValid) return json(req, {error: 'Please check the required quote fields.'}, 400)
         const {data: rows, error} = await service.from('quote_requests').insert({
           customer_user_id: user.id,
           customer_name: customer.name || user.user_metadata?.full_name || user.email || 'Customer',
