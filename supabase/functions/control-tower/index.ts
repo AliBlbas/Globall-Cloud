@@ -66,7 +66,7 @@ function millis(value: unknown) {
 }
 
 function visible(staff: Staff, branch: unknown) {
-  if (staff.branch === 'all') return true
+  if (!staff.branch || staff.branch === 'all') return true
   if (!branch) return false
   return String(branch) === String(staff.branch)
 }
@@ -105,6 +105,9 @@ async function build(service: ReturnType<typeof serviceClient>, staff: Staff) {
   const payments = (paymentsQ.data as Row[] || [])
   const outbox = (outboxQ.data as Row[] || [])
 
+  const movementShipmentIds = new Set(movements.map(m => String(m.shipment_id)))
+  const receiptWithoutMovement = receipts.filter(r => !movementShipmentIds.has(String(r.shipment_id)))
+
   const active = shipments.filter(s => !['delivered', 'cancelled', 'closed'].includes(String(s.operational_status || '').toLowerCase()))
   const moving = active.filter(s => ['in_transit', 'at_transit_hub', 'out_for_delivery'].includes(String(s.operational_status || '').toLowerCase()))
   const overdue = active.filter(s => { const t = millis(s.eta); return Number.isFinite(t) && t < now - 2 * 60 * 60 * 1000 })
@@ -128,6 +131,10 @@ async function build(service: ReturnType<typeof serviceClient>, staff: Staff) {
   for (const e of exceptions) alerts.push({ type: 'exception', severity: e.severity || 'medium', shipment_id: e.shipment_id, title: e.title || 'Logistics exception', note: e.note || '', occurred_at: e.updated_at || e.created_at, due_at: e.due_at })
   for (const s of highPriority) alerts.push({ type: 'priority', severity: s.priority, shipment_id: s.id, tracking_number: s.tracking_number, title: `${String(s.priority).toUpperCase()} priority shipment`, note: 'Active shipment requires attention.', occurred_at: s.tracking_updated_at || s.created_at })
   for (const s of missingMode) alerts.push({ type: 'missing_data', severity: 'medium', shipment_id: s.id, tracking_number: s.tracking_number, title: 'Transport mode missing', note: 'Assign air/sea/land before operational dispatch.', occurred_at: s.created_at })
+  for (const r of receiptWithoutMovement) {
+    const shipment = shipments.find(s => String(s.id) === String(r.shipment_id))
+    alerts.push({ type: 'warehouse_chain_gap', severity: 'high', shipment_id: r.shipment_id, tracking_number: shipment?.tracking_number, title: 'Warehouse receipt has no movement', note: 'Receipt exists but no warehouse movement has been recorded for this shipment.', occurred_at: r.created_at })
+  }
   if (admin) {
     const pending = outbox.filter(o => ['pending', 'retrying', 'processing'].includes(String(o.status || '').toLowerCase())).length
     if (pending > 0) alerts.push({ type: 'outbox_backlog', severity: pending > 25 ? 'high' : 'medium', title: 'Notification outbox backlog', note: `${pending} notification items require processing.`, occurred_at: new Date().toISOString() })
@@ -143,6 +150,7 @@ async function build(service: ReturnType<typeof serviceClient>, staff: Staff) {
       overdue: overdue.length, stale_tracking: stale.length, exceptions: exceptions.length,
       high_priority: highPriority.length, missing_transport_mode: missingMode.length,
       warehouse_receipts: receipts.length, warehouse_movements: movements.length,
+      warehouse_chain_gaps: receiptWithoutMovement.length,
       documents: docs.length, unverified_documents: unverifiedDocs,
       billed_by_currency: finance ? Object.fromEntries(billed) : null,
       paid_by_currency: finance ? Object.fromEntries(paid) : null,
