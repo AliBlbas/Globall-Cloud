@@ -13,6 +13,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
@@ -42,4 +44,26 @@ jobs:
           grep -q 'fx_worker_schedule' <(printf '%s\n' "$(find supabase/migrations -type f -name '*fx_worker_schedule*.sql')")
           grep -q "script-src 'self'" _headers
           ! grep -q 'script-src[^;]*unsafe-inline' _headers
-          ! grep -RnoE 'SUPABASE_SERVICE_ROLE_KEY[[:space:]]*[:=][[:space:]]*["'"'](eyJ|sb_secret_)' --exclude-dir=.git --exclude-dir=node_modules --exclude='*.md' .
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, sys
+          root = Path('.')
+          blocked = {'.git', '.wrangler', 'node_modules'}
+          patterns = [
+              re.compile(r'''(?i)SUPABASE_SERVICE_ROLE_KEY\s*[:=]\s*["'](?:eyJ|sb_secret_)[A-Za-z0-9._-]{10,}'''),
+              re.compile(r'''(?i)service_role[_-]?key\s*[:=]\s*["'](?:eyJ|sb_secret_)[A-Za-z0-9._-]{10,}'''),
+              re.compile(r'''(?i)CLOUDFLARE_API_TOKEN\s*[:=]\s*["'][A-Za-z0-9._-]{20,}'''),
+          ]
+          allowed_suffixes = {'.js','.mjs','.ts','.tsx','.html','.css','.json','.toml','.yml','.yaml','.sh','.py'}
+          for path in root.rglob('*'):
+              if not path.is_file() or any(part in blocked for part in path.parts) or path.suffix not in allowed_suffixes:
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8', errors='ignore')
+              except Exception:
+                  continue
+              for pattern in patterns:
+                  if pattern.search(text):
+                      print(f'secret-like value detected in {path}', file=sys.stderr)
+                      raise SystemExit(1)
+          PY
