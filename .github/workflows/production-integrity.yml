@@ -55,7 +55,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -q "gc-v90" sw.js
+          grep -q "gc-v91" sw.js
           grep -q "staff-os-v5.html" sw.js
           grep -q "staff-os-v5.js?v=20260905-3" sw.js
           grep -q "staff-os-v5-shipment-create-fix.js?v=20260905-3" sw.js
