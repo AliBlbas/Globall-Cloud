@@ -70,3 +70,23 @@ jobs:
                       print(f'secret-like value detected in {path}', file=sys.stderr)
                       raise SystemExit(1)
           PY
+      - name: Hardened public endpoint invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in supabase/functions/public-config/index.ts supabase/functions/public-message/index.ts supabase/functions/public-quote/index.ts supabase/functions/public-pricing/index.ts supabase/functions/public-track/index.ts; do
+            grep -q 'consume_public_message_rate_limit' "$file"
+          done
+          grep -q 'status_requeried' supabase/functions/payment-webhook/index.ts
+          grep -q 'QICARD_WEBHOOK_PUBLIC_KEY' supabase/functions/payment-webhook/index.ts
+          grep -q 'getProviderPayment' supabase/functions/payment-webhook/index.ts
+          grep -q 'company_website' supabase/functions/public-message/index.ts
+          grep -q 'company_website' supabase/functions/public-quote/index.ts
+      - name: Critical source files
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in supabase/functions/public-config/index.ts supabase/functions/public-message/index.ts supabase/functions/public-quote/index.ts supabase/functions/public-pricing/index.ts supabase/functions/public-track/index.ts supabase/functions/customer-self/index.ts supabase/functions/payment-webhook/index.ts supabase/functions/_shared/payment-providers.ts; do test -f "$file"; done
+          test ! -f supabase/functions/payment-webhook/index.js
+          grep -q '^20260906165947' <(printf '%s\n' "$(find supabase/migrations -maxdepth 1 -type f -name '20260906165947_*.sql')")
+          grep -q '^20260906172702' <(printf '%s\n' "$(find supabase/migrations -maxdepth 1 -type f -name '20260906172702_*.sql')")
