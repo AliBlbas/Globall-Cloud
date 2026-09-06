@@ -17,7 +17,11 @@ const headers = (origin = '') => ({
 })
 const json = (req: Request, body: Record<string, unknown>, status = 200) => new Response(JSON.stringify(body), {status, headers: headers(req.headers.get('origin') || '')})
 const env = (name: string) => { const v = Deno.env.get(name); if (!v) throw new Error(`${name} is not configured`); return v }
-const serviceKey = () => env('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_SECRET_KEY') || ''
+const serviceKey = () => {
+  const value = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')?.trim() || Deno.env.get('SUPABASE_SECRET_KEY')?.trim()
+  if (!value) throw new Error('Supabase service key is not configured')
+  return value
+}
 const serviceClient = () => createClient(env('SUPABASE_URL'), serviceKey(), {auth: {persistSession: false, autoRefreshToken: false, detectSessionInUrl: false}})
 const clientKey = (req: Request) => (req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown').split(',')[0].trim().slice(0, 80) || 'unknown'
 const sha256Hex = async (value: string) => { const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)); return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('') }
