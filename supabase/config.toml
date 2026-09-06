@@ -81,7 +81,7 @@ verify_jwt = false
 verify_jwt = true
 
 [functions.staff-analytics]
-verify_jwt = false
+verify_jwt = true
 
 [functions.fx-refresh]
 verify_jwt = false
