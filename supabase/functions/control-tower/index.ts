@@ -89,7 +89,7 @@ async function build(service: ReturnType<typeof serviceClient>, staff: Staff) {
     finance ? service.from('shipment_invoices').select('id,shipment_id,total,paid_total,currency,status,due_at,created_at').order('created_at', { ascending: false }).limit(500) : Promise.resolve({ data: [], error: null }),
     finance ? service.from('payment_transactions').select('id,invoice_id,shipment_id,amount,currency,status,created_at').order('created_at', { ascending: false }).limit(500) : Promise.resolve({ data: [], error: null }),
     admin ? service.from('notification_outbox').select('id,status,channel,created_at').order('created_at', { ascending: false }).limit(500) : Promise.resolve({ data: [], error: null }),
-    service.from('warehouse_receipts').select('id,shipment_id,warehouse,status,created_at').order('created_at', { ascending: false }).limit(500),
+    service.from('warehouse_receipts').select('id,shipment_id,warehouse,status,created_at,gc_code,batch_code').order('created_at', { ascending: false }).limit(500),
     service.from('warehouse_movements').select('id,shipment_id,package_id,to_hub,movement_type,scanned_at').order('scanned_at', { ascending: false }).limit(500),
     service.from('shipment_documents').select('id,shipment_id,document_status,created_at,verified_at').order('created_at', { ascending: false }).limit(500),
   ])
@@ -98,7 +98,9 @@ async function build(service: ReturnType<typeof serviceClient>, staff: Staff) {
   const shipments = (shipmentsQ.data as Row[] || []).filter(s => !s.archived_at && visible(staff, s.branch))
   const ids = new Set(shipments.map(s => String(s.id)))
   const exceptions = (exceptionsQ.data as Row[] || []).filter(e => ids.has(String(e.shipment_id)))
-  const receipts = (receiptsQ.data as Row[] || []).filter(r => ids.has(String(r.shipment_id)))
+  const allReceipts = (receiptsQ.data as Row[] || [])
+  const receipts = allReceipts.filter(r => ids.has(String(r.shipment_id)))
+  const unlinkedReceipts = allReceipts.filter(r => !r.shipment_id)
   const movements = (movementsQ.data as Row[] || []).filter(r => ids.has(String(r.shipment_id)))
   const docs = (docsQ.data as Row[] || []).filter(d => ids.has(String(d.shipment_id)))
   const invoices = (invoicesQ.data as Row[] || [])
@@ -135,6 +137,7 @@ async function build(service: ReturnType<typeof serviceClient>, staff: Staff) {
     const shipment = shipments.find(s => String(s.id) === String(r.shipment_id))
     alerts.push({ type: 'warehouse_chain_gap', severity: 'high', shipment_id: r.shipment_id, tracking_number: shipment?.tracking_number, title: 'Warehouse receipt has no movement', note: 'Receipt exists but no warehouse movement has been recorded for this shipment.', occurred_at: r.created_at })
   }
+  for (const r of unlinkedReceipts) alerts.push({ type: 'warehouse_unlinked_receipt', severity: 'high', receipt_id: r.id, gc_code: r.gc_code, batch_code: r.batch_code, title: 'Warehouse receipt is unlinked', note: 'Receipt has no shipment_id and cannot participate in shipment chain-of-custody.', occurred_at: r.created_at })
   if (admin) {
     const pending = outbox.filter(o => ['pending', 'retrying', 'processing'].includes(String(o.status || '').toLowerCase())).length
     if (pending > 0) alerts.push({ type: 'outbox_backlog', severity: pending > 25 ? 'high' : 'medium', title: 'Notification outbox backlog', note: `${pending} notification items require processing.`, occurred_at: new Date().toISOString() })
@@ -150,7 +153,7 @@ async function build(service: ReturnType<typeof serviceClient>, staff: Staff) {
       overdue: overdue.length, stale_tracking: stale.length, exceptions: exceptions.length,
       high_priority: highPriority.length, missing_transport_mode: missingMode.length,
       warehouse_receipts: receipts.length, warehouse_movements: movements.length,
-      warehouse_chain_gaps: receiptWithoutMovement.length,
+      warehouse_chain_gaps: receiptWithoutMovement.length, warehouse_unlinked_receipts: unlinkedReceipts.length,
       documents: docs.length, unverified_documents: unverifiedDocs,
       billed_by_currency: finance ? Object.fromEntries(billed) : null,
       paid_by_currency: finance ? Object.fromEntries(paid) : null,
