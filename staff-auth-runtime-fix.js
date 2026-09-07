@@ -56,9 +56,7 @@
   };
   const revealStaffConsole = async (client) => {
     const renderer = window.renderAdminGate;
-    if (typeof renderer === 'function') {
-      await renderer();
-    }
+    if (typeof renderer === 'function') await renderer();
     const page = el('page-admin');
     page?.classList.add('active');
     const loginView = el('adminLoginView');
@@ -169,6 +167,34 @@
     document.addEventListener('submit', handleLogin, true);
     document.addEventListener('click', handleMfa, true);
   };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind, { once: true });
-  else bind();
+  const refreshAdminGate = async () => {
+    const render = window.renderAdminGate;
+    if (typeof render !== 'function') return false;
+    const client = getClient();
+    if (!client) return false;
+    try { await render(); return true; } catch (error) { console.warn('[Globall Cloud] staff gate refresh:', error); return false; }
+  };
+  const bootstrapSupabase = async () => {
+    try {
+      const client = getClient() || (typeof window.gcEnsureSupabase === 'function' ? await window.gcEnsureSupabase() : null);
+      if (client?.auth) {
+        runtime.client = client;
+        window.sb = client;
+        await refreshAdminGate();
+        return true;
+      }
+    } catch (error) { console.warn('[Globall Cloud] staff Supabase bootstrap:', error); }
+    return false;
+  };
+  const bindWhenReady = () => {
+    bind();
+    void bootstrapSupabase();
+    window.addEventListener('gc:supabase-ready', () => void bootstrapSupabase(), { once: true });
+    window.addEventListener('gc:supabase-health', (event) => {
+      if (event.detail?.state === 'ready') void bootstrapSupabase();
+    });
+    [250, 750, 1500, 3000].forEach((delay) => setTimeout(() => void bootstrapSupabase(), delay));
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindWhenReady, { once: true });
+  else bindWhenReady();
 })();
