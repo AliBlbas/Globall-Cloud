@@ -1,6 +1,5 @@
-/* Globall Cloud — production branding repair + vNext boot bridge
-   Repairs broken logo assets and loads the shared vNext experience layer
-   without touching app state or business logic. */
+/* Globall Cloud — production branding repair + vNext boot bridge + runtime safety
+   Repairs broken logo assets and loads the shared vNext experience layer safely. */
 (() => {
   'use strict';
   const FALLBACKS = ['/logo-icon.svg','/logo-icon-original.png'];
@@ -34,13 +33,17 @@
       { tag:'link', rel:'stylesheet', href:'/gc-platform-vnext-plus.css?v=20260908-1', attr:'data-gc-vnext-plus-css' },
       { tag:'script', src:'/gc-platform-vnext.js?v=20260908-1', attr:'data-gc-vnext-loader' },
       { tag:'script', src:'/gc-platform-vnext-plus.js?v=20260908-1', attr:'data-gc-vnext-plus-loader' },
+      { tag:'script', src:'/gc-runtime-safety-v2026.js?v=20260908-1', attr:'data-gc-runtime-safety-loader' },
     ];
     for (const item of assets) {
-      const node=document.createElement(item.tag);
-      if(item.rel)node.rel=item.rel;
-      if(item.href)node.href=item.href;
-      if(item.src){node.src=item.src;node.defer=true;}
-      node.setAttribute(item.attr,'1');
+      const node = document.createElement(item.tag);
+      if (item.rel) node.rel = item.rel;
+      if (item.href) node.href = item.href;
+      if (item.src) {
+        node.src = item.src;
+        node.defer = true;
+      }
+      node.setAttribute(item.attr, '1');
       document.head.appendChild(node);
     }
   };
