@@ -11,8 +11,6 @@ const TRACKING_STEP_LABELS_KU = {
   delivered: 'گەیشت',
 };
 
-// Minimal local escaping — this snippet may be pasted into pages that
-// don't expose index.html's own escapeHtml(), so it stays self-contained.
 function trackingEscapeHtml(str) {
   return String(str ?? '').replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -35,6 +33,10 @@ function renderTrackingDetails(shipment) {
   return `<div class="tracking-step-list">${rows}</div>`;
 }
 
+function emitTrackingIntelligence(shipment, reason='initial') {
+  window.dispatchEvent(new CustomEvent('gc:tracking-intelligence', { detail: { shipment, reason } }));
+}
+
 function enableNotifications() {
   window.enhancedTracking.requestNotificationPermission().then(granted => {
     if (granted) {
@@ -45,8 +47,6 @@ function enableNotifications() {
   });
 }
 
-// Tracks whichever shipment ID was searched most recently, so a second
-// search can clean up the first one's realtime subscription.
 let activeTrackedShipmentId = null;
 
 function doTrackSearch() {
@@ -64,6 +64,7 @@ function doTrackSearch() {
     .then(shipment => {
       activeTrackedShipmentId = shipmentId;
       document.getElementById('trackingDetailsContainer').innerHTML = renderTrackingDetails(shipment);
+      emitTrackingIntelligence(shipment, 'initial');
       showToast('شوێنکەوتن دەستیپێکرد! نوێکردنەوەکان ڕاستەوخۆن.', 'success');
     })
     .catch(error => {
@@ -72,7 +73,15 @@ function doTrackSearch() {
     });
 }
 
-// Clean up the active subscription when leaving the page.
+window.addEventListener('gc:tracking-shipment', event => {
+  if (event.detail?.shipment) emitTrackingIntelligence(event.detail.shipment, 'realtime-update');
+});
+
+window.addEventListener('gc:tracking-event', event => {
+  const shipment = window.enhancedTracking?.shipments?.get?.(event.detail?.shipmentId);
+  if (shipment) emitTrackingIntelligence(shipment, 'new-event');
+});
+
 window.addEventListener('beforeunload', () => {
   if (activeTrackedShipmentId) window.enhancedTracking.cleanup(activeTrackedShipmentId);
 });
