@@ -50,7 +50,6 @@
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
 /warehouse-os.html
-  X-Robots-Tag: noindex, no-store, max-age=0, must-revalidate
   X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
