@@ -111,13 +111,16 @@ jobs:
           ! grep -q "staff-os-production.js?v=" sw.js
       - name: Public live smoke test
         if: github.event_name != 'pull_request'
+        env:
+          LIVE_EXPECTED_SHA: ${{ github.sha }}
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import json,re,urllib.request
+          import json, os, urllib.parse, urllib.request
           site='https://globall-cloud.pages.dev'
           supabase='https://ahslifnthiwfkmaswjno.supabase.co'
+          expected=os.environ['LIVE_EXPECTED_SHA']
           for path in ('/','/track','/tracking-integration.html','/warehouse-os.html','/customer-portal.html'):
               with urllib.request.urlopen(site+path,timeout=20) as r:
                   body=r.read().decode('utf-8','replace')
@@ -126,14 +129,20 @@ jobs:
           with urllib.request.urlopen(health_req,timeout=20) as r:
               health=json.loads(r.read().decode('utf-8','replace'))
               assert r.status==200 and health.get('ok') is True and health.get('edge')=='ok',health
-          release_req=urllib.request.Request(site+'/release.json?ci={{ GITHUB_SHA }}',headers={'Cache-Control':'no-cache','Accept':'application/json'})
+          release_url=site+'/release.json?ci='+urllib.parse.quote(expected)
+          release_req=urllib.request.Request(release_url,headers={'Cache-Control':'no-cache','Accept':'application/json'})
           with urllib.request.urlopen(release_req,timeout=20) as r:
               release=json.loads(r.read().decode('utf-8','replace'))
-              assert r.status==200 and release.get('service')=='globall-cloud' and release.get('commit')=='{{ GITHUB_SHA }}',release
+              assert r.status==200 and release.get('service')=='globall-cloud' and release.get('commit')==expected,release
           bridge=urllib.request.urlopen(site+'/production-bridge.js?e2e=1',timeout=20).read().decode('utf-8','replace')
-          m=re.search(r"SUPABASE_PUBLISHABLE_KEY\\s*=\\s*['\"]([^'\"]+)['\"]",bridge)
-          assert m,'publishable key not found'
-          req=urllib.request.Request(supabase+'/functions/v1/public-config?key=usd_iqd_rate',headers={'Origin':site,'Accept':'application/json','apikey':m.group(1)})
+          marker='SUPABASE_PUBLISHABLE_KEY'
+          assert marker in bridge,'publishable key marker not found'
+          start=bridge.index(marker)
+          quote=bridge[start:].split('=',1)[1].strip()[0]
+          rest=bridge[start:].split('=',1)[1].strip()[1:]
+          key=rest.split(quote,1)[0]
+          assert key.startswith('sb_publishable_'),'publishable key format unexpected'
+          req=urllib.request.Request(supabase+'/functions/v1/public-config?key=usd_iqd_rate',headers={'Origin':site,'Accept':'application/json','apikey':key})
           with urllib.request.urlopen(req,timeout=20) as r:
               body=json.loads(r.read().decode('utf-8','replace'))
               assert r.status==200 and body.get('key')=='usd_iqd_rate' and body.get('value') not in (None,'')
