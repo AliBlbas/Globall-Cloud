@@ -71,14 +71,14 @@ jobs:
       - name: Install Wrangler
         run: npx --yes wrangler@4 --version
 
-      - name: Deploy frontend and Pages Functions
+      - name: Deploy frontend and Pages Functions to production
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
           cd .pages-dist
-          npx --yes wrangler@4 pages deploy . --project-name=globall-cloud --branch=main --commit-hash="$GITHUB_SHA" --commit-message="${GITHUB_SHA} ${GITHUB_REF_NAME}"
+          npx --yes wrangler@4 pages deploy . --project-name=globall-cloud --commit-hash="$GITHUB_SHA" --commit-message="${GITHUB_SHA} ${GITHUB_REF_NAME}"
 
       - name: Verify production edge health
         shell: bash
