@@ -110,6 +110,7 @@ jobs:
           grep -q "staff-os-v5-stability.js?v=20260905-3" sw.js
           ! grep -q "staff-os-production.js?v=" sw.js
       - name: Public live smoke test
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
@@ -121,6 +122,14 @@ jobs:
               with urllib.request.urlopen(site+path,timeout=20) as r:
                   body=r.read().decode('utf-8','replace')
                   assert r.status==200 and len(body)>200,(path,r.status,len(body))
+          health_req=urllib.request.Request(site+'/api/health?ci=1',headers={'Cache-Control':'no-cache','Accept':'application/json'})
+          with urllib.request.urlopen(health_req,timeout=20) as r:
+              health=json.loads(r.read().decode('utf-8','replace'))
+              assert r.status==200 and health.get('ok') is True and health.get('edge')=='ok',health
+          release_req=urllib.request.Request(site+'/release.json?ci={{ GITHUB_SHA }}',headers={'Cache-Control':'no-cache','Accept':'application/json'})
+          with urllib.request.urlopen(release_req,timeout=20) as r:
+              release=json.loads(r.read().decode('utf-8','replace'))
+              assert r.status==200 and release.get('service')=='globall-cloud' and release.get('commit')=='{{ GITHUB_SHA }}',release
           bridge=urllib.request.urlopen(site+'/production-bridge.js?e2e=1',timeout=20).read().decode('utf-8','replace')
           m=re.search(r"SUPABASE_PUBLISHABLE_KEY\\s*=\\s*['\"]([^'\"]+)['\"]",bridge)
           assert m,'publishable key not found'
@@ -130,6 +139,7 @@ jobs:
               assert r.status==200 and body.get('key')=='usd_iqd_rate' and body.get('value') not in (None,'')
           PY
       - name: Read-only public E2E
+        if: github.event_name != 'pull_request'
         env:
           GC_SITE_URL: https://globall-cloud.pages.dev
           E2E_SUPABASE_URL: https://ahslifnthiwfkmaswjno.supabase.co
