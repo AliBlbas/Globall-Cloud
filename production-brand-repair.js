@@ -29,16 +29,20 @@
   const loadVNext = () => {
     if (document.querySelector('[data-gc-vnext-loader]')) return;
     if (location.pathname.startsWith('/api/')) return;
-    const css = document.createElement('link');
-    css.rel = 'stylesheet';
-    css.href = '/gc-platform-vnext.css?v=20260908-1';
-    css.dataset.gcVnextLoader = '1';
-    document.head.appendChild(css);
-    const script = document.createElement('script');
-    script.src = '/gc-platform-vnext.js?v=20260908-1';
-    script.defer = true;
-    script.dataset.gcVnextLoader = '1';
-    document.head.appendChild(script);
+    const assets = [
+      { tag:'link', rel:'stylesheet', href:'/gc-platform-vnext.css?v=20260908-1', attr:'data-gc-vnext-loader' },
+      { tag:'link', rel:'stylesheet', href:'/gc-platform-vnext-plus.css?v=20260908-1', attr:'data-gc-vnext-plus-css' },
+      { tag:'script', src:'/gc-platform-vnext.js?v=20260908-1', attr:'data-gc-vnext-loader' },
+      { tag:'script', src:'/gc-platform-vnext-plus.js?v=20260908-1', attr:'data-gc-vnext-plus-loader' },
+    ];
+    for (const item of assets) {
+      const node=document.createElement(item.tag);
+      if(item.rel)node.rel=item.rel;
+      if(item.href)node.href=item.href;
+      if(item.src){node.src=item.src;node.defer=true;}
+      node.setAttribute(item.attr,'1');
+      document.head.appendChild(node);
+    }
   };
   const scan = () => { document.querySelectorAll('img').forEach(repair); loadVNext(); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan, { once: true });
