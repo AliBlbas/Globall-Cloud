@@ -1,0 +1,57 @@
+name: Logistics Feature Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+      - name: Validate new production assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in production-mobile-ux-v2026.css tracking-intelligence.css tracking-intelligence.js staff-logistics-intelligence.css staff-logistics-intelligence.js staff-os-v5.html supabase/functions/logistics-control-tower/index.ts supabase/config.toml sw.js; do test -f "$file"; done
+          grep -q "gc-v93" sw.js
+          grep -q "staff-logistics-intelligence.css?v=20260908-1" sw.js
+          grep -q "staff-logistics-intelligence.js?v=20260908-1" sw.js
+          grep -q "tracking-intelligence.css?v=20260908-1" sw.js
+          grep -q "tracking-intelligence.js?v=20260908-1" sw.js
+          grep -q "\[functions.logistics-control-tower\]" supabase/config.toml
+          grep -A1 '^\[functions.logistics-control-tower\]' supabase/config.toml | grep -q 'verify_jwt = true'
+          grep -q "logistics-control-tower" staff-logistics-intelligence.js
+          grep -q "Shipment Intelligence" tracking-intelligence.js
+          grep -q "Supabase" supabase/functions/logistics-control-tower/index.ts
+      - name: JavaScript syntax checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check tracking-intelligence.js
+          node --check staff-logistics-intelligence.js
+          node --check gc-csp-scripts/tracking-integration-inline-1.js
+      - name: TypeScript bundle check
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes esbuild@0.25.9 supabase/functions/logistics-control-tower/index.ts --bundle --platform=neutral --format=esm --outfile=/tmp/logistics-control-tower-check.js
+      - name: Repository tests
+        run: |
+          npm ci --ignore-scripts
+          npm test
