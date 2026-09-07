@@ -28,7 +28,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in production-mobile-ux-v2026.css tracking-intelligence.css tracking-intelligence.js status.html status-page.js staff-logistics-intelligence.css staff-logistics-intelligence.js gc-platform-vnext.css gc-platform-vnext.js gc-platform-vnext-plus.css gc-platform-vnext-plus.js production-brand-repair.js staff-os-v5.html supabase/functions/logistics-control-tower/index.ts supabase/config.toml sw.js functions/_middleware.js; do test -f "$file"; done
+          for file in production-mobile-ux-v2026.css tracking-intelligence.css tracking-intelligence.js status.html status-page.js staff-logistics-intelligence.css staff-logistics-intelligence.js gc-platform-vnext.css gc-platform-vnext.js gc-platform-vnext-plus.css gc-platform-vnext-plus.js gc-runtime-safety-v2026.js production-brand-repair.js staff-os-v5.html supabase/functions/logistics-control-tower/index.ts supabase/config.toml sw.js functions/_middleware.js; do test -f "$file"; done
           grep -q "gc-v94" sw.js
           grep -q "staff-logistics-intelligence.css?v=20260908-1" sw.js
           grep -q "staff-logistics-intelligence.js?v=20260908-1" sw.js
@@ -41,6 +41,7 @@ jobs:
           grep -q "Supabase" supabase/functions/logistics-control-tower/index.ts
           grep -q "gc-platform-vnext" production-brand-repair.js
           grep -q "gc-platform-vnext-plus" production-brand-repair.js
+          grep -q "gc-runtime-safety-v2026" production-brand-repair.js
           ! grep -q "<script>" status.html
           grep -q "/status-page.js?v=20260908-1" status.html
       - name: JavaScript syntax checks
@@ -53,6 +54,7 @@ jobs:
           node --check gc-csp-scripts/tracking-integration-inline-1.js
           node --check gc-platform-vnext.js
           node --check gc-platform-vnext-plus.js
+          node --check gc-runtime-safety-v2026.js
           node --check production-brand-repair.js
           node --check functions/_middleware.js
       - name: TypeScript bundle check
