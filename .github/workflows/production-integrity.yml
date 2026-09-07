@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   integrity:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -76,7 +76,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in index.html sw.js production-bridge.js runtime-guard.js _headers _redirects tracking-integration.html customer-portal.html warehouse-os.html driver-workspace.html staff-os-v5.html staff-os-v5.css staff-os-v5.js staff-os-v5-shipment-create-fix.js staff-os-v5-shipment-control-bridge.js staff-os-data-health-panel.js staff-os-v5-integrations.js staff-os-v5-profile.js staff-os-production-analytics-bridge.js staff-os-v5-stability.js warehouse-offline-sync.js gc-csp-scripts/logistics-pricing-ui.js supabase/config.toml package.json package-lock.json supabase/functions/logistics-control-plane/index.ts supabase/functions/notification-dispatch/index.ts supabase/functions/warehouse-receiving/index.ts supabase/functions/warehouse-notify/index.ts supabase/functions/staff-ops-hub/index.ts supabase/functions/staff-analytics/index.ts supabase/functions/invoice-ai/index.ts supabase/functions/customer-debt-assistant/index.ts supabase/functions/fx-refresh/index.ts supabase/functions/staff-shipment-v5/index.ts supabase/functions/staff-shipment-control/index.ts supabase/functions/public-config/index.ts supabase/functions/public-message/index.ts supabase/functions/public-quote/index.ts supabase/functions/public-pricing/index.ts supabase/functions/public-track/index.ts supabase/functions/customer-self/index.ts supabase/functions/payment-webhook/index.ts supabase/functions/_shared/payment-providers.ts tests/validate.mjs tests/e2e/run.mjs; do test -f "$file"; done
+          for file in index.html sw.js production-bridge.js runtime-guard.js _headers _redirects tracking-integration.html customer-portal.html warehouse-os.html driver-workspace.html staff-os-v5.html staff-os-v5.css staff-os-v5.js staff-os-v5-shipment-create-fix.js staff-os-v5-shipment-control-bridge.js staff-os-data-health-panel.js staff-os-v5-integrations.js staff-os-v5-profile.js staff-os-production-analytics-bridge.js staff-os-v5-stability.js warehouse-offline-sync.js production-mobile-ux-v2026.css gc-csp-scripts/logistics-pricing-ui.js supabase/config.toml package.json package-lock.json supabase/functions/logistics-control-plane/index.ts supabase/functions/notification-dispatch/index.ts supabase/functions/warehouse-receiving/index.ts supabase/functions/warehouse-notify/index.ts supabase/functions/staff-ops-hub/index.ts supabase/functions/staff-analytics/index.ts supabase/functions/invoice-ai/index.ts supabase/functions/customer-debt-assistant/index.ts supabase/functions/fx-refresh/index.ts supabase/functions/staff-shipment-v5/index.ts supabase/functions/staff-shipment-control/index.ts supabase/functions/public-config/index.ts supabase/functions/public-message/index.ts supabase/functions/public-quote/index.ts supabase/functions/public-pricing/index.ts supabase/functions/public-track/index.ts supabase/functions/customer-self/index.ts supabase/functions/payment-webhook/index.ts supabase/functions/_shared/payment-providers.ts tests/validate.mjs tests/e2e/run.mjs; do test -f "$file"; done
       - name: Hardened public endpoint invariants
         shell: bash
         run: |
