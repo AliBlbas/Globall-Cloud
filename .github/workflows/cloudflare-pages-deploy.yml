@@ -68,6 +68,19 @@ jobs:
           ! test -d .pages-dist/supabase
           ! find .pages-dist -type f \( -name '*.sql' -o -name '*.pem' -o -name '*.key' -o -name '.env' -o -name '.env.*' \) -print -quit | grep -q .
 
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          Path('.pages-dist/release.json').write_text(json.dumps({
+              'service': 'globall-cloud',
+              'commit': os.environ['GITHUB_SHA'],
+              'ref': os.environ['GITHUB_REF_NAME'],
+              'workflow_run': os.environ['GITHUB_RUN_ID'],
+          }, separators=(',', ':')) + '\n', encoding='utf-8')
+          PY
+          test -f .pages-dist/release.json
+          grep -q "$GITHUB_SHA" .pages-dist/release.json
+
       - name: Install Wrangler
         run: npx --yes wrangler@4 --version
 
@@ -96,3 +109,17 @@ jobs:
           done
           echo "Production health check failed."
           exit 1
+
+      - name: Verify exact live release matches GitHub commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$(curl -fsS --max-time 15 -H 'Cache-Control: no-cache' "https://globall-cloud.pages.dev/release.json?verify=$GITHUB_SHA")"
+          python3 - "$body" "$GITHUB_SHA" <<'PY'
+          import json, sys
+          body = json.loads(sys.argv[1])
+          expected = sys.argv[2]
+          assert body.get('service') == 'globall-cloud', body
+          assert body.get('commit') == expected, body
+          print(json.dumps(body, ensure_ascii=False))
+          PY
