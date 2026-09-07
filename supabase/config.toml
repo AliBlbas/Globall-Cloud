@@ -59,7 +59,7 @@ verify_jwt = false
 [functions.logistics-control-plane]
 verify_jwt = true
 
-[functions/logistics-control-tower]
+[functions.logistics-control-tower]
 verify_jwt = true
 
 [functions.document-access]
