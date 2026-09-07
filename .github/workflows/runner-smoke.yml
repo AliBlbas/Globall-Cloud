@@ -1,0 +1,33 @@
+name: Runner Smoke Test
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: runner-smoke
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Verify GitHub hosted runner
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - name: Print runner identity
+        run: |
+          set -euo pipefail
+          echo "runner=$RUNNER_NAME"
+          echo "os=$RUNNER_OS"
+          echo "arch=$RUNNER_ARCH"
+          echo "ref=$GITHUB_SHA"
+      - name: Verify shell and network tooling
+        run: |
+          set -euo pipefail
+          node --version
+          npm --version
+          curl --version | head -n 1
