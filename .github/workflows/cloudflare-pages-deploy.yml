@@ -16,7 +16,7 @@ jobs:
   deploy:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    name: Deploy frontend to Cloudflare Pages
+    name: Deploy frontend and Pages Functions to Cloudflare
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -38,7 +38,13 @@ jobs:
           test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing CLOUDFLARE_API_TOKEN"; exit 1; }
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "Missing CLOUDFLARE_ACCOUNT_ID"; exit 1; }
 
-      - name: Prepare frontend-only deployment bundle
+      - name: Validate server-side JavaScript
+        run: |
+          set -euo pipefail
+          node --check functions/_middleware.js
+          node --check functions/api/health.js
+
+      - name: Prepare production deployment bundle
         shell: bash
         run: |
           set -euo pipefail
@@ -56,14 +62,37 @@ jobs:
           test -f .pages-dist/index.html
           test -f .pages-dist/_headers
           test -f .pages-dist/_redirects
+          test -d .pages-dist/functions
+          test -f .pages-dist/functions/_middleware.js
+          test -f .pages-dist/functions/api/health.js
           ! test -d .pages-dist/supabase
           ! find .pages-dist -type f \( -name '*.sql' -o -name '*.pem' -o -name '*.key' -o -name '.env' -o -name '.env.*' \) -print -quit | grep -q .
 
       - name: Install Wrangler
         run: npx --yes wrangler@4 --version
 
-      - name: Deploy to Cloudflare Pages
+      - name: Deploy frontend and Pages Functions
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx --yes wrangler@4 pages deploy .pages-dist --project-name=globall-cloud --branch=main --commit-hash="$GITHUB_SHA" --commit-message="${GITHUB_SHA} ${GITHUB_REF_NAME}"
+        run: |
+          set -euo pipefail
+          cd .pages-dist
+          npx --yes wrangler@4 pages deploy . --project-name=globall-cloud --branch=main --commit-hash="$GITHUB_SHA" --commit-message="${GITHUB_SHA} ${GITHUB_REF_NAME}"
+
+      - name: Verify production edge health
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://globall-cloud.pages.dev/api/health"
+          for attempt in {1..12}; do
+            body="$(curl -fsS --max-time 10 "$url" 2>/dev/null || true)"
+            if printf '%s' "$body" | grep -q '"ok":true'; then
+              printf '%s\n' "$body"
+              exit 0
+            fi
+            echo "Health check attempt $attempt did not return a healthy response yet."
+            sleep 5
+          done
+          echo "Production health check failed."
+          exit 1
