@@ -1,0 +1,109 @@
+/* Globall Cloud — Enterprise Shell 2026
+ * Safe, additive layer for the existing static/operational surfaces.
+ * Keeps the premium navy/cyan/gold identity while improving hierarchy,
+ * accessibility, touch targets, status communication and mobile behavior.
+ */
+
+:root{
+  --gc-e-bg:#061428;
+  --gc-e-panel:rgba(10,29,51,.82);
+  --gc-e-panel-2:rgba(14,39,68,.72);
+  --gc-e-line:rgba(142,232,244,.16);
+  --gc-e-line-strong:rgba(142,232,244,.30);
+  --gc-e-cyan:#19d7e7;
+  --gc-e-cyan-soft:#8ef1f7;
+  --gc-e-gold:#ffc768;
+  --gc-e-good:#36d98a;
+  --gc-e-warn:#ffbd57;
+  --gc-e-danger:#ff765f;
+  --gc-e-radius:18px;
+  --gc-e-shadow:0 18px 48px rgba(1,8,20,.28);
+}
+
+/* Prevent layout jumps when long operational labels wrap. */
+body{overflow-x:clip;}
+
+/* Universal surface polish. */
+:is(.card,.panel,.modal,.dialog,.admin-card,.ops-card,.service-card,.feature-card,.warehouse-card,.hub-card,.testimonial-card,.step-card,.shipment-card,.stat-card,.dashboard-card){
+  border-color:var(--gc-e-line);
+  box-shadow:var(--gc-e-shadow),inset 0 1px 0 rgba(255,255,255,.045);
+}
+
+:is(.card,.panel,.modal,.dialog,.admin-card,.ops-card,.service-card,.feature-card,.warehouse-card,.hub-card,.testimonial-card,.step-card,.shipment-card,.stat-card,.dashboard-card):focus-within{
+  border-color:var(--gc-e-line-strong);
+}
+
+/* Status language used throughout operations. */
+[data-status="ready"],[data-state="ready"],.status-ready,.badge-success,.pill-success{color:var(--gc-e-good)!important;}
+[data-status="warning"],[data-state="warning"],.status-warning,.badge-warning,.pill-warning{color:var(--gc-e-warn)!important;}
+[data-status="error"],[data-state="error"],.status-error,.badge-danger,.pill-danger{color:var(--gc-e-danger)!important;}
+
+:is(button,.btn,input[type="submit"],input[type="button"]){
+  min-height:44px;
+  -webkit-tap-highlight-color:transparent;
+}
+
+:is(button,.btn):disabled{cursor:not-allowed;opacity:.58;filter:saturate(.65);}
+
+:is(input,select,textarea):focus-visible{
+  border-color:var(--gc-e-cyan-soft)!important;
+  box-shadow:0 0 0 3px rgba(25,215,231,.12)!important;
+}
+
+/* Professional login / staff-console rhythm. */
+:is(.admin-login,.staff-login,.login-card,.auth-card,.auth-panel){
+  border-color:var(--gc-e-line-strong);
+  background:linear-gradient(145deg,rgba(12,34,58,.94),rgba(4,15,29,.97));
+  box-shadow:0 26px 70px rgba(1,7,18,.42),inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+/* Live connection indicator. */
+[data-gc-connection-message="ready"],[data-gc-runtime-state="ready"]{
+  border-color:rgba(54,217,138,.28)!important;
+  color:#9af4c6!important;
+}
+
+[data-gc-connection-message="loading"],[data-gc-runtime-state="checking"]{opacity:.92;}
+
+/* Keep embedded maps and operational visualizations from becoming too sharp. */
+:is(.route-map,.map-panel,.tracking-map,.hero-status-card){
+  overflow:hidden;
+  isolation:isolate;
+}
+
+/* Mobile first: tighter cards, larger hit targets and safer bottom spacing. */
+@media (max-width:760px){
+  :is(.card,.panel,.modal,.dialog,.admin-card,.ops-card,.service-card,.feature-card,.warehouse-card,.hub-card,.testimonial-card,.step-card,.shipment-card,.stat-card,.dashboard-card){
+    border-radius:16px;
+  }
+
+  :is(button,.btn,input[type="submit"],input[type="button"]){min-height:46px;}
+
+  :is(.table-wrap,.data-table-wrap,.table-responsive){
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;
+  }
+}
+
+/* Reduced motion stays fully respected. */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}
+}
+
+/* High contrast utility for important operational alerts. */
+.gc-critical-alert{
+  border:1px solid rgba(255,118,95,.38)!important;
+  background:linear-gradient(145deg,rgba(85,28,24,.30),rgba(45,15,14,.24));
+  box-shadow:0 16px 36px rgba(80,20,15,.18);
+}
+
+.gc-live-dot{
+  width:8px;height:8px;border-radius:50%;
+  display:inline-block;
+  background:var(--gc-e-good);
+  box-shadow:0 0 0 5px rgba(54,217,138,.10),0 0 16px rgba(54,217,138,.52);
+}
+
+/* Ensure long Kurdish/Arabic labels never break buttons awkwardly. */
+:is(.btn,button,a).gc-no-wrap{white-space:nowrap;}
