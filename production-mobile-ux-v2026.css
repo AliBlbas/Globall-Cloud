@@ -1,0 +1,207 @@
+/* Globall Cloud — unified mobile-first UX layer
+ * Designed for iPhone/Android while preserving desktop layouts.
+ * No business logic, credentials or API behavior lives here.
+ */
+
+:root{
+  --gc-safe-top: env(safe-area-inset-top, 0px);
+  --gc-safe-right: env(safe-area-inset-right, 0px);
+  --gc-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --gc-safe-left: env(safe-area-inset-left, 0px);
+}
+
+html{
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+  scroll-padding-top:86px;
+}
+
+body{
+  min-width:320px;
+  padding-inline:0;
+}
+
+img,svg,video,canvas{max-width:100%;height:auto;}
+iframe{max-width:100%;border:0;}
+button,a,input,select,textarea{touch-action:manipulation;}
+button,a{ -webkit-tap-highlight-color:transparent; }
+
+/* ---------- mobile layout foundation ---------- */
+@media (max-width: 900px){
+  .container{padding-inline:18px;}
+  .section{padding-block:46px;}
+  .section-head{margin-bottom:30px;}
+  .section-head h2{font-size:clamp(24px,7vw,31px);}
+  .section-head p{font-size:14px;}
+  .nav-inner{padding:12px 16px;gap:10px;}
+  .nav-links{gap:18px;}
+  .top-announcement-inner{padding:8px 16px;}
+  .hero-overlay{inset:12px;}
+}
+
+@media (max-width: 700px){
+  html{scroll-padding-top:76px;}
+  body{padding-bottom:calc(14px + var(--gc-safe-bottom));}
+
+  .container{padding-inline:14px;}
+  .section{padding-block:38px;}
+  .section-head{margin-bottom:24px;}
+  .section-head h2{line-height:1.3;}
+
+  /* header */
+  .nav{
+    position:sticky;
+    top:0;
+    padding-top:var(--gc-safe-top);
+  }
+  .nav-inner{min-height:62px;padding:9px 14px;}
+  .brand{gap:8px;min-width:0;}
+  .brand-logo{width:32px;height:32px;}
+  .brand b{font-size:15px;white-space:nowrap;}
+  .brand small{font-size:8.5px;white-space:nowrap;}
+  .nav-links{display:none!important;}
+  .nav-right{margin-inline-start:auto;gap:6px;}
+  .lang-toggle button{padding:7px 9px;font-size:10px;}
+  .theme-toggle-btn{width:36px;height:36px;}
+  .nav-auth{display:none!important;}
+  .burger{display:inline-flex!important;width:40px;height:40px;flex-shrink:0;}
+  .mobile-menu{
+    padding:8px 14px calc(12px + var(--gc-safe-bottom));
+    gap:2px;
+  }
+  .mobile-menu a{
+    min-height:48px;
+    padding:13px 8px;
+    border-radius:10px;
+  }
+
+  /* announcement */
+  .top-announcement-inner{
+    padding:7px 12px;
+    gap:7px;
+    font-size:10px;
+  }
+  .announcement-pill,.announcement-chip{padding:6px 9px;}
+
+  /* buttons and controls */
+  .btn{
+    min-height:48px;
+    padding:13px 18px;
+    font-size:14px;
+  }
+  .btn-icon{min-width:46px;min-height:46px;}
+  .field,select.field,textarea.field{font-size:16px;min-height:50px;}
+  .form-grid{grid-template-columns:1fr!important;gap:12px;}
+  .field-label{font-size:12.5px;}
+
+  /* hero */
+  .hero{overflow:hidden;}
+  .hero-overlay{position:static;display:block;margin-top:10px;pointer-events:auto;}
+  .hero-status-card,.route-chip{max-width:none;width:100%;}
+  .hero-status-card{padding:14px;border-radius:16px;}
+  .hero-route-stack{width:100%;margin-top:10px;}
+  .route-chip{padding:11px 12px;}
+  .route-chip b{font-size:13px;}
+  .route-chip small{font-size:10.5px;}
+  .route-map{padding:9px!important;}
+  .route-map > img{width:100%;min-height:190px;object-fit:cover;}
+
+  /* common grid patterns used across public and operational surfaces */
+  .grid,.cards,.card-grid,.features-grid,.services-grid,.stats-grid,.dashboard-grid,.metrics-grid,.kpi-grid,.two-col,.three-col{
+    grid-template-columns:1fr!important;
+    gap:12px!important;
+  }
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr!important;}
+  .panel,.card,.service-card,.feature-card,.stat-card,.metric-card,.kpi-card,.surface,.glass-card{
+    min-width:0;
+  }
+
+  /* tables */
+  .table-wrap,.table-responsive,.data-table-wrap,.table-scroll{
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-inline:contain;
+    border-radius:14px;
+  }
+  table{min-width:680px;}
+  th,td{white-space:nowrap;}
+
+  /* modal / drawer surfaces */
+  .modal,.dialog,.drawer,.sheet,.offcanvas{
+    max-width:calc(100vw - 20px);
+  }
+  .modal{margin-inline:10px;}
+  .drawer,.sheet,.offcanvas{
+    width:100%!important;
+    max-width:none;
+  }
+
+  /* long forms and toolbar rows */
+  .toolbar,.actions,.action-row,.header-actions,.filters,.filter-row,.search-row,.form-actions{
+    flex-wrap:wrap!important;
+    gap:8px!important;
+  }
+  .toolbar > *, .actions > *, .action-row > *, .header-actions > *, .filters > *, .filter-row > *, .search-row > *, .form-actions > *{
+    max-width:100%;
+  }
+
+  /* status and badges */
+  .status-pill,.badge,.chip,.tag{max-width:100%;white-space:normal;line-height:1.35;}
+
+  /* staff / warehouse / operations density */
+  .admin-shell,.staff-shell,.warehouse-shell,.operations-shell,.dashboard-shell{
+    padding-inline:10px!important;
+  }
+  .sidebar,.side-nav,.app-sidebar{
+    max-width:100%!important;
+  }
+  .sidebar{position:static!important;}
+  .dashboard-header,.page-header,.section-row,.panel-header{
+    gap:10px!important;
+    align-items:flex-start!important;
+    flex-wrap:wrap!important;
+  }
+
+  /* cards should breathe on small screens */
+  .card,.panel,.service-card,.feature-card,.stat-card,.metric-card{
+    border-radius:18px!important;
+    padding:16px!important;
+  }
+
+  /* footer */
+  footer{padding-inline:14px!important;padding-bottom:calc(24px + var(--gc-safe-bottom))!important;}
+
+  /* avoid iOS zoom and clipped focus */
+  input[type="date"],input[type="time"],input[type="number"]{max-width:100%;}
+  :focus-visible{scroll-margin-top:96px;}
+}
+
+@media (max-width: 420px){
+  .container{padding-inline:12px;}
+  .nav-inner{padding-inline:10px;}
+  .brand b{font-size:14px;}
+  .brand small{display:none;}
+  .lang-toggle button{padding-inline:8px;}
+  .theme-toggle-btn{width:34px;height:34px;}
+  .burger{width:38px;height:38px;}
+  .section{padding-block:32px;}
+  .section-head h2{font-size:23px;}
+  .btn{width:100%;}
+  .btn.btn-icon{width:46px;}
+  .btn + .btn{margin-inline-start:0;}
+  .actions .btn,.action-row .btn,.form-actions .btn{flex:1 1 100%;}
+}
+
+@media (min-width:701px){
+  /* keep the new layer invisible as a mobile intervention on desktop */
+  .mobile-menu{max-height:none;}
+}
+
+/* reduced motion / high contrast respect */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;}
+}
+
+/* safe-area helpers for fixed controls */
+.fixed-bottom,.bottom-bar,.mobile-bottom-nav{padding-bottom:var(--gc-safe-bottom);}
