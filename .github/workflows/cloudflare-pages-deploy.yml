@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     name: Deploy frontend and Pages Functions to Cloudflare
     steps:
@@ -100,7 +100,7 @@ jobs:
           url="https://globall-cloud.pages.dev/api/health"
           for attempt in {1..12}; do
             body="$(curl -fsS --max-time 10 "$url" 2>/dev/null || true)"
-            if printf '%s' "$body" | grep -q '"ok":true'; then
+            if printf '%s' "$body" | grep -q '\"ok\":true'; then
               printf '%s\n' "$body"
               exit 0
             fi
