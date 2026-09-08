@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   integrity:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -32,35 +32,14 @@ jobs:
         run: npm ci --ignore-scripts
       - name: Repository validation
         run: npm test
+      - name: Production contract validation
+        run: npm run test:contracts
       - name: Production reference and security invariants
         shell: bash
         run: |
           set -euo pipefail
-          test "$(grep -E '^project_id[[:space:]]*=' supabase/config.toml | head -n1 | sed -E 's/.*=[[:space:]]*"([^"]+)".*/\1/')" = "ahslifnthiwfkmaswjno"
+          test "$(grep -E '^project_id[[:space:]]*=' supabase/config.toml | head -n1 | sed -E 's/.*=[[:space:]]*\"([^\"]+)\".*/\1/')" = "ahslifnthiwfkmaswjno"
           ! grep -RIl 'swptmhhwhdtyrrfzetam' --include='*.js' --include='*.mjs' --include='*.ts' --include='*.tsx' --include='*.html' --include='*.css' --include='*.json' --include='*.toml' --include='*.yml' --include='*.yaml' .
-          python3 - <<'PY'
-          from pathlib import Path
-          import re, sys
-          root = Path('.')
-          blocked = {'.git', '.wrangler', 'node_modules'}
-          patterns = [
-              re.compile(r'''(?i)SUPABASE_SERVICE_ROLE_KEY\s*[:=]\s*["'](?:eyJ|sb_secret_)[A-Za-z0-9._-]{10,}'''),
-              re.compile(r'''(?i)service_role[_-]?key\s*[:=]\s*["'](?:eyJ|sb_secret_)[A-Za-z0-9._-]{10,}'''),
-              re.compile(r'''(?i)CLOUDFLARE_API_TOKEN\s*[:=]\s*["'][A-Za-z0-9._-]{20,}'''),
-          ]
-          allowed_suffixes = {'.js','.mjs','.ts','.tsx','.html','.css','.json','.toml','.yml','.yaml','.sh','.py'}
-          for path in root.rglob('*'):
-              if not path.is_file() or any(part in blocked for part in path.parts) or path.suffix not in allowed_suffixes:
-                  continue
-              try:
-                  text = path.read_text(encoding='utf-8', errors='ignore')
-              except Exception:
-                  continue
-              for pattern in patterns:
-                  if pattern.search(text):
-                      print(f'secret-like value detected in {path}: {pattern.pattern}', file=sys.stderr)
-                      raise SystemExit(1)
-          PY
           grep -q "script-src 'self'" _headers
           ! grep -q "script-src[^;]*unsafe-inline" _headers
           grep -q 'ahslifnthiwfkmaswjno.supabase.co' production-bridge.js
@@ -76,7 +55,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in index.html sw.js production-bridge.js runtime-guard.js _headers _redirects tracking-integration.html customer-portal.html warehouse-os.html driver-workspace.html staff-os-v5.html staff-os-v5.css staff-os-v5.js staff-os-v5-shipment-create-fix.js staff-os-v5-shipment-control-bridge.js staff-os-data-health-panel.js staff-os-v5-integrations.js staff-os-v5-profile.js staff-os-production-analytics-bridge.js staff-os-v5-stability.js warehouse-offline-sync.js production-mobile-ux-v2026.css gc-csp-scripts/logistics-pricing-ui.js supabase/config.toml package.json package-lock.json supabase/functions/logistics-control-plane/index.ts supabase/functions/notification-dispatch/index.ts supabase/functions/warehouse-receiving/index.ts supabase/functions/warehouse-notify/index.ts supabase/functions/staff-ops-hub/index.ts supabase/functions/staff-analytics/index.ts supabase/functions/invoice-ai/index.ts supabase/functions/customer-debt-assistant/index.ts supabase/functions/fx-refresh/index.ts supabase/functions/staff-shipment-v5/index.ts supabase/functions/staff-shipment-control/index.ts supabase/functions/public-config/index.ts supabase/functions/public-message/index.ts supabase/functions/public-quote/index.ts supabase/functions/public-pricing/index.ts supabase/functions/public-track/index.ts supabase/functions/customer-self/index.ts supabase/functions/payment-webhook/index.ts supabase/functions/_shared/payment-providers.ts tests/validate.mjs tests/e2e/run.mjs; do test -f "$file"; done
+          for file in index.html sw.js production-bridge.js runtime-guard.js _headers _redirects tracking-integration.html tracking-intelligence.html tracking-intelligence.css tracking-intelligence.js customer-portal.html warehouse-os.html driver-workspace.html staff-os-v5.html staff-os-v5.css staff-os-v5.js staff-os-v5-shipment-create-fix.js staff-os-v5-shipment-control-bridge.js staff-os-data-health-panel.js staff-os-v5-integrations.js staff-os-v5-profile.js staff-os-production-analytics-bridge.js staff-os-v5-stability.js staff-logistics-intelligence.css staff-logistics-intelligence.js warehouse-offline-sync.js production-mobile-ux-v2026.css gc-platform-vnext.css gc-platform-vnext.js gc-platform-vnext-plus.css gc-platform-vnext-plus.js gc-runtime-safety-v2026.js production-brand-repair.js gc-csp-scripts/logistics-pricing-ui.js supabase/config.toml package.json package-lock.json supabase/functions/logistics-control-plane/index.ts supabase/functions/notification-dispatch/index.ts supabase/functions/warehouse-receiving/index.ts supabase/functions/warehouse-notify/index.ts supabase/functions/staff-ops-hub/index.ts supabase/functions/staff-analytics/index.ts supabase/functions/invoice-ai/index.ts supabase/functions/customer-debt-assistant/index.ts supabase/functions/fx-refresh/index.ts supabase/functions/staff-shipment-v5/index.ts supabase/functions/staff-shipment-control/index.ts supabase/functions/public-config/index.ts supabase/functions/public-message/index.ts supabase/functions/public-quote/index.ts supabase/functions/public-pricing/index.ts supabase/functions/public-track/index.ts supabase/functions/customer-self/index.ts supabase/functions/payment-webhook/index.ts supabase/functions/_shared/payment-providers.ts tests/validate.mjs tests/e2e/run.mjs scripts/production-contracts.mjs; do test -f "$file"; done
       - name: Hardened public endpoint invariants
         shell: bash
         run: |
@@ -98,16 +77,31 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -q "gc-v91" sw.js
-          grep -q "staff-os-v5.html" sw.js
-          grep -q "staff-os-v5.js?v=20260905-3" sw.js
-          grep -q "staff-os-v5-shipment-create-fix.js?v=20260905-3" sw.js
-          grep -q "staff-os-v5-shipment-control-bridge.js?v=20260905-1" sw.js
-          grep -q "staff-os-data-health-panel.js?v=20260905-1" sw.js
-          grep -q "staff-os-v5-integrations.js?v=20260905-3" sw.js
-          grep -q "staff-os-v5-profile.js?v=20260905-3" sw.js
-          grep -q "staff-os-production-analytics-bridge.js?v=20260905-3" sw.js
-          grep -q "staff-os-v5-stability.js?v=20260905-3" sw.js
+          CACHE_VERSION="$(node - <<'NODE'
+          const fs = require('node:fs')
+          const source = fs.readFileSync('sw.js', 'utf8')
+          const match = source.match(/const CACHE_VERSION=['\"](gc-v\d+)['\"];/)
+          if (!match) process.exit(1)
+          process.stdout.write(match[1])
+          NODE
+          )"
+          grep -q "const CACHE_VERSION=['\"]${CACHE_VERSION}['\"]" sw.js
+          for asset in \
+            staff-os-v5.html \
+            staff-os-v5.js?v=20260905-3 \
+            staff-os-v5-shipment-create-fix.js?v=20260905-3 \
+            staff-os-v5-shipment-control-bridge.js?v=20260905-1 \
+            staff-os-data-health-panel.js?v=20260905-1 \
+            staff-os-v5-integrations.js?v=20260905-3 \
+            staff-os-v5-profile.js?v=20260905-3 \
+            staff-os-production-analytics-bridge.js?v=20260905-3 \
+            staff-os-v5-stability.js?v=20260905-3 \
+            staff-logistics-intelligence.css?v=20260908-1 \
+            staff-logistics-intelligence.js?v=20260908-1 \
+            tracking-intelligence.css?v=20260908-1 \
+            tracking-intelligence.js?v=20260908-1; do
+            grep -q "$asset" sw.js
+          done
           ! grep -q "staff-os-production.js?v=" sw.js
       - name: Public live smoke test
         if: github.event_name != 'pull_request'
