@@ -10,9 +10,13 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: live-supabase-reference-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Checkout
@@ -30,12 +34,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(grep -E '^project_id[[:space:]]*=' supabase/config.toml | head -n1 | sed -E 's/.*=[[:space:]]*"([^"]+)".*/\1/')" = "ahslifnthiwfkmaswjno"
+          test "$(grep -E '^project_id[[:space:]]*=' supabase/config.toml | head -n1 | sed -E 's/.*=[[:space:]]*\"([^\"]+)\".*/\1/')" = "ahslifnthiwfkmaswjno"
           if grep -RIl 'swptmhhwhdtyrrfzetam' --include='*.js' --include='*.mjs' --include='*.ts' --include='*.tsx' --include='*.html' --include='*.css' --include='*.json' --include='*.toml' --include='*.yml' --include='*.yaml' .; then
             echo 'Forbidden stale Supabase project reference detected in runtime/config files.'
             exit 1
           fi
           grep -RIl 'ahslifnthiwfkmaswjno.supabase.co' --include='*.js' --include='*.mjs' --include='*.ts' --include='*.tsx' --include='*.html' --include='*.css' --include='*.json' --include='*.toml' --include='*.yml' --include='*.yaml' . >/dev/null
+
+      - name: Validate production contracts
+        run: npm run test:contracts
 
       - name: Validate application
         run: |
