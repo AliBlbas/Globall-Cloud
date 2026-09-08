@@ -11,6 +11,7 @@ on:
       - 'staff-os-v5-*.js'
       - 'staff-os-production-analytics-bridge.js'
       - 'staff-logistics-intelligence.*'
+      - 'staff-mobile-command-dock.*'
       - 'sw.js'
       - '.github/workflows/staff-production-contract.yml'
   pull_request:
@@ -23,6 +24,7 @@ on:
       - 'staff-os-v5-*.js'
       - 'staff-os-production-analytics-bridge.js'
       - 'staff-logistics-intelligence.*'
+      - 'staff-mobile-command-dock.*'
       - 'sw.js'
       - '.github/workflows/staff-production-contract.yml'
   workflow_dispatch:
@@ -75,6 +77,8 @@ jobs:
             staff-logistics-intelligence.css \
             staff-logistics-intelligence.js \
             staff-os-v2-compat.js \
+            staff-mobile-command-dock.css \
+            staff-mobile-command-dock.js \
             sw.js; do
             test -f "$file"
           done
@@ -84,6 +88,8 @@ jobs:
         run: |
           set -euo pipefail
           grep -q 'staff-os-v2-compat.js?v=20260908-2' staff-os-v5.html
+          grep -q 'staff-mobile-command-dock.css?v=20260908-1' staff-os-v5.html
+          grep -q 'staff-mobile-command-dock.js?v=20260908-1' staff-os-v5.html
           grep -q 'https://ahslifnthiwfkmaswjno.supabase.co' staff-os-v5.js
           grep -q 'account-admin' staff-os-v5.js
           grep -q 'operations-v4' staff-os-v5.js
@@ -107,6 +113,7 @@ jobs:
           node --check staff-os-production-analytics-bridge.js
           node --check staff-os-v5-stability.js
           node --check staff-logistics-intelligence.js
+          node --check staff-mobile-command-dock.js
           node --check sw.js
 
       - name: Service worker contract
