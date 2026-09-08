@@ -122,7 +122,6 @@ jobs:
           NODE
           )"
           grep -q "const CACHE_VERSION=['\"]${CACHE_VERSION}['\"]" sw.js
-          grep -q "/staff-os-v2-compat.js?v=20260908-2" sw.js || true
           grep -q "/staff-os-v5.html" sw.js
 
       - name: Repository tests
