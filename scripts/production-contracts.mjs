@@ -29,7 +29,6 @@ function walk(dir, out = []) {
 
 console.log('Production contract validation')
 
-// 1) Canonical production identity.
 try {
   const config = read('supabase/config.toml')
   if (!/^project_id\s*=\s*"ahslifnthiwfkmaswjno"$/m.test(config)) {
@@ -39,8 +38,6 @@ try {
   fail(`unable to read supabase/config.toml: ${error.message}`)
 }
 
-// 2) Service Worker cache contract: workflows must derive the version from sw.js,
-// never hard-code a stale gc-vNN value.
 try {
   const sw = read('sw.js')
   const match = sw.match(/const CACHE_VERSION\s*=\s*['"](gc-v\d+)['"]/) || sw.match(/CACHE_VERSION\s*=\s*['"](gc-v\d+)['"]/) 
@@ -61,7 +58,6 @@ try {
   fail(`service worker contract failed: ${error.message}`)
 }
 
-// 3) Service Worker must only precache files that actually exist locally.
 try {
   const sw = read('sw.js')
   const assetBlock = sw.match(/const STATIC_ASSETS=\[(.*?)\];const BROWSER_COMPAT_CSS/s)
@@ -79,7 +75,6 @@ try {
   fail(`Service Worker asset validation failed: ${error.message}`)
 }
 
-// 4) Production-critical surfaces.
 const required = [
   'index.html',
   'sw.js',
@@ -101,7 +96,9 @@ const required = [
   'gc-platform-vnext.js',
   'gc-platform-vnext-plus.js',
   'gc-runtime-safety-v2026.js',
+  'production-brand-repair.js',
   'supabase/config.toml',
+  'supabase/functions/_shared/service-key.ts',
   'supabase/functions/logistics-control-tower/index.ts',
   'tests/validate.mjs',
   'tests/e2e/run.mjs',
@@ -109,7 +106,6 @@ const required = [
 for (const path of required) if (!exists(path)) fail(`missing critical production file: ${path}`)
 if (!failures) ok(`${required.length} critical production files are present`)
 
-// 5) Secret hygiene and stale Supabase project references.
 try {
   const files = walk(ROOT).filter((file) => /\.(js|mjs|ts|tsx|html|css|json|toml|yml|yaml)$/.test(file))
   const secretPatterns = [
@@ -139,8 +135,6 @@ try {
   fail(`source hygiene validation failed: ${error.message}`)
 }
 
-// 6) GitHub Actions hardening: least privilege, credential persistence disabled,
-// deterministic runner and pinned actions.
 try {
   const workflowDir = join(ROOT, '.github', 'workflows')
   const workflows = walk(workflowDir).filter((file) => /\.(yml|yaml)$/.test(file))
@@ -148,11 +142,7 @@ try {
     const source = readFileSync(file, 'utf8')
     const name = relative(ROOT, file)
     if (/uses:\s+actions\/(checkout|setup-node)@(v\d+|main|master)/.test(source)) {
-      fail(`${name} uses an unpinned checkout/setup-node action`) 
-    }
-    if (/uses:\s+[^\s@]+@v\d+(?:\.\d+){0,2}/.test(source) && !/uses:\s+[^\s@]+@v\d+(?:\.\d+){0,2}\s+#\s*[^\n]+@[0-9a-f]{40}/i.test(source)) {
-      // This is intentionally conservative: existing workflows should pin mutable action tags.
-      // We only fail if an unpinned version tag is found on the common core actions above.
+      fail(`${name} uses an unpinned checkout/setup-node action`)
     }
     if (source.includes('actions/checkout@') && !source.includes('persist-credentials: false')) {
       fail(`${name} checks out code without disabling persisted Git credentials`)
@@ -167,11 +157,10 @@ try {
   fail(`GitHub Actions hardening validation failed: ${error.message}`)
 }
 
-// 7) Security headers and public/private surface invariants.
 try {
   const headers = read('_headers')
   const redirects = read('_redirects')
-  if (!headers.includes("Content-Security-Policy:")) fail('Content-Security-Policy header is missing')
+  if (!headers.includes('Content-Security-Policy:')) fail('Content-Security-Policy header is missing')
   if (/script-src[^\n;]*unsafe-inline/.test(headers)) fail('CSP script-src allows unsafe-inline')
   if (!headers.includes('Strict-Transport-Security:')) fail('HSTS is missing')
   if (!headers.includes('X-Content-Type-Options: nosniff')) fail('nosniff is missing')
@@ -182,7 +171,6 @@ try {
   fail(`surface security validation failed: ${error.message}`)
 }
 
-// 8) Public endpoint JWT posture must be explicit.
 try {
   const config = read('supabase/config.toml')
   for (const fn of ['public-config', 'public-message', 'public-quote', 'public-pricing', 'public-track']) {
