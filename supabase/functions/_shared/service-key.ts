@@ -1,5 +1,5 @@
 export function resolveServiceKey(): string | null {
-  const direct = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  const direct = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')?.trim()
   if (direct) return direct
 
   const raw = Deno.env.get('SUPABASE_SECRET_KEYS')
