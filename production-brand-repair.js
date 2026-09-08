@@ -38,11 +38,11 @@
     document.head.appendChild(node);
   };
   const loadVNext = () => {
-    if (document.querySelector('[data-gc-vnext-loader]')) return;
     if (location.pathname.startsWith('/api/')) return;
     const assets = [
-      { tag:'link', rel:'stylesheet', href:'/gc-platform-vnext.css?v=20260908-1', attr:'data-gc-vnext-loader' },
+      { tag:'link', rel:'stylesheet', href:'/gc-platform-vnext.css?v=20260908-1', attr:'data-gc-vnext-css' },
       { tag:'link', rel:'stylesheet', href:'/gc-platform-vnext-plus.css?v=20260908-1', attr:'data-gc-vnext-plus-css' },
+      { tag:'link', rel:'stylesheet', href:'/mobile-premium-responsive-v2026.css?v=20260908-1', attr:'data-gc-mobile-premium' },
       { tag:'script', src:'/gc-platform-vnext.js?v=20260908-1', attr:'data-gc-vnext-loader' },
       { tag:'script', src:'/gc-platform-vnext-plus.js?v=20260908-1', attr:'data-gc-vnext-plus-loader' },
       { tag:'script', src:'/gc-runtime-safety-v2026.js?v=20260908-1', attr:'data-gc-runtime-safety-loader' },
