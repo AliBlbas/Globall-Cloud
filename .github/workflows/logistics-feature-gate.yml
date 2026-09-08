@@ -36,9 +36,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in production-mobile-ux-v2026.css tracking-intelligence.css tracking-intelligence.js status.html status-page.js staff-logistics-intelligence.css staff-logistics-intelligence.js gc-platform-vnext.css gc-platform-vnext.js gc-platform-vnext-plus.css gc-platform-vnext-plus.js gc-runtime-safety-v2026.js production-brand-repair.js staff-os-v5.html supabase/functions/logistics-control-tower/index.ts supabase/config.toml sw.js functions/_middleware.js; do test -f "$file"; done
-          grep -q "staff-logistics-intelligence.css?v=20260908-1" sw.js
-          grep -q "staff-logistics-intelligence.js?v=20260908-1" sw.js
+          for file in production-mobile-ux-v2026.css tracking-intelligence.css tracking-intelligence.js status.html status-page.js public-production-safety.js staff-logistics-intelligence.css staff-logistics-intelligence.js staff-mobile-command-dock.css staff-mobile-command-dock.js gc-platform-vnext.css gc-platform-vnext.js gc-platform-vnext-plus.css gc-platform-vnext-plus.js gc-runtime-safety-v2026.js production-brand-repair.js staff-os-v5.html supabase/functions/logistics-control-tower/index.ts supabase/config.toml sw.js functions/_middleware.js; do test -f "$file"; done
+          grep -q "staff-logistics-intelligence.css?v=20260908-1" staff-os-v5.html
+          grep -q "staff-logistics-intelligence.js?v=20260908-1" staff-os-v5.html
+          grep -q "staff-mobile-command-dock.css?v=20260908-1" staff-os-v5.html
+          grep -q "staff-mobile-command-dock.js?v=20260908-1" staff-os-v5.html
           grep -q "tracking-intelligence.css?v=20260908-1" sw.js
           grep -q "tracking-intelligence.js?v=20260908-1" sw.js
           grep -q "logistics-control-tower" supabase/config.toml
@@ -49,12 +51,16 @@ jobs:
           grep -q "gc-platform-vnext" production-brand-repair.js
           grep -q "gc-platform-vnext-plus" production-brand-repair.js
           grep -q "gc-runtime-safety-v2026" production-brand-repair.js
+          grep -q "public-production-safety.js" production-brand-repair.js
+          grep -q "staff-mobile-command-dock.js" production-brand-repair.js
           ! grep -q "<script>" status.html
           grep -q "/status-page.js?v=20260908-1" status.html
       - name: JavaScript syntax checks
         shell: bash
         run: |
           set -euo pipefail
+          node --check public-production-safety.js
+          node --check staff-mobile-command-dock.js
           node --check tracking-intelligence.js
           node --check staff-logistics-intelligence.js
           node --check status-page.js
