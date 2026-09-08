@@ -16,6 +16,15 @@
     history.replaceState(null, '', `${window.location.pathname}${window.location.search}#${route}`);
   }
 
+  const staffGuardSrc = '/public-staff-guard-20260909.js?v=20260909-1';
+  if (!document.querySelector(`script[src^="${staffGuardSrc}"]`)) {
+    const script = document.createElement('script');
+    script.src = staffGuardSrc;
+    script.defer = true;
+    script.setAttribute('data-gc-public-staff-guard', '1');
+    document.head.appendChild(script);
+  }
+
   const safetySrc = '/public-production-safety.js?v=20260908-1';
   if (!document.querySelector(`script[src^="${safetySrc}"]`)) {
     const script = document.createElement('script');
