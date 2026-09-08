@@ -1,3 +1,17 @@
+/about /index.html 200
+/about/ /index.html 200
+/services /index.html 200
+/services/ /index.html 200
+/contact /index.html 200
+/contact/ /index.html 200
+/quote /index.html 200
+/quote/ /index.html 200
+/request /index.html 200
+/request/ /index.html 200
+/dashboard /index.html 200
+/dashboard/ /index.html 200
+/portal /index.html 200
+/portal/ /index.html 200
 /staff /staff-os-v5.html 200
 /staff/ /staff-os-v5.html 200
 /staff-os /staff-os-v5.html 200
