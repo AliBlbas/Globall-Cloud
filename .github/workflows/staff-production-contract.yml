@@ -101,7 +101,7 @@ jobs:
           node --check staff-os-v2-compat.js
           node --check staff-os-v5-shipment-create-fix.js
           node --check staff-os-v5-shipment-control-bridge.js
-          node --check staff-data-health-panel.js
+          node --check staff-os-data-health-panel.js
           node --check staff-os-v5-integrations.js
           node --check staff-os-v5-profile.js
           node --check staff-os-production-analytics-bridge.js
