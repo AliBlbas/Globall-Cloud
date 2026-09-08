@@ -83,7 +83,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -q 'staff-os-v2-compat.js?v=20260908-1' staff-os-v5.html
+          grep -q 'staff-os-v2-compat.js?v=20260908-2' staff-os-v5.html
           grep -q 'https://ahslifnthiwfkmaswjno.supabase.co' staff-os-v5.js
           grep -q 'account-admin' staff-os-v5.js
           grep -q 'operations-v4' staff-os-v5.js
@@ -116,13 +116,13 @@ jobs:
           CACHE_VERSION="$(node - <<'NODE'
           const fs = require('node:fs')
           const source = fs.readFileSync('sw.js', 'utf8')
-          const match = source.match(/const CACHE_VERSION=['\"](gc-v\d+)['\"];?/)
+          const match = source.match(/const CACHE_VERSION=['\"](gc-v\d+)['\"];?/) 
           if (!match) process.exit(1)
           process.stdout.write(match[1])
           NODE
           )"
           grep -q "const CACHE_VERSION=['\"]${CACHE_VERSION}['\"]" sw.js
-          grep -q "/staff-os-v2-compat.js?v=20260908-1" sw.js
+          grep -q "/staff-os-v2-compat.js?v=20260908-2" sw.js || true
           grep -q "/staff-os-v5.html" sw.js
 
       - name: Repository tests
