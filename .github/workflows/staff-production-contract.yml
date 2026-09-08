@@ -1,0 +1,118 @@
+name: Staff Production Contract
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'staff-os-v5.html'
+      - 'staff-os-v5.js'
+      - 'staff-os-v5.css'
+      - 'staff-os-v2-compat.js'
+      - 'staff-os-v5-*.js'
+      - 'staff-os-production-analytics-bridge.js'
+      - 'staff-logistics-intelligence.*'
+      - 'sw.js'
+      - '.github/workflows/staff-production-contract.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'staff-os-v5.html'
+      - 'staff-os-v5.js'
+      - 'staff-os-v5.css'
+      - 'staff-os-v2-compat.js'
+      - 'staff-os-v5-*.js'
+      - 'staff-os-production-analytics-bridge.js'
+      - 'staff-logistics-intelligence.*'
+      - 'sw.js'
+      - '.github/workflows/staff-production-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staff-production-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify Staff OS production contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Validate Staff OS files
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in \
+            staff-os-v5.html \
+            staff-os-v5.css \
+            staff-os-v5.js \
+            staff-os-v5-shipment-create-fix.js \
+            staff-os-v5-shipment-control-bridge.js \
+            staff-os-data-health-panel.js \
+            staff-os-v5-integrations.js \
+            staff-os-v5-profile.js \
+            staff-os-production-analytics-bridge.js \
+            staff-os-v5-stability.js \
+            staff-logistics-intelligence.css \
+            staff-logistics-intelligence.js \
+            staff-os-v2-compat.js \
+            sw.js; do
+            test -f "$file"
+          done
+
+      - name: Validate Staff OS HTML contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'staff-os-v2-compat.js?v=20260908-1' staff-os-v5.html
+          grep -q 'https://ahslifnthiwfkmaswjno.supabase.co' staff-os-v5.js
+          grep -q 'account-admin' staff-os-v5.js
+          grep -q 'operations-v4' staff-os-v5.js
+          grep -q 'warehouse-receiving' staff-os-v5.js
+          grep -q 'staff-ops-hub' staff-os-v5.js
+          ! grep -q 'YOUR_PROJECT_ID' staff-os-v5.html
+          ! grep -q 'YOUR_ANON_KEY' staff-os-v5.html
+          ! grep -q '/api/send-whatsapp' staff-os-v2-compat.js
+
+      - name: JavaScript syntax checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check staff-os-v5.js
+          node --check staff-os-v2-compat.js
+          node --check staff-os-v5-shipment-create-fix.js
+          node --check staff-os-v5-shipment-control-bridge.js
+          node --check staff-os-data-health-panel.js
+          node --check staff-os-v5-integrations.js
+          node --check staff-os-v5-profile.js
+          node --check staff-os-production-analytics-bridge.js
+          node --check staff-os-v5-stability.js
+          node --check staff-logistics-intelligence.js
+          node --check sw.js
+
+      - name: Service worker contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "gc-v95" sw.js
+          grep -q "/staff-os-v2-compat.js?v=20260908-1" sw.js
+          grep -q "/staff-os-v5.html" sw.js
+
+      - name: Repository tests
+        run: npm test
