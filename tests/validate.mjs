@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import { execFileSync } from 'node:child_process';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join, extname, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { dirname, join, extname, relative } from 'node:path';
 
-const ROOT = join(new URL('.', import.meta.url).pathname, '..');
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 let failures = 0;
 const fail = (msg) => { console.error(`  ✗ ${msg}`); failures++; };
 const ok = (msg) => console.log(`  ✓ ${msg}`);
@@ -12,9 +13,10 @@ const read = (rel) => readFileSync(join(ROOT, rel), 'utf8');
 function walk(dir, exts, out = []) {
   if (!existsSync(dir)) return out;
   for (const entry of readdirSync(dir)) {
-    if (entry === '.git' || entry === 'node_modules') continue;
+    if (entry === '.git' || entry === 'node_modules' || entry === '.wrangler' || entry === '.pages-dist') continue;
     const p = join(dir, entry);
-    const s = statSync(p);
+    let s;
+    try { s = statSync(p); } catch { continue; }
     if (s.isDirectory()) walk(p, exts, out);
     else if (exts.includes(extname(p))) out.push(p);
   }
@@ -50,9 +52,13 @@ if (ts) {
 console.log('Required production files');
 const required = [
   'index.html','sw.js','production-bridge.js','runtime-guard.js','_headers','_redirects',
-  'tracking-integration.html','customer-portal.html','warehouse-os.html','driver-workspace.html',
-  'staff-os.html','super-admin-command-center.html','warehouse-offline-sync.js',
+  'tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css',
+  'customer-portal.html','warehouse-os.html','driver-workspace.html',
+  'staff-os.html','staff-os-v5.html','super-admin-command-center.html','warehouse-offline-sync.js',
+  'staff-logistics-intelligence.js','staff-logistics-intelligence.css','status.html','status-page.js',
+  'gc-platform-vnext.js','gc-platform-vnext-plus.js','gc-runtime-safety-v2026.js','production-brand-repair.js',
   'supabase/config.toml','package.json','package-lock.json',
+  'supabase/functions/_shared/service-key.ts',
   'supabase/functions/logistics-control-plane/index.ts',
   'supabase/functions/notification-dispatch/index.ts',
   'supabase/functions/warehouse-receiving/index.ts',
@@ -64,6 +70,7 @@ const required = [
   'supabase/functions/fx-refresh/index.ts',
   'supabase/functions/_shared/payment-providers.ts',
   'tests/e2e/run.mjs',
+  'scripts/production-contracts.mjs',
 ];
 const beforeReq = failures;
 for (const rel of required) if (!existsSync(join(ROOT, rel))) fail(`missing ${rel}`);
@@ -192,6 +199,13 @@ for (const f of runtimeFiles) {
   if (/SUPABASE_SERVICE_ROLE_KEY\s*[:=]\s*['"](eyJ|sb_secret_)/.test(text)) fail(`service-role key literal found in ${relative(ROOT, f)}`);
 }
 if (!failures) ok('No service-role secret literal found');
+
+console.log('Production contracts');
+try {
+  execFileSync(process.execPath, [join(ROOT, 'scripts', 'production-contracts.mjs')], { stdio: 'inherit' });
+} catch {
+  fail('production contract validation failed');
+}
 
 console.log('');
 if (failures) {
