@@ -15,7 +15,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     name: Deploy frontend and Pages Functions to Cloudflare
     steps:
       - name: Checkout
@@ -28,6 +28,12 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
+
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Validate repository before deployment
+        run: npm test
 
       - name: Verify Cloudflare credentials are configured
         env:
