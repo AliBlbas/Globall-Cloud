@@ -7,7 +7,7 @@
   const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
   const HEALTH_FN = `${SUPABASE_URL}/functions/v1/staff-data-health`;
-  const state = { lastSync:null, health:null, healthBusy:false, paletteOpen:false, booted:false };
+  const state = { lastSync:null, health:null, healthBusy:false, paletteOpen:false, booted:false, errorGuard:false };
   const qs = (selector, root=document) => root.querySelector(selector);
   const qsa = (selector, root=document) => [...root.querySelectorAll(selector)];
   const text = (v) => String(v ?? '').trim();
@@ -99,7 +99,6 @@
       const issues = Number(q.missing_gc||0)+Number(q.missing_mode||0)+Number(q.missing_operational_status||0)+Number(q.missing_timeline||0)+Number(q.stale_72h||0);
       const healthy = issues===0;
       setHealth(healthy,healthy?`healthy · ${latency}ms`:`degraded · ${issues}`,`Backend latency ${latency}ms`);
-      updateHealthMetrics(q);
       setSync(payload.generated_at || Date.now());
       setStatus(healthy?'Supabase · Live':'Supabase · Degraded',healthy?'live':'warn');
       return payload;
@@ -108,13 +107,6 @@
       setStatus('Supabase · Degraded','warn');
       return null;
     } finally { state.healthBusy=false; }
-  }
-
-  function updateHealthMetrics(q) {
-    const map={gcHealthShipments:q.shipments,gcHealthOpenTasks:q.tasks_open,gcHealthReceipts:q.warehouse_receipts,gcHealthFinance:q.finance_transactions,gcHealthAlerts:q.alerts};
-    Object.entries(map).forEach(([id,value])=>{const el=qs(`#${id}`);if(el)el.textContent=Number(value??0).toLocaleString('en-US');});
-    const issueEl=qs('#gcHealthIssues');
-    if(issueEl){const issues=Number(q.missing_gc||0)+Number(q.missing_mode||0)+Number(q.missing_operational_status||0)+Number(q.missing_timeline||0)+Number(q.stale_72h||0);issueEl.textContent=String(issues);issueEl.dataset.state=issues?'warn':'ok';}
   }
 
   function installFetchObserver() {
@@ -127,16 +119,6 @@
       if(/supabase\.co\/functions\/v1\/(operations-v4|account-admin|warehouse-receiving|staff-ops-hub|staff-data-health)/i.test(url)&&response.ok){setSync(Date.now());setStatus('Supabase · Live','live');}
       return response;
     };
-  }
-
-  function addHealthSummary() {
-    const view=qs('#view');
-    if(!view||qs('[data-gc-pro-health-summary]'))return;
-    const title=text(qs('#pageTitle')?.textContent);
-    if(!/داشبۆرد|Dashboard/i.test(title))return;
-    const card=document.createElement('section');card.className='card gc-pro-health-summary';card.dataset.gcProHealthSummary='1';
-    card.innerHTML='<div class="card-head"><div><h3>PRODUCTION HEALTH</h3><span class="muted">پشکنینی راستەوخۆی backend و quality ـی داتا</span></div><span class="pill" id="gcHealthIssues">—</span></div><div class="gc-pro-health-grid"><div><span>Shipments</span><strong id="gcHealthShipments">—</strong></div><div><span>Open Tasks</span><strong id="gcHealthOpenTasks">—</strong></div><div><span>Warehouse</span><strong id="gcHealthReceipts">—</strong></div><div><span>Finance</span><strong id="gcHealthFinance">—</strong></div><div><span>Alerts</span><strong id="gcHealthAlerts">—</strong></div></div><div class="gc-pro-health-note" id="gcHealthNote">کەمترین مەعلومات لێرە پیشان دەدرێت؛ هیچ داتای ساختە زیاد ناکرێت.</div>';
-    view.appendChild(card);
   }
 
   function normalizeErrors(root=document) {
@@ -181,9 +163,10 @@
 
   function bootWhenReady(){
     const tryBoot=()=>{
+      if(!state.errorGuard){state.errorGuard=true;setupErrorGuard();bindKeyboard();}
       if(!qs('.gc-shell'))return false;
-      if(!state.booted){state.booted=true;installFetchObserver();ensureRibbon();updateScope();setupErrorGuard();bindKeyboard();void refreshHealth(true);window.setTimeout(()=>{addHealthSummary();void refreshHealth(false);},900);window.setInterval(()=>{updateScope();updateOnline();void refreshHealth(false);},30000);}
-      else{ensureRibbon();updateScope();addHealthSummary();normalizeErrors();}
+      if(!state.booted){state.booted=true;installFetchObserver();ensureRibbon();updateScope();void refreshHealth(true);window.setInterval(()=>{updateScope();updateOnline();void refreshHealth(false);},30000);}
+      else{ensureRibbon();updateScope();normalizeErrors();}
       return true;
     };
     if(tryBoot())return;
