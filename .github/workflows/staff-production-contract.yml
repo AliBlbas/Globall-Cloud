@@ -101,7 +101,7 @@ jobs:
           node --check staff-os-v2-compat.js
           node --check staff-os-v5-shipment-create-fix.js
           node --check staff-os-v5-shipment-control-bridge.js
-          node --check staff-os-data-health-panel.js
+          node --check staff-data-health-panel.js
           node --check staff-os-v5-integrations.js
           node --check staff-os-v5-profile.js
           node --check staff-os-production-analytics-bridge.js
@@ -116,7 +116,7 @@ jobs:
           CACHE_VERSION="$(node - <<'NODE'
           const fs = require('node:fs')
           const source = fs.readFileSync('sw.js', 'utf8')
-          const match = source.match(/const CACHE_VERSION=['\"](gc-v\d+)['\"];/?)/)
+          const match = source.match(/const CACHE_VERSION=['\"](gc-v\d+)['\"];?/)
           if (!match) process.exit(1)
           process.stdout.write(match[1])
           NODE
