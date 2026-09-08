@@ -1,0 +1,42 @@
+name: Runner Diagnostic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/runner-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: runner-diagnostic-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Inspect runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "runner=${RUNNER_NAME}"
+          echo "os=${RUNNER_OS}"
+          echo "arch=${RUNNER_ARCH}"
+          uname -a
+          node --version
+          npm --version
+      - name: Verify repository access
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f package.json
+          test -f sw.js
+          echo "runner-ok"
