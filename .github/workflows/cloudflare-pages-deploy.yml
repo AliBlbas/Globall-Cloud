@@ -58,7 +58,7 @@ jobs:
           mkdir -p .pages-dist
           git ls-files -z | while IFS= read -r -d '' file; do
             case "$file" in
-              .github/*|.git/*|.wrangler/*|supabase/*|tests/*|docs/*|*.md|*.MD|package.json|package-lock.json|pnpm-lock.yaml|yarn.lock|bun.lockb|tsconfig.json|vite.config.*|wrangler.toml|wrangler.json|wrangler.jsonc|*.sql|*.dump|*.bak|*.log|*.pem|*.key|*.crt|.env|.env.*|*.tf|*.tfvars)
+              .github/*|.git/*|.wrangler/*|scripts/*|supabase/*|tests/*|docs/*|.devcontainer/*|.vscode/*|*.md|*.MD|*.txt|*.patch|package.json|package-lock.json|pnpm-lock.yaml|yarn.lock|bun.lockb|tsconfig.json|vite.config.*|wrangler.toml|wrangler.json|wrangler.jsonc|*.sql|*.dump|*.bak|*.log|*.pem|*.key|*.crt|.env|.env.*|*.tf|*.tfvars)
                 continue
                 ;;
             esac
@@ -72,6 +72,7 @@ jobs:
           test -f .pages-dist/functions/_middleware.js
           test -f .pages-dist/functions/api/health.js
           ! test -d .pages-dist/supabase
+          ! test -d .pages-dist/scripts
           ! find .pages-dist -type f \( -name '*.sql' -o -name '*.pem' -o -name '*.key' -o -name '.env' -o -name '.env.*' \) -print -quit | grep -q .
 
           python3 - <<'PY'
