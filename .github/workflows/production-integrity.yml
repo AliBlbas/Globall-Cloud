@@ -39,7 +39,11 @@ jobs:
         run: |
           set -euo pipefail
           test "$(grep -E '^project_id[[:space:]]*=' supabase/config.toml | head -n1 | sed -E 's/.*=[[:space:]]*\"([^\"]+)\".*/\1/')" = "ahslifnthiwfkmaswjno"
-          ! grep -RIl 'swptmhhwhdtyrrfzetam' --include='*.js' --include='*.mjs' --include='*.ts' --include='*.tsx' --include='*.html' --include='*.css' --include='*.json' --include='*.toml' --include='*.yml' --include='*.yaml' .
+          stale='swptmhhwhdtyrrfzetam'
+          if grep -RIl "$stale" --include='*.js' --include='*.mjs' --include='*.ts' --include='*.tsx' --include='*.html' --include='*.css' --include='*.json' --include='*.toml' --include='*.yml' --include='*.yaml' .; then
+            echo 'Forbidden stale Supabase project reference detected in runtime/config files.'
+            exit 1
+          fi
           grep -q "script-src 'self'" _headers
           ! grep -q "script-src[^;]*unsafe-inline" _headers
           grep -q 'ahslifnthiwfkmaswjno.supabase.co' production-bridge.js
