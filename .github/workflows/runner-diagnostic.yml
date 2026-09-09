@@ -40,3 +40,6 @@ jobs:
           test -f package.json
           test -f sw.js
           echo "runner-ok"
+      # Diagnostic release marker: proves whether a fresh GitHub-hosted runner can start and execute steps.
+      - name: Emit diagnostic release marker
+        run: echo "runner-diagnostic-release=2026-09-09"
