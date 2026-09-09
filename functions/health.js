@@ -1,5 +1,5 @@
 export async function onRequestGet(context) {
-  const supabaseUrl = 'https://swptmhhwhdtyrrfzetam.supabase.co';
+  const supabaseUrl = 'https://ahslifnthiwfkmaswjno.supabase.co';
   const started = Date.now();
 
   let supabase = { ok: false, status: 0 };
