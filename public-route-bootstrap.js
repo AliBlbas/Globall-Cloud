@@ -34,8 +34,6 @@
     document.head.appendChild(script);
   }
 
-  // Public navigation completion: exposes every customer-facing route and
-  // makes route controls usable even when the CSP bridge has not bound them yet.
   const navCss = '/site-navigation-20260909.css?v=20260909-1';
   if (!document.querySelector(`link[href^="${navCss}"]`)) {
     const link = document.createElement('link');
@@ -49,6 +47,23 @@
     script.src = navScript;
     script.defer = true;
     script.setAttribute('data-gc-public-navigation', '1');
+    document.head.appendChild(script);
+  }
+
+  // Premium mobile UX: bottom quick actions + touch-first spacing.
+  const mobileCss = '/public-premium-mobile-20260909.css?v=20260909-1';
+  if (!document.querySelector(`link[href^="${mobileCss}"]`)) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = mobileCss;
+    document.head.appendChild(link);
+  }
+  const mobileScript = '/public-premium-mobile-20260909.js?v=20260909-1';
+  if (!document.querySelector(`script[src^="${mobileScript}"]`)) {
+    const script = document.createElement('script');
+    script.src = mobileScript;
+    script.defer = true;
+    script.setAttribute('data-gc-premium-mobile', '1');
     document.head.appendChild(script);
   }
 })();
