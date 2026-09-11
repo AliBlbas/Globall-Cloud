@@ -14,6 +14,7 @@ const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : 
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\\/body>/i, `${fragment}</body>`)
 
 const OPERATIONAL_PAGE = /^\\/(staff(?:-os)?|warehouse(?:-os)?|customer-portal|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\\.html)?\\/?$/i
+const V5_STAFF_ROUTE = /^\\/staff(?:-os)?(?:\\.html)?\\/?$/i
 
 const applySecurityHeaders = (headers) => {
   headers.set('content-security-policy', CSP)
@@ -36,6 +37,19 @@ export async function onRequest(context) {
   if (!contentType.toLowerCase().includes(HTML_ACCEPT)) return response
 
   let html = await response.text()
+
+  /* V5 Staff OS owns its complete DOM/auth lifecycle. Do not inject any
+     legacy staff compatibility, admin, command-center, or directory layers
+     into this route. Keep only the security headers and the page as shipped. */
+  if (V5_STAFF_ROUTE.test(path)) {
+    html = html.split(LEGACY_SUPABASE_NOTICE).join(CURRENT_SUPABASE_NOTICE)
+    const headers = applySecurityHeaders(new Headers(response.headers))
+    headers.delete('content-encoding')
+    headers.delete('content-length')
+    headers.delete('etag')
+    headers.set('content-type', 'text/html; charset=UTF-8')
+    return new Response(html, { status: response.status, statusText: response.statusText, headers })
+  }
 
   /* Never ship the old misleading setup warning in rendered HTML. */
   html = html.split(LEGACY_SUPABASE_NOTICE).join(CURRENT_SUPABASE_NOTICE)
