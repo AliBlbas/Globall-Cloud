@@ -2,9 +2,10 @@
 (() => {
   'use strict';
 
-  // The current Staff OS shell owns its auth lifecycle in staff-os-console.js.
-  // Runtime injection can happen before DOM parsing, so guard the route itself first.
-  if (/^\/staff-os(?:\.html)?\/?$/.test(window.location.pathname)) return;
+  // V5 Staff OS owns authentication on both public staff entry routes.
+  // Never install the legacy bridge on those routes; doing so can create a
+  // second auth lifecycle and interfere with the V5 renderer after login.
+  if (/^\/staff(?:-os)?(?:\.html)?\/?$/.test(window.location.pathname)) return;
   if (!/^\/staff(?:\.html)?\/?$/.test(window.location.pathname)) return;
   if (document.querySelector('meta[name="gc-staff-core"]') || document.getElementById('nav')) return;
   if (window.__gcStaffAuthBooted) return;
