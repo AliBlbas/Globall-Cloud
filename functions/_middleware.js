@@ -40,6 +40,14 @@ export async function onRequest(context) {
   /* Never ship the old misleading setup warning in rendered HTML. */
   html = html.split(LEGACY_SUPABASE_NOTICE).join(CURRENT_SUPABASE_NOTICE)
 
+  /* The old same-page admin anchor is a fragile mobile surface. Always send
+     public staff entry points to the protected /staff route instead. */
+  if (path === '/' || path === '/index.html') {
+    html = html.replace(/href=["']#admin["']/gi, 'href="/staff"')
+    html = html.replace(/href=["']\\.\\/staff-os\\.html["']/gi, 'href="/staff"')
+    html = html.replace(/\\sdata-gc-onclick=["']route\\('admin'\\)["']/gi, '')
+  }
+
   const headAssets = [
     ['name="color-scheme"', '<meta name="color-scheme" content="dark light">'],
     ['href="/enterprise-shell-v2026.css', ENTERPRISE_SHELL],
