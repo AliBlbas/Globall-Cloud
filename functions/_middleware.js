@@ -43,9 +43,9 @@ export async function onRequest(context) {
   /* The old same-page admin anchor is a fragile mobile surface. Always send
      public staff entry points to the protected /staff route instead. */
   if (path === '/' || path === '/index.html') {
-    html = html.replace(/href=["']#admin["']/gi, 'href="/staff"')
-    html = html.replace(/href=["']\\.\\/staff-os\\.html["']/gi, 'href="/staff"')
-    html = html.replace(/\\sdata-gc-onclick=["']route\\('admin'\\)["']/gi, '')
+    html = html.split('href="#admin"').join('href="/staff"')
+    html = html.split('href="./staff-os.html"').join('href="/staff"')
+    html = html.split(' data-gc-onclick="route(\'admin\')"').join('')
   }
 
   const headAssets = [
