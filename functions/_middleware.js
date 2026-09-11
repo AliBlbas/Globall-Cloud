@@ -14,7 +14,6 @@ const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : 
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`)
 
 const OPERATIONAL_PAGE = /^\/(staff(?:-os)?|warehouse(?:-os)?|customer-portal|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\.html)?\/?$/i
-const STAFF_V5_ROUTE = /^\/staff(?:-os)?\/?$/i
 
 const applySecurityHeaders = (headers) => {
   headers.set('content-security-policy', CSP)
@@ -62,9 +61,7 @@ export async function onRequest(context) {
   ]
   for (const [needle, fragment] of headAssets) html = addHeadAsset(html, needle, fragment)
 
-  /* V5 Staff owns its complete runtime/auth lifecycle. Do not inject the
-     legacy Staff Auth/Compat/Admin enhancement stack into /staff or /staff-os. */
-  if (OPERATIONAL_PAGE.test(path) && !STAFF_V5_ROUTE.test(path)) {
+  if (OPERATIONAL_PAGE.test(path)) {
     html = addHeadAsset(html, 'src="/runtime-guard.js', `<script src="/runtime-guard.js?v=${VERSION}" defer data-gc-runtime-guard="1"></script>`)
   }
 
@@ -73,11 +70,11 @@ export async function onRequest(context) {
     html = addBodyAsset(html, 'src="/gc-csp-scripts/logistics-pricing-ui.js', `<script src="/gc-csp-scripts/logistics-pricing-ui.js?v=${VERSION}" defer data-gc-logistics-pricing-ui="1"></script>`)
   }
 
-  if (/^\/staff(?:-os)?(?:\.html)?\/?$/i.test(path) && !STAFF_V5_ROUTE.test(path)) {
+  if (/^\/staff(?:-os)?(?:\.html)?\/?$/.test(path)) {
     html = html.replace(/<script\b[^>]*src=["']\/staff-os-compat\.js\?v=[^"']+["'][^>]*><\/script>/gi,
       `<script src="/staff-os-compat.js?v=${VERSION}" defer data-gc-staff-compat="1"></script>`)
     html = addHeadAsset(html, 'src="/staff-os-compat.js', `<script src="/staff-os-compat.js?v=${VERSION}" defer data-gc-staff-compat="1"></script>`)
-    if (!/^\/staff-os(?:\.html)?\/?$/i.test(path)) {
+    if (!/^\/staff-os(?:\.html)?\/?$/.test(path)) {
       html = html.replace(/<script\b[^>]*src=["']\/staff-auth-fix\.js\?v=[^"']+["'][^>]*><\/script>/gi,
         `<script src="/staff-auth-fix.js?v=${VERSION}" defer data-gc-staff-auth-fix="1"></script>`)
       html = addHeadAsset(html, 'src="/staff-auth-fix.js', `<script src="/staff-auth-fix.js?v=${VERSION}" defer data-gc-staff-auth-fix="1"></script>`)
@@ -96,8 +93,8 @@ export async function onRequest(context) {
     html = addHeadAsset(html, 'href="/admin-console-enhanced.css', `<link rel="stylesheet" href="/admin-console-enhanced.css?v=${VERSION}" data-gc-admin-polish="1">`)
     html = addHeadAsset(html, 'src="/admin-console-enhanced.js', `<script src="/admin-console-enhanced.js?v=${VERSION}" defer data-gc-admin-recovery="1"></script>`)
   }
-  if (/^\/warehouse-os(?:\.html)?\/?$/i.test(path)) {
-    html = addHeadAsset(html, 'href="/warehouse-receipt-proof.css', `<link rel="stylesheet" href="/warehouse-receipt-proof.css?v=${VERSION}" defer data-gc-warehouse-receipt-proof="1">`)
+  if (/^\/warehouse-os(?:\.html)?\/?$/.test(path)) {
+    html = addHeadAsset(html, 'href="/warehouse-receipt-proof.css', `<link rel="stylesheet" href="/warehouse-receipt-proof.css?v=${VERSION}" data-gc-warehouse-receipt-proof="1">`)
     html = addBodyAsset(html, 'src="/gc-csp-scripts/warehouse-receipt-proof-enhancement.js', `<script src="/gc-csp-scripts/warehouse-receipt-proof-enhancement.js?v=${VERSION}" defer data-gc-warehouse-receipt-proof="1"></script>`)
     html = addBodyAsset(html, 'src="/gc-csp-scripts/warehouse-receiving-chain-bridge.js', `<script src="/gc-csp-scripts/warehouse-receiving-chain-bridge.js?v=${VERSION}" defer data-gc-warehouse-receiving-chain="1"></script>`)
   }
