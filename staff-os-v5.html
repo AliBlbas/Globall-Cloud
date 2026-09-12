@@ -12,23 +12,33 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap">
-  <link rel="stylesheet" href="/staff-os-v5.css?v=20260912-2">
-  <link rel="stylesheet" href="/staff-logistics-intelligence.css?v=20260912-2">
-  <link rel="stylesheet" href="/staff-mobile-command-dock.css?v=20260912-2">
-  <link rel="stylesheet" href="/mobile-premium-responsive-v2026.css?v=20260912-2">
-  <link rel="stylesheet" href="/staff-os-pro-20260909.css?v=20260912-2">
-  <link rel="stylesheet" href="/staff-shell-polish-20260909.css?v=20260912-2">
-  <link rel="stylesheet" href="/staff-premium-mobile-20260909.css?v=20260912-2">
+  <link rel="stylesheet" href="/staff-os-v5.css?v=20260912-3">
+  <link rel="stylesheet" href="/staff-logistics-intelligence.css?v=20260912-3">
+  <link rel="stylesheet" href="/staff-mobile-command-dock.css?v=20260912-3">
+  <link rel="stylesheet" href="/mobile-premium-responsive-v2026.css?v=20260912-3">
+  <link rel="stylesheet" href="/staff-os-pro-20260909.css?v=20260912-3">
+  <link rel="stylesheet" href="/staff-shell-polish-20260909.css?v=20260912-3">
+  <link rel="stylesheet" href="/staff-premium-mobile-20260909.css?v=20260912-3">
+  <script src="/staff-os-v5-rescue.js?v=20260912-1" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js" defer></script>
 </head>
 <body>
-  <div id="app"></div>
+  <div id="app">
+    <main class="gc-rescue-shell" dir="rtl" style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#03101f;color:#f5f9fd;font-family:Vazirmatn,Noto Sans Arabic,system-ui,sans-serif">
+      <section style="width:min(560px,100%);padding:34px;border:1px solid rgba(111,145,180,.35);border-radius:24px;background:rgba(8,24,44,.94);box-shadow:0 24px 80px rgba(0,0,0,.4);text-align:center">
+        <div style="width:64px;height:64px;margin:0 auto 16px;display:grid;place-items:center;border-radius:18px;background:linear-gradient(135deg,#4fe3f0,#00a8bd);color:#03101f;font-weight:900;font-size:20px">GC</div>
+        <div style="font:700 11px/1.4 JetBrains Mono,monospace;letter-spacing:1.5px;color:#4fe3f0;margin-bottom:10px">STAFF OPERATING SYSTEM · V5</div>
+        <h1 style="margin:0 0 10px;font-size:28px">سیستەمی ستاف بار دەکرێت…</h1>
+        <p style="margin:0;color:#9bb2d0;line-height:1.8">تکایە چاوەڕوان بە. پەیوەندییەکانی سیستەم و پاراستن خەریکی پشکنینن.</p>
+      </section>
+    </main>
+  </div>
 
   <!-- Core Staff OS: these are the only scripts allowed to participate in the
        initial authentication/render lifecycle. -->
-  <script src="/staff-os-v5.js?v=20260912-2" defer></script>
+  <script src="/staff-os-v5.js?v=20260912-3" defer></script>
 
   <!-- Enhancement layer is external so the production CSP can keep
        script-src free of unsafe-inline. It starts only after the V5 shell exists. -->
