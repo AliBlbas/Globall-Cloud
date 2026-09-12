@@ -16,54 +16,30 @@
     history.replaceState(null, '', `${window.location.pathname}${window.location.search}#${route}`);
   }
 
-  const staffGuardSrc = '/public-staff-guard-20260909.js?v=20260909-1';
-  if (!document.querySelector(`script[src^="${staffGuardSrc}"]`)) {
+  const loadScript = (src, attribute) => {
+    if (document.querySelector(`script[data-gc-${attribute}]`)) return;
     const script = document.createElement('script');
-    script.src = staffGuardSrc;
+    script.src = src;
     script.defer = true;
-    script.setAttribute('data-gc-public-staff-guard', '1');
+    script.setAttribute(`data-gc-${attribute}`, '1');
     document.head.appendChild(script);
-  }
+  };
 
-  const safetySrc = '/public-production-safety.js?v=20260908-1';
-  if (!document.querySelector(`script[src^="${safetySrc}"]`)) {
-    const script = document.createElement('script');
-    script.src = safetySrc;
-    script.defer = true;
-    script.setAttribute('data-gc-public-production-safety', '1');
-    document.head.appendChild(script);
-  }
+  loadScript('/public-staff-guard-20260909.js?v=20260909-1', 'public-staff-guard');
+  loadScript('/public-production-safety.js?v=20260908-1', 'public-production-safety');
+  loadScript('/site-navigation-20260909.js?v=20260912-2', 'public-navigation');
+  loadScript('/public-ui-recovery-20260912.js?v=20260912-1', 'public-ui-recovery');
 
-  const navCss = '/site-navigation-20260909.css?v=20260909-1';
-  if (!document.querySelector(`link[href^="${navCss}"]`)) {
+  const addCss = (href, attribute) => {
+    if (document.querySelector(`link[data-gc-${attribute}]`)) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = navCss;
+    link.href = href;
+    link.setAttribute(`data-gc-${attribute}`, '1');
     document.head.appendChild(link);
-  }
-  const navScript = '/site-navigation-20260909.js?v=20260909-1';
-  if (!document.querySelector(`script[src^="${navScript}"]`)) {
-    const script = document.createElement('script');
-    script.src = navScript;
-    script.defer = true;
-    script.setAttribute('data-gc-public-navigation', '1');
-    document.head.appendChild(script);
-  }
+  };
 
-  // Premium mobile UX: bottom quick actions + touch-first spacing.
-  const mobileCss = '/public-premium-mobile-20260909.css?v=20260909-1';
-  if (!document.querySelector(`link[href^="${mobileCss}"]`)) {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = mobileCss;
-    document.head.appendChild(link);
-  }
-  const mobileScript = '/public-premium-mobile-20260909.js?v=20260909-1';
-  if (!document.querySelector(`script[src^="${mobileScript}"]`)) {
-    const script = document.createElement('script');
-    script.src = mobileScript;
-    script.defer = true;
-    script.setAttribute('data-gc-premium-mobile', '1');
-    document.head.appendChild(script);
-  }
+  addCss('/site-navigation-20260909.css?v=20260909-1', 'navigation-css');
+  addCss('/public-premium-mobile-20260909.css?v=20260909-1', 'premium-mobile-css');
+  loadScript('/public-premium-mobile-20260909.js?v=20260909-1', 'premium-mobile');
 })();
