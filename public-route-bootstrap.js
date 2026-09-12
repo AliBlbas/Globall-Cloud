@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '20260912-4';
+  const VERSION = '20260912-6';
   const path = window.location.pathname.replace(/\/$/, '') || '/';
   const pathRoutes = {
     '/quote': 'request',
@@ -48,7 +48,17 @@
     (document.head || document.documentElement).appendChild(link);
   };
 
+  const registerRecoveryWorker = () => {
+    if (!('serviceWorker' in navigator)) return;
+    try {
+      navigator.serviceWorker.register(`/sw-v98.js?v=${VERSION}`, { scope: '/' }).then((registration) => {
+        try { registration.update(); } catch (_) {}
+      }).catch(() => {});
+    } catch (_) {}
+  };
+
   const publicBoot = async () => {
+    addCss(`/public-render-visibility.css?v=${VERSION}`, 'render-visibility');
     addCss(`/site-navigation-20260909.css?v=${VERSION}`, 'navigation-css');
     addCss(`/public-premium-mobile-20260909.css?v=${VERSION}`, 'premium-mobile-css');
 
@@ -57,6 +67,7 @@
     await loadScript(`/site-navigation-20260909.js?v=${VERSION}`, 'public-navigation');
     await loadScript(`/public-ui-recovery-20260912.js?v=${VERSION}`, 'public-ui-recovery');
     await loadScript(`/public-runtime-guarantee.js?v=${VERSION}`, 'public-runtime-guarantee');
+    await loadScript(`/public-hardfix-v2.js?v=${VERSION}`, 'public-hardfix');
     await loadScript(`/public-premium-mobile-20260909.js?v=${VERSION}`, 'premium-mobile');
 
     const hydrate = () => {
@@ -93,6 +104,7 @@
       } catch (_) {}
     };
 
+    registerRecoveryWorker();
     hydrate();
     [150, 500, 1200, 2500, 5000].forEach((delay) => window.setTimeout(hydrate, delay));
   };
