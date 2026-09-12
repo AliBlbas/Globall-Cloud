@@ -21,13 +21,6 @@
     try{ console.warn('[Globall Cloud] Supabase pre-paint bootstrap:', e); }catch(_){}
   }
 
-  /*
-   * Public UI recovery:
-   * index-inline-2.js contains the data-driven renderer, but parts of its
-   * startup wait on remote services. Never let that turn the home page into
-   * a partially empty shell. Re-apply translations/renderers as soon as the
-   * functions become available, and load the navigation completion layer.
-   */
   function hydratePublicUI(){
     try{
       var renderers = [
@@ -52,7 +45,7 @@
       try{
         if(!document.querySelector('script[data-gc-site-navigation]')){
           var nav=document.createElement('script');
-          nav.src='/site-navigation-20260909.js?v=20260912-1';
+          nav.src='/site-navigation-20260909.js?v=20260912-2';
           nav.defer=true;
           nav.dataset.gcSiteNavigation='1';
           (document.head || document.documentElement).appendChild(nav);
