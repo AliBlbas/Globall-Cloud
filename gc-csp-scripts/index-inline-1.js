@@ -1,5 +1,6 @@
 /* Globall Cloud — pre-paint bootstrap.
- * Applies the preferred theme and starts the verified Supabase bridge early.
+ * Applies the preferred theme, starts the verified Supabase bridge early,
+ * and guarantees that the public UI hydrates even when backend calls are slow.
  */
 (function(){
   try{
@@ -18,5 +19,63 @@
     }
   }catch(e){
     try{ console.warn('[Globall Cloud] Supabase pre-paint bootstrap:', e); }catch(_){}
+  }
+
+  /*
+   * Public UI recovery:
+   * index-inline-2.js contains the data-driven renderer, but parts of its
+   * startup wait on remote services. Never let that turn the home page into
+   * a partially empty shell. Re-apply translations/renderers as soon as the
+   * functions become available, and load the navigation completion layer.
+   */
+  function hydratePublicUI(){
+    try{
+      var renderers = [
+        'renderHomeServices',
+        'renderBusinessHub',
+        'renderDashboardPreview',
+        'renderCorridorStrip',
+        'renderWarehouseCards',
+        'renderOperationsHub',
+        'renderHow',
+        'renderWhy'
+      ];
+      for(var i=0;i<renderers.length;i++){
+        try{
+          var fn = window[renderers[i]];
+          if(typeof fn === 'function') fn();
+        }catch(e){}
+      }
+      try{
+        if(typeof window.applyI18n === 'function') window.applyI18n();
+      }catch(e){}
+      try{
+        if(!document.querySelector('script[data-gc-site-navigation]')){
+          var nav=document.createElement('script');
+          nav.src='/site-navigation-20260909.js?v=20260912-1';
+          nav.defer=true;
+          nav.dataset.gcSiteNavigation='1';
+          (document.head || document.documentElement).appendChild(nav);
+        }
+      }catch(e){}
+      document.documentElement.dataset.gcUiHydration='active';
+    }catch(e){}
+  }
+
+  function startPublicUIRecovery(){
+    var delays=[0,150,500,1000,1800,3000,5000];
+    for(var i=0;i<delays.length;i++){
+      (function(delay){ window.setTimeout(hydratePublicUI,delay); })(delays[i]);
+    }
+    try{
+      window.addEventListener('error',function(){ window.setTimeout(hydratePublicUI,0); },{passive:true});
+      window.addEventListener('unhandledrejection',function(){ window.setTimeout(hydratePublicUI,0); },{passive:true});
+    }catch(e){}
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',startPublicUIRecovery,{once:true});
+  }else{
+    startPublicUIRecovery();
   }
 })();
