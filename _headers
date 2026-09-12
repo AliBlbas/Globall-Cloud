@@ -7,7 +7,7 @@
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-origin
   Origin-Agent-Cluster: ?1
-  Content-Security-Policy: default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rum-static.pingdom.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.supabase.co https://rum-ingest.pingdom.net https://*.sentry.io https://sentry.io; frame-src 'self' https://www.google.com; worker-src 'self' blob:
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rum-static.pingdom.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.supabase.com https://rum-ingest.pingdom.net https://*.sentry.io https://sentry.io; frame-src 'self' https://www.google.com; worker-src 'self' blob:
   Cache-Control: no-store, max-age=0, must-revalidate
 
 /release.json
@@ -30,7 +30,7 @@
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
 /staff-os-v5.html
-  X-Robots-Tag: noindex, nofollow, noarchive
+  X-Robots-Tag: noindex, nofollow, max-age=0, must-revalidate
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
 /staff-portal.html
@@ -66,6 +66,9 @@
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
 /sw.js
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/mobile-final.css
   Cache-Control: no-cache, no-store, must-revalidate
 
 /*.css
