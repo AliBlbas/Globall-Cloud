@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '20260912-6';
+  const VERSION = '20260912-7';
   const path = window.location.pathname.replace(/\/$/, '') || '/';
   const pathRoutes = {
     '/quote': 'request',
@@ -58,6 +58,7 @@
   };
 
   const publicBoot = async () => {
+    await loadScript(`/public-emergency-ui.js?v=${VERSION}`, 'emergency-ui');
     addCss(`/public-render-visibility.css?v=${VERSION}`, 'render-visibility');
     addCss(`/site-navigation-20260909.css?v=${VERSION}`, 'navigation-css');
     addCss(`/public-premium-mobile-20260909.css?v=${VERSION}`, 'premium-mobile-css');
