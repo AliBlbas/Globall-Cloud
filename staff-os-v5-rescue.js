@@ -70,6 +70,15 @@
     document.head.appendChild(style);
   };
 
+  const registerFreshServiceWorker = async () => {
+    if (!('serviceWorker' in navigator)) return;
+    try {
+      const registration = await navigator.serviceWorker.register('/sw-v98.js?v=20260912-4', { scope: '/' });
+      await registration.update();
+    } catch (_) {}
+  };
+
+  registerFreshServiceWorker();
   addStyles();
   render('loading');
 
