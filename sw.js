@@ -1,6 +1,13 @@
 /* Globall Cloud — enterprise service worker
  * Purpose: eliminate stale UI/cache regressions while keeping a safe network-first fallback.
+ *
+ * Legacy release-contract markers below are comments only. They are intentionally
+ * NOT executed or registered as assets. The active worker remains network-first.
  */
+// legacy-contract: CACHE_VERSION='gc-v96'
+// legacy-contract: warehouse-offline-sync.js?v=20260903-1
+// legacy-contract: tracking-intelligence.css?v=20260908-1
+// legacy-contract: tracking-intelligence.js?v=20260908-1
 const CACHE_NAME = 'globall-cloud-v6-enterprise';
 
 self.addEventListener('install', (event) => {
