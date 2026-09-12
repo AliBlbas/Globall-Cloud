@@ -1,0 +1,6 @@
+/* Globall Cloud public rendering safety net.
+   Content must remain visible even when animation/runtime enhancement code is unavailable. */
+.page.active{display:block!important;visibility:visible!important;opacity:1!important;}
+.reveal,.reveal.in-view{opacity:1!important;visibility:visible!important;transform:none!important;}
+.hero .eyebrow,.hero h1,.hero .sub,.hero-ctas,.route-map,.trust-item,.live-track,.corridor-strip,.hero-status-card,.route-chip{opacity:1!important;visibility:visible!important;animation:none!important;transform:none!important;}
+.corridor-strip .corridor-item{opacity:1!important;visibility:visible!important;animation:none!important;transform:none!important;}
