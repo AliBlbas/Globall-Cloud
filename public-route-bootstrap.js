@@ -50,7 +50,6 @@
     document.head.appendChild(script);
   }
 
-  // Premium mobile UX: bottom quick actions + touch-first spacing.
   const mobileCss = '/public-premium-mobile-20260909.css?v=20260909-1';
   if (!document.querySelector(`link[href^="${mobileCss}"]`)) {
     const link = document.createElement('link');
@@ -67,11 +66,14 @@
     document.head.appendChild(script);
   }
 
-  // Replace the emergency v98 worker with the stable production worker.
+  // Register the stable enterprise worker with a fresh URL so iOS is forced to
+  // re-check the worker after each emergency-cache cleanup release.
   const registerStableWorker = () => {
     if (!('serviceWorker' in navigator)) return;
     try {
-      navigator.serviceWorker.register('/sw.js?v=20260912-stable', { scope: '/' }).catch(() => {});
+      navigator.serviceWorker.register('/sw.js?v=20260912-enterprise', { scope: '/' }).then((registration) => {
+        try { registration.update(); } catch (_) {}
+      }).catch(() => {});
     } catch (_) {}
   };
   if (document.readyState === 'loading') {
