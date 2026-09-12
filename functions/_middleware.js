@@ -4,7 +4,7 @@
  * off public/customer/payment surfaces.
  */
 const HTML_ACCEPT = 'text/html'
-const VERSION = '20260912-1'
+const VERSION = '20260912-4'
 const ENTERPRISE_SHELL = `<link rel="stylesheet" href="/enterprise-shell-v2026.css?v=${VERSION}" data-gc-enterprise-shell="1">`
 const LEGACY_SUPABASE_NOTICE = 'Supabase هێشتا پەیوەست نەکراوە — URL و publishable key لە کۆدەکەدا زیادبکە (سەرەتای script tag).'
 const CURRENT_SUPABASE_NOTICE = 'پشکنینی پەیوەندیی Supabase لە پڕۆسەی production ـدایە.'
@@ -12,7 +12,7 @@ const CSP = "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-a
 
 const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`)
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`)
-const OPERATIONAL_PAGE = /^\/(staff(?:-os)?|warehouse(?:-os)?|customer-portal|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\.html)?\/?$/i
+const OPERATIONAL_PAGE = /^\/(staff(?:-os)?|warehouse(?:-os)?|customer-portal|superadmin|super-admin-command-center|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\.html)?\/?$/i
 
 const applySecurityHeaders = (headers) => {
   headers.set('content-security-policy', CSP)
@@ -20,7 +20,7 @@ const applySecurityHeaders = (headers) => {
   headers.set('referrer-policy', 'strict-origin-when-cross-origin')
   headers.set('x-frame-options', 'DENY')
   headers.set('strict-transport-security', 'max-age=31536000; includeSubDomains; preload')
-  headers.set('permissions-policy', 'camera=(self), geolocation=(self), microphone=(), payment=()')
+  headers.set('permissions-policy', 'camera=(self), geolocation=(self), microphone=(), payment=())
   headers.set('cross-origin-opener-policy', 'same-origin')
   headers.set('origin-agent-cluster', '?1')
   return headers
@@ -43,11 +43,11 @@ export async function onRequest(context) {
     html = html.split('href="#admin"').join('href="/staff"')
     html = html.split('href="./staff-os.html"').join('href="/staff"')
     html = html.split(' data-gc-onclick="route(\'admin\')"').join('')
-    /* The public page has a pre-paint bootstrap. Always serve a new URL for it
-       so old Safari/iOS service-worker caches cannot keep the broken bootstrap. */
+    /* Every public bootstrap asset gets a fresh URL. This is important on iOS,
+       where an older cached JS file can otherwise keep the page empty even after
+       the HTML itself has been updated. */
+    html = html.split('/public-route-bootstrap.js?v=20260905-1').join(`/public-route-bootstrap.js?v=${VERSION}`)
     html = html.split('/gc-csp-scripts/index-inline-1.js?v=20260821-1').join(`/gc-csp-scripts/index-inline-1.js?v=${VERSION}`)
-    /* The data/rendering bundle also needs a fresh URL. A stale cached copy can
-       define the old renderer set and leave the otherwise valid HTML empty. */
     html = html.split('/gc-csp-scripts/index-inline-2.js?v=20260826-1').join(`/gc-csp-scripts/index-inline-2.js?v=${VERSION}`)
   }
 
@@ -64,14 +64,16 @@ export async function onRequest(context) {
   ]
   for (const [needle, fragment] of headAssets) html = addHeadAsset(html, needle, fragment)
 
-  /* V5 Staff owns its complete DOM/auth lifecycle. Only security headers and
-     cache-safe markup changes apply here; no legacy staff UI/auth scripts. */
+  /* Global public runtime guarantee. It is safe on operational pages too; the
+     script exits immediately unless public .page/data-i18n markup is present. */
+  html = addBodyAsset(html, 'src="/public-runtime-guarantee.js', `<script src="/public-runtime-guarantee.js?v=${VERSION}" defer data-gc-public-runtime-guarantee="1"></script>`)
+
   if (STAFF_V5.test(path)) {
     const headers = applySecurityHeaders(new Headers(response.headers))
     headers.delete('content-encoding')
     headers.delete('content-length')
     headers.delete('etag')
-    headers.set('cache-control', 'no-store, max-age=0')
+    headers.set('cache-control', 'no-store, max-age=0, must-revalidate')
     headers.set('content-type', 'text/html; charset=UTF-8')
     return new Response(html, { status: response.status, statusText: response.statusText, headers })
   }
