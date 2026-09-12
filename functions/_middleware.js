@@ -14,6 +14,7 @@ const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : 
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\\/body>/i, `${fragment}</body>`)
 
 const OPERATIONAL_PAGE = /^\\/(staff(?:-os)?|warehouse(?:-os)?|customer-portal|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\\.html)?\\/?$/i
+const STAFF_V5 = /^\\/(?:staff|staff-os)(?:\\.html)?\\/?$/i
 
 const applySecurityHeaders = (headers) => {
   headers.set('content-security-policy', CSP)
@@ -60,6 +61,16 @@ export async function onRequest(context) {
     ['src="/production-brand-repair.js', `<script src="/production-brand-repair.js?v=${VERSION}" defer data-gc-production-brand-repair="1"></script>`],
   ]
   for (const [needle, fragment] of headAssets) html = addHeadAsset(html, needle, fragment)
+
+  if (STAFF_V5.test(path)) {
+    const headers = applySecurityHeaders(new Headers(response.headers))
+    headers.delete('content-encoding')
+    headers.delete('content-length')
+    headers.delete('etag')
+    headers.set('cache-control', 'no-store, max-age=0, must-revalidate')
+    headers.set('content-type', 'text/html; charset=UTF-8')
+    return new Response(html, { status: response.status, statusText: response.statusText, headers })
+  }
 
   if (OPERATIONAL_PAGE.test(path)) {
     html = addHeadAsset(html, 'src="/runtime-guard.js', `<script src="/runtime-guard.js?v=${VERSION}" defer data-gc-runtime-guard="1"></script>`)
