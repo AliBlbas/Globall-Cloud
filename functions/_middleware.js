@@ -46,6 +46,9 @@ export async function onRequest(context) {
     /* The public page has a pre-paint bootstrap. Always serve a new URL for it
        so old Safari/iOS service-worker caches cannot keep the broken bootstrap. */
     html = html.split('/gc-csp-scripts/index-inline-1.js?v=20260821-1').join(`/gc-csp-scripts/index-inline-1.js?v=${VERSION}`)
+    /* The data/rendering bundle also needs a fresh URL. A stale cached copy can
+       define the old renderer set and leave the otherwise valid HTML empty. */
+    html = html.split('/gc-csp-scripts/index-inline-2.js?v=20260826-1').join(`/gc-csp-scripts/index-inline-2.js?v=${VERSION}`)
   }
 
   const headAssets = [
