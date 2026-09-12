@@ -66,4 +66,17 @@
     script.setAttribute('data-gc-premium-mobile', '1');
     document.head.appendChild(script);
   }
+
+  // Replace the emergency v98 worker with the stable production worker.
+  const registerStableWorker = () => {
+    if (!('serviceWorker' in navigator)) return;
+    try {
+      navigator.serviceWorker.register('/sw.js?v=20260912-stable', { scope: '/' }).catch(() => {});
+    } catch (_) {}
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', registerStableWorker, { once: true });
+  } else {
+    registerStableWorker();
+  }
 })();
