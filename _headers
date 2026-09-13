@@ -26,11 +26,10 @@
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
 /staff-os.html
-  X-Robots-Tag: noindex, nofollow, noarchive
-  Cache-Control: private, no-store, max-age=0, must-revalidate
+  X-Robots-Tag: noindex, no-store, max-age=0, must-revalidate
 
 /staff-os-v5.html
-  X-Robots-Tag: noindex, nofollow, max-age=0, must-revalidate
+  X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
 /staff-portal.html
@@ -46,7 +45,7 @@
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
 /operations-command-center.html
-  X-Robots-Tag: noindex, nofollow, noarchive
+  X-Robots-Tag: noindex, nofollow, max-age=0, must-revalidate
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
 /customer-portal.html
@@ -72,9 +71,9 @@
   Cache-Control: no-cache, no-store, must-revalidate
 
 /*.css
-  Cache-Control: public, max-age=3600
+  Cache-Control: no-cache, must-revalidate
 /*.js
-  Cache-Control: public, max-age=3600
+  Cache-Control: no-cache, must-revalidate
 /*.png
   Cache-Control: public, max-age=86400
 /*.jpg
