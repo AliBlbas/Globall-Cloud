@@ -4,7 +4,7 @@
  * cache policy. Application logic belongs in the page scripts themselves.
  */
 const HTML_ACCEPT = 'text/html';
-const VERSION = '20260913-2';
+const VERSION = '20260913-3';
 
 const ENTERPRISE_SHELL = `<link rel="stylesheet" href="/enterprise-shell-v2026.css?v=${VERSION}" data-gc-enterprise-shell="1">`;
 const LEGACY_SUPABASE_NOTICE = 'Supabase هێشتا پەیوەست نەکراوە — URL و publishable key لە کۆدەکەدا زیادبکە (سەرەتای script tag).';
@@ -25,7 +25,7 @@ const applySecurityHeaders = (headers) => {
   headers.set('referrer-policy', 'strict-origin-when-cross-origin');
   headers.set('x-frame-options', 'DENY');
   headers.set('strict-transport-security', 'max-age=31536000; includeSubDomains; preload');
-  headers.set('permissions-policy', 'camera=(self), geolocation=(self), microphone=(), payment=());
+  headers.set('permissions-policy', 'camera=(self), geolocation=(self), microphone=(), payment=()');
   headers.set('cross-origin-opener-policy', 'same-origin');
   headers.set('origin-agent-cluster', '?1');
   return headers;
