@@ -11,7 +11,7 @@
   try{
     if(!window.gcSupabase && !document.querySelector('script[data-gc-prepaint-bridge]')){
       var script = document.createElement('script');
-      script.src = '/production-bridge.js?v=20260828-1';
+      script.src = '/production-bridge.js?v=20260913-6';
       script.async = true;
       script.dataset.gcPrepaintBridge = '1';
       document.head.appendChild(script);
