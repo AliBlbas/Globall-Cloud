@@ -1,4 +1,5 @@
 (() => {
+  const RELEASE = '20260913-1';
   const path = window.location.pathname.replace(/\/$/, '') || '/';
   const pathRoutes = {
     '/quote': 'request',
@@ -16,62 +17,34 @@
     history.replaceState(null, '', `${window.location.pathname}${window.location.search}#${route}`);
   }
 
-  const staffGuardSrc = '/public-staff-guard-20260909.js?v=20260909-1';
-  if (!document.querySelector(`script[src^="${staffGuardSrc}"]`)) {
+  const addScript = (src, attribute) => {
+    if (document.querySelector(`script[src="${src}"]`)) return;
     const script = document.createElement('script');
-    script.src = staffGuardSrc;
+    script.src = src;
     script.defer = true;
-    script.setAttribute('data-gc-public-staff-guard', '1');
+    if (attribute) script.setAttribute(attribute, '1');
     document.head.appendChild(script);
-  }
-
-  const safetySrc = '/public-production-safety.js?v=20260908-1';
-  if (!document.querySelector(`script[src^="${safetySrc}"]`)) {
-    const script = document.createElement('script');
-    script.src = safetySrc;
-    script.defer = true;
-    script.setAttribute('data-gc-public-production-safety', '1');
-    document.head.appendChild(script);
-  }
-
-  const navCss = '/site-navigation-20260909.css?v=20260909-1';
-  if (!document.querySelector(`link[href^="${navCss}"]`)) {
+  };
+  const addStylesheet = (href) => {
+    if (document.querySelector(`link[href="${href}"]`)) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = navCss;
+    link.href = href;
     document.head.appendChild(link);
-  }
-  const navScript = '/site-navigation-20260909.js?v=20260909-1';
-  if (!document.querySelector(`script[src^="${navScript}"]`)) {
-    const script = document.createElement('script');
-    script.src = navScript;
-    script.defer = true;
-    script.setAttribute('data-gc-public-navigation', '1');
-    document.head.appendChild(script);
-  }
+  };
 
-  const mobileCss = '/public-premium-mobile-20260909.css?v=20260909-1';
-  if (!document.querySelector(`link[href^="${mobileCss}"]`)) {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = mobileCss;
-    document.head.appendChild(link);
-  }
-  const mobileScript = '/public-premium-mobile-20260909.js?v=20260909-1';
-  if (!document.querySelector(`script[src^="${mobileScript}"]`)) {
-    const script = document.createElement('script');
-    script.src = mobileScript;
-    script.defer = true;
-    script.setAttribute('data-gc-premium-mobile', '1');
-    document.head.appendChild(script);
-  }
+  addScript(`/public-staff-guard-20260909.js?v=${RELEASE}`, 'data-gc-public-staff-guard');
+  addScript(`/public-production-safety.js?v=${RELEASE}`, 'data-gc-public-production-safety');
+  addStylesheet(`/site-navigation-20260909.css?v=${RELEASE}`);
+  addScript(`/site-navigation-20260909.js?v=${RELEASE}`, 'data-gc-public-navigation');
+  addStylesheet(`/public-premium-mobile-20260909.css?v=${RELEASE}`);
+  addScript(`/public-premium-mobile-20260909.js?v=${RELEASE}`, 'data-gc-premium-mobile');
+  addScript(`/public-runtime-guarantee.js?v=${RELEASE}`, 'data-gc-public-runtime-guarantee');
 
-  // Register the stable enterprise worker with a fresh URL so iOS is forced to
-  // re-check the worker after each emergency-cache cleanup release.
   const registerStableWorker = () => {
     if (!('serviceWorker' in navigator)) return;
     try {
-      navigator.serviceWorker.register('/sw.js?v=20260912-enterprise', { scope: '/' }).then((registration) => {
+      navigator.serviceWorker.register(`/sw.js?v=${RELEASE}-enterprise`, { scope: '/' }).then((registration) => {
         try { registration.update(); } catch (_) {}
       }).catch(() => {});
     } catch (_) {}
