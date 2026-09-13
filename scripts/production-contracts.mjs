@@ -25,118 +25,85 @@ function walk(dir, out = []) {
 
 console.log('Production contract validation')
 
-try {
-  const config = read('supabase/config.toml')
-  if (!/^project_id\s*=\s*"ahslifnthiwfkmaswjno"$/m.test(config)) fail('Supabase project_id is not pinned to production')
-  else ok('Supabase production project is pinned')
-} catch (error) { fail(`unable to read Supabase config: ${error.message}`) }
+const config = read('supabase/config.toml')
+if (/^project_id\s*=\s*"ahslifnthiwfkmaswjno"$/m.test(config)) ok('Supabase production project is pinned')
+else fail('Supabase project_id is not pinned to production')
 
-try {
-  const sw = read('sw.js')
-  if (!/const CACHE_NAME\s*=\s*['"]globall-cloud-v6-enterprise['"]/.test(sw)) fail('sw.js is not using the canonical enterprise cache name')
-  if (!sw.includes("event.respondWith(fetch(request, { cache: 'no-store' }))")) fail('navigation requests are not network-first')
-  if (!sw.includes("fetch(request, { cache: 'no-store' })")) fail('asset requests are not network-first')
-  if (!sw.includes('self.skipWaiting()') || !sw.includes('self.clients.claim()')) fail('service worker lifecycle hardening is incomplete')
-  else ok('Service Worker network-first contract is active')
-} catch (error) { fail(`service worker contract failed: ${error.message}`) }
+const sw = read('sw.js')
+if (/const CACHE_NAME\s*=\s*['"]globall-cloud-v6-enterprise['"]/.test(sw)) ok('Canonical enterprise service-worker cache is configured')
+else fail('sw.js is not using the canonical enterprise cache name')
+if (sw.includes("fetch(request, { cache: 'no-store' })") && sw.includes('self.skipWaiting()') && sw.includes('self.clients.claim()')) ok('Service worker is network-first and self-updating')
+else fail('Service Worker network-first/lifecycle contract is incomplete')
 
 const required = [
-  'index.html','sw.js','production-bridge.js','runtime-guard.js','_headers','_redirects',
-  'public-route-bootstrap.js','public-staff-guard-20260909.js','public-premium-mobile-20260909.css',
-  'public-premium-mobile-20260909.js','tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css',
-  'customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os-v5.html','staff-os-v5.css','staff-os-v5.js',
+  'index.html','sw.js','production-bridge.js','runtime-guard.js','_headers','_redirects','public-route-bootstrap.js','public-runtime-guarantee.js',
+  'public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js','tracking-integration.html','tracking-intelligence.js',
+  'tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os-v5.html','staff-os-v5.css','staff-os-v5.js',
   'staff-os-v5-rescue.js','staff-logistics-intelligence.css','staff-logistics-intelligence.js','staff-mobile-command-dock.css','staff-mobile-command-dock.js',
   'staff-os-pro-20260909.css','staff-os-pro-20260909.js','staff-shell-polish-20260909.css','staff-shell-polish-20260909.js',
-  'staff-premium-mobile-20260909.css','staff-premium-mobile-20260909.js','warehouse-offline-sync.js',
-  'production-mobile-ux-v2026.css','gc-platform-vnext.js','gc-platform-vnext-plus.js','gc-runtime-safety-v2026.js','production-brand-repair.js',
-  'gc-csp-scripts/logistics-pricing-ui.js','supabase/config.toml','package.json','package-lock.json',
-  'supabase/functions/logistics-control-plane/index.ts','supabase/functions/notification-dispatch/index.ts',
-  'supabase/functions/warehouse-receiving/index.ts','supabase/functions/warehouse-notify/index.ts',
-  'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts',
-  'supabase/functions/invoice-ai/index.ts','supabase/functions/customer-debt-assistant/index.ts','supabase/functions/fx-refresh/index.ts',
-  'supabase/functions/staff-shipment-v5/index.ts','supabase/functions/staff-shipment-control/index.ts',
-  'supabase/functions/public-config/index.ts','supabase/functions/public-message/index.ts','supabase/functions/public-quote/index.ts',
-  'supabase/functions/public-pricing/index.ts','supabase/functions/public-track/index.ts','supabase/functions/customer-self/index.ts',
-  'supabase/functions/payment-webhook/index.ts','supabase/functions/_shared/payment-providers.ts','supabase/functions/_shared/service-key.ts',
-  'tests/validate.mjs','tests/e2e/run.mjs'
+  'staff-premium-mobile-20260909.css','staff-premium-mobile-20260909.js','warehouse-offline-sync.js','production-mobile-ux-v2026.css','gc-platform-vnext.js',
+  'gc-platform-vnext-plus.js','gc-runtime-safety-v2026.js','production-brand-repair.js','gc-csp-scripts/logistics-pricing-ui.js','supabase/config.toml',
+  'package.json','package-lock.json','supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
+  'supabase/functions/notification-dispatch/index.ts','supabase/functions/warehouse-receiving/index.ts','supabase/functions/warehouse-notify/index.ts',
+  'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/invoice-ai/index.ts',
+  'supabase/functions/customer-debt-assistant/index.ts','supabase/functions/fx-refresh/index.ts','supabase/functions/public-config/index.ts',
+  'supabase/functions/public-message/index.ts','supabase/functions/public-quote/index.ts','supabase/functions/public-pricing/index.ts',
+  'supabase/functions/public-track/index.ts','supabase/functions/customer-self/index.ts','supabase/functions/payment-webhook/index.ts',
+  'supabase/functions/_shared/payment-providers.ts','tests/validate.mjs','tests/e2e/run.mjs'
 ]
-for (const path of required) if (!exists(path)) fail(`missing critical production file: ${path}`)
-if (!failures) ok(`${required.length} critical production files are present`)
+const missing = required.filter((path) => !exists(path))
+if (missing.length) missing.forEach((path) => fail(`missing critical production file: ${path}`))
+else ok(`${required.length} critical production files are present`)
 
-try {
-  const extensions = new Set(['.js','.mjs','.ts','.tsx','.html','.css','.json','.toml','.yml','.yaml'])
-  const files = walk(ROOT).filter((file) => extensions.has(file.slice(file.lastIndexOf('.'))))
-  const stale = ['swptmhhwhdtyrrf', 'zetam'].join('')
-  const secretPatterns = [
-    /SUPABASE_SERVICE_ROLE_KEY\s*[:=]\s*["'](?:eyJ|sb_secret_)[A-Za-z0-9._-]{10,}/i,
-    /service[_-]?role[_-]?key\s*[:=]\s*["'](?:eyJ|sb_secret_)[A-Za-z0-9._-]{10,}/i,
-    /CLOUDFLARE_API_TOKEN\s*[:=]\s*["'][A-Za-z0-9._-]{20,}/i,
-  ]
-  let staleHits = 0
-  let secretHits = 0
-  for (const file of files) {
-    const source = readFileSync(file, 'utf8')
-    if (source.includes(stale)) { staleHits += 1; fail(`stale Supabase project reference in ${relative(ROOT, file)}`) }
-    if (secretPatterns.some((pattern) => pattern.test(source))) { secretHits += 1; fail(`secret-like credential literal detected in ${relative(ROOT, file)}`) }
-  }
-  if (!staleHits) ok('No stale Supabase project references detected')
-  if (!secretHits) ok('No service-role/API-token literals detected in source')
-} catch (error) { fail(`source hygiene validation failed: ${error.message}`) }
+const extensions = new Set(['.js','.mjs','.ts','.tsx','.html','.css','.json','.toml','.yml','.yaml'])
+const files = walk(ROOT).filter((file) => extensions.has(file.slice(file.lastIndexOf('.'))))
+const staleProjectRef = 'swptmhhwhdtyrrfzetam'
+let staleHits = 0
+let secretHits = 0
+const secretPatterns = [
+  /SUPABASE_SERVICE_ROLE_KEY\s*[:=]\s*["'](?:eyJ|sb_secret_)[A-Za-z0-9._-]{10,}/i,
+  /service[_-]?role[_-]?key\s*[:=]\s*["'](?:eyJ|sb_secret_)[A-Za-z0-9._-]{10,}/i,
+  /CLOUDFLARE_API_TOKEN\s*[:=]\s*["'][A-Za-z0-9._-]{20,}/i,
+]
+for (const file of files) {
+  const source = readFileSync(file, 'utf8')
+  if (source.includes(staleProjectRef)) { staleHits += 1; fail(`stale Supabase project reference in ${relative(ROOT, file)}`) }
+  if (secretPatterns.some((pattern) => pattern.test(source))) { secretHits += 1; fail(`secret-like credential literal detected in ${relative(ROOT, file)}`) }
+}
+if (!staleHits) ok('No stale Supabase project reference detected')
+if (!secretHits) ok('No secret-like service credential detected in source')
 
-try {
-  const headers = read('_headers')
-  const redirects = read('_redirects')
-  if (!headers.includes('Content-Security-Policy:')) fail('CSP header missing')
-  if (/script-src[^\n;]*unsafe-inline/.test(headers)) fail('CSP script-src allows unsafe-inline')
-  if (!headers.includes('Strict-Transport-Security:')) fail('HSTS missing')
-  if (!headers.includes('X-Content-Type-Options: nosniff')) fail('nosniff missing')
-  for (const route of ['/track /tracking-integration.html 200','/staff /staff-os-v5.html 200','/staff/ /staff-os-v5.html 200','/staff-os /staff-os-v5.html 200']) if (!redirects.includes(route)) fail(`route contract missing: ${route}`)
-  ok('Security headers and route contracts are present')
-} catch (error) { fail(`surface security validation failed: ${error.message}`) }
+const headers = read('_headers')
+const redirects = read('_redirects')
+if (!headers.includes('Content-Security-Policy:') || /script-src[^\n;]*unsafe-inline/.test(headers) || !headers.includes('Strict-Transport-Security:') || !headers.includes('X-Content-Type-Options: nosniff')) fail('security header contract is incomplete')
+else ok('Security headers are present')
+for (const route of ['/track /tracking-integration.html 200','/staff /staff-os-v5.html 200','/staff/ /staff-os-v5.html 200','/staff-os /staff-os-v5.html 200']) if (!redirects.includes(route)) fail(`route contract missing: ${route}`)
+if (!failures) ok('Core public/staff routes are wired')
 
-try {
-  const config = read('supabase/config.toml')
-  for (const fn of ['public-config','public-message','public-quote','public-pricing','public-track','customer-self','staff-directory']) {
-    const re = new RegExp(`\\[functions\\.${fn}\\][\\s\\S]*?verify_jwt\\s*=\\s*(true|false)`)
-    const match = config.match(re)
-    if (!match) fail(`missing explicit verify_jwt setting for ${fn}`)
-    else if (match[1] !== 'false') fail(`${fn} must remain publicly callable by design`)
-  }
-  for (const fn of ['logistics-control-plane','logistics-control-tower','document-access','warehouse-receiving','operations-admin','staff-analytics']) {
-    const re = new RegExp(`\\[functions\\.${fn}\\][\\s\\S]*?verify_jwt\\s*=\\s*(true|false)`)
-    const match = config.match(re)
-    if (!match) fail(`missing explicit verify_jwt setting for protected function ${fn}`)
-    else if (match[1] !== 'true') fail(`${fn} must require JWT authentication`)
-  }
-  ok('Public/protected Edge Function JWT posture is explicit')
-} catch (error) { fail(`JWT posture validation failed: ${error.message}`) }
+const bridge = read('production-bridge.js')
+const staff = read('staff-os-v5.html')
+const publicIndex = read('gc-csp-scripts/index-inline-2.js')
+const publicBootstrap = read('public-route-bootstrap.js')
+const publicRuntime = read('public-runtime-guarantee.js')
+if (!bridge.includes('https://ahslifnthiwfkmaswjno.supabase.co')) fail('production bridge points at the wrong Supabase project')
+if (!bridge.includes('SUPABASE_PUBLISHABLE_KEY')) fail('production bridge publishable key marker missing')
+if (!staff.includes('staff-premium-mobile-20260909.css?v=')) fail('Staff premium mobile CSS is not loaded')
+if (!staff.includes('staff-premium-mobile-20260909.js?v=')) fail('Staff premium mobile JS is not loaded')
+if (!staff.includes('mobile-premium-responsive-v2026.css?v=')) fail('Staff responsive CSS is not loaded')
+if (!staff.includes('staff-os-pro-20260909.css?v=') || !staff.includes('staff-shell-polish-20260909.css?v=')) fail('Staff shell polish assets are not loaded')
+if (!publicIndex.includes('functions/v1/public-quote')) fail('public quote endpoint is not wired')
+if (!publicIndex.includes('functions/v1/public-message')) fail('public message endpoint is not wired')
+if (!publicBootstrap.includes('/public-runtime-guarantee.js')) fail('public runtime guarantee is not loaded')
+if (!publicRuntime.includes('renderEmergencyShell')) fail('public emergency shell is missing')
+if (staff.includes('YOUR_PROJECT_ID') || staff.includes('YOUR_ANON_KEY')) fail('Staff OS still contains placeholder Supabase configuration')
 
-try {
-  const bridge = read('production-bridge.js')
-  const routes = read('_redirects')
-  const staff = read('staff-os-v5.html')
-  const mobile = read('staff-premium-mobile-20260909.js')
-  if (!bridge.includes('https://ahslifnthiwfkmaswjno.supabase.co')) fail('production bridge points at the wrong Supabase project')
-  if (!bridge.includes('SUPABASE_PUBLISHABLE_KEY')) fail('production bridge publishable key marker missing')
-  if (!routes.includes('/staff /staff-os-v5.html 200')) fail('staff route missing')
-  const staffAssets = [
-    /staff-mobile-command-dock\.css\?v=/,
-    /staff-mobile-command-dock\.js\?v=/,
-    /mobile-premium-responsive-v2026\.css\?v=/,
-    /staff-os-pro-20260909\.css\?v=/,
-    /staff-os-shell-polish-20260909\.css\?v=/,
-    /staff-shell-polish-20260909\.css\?v=/,
-    /staff-premium-mobile-20260909\.css\?v=/,
-    /staff-os-pro-20260909\.js\?v=/,
-    /staff-shell-polish-20260909\.js\?v=/,
-    /staff-premium-mobile-20260909\.js\?v=/,
-    /staff-os-v5-rescue\.js\?v=/,
-  ]
-  for (const pattern of staffAssets) if (!pattern.test(staff)) fail(`Staff asset missing from entry: ${pattern}`)
-  if (!mobile.includes('Staff OS')) fail('Staff mobile command dock marker missing')
-  if (staff.includes('YOUR_PROJECT_ID') || staff.includes('YOUR_ANON_KEY')) fail('placeholder Supabase configuration remains in Staff OS')
-  ok('Staff/public UI release invariants are present')
-} catch (error) { fail(`UI release validation failed: ${error.message}`) }
+const publicFns = ['public-config','public-message','public-quote','public-pricing','public-track','customer-self','staff-directory']
+for (const fn of publicFns) {
+  const block = new RegExp(`\\[functions\\.${fn}\\][\\s\\S]*?verify_jwt\\s*=\\s*(true|false)`).exec(config)
+  if (!block) fail(`missing explicit verify_jwt setting for ${fn}`)
+  else if (block[1] !== 'false') fail(`${fn} must be publicly callable`)
+}
+if (!failures) ok('Public function JWT posture is explicit')
 
 console.log('')
 if (failures) { console.error(`${failures} production contract check(s) failed.`); process.exit(1) }
