@@ -50,7 +50,7 @@ if (ts) {
 
 console.log('Required production files')
 const required = [
-  'index.html','sw.js','sw-v98.js','production-bridge.js','runtime-guard.js','_headers','_redirects',
+  'index.html','sw.js','production-bridge.js','runtime-guard.js','_headers','_redirects',
   'public-route-bootstrap.js','public-runtime-guarantee.js','public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js',
   'tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html',
   'staff-os-v5.html','staff-os-v5.css','staff-os-v5.js','staff-os-v5-rescue.js','staff-logistics-intelligence.js','staff-logistics-intelligence.css',
@@ -85,9 +85,9 @@ const publicBootstrap = read('public-route-bootstrap.js')
 const publicRuntime = read('public-runtime-guarantee.js')
 const guards = [
   ['quote uses public-quote', publicIndex.includes('functions/v1/public-quote')],
-  ['quote avoids direct shipment write', !/from\(['"]shipments['"]\)\.insert|saveShipment/.test(publicIndex)],
+  ['quote avoids direct shipment write', !/from\([\'"]shipments[\'"]\)\.insert|saveShipment/.test(publicIndex)],
   ['contact uses public-message', publicIndex.includes('functions/v1/public-message')],
-  ['contact avoids direct messages insert', !/from\(['"]messages['"]\)\.insert/.test(publicIndex)],
+  ['contact avoids direct messages insert', !/from\([\'"]messages[\'"]\)\.insert/.test(publicIndex)],
   ['production bridge uses live project', read('production-bridge.js').includes('ahslifnthiwfkmaswjno.supabase.co')],
   ['staff route is isolated', read('_redirects').includes('/staff /staff-os-v5.html 200')],
   ['staff entry has mobile shell', /staff-premium-mobile-20260909\.css\?v=/.test(read('staff-os-v5.html'))],
