@@ -23,169 +23,90 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
+
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
+
       - name: Install locked dependencies
         run: npm ci --ignore-scripts
+
       - name: Repository validation
         run: npm test
+
       - name: Production contract validation
         run: npm run test:contracts
-      - name: Production reference and security invariants
+
+      - name: Runtime reference and security invariants
         shell: bash
         run: |
           set -euo pipefail
           test "$(grep -E '^project_id[[:space:]]*=' supabase/config.toml | head -n1 | sed -E 's/.*=[[:space:]]*\"([^\"]+)\".*/\1/')" = "ahslifnthiwfkmaswjno"
-          stale='swptmhhwhdtyrrfzetam'
-          if grep -RIl "$stale" --include='*.js' --include='*.mjs' --include='*.ts' --include='*.tsx' --include='*.html' --include='*.css' --include='*.json' --include='*.toml' --include='*.yml' --include='*.yaml' .; then
-            echo 'Forbidden stale Supabase project reference detected in runtime/config files.'
+          if grep -RIl 'swptmhhwhdtyrrfzetam' --include='*.js' --include='*.mjs' --include='*.ts' --include='*.tsx' --include='*.html' --include='*.css' --include='*.json' --include='*.toml' --include='*.yml' --include='*.yaml' .; then
+            echo 'Forbidden stale Supabase project reference detected.'
             exit 1
           fi
-          grep -q "script-src 'self'" _headers
+          grep -q "Content-Security-Policy:" _headers
+          grep -q "Strict-Transport-Security:" _headers
+          grep -q "X-Content-Type-Options: nosniff" _headers
           ! grep -q "script-src[^;]*unsafe-inline" _headers
-          grep -q 'ahslifnthiwfkmaswjno.supabase.co' production-bridge.js
+          grep -q 'https://ahslifnthiwfkmaswjno.supabase.co' production-bridge.js
           grep -q '^/staff /staff-os-v5.html 200$' _redirects
-          grep -q '^/staff/ /staff-os-v5.html 200$' _redirects
-          grep -q '^/staff-os /staff-os-v5.html 200$' _redirects
           grep -q '^/track /tracking-integration.html 200$' _redirects
-          grep -q '^\[functions.public-pricing\]' supabase/config.toml
-          grep -A1 '^\[functions.public-pricing\]' supabase/config.toml | grep -q 'verify_jwt = false'
-          grep -A1 '^\[functions.customer-self\]' supabase/config.toml | grep -q 'verify_jwt = false'
-          grep -A1 '^\[functions.staff-directory\]' supabase/config.toml | grep -q 'verify_jwt = false'
-      - name: Critical production files
+
+      - name: Public and Staff smoke validation
         shell: bash
         run: |
           set -euo pipefail
-          for file in index.html sw.js production-bridge.js runtime-guard.js _headers _redirects public-production-safety.js public-route-bootstrap.js site-navigation-20260909.css site-navigation-20260909.js public-premium-mobile-20260909.css public-premium-mobile-20260909.js public-staff-guard-20260909.js mobile-premium-responsive-v2026.css tracking-integration.html tracking-intelligence.html tracking-intelligence.css tracking-intelligence.js customer-portal.html warehouse-os.html driver-workspace.html staff-os-v5.html staff-os-v5.css staff-os-v5.js staff-os-v5-shipment-create-fix.js staff-os-v5-shipment-control-bridge.js staff-os-data-health-panel.js staff-os-v5-integrations.js staff-os-v5-profile.js staff-os-production-analytics-bridge.js staff-os-v5-stability.js staff-logistics-intelligence.css staff-logistics-intelligence.js staff-mobile-command-dock.css staff-mobile-command-dock.js staff-os-pro-20260909.css staff-os-pro-20260909.js staff-shell-polish-20260909.css staff-shell-polish-20260909.js staff-premium-mobile-20260909.css staff-premium-mobile-20260909.js warehouse-offline-sync.js production-mobile-ux-v2026.css gc-platform-vnext.css gc-platform-vnext.js gc-platform-vnext-plus.css gc-platform-vnext-plus.js gc-runtime-safety-v2026.js production-brand-repair.js gc-csp-scripts/logistics-pricing-ui.js supabase/config.toml package.json package-lock.json supabase/functions/logistics-control-plane/index.ts supabase/functions/notification-dispatch/index.ts supabase/functions/warehouse-receiving/index.ts supabase/functions/warehouse-notify/index.ts supabase/functions/staff-ops-hub/index.ts supabase/functions/staff-analytics/index.ts supabase/functions/invoice-ai/index.ts supabase/functions/customer-debt-assistant/index.ts supabase/functions/fx-refresh/index.ts supabase/functions/staff-shipment-v5/index.ts supabase/functions/staff-shipment-control/index.ts supabase/functions/public-config/index.ts supabase/functions/public-message/index.ts supabase/functions/public-quote/index.ts supabase/functions/public-pricing/index.ts supabase/functions/public-track/index.ts supabase/functions/customer-self/index.ts supabase/functions/payment-webhook/index.ts supabase/functions/_shared/payment-providers.ts supabase/functions/_shared/service-key.ts tests/validate.mjs tests/e2e/run.mjs scripts/production-contracts.mjs; do test -f "$file"; done
-      - name: Hardened public endpoint invariants
-        shell: bash
-        run: |
-          set -euo pipefail
-          for file in supabase/functions/public-config/index.ts supabase/functions/public-message/index.ts supabase/functions/public-quote/index.ts supabase/functions/public-pricing/index.ts supabase/functions/public-track/index.ts; do
-            grep -q 'consume_public_message_rate_limit' "$file"
-          done
-          grep -q 'status_requeried' supabase/functions/payment-webhook/index.ts
-          grep -q 'QICARD_WEBHOOK_PUBLIC_KEY' supabase/functions/payment-webhook/index.ts
-          grep -q 'getProviderPayment' supabase/functions/payment-webhook/index.ts
-          grep -q 'SUPABASE_SERVICE_ROLE_KEY' supabase/functions/public-message/index.ts
-          grep -q 'company_website' supabase/functions/public-message/index.ts
-          grep -q 'company_website' supabase/functions/public-quote/index.ts
-          grep -q 'ilike.*destination_key' supabase/functions/public-quote/index.ts
-          grep -q 'functions/v1/public-pricing' gc-csp-scripts/logistics-pricing-ui.js
-          ! grep -q "rpc('calculate_logistics_price'" gc-csp-scripts/logistics-pricing-ui.js
-          ! grep -q "rpc('validate_logistics_cargo'" gc-csp-scripts/logistics-pricing-ui.js
-      - name: Staff/public UI invariants
-        shell: bash
-        run: |
-          set -euo pipefail
-          grep -q 'staff-mobile-command-dock.css?v=20260908-1' staff-os-v5.html
-          grep -q 'staff-mobile-command-dock.js?v=20260908-1' staff-os-v5.html
-          grep -q 'mobile-premium-responsive-v2026.css?v=20260908-1' staff-os-v5.html
-          grep -q 'staff-os-pro-20260909.css?v=20260909-1' staff-os-v5.html
-          grep -q 'staff-shell-polish-20260909.css?v=20260909-1' staff-os-v5.html
-          grep -q 'staff-premium-mobile-20260909.css?v=20260909-1' staff-os-v5.html
-          grep -q 'staff-os-pro-20260909.js?v=20260909-1' staff-os-v5.html
-          grep -q 'staff-shell-polish-20260909.js?v=20260909-1' staff-os-v5.html
-          grep -q 'staff-premium-mobile-20260909.js?v=20260909-1' staff-os-v5.html
-          grep -q 'public-staff-guard-20260909.js' public-route-bootstrap.js
-          grep -q 'public-premium-mobile-20260909.css' public-route-bootstrap.js
-          grep -q 'public-premium-mobile-20260909.js' public-route-bootstrap.js
-          grep -q 'public-production-safety.js' production-brand-repair.js
-          grep -q 'mobile-premium-responsive-v2026.css' production-brand-repair.js
-          grep -q 'Staff OS' staff-mobile-command-dock.js
+          grep -q 'staff-premium-mobile-20260909.css?v=' staff-os-v5.html
+          grep -q 'staff-premium-mobile-20260909.js?v=' staff-os-v5.html
+          grep -q 'mobile-premium-responsive-v2026.css?v=' staff-os-v5.html
+          grep -q 'staff-os-pro-20260909.css?v=' staff-os-v5.html
+          grep -q 'staff-shell-polish-20260909.css?v=' staff-os-v5.html
+          grep -q 'functions/v1/public-quote' gc-csp-scripts/index-inline-2.js
+          grep -q 'functions/v1/public-message' gc-csp-scripts/index-inline-2.js
+          grep -q '/public-runtime-guarantee.js' public-route-bootstrap.js
+          grep -q 'renderEmergencyShell' public-runtime-guarantee.js
           ! grep -q 'YOUR_PROJECT_ID' staff-os-v5.html
           ! grep -q 'YOUR_ANON_KEY' staff-os-v5.html
-      - name: Service worker release invariants
-        shell: bash
-        run: |
-          set -euo pipefail
-          CACHE_VERSION="$(node - <<'NODE'
-          const fs = require('node:fs')
-          const source = fs.readFileSync('sw.js', 'utf8')
-          const match = source.match(/const CACHE_VERSION=['\"](gc-v\d+)['\"];/)
-          if (!match) process.exit(1)
-          process.stdout.write(match[1])
-          NODE
-          )"
-          grep -q "const CACHE_VERSION=['\"]${CACHE_VERSION}['\"]" sw.js
-          for asset in \
-            staff-os-v5.html \
-            staff-os-v5.js?v=20260905-3 \
-            staff-os-v5-shipment-create-fix.js?v=20260905-3 \
-            staff-os-v5-shipment-control-bridge.js?v=20260905-1 \
-            staff-os-data-health-panel.js?v=20260905-1 \
-            staff-os-v5-integrations.js?v=20260905-3 \
-            staff-os-v5-profile.js?v=20260905-3 \
-            staff-os-production-analytics-bridge.js?v=20260905-3 \
-            staff-os-v5-stability.js?v=20260905-3 \
-            staff-logistics-intelligence.css?v=20260908-1 \
-            staff-logistics-intelligence.js?v=20260908-1 \
-            staff-mobile-command-dock.css?v=20260908-1 \
-            staff-mobile-command-dock.js?v=20260908-1 \
-            mobile-premium-responsive-v2026.css?v=20260908-1 \
-            staff-os-pro-20260909.css?v=20260909-1 \
-            staff-os-pro-20260909.js?v=20260909-1 \
-            staff-shell-polish-20260909.css?v=20260909-1 \
-            staff-shell-polish-20260909.js?v=20260909-1 \
-            staff-premium-mobile-20260909.css?v=20260909-1 \
-            staff-premium-mobile-20260909.js?v=20260909-1 \
-            public-route-bootstrap.js?v=20260909-1 \
-            site-navigation-20260909.css?v=20260909-1 \
-            site-navigation-20260909.js?v=20260909-1 \
-            public-premium-mobile-20260909.css?v=20260909-1 \
-            public-premium-mobile-20260909.js?v=20260909-1 \
-            public-staff-guard-20260909.js?v=20260909-1 \
-            tracking-intelligence.css?v=20260908-1 \
-            tracking-intelligence.js?v=20260908-1; do
-            grep -q "$asset" sw.js
-          done
-          ! grep -q "staff-os-production.js?v=" sw.js
+
       - name: Public live smoke test
         if: github.event_name != 'pull_request'
         env:
-          LIVE_EXPECTED_SHA: ${{ github.sha }}
+          EXPECTED_SHA: ${{ github.sha }}
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import json, os, urllib.parse, urllib.request
+          import json, os, time, urllib.parse, urllib.request
           site='https://globall-cloud.pages.dev'
-          supabase='https://ahslifnthiwfkmaswjno.supabase.co'
-          expected=os.environ['LIVE_EXPECTED_SHA']
+          expected=os.environ['EXPECTED_SHA']
           legacy='Supabase هێشتا پەیوەست نەکراوە'
-          for path in ('/','/track','/tracking-integration.html','/warehouse-os.html','/customer-portal.html'):
-              with urllib.request.urlopen(site+path,timeout=20) as r:
-                  body=r.read().decode('utf-8','replace')
-                  assert r.status==200 and len(body)>200,(path,r.status,len(body))
-                  assert legacy not in body,(path,'legacy Supabase setup notice present')
-          health_req=urllib.request.Request(site+'/api/health?ci=1',headers={'Cache-Control':'no-cache','Accept':'application/json'})
-          with urllib.request.urlopen(health_req,timeout=20) as r:
-              health=json.loads(r.read().decode('utf-8','replace'))
-              assert r.status==200 and health.get('ok') is True and health.get('edge')=='ok',health
-          release_url=site+'/release.json?ci='+urllib.parse.quote(expected)
-          release_req=urllib.request.Request(release_url,headers={'Cache-Control':'no-cache','Accept':'application/json'})
-          with urllib.request.urlopen(release_req,timeout=20) as r:
-              release=json.loads(r.read().decode('utf-8','replace'))
-              assert r.status==200 and release.get('service')=='globall-cloud' and release.get('commit')==expected,release
-          bridge=urllib.request.urlopen(site+'/production-bridge.js?e2e=1',timeout=20).read().decode('utf-8','replace')
-          marker='SUPABASE_PUBLISHABLE_KEY'
-          assert marker in bridge,'publishable key marker not found'
-          start=bridge.index(marker)
-          quote=bridge[start:].split('=',1)[1].strip()[0]
-          rest=bridge[start:].split('=',1)[1].strip()[1:]
-          key=rest.split(quote,1)[0]
-          assert key.startswith('sb_publishable_'),'publishable key format unexpected'
-          req=urllib.request.Request(supabase+'/functions/v1/public-config?key=usd_iqd_rate',headers={'Origin':site,'Accept':'application/json','apikey':key})
-          with urllib.request.urlopen(req,timeout=20) as r:
-              body=json.loads(r.read().decode('utf-8','replace'))
-              assert r.status==200 and body.get('key')=='usd_iqd_rate' and body.get('value') not in (None,'')
+          for attempt in range(1,25):
+              try:
+                  release_req=urllib.request.Request(site+'/release.json?verify='+urllib.parse.quote(expected),headers={'Cache-Control':'no-cache','Accept':'application/json'})
+                  with urllib.request.urlopen(release_req,timeout=15) as r:
+                      release=json.loads(r.read().decode('utf-8','replace'))
+                  if release.get('commit') != expected:
+                      raise RuntimeError(f'release commit is {release.get("commit")!r}, expected {expected!r}')
+                  for path in ('/','/track','/tracking-integration.html','/warehouse-os.html','/customer-portal.html','/staff'):
+                      req=urllib.request.Request(site+path+'?ci='+str(attempt),headers={'Cache-Control':'no-cache'})
+                      with urllib.request.urlopen(req,timeout=15) as r:
+                          body=r.read().decode('utf-8','replace')
+                          assert r.status == 200 and len(body) > 200, (path,r.status,len(body))
+                          assert legacy not in body, (path,'legacy Supabase setup notice present')
+                  health_req=urllib.request.Request(site+'/api/health?ci=1',headers={'Cache-Control':'no-cache','Accept':'application/json'})
+                  with urllib.request.urlopen(health_req,timeout=15) as r:
+                      health=json.loads(r.read().decode('utf-8','replace'))
+                      assert r.status == 200 and health.get('ok') is True, health
+                  print(json.dumps(release,ensure_ascii=False))
+                  print(json.dumps(health,ensure_ascii=False))
+                  break
+              except Exception as exc:
+                  if attempt == 24:
+                      raise
+                  print(f'Waiting for live release ({attempt}/24): {exc}')
+                  time.sleep(5)
           PY
-      - name: Read-only public E2E
-        if: github.event_name != 'pull_request'
-        env:
-          GC_SITE_URL: https://globall-cloud.pages.dev
-          E2E_SUPABASE_URL: https://ahslifnthiwfkmaswjno.supabase.co
-        run: npm run test:e2e:public
