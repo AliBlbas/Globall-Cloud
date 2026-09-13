@@ -33,9 +33,11 @@ try {
 
 try {
   const sw = read('sw.js')
-  const match = sw.match(/CACHE_VERSION\s*=\s*['"](gc-v\d+)['"]/) 
-  if (!match) fail('sw.js has no canonical gc-vNN cache version')
-  else ok(`Service Worker cache contract is ${match[1]}`)
+  if (!/const CACHE_NAME\s*=\s*['"]globall-cloud-v6-enterprise['"]/.test(sw)) fail('sw.js is not using the canonical enterprise cache name')
+  if (!sw.includes("event.respondWith(fetch(request, { cache: 'no-store' }))")) fail('navigation requests are not network-first')
+  if (!sw.includes("fetch(request, { cache: 'no-store' })")) fail('asset requests are not network-first')
+  if (!sw.includes('self.skipWaiting()') || !sw.includes('self.clients.claim()')) fail('service worker lifecycle hardening is incomplete')
+  else ok('Service Worker network-first contract is active')
 } catch (error) { fail(`service worker contract failed: ${error.message}`) }
 
 const required = [
@@ -43,7 +45,7 @@ const required = [
   'public-route-bootstrap.js','public-staff-guard-20260909.js','public-premium-mobile-20260909.css',
   'public-premium-mobile-20260909.js','tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css',
   'customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os-v5.html','staff-os-v5.css','staff-os-v5.js',
-  'staff-logistics-intelligence.css','staff-logistics-intelligence.js','staff-mobile-command-dock.css','staff-mobile-command-dock.js',
+  'staff-os-v5-rescue.js','staff-logistics-intelligence.css','staff-logistics-intelligence.js','staff-mobile-command-dock.css','staff-mobile-command-dock.js',
   'staff-os-pro-20260909.css','staff-os-pro-20260909.js','staff-shell-polish-20260909.css','staff-shell-polish-20260909.js',
   'staff-premium-mobile-20260909.css','staff-premium-mobile-20260909.js','warehouse-offline-sync.js',
   'production-mobile-ux-v2026.css','gc-platform-vnext.js','gc-platform-vnext-plus.js','gc-runtime-safety-v2026.js','production-brand-repair.js',
@@ -117,7 +119,20 @@ try {
   if (!bridge.includes('https://ahslifnthiwfkmaswjno.supabase.co')) fail('production bridge points at the wrong Supabase project')
   if (!bridge.includes('SUPABASE_PUBLISHABLE_KEY')) fail('production bridge publishable key marker missing')
   if (!routes.includes('/staff /staff-os-v5.html 200')) fail('staff route missing')
-  for (const asset of ['staff-mobile-command-dock.css?v=20260908-1','staff-mobile-command-dock.js?v=20260908-1','mobile-premium-responsive-v2026.css?v=20260908-1','staff-os-pro-20260909.css?v=20260909-1','staff-shell-polish-20260909.css?v=20260909-1','staff-premium-mobile-20260909.css?v=20260909-1','staff-premium-mobile-20260909.js?v=20260909-1']) if (!staff.includes(asset)) fail(`Staff asset missing from entry: ${asset}`)
+  const staffAssets = [
+    /staff-mobile-command-dock\.css\?v=/,
+    /staff-mobile-command-dock\.js\?v=/,
+    /mobile-premium-responsive-v2026\.css\?v=/,
+    /staff-os-pro-20260909\.css\?v=/,
+    /staff-os-shell-polish-20260909\.css\?v=/,
+    /staff-shell-polish-20260909\.css\?v=/,
+    /staff-premium-mobile-20260909\.css\?v=/,
+    /staff-os-pro-20260909\.js\?v=/,
+    /staff-shell-polish-20260909\.js\?v=/,
+    /staff-premium-mobile-20260909\.js\?v=/,
+    /staff-os-v5-rescue\.js\?v=/,
+  ]
+  for (const pattern of staffAssets) if (!pattern.test(staff)) fail(`Staff asset missing from entry: ${pattern}`)
   if (!mobile.includes('Staff OS')) fail('Staff mobile command dock marker missing')
   if (staff.includes('YOUR_PROJECT_ID') || staff.includes('YOUR_ANON_KEY')) fail('placeholder Supabase configuration remains in Staff OS')
   ok('Staff/public UI release invariants are present')
