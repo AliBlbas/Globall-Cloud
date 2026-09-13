@@ -7,6 +7,7 @@
   const IS_STAFF = /^\/(?:staff|staff-os)(?:\.html)?\/?$/i.test(PATH);
   const IS_OPERATIONAL = /^\/(?:staff(?:-os)?|warehouse(?:-os)?|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\.html)?\/?$/i.test(PATH);
   const FALLBACKS = ['/logo-icon.svg', '/logo-icon-original.png'];
+  const LEGACY_NODES = ['#gcVnextHome','#gcVnextDock','#gcVnextCustomer','#gcVnextStaff','#gcPublicMobileActions','#gcPublicMobileNav'];
   const repaired = new WeakSet();
   let booted = false;
 
@@ -39,35 +40,46 @@
     else img.addEventListener('error', next, { once: true });
   };
 
+  const cleanupLegacyOverlays = () => {
+    for (const selector of LEGACY_NODES) {
+      document.querySelectorAll(selector).forEach((node) => node.remove());
+    }
+    document.querySelectorAll('[data-gc-vnext],[data-gc-vnext-loader],[data-gc-vnext-plus-loader],[data-gc-public-mobile-system]').forEach((node) => {
+      if (node.tagName === 'SCRIPT' || node.tagName === 'LINK') node.remove();
+    });
+  };
+
   const repairLogos = () => document.querySelectorAll('img').forEach(repairLogo);
 
   const boot = () => {
     if (IS_API || booted) return;
     booted = true;
 
-    // Public pages use the native renderer. Historical VNext overlays and
-    // mobile-system docks were creating duplicate UI and visual collisions.
+    // The public site uses its native renderer. Do not load the historical
+    // VNext/mobile overlay stack that produced duplicated and empty mobile UI.
     if (!IS_OPERATIONAL) {
-      loadAsset({tag: 'link', href: '/mobile-premium-responsive-v2026.css?v=20260913-4', attr: 'data-gc-mobile-premium'});
-      loadAsset({tag: 'script', src: '/public-core-recovery.js?v=20260913-4', attr: 'data-gc-public-core-recovery'});
-      loadAsset({tag: 'script', src: '/public-production-safety.js?v=20260913-4', attr: 'data-gc-public-production-safety'});
+      loadAsset({tag: 'link', href: '/mobile-premium-responsive-v2026.css?v=20260913-5', attr: 'data-gc-mobile-premium'});
+      loadAsset({tag: 'script', src: '/public-core-recovery.js?v=20260913-5', attr: 'data-gc-public-core-recovery'});
+      loadAsset({tag: 'script', src: '/public-production-safety.js?v=20260913-5', attr: 'data-gc-public-production-safety'});
     }
 
     if (IS_STAFF) {
-      loadAsset({tag: 'link', href: '/staff-mobile-command-dock.css?v=20260913-4', attr: 'data-gc-staff-mobile-css'});
-      loadAsset({tag: 'script', src: '/staff-mobile-command-dock.js?v=20260913-4', attr: 'data-gc-staff-mobile-js'});
-      loadAsset({tag: 'link', href: '/staff-premium-mobile-20260909.css?v=20260913-4', attr: 'data-gc-staff-premium-mobile'});
+      loadAsset({tag: 'link', href: '/staff-mobile-command-dock.css?v=20260913-5', attr: 'data-gc-staff-mobile-css'});
+      loadAsset({tag: 'script', src: '/staff-mobile-command-dock.js?v=20260913-5', attr: 'data-gc-staff-mobile-js'});
+      loadAsset({tag: 'link', href: '/staff-premium-mobile-20260909.css?v=20260913-5', attr: 'data-gc-staff-premium-mobile'});
     }
 
     if (IS_OPERATIONAL) {
-      loadAsset({tag: 'script', src: '/gc-runtime-safety-v2026.js?v=20260913-4', attr: 'data-gc-runtime-safety'});
+      loadAsset({tag: 'script', src: '/gc-runtime-safety-v2026.js?v=20260913-5', attr: 'data-gc-runtime-safety'});
     }
 
+    cleanupLegacyOverlays();
     repairLogos();
   };
 
   const start = () => {
     boot();
+    cleanupLegacyOverlays();
     repairLogos();
   };
 
@@ -87,6 +99,9 @@
         changed = true;
       }
     }
-    if (changed) repairLogos();
+    if (changed) {
+      cleanupLegacyOverlays();
+      repairLogos();
+    }
   }).observe(document.documentElement, { childList: true, subtree: true });
 })();
