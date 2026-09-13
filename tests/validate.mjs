@@ -71,11 +71,11 @@ console.log('Production project reference')
 const config = read('supabase/config.toml')
 if (!/^project_id\s*=\s*"ahslifnthiwfkmaswjno"$/m.test(config)) fail('supabase/config.toml is not pinned to production')
 const runtimeFiles = walk(ROOT, ['.js','.mjs','.ts','.tsx','.html','.css','.json','.toml'])
-const stale = ['swptmhhwhdtyrrf', 'zetam'].join('')
+const staleProjectRef = 'swptmhhwhdtyrrfzetam'
 let staleHits = 0
 for (const f of runtimeFiles) {
   const text = readFileSync(f, 'utf8')
-  if (text.includes(stale)) { staleHits++; fail(`stale Supabase project reference in ${relative(ROOT, f)}`) }
+  if (text.includes(staleProjectRef)) { staleHits++; fail(`stale Supabase project reference in ${relative(ROOT, f)}`) }
 }
 if (!staleHits) ok('Live Supabase reference is consistent')
 
@@ -99,7 +99,7 @@ if (!failures) ok('Public and Staff integration guards OK')
 
 console.log('Migration naming and presence')
 const migDir = join(ROOT, 'supabase', 'migrations')
-const migrations = readdirSync(migDir).filter((x) => x.endsWith('.sql'))
+const migrations = existsSync(migDir) ? readdirSync(migDir).filter((x) => x.endsWith('.sql')) : []
 for (const name of migrations) if (!/^\d{14}_[a-z0-9_]+\.sql$/.test(name)) fail(`bad migration filename: ${name}`)
 for (const pattern of ['production_security_hardening','fix_alert_monitor_uuid_text_cast_v1','production_runtime_alignment_v1']) {
   if (!migrations.some((name) => name.includes(pattern))) fail(`missing production migration: ${pattern}`)
