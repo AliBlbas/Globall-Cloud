@@ -4,7 +4,7 @@
  * cache policy. Application logic belongs in the page scripts themselves.
  */
 const HTML_ACCEPT = 'text/html';
-const VERSION = '20260913-3';
+const VERSION = '20260913-4';
 
 const ENTERPRISE_SHELL = `<link rel="stylesheet" href="/enterprise-shell-v2026.css?v=${VERSION}" data-gc-enterprise-shell="1">`;
 const LEGACY_SUPABASE_NOTICE = 'Supabase هێشتا پەیوەست نەکراوە — URL و publishable key لە کۆدەکەدا زیادبکە (سەرەتای script tag).';
@@ -85,6 +85,7 @@ export async function onRequest(context) {
     html = addHeadAsset(html, 'src="/staff-auth-runtime-fix.js', `<script src="/staff-auth-runtime-fix.js?v=${VERSION}" defer data-gc-staff-auth-runtime="1"></script>`);
     html = addBodyAsset(html, 'src="/gc-csp-scripts/logistics-pricing-ui.js', `<script src="/gc-csp-scripts/logistics-pricing-ui.js?v=${VERSION}" defer data-gc-logistics-pricing-ui="1"></script>`);
     html = addBodyAsset(html, 'src="/site-navigation-20260909.js', `<script src="/site-navigation-20260909.js?v=${VERSION}" defer data-gc-site-navigation="1"></script>`);
+    html = addBodyAsset(html, 'src="/public-core-recovery.js', `<script src="/public-core-recovery.js?v=${VERSION}" defer data-gc-public-core-recovery="1"></script>`);
   }
 
   if (path === '/staff' || path === '/staff/' || path === '/staff-os' || path === '/staff-os/' || path === '/staff.html' || path === '/staff-os.html') {
