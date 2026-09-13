@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const RELEASE = '20260913-5';
+  const RELEASE = '20260913-6';
   const path = window.location.pathname.replace(/\/$/, '') || '/';
   const pathRoutes = {
     '/quote': 'request',
@@ -34,14 +34,14 @@
     document.head.appendChild(link);
   };
 
-  // Keep one navigation system. The historical premium mobile JS created a
-  // second bottom dock and competed with the native site navigation.
+  // One public navigation system + one deterministic core renderer.
+  // Do not add a second mobile dock layer.
+  addScript(`/public-core-entry.js?v=${RELEASE}`, 'data-gc-public-core-entry-loader');
   addScript(`/public-staff-guard-20260909.js?v=${RELEASE}`, 'data-gc-public-staff-guard');
   addScript(`/public-production-safety.js?v=${RELEASE}`, 'data-gc-public-production-safety');
   addStylesheet(`/site-navigation-20260909.css?v=${RELEASE}`);
   addScript(`/site-navigation-20260909.js?v=${RELEASE}`, 'data-gc-public-navigation');
   addScript(`/public-runtime-guarantee.js?v=${RELEASE}`, 'data-gc-public-runtime-guarantee');
-  addScript(`/public-core-recovery.js?v=${RELEASE}`, 'data-gc-public-core-recovery');
 
   const registerStableWorker = () => {
     if (!('serviceWorker' in navigator)) return;
