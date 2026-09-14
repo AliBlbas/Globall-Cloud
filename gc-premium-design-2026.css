@@ -1,0 +1,80 @@
+:root{
+  --gc-ui-bg:#06111f;
+  --gc-ui-surface:#0b1b2e;
+  --gc-ui-surface-2:#10253d;
+  --gc-ui-line:rgba(148,197,226,.16);
+  --gc-ui-line-strong:rgba(91,226,239,.32);
+  --gc-ui-text:#f6fbff;
+  --gc-ui-muted:#91abc2;
+  --gc-ui-brand:#54e5ef;
+  --gc-ui-brand-2:#3288ff;
+  --gc-ui-success:#52e3a0;
+  --gc-ui-warning:#ffd36f;
+  --gc-ui-danger:#ff8f91;
+  --gc-ui-radius-sm:10px;
+  --gc-ui-radius-md:14px;
+  --gc-ui-radius-lg:20px;
+  --gc-ui-shadow:0 18px 55px rgba(0,0,0,.22);
+  --gc-ui-shadow-hover:0 24px 70px rgba(0,0,0,.30);
+}
+
+/* Premium visual layer — additive only. It does not replace existing layout or behavior. */
+html{scroll-behavior:smooth}
+body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+button,a,input,select,textarea{transition:background-color .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .18s ease}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--gc-ui-brand);outline-offset:3px;box-shadow:0 0 0 5px rgba(84,229,239,.12)}
+
+/* Navigation and brand */
+header,nav,.navbar,.topbar,.site-header,.gc-header,.gc-nav{backdrop-filter:blur(18px) saturate(135%);-webkit-backdrop-filter:blur(18px) saturate(135%)}
+.gc-brand,.gc-status-brand,.brand-logo,.logo{font-weight:900;letter-spacing:-.02em}
+.gc-brand img,.gc-status-brand img,.brand-logo img,.logo img{filter:drop-shadow(0 5px 18px rgba(84,229,239,.14))}
+
+/* Cards, panels, operational surfaces */
+.card,.panel,.gc-card,.gc-vnext-card,.stat-card,.kpi,.feature-card,.service-card,.shipment-card,.dashboard-card,.admin-card{border-color:var(--gc-ui-line);box-shadow:var(--gc-ui-shadow)}
+.card:hover,.panel:hover,.gc-card:hover,.gc-vnext-card:hover,.stat-card:hover,.kpi:hover,.feature-card:hover,.service-card:hover,.shipment-card:hover,.dashboard-card:hover,.admin-card:hover{border-color:var(--gc-ui-line-strong);box-shadow:var(--gc-ui-shadow-hover)}
+
+/* Clear icon containers */
+.gc-icon,.icon,.nav-icon,.menu-icon,.feature-icon,.service-icon,.card-icon,.action-icon,.stat-icon,.kpi-icon{display:inline-grid;place-items:center;flex:0 0 auto;width:42px;height:42px;border-radius:13px;border:1px solid rgba(84,229,239,.18);background:linear-gradient(145deg,rgba(84,229,239,.13),rgba(50,136,255,.11));color:var(--gc-ui-brand);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 8px 22px rgba(0,0,0,.12);font-size:19px;line-height:1}
+.gc-icon svg,.icon svg,.nav-icon svg,.menu-icon svg,.feature-icon svg,.service-icon svg,.card-icon svg,.action-icon svg,.stat-icon svg,.kpi-icon svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* Make emoji/icon glyphs visually contained instead of floating */
+.gc-vnext-icon{width:46px;height:46px;border-radius:14px;font-size:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 26px rgba(0,0,0,.16)}
+
+/* Buttons */
+button,.btn,.button,.cta,a[role="button"]{min-height:42px;border-radius:12px}
+button:hover,.btn:hover,.button:hover,.cta:hover,a[role="button"]:hover{transform:translateY(-1px)}
+button:active,.btn:active,.button:active,.cta:active,a[role="button"]:active{transform:translateY(0)}
+
+/* Forms */
+input,select,textarea{border-radius:12px!important;border-color:var(--gc-ui-line)!important;background:rgba(6,18,31,.72)!important;color:var(--gc-ui-text)!important}
+input::placeholder,textarea::placeholder{color:#66839d}
+
+/* Status language */
+.status,.badge,.chip,.pill{border-radius:999px;font-weight:800}
+.status-success,.badge-success,.chip-success,[data-status="delivered"],[data-status="success"]{color:var(--gc-ui-success)}
+.status-warning,.badge-warning,.chip-warning,[data-status="pending"],[data-status="warning"]{color:var(--gc-ui-warning)}
+.status-danger,.badge-danger,.chip-danger,[data-status="failed"],[data-status="danger"]{color:var(--gc-ui-danger)}
+
+/* Tables */
+table{border-collapse:separate;border-spacing:0;overflow:hidden;border:1px solid var(--gc-ui-line);border-radius:16px;background:rgba(8,26,48,.58)}
+thead th{background:rgba(84,229,239,.045);color:#b9d3e8;font-weight:850}
+tbody tr{transition:background-color .16s ease}
+tbody tr:hover{background:rgba(84,229,239,.045)}
+th,td{border-bottom:1px solid rgba(148,197,226,.09)}
+tbody tr:last-child td{border-bottom:0}
+
+/* Toasts/modals */
+.modal,.dialog,.gc-vnext-modal{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.modal-content,.dialog-content,.gc-vnext-box{box-shadow:0 32px 110px rgba(0,0,0,.48);border-color:var(--gc-ui-line-strong)}
+
+/* Mobile precision */
+@media(max-width:720px){
+  .gc-icon,.icon,.nav-icon,.menu-icon,.feature-icon,.service-icon,.card-icon,.action-icon,.stat-icon,.kpi-icon{width:40px;height:40px;border-radius:12px}
+  button,.btn,.button,.cta,a[role="button"]{min-height:44px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}
+}
