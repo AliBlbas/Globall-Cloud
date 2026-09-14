@@ -10,13 +10,13 @@
   const operationalPage = /^\/(staff(?:-os)?|warehouse(?:-os)?|customer-portal|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\.html)?\/?$/i.test(path);
   if (!operationalPage) return;
 
-  const BRIDGE = '/production-bridge.js?v=20260828-2';
-  const STAFF_ENHANCEMENTS = '/staff-os-enhancements-v2.js?v=20260902-1';
-  const STAFF_FX_ENHANCEMENTS = '/staff-os-fx.js?v=20260903-2';
-  const STAFF_WAREHOUSE_NOTIFY = '/staff-os-warehouse-notify.js?v=20260902-1';
-  const STAFF_DASHBOARD = '/staff-os-dashboard.js?v=20260902-1';
-  const STAFF_AI_TOOLS = '/staff-os-ai-tools.js?v=20260902-1';
-  const WAREHOUSE_OFFLINE = '/warehouse-offline-sync.js?v=20260903-1';
+  const BRIDGE = '/production-bridge.js?v=20260914-2';
+  const STAFF_ENHANCEMENTS = '/staff-os-enhancements-v2.js?v=20260914-2';
+  const STAFF_FX_ENHANCEMENTS = '/staff-os-fx.js?v=20260914-2';
+  const STAFF_WAREHOUSE_NOTIFY = '/staff-os-warehouse-notify.js?v=20260914-2';
+  const STAFF_DASHBOARD = '/staff-os-dashboard.js?v=20260914-2';
+  const STAFF_AI_TOOLS = '/staff-os-ai-tools.js?v=20260914-2';
+  const WAREHOUSE_OFFLINE = '/warehouse-offline-sync.js?v=20260914-2';
   const LEGACY_MESSAGE = 'Supabase هێشتا پەیوەست نەکراوە';
   const READY_MESSAGE = 'پەیوەندیی پارێزراو بە Supabase چالاکە و سیستەمەکە ئامادەیە.';
   const FAIL_MESSAGE = 'پەیوەندیی خزمەتگوزاری بە شێوەیەکی پارێزراو دەتاقیکرێتەوە.';
