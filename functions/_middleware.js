@@ -4,11 +4,10 @@
  * cache policy. Application logic belongs in the page scripts themselves.
  */
 const HTML_ACCEPT = 'text/html';
-const VERSION = '20260913-4';
+const VERSION = '20260914-3';
 
 const ENTERPRISE_SHELL = `<link rel="stylesheet" href="/enterprise-shell-v2026.css?v=${VERSION}" data-gc-enterprise-shell="1">`;
 const LEGACY_SUPABASE_NOTICE = 'Supabase هێشتا پەیوەست نەکراوە — URL و publishable key لە کۆدەکەدا زیادبکە (سەرەتای script tag).';
-const CURRENT_SUPABASE_NOTICE = 'پشکنینی پەیوەندیی Supabase لە پڕۆسەی production ـدایە.';
 const CSP = "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rum-static.pingdom.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.supabase.co https://rum-ingest.pingdom.net https://*.sentry.io https://sentry.io; frame-src 'self' https://www.google.com; worker-src 'self' blob:";
 
 const STAFF_V5 = /^\/(?:staff|staff-os)(?:\.html)?\/?$/i;
@@ -33,7 +32,7 @@ const applySecurityHeaders = (headers) => {
 
 const rewriteRootHtml = (html) => {
   let out = html;
-  out = out.split(LEGACY_SUPABASE_NOTICE).join(CURRENT_SUPABASE_NOTICE);
+  out = out.split(LEGACY_SUPABASE_NOTICE).join('');
   out = out.split('href="#admin"').join('href="/staff"');
   out = out.split('href="./staff-os.html"').join('href="/staff"');
   out = out.split(' data-gc-onclick="route(\'admin\')"').join('');
@@ -52,7 +51,7 @@ export async function onRequest(context) {
 
   let html = await response.text();
   if (path === '/' || path === '/index.html') html = rewriteRootHtml(html);
-  else html = html.split(LEGACY_SUPABASE_NOTICE).join(CURRENT_SUPABASE_NOTICE);
+  else html = html.split(LEGACY_SUPABASE_NOTICE).join('');
 
   const headAssets = [
     ['name="color-scheme"', '<meta name="color-scheme" content="dark light">'],
@@ -88,7 +87,7 @@ export async function onRequest(context) {
     html = addBodyAsset(html, 'src="/public-core-recovery.js', `<script src="/public-core-recovery.js?v=${VERSION}" defer data-gc-public-core-recovery="1"></script>`);
   }
 
-  if (path === '/staff' || path === '/staff/' || path === '/staff-os' || path === '/staff-os/' || path === '/staff.html' || path === '/staff-os.html') {
+  if (STAFF_V5.test(path)) {
     html = addHeadAsset(html, 'src="/staff-os-compat.js', `<script src="/staff-os-compat.js?v=${VERSION}" defer data-gc-staff-compat="1"></script>`);
     html = addHeadAsset(html, 'href="/staff-login-polish.css', `<link rel="stylesheet" href="/staff-login-polish.css?v=${VERSION}" data-gc-staff-login-polish="1">`);
     html = addHeadAsset(html, 'href="/staff-command-center-pro.css', `<link rel="stylesheet" href="/staff-command-center-pro.css?v=${VERSION}" data-gc-staff-command-center-css="1">`);
@@ -100,7 +99,7 @@ export async function onRequest(context) {
   }
 
   const legacyAdminSurface = /^\/(?:management|accounts-console|operations-suite|operations-command-center|operations-control|operations-control-v2|staff-portal|warehouse-os|superadmin|super-admin-command-center)\.html$/i;
-  if (legacyAdminSurface) {
+  if (legacyAdminSurface.test(path)) {
     html = addHeadAsset(html, 'href="/admin-console-enhanced.css', `<link rel="stylesheet" href="/admin-console-enhanced.css?v=${VERSION}" data-gc-admin-polish="1">`);
     html = addHeadAsset(html, 'src="/admin-console-enhanced.js', `<script src="/admin-console-enhanced.js?v=${VERSION}" defer data-gc-admin-recovery="1"></script>`);
   }
