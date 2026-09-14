@@ -18,48 +18,30 @@
   const STAFF_AI_TOOLS = '/staff-os-ai-tools.js?v=20260914-2';
   const WAREHOUSE_OFFLINE = '/warehouse-offline-sync.js?v=20260914-2';
   const LEGACY_MESSAGE = 'Supabase هێشتا پەیوەست نەکراوە';
-  const READY_MESSAGE = 'پەیوەندیی پارێزراو بە Supabase چالاکە و سیستەمەکە ئامادەیە.';
-  const FAIL_MESSAGE = 'پەیوەندیی خزمەتگوزاری بە شێوەیەکی پارێزراو دەتاقیکرێتەوە.';
 
-  function replaceLegacyLeafText(text) {
-    document.querySelectorAll('body *').forEach((node) => {
-      if (node.children.length) return;
-      const current = (node.textContent || '').trim();
-      if (!current.includes(LEGACY_MESSAGE)) return;
-      node.textContent = text;
-      node.setAttribute('data-gc-runtime-state', text === READY_MESSAGE ? 'ready' : 'guarded');
-    });
-  }
-
-  function updateConnectionNotice(text) {
-    const notice = document.getElementById('adminNotConfigured');
-    if (notice) {
-      notice.textContent = text;
-      notice.dataset.gcRuntimeState = text === READY_MESSAGE ? 'ready' : 'guarded';
-      notice.hidden = text !== READY_MESSAGE;
-      notice.setAttribute('aria-live', 'polite');
-    }
-    replaceLegacyLeafText(text);
-  }
-
-  function hideLegacyNoticeImmediately() {
+  function hideLegacyNotice() {
     const notice = document.getElementById('adminNotConfigured');
     if (notice) {
       notice.hidden = true;
-      notice.dataset.gcRuntimeState = 'checking';
-      notice.setAttribute('aria-live', 'polite');
+      notice.setAttribute('aria-hidden', 'true');
+      notice.dataset.gcRuntimeState = 'hidden';
     }
+
+    document.querySelectorAll('body *').forEach((node) => {
+      if (node.children.length) return;
+      if ((node.textContent || '').trim().includes(LEGACY_MESSAGE)) {
+        node.hidden = true;
+        node.setAttribute('aria-hidden', 'true');
+        node.dataset.gcLegacyNotice = 'hidden';
+      }
+    });
   }
 
   function startLegacyTextGuard() {
-    hideLegacyNoticeImmediately();
-    replaceLegacyLeafText(FAIL_MESSAGE);
-    const observer = new MutationObserver(() => {
-      hideLegacyNoticeImmediately();
-      replaceLegacyLeafText(FAIL_MESSAGE);
-    });
+    hideLegacyNotice();
+    const observer = new MutationObserver(hideLegacyNotice);
     observer.observe(document.documentElement, { subtree: true, childList: true, characterData: true });
-    window.setTimeout(() => observer.disconnect(), 9000);
+    window.setTimeout(() => observer.disconnect(), 12000);
   }
 
   function waitForHealth(timeoutMs = 2500) {
@@ -129,17 +111,16 @@
 
   async function boot() {
     startLegacyTextGuard();
-    updateConnectionNotice(FAIL_MESSAGE);
     loadWarehouseOffline();
     window.addEventListener('gc:staff-auth-ready', loadStaffEnhancements);
     try {
       await loadBridgeOnce();
-      const healthy = await waitForHealth();
-      updateConnectionNotice(healthy ? READY_MESSAGE : FAIL_MESSAGE);
+      await waitForHealth();
+      hideLegacyNotice();
       loadStaffEnhancements();
     } catch (error) {
       console.warn('[Globall Cloud] runtime guard:', error);
-      updateConnectionNotice(FAIL_MESSAGE);
+      hideLegacyNotice();
       loadStaffEnhancements();
     }
   }
