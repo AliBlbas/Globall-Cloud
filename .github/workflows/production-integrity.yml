@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-node@v7 # v7.0.0
         with:
           node-version: 24
-          cache: npm
+          package-manager-cache: false
 
       - name: Install locked dependencies
         run: npm ci --ignore-scripts
@@ -90,7 +90,7 @@ jobs:
                   with urllib.request.urlopen(release_req,timeout=15) as r:
                       release=json.loads(r.read().decode('utf-8','replace'))
                   if release.get('commit') != expected:
-                      raise RuntimeError(f'release commit is {release.get("commit")!r}, expected {expected!r}')
+                      raise RuntimeError(f'release commit is {release.get(\"commit\")!r}, expected {expected!r}')
                   for path in ('/','/track','/tracking-integration.html','/warehouse-os.html','/customer-portal.html','/staff'):
                       req=urllib.request.Request(site+path+'?ci='+str(attempt),headers={'Cache-Control':'no-cache'})
                       with urllib.request.urlopen(req,timeout=15) as r:
