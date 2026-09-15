@@ -1,0 +1,48 @@
+/* Globall Cloud Staff OS — mobile-first command experience */
+@media (max-width: 760px){
+  html,body{width:100%;overflow-x:hidden}body{padding:0}
+  .gc-shell{display:flex;flex-direction:column;gap:0;min-height:100dvh;width:100%;max-width:none}
+  .gc-main{width:100%;padding-bottom:76px}
+  .gc-side{position:fixed;z-index:120;inset:auto 10px 10px 10px;height:auto;max-height:none;padding:7px 8px;border-radius:20px;display:block;overflow:hidden;background:rgba(5,18,31,.96);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 18px 55px rgba(0,0,0,.5),0 0 0 1px rgba(139,234,246,.10)}
+  .gc-side .brand,.gc-side .side-foot{display:none}
+  .nav{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;overflow:visible}
+  .nav-btn{min-width:0;min-height:50px;padding:6px 3px;border-radius:14px;display:flex;flex-direction:column;justify-content:center;gap:2px;text-align:center;font-size:8px;line-height:1.2;white-space:nowrap}
+  .nav-icon{width:auto;font-size:8px;line-height:1;color:var(--cyan2)}
+  .nav-badge{position:absolute;top:4px;inset-inline-end:7px;min-width:15px;height:15px;font-size:8px}
+  .topbar{position:sticky;top:0;z-index:100;margin:0;border-radius:0 0 18px 18px;padding:10px 12px;gap:8px}
+  .top-title strong{font-size:15px}.top-title span{font-size:8px;max-width:48vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .top-actions{margin-inline-start:auto;flex:0 0 auto}.top-actions .status{display:none}.top-actions .btn{min-height:36px;padding:7px 9px;font-size:10px}
+  .view{margin:8px 8px 0;padding:10px;border-radius:18px;min-height:calc(100dvh - 128px)}
+  .section-head{gap:8px;margin-bottom:10px}.section-head h1{font-size:19px}.section-head p{font-size:9px}
+  .grid-kpi{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.kpi{padding:10px;border-radius:14px}.kpi strong{font-size:17px}.kpi span,.kpi small{font-size:8px}
+  .two-col,.three-col,.qr-wrap,.chat-layout{grid-template-columns:1fr;gap:8px}
+  .toolbar{gap:5px}.toolbar .field{min-width:0;flex-basis:100%}
+  .table-wrap{margin-inline:-2px;border-radius:12px}.table{min-width:760px}.table th,.table td{padding:8px 7px;font-size:9px}
+  .card{padding:10px;border-radius:14px}.card-head h3{font-size:12px}
+  .mini-row{padding:8px;border-radius:11px;gap:7px}.mini-row b{font-size:10px}.mini-row span{font-size:8px}
+  .timeline-row{grid-template-columns:1fr;gap:3px;padding:8px}.timeline-row time{font-size:8px}
+  .photo-grid{grid-template-columns:repeat(3,1fr)}
+  .chat-box{grid-template-rows:auto minmax(260px,1fr) auto}.messages{max-height:none}
+  .composer{grid-template-columns:minmax(0,1fr) auto}.composer .btn{min-width:76px}
+  .form-grid{grid-template-columns:1fr}.form-field.full{grid-column:auto}
+  .modal-backdrop{padding:8px;align-items:end}.modal{max-height:92dvh;border-radius:20px 20px 12px 12px;padding:12px}
+  .modal-head h2{font-size:16px}.modal-foot{position:sticky;bottom:0;padding-top:8px;background:linear-gradient(180deg,transparent,#061627 24%)}
+  .login{min-height:100dvh;padding:16px}.login-card{width:100%;padding:19px;border-radius:20px}.login-card h1{font-size:21px}
+  .field{min-height:44px;font-size:16px}.btn{min-height:42px}
+  .scanner video{max-height:46dvh}
+  #gcStaffAiButton{bottom:74px!important;inset-inline-end:14px!important;width:52px!important;height:52px!important;z-index:330!important}
+  #gcStaffAiPanel{z-index:329!important}
+}
+
+@media (max-width: 430px){
+  .nav{grid-template-columns:repeat(6,minmax(0,1fr))}.nav-btn{min-height:48px;font-size:7.5px}
+  .view{margin-inline:6px;padding:9px}.grid-kpi{gap:6px}.kpi strong{font-size:15px}
+  .section-head h1{font-size:18px}.section-head p{font-size:8px}
+  .topbar{padding-inline:9px}.top-title span{display:none}.top-actions .btn{font-size:9px;padding-inline:8px}
+  .photo-grid{grid-template-columns:repeat(3,1fr)}
+}
+
+@media (max-width: 360px){
+  .nav-btn{font-size:7px}.nav-icon{font-size:7px}.nav-badge{inset-inline-end:3px}
+  .view{margin-inline:4px}.top-title strong{font-size:14px}.top-actions .btn{padding-inline:6px}
+}
