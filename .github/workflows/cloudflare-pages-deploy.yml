@@ -14,7 +14,10 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: ubuntu-24.04
+    # Use GitHub's maintained hosted runner label. The previous ubuntu-24.04
+    # attempt failed before the first step was initialized, so there was no
+    # application-level failure to diagnose.
+    runs-on: ubuntu-latest
     timeout-minutes: 25
     name: Deploy frontend and Pages Functions to Cloudflare
     steps:
@@ -24,7 +27,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe502c # v7.0.0
         with:
           node-version: 24
           package-manager-cache: false
