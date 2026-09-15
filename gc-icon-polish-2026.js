@@ -51,6 +51,9 @@
       icon.className = 'gc-command-nav-icon';
       icon.setAttribute('aria-hidden', 'true');
       icon.innerHTML = svg;
+      [...el.childNodes].forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) node.remove();
+      });
       el.insertBefore(icon, el.firstChild);
       if (label) label.textContent = label.textContent.trim();
     });
