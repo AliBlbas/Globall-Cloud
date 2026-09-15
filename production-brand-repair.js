@@ -46,8 +46,8 @@
     }
     loadAsset({tag:'script', src:'/gc-platform-vnext.js?v=20260908-1', attr:'data-gc-vnext-loader'});
     loadAsset({tag:'script', src:'/gc-platform-vnext-plus.js?v=20260908-1', attr:'data-gc-vnext-plus-loader'});
-    loadAsset({tag:'script', src:'/gc-icon-polish-2026.js?v=20260915-1', attr:'data-gc-icon-polish-2026'});
-    loadAsset({tag:'link', rel:'stylesheet', href:'/gc-command-nav-polish-2026.css?v=20260915-1', attr:'data-gc-command-nav-polish'});
+    loadAsset({tag:'script', src:'/gc-icon-polish-2026.js?v=20260915-2', attr:'data-gc-icon-polish-2026'});
+    loadAsset({tag:'link', rel:'stylesheet', href:'/gc-command-nav-polish-2026.css?v=20260915-2', attr:'data-gc-command-nav-polish'});
     loadAsset({tag:'script', src:'/gc-runtime-safety-v2026.js?v=20260908-1', attr:'data-gc-runtime-safety-loader'});
     loadAsset({tag:'script', src:'/public-production-safety.js?v=20260908-1', attr:'data-gc-public-production-safety'});
     if (/^\/staff(?:-os)?(?:\.html)?\/?$/i.test(location.pathname)) {
