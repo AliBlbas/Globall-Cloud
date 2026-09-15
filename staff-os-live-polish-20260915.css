@@ -1,0 +1,36 @@
+/* Globall Cloud Staff OS — production polish layer, 2026-09-15 */
+:root{--gc-focus:#8beaf6;--gc-line-soft:rgba(139,234,246,.16)}
+html{scroll-behavior:smooth}
+body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button,a,input,textarea,select{touch-action:manipulation}
+.nav-item{min-height:46px;position:relative;overflow:hidden}
+.nav-item::after{content:'';position:absolute;inset-block:8px;inset-inline-end:0;width:2px;border-radius:99px;background:transparent;transition:background .18s ease}
+.nav-item:hover::after,.nav-item.active::after{background:var(--cyan)}
+.nav-item:focus-visible,.btn:focus-visible,.icon-btn:focus-visible,.quick:focus-visible,.room:focus-visible{outline:3px solid var(--gc-focus);outline-offset:2px}
+.top-actions .btn,.top-actions .status{min-height:40px}
+.btn{transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease,background .16s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.metrics-grid .metric{transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.metrics-grid .metric:hover{transform:translateY(-2px);border-color:var(--gc-line-soft);box-shadow:0 16px 34px rgba(0,0,0,.2)}
+.quick{transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.table-wrap{scrollbar-width:thin;scrollbar-color:rgba(139,234,246,.3) transparent}
+.table-wrap th{position:sticky;top:0;z-index:1}
+.status,.ok,.warn,.bad,.pill{line-height:1.2}
+.field::placeholder{color:#63819e;opacity:1}
+.gate-card{position:relative;overflow:hidden}
+.gate-card::before{content:'';position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+@media(max-width:820px){
+  body{padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+  .sidebar{z-index:5}
+  .nav-item{min-height:44px}
+  .top-actions{gap:6px}
+  .top-actions .btn,.top-actions .status{min-width:0}
+}
+@media(max-width:560px){
+  .nav-item{min-height:44px;border-radius:12px}
+  .nav-item span{flex:0 0 24px}
+  .top-actions .btn{padding-inline:10px}
+  .table-wrap{margin-inline:-2px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.nav-item::after,.btn,.metrics-grid .metric,.quick{transition:none}.btn:hover,.metrics-grid .metric:hover,.quick:hover{transform:none}}
