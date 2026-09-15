@@ -5,7 +5,7 @@
  */
 
 const DEFAULT_SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co'
-const VERSION = '2026.09.08'
+const VERSION = '2026.09.15'
 
 const headers = {
   'content-type': 'application/json; charset=UTF-8',
@@ -21,26 +21,20 @@ export async function onRequestGet({ request, env }) {
   const startedAt = Date.now()
   const supabaseUrl = String(env?.SUPABASE_URL || DEFAULT_SUPABASE_URL).replace(/\/$/, '')
   let supabase = { status: 'not_checked' }
-
   try {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 3500)
-    const response = await fetch(`${supabaseUrl}/functions/v1/system-health`, {
-      method: 'GET',
-      headers: { accept: 'application/json' },
-      signal: controller.signal,
-      cache: 'no-store',
-    })
-    clearTimeout(timeout)
-    supabase = {
-      status: response.ok ? 'ok' : 'degraded',
-      http_status: response.status,
-    }
+    try {
+      const response = await fetch(`${supabaseUrl}/functions/v1/system-health`, {
+        method: 'GET',
+        headers: { accept: 'application/json' },
+        signal: controller.signal,
+        cache: 'no-store',
+      })
+      supabase = { status: response.ok ? 'ok' : 'degraded', http_status: response.status }
+    } finally { clearTimeout(timeout) }
   } catch (error) {
-    supabase = {
-      status: 'degraded',
-      error: error instanceof Error ? error.name : 'upstream_error',
-    }
+    supabase = { status: 'degraded', error: error instanceof Error ? error.name : 'upstream_error' }
   }
 
   const healthy = supabase.status === 'ok'
@@ -52,10 +46,7 @@ export async function onRequestGet({ request, env }) {
     supabase,
     response_ms: Date.now() - startedAt,
     timestamp: new Date().toISOString(),
-  }), {
-    status: healthy ? 200 : 503,
-    headers,
-  })
+  }), { status: healthy ? 200 : 503, headers })
 }
 
 export async function onRequest(context) {
