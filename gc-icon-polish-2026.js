@@ -46,16 +46,11 @@
       const svg = navIcons[key];
       if (!svg || el.dataset.gcNavIconPolished === '1') return;
       el.dataset.gcNavIconPolished = '1';
-      const label = el.querySelector('span');
       const icon = document.createElement('span');
       icon.className = 'gc-command-nav-icon';
       icon.setAttribute('aria-hidden', 'true');
       icon.innerHTML = svg;
-      [...el.childNodes].forEach((node) => {
-        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) node.remove();
-      });
       el.insertBefore(icon, el.firstChild);
-      if (label) label.textContent = label.textContent.trim();
     });
   };
   const polishControls = (root) => {
@@ -63,9 +58,14 @@
       const el = root.getElementById?.(id) || document.getElementById(id);
       if (!el || el.dataset.gcControlIconPolished === '1') return;
       el.dataset.gcControlIconPolished = '1';
-      el.dataset.gcOriginalText = el.textContent.trim();
       el.setAttribute('aria-label', el.getAttribute('aria-label') || el.title || id);
-      el.innerHTML = `<span class="gc-control-svg" aria-hidden="true">${svg}</span>`;
+      const icon = document.createElement('span');
+      icon.className = 'gc-control-svg';
+      icon.setAttribute('aria-hidden', 'true');
+      icon.innerHTML = svg;
+      const firstText = [...el.childNodes].find((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+      if (firstText) firstText.remove();
+      el.insertBefore(icon, el.firstChild);
     });
   };
   const apply = (root = document) => {
