@@ -30,8 +30,9 @@ if (/^project_id\s*=\s*"ahslifnthiwfkmaswjno"$/m.test(config)) ok('Supabase prod
 else fail('Supabase project_id is not pinned to production')
 
 const sw = read('sw.js')
-if (/const CACHE_NAME\s*=\s*['"]globall-cloud-v6-enterprise['"]/.test(sw)) ok('Canonical enterprise service-worker cache is configured')
-else fail('sw.js is not using the canonical enterprise cache name')
+const cacheName = sw.match(/const CACHE_NAME\s*=\s*['"]([^'"]+)['"]/)?.[1]
+if (cacheName && /^globall-cloud-v\d+-\d{8,}$/.test(cacheName)) ok(`Service-worker cache is versioned: ${cacheName}`)
+else fail('sw.js does not use a versioned Globall Cloud cache name')
 if (sw.includes("fetch(request, { cache: 'no-store' })") && sw.includes('self.skipWaiting()') && sw.includes('self.clients.claim()')) ok('Service worker is network-first and self-updating')
 else fail('Service Worker network-first/lifecycle contract is incomplete')
 
