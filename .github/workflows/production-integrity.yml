@@ -20,12 +20,12 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7 # v7.0.0
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           package-manager-cache: false
@@ -43,14 +43,22 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(grep -E '^project_id[[:space:]]*=' supabase/config.toml | head -n1 | sed -E 's/.*=[[:space:]]*\"([^\"]+)\".*/\1/')" = "ahslifnthiwfkmaswjno"
-          if grep -RIl 'swptmhhwhdtyrrfzetam' --include='*.js' --include='*.mjs' --include='*.ts' --include='*.tsx' --include='*.html' --include='*.css' --include='*.json' --include='*.toml' --include='*.yml' --include='*.yaml' .; then
+
+          project_id="$(sed -nE 's/^project_id[[:space:]]*=[[:space:]]*"([^"]+)".*$/\1/p' supabase/config.toml | head -n1)"
+          test "$project_id" = "ahslifnthiwfkmaswjno"
+
+          if grep -RIl --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.wrangler \
+            --include='*.js' --include='*.mjs' --include='*.ts' --include='*.tsx' \
+            --include='*.html' --include='*.css' --include='*.json' \
+            --include='*.toml' --include='*.yml' --include='*.yaml' \
+            'swptmhhwhdtyrrfzetam' .; then
             echo 'Forbidden stale Supabase project reference detected.'
             exit 1
           fi
-          grep -q "Content-Security-Policy:" _headers
-          grep -q "Strict-Transport-Security:" _headers
-          grep -q "X-Content-Type-Options: nosniff" _headers
+
+          grep -q 'Content-Security-Policy:' _headers
+          grep -q 'Strict-Transport-Security:' _headers
+          grep -q 'X-Content-Type-Options: nosniff' _headers
           ! grep -q "script-src[^;]*unsafe-inline" _headers
           grep -q 'https://ahslifnthiwfkmaswjno.supabase.co' production-bridge.js
           grep -q '^/staff /staff-os-v5.html 200$' _redirects
@@ -79,34 +87,71 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          import json, os, time, urllib.parse, urllib.request
-          site='https://globall-cloud.pages.dev'
-          expected=os.environ['EXPECTED_SHA']
-          legacy='Supabase هێشتا پەیوەست نەکراوە'
-          for attempt in range(1,25):
+          python3 - "$EXPECTED_SHA" <<'PY'
+          import json
+          import sys
+          import time
+          import urllib.parse
+          import urllib.request
+
+          site = 'https://globall-cloud.pages.dev'
+          expected = sys.argv[1]
+          legacy = 'Supabase هێشتا پەیوەست نەکراوە'
+          paths = (
+              '/',
+              '/track',
+              '/tracking-integration.html',
+              '/warehouse-os.html',
+              '/customer-portal.html',
+              '/staff',
+          )
+
+          for attempt in range(1, 25):
               try:
-                  release_req=urllib.request.Request(site+'/release.json?verify='+urllib.parse.quote(expected),headers={'Cache-Control':'no-cache','Accept':'application/json'})
-                  with urllib.request.urlopen(release_req,timeout=15) as r:
-                      release=json.loads(r.read().decode('utf-8','replace'))
-                  if release.get('commit') != expected:
-                      raise RuntimeError(f'release commit is {release.get(\"commit\")!r}, expected {expected!r}')
-                  for path in ('/','/track','/tracking-integration.html','/warehouse-os.html','/customer-portal.html','/staff'):
-                      req=urllib.request.Request(site+path+'?ci='+str(attempt),headers={'Cache-Control':'no-cache'})
-                      with urllib.request.urlopen(req,timeout=15) as r:
-                          body=r.read().decode('utf-8','replace')
-                          assert r.status == 200 and len(body) > 200, (path,r.status,len(body))
-                          assert legacy not in body, (path,'legacy Supabase setup notice present')
-                  health_req=urllib.request.Request(site+'/api/health?ci=1',headers={'Cache-Control':'no-cache','Accept':'application/json'})
-                  with urllib.request.urlopen(health_req,timeout=15) as r:
-                      health=json.loads(r.read().decode('utf-8','replace'))
-                      assert r.status == 200 and health.get('ok') is True, health
-                  print(json.dumps(release,ensure_ascii=False))
-                  print(json.dumps(health,ensure_ascii=False))
+                  release_req = urllib.request.Request(
+                      site + '/release.json?verify=' + urllib.parse.quote(expected),
+                      headers={'Cache-Control': 'no-cache', 'Accept': 'application/json'},
+                  )
+                  with urllib.request.urlopen(release_req, timeout=15) as response:
+                      release = json.loads(response.read().decode('utf-8', 'replace'))
+
+                  actual = release.get('commit')
+                  if actual != expected:
+                      raise RuntimeError(
+                          'release commit is {!r}, expected {!r}'.format(actual, expected)
+                      )
+
+                  for path in paths:
+                      req = urllib.request.Request(
+                          site + path + '?ci=' + str(attempt),
+                          headers={'Cache-Control': 'no-cache'},
+                      )
+                      with urllib.request.urlopen(req, timeout=15) as response:
+                          body = response.read().decode('utf-8', 'replace')
+                          assert response.status == 200 and len(body) > 200, (
+                              path,
+                              response.status,
+                              len(body),
+                          )
+                          assert legacy not in body, (
+                              path,
+                              'legacy Supabase setup notice present',
+                          )
+
+                  health_req = urllib.request.Request(
+                      site + '/api/health?ci=1',
+                      headers={'Cache-Control': 'no-cache', 'Accept': 'application/json'},
+                  )
+                  with urllib.request.urlopen(health_req, timeout=15) as response:
+                      health = json.loads(response.read().decode('utf-8', 'replace'))
+                      assert response.status == 200 and health.get('ok') is True, health
+
+                  print(json.dumps(release, ensure_ascii=False))
+                  print(json.dumps(health, ensure_ascii=False))
                   break
               except Exception as exc:
                   if attempt == 24:
                       raise
-                  print(f'Waiting for live release ({attempt}/24): {exc}')
+                  print('Waiting for live release ({}/24): {}'.format(attempt, exc))
                   time.sleep(5)
           PY
