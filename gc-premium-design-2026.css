@@ -16,17 +16,26 @@
   --gc-ui-radius-lg:20px;
   --gc-ui-shadow:0 18px 55px rgba(0,0,0,.22);
   --gc-ui-shadow-hover:0 24px 70px rgba(0,0,0,.30);
+  --gc-ui-content-max:1440px;
+  --gc-ui-control-height:44px;
 }
 
-/* Premium visual layer — additive only. It does not replace existing layout or behavior. */
+/* Premium visual layer — additive only. It preserves existing layout and behavior. */
 html{scroll-behavior:smooth}
 body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+/* Global rhythm and readable hierarchy */
+h1,h2,h3,h4,h5,h6{letter-spacing:-.018em;line-height:1.2}
+p,li,td,th,label{line-height:1.55}
+main,.main,.content,.page-content,.container,.gc-container{max-width:var(--gc-ui-content-max)}
 
 button,a,input,select,textarea{transition:background-color .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .18s ease}
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--gc-ui-brand);outline-offset:3px;box-shadow:0 0 0 5px rgba(84,229,239,.12)}
 
 /* Navigation and brand */
 header,nav,.navbar,.topbar,.site-header,.gc-header,.gc-nav{backdrop-filter:blur(18px) saturate(135%);-webkit-backdrop-filter:blur(18px) saturate(135%)}
+nav a,.navbar a,.gc-nav a,.topbar a{font-weight:700;text-decoration:none}
+nav a:hover,.navbar a:hover,.gc-nav a:hover,.topbar a:hover{text-decoration:none;color:var(--gc-ui-brand)}
 .gc-brand,.gc-status-brand,.brand-logo,.logo{font-weight:900;letter-spacing:-.02em}
 .gc-brand img,.gc-status-brand img,.brand-logo img,.logo img{filter:drop-shadow(0 5px 18px rgba(84,229,239,.14))}
 
@@ -34,24 +43,31 @@ header,nav,.navbar,.topbar,.site-header,.gc-header,.gc-nav{backdrop-filter:blur(
 .card,.panel,.gc-card,.gc-vnext-card,.stat-card,.kpi,.feature-card,.service-card,.shipment-card,.dashboard-card,.admin-card{border-color:var(--gc-ui-line);box-shadow:var(--gc-ui-shadow)}
 .card:hover,.panel:hover,.gc-card:hover,.gc-vnext-card:hover,.stat-card:hover,.kpi:hover,.feature-card:hover,.service-card:hover,.shipment-card:hover,.dashboard-card:hover,.admin-card:hover{border-color:var(--gc-ui-line-strong);box-shadow:var(--gc-ui-shadow-hover)}
 
-/* Clear icon containers */
+/* Clear icon containers — one visual language */
 .gc-icon,.icon,.nav-icon,.menu-icon,.feature-icon,.service-icon,.card-icon,.action-icon,.stat-icon,.kpi-icon{display:inline-grid;place-items:center;flex:0 0 auto;width:42px;height:42px;border-radius:13px;border:1px solid rgba(84,229,239,.18);background:linear-gradient(145deg,rgba(84,229,239,.13),rgba(50,136,255,.11));color:var(--gc-ui-brand);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 8px 22px rgba(0,0,0,.12);font-size:19px;line-height:1}
 .gc-icon svg,.icon svg,.nav-icon svg,.menu-icon svg,.feature-icon svg,.service-icon svg,.card-icon svg,.action-icon svg,.stat-icon svg,.kpi-icon svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
-
-/* Make emoji/icon glyphs visually contained instead of floating */
 .gc-vnext-icon{width:46px;height:46px;border-radius:14px;font-size:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 26px rgba(0,0,0,.16)}
+.gc-nav-iconized{display:inline-flex!important;align-items:center;gap:10px}
+.gc-nav-svg{display:inline-grid;place-items:center;width:22px;height:22px;flex:0 0 22px}
+.gc-nav-svg svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
 
-/* Buttons */
+/* Buttons and icon actions */
 button,.btn,.button,.cta,a[role="button"]{min-height:42px;border-radius:12px}
 button:hover,.btn:hover,.button:hover,.cta:hover,a[role="button"]:hover{transform:translateY(-1px)}
 button:active,.btn:active,.button:active,.cta:active,a[role="button"]:active{transform:translateY(0)}
+button svg,.btn svg,.button svg,.cta svg,a[role="button"] svg{width:18px;height:18px;vertical-align:-.18em;flex:0 0 auto}
+.icon-button,.btn-icon,[aria-label]:has(> svg){min-width:42px}
 
 /* Forms */
-input,select,textarea{border-radius:12px!important;border-color:var(--gc-ui-line)!important;background:rgba(6,18,31,.72)!important;color:var(--gc-ui-text)!important}
+label{font-weight:750;color:#cfe1ee}
+input,select,textarea{border-radius:12px!important;border-color:var(--gc-ui-line)!important;background:rgba(6,18,31,.72)!important;color:var(--gc-ui-text)!important;min-height:var(--gc-ui-control-height)}
+textarea{min-height:110px;padding-block:12px!important}
 input::placeholder,textarea::placeholder{color:#66839d}
+input:focus,select:focus,textarea:focus{border-color:var(--gc-ui-brand)!important;box-shadow:0 0 0 4px rgba(84,229,239,.10)!important}
 
-/* Status language */
-.status,.badge,.chip,.pill{border-radius:999px;font-weight:800}
+/* Status language: color + label, never color alone */
+.status,.badge,.chip,.pill{border-radius:999px;font-weight:800;display:inline-flex;align-items:center;gap:6px}
+.status::before,.badge::before,.chip::before,.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.9}
 .status-success,.badge-success,.chip-success,[data-status="delivered"],[data-status="success"]{color:var(--gc-ui-success)}
 .status-warning,.badge-warning,.chip-warning,[data-status="pending"],[data-status="warning"]{color:var(--gc-ui-warning)}
 .status-danger,.badge-danger,.chip-danger,[data-status="failed"],[data-status="danger"]{color:var(--gc-ui-danger)}
@@ -61,18 +77,29 @@ table{border-collapse:separate;border-spacing:0;overflow:hidden;border:1px solid
 thead th{background:rgba(84,229,239,.045);color:#b9d3e8;font-weight:850}
 tbody tr{transition:background-color .16s ease}
 tbody tr:hover{background:rgba(84,229,239,.045)}
-th,td{border-bottom:1px solid rgba(148,197,226,.09)}
+th,td{border-bottom:1px solid rgba(148,197,226,.09);padding-block:12px}
 tbody tr:last-child td{border-bottom:0}
 
 /* Toasts/modals */
 .modal,.dialog,.gc-vnext-modal{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .modal-content,.dialog-content,.gc-vnext-box{box-shadow:0 32px 110px rgba(0,0,0,.48);border-color:var(--gc-ui-line-strong)}
 
+/* RTL: use logical alignment and mirror navigation safely */
+html[dir="rtl"] body{text-align:right}
+html[dir="rtl"] nav,html[dir="rtl"] .navbar,html[dir="rtl"] .gc-nav{text-align:right}
+html[dir="rtl"] .gc-nav-iconized{flex-direction:row-reverse}
+html[dir="rtl"] .gc-nav-svg{transform:none}
+html[dir="rtl"] table{text-align:right}
+
 /* Mobile precision */
 @media(max-width:720px){
   .gc-icon,.icon,.nav-icon,.menu-icon,.feature-icon,.service-icon,.card-icon,.action-icon,.stat-icon,.kpi-icon{width:40px;height:40px;border-radius:12px}
+  .gc-vnext-icon{width:44px;height:44px}
   button,.btn,.button,.cta,a[role="button"]{min-height:44px}
   table{display:block;overflow-x:auto;white-space:nowrap}
+  h1{font-size:clamp(1.7rem,7vw,2.2rem)}
+  h2{font-size:clamp(1.35rem,5.5vw,1.8rem)}
+  .gc-nav-iconized{min-height:44px}
 }
 
 @media(prefers-reduced-motion:reduce){
