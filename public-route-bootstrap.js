@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const RELEASE = '20260915-1';
+  const RELEASE = '20260915-2';
   const path = window.location.pathname.replace(/\/$/, '') || '/';
   const pathRoutes = {
     '/quote': 'request',
@@ -45,8 +45,8 @@
   addStylesheet(`/public-live-repair-20260914.css?v=${RELEASE}`);
   addStylesheet(`/site-navigation-20260909.css?v=${RELEASE}`);
 
-  // Critical interaction repair runs independently of the main application.
-  addScript(`/public-live-repair-20260914.js?v=${RELEASE}`, 'data-gc-public-live-repair-early');
+  // Critical interaction repair runs independently of the main renderer.
+  addScript(`/public-live-repair-20260914.js?v=${RELEASE}`, 'data-gc-public-live-repair');
 
   // Primary public runtime.
   addScript(`/public-core-entry.js?v=${RELEASE}`, 'data-gc-public-core-entry-loader');
@@ -54,10 +54,6 @@
   addScript(`/public-production-safety.js?v=${RELEASE}`, 'data-gc-public-production-safety');
   addScript(`/site-navigation-20260909.js?v=${RELEASE}`, 'data-gc-public-navigation');
   addScript(`/public-runtime-guarantee.js?v=${RELEASE}`, 'data-gc-public-runtime-guarantee');
-
-  // Keep the defensive repair layer idempotent; the same script may also be
-  // referenced by recovery/failsafe layers during a cold production start.
-  addScript(`/public-live-repair-20260914.js?v=${RELEASE}`, 'data-gc-public-live-repair');
 
   const registerStableWorker = () => {
     if (!('serviceWorker' in navigator)) return;
