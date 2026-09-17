@@ -20,6 +20,35 @@
     el.textContent = message;
     el.style.display = message ? 'block' : 'none';
   };
+  const goPortal = (event) => {
+    event?.preventDefault();
+    if (typeof window.route === 'function') {
+      try { window.route('portal'); return; } catch (_) {}
+    }
+    window.location.href = '/dashboard';
+  };
+  const ensureLoginEntry = () => {
+    const navActions = document.querySelector('.gc-nav-actions');
+    if (navActions && !navActions.querySelector('[data-gc-customer-login]')) {
+      const link = document.createElement('a');
+      link.href = '/dashboard';
+      link.textContent = 'چوونەژوورەوەی کڕیار';
+      link.dataset.gcCustomerLogin = '1';
+      link.className = 'gc-btn gc-btn-ghost gc-customer-login';
+      link.addEventListener('click', goPortal);
+      navActions.insertBefore(link, navActions.querySelector('.gc-staff') || navActions.firstChild);
+    }
+    const mobile = document.querySelector('.gc-mobile-menu');
+    if (mobile && !mobile.querySelector('[data-gc-customer-login]')) {
+      const link = document.createElement('a');
+      link.href = '/dashboard';
+      link.textContent = '◉ چوونەژوورەوەی کڕیار';
+      link.dataset.gcCustomerLogin = '1';
+      link.className = 'gc-customer-login-mobile';
+      link.addEventListener('click', goPortal);
+      mobile.insertBefore(link, mobile.firstChild);
+    }
+  };
   const showDashboard = () => {
     get('portalSignIn')?.style.setProperty('display','none','important');
     get('portalDashboard')?.style.setProperty('display','block','important');
@@ -34,6 +63,7 @@
     }
   };
   const bind = () => {
+    ensureLoginEntry();
     const form = get('portalSignInForm');
     if (!form || form.dataset.gcAuthFixBound === '1') return;
     form.dataset.gcAuthFixBound = '1';
