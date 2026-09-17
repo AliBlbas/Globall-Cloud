@@ -1,0 +1,34 @@
+/* Globall Cloud Staff OS — premium command-center layer (2026-09-18)
+   Additive only: preserves existing IDs, routes and functional contracts. */
+:root{
+  --gc-gold:#f5c96a;
+  --gc-gold-2:#ffe7a8;
+  --gc-gold-dim:rgba(245,201,106,.16);
+  --gc-navy:#020811;
+}
+body{background:radial-gradient(900px 500px at 82% -10%,rgba(245,201,106,.10),transparent 62%),radial-gradient(760px 520px at 8% 22%,rgba(24,201,232,.11),transparent 66%),linear-gradient(145deg,#02070e 0%,#061423 48%,#02070e 100%)}
+.gc-side{border-color:rgba(245,201,106,.20);box-shadow:0 30px 90px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.04)}
+.brand-logo{background:linear-gradient(145deg,#fff1b5,#f5c96a 55%,#a96e20);color:#211505;box-shadow:0 0 0 1px rgba(255,231,168,.35),0 12px 34px rgba(245,201,106,.18)}
+.brand b{font-size:17px;letter-spacing:-.02em}.brand small{letter-spacing:.7px}
+.nav-btn{min-height:44px;border-radius:15px}.nav-btn.active{background:linear-gradient(135deg,rgba(24,201,232,.18),rgba(245,201,106,.13));border-color:rgba(245,201,106,.28);box-shadow:inset 3px 0 0 var(--gc-gold),0 8px 24px rgba(0,0,0,.16)}
+.nav-btn.active .nav-icon{color:var(--gc-gold-2)}.nav-icon{font-size:10px}
+.topbar{border-color:rgba(245,201,106,.18);background:linear-gradient(90deg,rgba(4,15,27,.90),rgba(10,24,39,.84));box-shadow:0 18px 55px rgba(0,0,0,.32)}
+.top-title strong{font-size:20px}.top-title span{font-size:11px}
+.status{border-color:rgba(99,232,182,.30);box-shadow:inset 0 0 18px rgba(99,232,182,.04)}
+.view{border-color:rgba(245,201,106,.16);background:linear-gradient(150deg,rgba(8,29,49,.94),rgba(2,9,17,.985));box-shadow:0 28px 90px rgba(0,0,0,.36)}
+.section-head h1{font-size:28px}.eyebrow{color:var(--gc-gold-2)}
+.grid-kpi{gap:10px}.kpi{border-color:rgba(245,201,106,.13);background:linear-gradient(145deg,rgba(18,48,78,.86),rgba(4,15,27,.97));box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}.kpi strong{color:var(--gc-gold-2)}
+.card{border-color:rgba(245,201,106,.11);background:linear-gradient(145deg,rgba(255,255,255,.034),rgba(255,255,255,.018));box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}
+.card-head h3{font-size:15px}.pill{border:1px solid rgba(24,201,232,.10)}.pill.warn{border-color:rgba(245,201,106,.18);color:var(--gc-gold-2)}
+.btn.primary{background:linear-gradient(135deg,#ffe7a8,#f5c96a 52%,#d89432);color:#241605;box-shadow:0 10px 28px rgba(245,201,106,.14)}
+.btn.primary:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.table-wrap{border-color:rgba(245,201,106,.10)}.table th{background:linear-gradient(90deg,rgba(245,201,106,.06),rgba(255,255,255,.025));color:#e8d6a9}.table tr:hover td{background:rgba(245,201,106,.025)}
+.field:focus{border-color:var(--gc-gold);box-shadow:0 0 0 3px rgba(245,201,106,.08)}
+.modal{border-color:rgba(245,201,106,.20);background:linear-gradient(155deg,#071a2b,#03101d);box-shadow:0 35px 120px rgba(0,0,0,.62)}
+.notice.unread{box-shadow:inset 3px 0 0 var(--gc-gold),0 8px 25px rgba(0,0,0,.12)}
+.photo{border-color:rgba(245,201,106,.16)}
+.login-card{border-color:rgba(245,201,106,.22);background:linear-gradient(155deg,#0a2844,#04121f);box-shadow:0 35px 100px rgba(0,0,0,.52)}
+.gc-shell{position:relative}.gc-shell:before{content:'LIVE CONTROL';position:fixed;top:22px;inset-inline-end:26px;color:rgba(245,201,106,.50);font:700 8px var(--mono);letter-spacing:1.4px;pointer-events:none;z-index:30}
+@media(max-width:1100px){.gc-shell:before{display:none}.section-head h1{font-size:24px}}
+@media(max-width:720px){body{padding:6px}.gc-shell{min-height:calc(100vh - 12px)}.topbar{top:6px}.view{padding:12px}.grid-kpi{grid-template-columns:repeat(2,1fr)}.kpi{min-height:92px}.section-head h1{font-size:22px}.table{min-width:820px}.modal{border-radius:18px}}
+@media(max-width:460px){.grid-kpi{grid-template-columns:1fr 1fr}.kpi strong{font-size:17px}}
