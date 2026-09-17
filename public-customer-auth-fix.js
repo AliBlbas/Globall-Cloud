@@ -1,25 +1,13 @@
 /* Globall Cloud — customer auth runtime hardening 2026-09-18
- * Reuses the existing Supabase client and existing customer auth UI.
+ * Makes the real Supabase client available before the existing customer auth flow runs.
+ * Does not replace the existing sign-in/profile/data handlers.
  */
 (() => {
   'use strict';
   if (window.__gcCustomerAuthFix20260918) return;
   window.__gcCustomerAuthFix20260918 = true;
+
   const get = (id) => document.getElementById(id);
-  const setBusy = (button, busy) => {
-    if (!button) return;
-    button.disabled = busy;
-    if (busy) {
-      button.dataset.gcAuthOriginal = button.textContent || '';
-      button.textContent = 'چاوەڕوان بە…';
-    } else if (button.dataset.gcAuthOriginal) button.textContent = button.dataset.gcAuthOriginal;
-  };
-  const showError = (message) => {
-    const el = get('portalSignInError');
-    if (!el) return;
-    el.textContent = message;
-    el.style.display = message ? 'block' : 'none';
-  };
   const goPortal = (event) => {
     event?.preventDefault();
     if (typeof window.route === 'function') {
@@ -27,6 +15,7 @@
     }
     window.location.href = '/dashboard';
   };
+
   const ensureLoginEntry = () => {
     const navActions = document.querySelector('.gc-nav-actions');
     if (navActions && !navActions.querySelector('[data-gc-customer-login]')) {
@@ -49,65 +38,39 @@
       mobile.insertBefore(link, mobile.firstChild);
     }
   };
-  const showDashboard = () => {
-    get('portalSignIn')?.style.setProperty('display','none','important');
-    get('portalDashboard')?.style.setProperty('display','block','important');
-    document.documentElement.dataset.gcCustomerAuth = 'authenticated';
-  };
-  const tryRefreshCustomerView = async () => {
-    for (const name of ['loadPortalProfile','loadCustomerProfile','renderCustomerDashboard','refreshPortal','loadPortalData']) {
-      if (typeof window[name] === 'function') {
-        try { await window[name](); } catch (_) {}
-        return;
-      }
+
+  const ensureClient = () => {
+    if (window.gcSupabase?.auth) {
+      window.sb = window.gcSupabase;
+      return Promise.resolve(window.gcSupabase);
     }
+    if (typeof window.gcEnsureSupabase === 'function') {
+      return window.gcEnsureSupabase().then((client) => {
+        window.sb = client;
+        return client;
+      }).catch(() => null);
+    }
+    return Promise.resolve(null);
   };
-  const bind = () => {
+
+  const syncAuthState = async () => {
+    const client = await ensureClient();
+    if (!client?.auth) return;
+    try {
+      const { data } = await client.auth.getSession();
+      document.documentElement.dataset.gcCustomerAuth = data?.session ? 'authenticated' : 'guest';
+    } catch (_) {}
+  };
+
+  const boot = () => {
     ensureLoginEntry();
-    const form = get('portalSignInForm');
-    if (!form || form.dataset.gcAuthFixBound === '1') return;
-    form.dataset.gcAuthFixBound = '1';
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      const email = String(get('siEmail')?.value || '').trim();
-      const password = String(get('siPassword')?.value || '');
-      const button = get('portalSignInBtn');
-      showError('');
-      if (!email || !password) {
-        showError('ئیمەیڵ و وشەی نهێنی پڕبکەرەوە.');
-        return;
-      }
-      setBusy(button, true);
-      try {
-        let client = window.gcSupabase || window.sb || null;
-        if (!client && typeof window.gcEnsureSupabase === 'function') client = await window.gcEnsureSupabase();
-        if (!client) throw new Error('پەیوەندی بە Supabase ئامادە نییە. تکایە دووبارە هەوڵ بدەوە.');
-        const { data, error } = await client.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        if (!data?.session) throw new Error('Session دروست نەبوو. تکایە دووبارە هەوڵ بدەوە.');
-        showDashboard();
-        await tryRefreshCustomerView();
-        window.dispatchEvent(new CustomEvent('gc:customer-authenticated', { detail: { session: data.session } }));
-      } catch (error) {
-        const raw = String(error?.message || error || 'چوونەژوورەوە سەرکەوتوو نەبوو.');
-        const friendly = /email not confirmed/i.test(raw)
-          ? 'تکایە یەکەم جار ئیمەیلەکەت پشتڕاست بکەرەوە، پاشان دووبارە بچۆ ژوورەوە.'
-          : /invalid login credentials/i.test(raw)
-            ? 'ئیمەیڵ یان وشەی نهێنی هەڵەیە.'
-            : raw;
-        showError(friendly);
-      } finally {
-        setBusy(button, false);
-      }
-    }, true);
+    void ensureClient();
+    void syncAuthState();
+    window.setTimeout(ensureLoginEntry, 400);
+    window.setTimeout(ensureLoginEntry, 1200);
+    window.setTimeout(ensureLoginEntry, 2500);
   };
-  const observe = () => {
-    bind();
-    const observer = new MutationObserver(bind);
-    observer.observe(document.documentElement, { childList: true, subtree: true });
-    [400,1000,2000,3500].forEach((delay) => window.setTimeout(bind, delay));
-  };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', observe, { once: true });
-  else observe();
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 })();
