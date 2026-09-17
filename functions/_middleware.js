@@ -4,7 +4,7 @@
  * cache policy. Application logic belongs in the page scripts themselves.
  */
 const HTML_ACCEPT = 'text/html';
-const VERSION = '20260916-2';
+const VERSION = '20260918-1';
 
 const ENTERPRISE_SHELL = `<link rel="stylesheet" href="/enterprise-shell-v2026.css?v=${VERSION}" data-gc-enterprise-shell="1">`;
 const LEGACY_SUPABASE_NOTICE = 'Supabase هێشتا پەیوەست نەکراوە — URL و publishable key لە کۆدەکەدا زیادبکە (سەرەتای script tag).';
@@ -63,6 +63,9 @@ export async function onRequest(context) {
     ['href="/production-mobile-hotfix.css', `<link rel="stylesheet" href="/production-mobile-hotfix.css?v=${VERSION}" data-gc-production-mobile-hotfix="1">`],
     ['href="/production-mobile-ux-v2026.css', `<link rel="stylesheet" href="/production-mobile-ux-v2026.css?v=${VERSION}" data-gc-production-mobile-ux="1">`],
     ['href="/gc-public-premium-ux-2026.css', `<link rel="stylesheet" href="/gc-public-premium-ux-2026.css?v=${VERSION}" data-gc-public-premium-ux="1">`],
+    ['href="/gc-home-final-2026.css', `<link rel="stylesheet" href="/gc-home-final-2026.css?v=${VERSION}" data-gc-home-final="1">`],
+    ['src="/production-bridge.js', `<script src="/production-bridge.js?v=${VERSION}" defer data-gc-production-bridge="1"></script>`],
+    ['src="/public-customer-auth-fix.js', `<script src="/public-customer-auth-fix.js?v=${VERSION}" defer data-gc-customer-auth-fix="1"></script>`],
     ['src="/production-brand-repair.js', `<script src="/production-brand-repair.js?v=${VERSION}" defer data-gc-production-brand-repair="1"></script>`],
     ['src="/gc-final-experience-2026.js', `<script src="/gc-final-experience-2026.js?v=${VERSION}" defer data-gc-final-experience="1"></script>`],
   ];
