@@ -1,5 +1,15 @@
 (() => {
   'use strict';
+
+  const loadPremiumHomepageStyles = () => {
+    if (document.querySelector('link[data-gc-premium-home]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/homepage-premium-v2.css?v=20260918-1';
+    link.dataset.gcPremiumHome = '1';
+    document.head.appendChild(link);
+  };
+
   const openMobileMenu = (open) => {
     const menu = document.querySelector('[data-gc-mobile-menu]');
     if (!menu) return;
@@ -82,9 +92,11 @@
   };
 
   const boot = () => {
+    loadPremiumHomepageStyles();
     bind();
     window.addEventListener('hashchange', () => { if (typeof window.route !== 'function') localRouteFallback(); });
     window.setTimeout(() => {
+      loadPremiumHomepageStyles();
       bind();
       if (typeof window.route !== 'function') localRouteFallback();
     }, 1200);
