@@ -14,10 +14,9 @@ concurrency:
 
 jobs:
   deploy:
-    # Use GitHub's maintained hosted runner label. The previous ubuntu-24.04
-    # attempt failed before the first step was initialized, so there was no
-    # application-level failure to diagnose.
-    runs-on: ubuntu-latest
+    # Pin the deployment job to the stable Ubuntu 22.04 runner. The previous
+    # ubuntu-latest/24.04 runner attempts failed before application steps ran.
+    runs-on: ubuntu-22.04
     timeout-minutes: 25
     name: Deploy frontend and Pages Functions to Cloudflare
     steps:
