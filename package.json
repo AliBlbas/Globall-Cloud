@@ -10,6 +10,7 @@
     "typescript": "^5.5.0"
   },
   "scripts": {
+    "build": "node -e \"console.log('Cloudflare Pages: static root build complete')\"",
     "test": "node tests/validate.mjs",
     "test:contracts": "node scripts/production-contracts.mjs",
     "test:syntax": "node tests/validate.mjs",
