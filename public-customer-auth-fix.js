@@ -1,15 +1,15 @@
 /* Globall Cloud — customer auth runtime hardening 2026-09-18
  * Makes the real Supabase client available before the existing customer auth flow runs.
- * Does not replace the existing sign-in/profile/data handlers.
+ * The premium homepage login surface owns its click event when loaded.
  */
 (() => {
   'use strict';
   if (window.__gcCustomerAuthFix20260918) return;
   window.__gcCustomerAuthFix20260918 = true;
 
-  const get = (id) => document.getElementById(id);
   const goPortal = (event) => {
     event?.preventDefault();
+    if (window.__gcCustomerLogin20260918) return;
     if (typeof window.route === 'function') {
       try { window.route('portal'); return; } catch (_) {}
     }
