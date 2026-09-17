@@ -1,6 +1,9 @@
 (() => {
   'use strict';
 
+  const enhancementStyles = [
+    '/staff-os-premium-20260918.css?v=20260918-1'
+  ];
   const enhancementScripts = [
     '/staff-os-v5-shipment-create-fix.js?v=20260912-2',
     '/staff-os-v5-shipment-control-bridge.js?v=20260912-2',
@@ -15,9 +18,17 @@
     '/staff-os-pro-20260909.js?v=20260912-2',
     '/staff-shell-polish-20260909.js?v=20260912-2',
     '/staff-premium-mobile-20260909.js?v=20260912-2',
-    '/staff-workflow-chain.js?v=20260912-2'
+    '/staff-workflow-chain.js?v=20260912-2',
+    '/staff-os-premium-20260918.js?v=20260918-1'
   ];
 
+  const loadStyle = (href) => {
+    if (document.querySelector(`link[href="${href}"]`)) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+  };
   const loadOne = (src) => new Promise((resolve) => {
     if (document.querySelector(`script[src="${src}"]`)) return resolve();
     const s = document.createElement('script');
@@ -32,6 +43,7 @@
     if (window.__gcStaffEnhancementsLoaded) return;
     if (!document.querySelector('.gc-shell')) return;
     window.__gcStaffEnhancementsLoaded = true;
+    enhancementStyles.forEach(loadStyle);
     for (const src of enhancementScripts) await loadOne(src);
   };
 
