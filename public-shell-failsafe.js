@@ -2,12 +2,28 @@
   'use strict';
 
   const loadPremiumHomepageStyles = () => {
-    if (document.querySelector('link[data-gc-premium-home]')) return;
+    if (document.querySelector('link[data-gc-premium-home-final]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/homepage-premium-v2.css?v=20260918-1';
-    link.dataset.gcPremiumHome = '1';
+    link.href = '/gc-home-premium-2026.css?v=20260918-1';
+    link.dataset.gcPremiumHomeFinal = '1';
     document.head.appendChild(link);
+  };
+
+  const loadPremiumHomepageScripts = () => {
+    const scripts = [
+      ['/gc-customer-login-2026.js?v=20260918-1', 'data-gc-customer-login-premium'],
+      ['/gc-public-mobile-system-v2026.js?v=20260918-2', 'data-gc-mobile-system-premium'],
+      ['/gc-icon-polish-2026.js?v=20260918-1', 'data-gc-icon-polish-premium'],
+    ];
+    for (const [src, attr] of scripts) {
+      if (document.querySelector(`script[${attr}]`)) continue;
+      const script = document.createElement('script');
+      script.src = src;
+      script.defer = true;
+      script.setAttribute(attr, '1');
+      document.head.appendChild(script);
+    }
   };
 
   const openMobileMenu = (open) => {
@@ -93,14 +109,19 @@
 
   const boot = () => {
     loadPremiumHomepageStyles();
+    loadPremiumHomepageScripts();
     bind();
     window.addEventListener('hashchange', () => { if (typeof window.route !== 'function') localRouteFallback(); });
     window.setTimeout(() => {
       loadPremiumHomepageStyles();
+      loadPremiumHomepageScripts();
       bind();
       if (typeof window.route !== 'function') localRouteFallback();
     }, 1200);
-    window.setTimeout(bind, 3000);
+    window.setTimeout(() => {
+      loadPremiumHomepageScripts();
+      bind();
+    }, 3000);
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
