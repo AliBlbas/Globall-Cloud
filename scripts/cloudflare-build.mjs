@@ -7,7 +7,7 @@ const out = path.join(src, 'dist');
 const skipNames = new Set([
   '.git', '.github', '.devcontainer', '.vscode',
   'node_modules', 'dist', 'scripts', 'supabase',
-  'tests', 'docs'
+  'tests', 'docs', 'functions'
 ]);
 
 const skipSuffixes = [
@@ -20,6 +20,7 @@ fs.mkdirSync(out, { recursive: true });
 
 function shouldSkip(name) {
   if (name === 'package.json' || name === 'package-lock.json') return true;
+  if (name === '.env' || name.startsWith('.env.')) return true;
   return skipSuffixes.some((suffix) => name.endsWith(suffix));
 }
 
@@ -62,10 +63,6 @@ fs.writeFileSync(
 
 if (!fs.existsSync(path.join(out, 'index.html'))) {
   throw new Error('Cloudflare build error: dist/index.html was not created');
-}
-
-if (!fs.existsSync(path.join(out, 'functions'))) {
-  throw new Error('Cloudflare build error: dist/functions was not created');
 }
 
 console.log('Cloudflare Pages: dist bundle created');
