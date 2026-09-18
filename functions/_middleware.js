@@ -41,7 +41,36 @@ const rewriteRootHtml = (html) => {
 };
 
 export async function onRequest(context) {
+  const requestUrl = new URL(context.request.url);
+  const requestPath = requestUrl.pathname;
   const accept = context.request.headers.get('accept') || '';
+
+  if (requestPath === '/health') {
+    return new Response(JSON.stringify({
+      ok: true,
+      service: 'globall-cloud',
+      cloudflare: 'pages',
+      timestamp: new Date().toISOString(),
+    }), { status: 200, headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' } });
+  }
+
+  if (requestPath === '/release.json') {
+    return new Response(JSON.stringify({
+      service: 'globall-cloud',
+      branch: context.env?.CF_PAGES_BRANCH || 'main',
+      commit: context.env?.CF_PAGES_COMMIT_SHA || null,
+      generated_at: new Date().toISOString(),
+    }), { status: 200, headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' } });
+  }
+
+  if (requestPath === '/api/health') {
+    return new Response(JSON.stringify({
+      ok: true,
+      service: 'globall-cloud',
+      edge: 'ok',
+      timestamp: new Date().toISOString(),
+    }), { status: 200, headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' } });
+  }
   if (!accept.toLowerCase().includes(HTML_ACCEPT)) return context.next();
 
   const path = new URL(context.request.url).pathname;
