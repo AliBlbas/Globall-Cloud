@@ -382,3 +382,150 @@ body:before{
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}
 }
+
+/* Globall Cloud — Public V4 visual polish
+   Reference direction: premium logistics cockpit, clearer hierarchy, less visual noise,
+   stronger mobile composition, and preserved existing markup/runtime. */
+:root{
+  --v4-gold:#f3cc72;
+  --v4-gold-2:#dca944;
+  --v4-cyan:#63e8f3;
+  --v4-bg:#030a12;
+  --v4-panel:rgba(10,24,39,.88);
+  --v4-line:rgba(243,204,114,.15);
+}
+.gc-nav-inner{min-height:76px}
+.gc-brand{gap:11px}
+.gc-brand small{opacity:.78}
+.gc-desktop-nav{gap:4px}
+.gc-desktop-nav a{padding:28px 12px 24px;font-weight:700}
+.gc-nav-actions{gap:8px}
+.gc-staff{color:#ead79f!important}
+.gc-hero{
+  display:grid;
+  grid-template-columns:minmax(0,1.04fr) minmax(320px,.72fr);
+  align-items:center;
+  gap:54px;
+  max-width:1240px;
+}
+.gc-hero:before{
+  inset:30px -24px 20px;
+  background:
+    radial-gradient(circle at 78% 15%,rgba(243,204,114,.075),transparent 28%),
+    linear-gradient(145deg,rgba(255,255,255,.018),rgba(255,255,255,0));
+}
+.gc-hero-copy{max-width:none}
+.gc-hero h1{max-width:700px;margin-top:18px}
+.gc-hero-copy>p{max-width:650px;line-height:2}
+.gc-hero-actions{margin-top:25px}
+.gc-hero-actions .gc-btn{min-width:142px}
+.gc-hero-card{
+  position:relative;
+  min-height:500px;
+  width:100%;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 70% 22%,rgba(99,232,243,.11),transparent 28%),
+    radial-gradient(circle at 38% 72%,rgba(243,204,114,.08),transparent 32%),
+    linear-gradient(145deg,#0b2237,#040c15 78%);
+}
+.gc-hero-card:after{
+  content:"";
+  position:absolute;
+  width:240px;height:240px;
+  left:-95px;bottom:-105px;
+  border:1px solid rgba(99,232,243,.16);
+  border-radius:50%;
+  box-shadow:0 0 0 38px rgba(99,232,243,.025),0 0 0 78px rgba(99,232,243,.014);
+}
+.gc-card-grid{z-index:3}
+.gc-route-status{z-index:4}
+.gc-stats{max-width:1240px}
+.gc-stats>div{
+  position:relative;
+  overflow:hidden;
+}
+.gc-stats>div:after{
+  content:"";
+  position:absolute;
+  inset:auto 14px 0;
+  height:2px;
+  background:linear-gradient(90deg,transparent,var(--v4-gold),transparent);
+  opacity:.55;
+}
+.gc-stats strong{letter-spacing:-1px}
+.gc-section{max-width:1240px}
+.gc-section-head{max-width:820px}
+.gc-service-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.gc-service{
+  min-height:190px;
+  padding:24px;
+  transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;
+}
+.gc-service:hover{
+  transform:translateY(-5px);
+  border-color:rgba(243,204,114,.32);
+  box-shadow:0 24px 50px rgba(0,0,0,.2);
+}
+.gc-service b{display:flex;align-items:center;gap:8px}
+.gc-service small{margin-top:auto}
+.gc-track-panel{
+  max-width:1240px;
+  padding:28px 30px;
+  min-height:190px;
+}
+.gc-track-panel h2{font-size:clamp(26px,3vw,38px)}
+.gc-track-form{min-width:min(470px,100%)}
+.gc-ops-preview{padding-top:68px}
+.gc-ops-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.gc-ops-grid>div{
+  min-height:125px;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:8px;
+}
+.gc-footer-grid{max-width:1240px}
+.gc-footer-bottom{max-width:1240px}
+.gc-inner-page{max-width:1240px}
+.gc-detail-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.gc-contact-grid{grid-template-columns:.8fr 1.2fr}
+.gc-form{background:linear-gradient(145deg,rgba(13,31,50,.75),rgba(5,14,24,.82));border-color:rgba(243,204,114,.12)}
+@media(max-width:1000px){
+  .gc-hero{grid-template-columns:1fr;gap:30px}
+  .gc-hero-copy{max-width:760px}
+  .gc-hero-card{min-height:450px}
+  .gc-service-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .gc-ops-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .gc-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:700px){
+  .gc-nav-inner{min-height:64px}
+  .gc-hero{display:flex;flex-direction:column;align-items:stretch;gap:22px;padding-top:32px}
+  .gc-hero:before{inset:8px -2px 8px}
+  .gc-hero h1{font-size:clamp(31px,10.5vw,44px);letter-spacing:-.8px}
+  .gc-hero-actions{display:grid;grid-template-columns:1fr 1fr}
+  .gc-hero-actions .gc-btn{width:100%;min-width:0}
+  .gc-hero-actions .gc-btn-whatsapp{grid-column:1/-1}
+  .gc-trust-row{grid-template-columns:repeat(3,1fr)}
+  .gc-trust-row div{padding:12px 9px}
+  .gc-trust-row b{font-size:14px}
+  .gc-trust-row span{font-size:9px}
+  .gc-hero-card{min-height:365px;border-radius:24px}
+  .gc-card-grid{width:calc(100% - 24px);right:12px;top:12px}
+  .gc-stats{grid-template-columns:1fr 1fr}
+  .gc-stats>div{min-height:94px}
+  .gc-service-grid,.gc-ops-grid,.gc-detail-grid,.gc-contact-grid{grid-template-columns:1fr}
+  .gc-service{min-height:155px}
+  .gc-track-panel{padding:22px 16px}
+  .gc-track-form{min-width:0}
+  .gc-ops-preview{padding-top:44px}
+}
+@media(max-width:430px){
+  .gc-hero-actions{grid-template-columns:1fr}
+  .gc-hero-actions .gc-btn-whatsapp{grid-column:auto}
+  .gc-trust-row{grid-template-columns:1fr}
+  .gc-trust-row div{min-height:64px}
+  .gc-stats strong{font-size:22px}
+}
