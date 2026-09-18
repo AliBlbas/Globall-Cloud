@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650" role="img" aria-labelledby="title desc">
+<title id="title">Globall Cloud logistics route</title>
+<desc id="desc">Stylized world map with air and sea freight routes from China and the UAE to Erbil.</desc>
+<defs>
+  <radialGradient id="bg" cx="52%" cy="44%" r="72%"><stop offset="0" stop-color="#18375a"/><stop offset="1" stop-color="#071321"/></radialGradient>
+  <linearGradient id="gold" x1="0" x2="1"><stop stop-color="#ffe4a0"/><stop offset=".5" stop-color="#d8a94f"/><stop offset="1" stop-color="#fff0bd"/></linearGradient>
+  <linearGradient id="cyan" x1="0" x2="1"><stop stop-color="#67e8f9"/><stop offset="1" stop-color="#1597c7"/></linearGradient>
+  <filter id="glow"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect width="900" height="650" rx="42" fill="url(#bg)"/>
+<g opacity=".18" stroke="#8db1d2" fill="none">
+  <path d="M80 120H820M55 220H845M45 325H855M55 430H845M85 530H815"/>
+  <path d="M130 65V585M270 35V615M410 28V622M550 35V615M690 65V585M800 100V550"/>
+</g>
+<g opacity=".38" fill="#1d4568" stroke="#6f92b1" stroke-width="1.2">
+  <path d="M112 190l38-35 72-18 52 24 31 45-24 35-43 3-28 38-51-11-32-37z"/>
+  <path d="M282 352l43-21 36 12 19 49-20 55-35 46-30-12 9-53-28-35z"/>
+  <path d="M455 150l56-27 58 12 24 36-31 30-21 34 19 41-31 35-30-34-12-50-36-21z"/>
+  <path d="M545 310l53-27 75 14 54 45-13 43-52 13-30 49-42-7-19-51-42-28z"/>
+  <path d="M695 145l58-12 55 30-18 37-49 5-38-23z"/>
+  <path d="M735 255l45 17 28 48-25 24-47-21-20-40z"/>
+</g>
+<path d="M150 245 C320 135 480 230 720 415" fill="none" stroke="url(#gold)" stroke-width="4" stroke-dasharray="10 12" opacity=".9" filter="url(#glow)"/>
+<path d="M420 420 C530 365 620 390 720 415" fill="none" stroke="url(#cyan)" stroke-width="3" stroke-dasharray="8 11" opacity=".8"/>
+<g filter="url(#glow)">
+  <circle cx="150" cy="245" r="10" fill="#ffd77e"/><circle cx="420" cy="205" r="9" fill="#ffd77e"/><circle cx="720" cy="415" r="11" fill="#5ee7ef"/>
+</g>
+<g transform="translate(300 130) rotate(12)">
+  <path d="M0 31l82-17 53-30 16 9-35 38 50 20-5 14-66-14-31 28-16-4 9-34-43-2z" fill="url(#gold)"/>
+  <path d="M65 20l26-33 10 3-13 35z" fill="#f5d88d"/>
+</g>
+<g transform="translate(495 430)">
+  <path d="M0 35h230l-18 28H20z" fill="#0b1828" stroke="url(#gold)" stroke-width="3"/>
+  <path d="M25 34l8-55h28l10 55M70 34l7-48h28l10 48M116 34l8-60h29l9 60M164 34l9-48h28l8 48" fill="#132b43" stroke="#6e8fae" stroke-width="2"/>
+  <path d="M0 63l16 7h198l16-7" fill="none" stroke="#2e8eb5" stroke-width="3"/>
+  <path d="M215 30l24-12-10 18z" fill="url(#gold)"/>
+</g>
+<g font-family="Arial, sans-serif" fill="#fff1c5">
+  <text x="105" y="285" font-size="19" font-weight="700">CHINA HUB</text>
+  <text x="675" y="455" font-size="19" font-weight="700">ERBIL HUB</text>
+  <text x="360" y="180" font-size="15" fill="#a8c1da">AIR ROUTE</text>
+  <text x="560" y="470" font-size="15" fill="#a8c1da">SEA FREIGHT</text>
+</g>
+<g transform="translate(45 48)"><circle r="18" fill="#0a1a2c" stroke="url(#gold)" stroke-width="2"/><path d="M-7 2L0-13l5 10 10 4-3 5-11-3-7 7z" fill="url(#gold)"/></g>
+</svg>
