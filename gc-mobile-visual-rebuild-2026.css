@@ -405,3 +405,22 @@
 @media(prefers-reduced-motion:reduce){
   .gc-btn,.gc-service,.gc-menu{transition:none!important}
 }
+
+@media(max-width:760px){
+  .gc-service b,.gc-ops-grid b{display:flex;align-items:center;gap:9px}
+  .gc-service-icon,.gc-ops-icon{
+    width:34px;height:34px;flex:0 0 34px;
+    display:grid;place-items:center;
+    border-radius:11px;
+    color:#79edf4;
+    border:1px solid rgba(99,232,243,.16);
+    background:linear-gradient(145deg,rgba(34,211,238,.11),rgba(37,99,235,.06));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .gc-ops-icon{width:30px;height:30px;flex-basis:30px;border-radius:10px}
+  .gc-service-icon svg,.gc-ops-icon svg{
+    width:18px;height:18px;fill:none;stroke:currentColor;
+    stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;
+  }
+  .gc-service b>.gc-service-icon+span,.gc-ops-grid b>.gc-ops-icon+span{min-width:0}
+}
