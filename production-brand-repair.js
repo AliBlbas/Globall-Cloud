@@ -185,6 +185,7 @@
     loadAsset({tag:'link', rel:'stylesheet', href:'/gc-platform-vnext-plus.css?v=20260908-1', attr:'data-gc-vnext-plus-css'});
     loadAsset({tag:'link', rel:'stylesheet', href:'/gc-premium-design-2026.css?v=20260915-3', attr:'data-gc-premium-design-2026'});
     loadAsset({tag:'link', rel:'stylesheet', href:'/gc-live-visual-refresh-2026.css?v=20260915-2', attr:'data-gc-live-visual-refresh'});
+    loadAsset({tag:'link', rel:'stylesheet', href:'/gc-mobile-visual-rebuild-2026.css?v=20260918-1', attr:'data-gc-mobile-visual-rebuild'});
     loadAsset({tag:'link', rel:'stylesheet', href:'/mobile-premium-responsive-v2026.css?v=20260908-1', attr:'data-gc-mobile-premium'});
     if (!isOperational()) {
       loadAsset({tag:'link', rel:'stylesheet', href:'/gc-public-mobile-system-v2026.css?v=20260908-1', attr:'data-gc-public-mobile-system'});
