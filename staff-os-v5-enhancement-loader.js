@@ -3,7 +3,8 @@
 
   const enhancementStyles = [
     '/staff-os-premium-20260918.css?v=20260918-1',
-    '/staff-mobile-production-20260919.css?v=20260919-1'
+    '/staff-mobile-production-20260919.css?v=20260919-1',
+    '/staff-mobile-smart-enhancement-20260919.css?v=20260919-1'
   ];
   const enhancementScripts = [
     '/staff-os-v5-shipment-create-fix.js?v=20260912-2',
@@ -19,7 +20,8 @@
     '/staff-os-pro-20260909.js?v=20260912-2',
     '/staff-shell-polish-20260909.js?v=20260912-2',
     '/staff-workflow-chain.js?v=20260912-2',
-    '/staff-os-premium-20260918.js?v=20260918-1'
+    '/staff-os-premium-20260918.js?v=20260918-1',
+    '/staff-mobile-smart-enhancement-20260919.js?v=20260919-1'
   ];
 
   const loadStyle = (href) => {
