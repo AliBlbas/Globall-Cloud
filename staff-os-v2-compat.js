@@ -359,15 +359,15 @@
     installErrorSurface();
     installResponsiveEnhancements();
     await waitForStaffApp().catch(() => false);
-    buildMobileDock();
+    // Legacy V2 mobile navigation is intentionally disabled.
+    // Staff OS V5 owns the mobile dock/drawer through staff-mobile-command-dock.js.
     installSystemMonitor();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
 
-  const appObserver = new MutationObserver(() => {
-    if (document.querySelector('.gc-shell')) buildMobileDock();
-  });
+  // V5 owns mobile navigation; do not rebuild the legacy dock on DOM mutations.
+  const appObserver = new MutationObserver(() => {});
   appObserver.observe(document.documentElement, { childList: true, subtree: true });
 })();
