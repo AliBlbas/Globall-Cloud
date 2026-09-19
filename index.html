@@ -281,3 +281,326 @@
 </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>گشتی - پەنێلی بەڕێوەبردنی ستاف</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        * { box-sizing: border-box; }
+        body { background: #f0f2f5; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        #loginScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #1e2a3a, #2c3e50);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999;
+        }
+        .login-box {
+            background: white; padding: 40px; border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 360px;
+        }
+        .login-box h2 { color: #1e2a3a; margin-bottom: 20px; }
+        .sidebar { background: #1e2a3a; min-height: 100vh; padding: 20px; color: white; }
+        .sidebar h4 { border-bottom: 1px solid #3a4a5a; padding-bottom: 15px; }
+        .nav-link { color: #b0c4de; cursor: pointer; }
+        .nav-link:hover, .nav-link.active { color: white; background: #2b3d54; border-radius: 8px; }
+        .main-content { padding: 30px; }
+        .card { border-radius: 15px; border: none; margin-bottom: 20px; }
+        .badge-notif { background: #e74c3c; color: white; border-radius: 50%; padding: 2px 10px; margin-right: 10px; }
+        .list-group-item.pending { border-left: 4px solid #f39c12; background: #fff9e6; }
+        .view-content { display: none; }
+        .view-content.active { display: block; }
+        .staff-table i { cursor: pointer; margin: 0 3px; }
+        .logout-btn { background: none; border: none; color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+<!-- شاشەی چوونەژوورەوە -->
+<div id="loginScreen">
+    <div class="login-box text-center">
+        <i class="bi bi-shield-lock" style="font-size: 60px; color: #1e2a3a;"></i>
+        <h2 class="mt-3">پەنێلی سوپەر ئەدمین</h2>
+        <input type="password" id="loginPass" class="form-control mb-3" placeholder="تێپەڕەوشە بنووسە">
+        <button class="btn btn-dark w-100" onclick="loginAdmin()">چوونەژوورەوە</button>
+        <div class="mt-2 text-muted small">تێپەڕەوشە: <strong>admin123</strong></div>
+    </div>
+</div>
+
+<!-- ناوەڕۆکی سەرەکی -->
+<div id="mainApp" style="display:none;">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- سایدبار -->
+            <div class="col-md-2 sidebar">
+                <h4><i class="bi bi-cloud"></i> گشتی</h4>
+                <hr>
+                <div class="nav flex-column nav-pills">
+                    <a class="nav-link active" data-view="dashboard"><i class="bi bi-speedometer2"></i> داشبۆرد</a>
+                    <a class="nav-link" data-view="requests"><i class="bi bi-bell"></i> داواکارییەکان <span class="badge-notif" id="notifCount">0</span></a>
+                    <a class="nav-link" data-view="accounts"><i class="bi bi-people"></i> بەڕێوەبردنی ئەکاونت</a>
+                    <a class="nav-link" data-view="prices"><i class="bi bi-tag"></i> نرخەکان</a>
+                </div>
+                <hr>
+                <button class="logout-btn" onclick="logout()"><i class="bi bi-box-arrow-right"></i> دەرچوون</button>
+                <div class="mt-3 text-muted small">تۆ: <strong>Super Admin</strong></div>
+            </div>
+
+            <!-- ناوەڕۆک -->
+            <div class="col-md-10 main-content">
+                <h2 class="mb-4" id="pageTitle">داشبۆرد</h2>
+
+                <!-- داشبۆرد -->
+                <div id="view-dashboard" class="view-content active">
+                    <div class="row">
+                        <div class="col-md-4"><div class="card p-3"><h5>چاوەڕوانی وەڵام</h5><h2 id="statPending">0</h2></div></div>
+                        <div class="col-md-4"><div class="card p-3"><h5>کۆی ستاف</h5><h2 id="statStaff">0</h2></div></div>
+                        <div class="col-md-4"><div class="card p-3"><h5>نرخەکان</h5><h2 id="statPrices">0</h2></div></div>
+                    </div>
+                    <div class="alert alert-success">✨ هەموو داتاکان لە Supabaseـدا هەڵدەگیرێن و بە شێوەی ڕاستەقینە کاردەکەن!</div>
+                </div>
+
+                <!-- داواکارییەکان -->
+                <div id="view-requests" class="view-content">
+                    <div class="card">
+                        <div class="card-header bg-white"><h5>لیستی داواکارییەکان <span id="reqCountBadge" class="badge bg-warning">0</span></h5></div>
+                        <div class="card-body" id="requestsList"></div>
+                    </div>
+                </div>
+
+                <!-- ئەکاونتەکان -->
+                <div id="view-accounts" class="view-content">
+                    <div class="card">
+                        <div class="card-header bg-white d-flex justify-content-between">
+                            <h5>دروستکردنی ئەکاونتی نوێ</h5>
+                            <button class="btn btn-primary btn-sm" onclick="addStaff()"><i class="bi bi-plus"></i> زیادکردن</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-4"><input id="newName" class="form-control" placeholder="ناوی ستاف"></div>
+                                <div class="col-4"><input id="newEmail" class="form-control" placeholder="ئیمەیڵ"></div>
+                                <div class="col-4"><select id="newRole" class="form-select"><option>Admin</option><option>Manager</option><option>Viewer</option></select></div>
+                            </div>
+                            <div id="staffList" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- نرخەکان -->
+                <div id="view-prices" class="view-content">
+                    <div class="card">
+                        <div class="card-header bg-white"><h5>بەڕێوەبردنی نرخەکان</h5></div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-5"><input id="priceKey" class="form-control" placeholder="ناوی کاڵا یان خزمەتگوزاری"></div>
+                                <div class="col-4"><input id="priceValue" class="form-control" placeholder="نرخ بە دۆلار"></div>
+                                <div class="col-3"><button class="btn btn-success w-100" onclick="savePrice()">تۆمارکردن</button></div>
+                            </div>
+                            <hr>
+                            <div id="priceTable" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // ======================== پەیوەندی بە Supabase ========================
+    const SUPABASE_URL = 'https://xxxxxxxxxxxxx.supabase.co';  // <-- URLـی پرۆژەکەت لێرە دابنێ
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // <-- anon keyـەکەت لێرە دابنێ
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ======================== چوونەژوورەوە ========================
+    function loginAdmin() {
+        const pass = document.getElementById('loginPass').value;
+        if (pass === 'admin123') {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            loadAllData();
+        } else {
+            alert('تێپەڕەوشە هەڵەیە!');
+        }
+    }
+    function logout() {
+        document.getElementById('mainApp').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('loginPass').value = '';
+    }
+
+    // ======================== بارکردنی هەموو داتا ========================
+    async function loadAllData() {
+        await Promise.all([loadStaffs(), loadRequests(), loadPrices()]);
+        updateUI();
+    }
+
+    async function loadStaffs() {
+        const { data, error } = await supabase.from('staffs').select('*');
+        if (error) console.error(error);
+        else window.staffs = data || [];
+    }
+    async function loadRequests() {
+        const { data, error } = await supabase.from('requests').select('*').order('id', { ascending: false });
+        if (error) console.error(error);
+        else window.requests = data || [];
+    }
+    async function loadPrices() {
+        const { data, error } = await supabase.from('prices').select('*');
+        if (error) console.error(error);
+        else window.prices = data || [];
+    }
+
+    function updateUI() {
+        const pending = (window.requests || []).filter(r => r.status === 'pending').length;
+        document.getElementById('notifCount').innerText = pending;
+        document.getElementById('statPending').innerText = pending;
+        document.getElementById('statStaff').innerText = (window.staffs || []).length;
+        document.getElementById('statPrices').innerText = (window.prices || []).length;
+        document.getElementById('reqCountBadge').innerText = pending;
+        renderRequests();
+        renderStaffs();
+        renderPrices();
+    }
+
+    // ======================== داواکارییەکان ========================
+    function renderRequests() {
+        const container = document.getElementById('requestsList');
+        const reqs = window.requests || [];
+        if (!reqs.length) return container.innerHTML = '<div class="text-muted">هیچ داواکارییەک نییە</div>';
+        let html = '<ul class="list-group">';
+        reqs.forEach(req => {
+            const isPending = req.status === 'pending';
+            html += `
+                <li class="list-group-item ${isPending ? 'pending' : ''} d-flex justify-content-between align-items-center">
+                    <div><strong>${req.name}</strong> - ${req.type} <br><small>${req.detail || ''} | ${req.date || ''}</small></div>
+                    <div>
+                        ${isPending ? `
+                            <span class="badge bg-warning">چاوەڕوان</span>
+                            <i class="bi bi-check-circle text-success" onclick="respondReq(${req.id}, 'accept')" style="font-size:20px;margin:0 5px;cursor:pointer;"></i>
+                            <i class="bi bi-x-circle text-danger" onclick="respondReq(${req.id}, 'reject')" style="font-size:20px;margin:0 5px;cursor:pointer;"></i>
+                        ` : `<span class="badge bg-secondary">وەڵام دراوە</span>`}
+                    </div>
+                </li>
+            `;
+        });
+        html += '</ul>';
+        container.innerHTML = html;
+    }
+
+    async function respondReq(id, action) {
+        const newStatus = action === 'accept' ? 'accepted' : 'rejected';
+        const { error } = await supabase.from('requests').update({ status: newStatus }).eq('id', id);
+        if (error) { alert('هەڵە ڕوویدا!'); return; }
+        alert(action === 'accept' ? '✅ پەسەند کرا!' : '❌ ڕەت کرایەوە');
+        await loadRequests();
+        updateUI();
+    }
+
+    // ======================== ئەکاونت ========================
+    async function addStaff() {
+        const name = document.getElementById('newName').value.trim();
+        const email = document.getElementById('newEmail').value.trim();
+        const role = document.getElementById('newRole').value;
+        if (!name || !email) return alert('تکایە ناو و ئیمەیڵ پڕ بکەوە');
+        
+        const { error } = await supabase.from('staffs').insert([{ name, email, role }]);
+        if (error) { alert('هەڵە ڕوویدا: ' + error.message); return; }
+        
+        // ئەگەر داواکارییەک هەبوو بۆ ئەم ئیمەیڵە، دەبێت بە وەڵامدراو
+        const { data: pendingReq } = await supabase.from('requests').select('id').eq('email', email).eq('status', 'pending');
+        if (pendingReq && pendingReq.length) {
+            await supabase.from('requests').update({ status: 'accepted' }).eq('id', pendingReq[0].id);
+        }
+        
+        document.getElementById('newName').value = '';
+        document.getElementById('newEmail').value = '';
+        alert('✅ ئەکاونت بە سەرکەوتوویی دروست کرا!');
+        await loadAllData();
+    }
+
+    function renderStaffs() {
+        const container = document.getElementById('staffList');
+        const staffs = window.staffs || [];
+        if (!staffs.length) return container.innerHTML = '<div class="text-muted">هیچ ستافێک نییە</div>';
+        let html = `<table class="table table-striped"><tr><th>ناو</th><th>ئیمەیڵ</th><th>ڕۆڵ</th></tr>`;
+        staffs.forEach(s => { html += `<tr><td>${s.name}</td><td>${s.email}</td><td>${s.role}</td></tr>`; });
+        html += '</table>';
+        container.innerHTML = html;
+    }
+
+    // ======================== نرخ ========================
+    async function savePrice() {
+        const key = document.getElementById('priceKey').value.trim();
+        const val = parseFloat(document.getElementById('priceValue').value);
+        if (!key || isNaN(val)) return alert('تکایە ناو و نرخی دروست بنووسە');
+        
+        // ببینە ئایا ئەم نرخە پێشتر هەیە
+        const { data: existing } = await supabase.from('prices').select('id').eq('key', key);
+        let error;
+        if (existing && existing.length) {
+            // نوێکردنەوە
+            const res = await supabase.from('prices').update({ value: val }).eq('key', key);
+            error = res.error;
+        } else {
+            // زیادکردنی نوێ
+            const res = await supabase.from('prices').insert([{ key, value: val }]);
+            error = res.error;
+        }
+        if (error) { alert('هەڵە ڕوویدا!'); return; }
+        document.getElementById('priceKey').value = '';
+        document.getElementById('priceValue').value = '';
+        alert('✅ نرخ تۆمار کرا!');
+        await loadPrices();
+        updateUI();
+    }
+
+    function renderPrices() {
+        const container = document.getElementById('priceTable');
+        const prices = window.prices || [];
+        if (!prices.length) return container.innerHTML = '<div class="text-muted">هیچ نرخێک دیاری نەکراوە</div>';
+        let html = `<table class="table table-striped"><tr><th>خزمەتگوزاری</th><th>نرخ ($)</th><th>کردار</th></tr>`;
+        prices.forEach((p, idx) => {
+            html += `<tr><td>${p.key}</td><td>${p.value}</td>
+                <td><i class="bi bi-pencil text-primary" onclick="editPrice(${p.id}, '${p.key}', ${p.value})" style="cursor:pointer;"></i> 
+                    <i class="bi bi-trash text-danger" onclick="deletePrice(${p.id})" style="cursor:pointer;"></i></td></tr>`;
+        });
+        html += '</table>';
+        container.innerHTML = html;
+    }
+
+    async function editPrice(id, key, currentVal) {
+        const newVal = prompt(`نرخی نوێ بۆ "${key}" بنووسە:`, currentVal);
+        if (newVal !== null && !isNaN(parseFloat(newVal))) {
+            const { error } = await supabase.from('prices').update({ value: parseFloat(newVal) }).eq('id', id);
+            if (error) alert('هەڵە ڕوویدا!');
+            else { await loadPrices(); updateUI(); }
+        }
+    }
+
+    async function deletePrice(id) {
+        if (!confirm('دڵنیای لە سڕینەوەی ئەم نرخە؟')) return;
+        const { error } = await supabase.from('prices').delete().eq('id', id);
+        if (error) alert('هەڵە ڕوویدا!');
+        else { await loadPrices(); updateUI(); }
+    }
+
+    // ======================== گۆڕینی پەنجەرە ========================
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+            const view = this.dataset.view;
+            document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${view}`).classList.add('active');
+            document.getElementById('pageTitle').innerText = this.innerText.trim();
+        });
+    });
+</script>
+</body>
+</html>
