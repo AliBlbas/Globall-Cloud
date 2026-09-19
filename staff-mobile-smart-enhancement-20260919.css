@@ -1,0 +1,28 @@
+/* Staff OS — smart mobile enhancement. Additive only. */
+.gc-smart-mobile-list{display:none}
+@media (max-width:760px){
+  .table-wrap > table[data-gc-smart-mobile="1"]{display:none !important}
+  .gc-smart-mobile-list{display:grid;gap:9px;margin-top:10px}
+  .gc-smart-mobile-card{
+    display:grid;gap:9px;padding:13px;border:1px solid rgba(92,146,184,.22);border-radius:16px;
+    background:linear-gradient(145deg,rgba(10,34,55,.96),rgba(4,18,31,.96));
+    box-shadow:0 10px 28px rgba(0,0,0,.18);min-width:0
+  }
+  .gc-smart-mobile-card-head{display:grid;gap:3px;min-width:0}
+  .gc-smart-mobile-primary{font-weight:900;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#f4fbff}
+  .gc-smart-mobile-secondary{font:600 10px/1.5 var(--mono,monospace);color:#83a3bc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .gc-smart-mobile-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .gc-smart-mobile-detail{min-width:0;padding:7px 8px;border-radius:10px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.045)}
+  .gc-smart-mobile-detail small{display:block;color:#708ba4;font-size:9px;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .gc-smart-mobile-detail strong{display:block;color:#eaf6ff;font-size:11px;line-height:1.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .gc-smart-mobile-actions{display:flex;gap:6px;flex-wrap:wrap;padding-top:2px}
+  .gc-smart-mobile-action{min-height:42px !important;flex:1 1 120px}
+  .gc-mobile-dock,.gc-mobile-drawer,.gc-mobile-menu-btn{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .gc-mobile-menu-btn{min-width:44px !important;min-height:44px !important}
+  .field,button,.btn,select,textarea{touch-action:manipulation}
+}
+@media (max-width:520px){
+  .gc-smart-mobile-card{padding:11px}
+  .gc-smart-mobile-details{grid-template-columns:1fr 1fr}
+  .gc-smart-mobile-action{flex-basis:100%}
+}
