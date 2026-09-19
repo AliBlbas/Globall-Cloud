@@ -4,11 +4,11 @@
   window.__gcMobileCommandDock = true;
 
   const tabs = [
-    ['overview','01','داشبۆرد'],
-    ['shipments','02','بارەکان'],
-    ['customers','04','کڕیاران'],
-    ['warehouses','06','کۆگا'],
-    ['alerts','03','Alerts'],
+    ['overview','⌂','داشبۆرد'],
+    ['shipments','▣','بارەکان'],
+    ['customers','◎','کڕیاران'],
+    ['warehouses','▤','کۆگا'],
+    ['alerts','!','ئاگاداری'],
   ];
   const allTabs = [
     ...tabs,
@@ -36,6 +36,10 @@
 
   function boot() {
     if (!document.querySelector('.gc-side') || document.getElementById('gcMobileCommandDock')) return;
+
+    // Remove any legacy V2 mobile dock/menu left by an older cached runtime.
+    document.getElementById('gcMobileDock')?.remove();
+    document.querySelector('.gc-mobile-menu-toggle')?.remove();
 
     const backdrop = document.createElement('div');
     backdrop.className = 'gc-mobile-backdrop';
