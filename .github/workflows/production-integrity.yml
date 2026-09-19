@@ -1,0 +1,157 @@
+name: Production Integrity
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-integrity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integrity:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Repository validation
+        run: npm test
+
+      - name: Production contract validation
+        run: npm run test:contracts
+
+      - name: Runtime reference and security invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          project_id="$(sed -nE 's/^project_id[[:space:]]*=[[:space:]]*"([^"]+)".*$/\1/p' supabase/config.toml | head -n1)"
+          test "$project_id" = "ahslifnthiwfkmaswjno"
+
+          if grep -RIl --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.wrangler \
+            --include='*.js' --include='*.mjs' --include='*.ts' --include='*.tsx' \
+            --include='*.html' --include='*.css' --include='*.json' \
+            --include='*.toml' --include='*.yml' --include='*.yaml' \
+            'swptmhhwhdtyrrfzetam' .; then
+            echo 'Forbidden stale Supabase project reference detected.'
+            exit 1
+          fi
+
+          grep -q 'Content-Security-Policy:' _headers
+          grep -q 'Strict-Transport-Security:' _headers
+          grep -q 'X-Content-Type-Options: nosniff' _headers
+          ! grep -q "script-src[^;]*unsafe-inline" _headers
+          grep -q 'https://ahslifnthiwfkmaswjno.supabase.co' production-bridge.js
+          grep -q '^/staff /staff-os-v5.html 200$' _redirects
+          grep -q '^/track /tracking-integration.html 200$' _redirects
+
+      - name: Public and Staff smoke validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'staff-premium-mobile-20260909.css?v=' staff-os-v5.html
+          grep -q 'staff-premium-mobile-20260909.js?v=' staff-os-v5.html
+          grep -q 'mobile-premium-responsive-v2026.css?v=' staff-os-v5.html
+          grep -q 'staff-os-pro-20260909.css?v=' staff-os-v5.html
+          grep -q 'staff-shell-polish-20260909.css?v=' staff-os-v5.html
+          grep -q 'functions/v1/public-quote' gc-csp-scripts/index-inline-2.js
+          grep -q 'functions/v1/public-message' gc-csp-scripts/index-inline-2.js
+          grep -q '/public-runtime-guarantee.js' public-route-bootstrap.js
+          grep -q 'renderEmergencyShell' public-runtime-guarantee.js
+          ! grep -q 'YOUR_PROJECT_ID' staff-os-v5.html
+          ! grep -q 'YOUR_ANON_KEY' staff-os-v5.html
+
+      - name: Public live smoke test
+        if: github.event_name != 'pull_request'
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - "$EXPECTED_SHA" <<'PY'
+          import json
+          import sys
+          import time
+          import urllib.parse
+          import urllib.request
+
+          site = 'https://globall-cloud.pages.dev'
+          expected = sys.argv[1]
+          legacy = 'Supabase هێشتا پەیوەست نەکراوە'
+          paths = (
+              '/',
+              '/track',
+              '/tracking-integration.html',
+              '/warehouse-os.html',
+              '/customer-portal.html',
+              '/staff',
+          )
+
+          for attempt in range(1, 25):
+              try:
+                  release_req = urllib.request.Request(
+                      site + '/release.json?verify=' + urllib.parse.quote(expected),
+                      headers={'Cache-Control': 'no-cache', 'Accept': 'application/json'},
+                  )
+                  with urllib.request.urlopen(release_req, timeout=15) as response:
+                      release = json.loads(response.read().decode('utf-8', 'replace'))
+
+                  actual = release.get('commit')
+                  if actual != expected:
+                      raise RuntimeError(
+                          'release commit is {!r}, expected {!r}'.format(actual, expected)
+                      )
+
+                  for path in paths:
+                      req = urllib.request.Request(
+                          site + path + '?ci=' + str(attempt),
+                          headers={'Cache-Control': 'no-cache'},
+                      )
+                      with urllib.request.urlopen(req, timeout=15) as response:
+                          body = response.read().decode('utf-8', 'replace')
+                          assert response.status == 200 and len(body) > 200, (
+                              path,
+                              response.status,
+                              len(body),
+                          )
+                          assert legacy not in body, (
+                              path,
+                              'legacy Supabase setup notice present',
+                          )
+
+                  health_req = urllib.request.Request(
+                      site + '/api/health?ci=1',
+                      headers={'Cache-Control': 'no-cache', 'Accept': 'application/json'},
+                  )
+                  with urllib.request.urlopen(health_req, timeout=15) as response:
+                      health = json.loads(response.read().decode('utf-8', 'replace'))
+                      assert response.status == 200 and health.get('ok') is True, health
+
+                  print(json.dumps(release, ensure_ascii=False))
+                  print(json.dumps(health, ensure_ascii=False))
+                  break
+              except Exception as exc:
+                  if attempt == 24:
+                      raise
+                  print('Waiting for live release ({}/24): {}'.format(attempt, exc))
+                  time.sleep(5)
+          PY

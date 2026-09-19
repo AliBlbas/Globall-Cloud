@@ -1,0 +1,139 @@
+# Globall Cloud Production System TODO
+
+- [x] Confirm production architecture, hosting boundary, roles, and critical business assumptions
+- [x] Audit current Supabase schema, Edge Functions, RLS, authentication, and deployment configuration
+- [x] Define canonical shipment, quote, invoice, package, warehouse, delivery, and audit data contracts
+- [x] Harden role-based access and staff/customer authorization paths
+- [x] Build and verify core shipment and operations workflows — existing control-plane and operations workflows audited and role-scoped
+- [x] Build customer and staff application surfaces around real production data — customer/staff surfaces exist; driver workspace hardening published, warehouse/finance/admin review remains
+- [ ] Verify payment, notification, document, and external-event integrations
+- [ ] Add idempotency, retries, background processing, logging, monitoring, and alerts
+- [ ] Add backup, recovery, migration, and release safeguards
+- [ ] Run end-to-end security, functional, performance, and deployment validation
+- [ ] Publish the production system and document remaining account-level actions
+
+## Confirmed architecture decisions
+
+- [x] Use the existing Supabase project as the production backend foundation
+- [x] Support both Qicard and FIB payment providers through server-side adapters
+- [x] Support Customer, Driver, Warehouse, Operations, Finance, and Admin roles
+- [x] Complete the production architecture and locked business-assumption review
+- [x] Add a canonical role policy shared by operations functions, preserving legacy role aliases
+- [x] Restrict operations read/write paths by role and keep shipment mutations auditable
+- [x] Add tests for role authorization and legacy-role compatibility via production integrity/static guard validation
+- [x] Fix the operations function’s internal shipment-write guard to use the canonical role policy
+- [x] Scope driver reads to assigned shipments and prevent unrelated customer/staff data access
+- [x] Scope driver event reads and event creation to assigned shipments
+- [x] Re-run production validation after the final authorization hardening
+- [x] Define shared TypeScript contracts for shipments, events, packages, quotes, invoices, payments, deliveries, and audit records
+- [x] Document canonical status vocabularies, ownership fields, and idempotency rules
+- [x] Validate the contracts against the existing Supabase migration and function surface
+- [x] Add a deterministic role-policy regression test to the repository validation command
+- [x] Verify shipment lifecycle transitions and status-history persistence
+- [x] Verify package/barcode, warehouse movement, consolidation, customs, delivery, and POD workflows
+- [x] Verify audit-log coverage for privileged operational writes
+- [x] Add regression guards for core workflow entry points
+- [x] Correct the delivery-proof regression guard to use the authoritative migration/control-plane sources
+- [x] Add mobile driver accessibility and proof-of-delivery validation guards
+- [ ] Collect production Supabase service configuration and Qicard/FIB credentials through a secure channel
+- [ ] Confirm webhook URLs, signing secrets, merchant IDs, and callback environments for both payment providers
+- [ ] Activate provider-backed payment and notification integrations only after credentials are configured
+- [x] Define provider-neutral payment adapter and normalized payment-state contract
+- [x] Add webhook idempotency and signature-verification scaffolding without live credentials
+- [x] Add notification and document integration guards for customer/staff workflows
+- [x] Add sandbox-safe integration tests and publish the scaffolding milestone
+- [x] Add provider-neutral payment adapter and webhook replay-safety regression guards
+- [x] Audit idempotency and retry behavior across payments, notifications, and shipment transitions
+- [x] Verify scheduled worker and heartbeat configuration for periodic logistics processing
+- [x] Add structured observability and safe operational failure reporting
+- [x] Document backup, recovery, migration, and release safeguards
+- [x] Validate and publish the reliability hardening milestone
+- [x] Run full JavaScript and TypeScript validation with production integrity checks
+- [x] Verify public site, customer portal, payment checkout, and tracking endpoints
+- [x] Confirm the latest main commit and Cloudflare Pages reachability
+- [x] Record remaining account-level actions for live provider activation
+- [x] Diagnose the Supabase Preview failure caused by remote migration versions missing locally
+- [x] Reconcile migration history safely without destructive database changes
+- [x] Re-run Supabase Preview and production integrity validation after reconciliation
+- [x] Audit the provided mobile landing-screen direction against the current Globall-Cloud frontend
+- [x] Improve mobile RTL hierarchy, typography, spacing, and CTA clarity
+- [x] Refine header, bottom navigation, live-corridor card, and responsive interactions
+- [x] Validate the refined UI at mobile and desktop breakpoints with accessibility and production checks (mobile rules audited in source; public desktop render verified; protected preview requires authenticated access)
+- [x] Publish the refined UI milestone and document the changes
+- [x] Audit the current homepage assets and composition against the supplied premium logistics reference
+- [x] Define the navy-gold cinematic visual system and production-safe asset strategy
+- [x] Add premium global logistics imagery and app-style visual surfaces without hardcoded customer data
+- [x] Restyle the homepage for RTL mobile and desktop with premium hierarchy and accessible CTAs
+- [x] Validate asset loading, responsive behavior, accessibility, and production integrity
+- [x] Publish the premium redesign and document the exact changes
+- [x] Audit existing motion rules and animated surfaces
+- [x] Define a premium motion language with reduced-motion fallback
+- [x] Add animations for cards, hero, routes, CTAs, and navigation
+- [x] Validate animation accessibility, responsiveness, and production integrity
+- [x] Publish the animated interface and document the changes
+- [x] Diagnose Safari homepage content hidden by incomplete entrance-animation state
+- [x] Add Safari-safe visible-content fallback while preserving supported-browser motion
+- [x] Validate Safari compatibility, reduced-motion behavior, and production integrity
+- [x] Publish the Safari compatibility fix and document the result
+- [x] Audit the mobile announcement bar height and chip wrapping
+- [x] Compact the truck message and support-hours chips while preserving readable RTL text
+- [x] Validate the compact header layout and production integrity
+- [x] Publish the compact announcement-bar refinement
+- [x] Audit staff OS pages, styles, scripts, and role-sensitive surfaces against the supplied references
+- [x] Define the enterprise Staff OS visual hierarchy and responsive information architecture
+- [x] Redesign staff header, authenticated status, metrics, quick actions, and operational navigation
+- [x] Validate role safety, RTL mobile behavior, accessibility, and production integrity
+- [x] Publish the Staff OS redesign and document the delivered improvements
+- [x] Audit existing staff task surfaces, data contracts, and role boundaries
+- [x] Define task priorities, ownership, statuses, SLA rules, filters, and audit expectations
+- [x] Add a role-aware Task Management workspace to Staff OS
+- [x] Add actionable queues, task detail interactions, and mobile-first RTL surfaces
+- [x] Validate task workflows, security, accessibility, and production integrity
+- [x] Publish the Task Management upgrade and document the operating model
+- [x] Implement the approved production Task Management scope: schema/RLS, authenticated API, Operations Queue, filters, SLA indicators, quick actions, audit logging, and responsive RTL UI
+- [x] Audit warehouse receipt creation, photo storage, customer-code fields, and role boundaries
+- [x] Define OCR code extraction, confidence thresholds, location capture, and manual confirmation rules
+- [x] Implement secure photo storage and GC-code to customer matching with manual confirmation gate
+- [x] Link confirmed intake photos and location to the warehouse receipt/customer record
+- [x] Build mobile camera intake, review, confirmation, and receipt history surfaces
+- [x] Validate photo access, customer isolation, input-safety, mobile UX, and production integrity
+- [x] Publish the photo-intake workflow and document warehouse operations; automatic image OCR provider remains pending
+- [x] Audit existing customer portal, shipment data, photo access, tracking, and auth boundaries
+- [x] Define customer-scoped dashboard privacy and shipment-detail contract
+- [x] Implement secure customer shipment, photo, location, timeline, and payment views
+- [x] Build mobile-first customer dashboard and shipment detail screens
+- [x] Validate customer isolation, photo authorization, accessibility, responsive UX, and production integrity
+- [x] Publish the customer dashboard and document the customer operating flow
+- [x] Audit invoice, payment, expense, document, and customer ownership contracts
+- [x] Define customer finance privacy, balance, expense, and invoice presentation rules
+- [x] Implement customer-scoped invoice, expense, balance, download, and payment data flows
+- [x] Build customer finance summary and invoice-detail surfaces in Customer Portal
+- [x] Validate financial accuracy, customer isolation, accessibility, and production integrity
+- [x] Publish the customer finance workspace and document the customer operating flow
+- [x] Audit company finance schema, ledger semantics, and executive role boundaries
+- [x] Define revenue, cost, profit, cash, currency, and period reporting rules
+- [x] Implement role-restricted executive finance queries and aggregation views
+- [x] Build executive finance cards, trends, breakdowns, and drill-downs
+- [x] Validate financial accuracy, access control, currency handling, accessibility, and production integrity
+- [x] Publish the executive finance dashboard and document reporting assumptions
+- [x] Audit existing quote pricing, currency, service, and manager authorization contracts
+- [x] Define pricing catalog, effective-date, audit, and historical-invoice rules
+- [x] Implement editable rate storage, current supplied rates, and quote calculation integration
+- [x] Build manager pricing console with rate editing, publishing, and audit visibility
+- [x] Validate price accuracy, role security, currency handling, quote behavior, and production integrity
+- [x] Publish pricing management and document the current rate card
+- [x] Audit quote schemas, calculator routes, units, and existing pricing catalog
+- [x] Define the 1:6000 volumetric-weight and billable-weight contract
+- [x] Implement server calculation, quote snapshot, and pricing integration
+- [x] Add air and sea calculator controls with transparent calculation details
+- [x] Validate weight math, boundary cases, permissions, currency, accessibility, and production integrity
+- [x] Publish the volumetric-weight feature and document the billing rule
+- [ ] Audit warehouse photo intake, customer-code lookup, storage, and existing receipt authorization
+- [ ] Define barcode/OCR extraction, confidence thresholds, privacy, and manual-review rules
+- [ ] Implement client barcode scanning, server OCR extraction, customer matching, and audit events
+- [ ] Build the Warehouse OS scan-and-review interface with camera and fallback flows
+- [ ] Validate recognition accuracy safeguards, customer isolation, mobile camera behavior, and production integrity
+- [ ] Publish the package recognition workflow and document operational review rules
+- [x] Add Warehouse OS camera barcode detection and GC-code extraction with customer confirmation fallback
+- [x] Validate barcode recognition, customer isolation, mobile camera behavior, and production integrity
+- [ ] Connect a production OCR/vision provider to read printed GC-* text when no barcode is present

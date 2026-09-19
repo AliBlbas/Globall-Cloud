@@ -1,0 +1,71 @@
+/* Globall Cloud — cross-browser compatibility layer
+ * Designed to keep Safari/WebKit visually aligned with Chrome/Chromium.
+ */
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+body{min-height:100%;overflow-x:hidden;-webkit-overflow-scrolling:touch;background-attachment:scroll}
+img,svg,video,canvas{display:block;max-width:100%;height:auto}
+button,input,select,textarea{-webkit-appearance:none;appearance:none;border-radius:0}
+button,input,select,textarea{font:inherit;line-height:1.2}
+button{cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+select{background-image:none}
+
+:root{--gc-vh:100vh;--gc-dvh:100dvh;--gc-svh:100svh;--gc-lvh:100lvh}
+body{min-height:var(--gc-dvh);min-height:100svh;min-height:100dvh}
+.min-h-screen,.min-height-screen,.full-screen{min-height:var(--gc-dvh);min-height:100svh;min-height:100dvh}
+
+.nav,.nav-inner,.hero,.hero-grid,.grid,.dashboard-grid,.feature-grid,.services-grid,.stats-grid,.cards-grid,.toolbar,.actions{min-width:0}
+.flex,.grid,.nav-inner{min-width:0}
+.flex>*,.grid>*{min-width:0}
+
+.glass,.glass-card,.nav,.modal-card,.auth-card,.panel,.card,.hero-card{background-color:rgba(11,27,49,.96)}
+@supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+  .glass,.glass-card,.nav,.modal-card,.auth-card,.panel,.card,.hero-card{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+}
+
+.btn-primary{background:#00c2d9}
+@supports (background:color-mix(in srgb, red 20%, transparent)){
+  .btn-primary{background:linear-gradient(135deg,#55e5f2,#00c2d9)}
+}
+
+body::before,body::after{transform:translateZ(0);backface-visibility:hidden}
+.bottom-nav,.mobile-bottom-nav,.floating-actions,.mobile-actions{padding-bottom:max(10px,env(safe-area-inset-bottom,0px))}
+.live-map-container,.route-map,.route-visualization,.tracking-details,.map-summary,.map-legend{min-width:0;max-width:100%;overflow:hidden}
+.route-visualization svg{width:100%;max-width:100%;height:auto;overflow:visible}
+.brand-logo,.logo-icon{aspect-ratio:1/1;object-fit:contain;flex:0 0 auto}
+
+@media (max-width:768px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  input,select,textarea{font-size:16px!important}
+  .container,.wrap,.page,.section{width:100%;max-width:100%;min-width:0}
+}
+
+/* iPhone/iPad Safari has a moving browser chrome; avoid 100vh jumps. */
+@supports (-webkit-touch-callout:none){
+  html,body{width:100%;min-width:0;max-width:100%;overflow-x:hidden!important;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{min-height:100svh;min-height:100dvh;background-attachment:scroll}
+  .full-screen,.min-h-screen,.min-height-screen{min-height:100svh;min-height:100dvh}
+
+  .nav{position:-webkit-sticky;position:sticky;top:0;z-index:200}
+  .glass,.glass-card,.nav,.modal-card,.auth-card,.panel,.card,.hero-card,
+  .mobile-menu,.mobile-bottom-nav,.bottom-nav,.drawer,.sheet{ -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px) }
+
+  .nav-inner,.hero,.hero-grid,.hero-content,.hero-card,.container,.section,
+  .grid,.cards-grid,.feature-grid,.services-grid,.dashboard-grid,.form-grid,
+  .page,main,section,article,aside,footer,header{min-width:0!important;max-width:100%!important}
+
+  img,svg,video,canvas,iframe{max-width:100%!important}
+  iframe{border:0}
+
+  input,select,textarea,.field{font-size:16px!important;line-height:1.35!important;min-height:48px}
+  button{min-height:44px}
+
+  .bottom-nav,.mobile-bottom-nav,.floating-actions,.mobile-actions{
+    padding-bottom:max(10px,env(safe-area-inset-bottom,0px));
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.001ms!important;animation-duration:.001ms!important}
+}

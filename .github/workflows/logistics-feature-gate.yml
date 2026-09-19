@@ -1,0 +1,82 @@
+name: Logistics Feature Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: logistics-feature-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v7 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+      - name: Production contract validation
+        run: npm run test:contracts
+      - name: Validate production assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in mobile-premium-responsive-v2026.css production-mobile-ux-v2026.css tracking-intelligence.css tracking-intelligence.js status.html status-page.js public-production-safety.js staff-logistics-intelligence.css staff-logistics-intelligence.js staff-mobile-command-dock.css staff-mobile-command-dock.js gc-platform-vnext.css gc-platform-vnext.js gc-platform-vnext-plus.css gc-platform-vnext-plus.js gc-runtime-safety-v2026.js production-brand-repair.js staff-os-v5.html supabase/functions/logistics-control-tower/index.ts supabase/config.toml sw.js sw-v98.js functions/_middleware.js; do test -s "$file"; done
+          grep -q "mobile-premium-responsive-v2026.css?v=" production-brand-repair.js
+          grep -q "staff-logistics-intelligence.css?v=" staff-os-v5.html
+          grep -q "staff-logistics-intelligence.js?v=" staff-os-v5.html
+          grep -q "staff-mobile-command-dock.css?v=" staff-os-v5.html
+          grep -q "staff-mobile-command-dock.js?v=" staff-os-v5.html
+          grep -q "tracking-intelligence.css?v=" sw.js
+          grep -q "tracking-intelligence.js?v=" sw.js
+          grep -q "mobile-premium-responsive-v2026.css?v=" sw.js
+          grep -q "logistics-control-tower" supabase/config.toml
+          grep -A1 '^\[functions.logistics-control-tower\]' supabase/config.toml | grep -q 'verify_jwt = true'
+          grep -q "logistics-control-tower" staff-logistics-intelligence.js
+          grep -q "Shipment Intelligence" tracking-intelligence.js
+          grep -q "Supabase" supabase/functions/logistics-control-tower/index.ts
+          grep -q "gc-platform-vnext" production-brand-repair.js
+          grep -q "gc-platform-vnext-plus" production-brand-repair.js
+          grep -q "gc-runtime-safety-v2026" production-brand-repair.js
+          grep -q "public-production-safety.js" production-brand-repair.js
+          grep -q "staff-mobile-command-dock.js" production-brand-repair.js
+          grep -q "legacy-contract: CACHE_VERSION=" sw.js
+          ! grep -q "<script>" status.html
+          grep -q "/status-page.js?v=" status.html
+      - name: JavaScript syntax checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check public-production-safety.js
+          node --check staff-mobile-command-dock.js
+          node --check tracking-intelligence.js
+          node --check staff-logistics-intelligence.js
+          node --check status-page.js
+          node --check gc-csp-scripts/tracking-integration-inline-1.js
+          node --check gc-platform-vnext.js
+          node --check gc-platform-vnext-plus.js
+          node --check gc-runtime-safety-v2026.js
+          node --check production-brand-repair.js
+          node --check functions/_middleware.js
+      - name: TypeScript bundle check
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes esbuild@0.25.9 supabase/functions/logistics-control-tower/index.ts --bundle --platform=neutral --format=esm --outfile=/tmp/logistics-control-tower-check.js
+      - name: Repository tests
+        run: npm test

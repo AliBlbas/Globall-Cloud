@@ -1,0 +1,24 @@
+PASS control-plane JavaScript syntax
+PASS all JavaScript syntax
+PASS control-plane has no executable inline script
+PASS control-plane has no inline event attributes
+PASS payment checkout has no executable inline script
+PASS payment checkout has no inline event attributes
+PASS customer portal has no executable inline script
+PASS customer portal has no inline event attributes
+PASS CSP has same-origin script policy
+PASS CSP script policy excludes unsafe-inline
+PASS service worker contains control-plane, customer and payment assets
+PASS Supabase function is JWT-protected
+PASS payment functions and public callback config exist
+PASS control-plane migration exists
+PASS advanced logistics migration exists
+PASS advanced logistics RPCs exist
+PASS advanced control-plane actions exist
+PASS document access endpoint is JWT-protected
+PASS payment migration exists
+PASS payment provider adapters exist
+PASS transition and outbox RPCs exist
+PASS payment settlement guards exist
+PASS no hardcoded service-role secret
+All production checks passed.

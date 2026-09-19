@@ -1,0 +1,658 @@
+/* Enhanced Tracking Styles — companion to tracking-enhanced.js.
+   Uses the same design tokens as index.html's :root (--surface, --teal,
+   --line-soft, etc.) so it drops in without a separate theme, and uses
+   logical (inline-start/end) properties throughout to match index.html's
+   RTL-first layout instead of hardcoded left/right. */
+
+.live-map-container {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-l);
+  padding: 20px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.map-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.map-summary-route {
+  font-weight: 700;
+  color: var(--text);
+  font-family: var(--mono);
+}
+
+.map-summary-eta { color: var(--muted); }
+
+.route-visualization {
+  width: 100%;
+  height: auto;
+  min-height: 300px;
+  margin-bottom: 16px;
+}
+
+.map-point {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.map-point:hover {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.origin-point { fill: #2ED27F; }
+.current-point { fill: #00D4FF; }
+.dest-point { fill: #E5533D; }
+
+.map-label {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--text);
+  pointer-events: none;
+}
+
+.route-line {
+  stroke: #1677FF;
+  stroke-width: 3;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.map-legend {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.legend-item .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.tracking-details {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-m);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.tracking-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.tracking-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-family: var(--mono);
+}
+
+.tracking-route {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.tracking-route strong { color: var(--text); }
+
+.tracking-progress { margin-bottom: 20px; }
+
+.progress-bar {
+  height: 6px;
+  background: linear-gradient(90deg, var(--teal), var(--teal-l));
+  border-radius: 999px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 12px rgba(0, 194, 217, 0.3);
+}
+
+/* Simple step list, used by tracking-integration.html's renderTrackingDetails() */
+.tracking-step-list { display: flex; flex-direction: column; gap: 10px; }
+
+.tracking-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border-radius: 8px;
+  border-inline-start: 3px solid var(--line-soft);
+  font-size: 13.5px;
+}
+
+.tracking-step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--line-soft);
+  flex-shrink: 0;
+}
+
+.tracking-step-label { color: var(--muted); flex: 1; }
+.tracking-step-date { color: var(--muted-2); font-family: var(--mono); font-size: 12px; }
+
+.tracking-step--done {
+  border-inline-start-color: #2ED27F;
+}
+.tracking-step--done .tracking-step-dot { background: #2ED27F; }
+.tracking-step--done .tracking-step-label { color: var(--text); }
+
+.tracking-step--current {
+  border-inline-start-color: #00D4FF;
+  background: rgba(0, 194, 217, 0.08);
+}
+.tracking-step--current .tracking-step-dot {
+  background: #00D4FF;
+  box-shadow: 0 0 8px rgba(0, 194, 217, 0.5);
+}
+.tracking-step--current .tracking-step-label { color: var(--text); font-weight: 700; }
+
+.timeline { position: relative; padding-inline-start: 24px; }
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 5px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--line-soft);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+}
+
+.timeline-item:last-child { margin-bottom: 0; padding-bottom: 0; }
+
+.timeline-dot {
+  position: absolute;
+  inset-inline-start: -17px;
+  top: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 2px solid var(--line-soft);
+  transition: all 0.2s ease;
+}
+
+.timeline-item.completed .timeline-dot {
+  background: #2ED27F;
+  border-color: #2ED27F;
+  box-shadow: 0 0 8px rgba(46, 210, 127, 0.4);
+}
+
+.timeline-item.current .timeline-dot {
+  background: #00D4FF;
+  border-color: #00D4FF;
+  width: 16px;
+  height: 16px;
+  inset-inline-start: -19px;
+  box-shadow: 0 0 12px rgba(0, 194, 217, 0.5);
+}
+
+.timeline-content {
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border-radius: 8px;
+  border-inline-start: 3px solid var(--line-soft);
+}
+
+.timeline-item.completed .timeline-content { border-inline-start-color: #2ED27F; }
+
+.timeline-item.current .timeline-content {
+  border-inline-start-color: #00D4FF;
+  background: rgba(0, 194, 217, 0.08);
+}
+
+.timeline-content strong {
+  display: block;
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.timeline-content p {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 0 6px 0;
+}
+
+.timeline-date {
+  display: block;
+  font-size: 11.5px;
+  color: var(--muted-2);
+  font-family: var(--mono);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: var(--mono);
+  letter-spacing: 0.3px;
+}
+
+.badge-success { background: rgba(46, 210, 127, 0.12); color: #2ED27F; }
+.badge-info { background: rgba(0, 194, 217, 0.12); color: #00D4FF; }
+.badge-warning { background: rgba(240, 168, 58, 0.12); color: #F0A83A; }
+.badge-danger { background: rgba(229, 83, 61, 0.12); color: #E5533D; }
+
+.notification-badge {
+  position: absolute;
+  top: -8px;
+  inset-inline-end: -8px;
+  width: 20px;
+  height: 20px;
+  background: #E5533D;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(229, 83, 61, 0.4);
+}
+
+@media (max-width: 640px) {
+  .live-map-container { padding: 16px; }
+  .route-visualization { min-height: 250px; }
+  .tracking-details { padding: 16px; }
+  .timeline { padding-inline-start: 20px; }
+  .timeline-dot { inset-inline-start: -14px; }
+  .timeline-item.current .timeline-dot { inset-inline-start: -16px; }
+  .badge { padding: 4px 10px; font-size: 11px; }
+}
+
+/* ---------- Production mobile guardrails ---------- */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+img,
+svg,
+video,
+canvas,
+iframe {
+  max-width: 100%;
+}
+
+iframe,
+video {
+  width: 100%;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+@media (max-width: 768px) {
+  body { overflow-x: clip; }
+
+  main,
+  section,
+  header,
+  footer,
+  nav,
+  article,
+  aside,
+  .container,
+  .page,
+  .card,
+  .panel,
+  .modal,
+  .modal-card,
+  .track-hero-card,
+  .hero-card,
+  .route-map,
+  .corridor-strip {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .container {
+    width: 100%;
+    padding-inline: 16px;
+  }
+
+  .nav-inner,
+  .top-announcement-inner {
+    width: 100%;
+    max-width: 100%;
+    padding-inline: 16px;
+  }
+
+  .brand b,
+  .brand small,
+  .nav-auth,
+  .section-head h2,
+  .section-head p,
+  .hero h1,
+  .hero p,
+  .tracking-header h3,
+  .map-summary-route,
+  .map-summary-eta,
+  .tracking-route,
+  .route-chip b,
+  .route-chip small,
+  .kv,
+  .field-label {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .btn,
+  .field,
+  select.field,
+  textarea.field,
+  input,
+  select,
+  textarea {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  input,
+  select,
+  textarea,
+  .field,
+  select.field,
+  textarea.field {
+    font-size: 16px !important;
+  }
+
+  table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  pre,
+  code {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .form-grid,
+  .grid,
+  .stats-grid,
+  .cards-grid,
+  .services-grid,
+  .feature-grid,
+  .dashboard-grid {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 390px) {
+  .container,
+  .nav-inner,
+  .top-announcement-inner {
+    padding-inline: 12px;
+  }
+
+  .live-map-container,
+  .tracking-details {
+    padding: 12px;
+  }
+
+  .btn { padding-inline: 16px; }
+}
+
+/* ---------- Safari / WebKit production compatibility ----------
+   This block is intentionally defensive. The main page contains a large
+   inline stylesheet loaded after this file, so compatibility declarations
+   that must win use !important only where Safari rendering needs a fallback. */
+
+@supports (-webkit-touch-callout: none) {
+  html,
+  body {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+  }
+
+  body {
+    background-attachment: scroll !important;
+  }
+
+  /* Safari historically needs the prefixed backdrop-filter property. */
+  .nav,
+  .top-announcement,
+  .modal,
+  .modal-card,
+  [class*="overlay"],
+  [class*="drawer"],
+  [class*="sheet"] {
+    -webkit-backdrop-filter: blur(10px) !important;
+    backdrop-filter: blur(10px) !important;
+  }
+
+  .nav {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 0 !important;
+  }
+
+  /* Avoid flex/grid children forcing horizontal overflow in WebKit. */
+  .nav-inner,
+  .container,
+  .section,
+  .hero,
+  .hero-inner,
+  .hero-content,
+  .hero-card,
+  .cards-grid,
+  .feature-grid,
+  .services-grid,
+  .dashboard-grid,
+  .form-grid,
+  .modal-card,
+  .modal-content,
+  .page,
+  main,
+  section,
+  article,
+  aside,
+  footer {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Keep long labels, emails and tracking IDs from stretching a card. */
+  .brand,
+  .brand > *,
+  .nav-links,
+  .nav-right,
+  .hero-content,
+  .card,
+  .panel,
+  .field,
+  input,
+  select,
+  textarea,
+  button,
+  a,
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  small,
+  label,
+  span {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* WebKit can retain intrinsic widths on replaced media and iframes. */
+  img,
+  svg,
+  video,
+  canvas,
+  iframe {
+    width: auto;
+    max-width: 100% !important;
+    height: auto;
+  }
+
+  iframe {
+    border: 0;
+  }
+
+  /* Prevent iOS Safari from zooming form controls while preserving the 16px UX. */
+  input,
+  select,
+  textarea,
+  .field,
+  select.field,
+  textarea.field {
+    font-size: 16px !important;
+    min-height: 48px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  select.field,
+  select {
+    background-image: none;
+  }
+
+  /* Stable button hit-area and no accidental native bevels. */
+  button,
+  .btn,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"] {
+    -webkit-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Safari needs explicit scrolling on overflowing data areas. */
+  table {
+    max-width: 100% !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* A safer fallback for Safari versions that do not fully support overflow: clip. */
+  .page,
+  .modal,
+  .modal-card,
+  .mobile-menu,
+  .drawer,
+  .sheet {
+    overflow-x: hidden !important;
+  }
+
+  /* Use dynamic viewport units where Safari supports them, without breaking old iOS. */
+  @supports (height: 100dvh) {
+    .page,
+    .modal,
+    .modal-card,
+    .mobile-menu,
+    .drawer,
+    .sheet {
+      max-height: 100dvh !important;
+    }
+  }
+}
+
+/* Safari 15/16 fallback when the newer feature query above is unavailable. */
+@supports not (height: 100dvh) {
+  .page,
+  .modal,
+  .modal-card,
+  .mobile-menu,
+  .drawer,
+  .sheet {
+    max-height: -webkit-fill-available;
+  }
+}
+
+/* iPhone safe areas: keep bottom controls clear of the home indicator. */
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .mobile-menu,
+  .bottom-nav,
+  .mobile-nav,
+  .sticky-actions,
+  .floating-actions {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Improve rendering consistency of gradients and clipped rounded surfaces. */
+@media (max-width: 768px) {
+  .card,
+  .panel,
+  .hero-card,
+  .modal-card,
+  .tracking-details,
+  .live-map-container {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  .btn,
+  .field,
+  .lang-toggle,
+  .theme-toggle-btn,
+  .burger {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}

@@ -1,0 +1,272 @@
+/* Globall Cloud — Premium cross-device responsive system (2026)
+ * Visual/responsive layer only. No business logic, credentials, or API behavior.
+ * Targets modern iPhone, Android, small tablets and desktop widths.
+ */
+
+:root{
+  --gc-safe-top: env(safe-area-inset-top,0px);
+  --gc-safe-right: env(safe-area-inset-right,0px);
+  --gc-safe-bottom: env(safe-area-inset-bottom,0px);
+  --gc-safe-left: env(safe-area-inset-left,0px);
+}
+
+html{
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+  overflow-x:hidden;
+}
+
+body{
+  min-width:320px;
+  overflow-x:hidden;
+}
+
+button,input,select,textarea,a{
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+
+img,svg,video,canvas,iframe{max-width:100%;}
+
+/* ---------------- Public / customer surfaces ---------------- */
+@media (max-width: 900px){
+  body:not(:has(.gc-shell)) .container{padding-inline:18px;}
+  body:not(:has(.gc-shell)) .section{padding-block:48px;}
+  body:not(:has(.gc-shell)) .nav-inner{padding:11px 16px;min-height:62px;}
+  body:not(:has(.gc-shell)) .nav-links{gap:16px;}
+  body:not(:has(.gc-shell)) .hero-overlay{inset:12px;}
+}
+
+@media (max-width: 760px){
+  body:not(:has(.gc-shell)){
+    padding-bottom:var(--gc-safe-bottom);
+  }
+  body:not(:has(.gc-shell)) .container{padding-inline:14px;}
+  body:not(:has(.gc-shell)) .section{padding-block:38px;}
+  body:not(:has(.gc-shell)) .section-head{margin-bottom:24px;}
+  body:not(:has(.gc-shell)) .section-head h2{font-size:clamp(23px,7.2vw,31px);line-height:1.3;}
+  body:not(:has(.gc-shell)) .section-head p{font-size:13.5px;line-height:1.9;}
+
+  body:not(:has(.gc-shell)) .nav{padding-top:var(--gc-safe-top);}
+  body:not(:has(.gc-shell)) .nav-inner{padding:8px 12px;min-height:60px;gap:8px;}
+  body:not(:has(.gc-shell)) .brand{min-width:0;gap:8px;}
+  body:not(:has(.gc-shell)) .brand-logo{width:32px;height:32px;}
+  body:not(:has(.gc-shell)) .brand b{font-size:15px;white-space:nowrap;}
+  body:not(:has(.gc-shell)) .brand small{font-size:8px;white-space:nowrap;}
+  body:not(:has(.gc-shell)) .nav-links,
+  body:not(:has(.gc-shell)) .nav-auth{display:none!important;}
+  body:not(:has(.gc-shell)) .nav-right{margin-inline-start:auto;gap:5px;}
+  body:not(:has(.gc-shell)) .theme-toggle-btn{width:38px;height:38px;}
+  body:not(:has(.gc-shell)) .burger{display:inline-flex!important;width:42px;height:42px;border-radius:11px;}
+  body:not(:has(.gc-shell)) .mobile-menu{padding:8px 12px calc(12px + var(--gc-safe-bottom));}
+  body:not(:has(.gc-shell)) .mobile-menu a{min-height:48px;padding:13px 8px;}
+
+  body:not(:has(.gc-shell)) .btn{
+    min-height:48px;
+    padding:12px 17px;
+    font-size:14px;
+  }
+  body:not(:has(.gc-shell)) .btn-icon{min-width:46px;min-height:46px;}
+  body:not(:has(.gc-shell)) .field,
+  body:not(:has(.gc-shell)) select.field,
+  body:not(:has(.gc-shell)) textarea.field{
+    min-height:50px;
+    font-size:16px;
+  }
+  body:not(:has(.gc-shell)) .form-grid{grid-template-columns:1fr!important;gap:12px;}
+
+  body:not(:has(.gc-shell)) .hero{min-height:auto;overflow:hidden;}
+  body:not(:has(.gc-shell)) .hero-overlay{position:static;display:block;margin-top:10px;}
+  body:not(:has(.gc-shell)) .hero-status-card,
+  body:not(:has(.gc-shell)) .hero-route-stack,
+  body:not(:has(.gc-shell)) .route-chip{width:100%;max-width:none;}
+  body:not(:has(.gc-shell)) .hero-status-card{padding:14px;border-radius:18px;}
+  body:not(:has(.gc-shell)) .route-chip{padding:11px 12px;}
+  body:not(:has(.gc-shell)) .route-chip b{font-size:13px;}
+  body:not(:has(.gc-shell)) .route-chip small{font-size:10px;}
+  body:not(:has(.gc-shell)) .route-map{padding:8px!important;}
+  body:not(:has(.gc-shell)) .route-map img{width:100%;min-height:180px;object-fit:cover;}
+
+  body:not(:has(.gc-shell)) .grid,
+  body:not(:has(.gc-shell)) .cards,
+  body:not(:has(.gc-shell)) .card-grid,
+  body:not(:has(.gc-shell)) .features-grid,
+  body:not(:has(.gc-shell)) .services-grid,
+  body:not(:has(.gc-shell)) .stats-grid,
+  body:not(:has(.gc-shell)) .dashboard-grid,
+  body:not(:has(.gc-shell)) .metrics-grid,
+  body:not(:has(.gc-shell)) .kpi-grid,
+  body:not(:has(.gc-shell)) .two-col,
+  body:not(:has(.gc-shell)) .three-col,
+  body:not(:has(.gc-shell)) .form-grid{
+    grid-template-columns:1fr!important;
+    gap:12px!important;
+  }
+
+  body:not(:has(.gc-shell)) .table-wrap,
+  body:not(:has(.gc-shell)) .table-responsive,
+  body:not(:has(.gc-shell)) .data-table-wrap,
+  body:not(:has(.gc-shell)) .table-scroll{
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-inline:contain;
+  }
+  body:not(:has(.gc-shell)) table{min-width:680px;}
+
+  body:not(:has(.gc-shell)) .modal,
+  body:not(:has(.gc-shell)) .dialog{
+    width:calc(100vw - 20px)!important;
+    max-height:calc(100dvh - 20px);
+    margin:10px;
+  }
+
+  body:not(:has(.gc-shell)) footer{
+    padding-bottom:calc(24px + var(--gc-safe-bottom))!important;
+  }
+}
+
+@media (max-width: 430px){
+  body:not(:has(.gc-shell)) .container{padding-inline:12px;}
+  body:not(:has(.gc-shell)) .brand small{display:none;}
+  body:not(:has(.gc-shell)) .section{padding-block:32px;}
+  body:not(:has(.gc-shell)) .section-head h2{font-size:23px;}
+  body:not(:has(.gc-shell)) .actions,
+  body:not(:has(.gc-shell)) .header-actions,
+  body:not(:has(.gc-shell)) .form-actions{
+    display:grid!important;
+    grid-template-columns:1fr;
+  }
+  body:not(:has(.gc-shell)) .actions .btn,
+  body:not(:has(.gc-shell)) .header-actions .btn,
+  body:not(:has(.gc-shell)) .form-actions .btn{width:100%;}
+}
+
+@media (max-width: 360px){
+  body:not(:has(.gc-shell)) .nav-inner{padding-inline:8px;}
+  body:not(:has(.gc-shell)) .brand b{font-size:14px;}
+  body:not(:has(.gc-shell)) .lang-toggle button{padding-inline:7px;font-size:10px;}
+  body:not(:has(.gc-shell)) .theme-toggle-btn{width:36px;height:36px;}
+  body:not(:has(.gc-shell)) .burger{width:38px;height:38px;}
+  body:not(:has(.gc-shell)) .section{padding-block:28px;}
+}
+
+/* ---------------- Staff / operational surfaces ---------------- */
+@media (max-width: 900px){
+  body:has(.gc-shell){
+    padding:8px!important;
+    padding-bottom:calc(82px + var(--gc-safe-bottom))!important;
+  }
+  body:has(.gc-shell) .gc-shell{display:block!important;min-height:calc(100vh - 16px);}
+  body:has(.gc-shell) .gc-side{display:none!important;}
+  body:has(.gc-shell) .gc-main{width:100%;min-width:0;}
+  body:has(.gc-shell) .topbar{
+    position:sticky;
+    top:calc(6px + var(--gc-safe-top));
+    z-index:100;
+    padding:9px 10px;
+    margin-bottom:9px;
+    border-radius:18px;
+  }
+  body:has(.gc-shell) .top-title strong{font-size:15px;}
+  body:has(.gc-shell) .top-title span{font-size:9px;}
+  body:has(.gc-shell) .top-actions{gap:5px;}
+  body:has(.gc-shell) .top-actions .btn:not(#refreshBtn){display:none;}
+  body:has(.gc-shell) #refreshBtn{min-width:42px;padding:8px 10px;font-size:0;}
+  body:has(.gc-shell) #refreshBtn::after{content:'↻';font-size:18px;font-weight:900;}
+  body:has(.gc-shell) .view{
+    min-height:calc(100dvh - 105px);
+    padding:10px;
+    border-radius:18px;
+  }
+  body:has(.gc-shell) .grid-kpi{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  body:has(.gc-shell) .two-col,
+  body:has(.gc-shell) .three-col,
+  body:has(.gc-shell) .chat-layout,
+  body:has(.gc-shell) .qr-wrap,
+  body:has(.gc-shell) .form-grid{grid-template-columns:1fr!important;}
+  body:has(.gc-shell) .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  body:has(.gc-shell) .table{min-width:760px;}
+  body:has(.gc-shell) .section-head h1{font-size:20px;}
+  body:has(.gc-shell) .section-head p{font-size:10px;}
+}
+
+@media (max-width: 600px){
+  body:has(.gc-shell) .card,
+  body:has(.gc-shell) .kpi,
+  body:has(.gc-shell) .notice,
+  body:has(.gc-shell) .mini-row{border-radius:15px;}
+  body:has(.gc-shell) .kpi{padding:11px;}
+  body:has(.gc-shell) .kpi strong{font-size:18px;}
+  body:has(.gc-shell) .btn{min-height:46px;}
+  body:has(.gc-shell) .field{min-height:49px;font-size:16px;}
+  body:has(.gc-shell) .modal{max-height:calc(100dvh - 16px);}
+}
+
+@media (max-width: 430px){
+  body:has(.gc-shell){
+    padding:6px!important;
+    padding-bottom:calc(82px + var(--gc-safe-bottom))!important;
+  }
+  body:has(.gc-shell) .topbar{top:calc(4px + var(--gc-safe-top));padding:8px 9px;}
+  body:has(.gc-shell) .view{padding:9px;border-radius:16px;}
+  body:has(.gc-shell) .grid-kpi{gap:7px;}
+  body:has(.gc-shell) .kpi{padding:10px;}
+  body:has(.gc-shell) .kpi span{font-size:9px;}
+  body:has(.gc-shell) .kpi strong{font-size:16px;}
+  body:has(.gc-shell) .actions,
+  body:has(.gc-shell) .toolbar,
+  body:has(.gc-shell) .modal-foot{gap:6px;}
+}
+
+@media (max-width: 360px){
+  body:has(.gc-shell) .grid-kpi{grid-template-columns:1fr;}
+  body:has(.gc-shell) .top-title strong{font-size:14px;}
+  body:has(.gc-shell) .top-title span{display:none;}
+}
+
+/* Bottom command dock enhancement for the staff JS-generated dock */
+@media (max-width: 900px){
+  body:has(.gc-shell) .gc-mobile-dock{
+    bottom:calc(7px + var(--gc-safe-bottom));
+    inset-inline:7px;
+    padding:5px;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    border-radius:20px;
+    background:rgba(3,14,26,.96);
+    border-color:rgba(126,195,232,.17);
+    box-shadow:0 18px 60px rgba(0,0,0,.55),0 0 0 1px rgba(24,201,232,.04);
+  }
+  body:has(.gc-shell) .gc-mobile-dock button{
+    min-height:56px;
+    border-radius:15px;
+    font-size:9px;
+  }
+  body:has(.gc-shell) .gc-mobile-dock button.active{
+    background:linear-gradient(180deg,rgba(24,201,232,.18),rgba(24,201,232,.06));
+    box-shadow:inset 0 0 0 1px rgba(139,234,246,.13);
+  }
+  body:has(.gc-shell) .gc-mobile-menu-btn{
+    min-width:44px;
+    min-height:44px;
+  }
+  body:has(.gc-shell) .gc-mobile-drawer{
+    bottom:calc(79px + var(--gc-safe-bottom));
+    max-height:min(68dvh,620px);
+  }
+}
+
+/* iOS / narrow viewport ergonomics */
+@supports (-webkit-touch-callout:none){
+  input,select,textarea{font-size:16px;}
+}
+
+/* Avoid broken 100vh behavior on mobile browsers */
+@supports (height:100dvh){
+  .gc-shell,.gc-main,.gc-side{min-height:100dvh;}
+}
+
+/* Motion accessibility */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important;}
+}

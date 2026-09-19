@@ -1,0 +1,83 @@
+[1mdiff --git a/functions/_middleware.js b/functions/_middleware.js[m
+[1mindex b353959..289a17f 100644[m
+[1m--- a/functions/_middleware.js[m
+[1m+++ b/functions/_middleware.js[m
+[36m@@ -5,13 +5,46 @@[m
+  */[m
+ const HTML_ACCEPT = 'text/html'[m
+ const VERSION = '20260816-4'[m
+[32m+[m[32mconst STAFF_ORIGIN = 'https://globallos-rjtvfwdy.manus.space'[m
+[32m+[m[32mconst STAFF_PREFIX = '/staff'[m
+ const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`)[m
+ const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`)[m
+ [m
+[32m+[m[32masync function proxyStaff(context, path, url) {[m
+[32m+[m[32m  const isStaffPath = path === STAFF_PREFIX || path.startsWith(`${STAFF_PREFIX}/`)[m
+[32m+[m[32m  const relativePath = isStaffPath ? path.slice(STAFF_PREFIX.length) || '/' : path[m
+[32m+[m[32m  const hasFileExtension = /\.[a-z0-9]{1,8}$/i.test(relativePath)[m
+[32m+[m[32m  const upstreamPath = isStaffPath && !hasFileExtension ? '/' : relativePath[m
+[32m+[m[32m  const target = new URL(`${STAFF_ORIGIN}${upstreamPath}${url.search}`)[m
+[32m+[m[32m  const headers = new Headers(context.request.headers)[m
+[32m+[m[32m  headers.delete('host')[m
+[32m+[m[32m  headers.set('x-forwarded-host', url.host)[m
+[32m+[m[32m  const method = context.request.method.toUpperCase()[m
+[32m+[m[32m  const upstream = await fetch(target, {[m
+[32m+[m[32m    method,[m
+[32m+[m[32m    headers,[m
+[32m+[m[32m    body: method === 'GET' || method === 'HEAD' ? undefined : context.request.body,[m
+[32m+[m[32m    redirect: 'manual',[m
+[32m+[m[32m  })[m
+[32m+[m[32m  const responseHeaders = new Headers(upstream.headers)[m
+[32m+[m[32m  const location = responseHeaders.get('location')[m
+[32m+[m[32m  if (location?.startsWith(STAFF_ORIGIN)) responseHeaders.set('location', `${url.origin}${location.slice(STAFF_ORIGIN.length)}`)[m
+[32m+[m[32m  const contentType = responseHeaders.get('content-type') || ''[m
+[32m+[m[32m  if (!contentType.toLowerCase().includes(HTML_ACCEPT)) return new Response(upstream.body, { status: upstream.status, statusText: upstream.statusText, headers: responseHeaders })[m
+[32m+[m[32m  let html = await upstream.text()[m
+[32m+[m[32m  html = html.replaceAll('href="/assets/', 'href="/staff/assets/').replaceAll('src="/assets/', 'src="/staff/assets/')[m
+[32m+[m[32m  responseHeaders.delete('content-encoding')[m
+[32m+[m[32m  responseHeaders.delete('content-length')[m
+[32m+[m[32m  return new Response(html, { status: upstream.status, statusText: upstream.statusText, headers: responseHeaders })[m
+[32m+[m[32m}[m
+[32m+[m
+ export async function onRequest(context) {[m
+[32m+[m[32m  const url = new URL(context.request.url)[m
+[32m+[m[32m  const path = url.pathname[m
+[32m+[m[32m  const isStaffRequest = path === STAFF_PREFIX || path.startsWith(`${STAFF_PREFIX}/`) || path.startsWith('/api/trpc') || path.startsWith('/api/oauth') || path.startsWith('/api/storage')[m
+[32m+[m[32m  if (isStaffRequest) return proxyStaff(context, path, url)[m
+   const accept = context.request.headers.get('accept') || ''[m
+   if (!accept.toLowerCase().includes(HTML_ACCEPT)) return context.next()[m
+[31m-  const path = new URL(context.request.url).pathname[m
+   const response = await context.next()[m
+   const contentType = response.headers.get('content-type') || ''[m
+   if (!contentType.toLowerCase().includes(HTML_ACCEPT)) return response[m
+[1mdiff --git a/index.html b/index.html[m
+[1mindex 0356252..bab137f 100644[m
+[1m--- a/index.html[m
+[1m+++ b/index.html[m
+[36m@@ -1017,7 +1017,7 @@[m [mbody{background-color:var(--ink); background-image:radial-gradient(ellipse 700px[m
+       <li><a data-route="services" data-gc-onclick="route('services')" data-i18n="nav.services"></a></li>[m
+       <li><a data-route="track" data-gc-onclick="route('track')" data-i18n="nav.track"></a></li>[m
+       <li><a data-route="contact" data-gc-onclick="route('contact')" data-i18n="nav.contact"></a></li>[m
+[31m-      <li><a href="./staff-os.html" class="staff-nav-link"><span aria-hidden="true">◈</span> ستاف</a></li>[m
+[32m+[m[32m      <li><a href="/staff" class="staff-nav-link"> <span aria-hidden="true">◈</span> ستاف</a></li>[m
+     </ul>[m
+     <div class="nav-right">[m
+       <div class="lang-toggle">[m
+[36m@@ -1037,7 +1037,7 @@[m [mbody{background-color:var(--ink); background-image:radial-gradient(ellipse 700px[m
+     <a data-route="track" data-gc-onclick="route('track')" data-i18n="nav.track"></a>[m
+     <a data-route="contact" data-gc-onclick="route('contact')" data-i18n="nav.contact"></a>[m
+     <a data-route="portal" data-gc-onclick="route('portal')" id="mobileAuthLabel"></a>[m
+[31m-    <a href="./staff-os.html" class="staff-mobile-link">◈ بەشی ستاف</a>[m
+[32m+[m[32m    <a href="/staff" class="staff-mobile-link">◈ بەشی ستاف</a>[m
+     <div style="display:flex; gap:10px; margin-top:14px;">[m
+       <div class="lang-toggle" style="flex-shrink:0;">[m
+         <button data-gc-onclick="setLang('ku')">KU</button>[m
+[36m@@ -1792,7 +1792,7 @@[m [mbody{background-color:var(--ink); background-image:radial-gradient(ellipse 700px[m
+     <span>© <span id="yearNow"></span> Globall Cloud. </span><span data-i18n="footer.rights"></span>[m
+     <a data-gc-onclick="route('privacy')" class="staff-link" data-i18n="footer.privacy"></a>[m
+     <a data-gc-onclick="route('terms')" class="staff-link" data-i18n="footer.terms"></a>[m
+[31m-    <a href="#admin" data-gc-onclick="route('admin')" class="staff-link">ستاف</a>[m
+[32m+[m[32m    <a href="/staff" class="staff-link">ستاف</a>[m
+   </div>[m
+ </footer>[m
+ [m

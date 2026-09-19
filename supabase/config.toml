@@ -1,0 +1,111 @@
+project_id = "ahslifnthiwfkmaswjno"
+
+[auth]
+enabled = true
+site_url = "https://globall-cloud.pages.dev"
+additional_redirect_urls = [
+  "https://globall-cloud.pages.dev/**",
+  "https://globall-cloud.netlify.app/**"
+]
+
+[functions.account-admin]
+verify_jwt = true
+
+[functions.staff-directory]
+verify_jwt = false
+
+[functions.lg-track-shipment]
+verify_jwt = true
+
+[functions.public-track]
+verify_jwt = false
+
+[functions.public-config]
+verify_jwt = false
+
+[functions.public-message]
+verify_jwt = false
+
+[functions.public-quote]
+verify_jwt = false
+
+[functions.public-pricing]
+verify_jwt = false
+
+[functions.account-self-password]
+verify_jwt = true
+
+[functions.account-self-profile]
+verify_jwt = true
+
+[functions.customer-self]
+verify_jwt = false
+
+[functions.customer-receipt-evidence]
+verify_jwt = true
+
+[functions.warehouse-receiving]
+verify_jwt = true
+
+[functions.operations-admin]
+verify_jwt = true
+
+[functions.driver-gps]
+verify_jwt = true
+
+[functions.system-health]
+verify_jwt = false
+
+[functions.logistics-control-plane]
+verify_jwt = true
+
+[functions.logistics-control-tower]
+verify_jwt = true
+
+[functions.document-access]
+verify_jwt = true
+
+[functions.notification-dispatch]
+verify_jwt = false
+
+[functions.notification-webhook]
+verify_jwt = false
+
+[functions.integration-webhook]
+verify_jwt = false
+
+[functions.payment-checkout]
+verify_jwt = false
+
+[functions.payment-webhook]
+verify_jwt = false
+
+[functions.payment-reconcile]
+verify_jwt = false
+
+[functions.discord-notify]
+verify_jwt = true
+
+[functions.staff-analytics]
+verify_jwt = true
+
+[functions.fx-refresh]
+verify_jwt = false
+
+[functions.customer-debt-assistant]
+verify_jwt = true
+
+[functions.staff-auth-verify]
+verify_jwt = false
+
+[functions.operations-v4]
+verify_jwt = true
+
+[functions.staff-ops-hub]
+verify_jwt = true
+
+[functions.warehouse-notify]
+verify_jwt = true
+
+[functions.invoice-ai]
+verify_jwt = true

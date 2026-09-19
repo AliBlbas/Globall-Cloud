@@ -1,0 +1,18 @@
+(() => {
+  'use strict';
+  if(window.__gcV5ProfileUpload)return; window.__gcV5ProfileUpload=true;
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const toast=msg=>{let x=document.getElementById('gcToast');if(!x){x=document.createElement('div');x.id='gcToast';x.className='toast';document.body.appendChild(x)}x.textContent=msg;clearTimeout(x._t);x._t=setTimeout(()=>x.remove(),3200)};
+  async function enhance(){
+    const view=document.getElementById('view'); if(!view||!view.textContent.includes('ڕێکخستنەکان')||document.getElementById('gcAvatarPanel'))return;
+    const card=[...view.querySelectorAll('.card')].find(x=>x.textContent.includes('Profile'))||view.querySelector('.card'); if(!card)return;
+    const session=(await window.gcSupabase?.auth?.getSession?.())?.data?.session; if(!session)return;
+    const wrap=document.createElement('div');wrap.id='gcAvatarPanel';wrap.style.cssText='margin-top:12px;padding:11px;border:1px solid rgba(126,195,232,.12);border-radius:15px;background:rgba(255,255,255,.02)';
+    wrap.innerHTML=`<div style="display:flex;align-items:center;gap:10px"><div id="gcAvatarPreview" style="width:54px;height:54px;border-radius:16px;overflow:hidden;background:#0b223a;display:grid;place-items:center;color:#8beaf6;font-weight:900">GC</div><div style="min-width:0;flex:1"><b style="font-size:11px">وێنەی پرۆفایل</b><div style="color:#9ab5cf;font-size:9px;margin-top:3px">JPG/PNG · تا 5MB · تەنها بۆ account ـی خۆت</div></div><label class="btn" style="cursor:pointer">گۆڕین<input id="gcAvatarFile" type="file" accept="image/png,image/jpeg,image/webp" hidden></label></div>`;
+    const form=card.querySelector('#profileForm'); form?.after(wrap);
+    const img=wrap.querySelector('#gcAvatarPreview');
+    try{const {data:p}=await window.gcSupabase.from('staff_profiles').select('avatar_key').eq('staff_id',session.user.id).maybeSingle();if(p?.avatar_key){const u=window.gcSupabase.storage.from('avatars').getPublicUrl(p.avatar_key).data.publicUrl;img.innerHTML=`<img src="${esc(u)}" alt="profile" style="width:100%;height:100%;object-fit:cover">`}}catch{}
+    wrap.querySelector('#gcAvatarFile').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;if(file.size>5*1024*1024){toast('وێنەکە دەبێت کەمتر لە 5MB بێت');return}if(!/^image\/(png|jpeg|webp)$/.test(file.type)){toast('تەنها PNG/JPG/WebP ڕێگەپێدراوە');return}const path=`${session.user.id}/profile-${Date.now()}.${file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg'}`;try{const up=await window.gcSupabase.storage.from('avatars').upload(path,file,{upsert:true,contentType:file.type,cacheControl:'3600'});if(up.error)throw up.error;const old=await window.gcSupabase.from('staff_profiles').select('avatar_key').eq('staff_id',session.user.id).maybeSingle();const db=await window.gcSupabase.from('staff_profiles').update({avatar_key:path,updated_at:new Date().toISOString()}).eq('staff_id',session.user.id);if(db.error)throw db.error;if(old.data?.avatar_key&&old.data.avatar_key!==path)await window.gcSupabase.storage.from('avatars').remove([old.data.avatar_key]).catch(()=>{});const u=window.gcSupabase.storage.from('avatars').getPublicUrl(path).data.publicUrl;img.innerHTML=`<img src="${esc(u)}" alt="profile" style="width:100%;height:100%;object-fit:cover">`;toast('وێنەی profile پاشەکەوت کرا')}catch(err){toast(err.message||'Upload سەرکەوتوو نەبوو')}};
+  }
+  const obs=new MutationObserver(()=>enhance());obs.observe(document.body,{subtree:true,childList:true});setTimeout(enhance,1200);
+})();

@@ -1,0 +1,97 @@
+/* Globall Cloud — Staff login mobile polish */
+#loginGate .gate-card {
+  width: min(560px, 100%);
+}
+
+#loginGate .gate-error,
+#loginGate #loginMsg {
+  min-height: 24px;
+}
+
+#loginGate input[type="email"],
+#loginGate input[type="password"] {
+  font-size: 16px;
+}
+
+#loginGate button[type="submit"] {
+  min-height: 52px;
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  body { padding: 8px; }
+
+  #loginGate {
+    min-height: 100dvh;
+    padding: max(8px, env(safe-area-inset-top)) max(4px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(4px, env(safe-area-inset-left));
+  }
+
+  #loginGate .gate-card {
+    width: min(100%, 560px);
+    padding: 22px 15px 18px;
+    border-radius: 22px;
+  }
+
+  #loginGate .gate-card .brand-row {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+  }
+
+  #loginGate .gate-card .logo {
+    width: 68px;
+    height: 68px;
+    border-radius: 21px;
+    font-size: 24px;
+    flex: 0 0 auto;
+  }
+
+  #loginGate .gate-card h1 {
+    margin: 6px 0 2px;
+    font-size: clamp(25px, 7.3vw, 34px);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+  }
+
+  #loginGate .gate-card p {
+    margin: 14px 0 10px;
+    font-size: 12px;
+    line-height: 1.9;
+    text-align: center;
+  }
+
+  #loginGate .gate-card .field {
+    min-height: 54px;
+    padding: 13px 14px;
+    border-radius: 15px;
+    font-size: 16px;
+  }
+
+  #loginGate .gate-card form {
+    display: grid;
+    gap: 10px;
+  }
+
+  #loginGate .gate-card button[type="submit"] {
+    min-height: 56px;
+    border-radius: 15px;
+    font-size: 15px;
+    font-weight: 900;
+  }
+
+  #loginGate .gate-error,
+  #loginGate #loginMsg {
+    font-size: 11px;
+    line-height: 1.7;
+    text-align: center;
+  }
+}
+
+@media (max-width: 380px) {
+  #loginGate .gate-card { padding: 18px 12px 15px; }
+  #loginGate .gate-card .logo { width: 62px; height: 62px; }
+  #loginGate .gate-card h1 { font-size: 24px; }
+}

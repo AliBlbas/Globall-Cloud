@@ -1,0 +1,12 @@
+Globall Cloud Production Package v2
+
+archive_root=Globall-Cloud-main/
+source_files=232
+html_files=20
+javascript_files=43
+migration_files=100
+edge_function_directories=12
+release_gate=passed
+sql_parser=PostgreSQL pglast; 107 statements parsed
+browser_smoke=passed on local production-style CSP
+external_sha256=see package-manifest.txt delivered alongside the ZIP

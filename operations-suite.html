@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#061428">
+  <meta name="color-scheme" content="dark">
+  <title>Globall Cloud — Operations Suite</title>
+  <meta name="description" content="Premium staff operations suite for Globall Cloud with live customer accounts, staff access, warehouse receipts, logs, and live settings.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="admin-dashboard.js"></script>
+  <style>
+    :root{--bg:#061428;--bg2:#0b1a30;--panel:#102742;--panel2:#173457;--line:#27486d;--text:#f5f9fd;--muted:#9db4d1;--accent:#00c2d9;--accent2:#4fe3f0;--good:#2ed27f;--warn:#f0a83a;--bad:#e5533d;--shadow:0 18px 40px rgba(0,0,0,.28);--radius:26px;--radius2:18px;--font:'Vazirmatn',sans-serif;--mono:'JetBrains Mono',monospace;}
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:radial-gradient(circle at 12% -10%, rgba(0,194,217,.12), transparent 35%),linear-gradient(180deg,var(--bg),#08111e 80%);color:var(--text);font-family:var(--font)}
+    body{padding:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom));overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    button,input,select,textarea{font:inherit;color:inherit}
+    .shell{max-width:1460px;margin:0 auto;display:grid;gap:18px}
+    .announcement{padding:12px 16px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;color:#d9eefc;font-weight:700}
+    .dot{width:8px;height:8px;border-radius:999px;background:var(--accent2);box-shadow:0 0 0 4px rgba(79,227,240,.15)}
+    .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:14px;min-width:0}
+    .mark{width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,var(--accent2),var(--accent));display:grid;place-items:center;color:#03181d;font-weight:900;font-size:18px;box-shadow:0 14px 28px rgba(0,194,217,.18);flex:0 0 auto}
+    .eyebrow{font-family:var(--mono);letter-spacing:2px;text-transform:uppercase;color:var(--accent2);font-size:12px;font-weight:900}
+    .title{font-size:24px;font-weight:900;line-height:1.15;margin-top:3px}
+    .subtitle{color:var(--muted);font-size:14px;margin-top:4px;line-height:1.7}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .btn{border:1px solid transparent;border-radius:999px;padding:12px 16px;cursor:pointer;font-weight:800;background:transparent;transition:.2s;min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
+    .btn:hover{transform:translateY(-1px)} .btn:active{transform:translateY(0) scale(.99)}
+    .btn-primary{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#03181d}
+    .btn-outline{border-color:var(--line);background:rgba(255,255,255,.02)}
+    .btn-soft{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08)}
+    .btn-danger{background:var(--bad);color:#fff}
+    .btn-block{width:100%}
+    .hero,.panel{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid rgba(255,255,255,.08);border-radius:28px;box-shadow:var(--shadow)}
+    .hero{padding:18px}
+    .hero-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:18px;align-items:stretch}
+    .panel{padding:18px}
+    .section-title{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    .section-title h2{margin:0;font-size:20px;line-height:1.2}
+    .section-title p{margin:4px 0 0;color:var(--muted);font-size:14px;line-height:1.6}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);font-weight:800;white-space:nowrap}
+    .badge-super{background:rgba(46,210,127,.14);color:#8ef0b6;border-color:rgba(46,210,127,.35)}
+    .badge-admin{background:rgba(0,194,217,.14);color:#9feef8;border-color:rgba(0,194,217,.35)}
+    .badge-accountant{background:rgba(240,168,58,.14);color:#ffd182;border-color:rgba(240,168,58,.35)}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px}
+    .stat b{display:block;font-size:28px;line-height:1;margin-bottom:6px}
+    .stat span{color:var(--muted);font-size:13px}
+    .chips,.tabs,.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+    .chips{margin-top:14px}
+    .chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:12px;font-weight:800;color:#d7ebff}
+    .tabs{margin:16px 0 12px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.02);cursor:pointer;font-weight:800;color:var(--muted);white-space:nowrap}
+    .tab.active{background:var(--accent);border-color:transparent;color:#03181d}
+    .layout{display:grid;grid-template-columns:minmax(320px,380px) 1fr;gap:18px;align-items:start}
+    .stack{display:grid;gap:18px}
+    .form-row{margin-bottom:12px}
+    .label{display:block;font-size:13px;color:var(--muted);font-weight:800;margin-bottom:7px}
+    .field{width:100%;padding:13px 14px;border-radius:14px;border:1.5px solid var(--line);background:rgba(255,255,255,.03);outline:none;transition:.2s}
+    .field:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,194,217,.14)}
+    .small{font-size:12px;color:var(--muted);line-height:1.6}
+    .muted{color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .table-wrap{overflow:auto;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(8,16,29,.52)}
+    table{width:100%;border-collapse:collapse;min-width:920px}
+    th,td{padding:14px 12px;border-bottom:1px solid rgba(255,255,255,.08);text-align:start;vertical-align:top}
+    th{font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:#d5e8ff;background:rgba(255,255,255,.03)}
+    td{font-size:14px;color:var(--text)}
+    tr:hover td{background:rgba(255,255,255,.02)}
+    .mono{font-family:var(--mono)}
+    .ok,.warn,.bad{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:900}
+    .ok{background:rgba(46,210,127,.14);color:#8ef0b6}.warn{background:rgba(240,168,58,.16);color:#ffd182}.bad{background:rgba(229,83,61,.15);color:#ffaf9f}
+    .hidden{display:none !important}.loading{opacity:.72;pointer-events:none}
+    .auth-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:18px}
+    .hero-card{border-radius:28px;padding:20px;background:linear-gradient(180deg, rgba(16,39,66,.98), rgba(11,26,48,.98));border:1px solid rgba(255,255,255,.08)}
+    .profile{display:grid;grid-template-columns:108px 1fr;gap:16px;align-items:center}
+    .avatar{width:108px;height:108px;border-radius:28px;background:radial-gradient(circle at 30% 25%, rgba(255,255,255,.35), transparent 35%),linear-gradient(135deg,var(--accent2),var(--accent));display:grid;place-items:center;color:#03181d;font-weight:900;font-size:32px;box-shadow:0 18px 32px rgba(0,194,217,.18)}
+    .hero-name{font-size:25px;font-weight:900;line-height:1.1;margin-bottom:8px}
+    .hero-sub{color:var(--muted);font-size:15px;line-height:1.8}
+    .quick-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    .quick-pill{padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);font-weight:800;font-size:13px}
+    .dashboard-note{margin-top:14px;padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:13.5px;line-height:1.8}
+    .mini-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+    .mini{padding:14px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
+    .mini b{display:block;margin-bottom:4px;font-size:14px}
+    .mini span{color:var(--muted);font-size:13px;line-height:1.6}
+    .status-line{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:13px}
+    .settings-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.pricing-console{margin-top:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,.08)}.pricing-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}.pricing-header h3{margin:0;font-size:18px}.pricing-header p{margin:5px 0 0;color:var(--muted);font-size:13px;line-height:1.6}.rate-list{display:grid;gap:10px;margin-top:12px}.rate-row{display:grid;grid-template-columns:minmax(190px,1.4fr) 110px 110px minmax(150px,1fr) auto;gap:10px;align-items:center;padding:12px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.025)}.rate-row label{font-size:13px;font-weight:800}.rate-row small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.rate-input{width:100%;padding:10px;border-radius:11px;border:1px solid var(--line);background:rgba(0,0,0,.18);color:var(--text)}.rate-save{min-height:40px;padding:9px 13px}.pricing-note{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.7}@media (max-width:760px){.rate-row{grid-template-columns:1fr 1fr}.rate-row label{grid-column:1/-1}.rate-row .rate-window{grid-column:1/-1}.rate-row .rate-save{grid-column:1/-1;width:100%}}
+    .setting-card{padding:16px;border-radius:20px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
+    .setting-card b{display:block;font-size:14px;margin-bottom:6px}
+    .setting-card span{display:block;font-size:13px;color:var(--muted);line-height:1.7}
+    .footer{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:12.5px;line-height:1.6;margin-top:4px}
+    @media (max-width: 1080px){.hero-grid,.layout{grid-template-columns:1fr}}
+    @media (max-width: 760px){.profile{grid-template-columns:1fr}.avatar{width:86px;height:86px;border-radius:22px}.hero-name{font-size:22px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid,.mini-grid,.settings-grid{grid-template-columns:1fr}.field,.search{min-width:100%;max-width:100%}}
+    @media (max-width: 640px){body{padding:12px}.hero,.panel{padding:16px}.title{font-size:19px}.top-actions{width:100%}.top-actions .btn{flex:1}}
+  </style>
+<script src="/gc-csp-bridge.js?v=20260816-1" defer data-gc-csp-bridge="1"></script></head>
+<body>
+  <div class="shell">
+    <div class="announcement"><span class="dot"></span> Premium staff operations suite · live accounts · secure receipts · fast actions</div>
+
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark">GC</div>
+        <div>
+          <div class="eyebrow">Globall Cloud</div>
+          <div class="title">Operations Suite</div>
+          <div class="subtitle">A polished staff hub for customer accounts, staff control, warehouse receipts, and live analytics.</div>
+        </div>
+      </div>
+      <div class="toolbar top-actions">
+        <button class="btn btn-outline" id="refreshBtn">Refresh</button>
+        <button class="btn btn-soft" id="exportBtn">Export Excel</button>
+        <button class="btn btn-danger hidden" id="logoutBtn">Sign out</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-card">
+          <div class="profile">
+            <div class="avatar" id="avatar">GC</div>
+            <div>
+              <div class="hero-name" id="heroName">Sign in to open the command center</div>
+              <div class="hero-sub" id="heroSub">Use your staff account to load the full operations dashboard. Customers stay outside this portal.</div>
+              <div class="quick-actions">
+                <span class="quick-pill">Customer accounts</span>
+                <span class="quick-pill">Staff access</span>
+                <span class="quick-pill">Warehouse receipts</span>
+                <span class="quick-pill">Activity logs</span>
+              </div>
+            </div>
+          </div>
+          <div class="tabs" id="tabsRow">
+            <button class="tab active" data-tab="overview">Overview</button>
+            <button class="tab" data-tab="customers">Customers</button>
+            <button class="tab" data-tab="staff">Staff</button>
+            <button class="tab" data-tab="receipts">Receipts</button>
+            <button class="tab" data-tab="logs">Logs</button>
+            <button class="tab" data-tab="settings">Settings</button>
+          </div>
+          <div class="dashboard-note" id="roleBadgeWrap">
+            Staff-only space. This page connects to the live Supabase backend and the account-admin edge function.
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">
+            <div>
+              <h2>Fast access</h2>
+              <p>Open the full admin console or jump to receipt intake when needed.</p>
+            </div>
+          </div>
+          <div class="grid" style="margin-bottom:12px">
+            <a class="btn btn-primary" href="./accounts-console.html">Open full console</a>
+            <a class="btn btn-outline" href="./management.html">Back to management</a>
+          </div>
+          <div class="mini-grid">
+            <div class="mini"><b>Live analytics</b><span>Totals and revenue refresh from the production database.</span></div>
+            <div class="mini"><b>Search and export</b><span>Find customers, staff, or receipts and export them instantly.</span></div>
+            <div class="mini"><b>Safe auth flow</b><span>Staff sign in with Supabase Auth before any data loads.</span></div>
+            <div class="mini"><b>Designed for mobile</b><span>Works cleanly on iPhone, Android, tablet, and desktop.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="layout">
+      <div class="stack">
+        <div class="panel hidden" id="authPanel">
+          <div class="section-title">
+            <div>
+              <h2>Staff sign in</h2>
+              <p>Enter your staff email and password to unlock the suite.</p>
+            </div>
+          </div>
+          <form id="loginForm" class="grid">
+            <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="loginEmail" required placeholder="staff@example.com"></div>
+            <div class="form-row"><label class="label">Password</label><input class="field" type="password" id="loginPassword" required placeholder="••••••••"></div>
+            <div class="grid" style="grid-column:1/-1">
+              <button class="btn btn-primary" type="submit">Sign in</button>
+              <button class="btn btn-outline" type="button" id="demoBtn">Fill demo hint</button>
+            </div>
+            <div class="status-line" id="loginMsg" style="grid-column:1/-1"></div>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">
+            <div>
+              <h2>Quick stats</h2>
+              <p>Live metrics from your Supabase database.</p>
+            </div>
+          </div>
+          <div class="stats" id="statsRow">
+            <div class="stat"><b>—</b><span>Revenue (30d)</span></div>
+            <div class="stat"><b>—</b><span>Outstanding</span></div>
+            <div class="stat"><b>—</b><span>Active shipments</span></div>
+            <div class="stat"><b>—</b><span>Delivered today</span></div>
+          </div>
+          <div class="status-line" id="loadStatus" style="margin-top:12px"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section-title">
+          <div>
+            <h2 id="tableTitle">Overview</h2>
+            <p id="tableSubtitle">A clean snapshot of the latest accounts and records.</p>
+          </div>
+          <input class="field" id="searchBox" placeholder="Search records..." style="max-width:320px;min-width:240px">
+        </div>
+
+        <div class="status-line" id="sessionLine"></div>
+
+        <div class="table-wrap" style="margin-top:14px">
+          <table>
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section-title">
+          <div>
+            <h2>System settings</h2>
+            <p>Live values used by the platform.</p>
+          </div>
+        </div>
+          <div class="settings-grid" id="settingsGrid">
+          <div class="setting-card"><b>USD→IQD rate</b><span id="rateValue">Waiting for data…</span></div>
+          <div class="setting-card"><b>Pacing / wellness</b><span>Keep a small running routine handy for staff wellness and pacing imports.</span></div>
+          <div class="setting-card"><b>Security posture</b><span>RLS, publishable keys, and staff-only access keep operations safe.</span></div>
+        </div>
+        <div class="pricing-console" id="pricingConsole">
+          <div class="pricing-header"><div><div class="eyebrow">RATE CONTROL</div><h3>نرخی ئەمڕۆی خزمەتگوزاری</h3><p>گۆڕانکارییەکان تەنها لە quote ـە نوێکان کاریگەری دەکەن؛ invoice ـە کۆنەکان ناگۆڕدرێن.</p></div><span class="badge badge-accountant">Admin · Accountant</span></div>
+          <div class="rate-list" id="rateList"><div class="setting-card">Loading rate catalog…</div></div>
+          <div class="pricing-note">نرخی دۆلار: 100 USD = 154,000 IQD. هەر update ـێک بە actor، کات و بەهای نوێ لە activity log تۆمار دەکرێت.</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      <span>Globall Cloud — China · UAE · Iraq logistics</span>
+      <span>Premium internal tools for management only</span>
+    </div>
+  </div>
+
+<script src="/gc-csp-scripts/operations-suite-inline-1.js?v=20260816-1" defer data-gc-externalized="1"></script>
+</body>
+</html>

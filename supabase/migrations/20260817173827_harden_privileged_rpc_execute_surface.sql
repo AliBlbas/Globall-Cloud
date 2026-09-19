@@ -1,0 +1,16 @@
+revoke execute on function public.attach_package_to_consolidation(uuid, uuid, uuid) from anon, authenticated;
+revoke execute on function public.record_payment_transaction(uuid, uuid, numeric, text, text, text, text, text, text, jsonb) from anon, authenticated;
+revoke execute on function public.record_shipment_transition(uuid, text, text, integer, text, text, jsonb, text) from anon, authenticated;
+revoke execute on function public.resolve_logistics_exception(uuid, uuid, text, text) from anon, authenticated;
+revoke execute on function public.upsert_consolidation_batch(uuid, text, text, text, text, text, text, text, timestamptz, text) from anon, authenticated;
+revoke execute on function public.upsert_shipment_customs_case(uuid, text, text, text, jsonb, numeric, numeric, text, boolean, text) from anon, authenticated;
+revoke execute on function public.upsert_shipment_invoice(uuid, text, text, jsonb, numeric, numeric, numeric, text, text, timestamptz) from anon, authenticated;
+revoke execute on function public.upsert_shipment_package(uuid, text, text, numeric, numeric, numeric, numeric, text, text, jsonb) from anon, authenticated;
+grant execute on function public.attach_package_to_consolidation(uuid, uuid, uuid) to service_role;
+grant execute on function public.record_payment_transaction(uuid, uuid, numeric, text, text, text, text, text, text, jsonb) to service_role;
+grant execute on function public.record_shipment_transition(uuid, text, text, integer, text, text, jsonb, text) to service_role;
+grant execute on function public.resolve_logistics_exception(uuid, uuid, text, text) to service_role;
+grant execute on function public.upsert_consolidation_batch(uuid, text, text, text, text, text, text, text, timestamptz, text) to service_role;
+grant execute on function public.upsert_shipment_customs_case(uuid, text, text, text, jsonb, numeric, numeric, text, boolean, text) to service_role;
+grant execute on function public.upsert_shipment_invoice(uuid, text, text, jsonb, numeric, numeric, numeric, text, text, timestamptz) to service_role;
+grant execute on function public.upsert_shipment_package(uuid, text, text, numeric, numeric, numeric, numeric, text, text, jsonb) to service_role;

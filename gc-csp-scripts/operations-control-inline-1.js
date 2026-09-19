@@ -1,0 +1,1 @@
+location.replace('/operations-control-v2.html')

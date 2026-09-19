@@ -1,0 +1,85 @@
+/* Globall Cloud — defensive public UI repair layer.
+ * Keeps legacy and current public shells usable on small screens without
+ * depending on the primary renderer successfully starting.
+ */
+*,*::before,*::after{box-sizing:border-box}
+html,body{max-width:100%;overflow-x:hidden}
+body{min-width:0}
+img,svg{max-width:100%}
+button,a{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+
+/* Current public shell */
+.gc-nav-inner{min-width:0}
+.gc-brand,.gc-brand span,.gc-nav-actions,.gc-desktop-nav{min-width:0}
+.gc-brand span{overflow:hidden}
+.gc-brand b,.gc-brand small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gc-nav-actions{flex-shrink:0}
+
+@media (max-width:900px){
+  .gc-desktop-nav{display:none!important}
+  .gc-menu{display:inline-flex!important;align-items:center;justify-content:center;cursor:pointer}
+  .gc-mobile-menu{display:none!important}
+  .gc-mobile-menu:not([hidden]),.gc-mobile-menu[data-open="1"]{display:flex!important;flex-direction:column}
+}
+
+@media (max-width:620px){
+  .gc-container{width:min(100% - 24px,1180px)}
+  .gc-announcement-inner{min-height:38px;font-size:10px;gap:8px}
+  .gc-announcement-inner>span:first-child{max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .gc-live-pill{white-space:nowrap}
+  .gc-nav-inner{min-height:64px;gap:9px}
+  .gc-brand img{width:34px!important;height:34px!important}
+  .gc-brand b{font-size:15px!important}
+  .gc-brand small{font-size:9px!important}
+  .gc-nav-actions{gap:7px}
+  .gc-staff{display:none!important}
+  .gc-nav-actions .gc-btn{font-size:12px!important;min-height:42px;padding-inline:14px!important}
+  .gc-menu{width:42px;height:42px}
+
+  .gc-hero{grid-template-columns:1fr!important;gap:24px;padding-top:34px!important}
+  .gc-hero h1{font-size:clamp(35px,9vw,46px)!important;line-height:1.22!important;letter-spacing:-.5px}
+  .gc-hero-copy>p{font-size:14px!important;line-height:1.95!important}
+  .gc-hero-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:9px!important}
+  .gc-hero-actions .gc-btn:first-child{grid-column:1/-1}
+  .gc-hero-actions .gc-btn{width:100%}
+  .gc-trust-row{grid-template-columns:1fr!important}
+  .gc-trust-row div{padding:15px}
+  .gc-stats{grid-template-columns:repeat(2,1fr)!important;padding-bottom:42px}
+  .gc-stats strong{font-size:22px}
+  .gc-service-grid,.gc-ops-grid,.gc-info-grid,.gc-detail-grid{grid-template-columns:1fr!important}
+  .gc-track-panel{grid-template-columns:1fr!important;padding:22px!important}
+  .gc-track-form{display:flex!important;flex-direction:column!important}
+  .gc-track-form .gc-btn{width:100%}
+  .gc-footer-grid{grid-template-columns:1fr 1fr!important}
+  .gc-footer-bottom{flex-direction:column}
+}
+
+/* Legacy shell compatibility — fixes the exact oversized navigation seen on
+ * older cached production HTML while it is being replaced by the current shell.
+ */
+@media (max-width:900px){
+  body .nav-links{display:none!important}
+  body .burger{display:inline-flex!important;align-items:center;justify-content:center}
+  body .nav-inner{gap:10px!important}
+  body .nav-links a{font-size:14px!important}
+  body .nav-right{gap:7px!important}
+  body .hero{grid-template-columns:1fr!important}
+  body .hero h1{font-size:clamp(35px,9vw,52px)!important;line-height:1.22!important}
+}
+@media (max-width:620px){
+  body .container{padding-inline:14px!important}
+  body .nav-inner{padding:10px 14px!important}
+  body .nav-auth{display:none!important}
+  body .nav-right .btn{padding:10px 14px!important;font-size:12px!important}
+  body .hero{padding:34px 0 26px!important;gap:24px!important}
+  body .hero-ctas{display:grid!important;grid-template-columns:1fr 1fr!important}
+  body .hero-ctas .btn:first-child{grid-column:1/-1}
+  body .hero-ctas .btn{width:100%}
+  body .route-map{min-height:270px}
+  body .form-grid{grid-template-columns:1fr!important}
+  body .contact-grid{grid-template-columns:1fr!important}
+  body .footer-grid,.footer-bottom{flex-direction:column}
+}
+
+/* Do not let native hidden attribute be defeated by legacy display rules. */
+[hidden]{display:none!important}

@@ -1,0 +1,13 @@
+/* Globall Cloud — Command Center navigation polish */
+:root{--gc-nav-cyan:#18c9e8;--gc-nav-cyan-soft:#8beaf6;--gc-nav-line:rgba(126,195,232,.14)}
+.nav-item{font-size:0;min-height:44px;transition:background .18s ease,border-color .18s ease,transform .18s ease}
+.nav-item>span:not(.gc-command-nav-icon){font-size:12px;line-height:1.4;min-width:0}
+.nav-item>kbd{font-size:9px;line-height:1;padding:4px 6px;border:1px solid var(--gc-nav-line);border-radius:7px;background:rgba(255,255,255,.025);color:#7897b4}
+.nav-item>em{font-size:9px;line-height:18px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:rgba(255,211,125,.12);color:#ffe2a3;font-style:normal;font-family:var(--mono,ui-monospace,monospace);text-align:center}
+.nav-item:hover{transform:translateX(-1px)}
+.nav-item.active{box-shadow:inset 3px 0 0 var(--gc-nav-cyan),0 10px 26px rgba(24,201,232,.08)}
+.gc-command-nav-icon{width:20px;height:20px;margin-inline-end:9px;color:var(--gc-nav-cyan-soft)}
+.nav-item.active .gc-command-nav-icon{color:#bff8ff}
+.nav-item:focus-visible{outline:2px solid var(--gc-nav-cyan);outline-offset:2px}
+@media(max-width:720px){.nav-item{min-height:46px}.gc-command-nav-icon{width:19px;height:19px;margin-inline-end:8px}.nav-item>span:not(.gc-command-nav-icon){font-size:11px}}
+@media(prefers-reduced-motion:reduce){.nav-item{transition:none}.nav-item:hover{transform:none}}

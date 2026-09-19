@@ -1,0 +1,40 @@
+/* Globall Cloud Staff OS — visual polish layer 2026-09-09 */
+html,body{overflow-x:hidden}
+body{background:
+  radial-gradient(900px 600px at 88% -10%,rgba(24,201,232,.14),transparent 64%),
+  radial-gradient(760px 520px at -10% 82%,rgba(168,160,255,.09),transparent 62%),
+  var(--bg)!important;
+}
+.gc-shell{position:relative}
+.gc-side{box-shadow:0 28px 90px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.03)}
+.gc-side::before{content:'';display:block;height:2px;border-radius:999px;background:linear-gradient(90deg,transparent,var(--cyan),var(--amber),transparent);opacity:.9;margin:-2px 1px 10px}
+.nav-btn{transition:transform .18s ease,background .18s ease,border-color .18s ease,box-shadow .18s ease}
+.nav-btn:hover{transform:translateX(-2px)}
+.nav-btn.active{box-shadow:inset -3px 0 0 var(--cyan),0 8px 26px rgba(24,201,232,.08)}
+.topbar{overflow:hidden}
+.topbar::before{content:'';position:absolute;inset:0 auto 0 0;width:34%;background:linear-gradient(90deg,rgba(24,201,232,.08),transparent);pointer-events:none}
+.top-actions{position:relative;z-index:1}
+.view{position:relative;overflow:hidden;box-shadow:0 28px 100px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.022)}
+.view::after{content:'';position:absolute;top:-120px;left:-120px;width:240px;height:240px;border-radius:50%;background:rgba(24,201,232,.05);filter:blur(30px);pointer-events:none}
+.card,.kpi,.mini-row,.room,.notice{transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease}
+.card:hover,.kpi:hover{transform:translateY(-2px);border-color:rgba(139,234,246,.18);box-shadow:0 16px 38px rgba(0,0,0,.16)}
+.login{min-height:100svh;background:transparent}
+.login::before{content:'';position:fixed;inset:0;pointer-events:none;background:linear-gradient(135deg,rgba(24,201,232,.07),transparent 34%,rgba(168,160,255,.05) 72%,transparent)}
+.login-card{position:relative;overflow:hidden;box-shadow:0 35px 120px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.03)}
+.login-card::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--cyan2),var(--cyan),var(--purple));}
+.login-card .brand-logo{font-size:16px}
+.login-card .eyebrow{margin-top:2px}
+.gc-pro-ribbon{position:relative;overflow:hidden}
+.gc-pro-ribbon::after{content:'';position:absolute;inset:auto -20% -50% auto;width:180px;height:100px;border-radius:50%;background:rgba(24,201,232,.06);filter:blur(20px);pointer-events:none}
+.gc-pro-actions .btn.small{min-height:34px;padding:7px 10px}
+@media(max-width:760px){
+  body{padding:6px!important}
+  .topbar{border-radius:16px!important}
+  .top-title strong{font-size:15px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .top-title span{font-size:9px!important}
+  .view{border-radius:17px!important}
+  .card:hover,.kpi:hover{transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .nav-btn,.card,.kpi,.mini-row,.room,.notice{transition:none!important}
+}

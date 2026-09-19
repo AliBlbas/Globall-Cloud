@@ -1,0 +1,36 @@
+/* Globall Cloud — public navigation completion layer (2026-09-09) */
+.gc-section-menu{position:relative;flex-shrink:0}
+.gc-section-menu>button{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:7px 11px;border:1px solid var(--line);border-radius:999px;background:var(--surface-2);color:var(--text);font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;transition:border-color .2s ease,transform .2s ease,background .2s ease}
+.gc-section-menu>button:hover,.gc-section-menu.open>button{border-color:var(--teal-l);background:rgba(0,194,217,.08);transform:translateY(-1px)}
+.gc-section-menu>button .gc-chevron{font-size:10px;opacity:.75;transition:transform .2s ease}
+.gc-section-menu.open>button .gc-chevron{transform:rotate(180deg)}
+.gc-section-menu-panel{position:absolute;top:calc(100% + 10px);inset-inline-end:0;width:min(460px,calc(100vw - 32px));display:none;grid-template-columns:1fr 1fr;gap:8px;padding:12px;border:1px solid var(--line);border-radius:18px;background:color-mix(in srgb,var(--ink-2) 94%,transparent);backdrop-filter:blur(16px);box-shadow:0 24px 60px rgba(2,8,20,.48);z-index:260}
+.gc-section-menu.open .gc-section-menu-panel{display:grid;animation:gcMenuIn .16s ease-out}
+@keyframes gcMenuIn{from{opacity:0;transform:translateY(-5px) scale(.98)}to{opacity:1;transform:none}}
+.gc-section-menu-panel a{display:flex;align-items:center;gap:9px;min-height:44px;padding:9px 11px;border:1px solid var(--line-soft);border-radius:12px;color:var(--muted);font-size:13px;font-weight:800;transition:border-color .2s ease,color .2s ease,background .2s ease,transform .2s ease}
+.gc-section-menu-panel a:hover,.gc-section-menu-panel a:focus-visible{color:var(--text);border-color:var(--teal);background:rgba(0,194,217,.07);transform:translateY(-1px)}
+.gc-section-menu-panel a.gc-primary{border-color:rgba(0,194,217,.35);color:var(--teal-l);background:rgba(0,194,217,.06)}
+.gc-section-menu-panel a.gc-staff{color:var(--amber-l);border-color:rgba(240,168,58,.28);background:rgba(240,168,58,.05)}
+.gc-section-menu-panel .gc-menu-note{grid-column:1/-1;margin:2px 4px 3px;color:var(--muted-2);font-size:11px;line-height:1.55}
+.gc-route-ready{cursor:pointer}
+
+/* Extra public links stay compact on desktop and collapse cleanly on phones. */
+@media(max-width:1100px) and (min-width:901px){
+  .nav-inner{gap:12px;padding-inline:18px}
+  .nav-links{gap:16px}
+  .nav-links a{font-size:13px}
+  .nav-right{gap:7px}
+  .gc-section-menu>button{padding-inline:9px}
+}
+
+@media(max-width:900px){
+  .gc-section-menu{display:none!important}
+  .mobile-menu .gc-mobile-route{display:flex;align-items:center;gap:8px}
+  .mobile-menu .gc-mobile-route.gc-primary{color:var(--teal-l);font-weight:900}
+  .mobile-menu .gc-mobile-route.gc-staff{color:var(--amber-l)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .gc-section-menu-panel{animation:none!important}
+  .gc-section-menu>button,.gc-section-menu-panel a{transition:none!important}
+}

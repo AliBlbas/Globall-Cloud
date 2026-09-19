@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#061428">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>Globall Cloud — Control Tower</title>
+<link rel="icon" href="logo-icon.png">
+<link rel="stylesheet" href="control-tower.css?v=20260906-1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap topin">
+  <a class="brand" href="/"><img src="logo-icon.png" alt="Globall Cloud"><span><b>Globall Cloud</b><small>CONTROL TOWER</small></span></a>
+  <div class="tools"><span id="identity" class="pill">Guest</span><button id="refresh" class="btn ghost">↻ نوێکردنەوە</button><button id="logout" class="btn danger hidden">دەرچوون</button></div>
+</div></header>
+<main class="wrap shell">
+<section class="hero"><div class="card hero-card"><span class="eyebrow">LIVE OPERATIONS</span><h1>کۆنترۆڵی یەکگرتووی Globall Cloud</h1><p class="lead">بار، کۆگا، گومرگ، پارە، بەڵگەنامە، ئاگادارکردنەوە و ئەستەنگەکان لە یەک شوێن.</p><div class="toolbar"><a class="btn primary" href="/staff">Staff OS</a><a class="btn ghost" href="/operations-command-center.html">Operations</a><a class="btn ghost" href="/warehouse-os.html">Warehouse</a></div></div>
+<div class="card identity"><span class="eyebrow">SYSTEM STATE</span><div id="state" class="big">Waiting</div><div id="stateText" class="muted">بۆ دەستگەیشتن بە control tower چوونەژوورەوە بکە.</div><div class="sep"></div><div class="health-row"><span>Auth</span><b id="hAuth">—</b></div><div class="health-row"><span>Database</span><b id="hDb">—</b></div><div class="health-row"><span>Scope</span><b id="hScope">—</b></div></div></section>
+<section class="section"><div class="grid5" id="kpis"></div></section>
+<section class="section grid2">
+  <div class="card"><div class="section-head"><div><span class="eyebrow">CRITICAL ATTENTION</span><h2>کارە پێویستەکان</h2></div><span id="alertCount" class="pill">0</span></div><div id="alerts" class="list"><div class="empty">—</div></div></div>
+  <div class="card"><div class="section-head"><div><span class="eyebrow">LIVE FLEET</span><h2>دوایین بارەکان</h2></div><input id="search" class="field mini" placeholder="GC / کڕیار"></div><div id="shipments" class="list"><div class="empty">—</div></div></div>
+</section>
+<section class="section"><div class="grid4"><div class="card stat"><span class="muted">Warehouse receipts</span><b id="kReceipts">—</b></div><div class="card stat"><span class="muted">Warehouse movements</span><b id="kMovements">—</b></div><div class="card stat"><span class="muted">بەڵگەی پشتڕاست نەکراو</span><b id="kDocs">—</b></div><div class="card stat"><span class="muted">Notification backlog</span><b id="kOutbox">—</b></div></div></section>
+<div id="login" class="modal"><div class="modalbox"><span class="eyebrow">STAFF ACCESS</span><h2>چوونەژوورەوە</h2><p class="muted">تەنها staff ـی چالاک دەتوانێت Control Tower ببینێت.</p><div class="form"><label>ئیمەیل<input id="email" class="field" inputmode="email" autocomplete="username"></label><label>وشەی نهێنی<input id="password" class="field" type="password" autocomplete="current-password"></label><button id="loginBtn" class="btn primary block">چوونەژوورەوە</button><div id="loginMsg" class="error"></div></div></div></div>
+<div id="toast" class="toast hidden"></div>
+</main>
+<script src="control-tower.js?v=20260906-1" defer></script>
+</body>
+</html>
