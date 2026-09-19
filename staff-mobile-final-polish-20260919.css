@@ -1,0 +1,92 @@
+/* Globall Cloud Staff OS — final mobile visual polish (additive, no data/logic changes). */
+@media (max-width:760px){
+  :root{--gc-mobile-gap:10px}
+  html,body{width:100%;max-width:100%;overflow-x:hidden!important}
+  body{margin:0!important;padding:0 0 calc(82px + env(safe-area-inset-bottom))!important;background:#020d19!important}
+
+  .gc-shell{display:block!important;min-height:100svh!important}
+  .gc-main{width:100%!important;min-width:0!important;padding:0!important}
+
+  /* Compact command header: remove the oversized OPS/status strip on phones. */
+  .topbar{
+    position:sticky!important;top:0!important;z-index:110!important;
+    display:flex!important;align-items:center!important;gap:8px!important;
+    min-height:62px!important;margin:0 10px 8px!important;padding:9px 10px!important;
+    border-radius:0 0 18px 18px!important;border:1px solid rgba(95,184,224,.18)!important;
+    background:linear-gradient(180deg,rgba(4,22,38,.98),rgba(3,15,28,.96))!important;
+    box-shadow:0 10px 30px rgba(0,0,0,.25)!important;backdrop-filter:blur(18px)!important;
+  }
+  .top-title{min-width:0!important;flex:1!important;display:grid!important;gap:2px!important}
+  .top-title strong{font-size:15px!important;font-weight:900!important;line-height:1.25!important}
+  .top-title span{font-size:8px!important;color:#7794ad!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .top-actions{display:flex!important;align-items:center!important;gap:5px!important;flex:0 0 auto!important;margin:0!important}
+  .top-actions .status{display:none!important;visibility:hidden!important;width:0!important;max-width:0!important;overflow:hidden!important}
+  .top-actions .btn,#refreshBtn{width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;padding:0!important;border-radius:13px!important;font-size:0!important;display:grid!important;place-items:center!important}
+  #refreshBtn::before{content:'↻';font:900 23px/1 system-ui,sans-serif;color:#eefaff}
+
+  .view{
+    width:auto!important;min-width:0!important;min-height:auto!important;
+    margin:0 10px!important;padding:12px!important;border-radius:20px!important;
+    border:1px solid rgba(91,160,199,.18)!important;
+    background:linear-gradient(150deg,rgba(5,24,42,.97),rgba(2,15,28,.99))!important;
+    box-shadow:0 14px 45px rgba(0,0,0,.18)!important;
+  }
+
+  .section-head{display:grid!important;gap:5px!important;margin:2px 2px 12px!important}
+  .section-head h1{font-size:23px!important;line-height:1.25!important;margin:0!important;letter-spacing:-.2px!important}
+  .section-head p{font-size:10px!important;line-height:1.8!important;color:#88a6bf!important;margin:0!important}
+  .section-head .eyebrow{font-size:8px!important;letter-spacing:2px!important;color:#62d8ea!important}
+
+  .actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin:10px 0 12px!important}
+  .actions .btn{min-height:48px!important;width:100%!important;border-radius:15px!important;font-size:12px!important;font-weight:900!important}
+  .actions .btn:last-child{grid-column:1/-1}
+
+  .grid-kpi{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin-top:8px!important}
+  .kpi{
+    min-width:0!important;min-height:108px!important;padding:13px!important;border-radius:17px!important;
+    border:1px solid rgba(82,148,188,.20)!important;
+    background:linear-gradient(145deg,rgba(10,37,61,.95),rgba(4,22,39,.96))!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 9px 22px rgba(0,0,0,.12)!important;
+  }
+  .kpi span{font-size:9px!important;color:#8ca9bf!important;line-height:1.5!important}
+  .kpi strong{font-size:21px!important;line-height:1.2!important;color:#75e4f2!important;letter-spacing:.2px!important}
+  .kpi small{font-size:8px!important;color:#6f8ca4!important}
+
+  .card{min-width:0!important;padding:13px!important;border-radius:18px!important;margin-top:10px!important;border-color:rgba(87,149,187,.19)!important;background:linear-gradient(145deg,rgba(7,29,50,.96),rgba(3,18,32,.98))!important}
+  .card-head{gap:8px!important;align-items:center!important}
+  .card-head h3{font-size:13px!important}
+  .notice{border-radius:14px!important;padding:12px!important}
+
+  /* Empty-state panels should read as intentional states, not broken blank space. */
+  .card .empty,.card [class*="empty"],.data-empty{min-height:110px!important;display:grid!important;place-items:center!important;text-align:center!important;color:#7592aa!important}
+
+  .table-wrap{max-width:100%!important;overflow-x:auto!important;border-radius:14px!important}
+  .table{min-width:700px!important}
+
+  .field,select,textarea{min-height:44px!important;font-size:16px!important}
+  button,.btn{touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}
+
+  .modal-backdrop{padding:6px!important}
+  .modal{width:100%!important;max-width:100%!important;max-height:94svh!important;border-radius:20px!important;padding:13px!important}
+
+  .gc-staff-mobile-dock{
+    inset-inline:8px!important;bottom:calc(7px + env(safe-area-inset-bottom))!important;
+    height:66px!important;padding:5px!important;border-radius:20px!important;z-index:120!important;
+    background:rgba(3,15,28,.96)!important;border:1px solid rgba(98,197,231,.20)!important;
+    box-shadow:0 18px 50px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.05)!important;
+  }
+  .gc-staff-mobile-dock button{font-size:8px!important;border-radius:14px!important}
+  .gc-staff-mobile-dock button span{font-size:15px!important}
+
+  /* Keep the floating GC AI button clear of the dock and content. */
+  #gcAiLauncher,.gc-ai-launcher,.gc-ai-fab{bottom:calc(86px + env(safe-area-inset-bottom))!important;z-index:125!important}
+}
+
+@media (max-width:390px){
+  .view{margin-inline:7px!important;padding:10px!important}
+  .topbar{margin-inline:7px!important}
+  .section-head h1{font-size:21px!important}
+  .actions .btn{font-size:11px!important}
+  .kpi{min-height:102px!important;padding:11px!important}
+  .kpi strong{font-size:19px!important}
+}
