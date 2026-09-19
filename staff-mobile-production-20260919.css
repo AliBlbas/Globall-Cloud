@@ -1,0 +1,54 @@
+/* Globall Cloud Staff OS — production mobile repair (2026-09-19)
+   Additive override: mobile-only layout, safe-area, touch targets and overflow repair. */
+@media (max-width:760px){
+  html,body{width:100%;max-width:100%;min-width:0;overflow-x:hidden;overscroll-behavior-x:none}
+  body{padding:0 0 calc(82px + env(safe-area-inset-bottom,0px)) !important}
+  .gc-shell{width:100% !important;max-width:none !important;min-width:0 !important;display:block !important;margin:0 !important}
+  .gc-main,main{width:100% !important;min-width:0 !important;max-width:100% !important}
+  .topbar{position:sticky !important;top:0 !important;z-index:1000 !important;width:100% !important;max-width:none !important;margin:0 !important;border-radius:0 0 18px 18px !important;padding:10px 12px !important}
+  .top-title{min-width:0 !important;flex:1 1 auto !important;overflow:hidden !important}
+  .top-title strong,.top-title span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .top-actions{min-width:0 !important;max-width:100% !important;display:flex !important;align-items:center !important;gap:5px !important;flex-wrap:nowrap !important}
+  .top-actions .btn{min-width:0 !important;max-width:42vw !important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .view{width:auto !important;max-width:none !important;min-width:0 !important;margin:8px 10px 0 !important;padding:12px !important;overflow:visible !important}
+  .section-head,.head-actions,.actions{min-width:0;max-width:100%}
+  .section-head{display:block !important}
+  .head-actions,.actions{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:7px !important;margin-top:9px !important}
+  .head-actions .btn,.actions .btn{width:100% !important;min-width:0 !important;min-height:44px !important}
+  .metrics-grid,.grid-kpi{grid-template-columns:repeat(2,minmax(0,1fr)) !important;min-width:0 !important}
+  .dashboard-grid,.two-col,.three-col,.chat-layout,.qr-wrap{grid-template-columns:minmax(0,1fr) !important;min-width:0 !important}
+  .card,.metric,.kpi,.table-wrap,.chat-card,.modal,.login-card{min-width:0 !important;max-width:100% !important}
+  .table-wrap{overflow-x:auto !important;overflow-y:hidden !important;-webkit-overflow-scrolling:touch !important;overscroll-behavior-x:contain !important;scrollbar-width:thin}
+  .table-wrap table,.table{min-width:680px !important;width:max-content !important}
+  .field,select.field,textarea.field{width:100% !important;max-width:100% !important;min-width:0 !important;font-size:16px !important}
+  .form-grid{grid-template-columns:minmax(0,1fr) !important}
+  .composer{grid-template-columns:minmax(0,1fr) auto !important;min-width:0}
+  .composer .field{min-width:0 !important}
+  .gc-side{display:none !important}
+  .gc-mobile-dock{display:grid !important;position:fixed !important;left:8px !important;right:8px !important;bottom:max(8px,env(safe-area-inset-bottom)) !important;z-index:3000 !important}
+  .gc-mobile-dock button,.gc-mobile-menu-btn,.gc-mobile-drawer button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .gc-mobile-dock button{min-height:52px !important}
+  .gc-mobile-menu-btn{min-width:44px !important;min-height:44px !important;flex:0 0 44px !important}
+  .gc-mobile-drawer{z-index:3010 !important;max-height:calc(100dvh - 150px) !important;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px)) !important}
+  .gc-mobile-backdrop{z-index:3005 !important}
+  .modal-backdrop{z-index:4000 !important;padding:0 !important;align-items:end !important}
+  .modal{width:100% !important;max-height:92dvh !important;border-radius:22px 22px 0 0 !important;overflow:auto !important;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px)) !important}
+}
+@media (max-width:520px){
+  .view{margin-inline:7px !important;padding:10px !important}
+  .head-actions,.actions{grid-template-columns:1fr !important}
+  .metrics-grid,.grid-kpi{gap:6px !important}
+  .metric,.kpi{padding:10px !important}
+  .section-head h1,.section-head h2{font-size:18px !important;line-height:1.45 !important}
+  .table-wrap table,.table{min-width:620px !important}
+}
+@media (max-width:380px){
+  body{padding-bottom:78px !important}
+  .view{margin-inline:5px !important;padding:8px !important}
+  .topbar{padding-inline:8px !important}
+  .gc-mobile-dock{left:5px !important;right:5px !important;bottom:max(5px,env(safe-area-inset-bottom)) !important}
+  .gc-mobile-dock button{min-height:50px !important;font-size:8px !important}
+}
+@media (prefers-reduced-motion:reduce){
+  .gc-mobile-drawer,.gc-mobile-backdrop{transition:none !important}
+}
