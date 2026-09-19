@@ -93,7 +93,6 @@ export async function onRequest(context) {
     ['href="/production-mobile-ux-v2026.css', `<link rel="stylesheet" href="/production-mobile-ux-v2026.css?v=${VERSION}" data-gc-production-mobile-ux="1">`],
     ['href="/gc-public-premium-ux-2026.css', `<link rel="stylesheet" href="/gc-public-premium-ux-2026.css?v=${VERSION}" data-gc-public-premium-ux="1">`],
     ['href="/gc-home-final-2026.css', `<link rel="stylesheet" href="/gc-home-final-2026.css?v=${VERSION}" data-gc-home-final="1">`],
-    ['href="/globall-realistic-design-20260919.css', `<link rel="stylesheet" href="/globall-realistic-design-20260919.css?v=${VERSION}" data-gc-realistic-design="1">`],
     ['src="/production-bridge.js', `<script src="/production-bridge.js?v=${VERSION}" defer data-gc-production-bridge="1"></script>`],
     ['src="/public-customer-auth-fix.js', `<script src="/public-customer-auth-fix.js?v=${VERSION}" defer data-gc-customer-auth-fix="1"></script>`],
     ['src="/production-brand-repair.js', `<script src="/production-brand-repair.js?v=${VERSION}" defer data-gc-production-brand-repair="1"></script>`],
@@ -114,6 +113,11 @@ export async function onRequest(context) {
   if (OPERATIONAL_PAGE.test(path)) {
     html = addHeadAsset(html, 'src="/runtime-guard.js', `<script src="/runtime-guard.js?v=${VERSION}" defer data-gc-runtime-guard="1"></script>`);
   }
+  const REAL_DESIGN_PAGE = !OPERATIONAL_PAGE.test(path) || /^\/(?:customer-portal|tracking|tracking-integration)(?:\.html)?\/?$/i.test(path);
+  if (REAL_DESIGN_PAGE) {
+    html = addHeadAsset(html, 'href="/globall-realistic-design-20260919.css', `<link rel="stylesheet" href="/globall-realistic-design-20260919.css?v=${VERSION}" data-gc-realistic-design="1">`);
+  }
+
 
   if (path === '/' || path === '/index.html') {
     html = addHeadAsset(html, 'src="/staff-auth-runtime-fix.js', `<script src="/staff-auth-runtime-fix.js?v=${VERSION}" defer data-gc-staff-auth-runtime="1"></script>`);
