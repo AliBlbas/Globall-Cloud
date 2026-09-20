@@ -1,606 +1,188 @@
-<!DOCTYPE html>
-<html lang="ckb" dir="rtl">
+<!doctype html>
+<html lang="ckb" dir="rtl" id="htmlRoot">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>پەنێلی بەڕێوەبردنی گشتی</title>
-    <!-- فۆنت و شێواز -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <style>
-        body { background: #f4f7fc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .sidebar { background: #1e2a3a; min-height: 100vh; padding: 20px; color: white; }
-        .sidebar h4 { border-bottom: 1px solid #3a4a5a; padding-bottom: 15px; }
-        .nav-link { color: #b0c4de; }
-        .nav-link:hover, .nav-link.active { color: white; background: #2b3d54; border-radius: 8px; }
-        .main-content { padding: 30px; }
-        .card { border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); border: none; margin-bottom: 20px; }
-        .badge-notif { background: #e74c3c; color: white; border-radius: 50%; padding: 2px 10px; margin-right: 10px; }
-        .list-group-item { border-left: 4px solid transparent; }
-        .list-group-item.pending { border-left-color: #f39c12; background: #fff9e6; }
-        .table-actions i { cursor: pointer; margin: 0 5px; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07111f">
+  <meta name="robots" content="index,follow">
+  <title>Globall Cloud — China · UAE · USA → Erbil Logistics</title>
+  <meta name="description" content="Globall Cloud لۆجستیکی ڕاستەقینە لە چین، ئیمارات و ئەمریکا بۆ هەولێر و هەموو شارەکانی عێراق، بە شوێنکەوتن، گومرگ و گەیاندنی Door-to-Door.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Globall Cloud — China · UAE · USA → Erbil Logistics">
+  <meta property="og:description" content="گەیاندنی بار لە چین، ئیمارات و ئەمریکا بۆ هەولێر و هەموو عێراق، بە شوێنکەوتنی زیندوو و پشتیوانی.">
+  <meta property="og:url" content="https://globall-cloud.pages.dev/">
+  <meta property="og:site_name" content="Globall Cloud">
+  <link rel="canonical" href="https://globall-cloud.pages.dev/">
+  <link rel="icon" type="image/png" href="/logo-icon.png">
+  <link rel="apple-touch-icon" href="/logo-icon.png">
+  <link rel="manifest" href="/manifest.json">
+
+  <script src="/public-route-bootstrap.js?v=20260913-1"></script>
+  <script src="/gc-csp-scripts/index-inline-1.js?v=20260821-1" data-gc-externalized="1"></script>
+  <script src="/public-core-recovery.js?v=20260913-5" data-gc-public-recovery="1"></script>
+  <script src="/public-shell-failsafe.js?v=20260914-1" data-gc-public-shell-failsafe="1"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap">
+  <link rel="stylesheet" href="/public-shell-failsafe.css?v=20260916-1">
+  <link rel="stylesheet" href="/tracking-styles.css">
+  <link rel="stylesheet" href="/public-elite-v3.css?v=20260918-2">
+  <link rel="stylesheet" href="/gc-public-nav-refinement-2026.css?v=20260918-1">
+  <link rel="stylesheet" href="/gc-mobile-visual-rebuild-2026.css?v=20260918-1">
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <!-- سایدبار -->
-        <div class="col-md-2 sidebar">
-            <h4><i class="bi bi-cloud"></i> گشتی</h4>
-            <hr>
-            <div class="nav flex-column nav-pills">
-                <a class="nav-link active" data-view="dashboard" href="#"><i class="bi bi-speedometer2"></i> داشبۆرد</a>
-                <a class="nav-link" data-view="requests" href="#"><i class="bi bi-bell"></i> داواکارییەکان <span class="badge-notif" id="notifCount">0</span></a>
-                <a class="nav-link" data-view="accounts" href="#"><i class="bi bi-people"></i> بەڕێوەبردنی ئەکاونت</a>
-                <a class="nav-link" data-view="prices" href="#"><i class="bi bi-tag"></i> نرخەکان</a>
-                <a class="nav-link" data-view="settings" href="#"><i class="bi bi-gear"></i> ڕێکخستن</a>
+  <div class="gc-app" id="gcApp">
+    <div class="gc-announcement">
+      <div class="gc-container gc-announcement-inner">
+        <span>🚚 ڕێڕەوەکانی چین · دوبەی · ئەمریکا · هەولێر چالاکن</span>
+        <span class="gc-live-pill"><i></i> پشتیوانی ٢٤/٧</span>
+      </div>
+    </div>
+
+    <header class="gc-nav">
+      <div class="gc-container gc-nav-inner">
+        <a class="gc-brand" href="/" data-gc-route="home">
+          <img src="/logo-icon.png" alt="Globall Cloud" loading="eager">
+          <span><b>Globall Cloud</b><small>لۆجستیک و گەیاندن</small></span>
+        </a>
+        <nav class="gc-desktop-nav" aria-label="ناڤیگەیشن">
+          <a href="/" data-gc-route="home">سەرەکی</a>
+          <a href="/about" data-gc-route="about">دەربارەمان</a>
+          <a href="/services" data-gc-route="services">خزمەتگوزاری</a>
+          <a href="/track" data-gc-route="track">شوێنکەوتن</a>
+          <a href="/contact" data-gc-route="contact">پەیوەندی</a>
+        </nav>
+        <div class="gc-nav-actions">
+          <a class="gc-staff" href="/staff"><span class="gc-staff-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 20c.8-4 3-6 7-6s6.2 2 7 6"/></svg></span>بەشی ستاف</a>
+          <a class="gc-btn gc-btn-primary" href="/request" data-gc-route="request">داواکردنی نرخ</a>
+          <button class="gc-menu" type="button" data-gc-menu aria-label="مینیو">☰</button>
+        </div>
+      </div>
+      <div class="gc-mobile-menu" data-gc-mobile-menu hidden>
+        <a href="/" data-gc-route="home">سەرەکی</a>
+        <a href="/about" data-gc-route="about">دەربارەمان</a>
+        <a href="/services" data-gc-route="services">خزمەتگوزاری</a>
+        <a href="/track" data-gc-route="track">شوێنکەوتن</a>
+        <a href="/request" data-gc-route="request">داواکردنی نرخ</a>
+        <a href="/contact" data-gc-route="contact">پەیوەندی</a>
+        <a class="gc-staff-mobile" href="/staff"><span class="gc-staff-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 20c.8-4 3-6 7-6s6.2 2 7 6"/></svg></span>بەشی ستاف</a>
+      </div>
+    </header>
+
+    <main id="gcMain">
+      <section class="page active" id="page-home">
+        <div class="gc-hero gc-container">
+          <div class="gc-hero-copy">
+            <span class="gc-eyebrow">CHINA · UAE · USA · IRAQ</span>
+            <h1>گەیاندنی بار بە <em>متمانە</em>، خێرایی و شوێنکەوتنی ڕوون.</h1>
+            <p>Globall Cloud بارەکانت لە چین، دوبەی و ئەمریکا بۆ هەولێر و هەموو شارەکانی عێراق بە ڕێڕەوی Air، Sea و Land، گومرگ و Door-to-Door بەڕێوە دەبات.</p>
+            <div class="gc-hero-actions">
+              <a class="gc-btn gc-btn-primary gc-btn-large" href="/track" data-gc-route="track">شوێنکەوتنی بار</a>
+              <a class="gc-btn gc-btn-ghost gc-btn-large" href="/request" data-gc-route="request">داواکردنی نرخ</a>
+              <a class="gc-btn gc-btn-whatsapp gc-btn-large" href="https://wa.me/9647507577137" target="_blank" rel="noopener">WhatsApp</a>
             </div>
-            <hr>
-            <div class="mt-4 text-muted small">تۆ: <strong>Super Admin</strong></div>
+            <div class="gc-trust-row">
+              <div><b>Air</b><span>خێرا بۆ بارە پەلەکان</span></div>
+              <div><b>Sea</b><span>بۆ بارە قورس و کۆکراوەکان</span></div>
+              <div><b>Land</b><span>گواستنەوەی ناوخۆیی عێراق</span></div>
+            </div>
+          </div>
+          <div class="gc-hero-card">
+            <div class="gc-card-grid">
+              <div class="gc-route-line">
+                <span class="gc-node gc-node-a"></span>
+                <div><small>ORIGIN HUB</small><b>گوانگژۆ، چین</b></div>
+              </div>
+              <div class="gc-route-line">
+                <span class="gc-node gc-node-b"></span>
+                <div><small>TRANSIT HUB</small><b>دوبەی، ئیمارات</b></div>
+              </div>
+              <div class="gc-route-line">
+                <span class="gc-node gc-node-c"></span>
+                <div><small>DELIVERY HUB</small><b>هەولێر، عێراق</b></div>
+              </div>
+            </div>
+            <div class="gc-route-status"><span class="gc-status-dot"></span> Shipment network online</div>
+          </div>
         </div>
 
-        <!-- ناوەڕۆک -->
-        <div class="col-md-10 main-content">
-            <h2 class="mb-4" id="pageTitle">داشبۆرد</h2>
-            
-            <!-- ڕووکاری داشبۆرد -->
-            <div id="view-dashboard" class="view-content">
-                <div class="row">
-                    <div class="col-md-4"><div class="card p-3"><h5>چاوەڕوانی وەڵام</h5><h2 id="statPending">0</h2></div></div>
-                    <div class="col-md-4"><div class="card p-3"><h5>کۆی ستاف</h5><h2 id="statStaff">0</h2></div></div>
-                    <div class="col-md-4"><div class="card p-3"><h5>نرخە گۆڕاوەکان</h5><h2 id="statPrices">0</h2></div></div>
-                </div>
-                <div class="alert alert-info mt-3">ئاگاداری نوێ: کاتێک داواکارییەک دێت، ژمارەکە لە سایدباردا دەردەکەوێت!</div>
-            </div>
-
-            <!-- ڕووکاری داواکارییەکان -->
-            <div id="view-requests" class="view-content" style="display:none;">
-                <div class="card">
-                    <div class="card-header bg-white"><h5>لیستی داواکارییەکان <span id="reqCountBadge" class="badge bg-warning">0</span></h5></div>
-                    <div class="card-body" id="requestsList">
-                        <!-- لەلایەن جاڤاسکریپتەوە پڕ دەکرێتەوە -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- ڕووکاری ئەکاونتەکان -->
-            <div id="view-accounts" class="view-content" style="display:none;">
-                <div class="card">
-                    <div class="card-header bg-white d-flex justify-content-between">
-                        <h5>دروستکردنی ئەکاونتی نوێ</h5>
-                        <button class="btn btn-primary btn-sm" onclick="addStaffAccount()"><i class="bi bi-plus"></i> زیادکردن</button>
-                    </div>
-                    <div class="card-body">
-                        <input type="text" id="newStaffName" class="form-control mb-2" placeholder="ناوی ستاف">
-                        <input type="email" id="newStaffEmail" class="form-control mb-2" placeholder="ئیمەیڵ">
-                        <select id="newStaffRole" class="form-select mb-2"><option>Admin</option><option>Manager</option><option>Viewer</option></select>
-                        <div id="staffList" class="mt-3"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ڕووکاری نرخەکان -->
-            <div id="view-prices" class="view-content" style="display:none;">
-                <div class="card">
-                    <div class="card-header bg-white"><h5>بەڕێوەبردنی نرخەکان</h5></div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-4"><input id="priceKey" class="form-control" placeholder="ناوی کاڵا / خزمەتگوزاری"></div>
-                            <div class="col-4"><input id="priceValue" class="form-control" placeholder="نرخ (بە دۆلار)"></div>
-                            <div class="col-4"><button class="btn btn-success" onclick="savePrice()">تۆمارکردن</button></div>
-                        </div>
-                        <hr>
-                        <div id="priceTable" class="mt-3"></div>
-                    </div>
-                </div>
-            </div>
+        <div class="gc-container gc-stats">
+          <div><strong>AIR</strong><span>گەیاندنی خێرا بۆ بارە پەلەکان</span></div>
+          <div><strong>SEA</strong><span>بارە قورس و کۆکراوەکان</span></div>
+          <div><strong>LAND</strong><span>گەیاندنی ناوخۆیی لە عێراق</span></div>
+          <div><strong>DOOR</strong><span>لە کۆگا تا دەرگای کڕیار</span></div>
         </div>
-    </div>
-</div>
 
-<script>
-    // ========== داتا (بۆ نموونە لە localStorage هەڵدەگیرێت) ==========
-    let data = {
-        requests: [
-            { id: 1, name: 'ڕێبازی کڕیار', type: 'نرخ', detail: 'نرخی پاکەتی Z', status: 'pending', date: '2026-08-29' },
-            { id: 2, name: 'ستاف ئەحمەد', type: 'ئەکاونت', detail: 'پێویستی بە مۆڵەتی نوێیە', status: 'pending', date: '2026-08-28' }
-        ],
-        staffs: [
-            { id: 101, name: 'سامان', email: 'saman@site.com', role: 'Admin' }
-        ],
-        prices: [
-            { key: 'پاکەتی A', value: 99 },
-            { key: 'پاکەتی B', value: 149 }
-        ]
-    };
-
-    // بارکردنی داتا لە LocalStorage
-    function loadData() {
-        const saved = localStorage.getItem('globalCloudData');
-        if (saved) {
-            try { data = JSON.parse(saved); } catch(e) {}
-        } else {
-            saveData(); // یەکەم جار دەنووسێت
-        }
-        updateUI();
-    }
-
-    function saveData() {
-        localStorage.setItem('globalCloudData', JSON.stringify(data));
-        updateUI();
-    }
-
-    // نیشاندانی ژمارەی ئاگاداری
-    function updateUI() {
-        const pending = data.requests.filter(r => r.status === 'pending').length;
-        document.getElementById('notifCount').innerText = pending;
-        document.getElementById('statPending').innerText = pending;
-        document.getElementById('statStaff').innerText = data.staffs.length;
-        document.getElementById('statPrices').innerText = data.prices.length;
-        document.getElementById('reqCountBadge').innerText = pending;
-
-        renderRequests();
-        renderStaffs();
-        renderPrices();
-    }
-
-    // ========== ڕێنادەری داواکاری ==========
-    function renderRequests() {
-        const container = document.getElementById('requestsList');
-        if (data.requests.length === 0) {
-            container.innerHTML = '<div class="text-muted">هیچ داواکارییەک نییە</div>';
-            return;
-        }
-        let html = `<ul class="list-group">`;
-        data.requests.forEach(req => {
-            const isPending = req.status === 'pending';
-            html += `
-                <li class="list-group-item ${isPending ? 'pending' : ''} d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>${req.name}</strong> - ${req.type} <br>
-                        <small>${req.detail} | ${req.date}</small>
-                    </div>
-                    <div>
-                        ${isPending ? `
-                            <span class="badge bg-warning">چاوەڕوان</span>
-                            <i class="bi bi-check-circle text-success" onclick="respondRequest(${req.id}, 'accept')" title="پەسەندکردن"></i>
-                            <i class="bi bi-x-circle text-danger" onclick="respondRequest(${req.id}, 'reject')" title="ڕەتکردنەوە"></i>
-                        ` : `<span class="badge bg-secondary">وەڵام دراوە</span>`}
-                    </div>
-                </li>
-            `;
-        });
-        html += `</ul>`;
-        container.innerHTML = html;
-    }
-
-    // وەڵامدانەوە بۆ داواکاری
-    function respondRequest(id, action) {
-        const req = data.requests.find(r => r.id === id);
-        if (!req) return;
-        if (action === 'accept') {
-            req.status = 'accepted';
-            alert(`داواکاری بۆ ${req.name} پەسەند کرا! (نرخەکە یان ئەکاونتەکە دەگۆڕدرێت)`);
-        } else {
-            req.status = 'rejected';
-            alert(`داواکاری بۆ ${req.name} ڕەت کرایەوە.`);
-        }
-        saveData();
-    }
-
-    // زیادکردنی ستاف
-    function addStaffAccount() {
-        const name = document.getElementById('newStaffName').value.trim();
-        const email = document.getElementById('newStaffEmail').value.trim();
-        const role = document.getElementById('newStaffRole').value;
-        if (!name || !email) return alert('تکایە ناو و ئیمەیڵ پڕ بکەوە');
-        data.staffs.push({ id: Date.now(), name, email, role });
-        // ئەگەر داواکارییەک لەسەر ئەمە بوو، بیڕە بە وەڵامدراو
-        const relatedReq = data.requests.find(r => r.email === email && r.status === 'pending');
-        if (relatedReq) relatedReq.status = 'accepted';
-        saveData();
-        document.getElementById('newStaffName').value = '';
-        document.getElementById('newStaffEmail').value = '';
-        alert('ئەکاونت بە سەرکەوتوویی دروست کرا!');
-    }
-
-    function renderStaffs() {
-        const container = document.getElementById('staffList');
-        if (data.staffs.length === 0) return container.innerHTML = '<div class="text-muted">هیچ ستافێک نییە</div>';
-        let html = `<table class="table table-sm"><tr><th>ناو</th><th>ئیمەیڵ</th><th>ڕۆڵ</th></tr>`;
-        data.staffs.forEach(s => {
-            html += `<tr><td>${s.name}</td><td>${s.email}</td><td>${s.role}</td></tr>`;
-        });
-        html += `</table>`;
-        container.innerHTML = html;
-    }
-
-    // نرخەکان
-    function savePrice() {
-        const key = document.getElementById('priceKey').value.trim();
-        const val = parseFloat(document.getElementById('priceValue').value);
-        if (!key || isNaN(val)) return alert('تکایە ناو و نرخی دروست بنووسە');
-        const existing = data.prices.find(p => p.key === key);
-        if (existing) {
-            existing.value = val;
-        } else {
-            data.prices.push({ key, value: val });
-        }
-        saveData();
-        document.getElementById('priceKey').value = '';
-        document.getElementById('priceValue').value = '';
-        alert('نرخ تۆمار کرا!');
-    }
-
-    function renderPrices() {
-        const container = document.getElementById('priceTable');
-        if (data.prices.length === 0) return container.innerHTML = '<div class="text-muted">هیچ نرخێک دیاری نەکراوە</div>';
-        let html = `<table class="table"><tr><th>خزمەتگوزاری</th><th>نرخ ($)</th><th>کردار</th></tr>`;
-        data.prices.forEach((p, idx) => {
-            html += `<tr>
-                <td>${p.key}</td>
-                <td>${p.value}</td>
-                <td><i class="bi bi-pencil text-primary" onclick="editPrice(${idx})"></i> <i class="bi bi-trash text-danger" onclick="deletePrice(${idx})"></i></td>
-            </tr>`;
-        });
-        html += `</table>`;
-        container.innerHTML = html;
-    }
-
-    function editPrice(idx) {
-        const p = data.prices[idx];
-        const newVal = prompt(`نرخی نوێ بۆ "${p.key}" بنووسە:`, p.value);
-        if (newVal !== null && !isNaN(parseFloat(newVal))) {
-            data.prices[idx].value = parseFloat(newVal);
-            saveData();
-        }
-    }
-    function deletePrice(idx) {
-        if (confirm('دڵنیای لە سڕینەوەی ئەم نرخە؟')) {
-            data.prices.splice(idx, 1);
-            saveData();
-        }
-    }
-
-    // ========== گۆڕینی نێوان پەنجەرەکان (Navigation) ==========
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            this.classList.add('active');
-            const view = this.dataset.view;
-            document.querySelectorAll('.view-content').forEach(el => el.style.display = 'none');
-            const target = document.getElementById(`view-${view}`);
-            if (target) target.style.display = 'block';
-            document.getElementById('pageTitle').innerText = this.innerText.trim();
-        });
-    });
-
-    // چونکە داواکارییەکان لە داتای سەرەتاییدا هەن، نیشانی دەدەین
-    loadData();
-</script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ckb" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>گشتی - پەنێلی بەڕێوەبردنی ستاف</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <style>
-        * { box-sizing: border-box; }
-        body { background: #f0f2f5; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        #loginScreen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #1e2a3a, #2c3e50);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 9999;
-        }
-        .login-box {
-            background: white; padding: 40px; border-radius: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 360px;
-        }
-        .login-box h2 { color: #1e2a3a; margin-bottom: 20px; }
-        .sidebar { background: #1e2a3a; min-height: 100vh; padding: 20px; color: white; }
-        .sidebar h4 { border-bottom: 1px solid #3a4a5a; padding-bottom: 15px; }
-        .nav-link { color: #b0c4de; cursor: pointer; }
-        .nav-link:hover, .nav-link.active { color: white; background: #2b3d54; border-radius: 8px; }
-        .main-content { padding: 30px; }
-        .card { border-radius: 15px; border: none; margin-bottom: 20px; }
-        .badge-notif { background: #e74c3c; color: white; border-radius: 50%; padding: 2px 10px; margin-right: 10px; }
-        .list-group-item.pending { border-left: 4px solid #f39c12; background: #fff9e6; }
-        .view-content { display: none; }
-        .view-content.active { display: block; }
-        .staff-table i { cursor: pointer; margin: 0 3px; }
-        .logout-btn { background: none; border: none; color: #e74c3c; }
-    </style>
-</head>
-<body>
-
-<!-- شاشەی چوونەژوورەوە -->
-<div id="loginScreen">
-    <div class="login-box text-center">
-        <i class="bi bi-shield-lock" style="font-size: 60px; color: #1e2a3a;"></i>
-        <h2 class="mt-3">پەنێلی سوپەر ئەدمین</h2>
-        <input type="password" id="loginPass" class="form-control mb-3" placeholder="تێپەڕەوشە بنووسە">
-        <button class="btn btn-dark w-100" onclick="loginAdmin()">چوونەژوورەوە</button>
-        <div class="mt-2 text-muted small">تێپەڕەوشە: <strong>admin123</strong></div>
-    </div>
-</div>
-
-<!-- ناوەڕۆکی سەرەکی -->
-<div id="mainApp" style="display:none;">
-    <div class="container-fluid">
-        <div class="row">
-            <!-- سایدبار -->
-            <div class="col-md-2 sidebar">
-                <h4><i class="bi bi-cloud"></i> گشتی</h4>
-                <hr>
-                <div class="nav flex-column nav-pills">
-                    <a class="nav-link active" data-view="dashboard"><i class="bi bi-speedometer2"></i> داشبۆرد</a>
-                    <a class="nav-link" data-view="requests"><i class="bi bi-bell"></i> داواکارییەکان <span class="badge-notif" id="notifCount">0</span></a>
-                    <a class="nav-link" data-view="accounts"><i class="bi bi-people"></i> بەڕێوەبردنی ئەکاونت</a>
-                    <a class="nav-link" data-view="prices"><i class="bi bi-tag"></i> نرخەکان</a>
-                </div>
-                <hr>
-                <button class="logout-btn" onclick="logout()"><i class="bi bi-box-arrow-right"></i> دەرچوون</button>
-                <div class="mt-3 text-muted small">تۆ: <strong>Super Admin</strong></div>
-            </div>
-
-            <!-- ناوەڕۆک -->
-            <div class="col-md-10 main-content">
-                <h2 class="mb-4" id="pageTitle">داشبۆرد</h2>
-
-                <!-- داشبۆرد -->
-                <div id="view-dashboard" class="view-content active">
-                    <div class="row">
-                        <div class="col-md-4"><div class="card p-3"><h5>چاوەڕوانی وەڵام</h5><h2 id="statPending">0</h2></div></div>
-                        <div class="col-md-4"><div class="card p-3"><h5>کۆی ستاف</h5><h2 id="statStaff">0</h2></div></div>
-                        <div class="col-md-4"><div class="card p-3"><h5>نرخەکان</h5><h2 id="statPrices">0</h2></div></div>
-                    </div>
-                    <div class="alert alert-success">✨ هەموو داتاکان لە Supabaseـدا هەڵدەگیرێن و بە شێوەی ڕاستەقینە کاردەکەن!</div>
-                </div>
-
-                <!-- داواکارییەکان -->
-                <div id="view-requests" class="view-content">
-                    <div class="card">
-                        <div class="card-header bg-white"><h5>لیستی داواکارییەکان <span id="reqCountBadge" class="badge bg-warning">0</span></h5></div>
-                        <div class="card-body" id="requestsList"></div>
-                    </div>
-                </div>
-
-                <!-- ئەکاونتەکان -->
-                <div id="view-accounts" class="view-content">
-                    <div class="card">
-                        <div class="card-header bg-white d-flex justify-content-between">
-                            <h5>دروستکردنی ئەکاونتی نوێ</h5>
-                            <button class="btn btn-primary btn-sm" onclick="addStaff()"><i class="bi bi-plus"></i> زیادکردن</button>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-4"><input id="newName" class="form-control" placeholder="ناوی ستاف"></div>
-                                <div class="col-4"><input id="newEmail" class="form-control" placeholder="ئیمەیڵ"></div>
-                                <div class="col-4"><select id="newRole" class="form-select"><option>Admin</option><option>Manager</option><option>Viewer</option></select></div>
-                            </div>
-                            <div id="staffList" class="mt-3"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- نرخەکان -->
-                <div id="view-prices" class="view-content">
-                    <div class="card">
-                        <div class="card-header bg-white"><h5>بەڕێوەبردنی نرخەکان</h5></div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-5"><input id="priceKey" class="form-control" placeholder="ناوی کاڵا یان خزمەتگوزاری"></div>
-                                <div class="col-4"><input id="priceValue" class="form-control" placeholder="نرخ بە دۆلار"></div>
-                                <div class="col-3"><button class="btn btn-success w-100" onclick="savePrice()">تۆمارکردن</button></div>
-                            </div>
-                            <hr>
-                            <div id="priceTable" class="mt-3"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="gc-container gc-section">
+          <div class="gc-section-head"><span class="gc-eyebrow">SERVICES</span><h2>هەموو ئەوەی بۆ جوڵاندنی بارەکەت پێویستە</h2><p>لە پەیوەندیدانی سەرچاوە تا کۆگا، گومرگ، شوێنکەوتن و گەیاندنی کۆتایی.</p></div>
+          <div class="gc-service-grid">
+            <a class="gc-service" href="/services" data-gc-route="services"><b><span class="gc-service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 16.5 21 8l-3.2 3.2-4.2 1.7 1.4 5-1.8 1-3.1-4.6-4.1 1.6Z"/></svg></span><span>Air Freight</span></b><span>بارە پەلەکان بە گەیاندنی خێرا.</span><small>بینینی خزمەتگوزاری ←</small></a>
+            <a class="gc-service" href="/services" data-gc-route="services"><b><span class="gc-service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 14h16l-2 3H6l-2-3Z"/><path d="M8 14V6h8v8"/><path d="M6 20c2.5-1.4 4.5 1.4 7 0 2.5-1.4 4.5 1.4 7 0"/></svg></span><span>Sea Freight</span></b><span>بۆ بارە قورس و کۆکراوەکان.</span><small>بینینی خزمەتگوزاری ←</small></a>
+            <a class="gc-service" href="/services" data-gc-route="services"><b><span class="gc-service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h11v10H3z"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></span><span>Land Delivery</span></b><span>گواستنەوەی ناوخۆیی بۆ شارەکان.</span><small>بینینی خزمەتگوزاری ←</small></a>
+            <a class="gc-service" href="/services" data-gc-route="services"><b><span class="gc-service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M6 20V9l6-4 6 4v11"/><path d="M9 13h6v7H9z"/></svg></span><span>Customs</span></b><span>بەڕێوەبردنی پڕۆسەی گومرگ و بەڵگە.</span><small>بینینی خزمەتگوزاری ←</small></a>
+          </div>
         </div>
-    </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-    // ======================== پەیوەندی بە Supabase ========================
-    const SUPABASE_URL = 'https://xxxxxxxxxxxxx.supabase.co';  // <-- URLـی پرۆژەکەت لێرە دابنێ
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // <-- anon keyـەکەت لێرە دابنێ
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        <div class="gc-container gc-track-panel" id="homeTrack">
+          <div><span class="gc-eyebrow">LIVE TRACKING</span><h2>بارەکەت لە کوێیە؟</h2><p>ژمارەی شوێنکەوتن بنووسە و بۆ هەموو نوێکارییەکان بچۆ بۆ Tracking.</p></div>
+          <form class="gc-track-form" data-gc-track-form>
+            <input name="track" type="text" placeholder="GC-10052341" autocomplete="off" aria-label="ژمارەی شوێنکەوتن">
+            <button class="gc-btn gc-btn-primary" type="submit">شوێنکەوتن</button>
+          </form>
+        </div>
 
-    // ======================== چوونەژوورەوە ========================
-    function loginAdmin() {
-        const pass = document.getElementById('loginPass').value;
-        if (pass === 'admin123') {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            loadAllData();
-        } else {
-            alert('تێپەڕەوشە هەڵەیە!');
-        }
-    }
-    function logout() {
-        document.getElementById('mainApp').style.display = 'none';
-        document.getElementById('loginScreen').style.display = 'flex';
-        document.getElementById('loginPass').value = '';
-    }
+        <div class="gc-container gc-section gc-real-flow">
+          <div class="gc-section-head"><span class="gc-eyebrow">HOW IT WORKS</span><h2>لە داواکاری تا گەیاندن</h2><p>هەموو قۆناغەکانی بارەکەت بە زنجیرەیەکی ڕوون و بەڵگەدار بەڕێوە دەچن.</p></div>
+          <div class="gc-ops-grid">
+            <div><b><span class="gc-ops-icon">01</span><span>داوا و نرخ</span></b><span>Origin، جۆری گواستنەوە، کێش و وردەکاری بنێرە.</span></div>
+            <div><b><span class="gc-ops-icon">02</span><span>وەرگرتن و کۆگا</span></b><span>بار وەردەگیرێت و بەڵگەی receipt و QC تۆمار دەکرێت.</span></div>
+            <div><b><span class="gc-ops-icon">03</span><span>گواستنەوە</span></b><span>Air، Sea یان Land بە status و tracking بەدواداچوون دەکرێت.</span></div>
+            <div><b><span class="gc-ops-icon">04</span><span>گومرگ و گەیاندن</span></b><span>لە clearance تا Door-to-Door، هەر گۆڕانکارییەک ڕوونە.</span></div>
+          </div>
+        </div>
 
-    // ======================== بارکردنی هەموو داتا ========================
-    async function loadAllData() {
-        await Promise.all([loadStaffs(), loadRequests(), loadPrices()]);
-        updateUI();
-    }
-
-    async function loadStaffs() {
-        const { data, error } = await supabase.from('staffs').select('*');
-        if (error) console.error(error);
-        else window.staffs = data || [];
-    }
-    async function loadRequests() {
-        const { data, error } = await supabase.from('requests').select('*').order('id', { ascending: false });
-        if (error) console.error(error);
-        else window.requests = data || [];
-    }
-    async function loadPrices() {
-        const { data, error } = await supabase.from('prices').select('*');
-        if (error) console.error(error);
-        else window.prices = data || [];
-    }
-
-    function updateUI() {
-        const pending = (window.requests || []).filter(r => r.status === 'pending').length;
-        document.getElementById('notifCount').innerText = pending;
-        document.getElementById('statPending').innerText = pending;
-        document.getElementById('statStaff').innerText = (window.staffs || []).length;
-        document.getElementById('statPrices').innerText = (window.prices || []).length;
-        document.getElementById('reqCountBadge').innerText = pending;
-        renderRequests();
-        renderStaffs();
-        renderPrices();
-    }
-
-    // ======================== داواکارییەکان ========================
-    function renderRequests() {
-        const container = document.getElementById('requestsList');
-        const reqs = window.requests || [];
-        if (!reqs.length) return container.innerHTML = '<div class="text-muted">هیچ داواکارییەک نییە</div>';
-        let html = '<ul class="list-group">';
-        reqs.forEach(req => {
-            const isPending = req.status === 'pending';
-            html += `
-                <li class="list-group-item ${isPending ? 'pending' : ''} d-flex justify-content-between align-items-center">
-                    <div><strong>${req.name}</strong> - ${req.type} <br><small>${req.detail || ''} | ${req.date || ''}</small></div>
-                    <div>
-                        ${isPending ? `
-                            <span class="badge bg-warning">چاوەڕوان</span>
-                            <i class="bi bi-check-circle text-success" onclick="respondReq(${req.id}, 'accept')" style="font-size:20px;margin:0 5px;cursor:pointer;"></i>
-                            <i class="bi bi-x-circle text-danger" onclick="respondReq(${req.id}, 'reject')" style="font-size:20px;margin:0 5px;cursor:pointer;"></i>
-                        ` : `<span class="badge bg-secondary">وەڵام دراوە</span>`}
-                    </div>
-                </li>
-            `;
-        });
-        html += '</ul>';
-        container.innerHTML = html;
-    }
-
-    async function respondReq(id, action) {
-        const newStatus = action === 'accept' ? 'accepted' : 'rejected';
-        const { error } = await supabase.from('requests').update({ status: newStatus }).eq('id', id);
-        if (error) { alert('هەڵە ڕوویدا!'); return; }
-        alert(action === 'accept' ? '✅ پەسەند کرا!' : '❌ ڕەت کرایەوە');
-        await loadRequests();
-        updateUI();
-    }
-
-    // ======================== ئەکاونت ========================
-    async function addStaff() {
-        const name = document.getElementById('newName').value.trim();
-        const email = document.getElementById('newEmail').value.trim();
-        const role = document.getElementById('newRole').value;
-        if (!name || !email) return alert('تکایە ناو و ئیمەیڵ پڕ بکەوە');
+        <div class="gc-container gc-section gc-ops-preview">
+          <div class="gc-section-head"><span class="gc-eyebrow">OPERATIONS</span><h2>سیستەمی ستاف بۆ بەڕێوەبردنی هەموو زنجیرەکە</h2><p>داشبۆردی کارگێڕی، بارەکان، کۆگا، دارایی، بەڵگەکان، گومرگ و ئاگادارییەکان لە یەک شوێن.</p></div>
+          <div class="gc-ops-grid">
+            <div><b><span class="gc-ops-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 8 4v10l-8 4-8-4V7l8-4Z"/><path d="m4 7 8 4 8-4"/><path d="M12 11v10"/></svg></span><span>Shipments</span></b><span>دۆخ، ڕێڕەو، کۆگا و تاریخچەی بار</span></div>
+            <div><b><span class="gc-ops-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 21V8l9-5 9 5v13"/><path d="M7 21v-7h10v7"/><path d="M7 10h2M15 10h2"/></svg></span><span>Warehouses</span></b><span>وەرگرتن، QC، کۆکردنەوە و دەرکردن</span></div>
+            <div><b><span class="gc-ops-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg></span><span>Finance</span></b><span>وەسڵ، پارەدان، فاکتۆر و ڕاپۆرت</span></div>
+            <div><b><span class="gc-ops-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 20 6v6c0 5-3.3 8-8 9-4.7-1-8-4-8-9V6l8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span>Security</span></b><span>Auth، RLS، 2FA و audit trail</span></div>
+          </div>
+          <a class="gc-btn gc-btn-ghost gc-centered-btn" href="/staff">کردنەوەی کۆنسۆڵی ستاف</a>
+        </div>
         
-        const { error } = await supabase.from('staffs').insert([{ name, email, role }]);
-        if (error) { alert('هەڵە ڕوویدا: ' + error.message); return; }
-        
-        // ئەگەر داواکارییەک هەبوو بۆ ئەم ئیمەیڵە، دەبێت بە وەڵامدراو
-        const { data: pendingReq } = await supabase.from('requests').select('id').eq('email', email).eq('status', 'pending');
-        if (pendingReq && pendingReq.length) {
-            await supabase.from('requests').update({ status: 'accepted' }).eq('id', pendingReq[0].id);
-        }
-        
-        document.getElementById('newName').value = '';
-        document.getElementById('newEmail').value = '';
-        alert('✅ ئەکاونت بە سەرکەوتوویی دروست کرا!');
-        await loadAllData();
-    }
+      </section>
 
-    function renderStaffs() {
-        const container = document.getElementById('staffList');
-        const staffs = window.staffs || [];
-        if (!staffs.length) return container.innerHTML = '<div class="text-muted">هیچ ستافێک نییە</div>';
-        let html = `<table class="table table-striped"><tr><th>ناو</th><th>ئیمەیڵ</th><th>ڕۆڵ</th></tr>`;
-        staffs.forEach(s => { html += `<tr><td>${s.name}</td><td>${s.email}</td><td>${s.role}</td></tr>`; });
-        html += '</table>';
-        container.innerHTML = html;
-    }
+      <section class="page" id="page-about" hidden>
+        <div class="gc-container gc-inner-page"><span class="gc-eyebrow">ABOUT</span><h1>دەربارەی Globall Cloud</h1><p>Globall Cloud بۆ خزمەتکردنی بازاڕی لۆجستیکی عێراق دروستکراوە، بە تەرکیز لە ڕێڕەوەکانی چین، ئیمارات، ئەمریکا و هەولێر.</p><div class="gc-info-grid"><div><b>ڕێڕەوی یەکگرتوو</b><span>سەرچاوە → ترانزیت → گومرگ → دابەشکردن</span></div><div><b>بەڵگە و شفافیت</b><span>Tracking، status history و ئاگادارییەکان</span></div><div><b>تێکەڵبوونی سیستەم</b><span>Cloudflare + Supabase + Edge Functions + Staff OS</span></div></div></div>
+      </section>
 
-    // ======================== نرخ ========================
-    async function savePrice() {
-        const key = document.getElementById('priceKey').value.trim();
-        const val = parseFloat(document.getElementById('priceValue').value);
-        if (!key || isNaN(val)) return alert('تکایە ناو و نرخی دروست بنووسە');
-        
-        // ببینە ئایا ئەم نرخە پێشتر هەیە
-        const { data: existing } = await supabase.from('prices').select('id').eq('key', key);
-        let error;
-        if (existing && existing.length) {
-            // نوێکردنەوە
-            const res = await supabase.from('prices').update({ value: val }).eq('key', key);
-            error = res.error;
-        } else {
-            // زیادکردنی نوێ
-            const res = await supabase.from('prices').insert([{ key, value: val }]);
-            error = res.error;
-        }
-        if (error) { alert('هەڵە ڕوویدا!'); return; }
-        document.getElementById('priceKey').value = '';
-        document.getElementById('priceValue').value = '';
-        alert('✅ نرخ تۆمار کرا!');
-        await loadPrices();
-        updateUI();
-    }
+      <section class="page" id="page-services" hidden>
+        <div class="gc-container gc-inner-page"><span class="gc-eyebrow">LOGISTICS SERVICES</span><h1>خزمەتگوزارییەکانمان</h1><div class="gc-detail-grid"><article><b>Air Freight</b><p>بۆ بارەکانی پەلە و کەم قەبارە.</p></article><article><b>Sea Freight</b><p>بۆ بارە کۆکراوە و بارە قورسەکان.</p></article><article><b>Land Freight</b><p>گواستنەوە لە هەولێر بۆ شارەکانی عێراق.</p></article><article><b>Customs Clearance</b><p>ڕێکخستنی بەڵگە و پڕۆسەی گومرگ.</p></article><article><b>Door-to-Door</b><p>لە کۆگا تا دەرگای کڕیار.</p></article><article><b>Live Tracking</b><p>شوێنکەوتنی بار و event history.</p></article></div><a class="gc-btn gc-btn-primary" href="/request" data-gc-route="request">دەستپێکردنی داوا</a></div>
+      </section>
 
-    function renderPrices() {
-        const container = document.getElementById('priceTable');
-        const prices = window.prices || [];
-        if (!prices.length) return container.innerHTML = '<div class="text-muted">هیچ نرخێک دیاری نەکراوە</div>';
-        let html = `<table class="table table-striped"><tr><th>خزمەتگوزاری</th><th>نرخ ($)</th><th>کردار</th></tr>`;
-        prices.forEach((p, idx) => {
-            html += `<tr><td>${p.key}</td><td>${p.value}</td>
-                <td><i class="bi bi-pencil text-primary" onclick="editPrice(${p.id}, '${p.key}', ${p.value})" style="cursor:pointer;"></i> 
-                    <i class="bi bi-trash text-danger" onclick="deletePrice(${p.id})" style="cursor:pointer;"></i></td></tr>`;
-        });
-        html += '</table>';
-        container.innerHTML = html;
-    }
+      <section class="page" id="page-track" hidden>
+        <div class="gc-container gc-inner-page"><span class="gc-eyebrow">TRACKING CENTER</span><h1>شوێنکەوتنی بار</h1><p>ژمارەی Tracking داخڵ بکە بۆ چوونە سەر پەڕەی Tracking و بینینی دۆخی بارەکەت.</p><form class="gc-track-form gc-track-form-wide" data-gc-track-form><input name="track" type="text" placeholder="GC-10052341" autocomplete="off"><button class="gc-btn gc-btn-primary" type="submit">بینینی بار</button></form><div class="gc-mini-notice">داتای تاکەکەسی و وردەکارییەکانی بار تەنها بۆ کڕیار و ستاف پیشان دەدرێن.</div></div>
+      </section>
 
-    async function editPrice(id, key, currentVal) {
-        const newVal = prompt(`نرخی نوێ بۆ "${key}" بنووسە:`, currentVal);
-        if (newVal !== null && !isNaN(parseFloat(newVal))) {
-            const { error } = await supabase.from('prices').update({ value: parseFloat(newVal) }).eq('id', id);
-            if (error) alert('هەڵە ڕوویدا!');
-            else { await loadPrices(); updateUI(); }
-        }
-    }
+      <section class="page" id="page-request" hidden>
+        <div class="gc-container gc-inner-page"><span class="gc-eyebrow">REQUEST A QUOTE</span><h1>داواکردنی نرخ</h1><p>سەرچاوە، جۆری گواستنەوە و زانیاریی بارەکەت بنێرە؛ تیمی Globall Cloud خەملاندنی نرخ ڕێکدەخات.</p><form class="gc-form" data-gc-quote-form><label>ناو<input name="name" required></label><label>ژمارەی مۆبایل<input name="phone" required></label><label>سەرچاوە<select name="origin"><option>چین</option><option>ئیمارات</option><option>ئەمریکا</option></select></label><label>جۆری بار<select name="mode"><option>Air</option><option>Sea</option><option>Land</option></select></label><label>وردەکاری<textarea name="details" rows="5" placeholder="جۆری کاڵا، کێش، قەبارە..." required></textarea></label><button class="gc-btn gc-btn-primary" type="submit">ناردنی داواکاری</button></form></div>
+      </section>
 
-    async function deletePrice(id) {
-        if (!confirm('دڵنیای لە سڕینەوەی ئەم نرخە؟')) return;
-        const { error } = await supabase.from('prices').delete().eq('id', id);
-        if (error) alert('هەڵە ڕوویدا!');
-        else { await loadPrices(); updateUI(); }
-    }
+      <section class="page" id="page-portal" hidden>
+        <div class="gc-container gc-inner-page gc-portal-card"><span class="gc-eyebrow">CUSTOMER PORTAL</span><h1>پرۆتالی کڕیار</h1><p>لە پرۆتالەکەوە دەتوانیت بارەکان، فاکتۆرەکان، بەڵگەکان، شوێنکەوتن و ئاگادارییەکانت بەڕێوەببەیت.</p><div class="gc-portal-actions"><a class="gc-btn gc-btn-primary" href="/dashboard">چوونەژوورەوە</a><a class="gc-btn gc-btn-ghost" href="/request" data-gc-route="request">داواکردنی نرخ</a></div></div>
+      </section>
 
-    // ======================== گۆڕینی پەنجەرە ========================
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            this.classList.add('active');
-            const view = this.dataset.view;
-            document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(`view-${view}`).classList.add('active');
-            document.getElementById('pageTitle').innerText = this.innerText.trim();
-        });
-    });
-</script>
+      <section class="page" id="page-contact" hidden>
+        <div class="gc-container gc-inner-page"><span class="gc-eyebrow">CONTACT</span><h1>پەیوەندی</h1><div class="gc-contact-grid"><div><h3>پشتیوانی</h3><p>بۆ پرسیار و پشتیوانی، تیمی Globall Cloud ئامادەیە.</p><a class="gc-contact-link" href="tel:+9647507577137">+964 750 757 7137</a><a class="gc-contact-link" href="mailto:tamanblbas271@gmail.com">tamanblbas271@gmail.com</a><a class="gc-contact-link" href="https://wa.me/9647507577137" target="_blank" rel="noopener">WhatsApp</a></div><form class="gc-form" data-gc-contact-form><label>ناو<input name="name" required></label><label>ئیمەیل<input type="email" name="email" required></label><label>پەیام<textarea name="message" rows="5" required></textarea></label><button class="gc-btn gc-btn-primary" type="submit">ناردنی پەیام</button></form></div></div>
+      </section>
+    </main>
+
+    <footer class="gc-footer">
+      <div class="gc-container gc-footer-grid"><div><b class="gc-footer-brand">Globall Cloud</b><p>لۆجستیکی ڕاستەقینە بۆ عێراق.</p></div><div><b>ڕێبەر</b><a href="/services" data-gc-route="services">خزمەتگوزاری</a><a href="/track" data-gc-route="track">شوێنکەوتن</a><a href="/request" data-gc-route="request">داواکردنی نرخ</a></div><div><b>کارگێڕی</b><a href="/staff">بەشی ستاف</a><a href="/dashboard">پرۆتالی کڕیار</a></div><div><b>پەیوەندی</b><a href="tel:+9647507577137">+964 750 757 7137</a><a href="mailto:tamanblbas271@gmail.com">tamanblbas271@gmail.com</a></div></div><div class="gc-container gc-footer-bottom"><span>© 2026 Globall Cloud</span><span>Air · Sea · Land · Customs · Tracking</span></div>
+    </footer>
+  </div>
 </body>
 </html>

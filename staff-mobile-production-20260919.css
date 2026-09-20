@@ -72,3 +72,12 @@
 @media (prefers-reduced-motion:reduce){
   .gc-mobile-drawer,.gc-mobile-backdrop{transition:none !important}
 }
+
+@media (max-width:760px){
+  .view{min-height:auto!important}
+  .view>.empty{min-height:120px!important;display:grid!important;place-items:center!important;margin:0!important}
+  .shipment-grid{grid-template-columns:1fr!important}
+  .shipment-card{padding:11px!important}
+  .shipment-actions{display:grid!important;grid-template-columns:1fr 1fr!important}
+  .shipment-actions .btn{width:100%!important}
+}
