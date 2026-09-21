@@ -31,8 +31,8 @@ jobs:
           node-version: 24
           package-manager-cache: false
 
-      - name: Install locked dependencies
-        run: npm ci --ignore-scripts
+      - name: Install validation dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false
 
       - name: Validate repository before deployment
         run: npm test

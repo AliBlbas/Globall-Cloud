@@ -4,8 +4,9 @@
  * cache policy. Application logic belongs in the page scripts themselves.
  */
 const HTML_ACCEPT = 'text/html';
-const VERSION = '20260918-1';
+const VERSION = '20260919-2';
 
+const VISUAL_REFRESH = `<link rel="stylesheet" href="/globall-visual-refresh-20260921.css?v=20260921-1" data-gc-visual-refresh="20260921-1">`;
 const ENTERPRISE_SHELL = `<link rel="stylesheet" href="/enterprise-shell-v2026.css?v=${VERSION}" data-gc-enterprise-shell="1">`;
 const LEGACY_SUPABASE_NOTICE = 'Supabase هێشتا پەیوەست نەکراوە — URL و publishable key لە کۆدەکەدا زیادبکە (سەرەتای script tag).';
 const CSP = "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rum-static.pingdom.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.supabase.co https://rum-ingest.pingdom.net https://*.sentry.io https://sentry.io; frame-src 'self' https://www.google.com; worker-src 'self' blob:";
@@ -84,6 +85,7 @@ export async function onRequest(context) {
 
   const headAssets = [
     ['name="color-scheme"', '<meta name="color-scheme" content="dark light">'],
+    ['href="/globall-visual-refresh-20260921.css', VISUAL_REFRESH],
     ['href="/enterprise-shell-v2026.css', ENTERPRISE_SHELL],
     ['href="/browser-compat.css', `<link rel="stylesheet" href="/browser-compat.css?v=${VERSION}" data-gc-browser-compat="1">`],
     ['href="/safari-compat-elite.css', `<link rel="stylesheet" href="/safari-compat-elite.css?v=${VERSION}" data-gc-safari-elite="1">`],
@@ -113,6 +115,11 @@ export async function onRequest(context) {
   if (OPERATIONAL_PAGE.test(path)) {
     html = addHeadAsset(html, 'src="/runtime-guard.js', `<script src="/runtime-guard.js?v=${VERSION}" defer data-gc-runtime-guard="1"></script>`);
   }
+  const REAL_DESIGN_PAGE = !OPERATIONAL_PAGE.test(path) || /^\/(?:customer-portal|tracking|tracking-integration)(?:\.html)?\/?$/i.test(path);
+  if (REAL_DESIGN_PAGE) {
+    html = addHeadAsset(html, 'href="/globall-realistic-design-20260919.css', `<link rel="stylesheet" href="/globall-realistic-design-20260919.css?v=${VERSION}" data-gc-realistic-design="1">`);
+  }
+
 
   if (path === '/' || path === '/index.html') {
     html = addHeadAsset(html, 'src="/staff-auth-runtime-fix.js', `<script src="/staff-auth-runtime-fix.js?v=${VERSION}" defer data-gc-staff-auth-runtime="1"></script>`);

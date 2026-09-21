@@ -24,7 +24,36 @@ async function requireStaff(req:Request,write=false){const a=await actor(req);if
 async function listShipments(admin:any, gcCode?:string){
  let q=admin.from('shipments').select('id,tracking_id,route,type,status,created_at,customer_name,customer_phone,customer_user_id,directory_customer_id,customer_gc_code,origin_key,dest_key,branch,total_amount,paid_amount,current_step_index,step_dates,eta,items_count,weight_kg,volume_cbm,transport_mode,origin_warehouse,destination_warehouse,cargo_description,carton_count,actual_weight_kg,length_cm,width_cm,height_cm,volumetric_weight_kg,chargeable_weight_kg,updated_at').order('created_at',{ascending:false}).limit(500)
  if(gcCode) q=q.or(`customer_gc_code.eq.${gcCode},tracking_id.eq.${gcCode}`)
- const {data,error}=await q;if(error)throw error;return data||[]
+ const {data,error}=await q;if(error)throw error;
+ const rows=data||[];
+ if(!rows.length)return rows;
+
+ let packages:any[]=[];
+ try{
+   const ids=rows.map((x:any)=>x.id).filter(Boolean);
+   const r=await admin.from('shipment_packages').select('shipment_id,package_code,package_type,description,weight_kg,metadata').in('shipment_id',ids);
+   if(!r.error)packages=r.data||[];
+ }catch(_){}
+
+ const byShipment=new Map<string,any[]>();
+ for(const p of packages){
+   const key=String(p.shipment_id);
+   if(!byShipment.has(key))byShipment.set(key,[]);
+   byShipment.get(key)!.push(p);
+ }
+ return rows.map((s:any)=>{
+   const ps=byShipment.get(String(s.id))||[];
+   const customers=new Set<string>();
+   const contents:string[]=[];
+   for(const p of ps){
+     const meta=p.metadata&&typeof p.metadata==='object'?p.metadata:{};
+     const gc=meta.customer_gc_code||meta.gc_code||meta.customer_code;
+     if(gc)customers.add(String(gc).toUpperCase());
+     const desc=p.description||meta.contents||meta.description;
+     if(desc)contents.push(String(desc));
+   }
+   return {...s,package_count:ps.length,customer_goods_count:customers.size||((s.customer_gc_code)?1:0),cargo_contents:[...new Set(contents)].slice(0,12)};
+ });
 }
 async function shipmentDetail(admin:any,id:string){
  const {data:shipment,error}=await admin.from('shipments').select('*').eq('id',id).maybeSingle();if(error)throw error;if(!shipment)throw new Error('Shipment not found')
@@ -37,7 +66,7 @@ async function shipmentDetail(admin:any,id:string){
  ]);return {shipment,packages:packages.data||[],events:events.data||[],receipts:receipts.data||[],insurance:insurance.data||[],ledger:ledger.data||[]}
 }
 async function customers(admin:any){const {data,error}=await admin.from('customer_directory').select('*').order('created_at',{ascending:false}).limit(2000);if(error)throw error;return data||[]}
-async function alerts(admin:any,staffId:string){const {data,error}=await admin.from('staff_alerts').select('*').order('created_at',{ascending:false}).limit(200);if(error)throw error;return (data||[]).filter((x:any)=>!x.audience_role||x.audience_role===String((await admin.from('staff').select('role').eq('id',staffId).maybeSingle()).data?.role)||!x.read_by?.includes(staffId))}
+async function alerts(admin:any,staffId:string){const {data,error}=await admin.from('staff_alerts').select('*').order('created_at',{ascending:false}).limit(200);if(error)throw error;const staffRow=await admin.from('staff').select('role').eq('id',staffId).maybeSingle();const role=String(staffRow.data?.role||'');return (data||[]).filter((x:any)=>!x.audience_role||x.audience_role===role)}
 async function pricing(admin:any){const [rates,fx,rules]=await Promise.all([admin.from('pricing_rates').select('*').order('origin_key').order('transport_mode').order('product_type'),admin.from('exchange_rates').select('*').order('created_at',{ascending:false}).limit(20),admin.from('pricing_rules').select('*').order('created_at',{ascending:false})]);if(rates.error)throw rates.error;if(fx.error)throw fx.error;if(rules.error)throw rules.error;return {rates:rates.data||[],exchange_rates:fx.data||[],rules:rules.data||[]}}
 async function finance(admin:any){
  const [tx,summary]=await Promise.all([admin.from('finance_transactions').select('*').order('created_at',{ascending:false}).limit(1000),admin.from('v_financial_summary').select('*').limit(1000)]);if(tx.error)throw tx.error;return {transactions:tx.data||[],summary:summary.data||[]}
