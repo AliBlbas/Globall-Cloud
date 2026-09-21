@@ -18,6 +18,10 @@
     const actions = document.querySelector('.top-actions');
     if (!topbar || !title || !actions || topbar.dataset.gcReferenceHeader === '1') return;
     topbar.dataset.gcReferenceHeader = '1';
+    const headerTitle = title.querySelector('strong');
+    const headerSubtitle = title.querySelector('span');
+    if (headerTitle) headerTitle.textContent = 'Globall Cloud Staff OS';
+    if (headerSubtitle) headerSubtitle.textContent = 'INTERNAL OPERATIONS';
 
     const notify = make('button', 'gc-ref-notify', '');
     notify.type = 'button';
@@ -35,6 +39,10 @@
       const count = document.querySelector('#alertsBadge')?.textContent?.trim();
       notify.dataset.count = count && count !== '' ? count : '0';
     };
+    const icons = ['▣','▱','ϟ','◷','◉','!'];
+    document.querySelectorAll('.grid-kpi .kpi,.metrics-grid .metric').forEach((card, index) => {
+      if (!card.dataset.icon) card.dataset.icon = icons[index % icons.length];
+    });
     const badge = document.querySelector('#alertsBadge');
     if (badge) new MutationObserver(syncCount).observe(badge, {childList:true,subtree:true,characterData:true,attributes:true});
   }
