@@ -38,8 +38,8 @@
     if (window.sb?.auth) return window.sb;
     if (typeof window.gcEnsureSupabase === 'function') return window.gcEnsureSupabase();
     if (window.supabase?.createClient) {
-      const url = 'https://ahslifnthiwfkmaswjno.supabase.co';
-      const key = 'sb_publishable_X9rQzP7m2nV4cL8kJ1hF6dS3pA0eB5nM';
+      const url = window.gcSupabaseConfig?.url || 'https://ahslifnthiwfkmaswjno.supabase.co';
+      const key = window.gcSupabaseConfig?.publishableKey || 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
       return window.supabase.createClient(url, key);
     }
     return null;
