@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   diagnostic:
-    runs-on: ubuntu-22.04
+    runs-on: windows-latest
     timeout-minutes: 5
     steps:
       - name: Checkout repository
@@ -24,21 +24,21 @@ jobs:
         with:
           persist-credentials: false
       - name: Inspect runner
-        shell: bash
+        shell: pwsh
         run: |
-          set -euo pipefail
-          echo "runner=${RUNNER_NAME}"
-          echo "os=${RUNNER_OS}"
-          echo "arch=${RUNNER_ARCH}"
-          uname -a
+          $ErrorActionPreference = 'Stop'
+          Write-Host "runner=$env:RUNNER_NAME"
+          Write-Host "os=$env:RUNNER_OS"
+          Write-Host "arch=$env:RUNNER_ARCH"
           node --version
           npm --version
       - name: Verify repository access
-        shell: bash
+        shell: pwsh
         run: |
-          set -euo pipefail
-          test -f package.json
-          test -f sw.js
-          echo "runner-ok"
+          $ErrorActionPreference = 'Stop'
+          if (-not (Test-Path package.json)) { throw 'package.json missing' }
+          if (-not (Test-Path sw.js)) { throw 'sw.js missing' }
+          Write-Host 'runner-ok'
       - name: Emit diagnostic release marker
-        run: echo "runner-diagnostic-release=2026-09-18-ubuntu-22"
+        shell: pwsh
+        run: Write-Host 'runner-diagnostic-release=2026-09-21-windows'
