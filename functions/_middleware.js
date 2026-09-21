@@ -85,6 +85,7 @@ export async function onRequest(context) {
 
   const headAssets = [
     ['name="color-scheme"', '<meta name="color-scheme" content="dark light">'],
+    ['href="/globall-visual-refresh-20260921.css', VISUAL_REFRESH],
     ['href="/enterprise-shell-v2026.css', ENTERPRISE_SHELL],
     ['href="/browser-compat.css', `<link rel="stylesheet" href="/browser-compat.css?v=${VERSION}" data-gc-browser-compat="1">`],
     ['href="/safari-compat-elite.css', `<link rel="stylesheet" href="/safari-compat-elite.css?v=${VERSION}" data-gc-safari-elite="1">`],
