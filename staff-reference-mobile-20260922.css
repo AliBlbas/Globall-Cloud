@@ -91,7 +91,8 @@
   }
   .kpi::after,.metric::after{
     content:attr(data-icon)!important;position:absolute!important;top:24px!important;right:24px!important;width:54px!important;height:54px!important;border-radius:16px!important;
-    background:rgba(25,210,235,.11)!important;border:1px solid rgba(74,226,240,.08)!important
+    display:grid!important;place-items:center!important;background:rgba(25,210,235,.11)!important;border:1px solid rgba(74,226,240,.08)!important;
+    color:#6fe7f2!important;font:900 21px/1 system-ui,sans-serif!important
   }
   .kpi span,.metric span{display:block!important;width:70%!important;color:#91abc4!important;font-size:14px!important;line-height:1.6!important;font-weight:800!important}
   .kpi strong,.metric strong{
