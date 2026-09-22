@@ -110,7 +110,6 @@ Deno.serve(async (req:Request) => {
     const changedStatus = requestedStatus && requestedStatus !== current.data.status
     const changedLocation = text(p.current_location_label || p.location_label) && text(p.current_location_label || p.location_label) !== text(current.data.current_location_label)
     if (changedStatus) {
-      const stepDates = { ...(current.data.step_dates || {}) }
       const now = new Date().toISOString()
       const stepDates = { ...(current.data.step_dates || {}) }
       stepDates[requestedStatus] = now
