@@ -25,7 +25,24 @@ main{min-width:0}.topbar{position:sticky;top:12px;z-index:10;display:flex;align-
 <link rel="stylesheet" href="staff-os-premium.css?v=20260825-2"><link rel="stylesheet" href="staff-os-ultra.css?v=20260826-1"><link rel="stylesheet" href="staff-os-mobile-20260922.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script src="/staff-os-compat.js?v=20260831-4" defer></script>
-</head>
+<style id="staff-mobile-polish">
+@media (max-width:760px){
+  body{padding:5px 5px calc(82px + env(safe-area-inset-bottom,0px))!important}
+  .shell{width:100%!important}
+  .sidebar{padding:8px!important;border-radius:20px!important}
+  .brand-row{gap:8px!important}
+  .mobile-nav-toggle{border:1px solid rgba(139,234,246,.24)!important;background:linear-gradient(145deg,rgba(22,199,229,.16),rgba(255,255,255,.04))!important}
+  main{width:100%!important}
+  .topbar{display:grid!important;grid-template-columns:1fr!important;gap:7px!important}
+  .top-actions{display:grid!important;grid-template-columns:1fr auto auto!important}
+  .top-actions .status{min-width:0!important;overflow:hidden;text-overflow:ellipsis}
+  .view{padding:10px!important}
+  .section-head h2{font-size:20px!important}
+  .metrics-grid{grid-template-columns:repeat(2,1fr)!important}
+  .table-wrap{margin-inline:-2px!important}
+  .gc-staff-mobile-dock{bottom:calc(5px + env(safe-area-inset-bottom,0px))!important}
+}
+</style></head>
 <body>
 <div id="loginGate" class="gate hidden" data-auth-protection="Protected by Supabase Auth"><div class="gate-card"><div class="brand-row"><div class="logo">GC</div><div><div class="kicker">GLOBAL CLOUD</div><h1>Staff Command Center</h1></div></div><p>تەنها بۆ ستافی پشتڕاستکراوە. هەژماری staff ـەکەت لە Supabase Auth ـەوە بە شێوەی پارێزراو دەپشکنرێت.</p><div id="loginError" class="gate-error"></div><form id="loginForm"><input id="email" class="field" type="email" autocomplete="username" placeholder="ئیمەیڵ" required><input id="password" class="field" type="password" autocomplete="current-password" placeholder="وشەی نهێنی" required><button class="btn primary" type="submit">چوونەژوورەوە بۆ Staff OS →</button></form></div></div>
 <div id="app" class="hidden"><div class="shell"><aside class="sidebar"><div class="brand"><div class="brand-row"><div class="logo">GC</div><div><b>Globall Cloud</b><small>Staff Command Center</small></div><button class="mobile-nav-toggle" id="mobileNavToggle" type="button" aria-expanded="false" aria-label="کردنەوەی ناوبەری">☰</button></div></div><nav id="nav" class="nav" aria-label="Staff navigation"></nav><div class="side-foot"><strong id="staffName">—</strong><span id="staffRole">—</span><div id="staffBranch" class="branch">—</div></div></aside><main><header class="topbar"><div class="top-title"><strong id="pageTitle">Staff Command Center</strong><small id="pageSubtitle">Operational workspace</small></div><div class="top-actions"><span id="systemStatus" class="status" data-kind="loading">SYSTEM: CHECKING</span><button id="refreshBtn" class="btn tiny" type="button">نوێکردنەوە</button><button id="logoutBtn" class="btn danger tiny" type="button">چوونەدەرەوە</button></div></header><section id="view" class="view"></section></main></div></div>
