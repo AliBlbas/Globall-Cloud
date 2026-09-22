@@ -88,3 +88,11 @@ body:has(#gcApp) a{text-decoration:none;color:inherit}
 }
 @media(max-width:400px){.gc-actions{grid-template-columns:1fr}.gc-actions .gc-btn:first-child{grid-column:auto}.gc-footer-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+.gc-app .page{display:none}
+.gc-app .page.active{display:block!important}
+.gc-picker-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:5px}
+.gc-picker-grid button{min-height:44px;border:1px solid #d8e4eb;border-radius:12px;background:#f7fafc;color:#27445b;font-weight:900;font-size:10px;cursor:pointer}
+.gc-picker-grid button:hover,.gc-picker-grid button.active{background:#edf8fa;border-color:#78d3df;color:#087f95}
+.gc-request-success{margin-top:18px;padding:20px;border-radius:19px;background:#eef9f4;border:1px solid #caeadb;color:#155d43}
+@media(max-width:680px){.gc-picker-grid{grid-template-columns:1fr 1fr}.gc-form .gc-btn{width:100%}}
