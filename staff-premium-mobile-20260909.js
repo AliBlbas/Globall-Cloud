@@ -23,7 +23,7 @@
     found?.click();
   }
   function build(){
-    if(innerWidth>760||document.querySelector('.gc-staff-mobile-dock')) return;
+    if(innerWidth>760||document.querySelector('.gc-staff-mobile-dock,.gc-mobile-dock')) return;
     const dock=document.createElement('nav');dock.className='gc-staff-mobile-dock';dock.setAttribute('aria-label','کۆنترۆڵی خێرای ستاف');
     actions.forEach(([id,icon,label])=>{const b=document.createElement('button');b.type='button';b.dataset.staffDock=id;b.innerHTML=`<span aria-hidden="true">${icon}</span><span>${label}</span>`;b.addEventListener('click',()=>{clickTarget(id);sync(id)});dock.appendChild(b)});
     document.body.appendChild(dock);sync();
