@@ -469,3 +469,21 @@ body:has(.checkout-shell){
 @media(prefers-reduced-motion:reduce){
   *{scroll-behavior:auto!important;animation:none!important;transition:none!important}
 }
+
+/* ---------- STATUS / HEALTH PAGE ---------- */
+body:has(.gc-status){
+  background:radial-gradient(900px 500px at 85% -10%,rgba(8,168,191,.10),transparent 62%),#eef4f8!important;
+  color:#102238!important;
+}
+.gc-status{min-height:100vh}
+.gc-status-nav{background:rgba(255,255,255,.90)!important;border-bottom:1px solid #dbe5ec!important;backdrop-filter:blur(18px)}
+.gc-status-brand{color:#0d2439!important}
+.gc-status-back{color:#087f95!important}
+.gc-status-hero{padding:38px 18px!important}
+.gc-status-card,.gc-status-item{background:#fff!important;border:1px solid #dbe5ec!important;box-shadow:0 16px 42px rgba(10,35,58,.07)!important;border-radius:19px!important}
+.gc-status-eyebrow{color:#087f95!important}
+.gc-status-overall{border-radius:16px!important}
+.gc-status-pill{border-radius:999px!important}
+.gc-status-chip{background:#f1f7fa!important;border-color:#d8e4eb!important;color:#476175!important}
+.gc-status-footer{color:#6b8093!important;border-color:#dbe5ec!important}
+@media(max-width:620px){.gc-status-hero{padding:26px 12px!important}.gc-status-grid{grid-template-columns:1fr!important}.gc-status-card{padding:15px!important}}
