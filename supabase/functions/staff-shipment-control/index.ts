@@ -111,7 +111,10 @@ Deno.serve(async (req:Request) => {
     const changedLocation = text(p.current_location_label || p.location_label) && text(p.current_location_label || p.location_label) !== text(current.data.current_location_label)
     if (changedStatus) {
       const stepDates = { ...(current.data.step_dates || {}) }
-      stepDates[requestedStatus] = new Date().toISOString()
+      const now = new Date().toISOString()
+      const stepDates = { ...(current.data.step_dates || {}) }
+      stepDates[requestedStatus] = now
+      if (requestedStatus === 'in_transit' && !stepDates.departed) stepDates.departed = now
       patch.step_dates = stepDates
       patch.current_step_index = stepIndex(requestedStatus)
     }
