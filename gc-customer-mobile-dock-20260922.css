@@ -1,0 +1,10 @@
+/* Globall Cloud — Customer Mobile Dock 2026-09-22 */
+.gc-customer-mobile-dock{display:none}
+@media(max-width:700px){
+  .gc-customer-mobile-dock{position:fixed;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;left:8px;right:8px;bottom:8px;height:66px;padding:6px;z-index:80;border:1px solid rgba(140,220,236,.22);border-radius:20px;background:rgba(5,18,31,.95);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 18px 55px rgba(0,0,0,.34)}
+  .gc-customer-mobile-dock a,.gc-customer-mobile-dock button{min-width:0;border:0;background:transparent;color:#86a4b7;border-radius:14px;display:grid;place-items:center;gap:1px;padding:4px;font:900 8px Vazirmatn,system-ui,sans-serif;text-decoration:none}
+  .gc-customer-mobile-dock .dock-icon{font:900 15px JetBrains Mono,monospace;line-height:1}
+  .gc-customer-mobile-dock .active{background:rgba(88,229,239,.11);color:#70e8f0}
+  .gc-customer-mobile-dock button:active,.gc-customer-mobile-dock a:active{transform:scale(.96)}
+  body{padding-bottom:82px}
+}
