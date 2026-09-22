@@ -58,7 +58,7 @@ else ok(`${required.length} critical production files are present`)
 
 const extensions = new Set(['.js','.mjs','.ts','.tsx','.html','.css','.json','.toml','.yml','.yaml'])
 const files = walk(ROOT).filter((file) => extensions.has(file.slice(file.lastIndexOf('.'))))
-const staleProjectRef = 'swptmhhwhdtyrrfzetam'
+const staleProjectRef = ['swptm', 'hhwhdtyrrfzetam'].join('')
 let staleHits = 0
 let secretHits = 0
 const secretPatterns = [

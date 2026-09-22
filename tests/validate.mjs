@@ -71,7 +71,7 @@ console.log('Production project reference')
 const config = read('supabase/config.toml')
 if (!/^project_id\s*=\s*"ahslifnthiwfkmaswjno"$/m.test(config)) fail('supabase/config.toml is not pinned to production')
 const runtimeFiles = walk(ROOT, ['.js','.mjs','.ts','.tsx','.html','.css','.json','.toml'])
-const staleProjectRef = 'swptmhhwhdtyrrfzetam'
+const staleProjectRef = ['swptm', 'hhwhdtyrrfzetam'].join('')
 let staleHits = 0
 for (const f of runtimeFiles) {
   const text = readFileSync(f, 'utf8')

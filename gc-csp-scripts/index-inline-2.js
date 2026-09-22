@@ -580,7 +580,7 @@ async function getShipment(id){
   const val = await safeGet('shipment:'+id, true);
   return val ? JSON.parse(val) : null;
 }
-async function saveShipment(s){
+async function persistShipment(s){
   if(sb){ const {error} = await sb.from('shipments').upsert(shipmentToRow(s)); return {error}; }
   await safeSet('shipment:'+s.id, JSON.stringify(s), true);
   return {error:null};
@@ -2082,7 +2082,7 @@ async function bulkMarkDelivered(){
     s.currentStepIndex = 5;
     s.stepDates = s.stepDates || {};
     if(!s.stepDates.delivered) s.stepDates.delivered = new Date().toISOString();
-    await saveShipment(s);
+    await persistShipment(s);
     logActivity('update_status', id, 'status → گەیشت (bulk)');
   }
   showToast(`${ids.length} بار وەک گەیشتوو نیشانکرا.`, 'success');
@@ -2717,7 +2717,7 @@ async function uploadStepPhoto(shipmentId, fileList){
   }
   if(uploadedCount === 0){ showToast('هەڵەیەک ڕوویدا لە بارکردنی وێنەکان.', 'error'); return; }
 
-  const {error} = await saveShipment(s);
+  const {error} = await persistShipment(s);
   if(error){ showToast('وێنەکان بارکران بەڵام پاشەکەوت نەکران.', 'error'); return; }
   logActivity('upload_photo', shipmentId, stepKey+' ('+uploadedCount+' وێنە)');
   const idx = currentShipmentsCache.findIndex(x=>x.id===shipmentId);
@@ -2945,7 +2945,7 @@ async function editBatchCode(shipmentId){
   const val = window.prompt('کۆدی کڕیار لە کۆگا (GC-XXX):', s.batchCode || '');
   if(val === null) return;
   s.batchCode = val.trim() || null;
-  const {error} = await saveShipment(s);
+  const {error} = await persistShipment(s);
   if(error){ showToast('هەڵەیەک ڕوویدا.', 'error'); return; }
   logActivity('update_batch_code', shipmentId, s.batchCode||'(لابرا)');
   const idx = currentShipmentsCache.findIndex(x=>x.id===shipmentId);
@@ -3077,7 +3077,7 @@ async function submitNewShipment(){
     requester: {name, phone, email:'', notes:''},
     directoryCustomerId: await lookupDirectoryCustomerId(phone)
   };
-  const {error} = await saveShipment(newShipment);
+  const {error} = await persistShipment(newShipment);
   if(error){
     msgEl.textContent = 'هەڵەیەک ڕوویدا، بارکردنەکە پاشەکەوت نەکرا.';
     msgEl.style.display = 'block';
@@ -3230,7 +3230,7 @@ async function updateShipmentStep(id, stepIndex){
   s.currentStepIndex = stepIndex;
   s.stepDates = s.stepDates || {};
   if(!s.stepDates[STEP_KEYS[stepIndex]]) s.stepDates[STEP_KEYS[stepIndex]] = new Date().toISOString();
-  const {error} = await saveShipment(s);
+  const {error} = await persistShipment(s);
   if(error){ showToast('هەڵەیەک ڕوویدا، دۆخی بار پاشەکەوت نەکرا.', 'error'); return; }
   logActivity('update_status', id, 'status → '+(STEP_LABELS_KU[stepIndex]||stepIndex));
   const idx = currentShipmentsCache.findIndex(x=>x.id===id);
@@ -3309,7 +3309,7 @@ async function updateShipmentFinance(id){
   if(!s) return;
   s.totalAmount = Number(document.getElementById('tot-'+id).value) || 0;
   s.paidAmount = Number(document.getElementById('paid-'+id).value) || 0;
-  const {error} = await saveShipment(s);
+  const {error} = await persistShipment(s);
   if(error){ showToast('هەڵەیەک ڕوویدا، دارایی پاشەکەوت نەکرا.', 'error'); return; }
   logActivity('update_finance', id, 'total=$'+s.totalAmount+' paid=$'+s.paidAmount);
   const idx = currentShipmentsCache.findIndex(x=>x.id===id);

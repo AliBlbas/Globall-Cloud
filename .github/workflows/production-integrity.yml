@@ -51,7 +51,7 @@ jobs:
             --include='*.js' --include='*.mjs' --include='*.ts' --include='*.tsx' \
             --include='*.html' --include='*.css' --include='*.json' \
             --include='*.toml' --include='*.yml' --include='*.yaml' \
-            'swptmhhwhdtyrrfzetam' .; then
+            'swptm''hhwhdtyrrfzetam' .; then
             echo 'Forbidden stale Supabase project reference detected.'
             exit 1
           fi

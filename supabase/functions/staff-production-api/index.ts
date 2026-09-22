@@ -59,4 +59,48 @@ async function post(a:any,action:string,d:any){
  if(action==='password_change'){const password=txt(d.password);if(!password||password.length<8)throw Error('Password must be at least 8 characters');const r=await a.db.auth.admin.updateUserById(a.user.id,{password});if(r.error)throw r.error;await audit(a,'profile.password_change',a.staff.id,{});return{ok:true}}
  throw Error('Unsupported action')
 }
-Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req)});try{const a=await actor(req);if(req.method==='GET'){const u=new URL(req.url),k=txt(u.searchParams.get('kind'))||'health';if(k==='shipments')return json(req,{items:await getShipments(a)});if(k==='shipment'){const id=txt(u.searchParams.get('id'));if(!id)throw Error('Shipment id is required');return json(req,await (async()=>{const x=await a.db.from('shipments').select('*').eq('id',id).maybeSingle();if(x.error)throw x.error;if(!x.data)throw Error('Shipment not found');const[p,e,r,i,l]=await Promise.all([a.db.from('shipment_packages').select('*').eq('shipment_id',id).order('created_at',{ascending:false}),a.db.from('shipment_tracking_events').select('*').eq('shipment_id',id).order('created_at',{ascending:false}),a.db.from('warehouse_receipts').select('*').eq('shipment_id',id).order('received_at',{ascending:false}),a.db.from('shipment_insurance').select('*').eq('shipment_id',id).order('purchased_at',{ascending:false}),a.db.from('shipment_financial_ledger').select('*').eq('shipment_id',id).order('created_at',{ascending:false})]);for(const z of [p,e,r,i,l])if(z.error)throw z.error;return{shipment:x.data,packages:p.data||[],events:e.data||[],receipts:r.data||[],insurance:i.data||[],ledger:l.data||[]}})());if(k==='customers')return json(req,{items:await getCustomers(a)});if(k==='pricing')return json(req,await getPricing(a));if(k==='finance')return json(req,await getFinance(a));if(k==='alerts')return json(req,{items:await getAlerts(a)});if(k==='warehouses')return json(req,await getWarehouses(a));if(k==='activity')return json(req,{items:await getActivity(a)});if(k==='staff-chat')return json(req,await getChats(a,false));if(k==='customer-chat')return json(req,await getChats(a,true));if(k==='requests')return json(req,await getRequests(a));if(k==='analytics')return json(req,await getAnalytics(a));if(k==='profile')return json(req,{staff:a.staff});return json(req,{ok:true,service:'staff-production-api',role:a.role,time:new Date().toISOString()})}const b=await req.json().catch(()=>({}));return json(req,await post(a,txt(b.action)||'',b.data||{}))}catch(e){const m=e instanceof Error?e.message:String(e);const s=/Unauthorized/i.test(m)?401:/Forbidden|permission/i.test(m)?403:/required|Invalid|Unsupported|not found/i.test(m)?400:500;return json(req,{error:m},s)}})
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(req) });
+  try {
+    const a = await actor(req);
+    if (req.method === 'GET') {
+      const u = new URL(req.url);
+      const k = txt(u.searchParams.get('kind')) || 'health';
+      if (k === 'shipments') return json(req, { items: await getShipments(a) });
+      if (k === 'shipment') {
+        const id = txt(u.searchParams.get('id'));
+        if (!id) throw Error('Shipment id is required');
+        const x = await a.db.from('shipments').select('*').eq('id', id).maybeSingle();
+        if (x.error) throw x.error;
+        if (!x.data) throw Error('Shipment not found');
+        const [p, e, r, i, l] = await Promise.all([
+          a.db.from('shipment_packages').select('*').eq('shipment_id', id).order('created_at', { ascending: false }),
+          a.db.from('shipment_tracking_events').select('*').eq('shipment_id', id).order('created_at', { ascending: false }),
+          a.db.from('warehouse_receipts').select('*').eq('shipment_id', id).order('received_at', { ascending: false }),
+          a.db.from('shipment_insurance').select('*').eq('shipment_id', id).order('purchased_at', { ascending: false }),
+          a.db.from('shipment_financial_ledger').select('*').eq('shipment_id', id).order('created_at', { ascending: false }),
+        ]);
+        for (const z of [p, e, r, i, l]) if (z.error) throw z.error;
+        return json(req, { shipment: x.data, packages: p.data || [], events: e.data || [], receipts: r.data || [], insurance: i.data || [], ledger: l.data || [] });
+      }
+      if (k === 'customers') return json(req, { items: await getCustomers(a) });
+      if (k === 'pricing') return json(req, await getPricing(a));
+      if (k === 'finance') return json(req, await getFinance(a));
+      if (k === 'alerts') return json(req, { items: await getAlerts(a) });
+      if (k === 'warehouses') return json(req, await getWarehouses(a));
+      if (k === 'activity') return json(req, { items: await getActivity(a) });
+      if (k === 'staff-chat') return json(req, await getChats(a, false));
+      if (k === 'customer-chat') return json(req, await getChats(a, true));
+      if (k === 'requests') return json(req, await getRequests(a));
+      if (k === 'analytics') return json(req, await getAnalytics(a));
+      if (k === 'profile') return json(req, { staff: a.staff });
+      return json(req, { ok: true, service: 'staff-production-api', role: a.role, time: new Date().toISOString() });
+    }
+    const b = await req.json().catch(() => ({}));
+    return json(req, await post(a, txt(b.action) || '', b.data || {}));
+  } catch (e) {
+    const m = e instanceof Error ? e.message : String(e);
+    const s = /Unauthorized/i.test(m) ? 401 : /Forbidden|permission/i.test(m) ? 403 : /required|Invalid|Unsupported|not found/i.test(m) ? 400 : 500;
+    return json(req, { error: m }, s);
+  }
+});
