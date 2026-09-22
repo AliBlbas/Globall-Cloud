@@ -133,8 +133,26 @@
     </section>
 
     <section class="gc-container gc-page" id="page-request" hidden>
-      <span class="gc-eyebrow">REQUEST A QUOTE</span><h1>داواکردنی نرخ</h1><p>زانیاری بار بنێرە؛ تیمی Globall Cloud quote ـی ورد پشتڕاست دەکات.</p>
-      <form class="gc-form" data-gc-quote-form><label>ناوی تەواو<input name="name" required></label><label>ژمارەی مۆبایل<input name="phone" required></label><label>سەرچاوە<select name="origin"><option>چین</option><option>ئیمارات</option><option>ئەمریکا</option></select></label><label>جۆری گواستنەوە<select name="mode"><option>Air</option><option>Sea</option><option>Land</option></select></label><label>وردەکاری<textarea name="details" rows="5" required></textarea></label><button class="gc-btn gc-btn-primary" type="submit">ناردنی داواکاری</button></form>
+      <span class="gc-eyebrow">REQUEST A QUOTE</span><h1>داواکردنی نرخ</h1><p>زانیاریی بار بنووسە و Origin، Destination و جۆری گواستنەوە هەڵبژێرە.</p>
+      <div id="requestFormWrap">
+        <form id="requestForm" class="gc-form" data-gc-request-form>
+          <label>ناوی تەواو<input id="reqName" name="name" required autocomplete="name"></label>
+          <label>ژمارەی مۆبایل<input id="reqPhone" name="phone" required inputmode="tel" autocomplete="tel"></label>
+          <label>ئیمەیل<input id="reqEmail" name="email" type="email" autocomplete="email"></label>
+          <input id="reqOrigin" name="origin" type="hidden" value="guangzhou">
+          <div><label>سەرچاوە</label><div id="reqOriginPicker" class="gc-picker-grid"></div></div>
+          <input id="reqDestination" name="destination" type="hidden" value="erbil">
+          <div><label>مەبەست</label><div id="reqDestPicker" class="gc-picker-grid"></div></div>
+          <label>جۆری گواستنەوە<select id="reqType" name="type"><option value="air">Air · ئاسمانی</option><option value="sea">Sea · دەریایی</option><option value="land">Land · وشکانی</option></select></label>
+          <label>جۆری کاڵا / وردەکاری<input id="reqProduct" name="product" maxlength="160"></label>
+          <label>کێش (KG)<input id="reqWeight" name="weight" type="number" min="0.1" step="0.1" required inputmode="decimal"></label>
+          <div id="reqVolumeRow"><label>قەبارە (CBM)<input id="reqVolume" name="volume" type="number" min="0" step="0.001" inputmode="decimal"></label></div>
+          <label>تێبینی<textarea id="reqNotes" name="notes" rows="5" maxlength="2000"></textarea></label>
+          <input id="reqHoneypot" name="website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;left:-10000px;opacity:0">
+          <button id="reqSubmitBtn" class="gc-btn gc-btn-primary" type="submit">ناردنی داواکاری</button>
+        </form>
+      </div>
+      <div id="requestSuccessWrap" hidden class="gc-request-success"></div>
     </section>
 
     <section class="gc-container gc-page" id="page-portal" hidden><div class="gc-portal-panel"><span class="gc-eyebrow" style="color:#75e1eb">CUSTOMER PORTAL</span><h1>هەژماری کڕیار</h1><p>بارەکان، invoice، payment، documents و notifications ـەکانت لە هەژماری تایبەتی خۆتدا ببینە.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:18px"><a class="gc-btn" style="background:#fff;color:#0b2a3b" href="/dashboard">کردنەوەی داشبۆرد</a><a class="gc-btn" style="border-color:rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:#fff" href="/request">داواکردنی نرخ</a></div></div></section>
@@ -145,6 +163,22 @@
       <form class="gc-form" data-gc-contact-form><label>ناو<input name="name" required></label><label>ئیمەیل<input type="email" name="email" required></label><label>پەیام<textarea name="message" rows="5" required></textarea></label><button class="gc-btn gc-btn-primary" type="submit">ناردنی پەیام</button></form>
     </section>
   </main>
+    <div id="gc-runtime-compat" aria-hidden="true" style="display:none!important">
+      <div id="homeServicesGrid"></div>
+      <div id="businessHubGrid"></div>
+      <div id="dashMiniGrid"></div>
+      <div id="corridorStrip"></div>
+      <div id="warehouseCardsGrid"></div>
+      <div id="opsMetrics"></div>
+      <div id="opsCards"></div>
+      <div id="howGrid"></div>
+      <div id="whyGrid"></div>
+      <div id="aboutValuesGrid"></div>
+      <div id="footerServicesList"></div>
+      <div id="privacyBody"></div>
+      <div id="termsBody"></div>
+      <div id="testimonialsGrid"></div>
+    </div>
 
   <footer class="gc-footer"><div class="gc-container gc-footer-grid"><div><b>Globall Cloud</b><p style="font-size:11px;line-height:1.9">لۆجستیکی دیجیتاڵ بۆ عێراق. Air · Sea · Land</p></div><div><b>Customer</b><a href="/dashboard">هەژمار</a><a href="/track">Tracking</a><a href="/request">Quote</a></div><div><b>Staff</b><a href="/staff">Staff Console</a><a href="/staff">Super Admin</a><a href="/staff">Operations</a></div><div><b>Support</b><a href="https://wa.me/9647507577137">WhatsApp</a><a href="mailto:tamanblbas271@gmail.com">Email</a></div></div><div class="gc-container gc-footer-bottom"><span>© 2026 Globall Cloud</span><span>Customer · Staff · Operations</span></div></footer>
 
