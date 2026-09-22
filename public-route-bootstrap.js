@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const RELEASE = '20260915-2';
+  const RELEASE = '20260922-2';
   const path = window.location.pathname.replace(/\/$/, '') || '/';
   const pathRoutes = {
     '/quote': 'request',
@@ -38,7 +38,8 @@
     document.head.appendChild(link);
   };
 
-  // Critical public/mobile presentation must not wait for the primary renderer.
+  // Unified visual layer: public pages, tracking, quote and routed workspaces.
+  addStylesheet(`/gc-unified-design-v2-20260922.css?v=${RELEASE}`);
   addStylesheet(`/site-polish.css?v=${RELEASE}`);
   addStylesheet(`/production-mobile-hotfix.css?v=${RELEASE}`);
   addStylesheet(`/production-mobile-ux-v2026.css?v=${RELEASE}`);
