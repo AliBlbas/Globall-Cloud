@@ -14,8 +14,8 @@ concurrency:
 
 jobs:
   deploy:
-    # Pin the deployment job to the stable Ubuntu 22.04 runner. The previous
-    # ubuntu-latest/24.04 runner attempts failed before application steps ran.
+    # Use Ubuntu 22.04 because previous ubuntu-latest/24.04 runner attempts
+    # failed before application steps ran. Keep this runner pin explicit.
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     name: Deploy frontend and Pages Functions to Cloudflare
