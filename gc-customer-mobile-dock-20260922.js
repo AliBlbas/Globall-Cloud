@@ -6,7 +6,7 @@
     if(key==='shipments'){document.getElementById('shipments')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
     if(key==='tracking'){document.getElementById('trackBtn')?.click();return;}
     if(key==='finance'){document.getElementById('billedKpi')?.scrollIntoView({behavior:'smooth',block:'center'});return;}
-    if(key==='account'){document.getElementById('loginBtn')?.click();return;}
+    if(key==='account'){const s=document.getElementById('gcAccountSettings');if(s){s.scrollIntoView({behavior:'smooth',block:'start'});return;}document.getElementById('loginBtn')?.click();return;}
   };
   const sync=()=>dock?.querySelectorAll('[data-dock]').forEach(b=>{
     b.classList.toggle('active',b.dataset.dock==='shipments' && !!document.querySelector('#shipments'));
