@@ -1,12 +1,19 @@
 (() => {
   const mountFinalStyle = () => {
     const href = '/globall-redesign-20260922.css?v=2';
+    const premiumHref = '/globall-premium-logistics-2026.css?v=1';
     [...document.querySelectorAll('link[rel="stylesheet"]')].filter(l => l.href.includes('/globall-redesign-20260922.css')).forEach(l => l.remove());
+    [...document.querySelectorAll('link[rel="stylesheet"]')].filter(l => l.href.includes('/globall-premium-logistics-2026.css')).forEach(l => l.remove());
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = href;
     link.dataset.gcFinalRedesign = '1';
     document.head.appendChild(link);
+    const premium = document.createElement('link');
+    premium.rel = 'stylesheet';
+    premium.href = premiumHref;
+    premium.dataset.gcPremiumLogistics = '1';
+    document.head.appendChild(premium);
   };
 
   const syncPages = (id) => {
