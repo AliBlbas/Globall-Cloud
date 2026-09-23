@@ -83,6 +83,24 @@ Deno.serve(async (req) => {
         return json(req, {ok: true, profile: updatedCustomer, email_confirmation_required: Boolean(email && email !== String(user.email || '').toLowerCase())})
       }
 
+      if (action === 'update_notification_preferences') {
+        const allowed = (value: unknown) => value === true
+        const quietStart = text(data.quiet_hours_start, 8) || null
+        const quietEnd = text(data.quiet_hours_end, 8) || null
+        const {data:preferences, error} = await service.from('customer_notification_preferences').upsert({
+          customer_user_id: user.id,
+          email_enabled: allowed(data.email_enabled),
+          whatsapp_enabled: allowed(data.whatsapp_enabled),
+          sms_enabled: allowed(data.sms_enabled),
+          in_app_enabled: data.in_app_enabled === undefined ? true : allowed(data.in_app_enabled),
+          quiet_hours_start: quietStart,
+          quiet_hours_end: quietEnd,
+          updated_at: new Date().toISOString(),
+        }, {onConflict:'customer_user_id'}).select('*').single()
+        if (error) throw error
+        return json(req, {ok: true, preferences})
+      }
+
       if (action === 'mark_notification_read') {
         const id = text(data.id, 100)
         if (!id) return json(req, {error: 'Notification id is required.'}, 400)
@@ -142,8 +160,9 @@ Deno.serve(async (req) => {
     const shipments = shipmentRows || []
     const shipmentIds = shipments.map((item) => item.id).filter(Boolean)
 
-    const [notifications, quotes, documents, pods, invoices, payments, events, ledger, receipts, packages] = await Promise.all([
+    const [notifications, quotes, documents, pods, invoices, payments, events, ledger, receipts, packages, preferences] = await Promise.all([
       service.from('customer_notifications').select('id,title,body,read_at,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(12),
+      service.from('customer_notification_preferences').select('email_enabled,whatsapp_enabled,sms_enabled,in_app_enabled,quiet_hours_start,quiet_hours_end,updated_at').eq('customer_user_id', user.id).maybeSingle(),
       service.from('quote_requests').select('id,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,status,quoted_amount,currency,valid_until,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(12),
       service.from('shipment_documents').select('id,shipment_id,document_type,title,file_url,is_public,document_status,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(12),
       shipmentIds.length ? service.from('delivery_proofs').select('shipment_id,delivered_at,receiver_name,note,photo_urls,latitude,longitude,created_at').in('shipment_id', shipmentIds).order('created_at', {ascending: false}).limit(12) : Promise.resolve({data: [], error: null}),
@@ -154,7 +173,7 @@ Deno.serve(async (req) => {
       service.from('warehouse_receipts').select('id,batch_code,location,stage,photo_taken_at,gc_code_detected,verification_status,photos,shipment_id,received_at,created_at').eq('directory_customer_id', customer.id).order('received_at', {ascending: false}).limit(30),
       shipmentIds.length ? service.from('shipment_packages').select('id,shipment_id,package_code,barcode,package_type,description,weight_kg,length_cm,width_cm,height_cm,declared_value,declared_currency,current_hub,status,created_at,updated_at').in('shipment_id', shipmentIds).order('created_at', {ascending: false}).limit(100) : Promise.resolve({data: [], error: null}),
     ])
-    const results = [notifications, quotes, documents, pods, invoices, payments, events, ledger, receipts, packages]
+    const results = [notifications, quotes, documents, pods, invoices, payments, events, ledger, receipts, packages, preferences]
     const failed = results.find((result) => result?.error)
     if (failed?.error) throw failed.error
 
@@ -184,6 +203,7 @@ Deno.serve(async (req) => {
       ledger: ledger.data || [],
       receipts: receipts.data || [],
       packages: packages.data || [],
+      notification_preferences: preferences.data || {email_enabled:false,whatsapp_enabled:false,sms_enabled:false,in_app_enabled:true},
     })
   } catch (error) {
     console.error('customer-self error', error instanceof Error ? error.message : String(error))
