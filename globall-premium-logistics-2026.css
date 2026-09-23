@@ -1,0 +1,28 @@
+/* Globall Cloud — Premium Logistics Command Layer 2026 */
+:root{--px:#071a2c;--pc:#0aa8be;--pg:#45d9b0;--pgold:#e4bd63;--pline:rgba(10,43,65,.12)}
+body:has(#gcApp){background:radial-gradient(800px 500px at 8% 0%,rgba(10,168,190,.09),transparent 65%),radial-gradient(700px 420px at 92% 12%,rgba(228,189,99,.07),transparent 65%),#f3f7f9}
+.gc-nav{box-shadow:0 12px 40px rgba(3,25,42,.08)!important}
+.gc-brand img{outline:1px solid rgba(10,168,190,.2);box-shadow:0 0 0 6px rgba(10,168,190,.04),0 12px 30px rgba(8,67,89,.16)}
+.gc-hero-rebuild{position:relative;padding-top:78px}
+.gc-hero-rebuild:before{content:"";position:absolute;inset:0 0 auto;height:520px;pointer-events:none;background-image:linear-gradient(rgba(7,28,45,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(7,28,45,.035) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,#000,transparent 90%)}
+.gc-hero-copy,.gc-hero-visual{position:relative;z-index:1}
+.gc-hero-copy h1{text-wrap:balance;text-shadow:0 2px 20px rgba(8,38,58,.05)}
+.gc-hero-copy h1 em{background:linear-gradient(90deg,#078ba3,#12b8c7 55%,#079b87);-webkit-background-clip:text;background-clip:text;color:transparent}
+.gc-actions .gc-btn-primary{box-shadow:0 16px 35px rgba(8,169,192,.25),inset 0 1px rgba(255,255,255,.22)}
+.gc-hero-visual{border:1px solid rgba(130,225,237,.12);box-shadow:0 35px 100px rgba(4,27,45,.28),inset 0 1px rgba(255,255,255,.08)}
+.gc-hero-visual:before{content:"";position:absolute;inset:0;background:radial-gradient(220px 180px at 20% 82%,rgba(75,218,181,.11),transparent 70%),linear-gradient(120deg,transparent 0 44%,rgba(255,255,255,.035) 45%,transparent 46% 100%);pointer-events:none}
+.gc-route-card{box-shadow:inset 0 1px rgba(255,255,255,.08),0 25px 60px rgba(0,0,0,.18)}
+.gc-route-stop{transition:transform .2s ease,border-color .2s ease,background .2s ease}.gc-route-stop:hover{transform:translateX(-3px);border-color:rgba(104,220,231,.3);background:rgba(255,255,255,.06)}
+.gc-route-stop em{font-family:JetBrains Mono,monospace;letter-spacing:.5px}
+.gc-live-status i{animation:gcPulse 1.8s infinite}
+@keyframes gcPulse{0%,100%{box-shadow:0 0 0 4px rgba(90,221,159,.08)}50%{box-shadow:0 0 0 9px rgba(90,221,159,.02)}}
+.gc-trust-card{position:relative;overflow:hidden;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}.gc-trust-card:after{content:"";position:absolute;inset:auto -30px -40px auto;width:90px;height:90px;border-radius:50%;background:rgba(10,168,190,.06)}.gc-trust-card:hover{transform:translateY(-3px);border-color:rgba(10,168,190,.25);box-shadow:0 18px 38px rgba(10,43,65,.09)}
+.gc-service,.gc-platform-card,.gc-entry-card{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}.gc-service:hover,.gc-platform-card:hover{transform:translateY(-5px);border-color:rgba(10,168,190,.24);box-shadow:0 26px 70px rgba(7,31,49,.12)}
+.gc-service b .gc-icon-box,.gc-platform-card>.gc-icon-box{box-shadow:inset 0 0 0 1px rgba(10,168,190,.08),0 8px 20px rgba(10,168,190,.06)}
+.gc-entry-card{box-shadow:0 26px 70px rgba(5,30,49,.16)}.gc-entry-card:hover{transform:translateY(-4px);box-shadow:0 34px 90px rgba(5,30,49,.22)}
+.gc-track-panel{position:relative;overflow:hidden}.gc-track-panel:after{content:"TRACKING CORE";position:absolute;right:24px;bottom:12px;color:rgba(143,213,225,.1);font:900 42px JetBrains Mono;letter-spacing:-2px;pointer-events:none}.gc-track-form{position:relative;z-index:1}
+.gc-track-form input{box-shadow:inset 0 1px rgba(255,255,255,.03)}
+.gc-section-head h2{font-weight:900}
+.gc-footer{box-shadow:inset 0 1px rgba(255,255,255,.04)}
+@media(max-width:680px){.gc-hero-rebuild{padding-top:44px}.gc-hero-copy h1{font-size:42px}.gc-actions{grid-template-columns:1fr}.gc-actions .gc-btn{width:100%}.gc-track-panel:after{font-size:24px}.gc-hero-visual{min-height:390px}.gc-route-card{inset:62px 12px 12px}.gc-route-stop{padding:12px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
