@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     const service = createClient(url, serviceKey, {auth: {persistSession: false, autoRefreshToken: false, detectSessionInUrl: false}})
     const {data: customer, error: customerError} = await service
       .from('customer_directory')
-      .select('id,code,gc_code,name,email,phone,phone2,whatsapp_phone,whatsapp_group_name,purchase_first_name,purchase_last_name,auth_user_id,is_active')
+      .select('id,code,gc_code,name,email,phone,phone2,whatsapp_phone,whatsapp_group_name,purchase_first_name,purchase_last_name,preferred_language,auth_user_id,is_active')
       .eq('auth_user_id', user.id)
       .maybeSingle()
     if (customerError) throw customerError
@@ -53,6 +53,35 @@ Deno.serve(async (req) => {
       try { body = await req.json() } catch { return json(req, {error: 'Invalid JSON body.'}, 400) }
       const action = text(body.action, 60)
       const data = (body.data && typeof body.data === 'object') ? body.data as Record<string, unknown> : {}
+
+      if (action === 'update_profile') {
+        const name = text(data.full_name, 160)
+        const phone = text(data.phone, 40)
+        const email = text(data.email, 180).toLowerCase()
+        const language = text(data.language, 8)
+        const avatarUrl = text(data.avatar_url, 1000)
+        if (name.length < 2) return json(req, {error: 'Full name is required.'}, 400)
+        if (language && !['ckb', 'ar', 'en'].includes(language)) return json(req, {error: 'Unsupported language.'}, 400)
+        const authPatch: Record<string, unknown> = { data: { ...user.user_metadata, full_name: name, avatar_url: avatarUrl || user.user_metadata?.avatar_url || null, preferred_language: language || customer.preferred_language || 'ckb' } }
+        if (email && email !== String(user.email || '').toLowerCase()) authPatch.email = email
+        if (phone && phone !== String(user.phone || '')) authPatch.phone = phone
+        const {error: authUpdateError} = await authClient.auth.updateUser(authPatch)
+        if (authUpdateError) return json(req, {error: authUpdateError.message || 'Profile authentication data could not be updated.'}, 400)
+        const {data: updatedCustomer, error: customerUpdateError} = await service
+          .from('customer_directory')
+          .update({
+            name,
+            phone: phone || null,
+            email: email || null,
+            preferred_language: language || customer.preferred_language || 'ckb',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', customer.id)
+          .select('id,code,gc_code,name,email,phone,preferred_language')
+          .single()
+        if (customerUpdateError) throw customerUpdateError
+        return json(req, {ok: true, profile: updatedCustomer, email_confirmation_required: Boolean(email && email !== String(user.email || '').toLowerCase())})
+      }
 
       if (action === 'mark_notification_read') {
         const id = text(data.id, 100)
@@ -141,6 +170,8 @@ Deno.serve(async (req) => {
         whatsapp_group_name: customer.whatsapp_group_name || (customer.gc_code ? String(customer.gc_code).replace(/^GC-/,'Gc-') : null),
         purchase_first_name: customer.purchase_first_name || (customer.gc_code ? String(customer.gc_code).replace(/^GC-/,'Gc-') : null),
         purchase_last_name: customer.purchase_last_name || customer.name || user.user_metadata?.full_name || user.email || 'Customer',
+        preferred_language: customer.preferred_language || user.user_metadata?.preferred_language || 'ckb',
+        avatar_url: user.user_metadata?.avatar_url || null,
       },
       shipments,
       notifications: notifications.data || [],
