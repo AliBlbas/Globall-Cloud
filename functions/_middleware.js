@@ -4,7 +4,7 @@
  * cache policy. Application logic belongs in the page scripts themselves.
  */
 const HTML_ACCEPT = 'text/html';
-const VERSION = '20260919-2';
+const VERSION = '20260923-1';
 
 const VISUAL_REFRESH = `<link rel="stylesheet" href="/globall-visual-refresh-20260921.css?v=20260921-1" data-gc-visual-refresh="20260921-1">`;
 const ENTERPRISE_SHELL = `<link rel="stylesheet" href="/enterprise-shell-v2026.css?v=${VERSION}" data-gc-enterprise-shell="1">`;
@@ -47,34 +47,19 @@ export async function onRequest(context) {
   const accept = context.request.headers.get('accept') || '';
 
   if (requestPath === '/health') {
-    return new Response(JSON.stringify({
-      ok: true,
-      service: 'globall-cloud',
-      cloudflare: 'pages',
-      timestamp: new Date().toISOString(),
-    }), { status: 200, headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' } });
+    return new Response(JSON.stringify({ ok: true, service: 'globall-cloud', cloudflare: 'pages', timestamp: new Date().toISOString() }), { status: 200, headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' } });
   }
 
   if (requestPath === '/release.json') {
-    return new Response(JSON.stringify({
-      service: 'globall-cloud',
-      branch: context.env?.CF_PAGES_BRANCH || 'main',
-      commit: context.env?.CF_PAGES_COMMIT_SHA || null,
-      generated_at: new Date().toISOString(),
-    }), { status: 200, headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' } });
+    return new Response(JSON.stringify({ service: 'globall-cloud', branch: context.env?.CF_PAGES_BRANCH || 'main', commit: context.env?.CF_PAGES_COMMIT_SHA || null, generated_at: new Date().toISOString() }), { status: 200, headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' } });
   }
 
   if (requestPath === '/api/health') {
-    return new Response(JSON.stringify({
-      ok: true,
-      service: 'globall-cloud',
-      edge: 'ok',
-      timestamp: new Date().toISOString(),
-    }), { status: 200, headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' } });
+    return new Response(JSON.stringify({ ok: true, service: 'globall-cloud', edge: 'ok', timestamp: new Date().toISOString() }), { status: 200, headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' } });
   }
   if (!accept.toLowerCase().includes(HTML_ACCEPT)) return context.next();
 
-  const path = new URL(context.request.url).pathname;
+  const path = requestUrl.pathname;
   const response = await context.next();
   const contentType = response.headers.get('content-type') || '';
   if (!contentType.toLowerCase().includes(HTML_ACCEPT)) return response;
@@ -104,28 +89,22 @@ export async function onRequest(context) {
 
   if (STAFF_V5.test(path)) {
     const headers = applySecurityHeaders(new Headers(response.headers));
-    headers.delete('content-encoding');
-    headers.delete('content-length');
-    headers.delete('etag');
+    headers.delete('content-encoding'); headers.delete('content-length'); headers.delete('etag');
     headers.set('cache-control', 'no-store, max-age=0, must-revalidate');
     headers.set('content-type', 'text/html; charset=UTF-8');
     return new Response(html, { status: response.status, statusText: response.statusText, headers });
   }
 
-  if (OPERATIONAL_PAGE.test(path)) {
-    html = addHeadAsset(html, 'src="/runtime-guard.js', `<script src="/runtime-guard.js?v=${VERSION}" defer data-gc-runtime-guard="1"></script>`);
-  }
+  if (OPERATIONAL_PAGE.test(path)) html = addHeadAsset(html, 'src="/runtime-guard.js', `<script src="/runtime-guard.js?v=${VERSION}" defer data-gc-runtime-guard="1"></script>`);
   const REAL_DESIGN_PAGE = !OPERATIONAL_PAGE.test(path) || /^\/(?:customer-portal|tracking|tracking-integration)(?:\.html)?\/?$/i.test(path);
-  if (REAL_DESIGN_PAGE) {
-    html = addHeadAsset(html, 'href="/globall-realistic-design-20260919.css', `<link rel="stylesheet" href="/globall-realistic-design-20260919.css?v=${VERSION}" data-gc-realistic-design="1">`);
-  }
-
+  if (REAL_DESIGN_PAGE) html = addHeadAsset(html, 'href="/globall-realistic-design-20260919.css', `<link rel="stylesheet" href="/globall-realistic-design-20260919.css?v=${VERSION}" data-gc-realistic-design="1">`);
 
   if (path === '/' || path === '/index.html') {
     html = addHeadAsset(html, 'src="/staff-auth-runtime-fix.js', `<script src="/staff-auth-runtime-fix.js?v=${VERSION}" defer data-gc-staff-auth-runtime="1"></script>`);
     html = addBodyAsset(html, 'src="/gc-csp-scripts/logistics-pricing-ui.js', `<script src="/gc-csp-scripts/logistics-pricing-ui.js?v=${VERSION}" defer data-gc-logistics-pricing-ui="1"></script>`);
     html = addBodyAsset(html, 'src="/site-navigation-20260909.js', `<script src="/site-navigation-20260909.js?v=${VERSION}" defer data-gc-site-navigation="1"></script>`);
     html = addBodyAsset(html, 'src="/public-core-recovery.js', `<script src="/public-core-recovery.js?v=${VERSION}" defer data-gc-public-core-recovery="1"></script>`);
+    html = addBodyAsset(html, 'src="/public-onboarding-20260923.js', `<script src="/public-onboarding-20260923.js?v=${VERSION}" defer data-gc-public-onboarding="1"></script>`);
   }
 
   if (STAFF_V5.test(path)) {
@@ -161,27 +140,17 @@ export async function onRequest(context) {
     html = addBodyAsset(html, 'src="/customer-debt-chat.js', `<script src="/customer-debt-chat.js?v=${VERSION}" defer data-gc-customer-debt-chat="1"></script>`);
   }
 
-  if (path === '/super-admin-command-center.html') {
-    html = addHeadAsset(html, 'src="/super-admin-live-control-v2.js', `<script src="/super-admin-live-control-v2.js?v=${VERSION}" defer data-gc-superadmin-live-control="1"></script>`);
-  }
-
+  if (path === '/super-admin-command-center.html') html = addHeadAsset(html, 'src="/super-admin-live-control-v2.js', `<script src="/super-admin-live-control-v2.js?v=${VERSION}" defer data-gc-superadmin-live-control="1"></script>`);
   if (path === '/superadmin.html') {
     html = addHeadAsset(html, 'href="/superadmin-server.css', `<link rel="stylesheet" href="/superadmin-server.css?v=${VERSION}" data-gc-superadmin-server-css="1">`);
     html = addBodyAsset(html, 'src="/superadmin-enhancements.js', `<script src="/superadmin-enhancements.js?v=${VERSION}" defer data-gc-superadmin-enhancements="1"></script>`);
     html = addBodyAsset(html, 'src="/superadmin-server.js', `<script src="/superadmin-server.js?v=${VERSION}" defer data-gc-superadmin-server="1"></script>`);
   }
-
-  if (path === '/operations-control-v2.html') {
-    html = addBodyAsset(html, 'src="/operations-events.js', `<script src="/operations-events.js?v=${VERSION}" defer data-gc-operations-events="1"></script>`);
-  }
-  if (path === '/operations-command-center.html') {
-    html = addBodyAsset(html, 'src="/operations-exception-engine.js', `<script src="/operations-exception-engine.js?v=${VERSION}" defer data-gc-exception-engine="1"></script>`);
-  }
+  if (path === '/operations-control-v2.html') html = addBodyAsset(html, 'src="/operations-events.js', `<script src="/operations-events.js?v=${VERSION}" defer data-gc-operations-events="1"></script>`);
+  if (path === '/operations-command-center.html') html = addBodyAsset(html, 'src="/operations-exception-engine.js', `<script src="/operations-exception-engine.js?v=${VERSION}" defer data-gc-exception-engine="1"></script>`);
 
   const headers = applySecurityHeaders(new Headers(response.headers));
-  headers.delete('content-encoding');
-  headers.delete('content-length');
-  headers.delete('etag');
+  headers.delete('content-encoding'); headers.delete('content-length'); headers.delete('etag');
   headers.set('content-type', 'text/html; charset=UTF-8');
   return new Response(html, { status: response.status, statusText: response.statusText, headers });
 }
