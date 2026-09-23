@@ -1,45 +1,19 @@
 <!doctype html>
-<html lang="ku" dir="rtl">
+<html lang="ckb" dir="rtl">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="کڕینی کاڵا لە SHEIN و گەیاندنی بۆ هەولێر بە Global Cloud">
-  <title>Shop from SHEIN | Global Cloud</title>
-  <link rel="stylesheet" href="/assets/css/shop.css">
+  <meta name="robots" content="noindex,follow">
+  <meta http-equiv="refresh" content="0;url=/request">
+  <title>Globall Cloud — Logistics</title>
+  <link rel="canonical" href="/request">
 </head>
 <body>
-  <main class="container" style="max-width:760px">
-    <h1>🛍️ Shop from SHEIN</h1>
-    <p>لینکی کاڵاکە دابنێ و نرخی کۆتایی بۆ هەولێر ببینە.</p>
-    <section class="card">
-      <div class="form-row">
-        <label for="productUrl">بەستەری کاڵا لە SHEIN</label>
-        <input id="productUrl" type="url" autocomplete="url" placeholder="https://www.shein.com/...">
-      </div>
-      <div class="form-grid">
-        <div class="form-row">
-          <label for="priceUsd">نرخی کاڵا ($)</label>
-          <input id="priceUsd" type="number" min="0.01" step="0.01" inputmode="decimal">
-        </div>
-        <div class="form-row">
-          <label for="shippingUsd">گەیاندن ($)</label>
-          <input id="shippingUsd" type="number" min="0" step="0.01" value="3" inputmode="decimal">
-        </div>
-      </div>
-      <div class="form-row">
-        <label for="quantity">ژمارە</label>
-        <input id="quantity" type="number" min="1" max="100" step="1" value="1" inputmode="numeric">
-      </div>
-      <div id="quoteBox" class="quote-box" hidden>
-        <div class="quote-row"><span>کۆی USD</span><strong id="totalUsd">-</strong></div>
-        <div class="quote-row"><span>نرخی دۆلار</span><strong id="exRate">-</strong></div>
-        <div class="quote-row"><span>خزمەتگوزاری Global Cloud (<span id="marginText">-</span>%)</span><strong id="marginAmount">-</strong></div>
-        <div class="quote-row quote-final"><span>نرخی کۆتایی</span><strong id="finalIqd">0 IQD</strong></div>
-      </div>
-      <div class="page-note">نرخی کۆتایی لە backend ـی Global Cloud پشتڕاست دەکرێتەوە پێش دروستکردنی order.</div>
-      <button id="orderBtn" disabled style="width:100%">Order Now</button>
-    </section>
+  <main style="max-width:760px;margin:4rem auto;padding:2rem;font-family:system-ui,sans-serif;text-align:center">
+    <h1>Globall Cloud Logistics</h1>
+    <p>خزمەتگوزاری کڕین و فرۆشتنی کاڵا لەم پلاتفۆرمەدا وەستێنراوە. Globall Cloud ئێستا پلاتفۆرمێکی لۆجستیکییە بۆ گواستنەوەی Air، Sea و Land، کۆگا، tracking و گەیاندن.</p>
+    <p><a href="/request">داواکردنی نرخ بۆ گواستنەوەی بار →</a></p>
   </main>
-  <script type="module" src="/assets/js/shopping/shein.js"></script>
+  <script>location.replace('/request' + location.search + location.hash);</script>
 </body>
 </html>
