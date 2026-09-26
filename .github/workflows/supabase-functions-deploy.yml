@@ -2,14 +2,14 @@ name: Supabase Source Consistency
 
 on:
   push:
-    branches: [main]
+    branches: [Product]
     paths:
       - 'supabase/functions/**'
       - 'supabase/config.toml'
       - 'scripts/normalize-supabase-secrets.mjs'
       - '.github/workflows/supabase-functions-deploy.yml'
   pull_request:
-    branches: [main]
+    branches: [Product]
     paths:
       - 'supabase/functions/**'
       - 'supabase/config.toml'
