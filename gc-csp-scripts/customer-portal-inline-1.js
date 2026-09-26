@@ -14,7 +14,12 @@ const customerApi = async ({ method = 'GET', body } = {}) => {
     cache: 'no-store',
   });
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.error || `Customer API ${response.status}`);
+  if (!response.ok) {
+    const error = new Error(payload.error || `Customer API ${response.status}`);
+    error.status = response.status;
+    error.payload = payload;
+    throw error;
+  }
   return payload;
 };
 const $ = (id) => document.getElementById(id);
@@ -23,6 +28,45 @@ const setHtml = (id, html) => { const element = $(id); if (element) element.inne
 const money = (amount, currency = 'USD') => `${Number(amount || 0).toLocaleString('en-US')} ${esc(currency)}`;
 const date = (value) => value ? new Date(value).toLocaleString() : '—';
 const showMessage = (message, kind = 'muted') => { $('quoteMessage').textContent = message; $('quoteMessage').className = kind; };
+
+const renderClaimPrompt = () => {
+  const status = $('portalStatus');
+  if (!status) return;
+  status.className = 'portal-status';
+  status.innerHTML = `
+    <div>
+      <strong>هەژماری کڕیاری خۆت پەیوەست بکە</strong>
+      <span>ئەم هەژمارەی login ـە هێشتا بە customer profile ـەکەت نەبەستراوە. GC Code و ژمارەی مۆبایلەکەت بنووسە بۆ پەیوەستکردنی هەژمارەکەت بە زانیارییەکانی کۆمپانیا.</span>
+      <div style="display:grid;gap:10px;margin-top:14px;max-width:520px">
+        <input id="gcClaimCode" class="field" inputmode="text" autocomplete="off" placeholder="GC-1008" aria-label="GC Code">
+        <input id="gcClaimPhone" class="field" inputmode="tel" autocomplete="tel" placeholder="+964 750 000 0000" aria-label="ژمارەی مۆبایل">
+        <button id="gcClaimBtn" class="btn primary" type="button">پەیوەستکردنی هەژمار</button>
+        <div id="gcClaimMsg" class="muted" role="status" aria-live="polite"></div>
+      </div>
+    </div>`;
+  $('gcClaimBtn')?.addEventListener('click', claimExistingCustomer);
+};
+
+const claimExistingCustomer = async () => {
+  const code = $('gcClaimCode')?.value.trim() || '';
+  const phone = $('gcClaimPhone')?.value.trim() || '';
+  const button = $('gcClaimBtn');
+  const msg = $('gcClaimMsg');
+  if (!code || !phone) {
+    if (msg) msg.textContent = 'GC Code و ژمارەی مۆبایل پڕبکەرەوە.';
+    return;
+  }
+  if (button) { button.disabled = true; button.textContent = 'پشکنین دەکرێت…'; }
+  if (msg) msg.textContent = '';
+  try {
+    await customerApi({ method: 'POST', body: { action: 'claim_account', data: { gc_code: code, phone } } });
+    if (msg) msg.textContent = 'هەژمارەکەت بە سەرکەوتوویی پەیوەست کرا. داتا بارکراوە.';
+    await load();
+  } catch (error) {
+    if (msg) msg.textContent = error.message || 'پەیوەستکردنی هەژمار سەرکەوتوو نەبوو.';
+    if (button) { button.disabled = false; button.textContent = 'پەیوەستکردنی هەژمار'; }
+  }
+};
 
 const renderShipments = (items) => setHtml('shipments', items.map((item) => `<button class="item shipment-card" type="button" data-shipment-id="${esc(item.id)}"><div class="row"><strong>${esc(item.id)}</strong><span class="pill">${esc(item.operational_status || item.current_step_index || 0)}</span></div><div class="muted">${esc(item.origin_key)} → ${esc(item.dest_key)}</div><small>${esc(item.current_location_label || '—')} · ETA ${esc(date(item.eta))}</small><span class="shipment-open">وردەکاری وێنە و شوێن ←</span></button>`).join('') || '<div class="muted">هیچ shipment نییە.</div>');
 const renderNotifications = (items) => setHtml('notifications', items.map((item) => `<div class="item"><div class="row"><strong>${esc(item.title)}</strong>${item.read_at ? '<span class="pill">خوێندراوە</span>' : `<button class="btn notification-action" type="button" data-read-notification="${esc(item.id)}">خوێندراوە بکە</button>`}</div><div class="muted">${esc(item.body)}</div><small>${esc(date(item.created_at))}</small></div>`).join('') || '<div class="muted">هیچ notification نییە.</div>');
@@ -167,4 +211,17 @@ $('closeShipmentDetail')?.addEventListener('click', () => $('shipmentDetail')?.c
 document.addEventListener('click', (event) => { const shipmentCard = event.target.closest('[data-shipment-id]'); if (shipmentCard) { const shipment = (window.__customerShipments || []).find((item) => item.id === shipmentCard.dataset.shipmentId); renderShipmentDetail(shipment, window.__customerEvents || [], window.__customerPods || []); renderShipmentRelated(shipment, window.__customerRelated || {}); } });
 document.addEventListener('click', (event) => { const notificationButton = event.target.closest('[data-read-notification]'); if (notificationButton) { notificationButton.disabled = true; markNotificationRead(notificationButton.dataset.readNotification).catch((error) => { notificationButton.disabled = false; showMessage(error.message, 'error'); }); return; } const documentLink = event.target.closest('[data-document-id]'); if (documentLink) { event.preventDefault(); downloadDocument(documentLink).then(() => window.open(documentLink.href, '_blank', 'noopener,noreferrer')).catch((error) => showMessage(error.message, 'error')); return; } const button = event.target.closest('[data-accept-quote]'); if (button) acceptQuote(button.dataset.acceptQuote).catch((error) => showMessage(error.message, 'error')); });
 sb.auth.onAuthStateChange(() => window.setTimeout(() => load().catch((error) => showMessage(error.message, 'error')), 100));
-load().catch((error) => { console.error(error); $('portalStatus')?.classList.remove('hidden'); setHtml('notifications', '<div class="alert">هەڵە لە هێنانی داتا؛ تکایە دواتر هەوڵ بدەرەوە.</div>'); });
+load().catch((error) => {
+  console.error(error);
+  if (Number(error?.status) === 403) {
+    $('portalStatus')?.classList.remove('hidden');
+    renderClaimPrompt();
+    $('shipKpi').textContent = '—';
+    $('movingKpi').textContent = '—';
+    $('dueKpi').textContent = '—';
+    $('notifKpi').textContent = '—';
+    return;
+  }
+  $('portalStatus')?.classList.remove('hidden');
+  setHtml('notifications', '<div class="alert">هەڵە لە هێنانی داتا؛ تکایە دواتر هەوڵ بدەرەوە.</div>');
+});
