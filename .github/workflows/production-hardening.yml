@@ -1,9 +1,9 @@
 name: Production Hardening
 on:
   push:
-    branches: [main]
+    branches: [Product]
   pull_request:
-    branches: [main]
+    branches: [Product]
   workflow_dispatch:
 permissions:
   contents: read
