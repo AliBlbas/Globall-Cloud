@@ -1,4 +1,4 @@
-const BRIDGE_SRC = '/production-bridge.js?v=20260829-shop';
+const BRIDGE_SRC = '/production-bridge.js?v=20260926-1';
 
 async function ensureBridge() {
   if (window.gcSupabase) return window.gcSupabase;
