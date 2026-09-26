@@ -10,7 +10,7 @@
   const operationalPage = /^\/(staff(?:-os)?|warehouse(?:-os)?|customer-portal|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\.html)?\/?$/i.test(path);
   if (!operationalPage) return;
 
-  const BRIDGE = '/production-bridge.js?v=20260914-2';
+  const BRIDGE = '/production-bridge.js?v=20260926-1';
   const STAFF_ENHANCEMENTS = '/staff-os-enhancements-v2.js?v=20260914-2';
   const STAFF_FX_ENHANCEMENTS = '/staff-os-fx.js?v=20260914-2';
   const STAFF_WAREHOUSE_NOTIFY = '/staff-os-warehouse-notify.js?v=20260914-2';
