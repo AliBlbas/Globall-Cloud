@@ -40,6 +40,68 @@ Deno.serve(async (req) => {
     if (userError || !user) return json(req, {error: 'Unauthorized'}, 401)
 
     const service = createClient(url, serviceKey, {auth: {persistSession: false, autoRefreshToken: false, detectSessionInUrl: false}})
+    let body: Record<string, unknown> = {}
+    if (req.method === 'POST') {
+      try { body = await req.json() } catch { return json(req, {error: 'Invalid JSON body.'}, 400) }
+    }
+    const action = text(body.action, 60)
+    const data = (body.data && typeof body.data === 'object') ? body.data as Record<string, unknown> : {}
+
+    if (req.method === 'POST' && action === 'claim_account') {
+      const normalizeGcCode = (value: unknown) => {
+        const raw = text(value, 50).toUpperCase().replace(/\\s+/g, '')
+        if (/^GC-\\d+$/.test(raw)) return raw
+        if (/^GC\\d+$/.test(raw)) return 'GC-' + raw.slice(2)
+        if (/^\\d+$/.test(raw)) return 'GC-' + raw
+        return ''
+      }
+      const normalizePhone = (value: unknown) => {
+        let digits = text(value, 50).replace(/\\D/g, '')
+        if (digits.startsWith('00964')) digits = digits.slice(5)
+        if (digits.startsWith('964')) digits = '0' + digits.slice(3)
+        return digits
+      }
+      const gcCode = normalizeGcCode(data.gc_code || data.code)
+      const phone = normalizePhone(data.phone)
+      if (!gcCode || phone.length < 7) return json(req, {error: 'GC code و ژمارەی مۆبایل پێویستن.'}, 400)
+
+      const {data: alreadyLinked, error: alreadyLinkedError} = await service
+        .from('customer_directory')
+        .select('id,is_active')
+        .eq('auth_user_id', user.id)
+        .maybeSingle()
+      if (alreadyLinkedError) throw alreadyLinkedError
+      if (alreadyLinked) return json(req, {ok: true, already_linked: true})
+
+      const {data: candidates, error: candidateError} = await service
+        .from('customer_directory')
+        .select('id,code,gc_code,normalized_gc_code,name,email,phone,phone2,auth_user_id,is_active')
+        .eq('is_active', true)
+        .is('auth_user_id', null)
+        .or('normalized_gc_code.eq.' + gcCode + ',gc_code.eq.' + gcCode + ',code.eq.' + gcCode)
+        .limit(5)
+      if (candidateError) throw candidateError
+
+      const matches = (candidates || []).filter((candidate) => {
+        const a = normalizePhone(candidate.phone)
+        const b = normalizePhone(candidate.phone2)
+        return a && (a === phone || b === phone)
+      })
+      if (matches.length !== 1) return json(req, {error: 'GC code یان ژمارەی مۆبایل لەگەڵ تۆمارێکی active یەکتا ناگونجێت.'}, 403)
+
+      const target = matches[0]
+      const {data: claimed, error: claimError} = await service
+        .from('customer_directory')
+        .update({auth_user_id: user.id, updated_at: new Date().toISOString()})
+        .eq('id', target.id)
+        .is('auth_user_id', null)
+        .eq('is_active', true)
+        .select('id,code,gc_code,name,email,phone,phone2,preferred_language,is_active')
+        .single()
+      if (claimError) throw claimError
+      return json(req, {ok: true, claimed: true, profile: claimed})
+    }
+
     const {data: customer, error: customerError} = await service
       .from('customer_directory')
       .select('id,code,gc_code,name,email,phone,phone2,whatsapp_phone,whatsapp_group_name,purchase_first_name,purchase_last_name,preferred_language,auth_user_id,is_active')
@@ -160,7 +222,7 @@ Deno.serve(async (req) => {
     const shipments = shipmentRows || []
     const shipmentIds = shipments.map((item) => item.id).filter(Boolean)
 
-    const [notifications, quotes, documents, pods, invoices, payments, events, ledger, receipts, packages, preferences] = await Promise.all([
+    const [notifications, preferences, quotes, documents, pods, invoices, payments, events, ledger, receipts, packages] = await Promise.all([
       service.from('customer_notifications').select('id,title,body,read_at,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(12),
       service.from('customer_notification_preferences').select('email_enabled,whatsapp_enabled,sms_enabled,in_app_enabled,quiet_hours_start,quiet_hours_end,updated_at').eq('customer_user_id', user.id).maybeSingle(),
       service.from('quote_requests').select('id,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,status,quoted_amount,currency,valid_until,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(12),
