@@ -1,0 +1,72 @@
+/* Globall Cloud — final UI stabilizer 2026-09-26
+   Last-layer CSS: fixes mobile stacking, SVG icons, RTL layout and floating controls.
+*/
+html,body{overflow-x:hidden!important}
+body{padding-bottom:0!important}
+*,*::before,*::after{box-sizing:border-box}
+button,a,input,select,textarea{touch-action:manipulation}
+img{max-width:100%;height:auto}
+svg{display:block}
+.gc-icon-box,.gc-bottom-icon{display:inline-grid!important;place-items:center!important;flex:0 0 auto!important;line-height:0!important}
+.gc-icon-box svg,.gc-bottom-icon svg{width:1.35em!important;height:1.35em!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important;overflow:visible!important}
+.gc-route-node{display:block!important;flex:0 0 auto!important}
+.gc-route-stop{min-width:0!important}
+.gc-route-stop>div{min-width:0!important}
+.gc-route-stop b,.gc-route-stop small{display:block!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.gc-btn{min-height:46px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important}
+.gc-nav{isolation:isolate!important}
+.gc-nav-actions{display:flex!important;align-items:center!important;gap:8px!important}
+.gc-menu{display:grid!important;place-items:center!important;line-height:1!important}
+.gc-mobile-menu[hidden]{display:none!important}
+.gc-mobile-menu{z-index:1400!important}
+.gc-bottom-dock{z-index:1200!important;position:fixed!important;left:12px!important;right:12px!important;bottom:calc(8px + env(safe-area-inset-bottom))!important;width:auto!important;margin:0!important}
+.gc-bottom-item{display:grid!important;place-items:center!important;gap:3px!important;text-align:center!important}
+.gc-bottom-icon{width:22px!important;height:22px!important}
+.gc-bottom-item span:last-child{font-size:9px!important;line-height:1.1!important}
+.gc-main{min-width:0!important}
+.gc-container{min-width:0!important}
+.gc-hero-grid,.gc-entry-grid,.gc-service-grid,.gc-platform-grid{min-width:0!important}
+.gc-hero-copy,.gc-hero-visual{min-width:0!important}
+.gc-actions{align-items:stretch!important}
+.gc-track-form{min-width:0!important}
+.gc-track-form input{min-width:0!important}
+@media(max-width:760px){
+  .gc-announcement{overflow:hidden!important}
+  .gc-nav-inner{min-height:64px!important;padding:8px 12px!important}
+  .gc-brand{min-width:0!important;max-width:55%!important}
+  .gc-brand img{width:42px!important;height:42px!important}
+  .gc-brand span{min-width:0!important}
+  .gc-brand b{font-size:14px!important}
+  .gc-brand small{font-size:8px!important}
+  .gc-nav-actions{gap:6px!important}
+  .gc-nav-actions .gc-staff{display:none!important}
+  .gc-nav-actions .gc-btn{min-height:40px!important;padding-inline:12px!important;font-size:10px!important}
+  .gc-menu{width:42px!important;height:42px!important;padding:0!important}
+  .gc-mobile-menu{position:absolute!important;left:10px!important;right:10px!important;top:calc(100% + 6px)!important;border-radius:18px!important;box-shadow:0 20px 60px rgba(0,0,0,.22)!important;overflow:hidden!important}
+  .gc-hero-rebuild{padding:34px 0 20px!important}
+  .gc-hero-grid{grid-template-columns:1fr!important}
+  .gc-hero-copy{padding:8px 0!important}
+  .gc-hero-copy h1{font-size:clamp(30px,8vw,42px)!important;line-height:1.2!important}
+  .gc-hero-copy>p{font-size:13px!important;line-height:1.9!important}
+  .gc-hero-visual{min-height:250px!important}
+  .gc-route-card{width:100%!important}
+  .gc-entry-grid,.gc-service-grid,.gc-platform-grid{grid-template-columns:1fr!important}
+  .gc-entry-card,.gc-service,.gc-platform-card{min-height:0!important}
+  .gc-track-panel{padding:20px!important}
+  .gc-track-form{display:grid!important;grid-template-columns:1fr!important}
+  .gc-trust{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .gc-section{padding-block:34px!important}
+  .gc-footer{padding-bottom:110px!important}
+  body{padding-bottom:90px!important}
+  /* Keep optional assistants from covering the real navigation. */
+  #gcAiLauncher,.gc-ai-launcher,.gc-ai-fab,#gcAssistLauncher,.gc-assist-fab{display:none!important}
+}
+@media(max-width:420px){
+  .gc-container{width:min(100% - 20px,1240px)!important}
+  .gc-trust{gap:7px!important}
+  .gc-bottom-dock{left:8px!important;right:8px!important}
+  .gc-bottom-item{min-height:52px!important}
+}
+@media(min-width:761px){
+  .gc-bottom-dock{display:none!important}
+}
