@@ -1,0 +1,192 @@
+/* Globall Cloud — Unified final UI polish 2026-09-26 */
+:root{
+  --gc-ui-ink:#071b2d;--gc-ui-ink2:#0b2941;--gc-ui-cyan:#09aec5;--gc-ui-cyan2:#72eaf2;
+  --gc-ui-line:rgba(12,67,91,.13);--gc-ui-muted:#647d90;--gc-ui-radius:20px;
+}
+html{scrollbar-gutter:stable}
+body:has(#gcApp){font-family:'Vazirmatn',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.gc-app{isolation:isolate}
+.gc-nav-inner{padding-block:8px}
+.gc-brand{min-width:190px}
+.gc-brand img{border-radius:14px}
+.gc-desktop-nav{gap:6px}
+.gc-desktop-nav a{min-height:42px;display:inline-flex;align-items:center;justify-content:center}
+.gc-nav-actions{flex-shrink:0}
+.gc-btn{min-height:46px;padding-inline:18px}
+.gc-btn:focus-visible,.gc-menu:focus-visible,.gc-mobile-menu a:focus-visible{outline:3px solid rgba(9,174,197,.28);outline-offset:2px}
+.gc-hero-rebuild{padding-top:68px}
+.gc-hero-grid{gap:34px}
+.gc-hero-copy h1{max-width:820px;font-weight:900}
+.gc-actions{max-width:660px}
+.gc-trust-card{min-width:0}
+.gc-service,.gc-platform-card,.gc-entry-card{will-change:transform}
+.gc-service:hover,.gc-platform-card:hover{transform:translateY(-3px)}
+.gc-entry-card:hover{transform:translateY(-4px)}
+.gc-route-card{backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.gc-route-stop{min-width:0}
+.gc-route-stop b{overflow-wrap:anywhere}
+.gc-section{scroll-margin-top:90px}
+.gc-page{scroll-margin-top:90px}
+.gc-footer a{padding-block:3px}
+.gc-bottom-dock{padding-inline:7px}
+
+@media(max-width:980px){
+  .gc-container{width:min(100% - 28px,1240px)}
+  .gc-hero-grid{gap:20px}
+  .gc-hero-visual{min-height:420px}
+}
+
+@media(max-width:700px){
+  body:has(#gcApp){padding-bottom:88px}
+  .gc-container{width:min(100% - 20px,1240px)}
+  .gc-announcement-inner{min-height:30px}
+  .gc-nav-inner{min-height:62px;gap:8px}
+  .gc-brand{min-width:0;max-width:58%}
+  .gc-brand span{min-width:0}
+  .gc-brand b,.gc-brand small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gc-brand b{font-size:14px}
+  .gc-nav-actions{gap:6px}
+  .gc-menu{display:grid;width:42px;height:42px;place-items:center}
+  .gc-mobile-menu{left:10px!important;right:10px!important;width:auto!important;margin:6px 0 0!important;border-radius:18px!important}
+  .gc-mobile-menu a{min-height:48px}
+  .gc-home{padding-bottom:20px}
+  .gc-hero-rebuild{padding:34px 0 16px}
+  .gc-hero-grid{grid-template-columns:1fr!important}
+  .gc-hero-copy{padding:4px 0}
+  .gc-hero-copy h1{font-size:clamp(32px,9.6vw,48px)!important;line-height:1.16;letter-spacing:-.035em}
+  .gc-hero-copy>p{font-size:13px;line-height:1.95}
+  .gc-actions{grid-template-columns:1fr!important;max-width:none}
+  .gc-actions .gc-btn{width:100%;min-height:50px}
+  .gc-trust{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px}
+  .gc-trust-card{padding:12px 11px;min-height:76px}
+  .gc-trust-card strong{font-size:17px}
+  .gc-hero-visual{min-height:350px;border-radius:22px}
+  .gc-route-card{inset:52px 10px 10px!important;padding:12px}
+  .gc-route-stop{padding:10px;grid-template-columns:14px minmax(0,1fr) auto;gap:8px}
+  .gc-route-stop small{font-size:7px}
+  .gc-route-stop b{font-size:11px}
+  .gc-route-bottom{padding-top:10px}
+  .gc-route-badge{font-size:7px}
+  .gc-entry-wrap{padding-top:34px}
+  .gc-entry-grid,.gc-service-grid,.gc-platform-grid{grid-template-columns:1fr!important}
+  .gc-entry-card{min-height:218px;padding:18px}
+  .gc-entry-card h3{font-size:21px}
+  .gc-track-panel{grid-template-columns:1fr!important;padding:18px!important;margin-top:24px;border-radius:20px}
+  .gc-track-panel h2{font-size:21px}
+  .gc-track-form{display:grid!important;grid-template-columns:1fr!important;min-width:0}
+  .gc-track-form input,.gc-track-form .gc-btn{min-height:50px;width:100%}
+  .gc-section{padding-top:36px}
+  .gc-section-head{margin-bottom:16px}
+  .gc-section-head h2{font-size:27px}
+  .gc-service,.gc-platform-card{min-height:154px;padding:16px!important}
+  .gc-page{padding:34px 0 54px}
+  .gc-page h1{font-size:32px}
+  .gc-form{width:100%}
+  .gc-footer{padding:34px 0 96px;margin-top:34px}
+  .gc-footer-grid{grid-template-columns:1fr 1fr!important;gap:16px}
+  .gc-footer-bottom{font-size:8px}
+  .gc-bottom-dock{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));bottom:calc(7px + env(safe-area-inset-bottom))!important}
+  .gc-bottom-item{min-width:0;min-height:52px}
+  .gc-bottom-item span:last-child{white-space:nowrap}
+}
+
+@media(max-width:420px){
+  .gc-container{width:calc(100% - 16px)}
+  .gc-brand{max-width:52%}
+  .gc-nav-actions .gc-btn{display:none!important}
+  .gc-hero-copy h1{font-size:31px!important}
+  .gc-hero-visual{min-height:326px}
+  .gc-route-stop em{display:none}
+  .gc-trust-card{min-height:70px}
+  .gc-footer-grid{grid-template-columns:1fr!important}
+  .gc-bottom-dock{left:6px!important;right:6px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .gc-service,.gc-platform-card,.gc-entry-card,.gc-trust-card{transition:none!important}
+}
+
+/* Customer portal final layer */
+body:has(#auth){padding-bottom:0}
+.top{z-index:100}
+.topin{gap:10px}
+.hero .card{overflow:hidden}
+.card{min-width:0}
+.item,.shipment-card,.portal-status{min-width:0}
+.shipment-route span{min-width:0}
+.detail-grid>div{min-width:0}
+@media(max-width:760px){
+  body:has(#auth){padding-bottom:82px}
+  .wrap{padding-inline:10px!important}
+  .topin{min-height:60px}
+  .topin>div:last-child{min-width:0}
+  .topin .btn{min-height:42px}
+  .hero .card{padding:18px}
+  .hero h1{font-size:clamp(28px,8vw,42px)!important;line-height:1.15}
+  .grid{grid-template-columns:1fr 1fr!important}
+  .grid3{grid-template-columns:1fr!important}
+  .portal-status{padding:14px}
+  .portal-status .btn{width:100%}
+  .section-head{align-items:flex-start}
+  .shipment-card{padding:13px}
+  .detail-grid{grid-template-columns:1fr!important}
+  .photo-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .field-grid{grid-template-columns:1fr!important}
+  .field-wrap.full{grid-column:auto}
+  .actions{display:grid!important;grid-template-columns:1fr!important}
+  .actions .btn{width:100%;min-width:0}
+  .gc-settings-tabs{position:sticky;top:66px}
+}
+@media(max-width:420px){
+  .grid{gap:8px}
+  .kpi{min-height:102px!important}
+  .kpi b{font-size:20px!important}
+  .photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* Staff OS final layer */
+.gc-side{min-width:0}
+.gc-main{min-width:0}
+.view{min-width:0}
+.shipment-grid{min-width:0}
+.shipment-card{min-width:0}
+@media(max-width:900px){
+  body:has(#app){padding-bottom:0!important}
+  .gc-shell{grid-template-columns:1fr!important}
+  .gc-side{position:sticky!important;top:6px!important;z-index:70}
+  .gc-main{width:100%!important}
+  .topbar{z-index:60}
+  .view{padding-bottom:96px!important}
+  .grid-kpi{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .kpi{min-height:120px!important;padding:14px!important}
+  .kpi strong{font-size:23px!important}
+  .two-col,.three-col,.shipment-grid,.chat-layout,.qr-wrap{grid-template-columns:1fr!important}
+  .toolbar{display:grid!important;grid-template-columns:1fr!important}
+  .toolbar .field{min-width:0}
+  .table-wrap{overflow-x:auto!important}
+  .table{min-width:720px!important}
+  .form-grid{grid-template-columns:1fr!important}
+}
+@media(max-width:600px){
+  body:has(#app){padding-inline:5px!important}
+  .gc-side{border-radius:18px!important}
+  .topbar{border-radius:16px!important;flex-wrap:wrap;padding:10px!important}
+  .top-actions{width:100%;margin-inline-start:0!important}
+  .top-actions>*{flex:1;min-width:0}
+  .view{padding:12px 9px 98px!important;border-radius:18px!important}
+  .section-head h1{font-size:24px!important}
+  .section-head p{font-size:11px!important}
+  .grid-kpi{grid-template-columns:1fr 1fr!important;gap:7px!important}
+  .kpi{min-height:112px!important;padding:12px!important;border-radius:16px!important}
+  .kpi strong{font-size:21px!important}
+  .card{padding:13px!important;border-radius:17px!important}
+  .shipment-card{padding:12px!important;border-radius:16px!important}
+  .shipment-facts{grid-template-columns:1fr!important}
+  .shipment-actions{display:grid!important;grid-template-columns:1fr 1fr!important}
+  .shipment-actions .btn{width:100%!important}
+}
+@media(max-width:420px){
+  .grid-kpi{grid-template-columns:1fr 1fr!important}
+  .section-head h1{font-size:21px!important}
+  .shipment-actions{grid-template-columns:1fr!important}
+}
