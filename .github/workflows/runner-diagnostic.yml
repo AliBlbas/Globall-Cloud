@@ -2,7 +2,7 @@ name: Runner Diagnostic
 
 on:
   push:
-    branches: [main]
+    branches: [Product]
     paths:
       - '.github/workflows/runner-diagnostic.yml'
   workflow_dispatch:
