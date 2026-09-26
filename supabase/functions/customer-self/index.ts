@@ -235,7 +235,7 @@ Deno.serve(async (req) => {
       service.from('warehouse_receipts').select('id,batch_code,location,stage,photo_taken_at,gc_code_detected,verification_status,photos,shipment_id,received_at,created_at').eq('directory_customer_id', customer.id).order('received_at', {ascending: false}).limit(30),
       shipmentIds.length ? service.from('shipment_packages').select('id,shipment_id,package_code,barcode,package_type,description,weight_kg,length_cm,width_cm,height_cm,declared_value,declared_currency,current_hub,status,created_at,updated_at').in('shipment_id', shipmentIds).order('created_at', {ascending: false}).limit(100) : Promise.resolve({data: [], error: null}),
     ])
-    const results = [notifications, quotes, documents, pods, invoices, payments, events, ledger, receipts, packages, preferences]
+    const results = [notifications, preferences, quotes, documents, pods, invoices, payments, events, ledger, receipts, packages]
     const failed = results.find((result) => result?.error)
     if (failed?.error) throw failed.error
 
