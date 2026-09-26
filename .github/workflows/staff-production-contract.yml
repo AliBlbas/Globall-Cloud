@@ -2,7 +2,7 @@ name: Staff Production Contract
 
 on:
   push:
-    branches: [main]
+    branches: [Product]
     paths:
       - 'staff-os-v5.html'
       - 'staff-os-v5.js'
@@ -15,7 +15,7 @@ on:
       - 'sw.js'
       - '.github/workflows/staff-production-contract.yml'
   pull_request:
-    branches: [main]
+    branches: [Product]
     paths:
       - 'staff-os-v5.html'
       - 'staff-os-v5.js'
@@ -43,46 +43,23 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@9c091bb21b7c1c1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-
       - name: Setup Node.js
         uses: actions/setup-node@v7 # v7.0.0
         with:
           node-version: 24
           cache: npm
-
       - name: Install locked dependencies
         run: npm ci --ignore-scripts
-
       - name: Validate production contracts
         run: npm run test:contracts
-
       - name: Validate Staff OS files
         shell: bash
         run: |
           set -euo pipefail
-          for file in \
-            staff-os-v5.html \
-            staff-os-v5.css \
-            staff-os-v5.js \
-            staff-os-v5-shipment-create-fix.js \
-            staff-os-v5-shipment-control-bridge.js \
-            staff-os-data-health-panel.js \
-            staff-os-v5-integrations.js \
-            staff-os-v5-profile.js \
-            staff-os-production-analytics-bridge.js \
-            staff-os-v5-stability.js \
-            staff-logistics-intelligence.css \
-            staff-logistics-intelligence.js \
-            staff-os-v2-compat.js \
-            staff-mobile-command-dock.css \
-            staff-mobile-command-dock.js \
-            sw.js; do
-            test -f "$file"
-          done
-
+          for file in staff-os-v5.html staff-os-v5.css staff-os-v5.js staff-os-v5-shipment-create-fix.js staff-os-v5-shipment-control-bridge.js staff-os-data-health-panel.js staff-os-v5-integrations.js staff-os-v5-profile.js staff-os-production-analytics-bridge.js staff-os-v5-stability.js staff-logistics-intelligence.css staff-logistics-intelligence.js staff-os-v2-compat.js staff-mobile-command-dock.css staff-mobile-command-dock.js sw.js; do test -f "$file"; done
       - name: Validate Staff OS HTML contract
         shell: bash
         run: |
@@ -98,7 +75,6 @@ jobs:
           ! grep -q 'YOUR_PROJECT_ID' staff-os-v5.html
           ! grep -q 'YOUR_ANON_KEY' staff-os-v5.html
           ! grep -q '/api/send-whatsapp' staff-os-v2-compat.js
-
       - name: JavaScript syntax checks
         shell: bash
         run: |
@@ -115,7 +91,6 @@ jobs:
           node --check staff-logistics-intelligence.js
           node --check staff-mobile-command-dock.js
           node --check sw.js
-
       - name: Service worker contract
         shell: bash
         run: |
@@ -130,6 +105,5 @@ jobs:
           )"
           grep -q "const CACHE_VERSION=['\"]${CACHE_VERSION}['\"]" sw.js
           grep -q "/staff-os-v5.html" sw.js
-
       - name: Repository tests
         run: npm test
