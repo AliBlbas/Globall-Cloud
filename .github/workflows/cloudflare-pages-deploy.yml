@@ -1,8 +1,10 @@
 name: Deploy Cloudflare Pages
 
+# Cloudflare's GitHub App is already attached to this repository and is
+# responsible for automatic Pages deployments. Keep this Actions workflow
+# manual-only so an exhausted Actions runner quota cannot mark every commit
+# red or duplicate the production deploy.
 on:
-  push:
-    branches: [Product]
   workflow_dispatch:
 
 permissions:
@@ -14,8 +16,6 @@ concurrency:
 
 jobs:
   deploy:
-    # Use Ubuntu 22.04 because previous ubuntu-latest/24.04 runner attempts
-    # failed before application steps ran. Keep this runner pin explicit.
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     name: Deploy frontend and Pages Functions to Cloudflare
@@ -100,7 +100,7 @@ jobs:
         run: |
           set -euo pipefail
           cd .pages-dist
-          npx --yes wrangler@4 pages deploy . --project-name=globall-cloud --commit-hash="$GITHUB_SHA" --commit-message="${GITHUB_SHA} ${GITHUB_REF_NAME}"
+          npx --yes wrangler@4 pages deploy . --project-name=globall-cloud --commit-hash="$GITHUB_SHA" --commit-message="$GITHUB_SHA $GITHUB_REF_NAME"
 
       - name: Verify production edge health
         shell: bash
