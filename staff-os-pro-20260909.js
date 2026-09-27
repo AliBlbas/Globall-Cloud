@@ -100,7 +100,6 @@
       const healthy = issues===0;
       setHealth(healthy,healthy?`healthy · ${latency}ms`:`degraded · ${issues}`,`Backend latency ${latency}ms`);
       setSync(payload.generated_at || Date.now());
-      setStatus(healthy?'Supabase · Live':'Supabase · Degraded',healthy?'live':'warn');
       return payload;
     } catch (error) {
       setHealth(false,'degraded',error.message || 'backend health failed');
@@ -116,7 +115,7 @@
     window.fetch=async(...args)=>{
       const response=await nativeFetch(...args);
       const url=typeof args[0]==='string'?args[0]:args[0]?.url||'';
-      if(/supabase\.co\/functions\/v1\/(operations-v4|account-admin|warehouse-receiving|staff-ops-hub|staff-data-health)/i.test(url)&&response.ok){setSync(Date.now());setStatus('Supabase · Live','live');}
+      if(/supabase\.co\/functions\/v1\/(operations-v4|account-admin|warehouse-receiving|staff-ops-hub|staff-data-health)/i.test(url)&&response.ok){setSync(Date.now());}
       return response;
     };
   }

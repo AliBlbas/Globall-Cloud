@@ -199,12 +199,7 @@
     loadAsset({tag:'link', rel:'stylesheet', href:'/gc-command-nav-polish-2026.css?v=20260915-2', attr:'data-gc-command-nav-polish'});
     loadAsset({tag:'script', src:'/gc-runtime-safety-v2026.js?v=20260908-1', attr:'data-gc-runtime-safety-loader'});
     loadAsset({tag:'script', src:'/public-production-safety.js?v=20260908-1', attr:'data-gc-public-production-safety'});
-    if (/^\/staff(?:-os)?(?:\.html)?\/?$/i.test(location.pathname)) {
-      loadAsset({tag:'link', rel:'stylesheet', href:'/staff-mobile-command-dock.css?v=20260908-1', attr:'data-gc-staff-mobile-css'});
-      loadAsset({tag:'script', src:'/staff-mobile-command-dock.js?v=20260908-1', attr:'data-gc-staff-mobile-js'});
-      loadAsset({tag:'link', rel:'stylesheet', href:'/staff-premium-mobile-20260909.css?v=20260911-1', attr:'data-gc-staff-premium-mobile'});
-    }
-    installGloballAssist();
+    /* Staff OS V5 owns mobile navigation. Legacy command-dock injection is disabled. */
   };
   const scan = () => { document.querySelectorAll('img').forEach(repair); boot(); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan, {once:true}); else scan();

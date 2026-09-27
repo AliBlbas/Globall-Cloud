@@ -39,7 +39,7 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.customer-self]
-verify_jwt = false
+verify_jwt = true
 
 [functions.customer-receipt-evidence]
 verify_jwt = true
@@ -109,3 +109,6 @@ verify_jwt = true
 
 [functions.invoice-ai]
 verify_jwt = true
+
+[functions.public-health]
+verify_jwt = false

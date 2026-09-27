@@ -153,9 +153,29 @@
     return '<div class="gc-shell"><aside class="gc-side"><div class="brand"><div class="brand-row"><div class="brand-logo">GC</div><div><b>Globall Cloud</b><small>STAFF OPERATING SYSTEM · V5</small></div></div></div><nav class="nav" aria-label="Staff modules">'+navButtons+'</nav><div class="side-foot"><strong id="sideName">'+esc(state.staff?.full_name || 'Staff')+'</strong><span id="sideRole" class="role-pill">'+esc(roleLabel(state.staff?.role))+' · '+esc(state.staff?.branch || 'all')+'</span><div style="margin-top:8px">Session: <span style="color:var(--mint)">SECURE</span><br>Actions: <span style="color:var(--cyan2)">AUDITED</span></div><button class="btn" id="logoutBtn" style="width:100%;margin-top:8px">چوونەدەرەوە</button></div></aside><main class="gc-main"><header class="topbar"><div class="top-title"><strong id="pageTitle">Dashboard</strong><span id="pageSub">کۆنترۆڵی یەکگرتووی عملیات و کڕیاران.</span></div><div class="top-actions"><span class="status" id="systemStatus">Supabase · Secure</span><button class="btn" id="refreshBtn">↻ نوێکردنەوە</button></div></header><section class="view" id="view"></section></main></div>';
   }
 
+  async function refreshRuntimeHealth() {
+    const el = document.getElementById('systemStatus');
+    if (!el) return;
+    try {
+      const response = await fetch('/api/ready?ui=staff', { cache: 'no-store', headers: { 'Accept': 'application/json' } });
+      const body = await response.json().catch(() => ({}));
+      if (response.ok && body.status === 'ready') {
+        el.textContent = 'Server · Ready';
+        el.dataset.health = 'ready';
+      } else {
+        el.textContent = body.status === 'degraded' ? 'Server · Degraded' : 'Server · Error';
+        el.dataset.health = body.status || 'error';
+      }
+    } catch {
+      el.textContent = 'Server · Offline';
+      el.dataset.health = 'offline';
+    }
+  }
+
   function renderApp() {
     document.body.innerHTML = shellHTML();
     bindShell();
+    void refreshRuntimeHealth();
   }
 
   function renderLogin(mfa=false, message='') {
@@ -221,11 +241,11 @@
       else if (tab==='requests') await renderRequests();
       else if (tab==='activity') await renderActivity();
       else if (tab==='settings') await renderSettings();
-      document.getElementById('systemStatus').textContent = 'Supabase · Live';
+      void refreshRuntimeHealth();
     } catch (err) {
       view.innerHTML = `<div class="empty"><strong style="color:var(--red)">هەڵەی module</strong><div style="margin-top:5px">${esc(err.message)}</div><button class="btn" data-retry style="margin-top:10px">↻ دووبارە هەوڵدان</button></div>`;
       view.querySelector('[data-retry]')?.addEventListener('click', () => loadTab(tab, true));
-      document.getElementById('systemStatus').textContent = 'Supabase · Error';
+      void refreshRuntimeHealth();
     }
     updateBadges();
   }

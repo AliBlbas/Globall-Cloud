@@ -37,7 +37,7 @@ if (sw.includes("fetch(request, { cache: 'no-store' })") && sw.includes('self.sk
 else fail('Service Worker network-first/lifecycle contract is incomplete')
 
 const required = [
-  'index.html','sw.js','production-bridge.js','runtime-guard.js','_headers','_redirects','public-route-bootstrap.js','public-runtime-guarantee.js',
+  'index.html','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js','public-route-bootstrap.js','public-runtime-guarantee.js',
   'public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js','tracking-integration.html','tracking-intelligence.js',
   'tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os-v5.html','staff-os-v5.css','staff-os-v5.js',
   'staff-os-v5-rescue.js','staff-logistics-intelligence.css','staff-logistics-intelligence.js','staff-mobile-command-dock.css','staff-mobile-command-dock.js',
@@ -49,7 +49,7 @@ const required = [
   'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/invoice-ai/index.ts',
   'supabase/functions/customer-debt-assistant/index.ts','supabase/functions/fx-refresh/index.ts','supabase/functions/public-config/index.ts',
   'supabase/functions/public-message/index.ts','supabase/functions/public-quote/index.ts','supabase/functions/public-pricing/index.ts',
-  'supabase/functions/public-track/index.ts','supabase/functions/customer-self/index.ts','supabase/functions/payment-webhook/index.ts',
+  'supabase/functions/public-track/index.ts','supabase/functions/public-health/index.ts','supabase/functions/customer-self/index.ts','supabase/functions/payment-webhook/index.ts',
   'supabase/functions/_shared/payment-providers.ts','tests/validate.mjs','tests/e2e/run.mjs'
 ]
 const missing = required.filter((path) => !exists(path))
@@ -83,22 +83,33 @@ if (!failures) ok('Core public/staff routes are wired')
 
 const bridge = read('production-bridge.js')
 const staff = read('staff-os-v5.html')
+const staffLoader = read('staff-os-v5-enhancement-loader.js')
+const publicShell = read('index.html')
 const publicIndex = read('gc-csp-scripts/index-inline-2.js')
 const publicBootstrap = read('public-route-bootstrap.js')
 const publicRuntime = read('public-runtime-guarantee.js')
 if (!bridge.includes('https://ahslifnthiwfkmaswjno.supabase.co')) fail('production bridge points at the wrong Supabase project')
+if (!/^\[functions\.customer-self\]\s*verify_jwt\s*=\s*true$/m.test(config)) fail('customer-self verify_jwt must remain true')
+if (!/^\[functions\.public-health\]\s*verify_jwt\s*=\s*false$/m.test(config)) fail('public-health verify_jwt must remain false')
+if (!read('functions/api/ready.js').includes('/functions/v1/public-health')) fail('ready endpoint points at the wrong Supabase health function')
 if (!bridge.includes('SUPABASE_PUBLISHABLE_KEY')) fail('production bridge publishable key marker missing')
-if (!staff.includes('staff-premium-mobile-20260909.css?v=')) fail('Staff premium mobile CSS is not loaded')
-if (!staff.includes('staff-premium-mobile-20260909.js?v=')) fail('Staff premium mobile JS is not loaded')
+if (!staff.includes('gc-staff-final-20260922.js?v=')) fail('Staff final mobile navigation JS is not loaded')
+if (staff.includes('staff-reference-mobile-20260922.js?v=') || staff.includes('staff-premium-mobile-20260909.js?v=')) fail('Legacy competing Staff mobile navigation scripts are still loaded')
+if (staffLoader.includes('staff-mobile-command-dock.js?v=')) fail('Legacy Staff mobile command dock is still dynamically loaded')
 if (!staff.includes('mobile-premium-responsive-v2026.css?v=')) fail('Staff responsive CSS is not loaded')
+if (!publicShell.includes('/gc-production-ui-20260927.css?v=1')) fail('Public production UI layer is not loaded')
+if (!staff.includes('/gc-production-ui-20260927.css?v=1')) fail('Staff production UI layer is not loaded')
+if (!read('customer-portal.html').includes('/gc-production-ui-20260927.css?v=1')) fail('Customer production UI layer is not loaded')
 if (!staff.includes('staff-os-pro-20260909.css?v=') || !staff.includes('staff-shell-polish-20260909.css?v=')) fail('Staff shell polish assets are not loaded')
-if (!publicIndex.includes('functions/v1/public-quote')) fail('public quote endpoint is not wired')
-if (!publicIndex.includes('functions/v1/public-message')) fail('public message endpoint is not wired')
+if (!publicShell.includes('/globall-redesign-20260922.js')) fail('active public shell does not load the current experience script')
+if (publicShell.includes('gc-csp-scripts/index-inline-2.js')) fail('legacy monolithic public script is still loaded by the active homepage')
+if (!publicIndex.includes('functions/v1/public-quote')) fail('active public quote endpoint is not wired')
+if (!publicIndex.includes('functions/v1/public-message')) fail('active public message endpoint is not wired')
 if (!publicBootstrap.includes('/public-runtime-guarantee.js')) fail('public runtime guarantee is not loaded')
 if (!publicRuntime.includes('renderEmergencyShell')) fail('public emergency shell is missing')
 if (staff.includes('YOUR_PROJECT_ID') || staff.includes('YOUR_ANON_KEY')) fail('Staff OS still contains placeholder Supabase configuration')
 
-const publicFns = ['public-config','public-message','public-quote','public-pricing','public-track','customer-self','staff-directory']
+const publicFns = ['public-config','public-message','public-quote','public-pricing','public-track','public-health','staff-directory']
 for (const fn of publicFns) {
   const block = new RegExp(`\\[functions\\.${fn}\\][\\s\\S]*?verify_jwt\\s*=\\s*(true|false)`).exec(config)
   if (!block) fail(`missing explicit verify_jwt setting for ${fn}`)

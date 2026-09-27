@@ -50,7 +50,7 @@ if (ts) {
 
 console.log('Required production files')
 const required = [
-  'index.html','sw.js','production-bridge.js','runtime-guard.js','_headers','_redirects',
+  'index.html','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
   'public-route-bootstrap.js','public-runtime-guarantee.js','public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js',
   'tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html',
   'staff-os-v5.html','staff-os-v5.css','staff-os-v5.js','staff-os-v5-rescue.js','staff-logistics-intelligence.js','staff-logistics-intelligence.css',
@@ -80,17 +80,34 @@ for (const f of runtimeFiles) {
 if (!staleHits) ok('Live Supabase reference is consistent')
 
 console.log('Public integration guards')
+const publicShell = read('index.html')
 const publicIndex = read('gc-csp-scripts/index-inline-2.js')
 const publicBootstrap = read('public-route-bootstrap.js')
 const publicRuntime = read('public-runtime-guarantee.js')
+const configContracts = [
+  ['customer-self requires JWT verification', /^\[functions\.customer-self\]\s*verify_jwt\s*=\s*true$/m.test(config)],
+  ['public-health is public', /^\[functions\.public-health\]\s*verify_jwt\s*=\s*false$/m.test(config)],
+]
+for (const [label, passed] of configContracts) if (!passed) fail(label)
+if (configContracts.every(([, passed]) => passed)) ok('Auth function JWT contracts aligned')
+
 const guards = [
   ['quote uses public-quote', publicIndex.includes('functions/v1/public-quote')],
   ['quote avoids direct shipment write', !/from\([\'"]shipments[\'"]\)\.insert|saveShipment/.test(publicIndex)],
   ['contact uses public-message', publicIndex.includes('functions/v1/public-message')],
   ['contact avoids direct messages insert', !/from\([\'"]messages[\'"]\)\.insert/.test(publicIndex)],
   ['production bridge uses live project', read('production-bridge.js').includes('ahslifnthiwfkmaswjno.supabase.co')],
+  ['ready endpoint uses public-health', read('functions/api/ready.js').includes('/functions/v1/public-health')],
+  ['health endpoint is present', existsSync(join(ROOT, 'functions/api/health.js'))],
   ['staff route is isolated', read('_redirects').includes('/staff /staff-os-v5.html 200')],
-  ['staff entry has mobile shell', /staff-premium-mobile-20260909\.css\?v=/.test(read('staff-os-v5.html'))],
+  ['staff entry has final mobile shell', /gc-staff-final-20260922\.js\?v=/.test(read('staff-os-v5.html'))],
+  ['staff entry has no competing legacy mobile JS', !/staff-reference-mobile-20260922\.js\?v=|staff-premium-mobile-20260909\.js\?v=/.test(read('staff-os-v5.html'))],
+  ['staff loader has no legacy mobile command dock', !/staff-mobile-command-dock\.js\?v=/.test(read('staff-os-v5-enhancement-loader.js'))],
+  ['active homepage uses current experience script', publicShell.includes('/globall-redesign-20260922.js')],
+  ['public production UI layer loaded', publicShell.includes('/gc-production-ui-20260927.css?v=1')],
+  ['staff production UI layer loaded', read('staff-os-v5.html').includes('/gc-production-ui-20260927.css?v=1')],
+  ['customer production UI layer loaded', read('customer-portal.html').includes('/gc-production-ui-20260927.css?v=1')],
+  ['active homepage avoids legacy monolithic script', !publicShell.includes('gc-csp-scripts/index-inline-2.js')],
   ['public bootstrap loads runtime guarantee', publicBootstrap.includes('/public-runtime-guarantee.js')],
   ['public runtime has emergency fallback', publicRuntime.includes('renderEmergencyShell')],
 ]

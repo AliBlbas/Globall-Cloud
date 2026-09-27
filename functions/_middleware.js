@@ -10,6 +10,7 @@ const OPERATIONAL_PAGE = /^\/(?:staff(?:-os)?|warehouse(?:-os)?|customer-portal|
 const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`);
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`);
 const applySecurityHeaders = (headers) => {
+  if (!headers.get('x-request-id')) headers.set('x-request-id', crypto.randomUUID());
   headers.set('content-security-policy', CSP); headers.set('x-content-type-options', 'nosniff');
   headers.set('referrer-policy', 'strict-origin-when-cross-origin'); headers.set('x-frame-options', 'DENY');
   headers.set('strict-transport-security', 'max-age=31536000; includeSubDomains; preload');
