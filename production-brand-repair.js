@@ -204,7 +204,6 @@
       loadAsset({tag:'script', src:'/staff-mobile-command-dock.js?v=20260908-1', attr:'data-gc-staff-mobile-js'});
       loadAsset({tag:'link', rel:'stylesheet', href:'/staff-premium-mobile-20260909.css?v=20260911-1', attr:'data-gc-staff-premium-mobile'});
     }
-    installGloballAssist();
   };
   const scan = () => { document.querySelectorAll('img').forEach(repair); boot(); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan, {once:true}); else scan();
