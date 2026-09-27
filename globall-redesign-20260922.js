@@ -14,6 +14,11 @@
     premium.href = premiumHref;
     premium.dataset.gcPremiumLogistics = '1';
     document.head.appendChild(premium);
+    const final = document.createElement('link');
+    final.rel = 'stylesheet';
+    final.href = '/gc-final-ui-20260927.css?v=3';
+    final.dataset.gcFinalUi = '1';
+    document.head.appendChild(final);
   };
 
   const syncPages = (id) => {
