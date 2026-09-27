@@ -594,3 +594,18 @@ body:has(#auth) textarea:focus-visible{
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}
 }
+
+/* Robust icon rendering — inline SVGs stay visible on every surface */
+.gc-icon-box,.gc-entry-icon,.gc-bottom-icon,.gc-side .nav-icon,.gc-mobile-staff-dock .dock-icon{
+  display:grid!important;place-items:center!important;flex:0 0 auto!important;
+}
+.gc-icon-box svg,.gc-entry-icon svg,.gc-bottom-icon svg,.gc-side .nav-icon svg,.gc-mobile-staff-dock .dock-icon svg{
+  display:block!important;width:20px!important;height:20px!important;max-width:20px!important;max-height:20px!important;
+  fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;
+  stroke-linecap:round!important;stroke-linejoin:round!important;overflow:visible!important;
+}
+@media(max-width:700px){
+  .gc-icon-box svg,.gc-entry-icon svg,.gc-bottom-icon svg,.gc-side .nav-icon svg,.gc-mobile-staff-dock .dock-icon svg{
+    width:19px!important;height:19px!important;max-width:19px!important;max-height:19px!important;
+  }
+}
