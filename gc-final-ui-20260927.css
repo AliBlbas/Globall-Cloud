@@ -654,3 +654,5 @@ body:has(#loginGate) .gc-vx-cmd,
 body:has(#loginGate) [data-gc-vx-cmd],
 body:has(#loginGate) .gc-command-launcher,
 body:has(#loginGate) [class*="vx-cmd"]{display:none!important}
+
+/* Product deploy trigger 2026-09-28 */
