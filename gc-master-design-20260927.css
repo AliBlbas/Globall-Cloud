@@ -359,3 +359,8 @@ body:has(#auth) .gc-customer-mobile-dock .dock-icon svg{width:18px!important;hei
   body:has(#auth) .kpi b{font-size:20px!important}
   body:has(#auth) .portal-section-heading h2{font-size:19px!important}
 }
+
+/* Runtime health state */
+#systemStatus[data-health="ready"]{color:#6fe1a3!important;border-color:rgba(111,225,163,.22)!important;background:rgba(111,225,163,.055)!important}
+#systemStatus[data-health="degraded"]{color:#f4c76b!important;border-color:rgba(244,199,107,.22)!important;background:rgba(244,199,107,.055)!important}
+#systemStatus[data-health="error"],#systemStatus[data-health="offline"]{color:#ff9da5!important;border-color:rgba(255,143,148,.20)!important;background:rgba(255,143,148,.05)!important}

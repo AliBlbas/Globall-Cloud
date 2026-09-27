@@ -53,7 +53,7 @@ const commit=process.env.CF_PAGES_COMMIT_SHA||process.env.CF_PAGES_GIT_COMMIT_SH
 const branch=process.env.CF_PAGES_BRANCH||'main';
 fs.writeFileSync(path.join(out,'release.json'),JSON.stringify({service:'globall-cloud',commit,ref:branch})+'\n','utf8');
 
-for(const required of ['index.html','_headers','_redirects','functions/_middleware.js','functions/api/health.js']){
+for(const required of ['index.html','_headers','_redirects','functions/_middleware.js','functions/api/health.js','functions/api/ready.js']){
   if(!fs.existsSync(path.join(out,required))) throw new Error(`Cloudflare build error: missing ${required}`);
 }
 
