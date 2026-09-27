@@ -22,7 +22,7 @@
     document.querySelectorAll('link[data-gc-redesign-v2026]').forEach((node) => node.remove());
     const publicRedesign = document.createElement('link');
     publicRedesign.rel = 'stylesheet';
-    publicRedesign.href = '/gc-redesign-v2026.css?v=20260927-1';
+    publicRedesign.href = '/gc-redesign-v2026.css?v=20260927-3';
     publicRedesign.dataset.gcRedesignV2026 = '1';
     document.head.appendChild(publicRedesign);
   };

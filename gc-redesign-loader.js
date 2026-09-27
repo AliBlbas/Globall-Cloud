@@ -5,7 +5,7 @@
     document.querySelectorAll('link[data-gc-redesign-v2026]').forEach((node) => node.remove());
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/gc-redesign-v2026.css?v=20260927-1';
+    link.href = '/gc-redesign-v2026.css?v=20260927-3';
     link.dataset.gcRedesignV2026 = '1';
     document.head.appendChild(link);
   };

@@ -24,7 +24,8 @@
   <link rel="stylesheet" href="/gc-production-ui-20260927.css?v=1">
 <link rel="stylesheet" href="/gc-visual-refresh-20260927.css?v=1">
   <link rel="stylesheet" href="/gc-signature-system-20260927.css?v=20260927-1">
-  <link rel="stylesheet" href="/gc-redesign-v2026.css?v=1">
+  <link rel="stylesheet" href="/gc-redesign-v2026.css?v=20260927-3">
+  <script src="/live-logistics-map.js?v=20260927-2" defer></script>
 </head>
 <body>
 <div class="gc-app" id="gcApp">
@@ -35,7 +36,7 @@
       <nav class="gc-desktop-nav" aria-label="ناڤیگەیشن">
         <a href="/" data-gc-route="home">سەرەکی</a><a href="/services" data-gc-route="services">خزمەتگوزاری</a><a href="/track" data-gc-route="track">شوێنکەوتن</a><a href="/request" data-gc-route="request">داواکردنی نرخ</a><a href="/contact" data-gc-route="contact">پەیوەندی</a>
       </nav>
-      <div class="gc-nav-actions"><a class="gc-staff" href="/staff">▣ بەشی ستاف</a><a class="gc-btn gc-btn-primary" href="/dashboard">هەژماری کڕیار</a><button class="gc-menu" type="button" data-gc-menu aria-label="menu">☰</button></div>
+      <div class="gc-nav-actions"><div class="gc-socials" aria-label="سۆشیال میدیا"><a href="https://www.facebook.com/" target="_blank" rel="noreferrer" aria-label="Facebook">f</a><a href="https://www.instagram.com/" target="_blank" rel="noreferrer" aria-label="Instagram">◎</a><a href="https://wa.me/9647507577137" target="_blank" rel="noreferrer" aria-label="WhatsApp">◔</a></div><a class="gc-staff" href="/staff">▣ بەشی ستاف</a><a class="gc-btn gc-btn-primary" href="/dashboard">چوونەژوورەوە</a><a class="gc-btn gc-btn-soft gc-register-link" href="/dashboard#register">تۆمارکردن</a><button class="gc-menu" type="button" data-gc-menu aria-label="menu">☰</button></div>
     </div>
     <div class="gc-mobile-menu" data-gc-mobile-menu hidden>
       <a href="/">سەرەکی</a><a href="/services">خزمەتگوزاری</a><a href="/track">شوێنکەوتن</a><a href="/request">داواکردنی نرخ</a><a href="/dashboard">هەژماری کڕیار</a><a href="/staff">کۆنسۆڵی ستاف</a><a href="/contact">پەیوەندی</a>
@@ -61,14 +62,11 @@
             <div class="gc-trust-card"><strong>24/7</strong><span>پشتیوانی زیندوو</span></div>
           </div>
         </div>
-        <div class="gc-hero-visual">
-          <div class="gc-route-card">
-            <div class="gc-route-list">
-              <div class="gc-route-stop"><i class="gc-route-node"></i><div><small>ORIGIN HUB</small><b>گوانگژۆ · چین</b></div><em>QC</em></div>
-              <div class="gc-route-stop"><i class="gc-route-node gold"></i><div><small>TRANSIT HUB</small><b>دوبەی · UAE</b></div><em>TRANSIT</em></div>
-              <div class="gc-route-stop"><i class="gc-route-node green"></i><div><small>DELIVERY HUB</small><b>هەولێر · IRAQ</b></div><em>DELIVER</em></div>
-            </div>
-            <div class="gc-route-bottom"><span class="gc-live-status"><i></i> NETWORK ONLINE</span><span class="gc-route-badge">AIR · SEA · LAND</span></div>
+        <div class="gc-hero-visual gc-command-map">
+          <div class="gc-map-shell">
+            <div class="gc-map-topbar"><span class="gc-live-status"><i></i> LIVE FLEET NETWORK</span><span class="gc-map-clock">UPDATED JUST NOW</span></div>
+            <div class="route-map" aria-label="نەخشەی زیندووی گواستنەوەی Globall Cloud"></div>
+            <div class="gc-map-fleet"><div><span class="gc-fleet-icon air">✈</span><b>Air cargo</b><small>گوانگژۆ → دوبەی</small></div><div><span class="gc-fleet-icon sea">⚓</span><b>Sea cargo</b><small>لە ڕێگای دەریا</small></div><div><span class="gc-fleet-icon land">▰</span><b>Land fleet</b><small>دوبەی → هەولێر</small></div></div>
           </div>
         </div>
       </div>
