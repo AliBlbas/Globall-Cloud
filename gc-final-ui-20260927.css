@@ -648,3 +648,9 @@ body:has(#auth) .gc-command-launcher{display:none!important}
 body:has(.gc-shell) .gc-vx-cmd,
 body:has(.gc-shell) [data-gc-vx-cmd],
 body:has(.gc-shell) .gc-command-launcher{display:none!important}
+
+/* Staff login: also suppress legacy command launcher before the authenticated shell mounts. */
+body:has(#loginGate) .gc-vx-cmd,
+body:has(#loginGate) [data-gc-vx-cmd],
+body:has(#loginGate) .gc-command-launcher,
+body:has(#loginGate) [class*="vx-cmd"]{display:none!important}
