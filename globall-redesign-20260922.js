@@ -16,7 +16,7 @@
     document.head.appendChild(premium);
     const final = document.createElement('link');
     final.rel = 'stylesheet';
-    final.href = '/gc-final-ui-20260927.css?v=3';
+    final.href = '/gc-final-ui-20260927.css?v=4';
     final.dataset.gcFinalUi = '1';
     document.head.appendChild(final);
     document.querySelectorAll('link[data-gc-redesign-v2026]').forEach((node) => node.remove());
