@@ -37,7 +37,7 @@ if (sw.includes("fetch(request, { cache: 'no-store' })") && sw.includes('self.sk
 else fail('Service Worker network-first/lifecycle contract is incomplete')
 
 const required = [
-  'index.html','sw.js','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js','public-route-bootstrap.js','public-runtime-guarantee.js',
+  'index.html','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js','public-route-bootstrap.js','public-runtime-guarantee.js',
   'public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js','tracking-integration.html','tracking-intelligence.js',
   'tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os-v5.html','staff-os-v5.css','staff-os-v5.js',
   'staff-os-v5-rescue.js','staff-logistics-intelligence.css','staff-logistics-intelligence.js','staff-mobile-command-dock.css','staff-mobile-command-dock.js',
@@ -97,6 +97,9 @@ if (!staff.includes('gc-staff-final-20260922.js?v=')) fail('Staff final mobile n
 if (staff.includes('staff-reference-mobile-20260922.js?v=') || staff.includes('staff-premium-mobile-20260909.js?v=')) fail('Legacy competing Staff mobile navigation scripts are still loaded')
 if (staffLoader.includes('staff-mobile-command-dock.js?v=')) fail('Legacy Staff mobile command dock is still dynamically loaded')
 if (!staff.includes('mobile-premium-responsive-v2026.css?v=')) fail('Staff responsive CSS is not loaded')
+if (!publicShell.includes('/gc-production-ui-20260927.css?v=1')) fail('Public production UI layer is not loaded')
+if (!staff.includes('/gc-production-ui-20260927.css?v=1')) fail('Staff production UI layer is not loaded')
+if (!read('customer-portal.html').includes('/gc-production-ui-20260927.css?v=1')) fail('Customer production UI layer is not loaded')
 if (!staff.includes('staff-os-pro-20260909.css?v=') || !staff.includes('staff-shell-polish-20260909.css?v=')) fail('Staff shell polish assets are not loaded')
 if (!publicShell.includes('/globall-redesign-20260922.js')) fail('active public shell does not load the current experience script')
 if (publicShell.includes('gc-csp-scripts/index-inline-2.js')) fail('legacy monolithic public script is still loaded by the active homepage')

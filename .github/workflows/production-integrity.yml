@@ -53,6 +53,9 @@ jobs:
           grep -q 'staff-premium-mobile-20260909.js?v=' staff-os-v5.html
           grep -q 'mobile-premium-responsive-v2026.css?v=' staff-os-v5.html
           grep -q 'gc-staff-final-20260922.js?v=' staff-os-v5.html
+          grep -q '/gc-production-ui-20260927.css?v=1' index.html
+          grep -q '/gc-production-ui-20260927.css?v=1' staff-os-v5.html
+          grep -q '/gc-production-ui-20260927.css?v=1' customer-portal.html
           ! grep -q 'staff-reference-mobile-20260922.js?v=' staff-os-v5.html
           ! grep -q 'staff-premium-mobile-20260909.js?v=' staff-os-v5.html
           ! grep -q 'staff-mobile-command-dock.js?v=' staff-os-v5-enhancement-loader.js

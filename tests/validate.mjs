@@ -50,7 +50,7 @@ if (ts) {
 
 console.log('Required production files')
 const required = [
-  'index.html','sw.js','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
+  'index.html','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
   'public-route-bootstrap.js','public-runtime-guarantee.js','public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js',
   'tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html',
   'staff-os-v5.html','staff-os-v5.css','staff-os-v5.js','staff-os-v5-rescue.js','staff-logistics-intelligence.js','staff-logistics-intelligence.css',
@@ -104,6 +104,9 @@ const guards = [
   ['staff entry has no competing legacy mobile JS', !/staff-reference-mobile-20260922\.js\?v=|staff-premium-mobile-20260909\.js\?v=/.test(read('staff-os-v5.html'))],
   ['staff loader has no legacy mobile command dock', !/staff-mobile-command-dock\.js\?v=/.test(read('staff-os-v5-enhancement-loader.js'))],
   ['active homepage uses current experience script', publicShell.includes('/globall-redesign-20260922.js')],
+  ['public production UI layer loaded', publicShell.includes('/gc-production-ui-20260927.css?v=1')],
+  ['staff production UI layer loaded', read('staff-os-v5.html').includes('/gc-production-ui-20260927.css?v=1')],
+  ['customer production UI layer loaded', read('customer-portal.html').includes('/gc-production-ui-20260927.css?v=1')],
   ['active homepage avoids legacy monolithic script', !publicShell.includes('gc-csp-scripts/index-inline-2.js')],
   ['public bootstrap loads runtime guarantee', publicBootstrap.includes('/public-runtime-guarantee.js')],
   ['public runtime has emergency fallback', publicRuntime.includes('renderEmergencyShell')],
