@@ -387,7 +387,9 @@
     const packages = d.packages || [];
     const receipts = d.receipts || [];
     const photos = receipts.flatMap(r => Array.isArray(r.photos) ? r.photos : []);
-
+    const status = String(s.status || 'received_origin');
+    const flow = ['received_origin','in_transit','at_transit_hub','customs','out_for_delivery','delivered'];
+    const next = flow[flow.indexOf(status) + 1];
     const packageCustomerCodes = new Set();
     const packageContents = [];
     for (const p of packages) {
@@ -399,42 +401,29 @@
     }
     const customerGoodsCount = Number(s.customer_goods_count || s.customer_count || packageCustomerCodes.size || (s.customer_gc_code ? 1 : 0));
     const sentAt = s.step_dates?.departed || s.dispatched_at || s.shipped_at || s.created_at;
+    const updatedAt = s.tracking_updated_at || s.updated_at || sentAt;
     const contents = packageContents.length ? packageContents.join(' · ') : (s.cargo_description || s.description || 'تێبینییەکی کاڵا تۆمار نەکراوە.');
+    const etaMs = s.eta ? new Date(s.eta).getTime() : 0;
+    const sla = etaMs ? Math.max(0, Math.min(100, Math.round(((etaMs - Date.now()) / (7 * 86400000)) * 100))) : null;
+    const milestoneRows = flow.map((key, index) => {
+      const event = ev.find(x => String(x.status_key || x.status || x.event_type) === key);
+      const stamp = s.step_dates?.[key] || event?.created_at || event?.occurred_at;
+      const complete = Boolean(stamp) || index < (Number(s.current_step_index ?? -1) + 1);
+      return { key, complete, stamp, event };
+    });
+    const eventRows = ev.slice(0, 20).map(e => `<div class="timeline-row"><time>${esc(date(e.created_at||e.occurred_at))}</time><div><b>${esc(statusLabel(e.status_key||e.status)||e.event_type||'Event')}</b><span>${esc(e.location_label||e.location||e.note||'')}</span><small>${esc(e.created_by_name||'Operations')}</small></div></div>`).join('');
+    const packageRows = packages.slice(0, 20).map((pkg, index) => { const meta = pkg.metadata && typeof pkg.metadata === 'object' ? pkg.metadata : {}; return `<div class="package-row"><span class="package-index">${String(index+1).padStart(2,'0')}</span><div><b>${esc(pkg.package_code||pkg.package_id||`Carton ${index+1}`)}</b><small>${esc(pkg.description||meta.contents||meta.customer_gc_code||'کارتۆن / پەکەجی بێ وەسف')}</small></div><span class="package-weight">${esc(pkg.weight_kg??'—')} kg</span></div>`; }).join('');
+    const footer = `<button class="btn" data-close>داخستن</button>${next && !['cancelled','on_hold'].includes(status) ? `<button class="btn primary" id="advanceShipment" data-next-status="${next}">→ ${statusLabel(next)}</button>` : ''}<button class="btn danger" id="holdShipment">وەستاندن / Hold</button><button class="btn" id="editFromDetail">دەستکاری ورد</button>`;
+    openModal(`Shipment Command · ${s.customer_gc_code || s.tracking_id || ''}`, `<div class="shipment-command"><section class="shipment-command-banner"><div><div class="eyebrow">SHIPMENT COMMAND CENTER</div><h2>${esc(s.tracking_id||s.customer_gc_code||'بار')}</h2><p>${esc(s.customer_name||'کڕیار نەناسراو')} · ${esc(s.origin_warehouse||s.origin_key||'—')} → ${esc(s.destination_warehouse||s.dest_key||'—')}</p></div><div class="shipment-command-status"><span class="pill ${status==='delivered'?'mint':status==='cancelled'?'red':'warn'}">${esc(statusLabel(status))}</span><small>Last update<br><b>${esc(date(updatedAt))}</b></small></div></section><div class="shipment-command-kpis"><div><span>Current location</span><b>${esc(s.current_location_label||s.origin_warehouse||'—')}</b></div><div><span>ETA</span><b>${esc(s.eta ? date(s.eta) : 'دیاری نەکراوە')}</b></div><div><span>Cartons / packages</span><b>${esc(s.carton_count??packages.length??'—')} / ${number(packages.length)}</b></div><div><span>Chargeable weight</span><b>${esc(s.chargeable_weight_kg??s.weight_kg??'—')} kg</b></div></div><section class="shipment-progress-panel"><div class="card-head"><div><div class="eyebrow">LIFECYCLE TRACK</div><h3>هەنگاوی بار</h3></div>${sla === null ? '<span class="pill">SLA بێ ETA</span>' : `<span class="pill ${sla<25?'red':'mint'}">SLA ${sla}%</span>`}</div><div class="shipment-milestones">${milestoneRows.map((m,i)=>`<div class="shipment-milestone ${m.complete?'complete':''} ${m.key===status?'current':''}"><span>${m.complete?'✓':String(i+1)}</span><b>${statusLabel(m.key)}</b><small>${m.stamp ? esc(shortDate(m.stamp)) : 'چاوەڕوان'}</small></div>`).join('')}</div></section><div class="two-col"><section class="card"><div class="card-head"><h3>بار و دارایی</h3><span class="pill mint">${number(customerGoodsCount)} کڕیار</span></div><div class="detail-lines"><p>کۆی بهای بار: <b>${money(s.total_amount||0,s.currency||'USD')}</b></p><p>پارەدراو: <b>${money(s.paid_amount||0,s.currency||'USD')}</b></p><p>ماوە: <b class="${Number(s.total_amount||0)>Number(s.paid_amount||0)?'text-danger':''}">${money(Math.max(0,Number(s.total_amount||0)-Number(s.paid_amount||0)),s.currency||'USD')}</b></p><p>کێشی واقعی: <b>${esc(s.actual_weight_kg??s.weight_kg??'—')} kg</b></p><p>Priority: <b>${esc(s.priority||'normal')}</b></p></div></section><section class="card"><div class="card-head"><h3>کاڵا و کارتۆن</h3><span class="pill">${number(packages.length)} evidence</span></div><p class="muted">${esc(contents)}</p><div class="package-list">${packageRows || '<div class="empty">هیچ carton detail ـێک نییە.</div>'}</div></section></div><section class="card"><div class="card-head"><div><div class="eyebrow">CHAIN OF CUSTODY</div><h3>Timeline ـی تۆمارکراو</h3></div><span class="pill">${number(ev.length)} events</span></div><div class="timeline">${eventRows || '<div class="empty">هێشتا event نییە.</div>'}</div></section>${photos.length ? `<section class="card"><div class="card-head"><div><div class="eyebrow">WAREHOUSE EVIDENCE</div><h3>وێنە و بەڵگە</h3></div><span class="pill mint">${number(photos.length)} photos</span></div><div class="photo-grid">${photos.slice(0,16).map(u=>`<a class="photo" href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="Warehouse evidence"></a>`).join('')}</div></section>` : ''}</div>`, footer);
+    document.getElementById('advanceShipment')?.addEventListener('click', async () => { await updateShipmentFromDetail(id, next, `Lifecycle advance: ${statusLabel(next)}`); });
+    document.getElementById('holdShipment')?.addEventListener('click', async () => { await updateShipmentFromDetail(id, 'on_hold', 'بار بۆ پشکنینی ستاف وەستاندرا.'); });
+    document.getElementById('editFromDetail')?.addEventListener('click', () => { closeModal(); editShipment(id); });
+  }
 
-    openModal(
-      `بار · ${s.customer_gc_code || s.tracking_id || ''}`,
-      `<div class="two-col">
-        <section class="card">
-          <div class="card-head"><h3>کڕیار و مسیر</h3><span class="pill">${esc(modeLabel(s.transport_mode||s.type))}</span></div>
-          <p><b>${esc(s.customer_name||'—')}</b> · ${esc(s.customer_gc_code||'—')}</p>
-          <p class="muted">${esc(s.origin_warehouse||s.origin_key||'—')} → ${esc(s.destination_warehouse||s.dest_key||'—')}</p>
-          <p class="muted">بەڕێکراو / نێردراو: <b>${esc(date(sentAt))}</b></p>
-          <p class="muted">ETA: ${esc(date(s.eta))}</p>
-        </section>
-        <section class="card">
-          <div class="card-head"><h3>بار و ژمارەکان</h3><span class="pill mint">${number(customerGoodsCount)} کڕیار</span></div>
-          <p>کۆی کارتۆن: <b>${esc(s.carton_count??s.items_count??packages.length??'—')}</b></p>
-          <p>کێشی واقعی: <b>${esc(s.actual_weight_kg??s.weight_kg??'—')} kg</b></p>
-          <p>Chargeable: <b>${esc(s.chargeable_weight_kg??'—')} kg</b></p>
-          <p>کۆی بهای بار: <b>${money(s.total_amount||0,s.currency||'USD')}</b></p>
-        </section>
-        <section class="card">
-          <div class="card-head"><h3>ناوەڕۆکی کاڵا</h3><span class="pill">${number(packages.length)} پەکەج</span></div>
-          <p class="muted">${esc(contents)}</p>
-          ${packages.length ? `<div class="list" style="margin-top:8px">${packages.slice(0,12).map(p=>`<div class="mini-row"><div><b>${esc(p.package_code||'Package')}</b><span>${esc(p.description||p.package_type||'carton')}</span></div><strong class="mono">${esc(p.weight_kg??'—')} kg</strong></div>`).join('')}</div>` : ''}
-        </section>
-        <section class="card">
-          <div class="card-head"><h3>Status</h3><span class="pill ${s.status==='delivered'?'mint':s.status==='cancelled'?'red':'warn'}">${esc(statusLabel(s.status))}</span></div>
-          <p class="muted">GC / Tracking: <span class="mono">${esc(s.tracking_id||s.customer_gc_code||'—')}</span></p>
-        </section>
-        <section class="card" style="grid-column:1/-1">
-          <div class="card-head"><h3>Timeline</h3></div>
-          <div class="timeline">${ev.length ? ev.map(e=>`<div class="timeline-row"><time>${esc(date(e.created_at||e.occurred_at))}</time><div><b>${esc(statusLabel(e.status)||e.event_type||'Event')}</b><span>${esc(e.location||e.location_label||e.note||'')}</span></div></div>`).join('') : '<div class="empty">هێشتا event نییە.</div>'}</div>
-        </section>
-        ${photos.length ? `<section class="card" style="grid-column:1/-1"><div class="card-head"><h3>وێنەکانی کۆگا</h3></div><div class="photo-grid">${photos.slice(0,12).map(u=>`<a class="photo" href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="Warehouse evidence"></a>`).join('')}</div></section>` : ''}
-      </div>`,
-      '<button class="btn" data-close>داخستن</button>'
-    );
+  async function updateShipmentFromDetail(id, nextStatus, note) {
+    const button = document.querySelector('#advanceShipment, #holdShipment');
+    if (button) button.disabled = true;
+    try { await request(FN.shipmentControl, '/', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({data:{id, status:nextStatus, note}})}); closeModal(); toast(`بار نوێکرایەوە: ${statusLabel(nextStatus)}`); await renderShipments(); } catch (e) { toast(e.message, 'bad'); if (button) button.disabled = false; }
   }
 
   function newShipmentModal() { openModal('دروستکردنی بار',`<form id="shipForm" class="form-grid"><div class="form-field"><label>GC code</label><input class="field" name="customer_gc_code" required placeholder="GC-1005"></div><div class="form-field"><label>Tracking</label><input class="field" name="tracking_id" required placeholder="GC-2026-0001"></div><div class="form-field"><label>Mode</label><select class="field" name="transport_mode">${MODES.map(x=>`<option value="${x}">${modeLabel(x)}</option>`).join('')}</select></div><div class="form-field"><label>Cartons</label><input class="field" name="carton_count" type="number" min="1" value="1"></div><div class="form-field"><label>Origin warehouse</label><input class="field" name="origin_warehouse" placeholder="China"></div><div class="form-field"><label>Destination warehouse</label><input class="field" name="destination_warehouse" value="Erbil"></div><div class="form-field"><label>Actual kg</label><input class="field" name="actual_weight_kg" type="number" step="0.01"></div><div class="form-field"><label>Length cm</label><input class="field" name="length_cm" type="number" step="0.01"></div><div class="form-field"><label>Width cm</label><input class="field" name="width_cm" type="number" step="0.01"></div><div class="form-field"><label>Height cm</label><input class="field" name="height_cm" type="number" step="0.01"></div><div class="form-field full"><label>کاڵا</label><textarea class="field" name="cargo_description" placeholder="2 laptop, 5 cover..."></textarea></div></form>`,'<button class="btn" data-close>هەڵوەشاندنەوە</button><button class="btn primary" id="saveShip">دروستکردن</button>'); document.getElementById('saveShip').onclick=async()=>{const d=Object.fromEntries(new FormData(document.getElementById('shipForm')).entries()); try{const r=await request(FN.shipmentCreate,'/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:{...d,status:'received_origin'}})}); closeModal(); toast('بارەکە تۆمار کرا'); await renderShipments(); return r;}catch(e){toast(e.message,'bad')}}; }
