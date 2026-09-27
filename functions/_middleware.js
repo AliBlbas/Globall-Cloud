@@ -61,7 +61,6 @@ export async function onRequest(context) {
     html=addBodyAsset(html,'src="/gc-csp-scripts/logistics-pricing-ui.js',`<script src="/gc-csp-scripts/logistics-pricing-ui.js?v=${VERSION}" defer data-gc-logistics-pricing-ui="1"></script>`);
     html=addBodyAsset(html,'src="/site-navigation-20260909.js',`<script src="/site-navigation-20260909.js?v=${VERSION}" defer data-gc-site-navigation="1"></script>`);
     html=addBodyAsset(html,'src="/public-core-recovery.js',`<script src="/public-core-recovery.js?v=${VERSION}" defer data-gc-public-core-recovery="1"></script>`);
-    html=addBodyAsset(html,'src="/public-onboarding-20260923.js',`<script src="/public-onboarding-20260923.js?v=${VERSION}" defer data-gc-public-onboarding="1"></script>`);
   }
   if (STAFF_V5.test(path)) {
     html=addHeadAsset(html,'src="/staff-os-compat.js',`<script src="/staff-os-compat.js?v=${VERSION}" defer data-gc-staff-compat="1"></script>`);

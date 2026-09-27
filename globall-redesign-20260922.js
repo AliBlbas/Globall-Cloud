@@ -19,6 +19,12 @@
     final.href = '/gc-final-ui-20260927.css?v=3';
     final.dataset.gcFinalUi = '1';
     document.head.appendChild(final);
+    document.querySelectorAll('link[data-gc-redesign-v2026]').forEach((node) => node.remove());
+    const publicRedesign = document.createElement('link');
+    publicRedesign.rel = 'stylesheet';
+    publicRedesign.href = '/gc-redesign-v2026.css?v=20260927-1';
+    publicRedesign.dataset.gcRedesignV2026 = '1';
+    document.head.appendChild(publicRedesign);
   };
 
   const syncPages = (id) => {
