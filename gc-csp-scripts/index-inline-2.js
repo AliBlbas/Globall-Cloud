@@ -59,7 +59,7 @@ ku:{
   topbar:{note:'ڕێڕەوەکانی چین، دوبەی، ئەمریکا و هەولێر بەبەردەوامی چالاکن',support:'پشتیوانی زیندوو ٢٤/٧'},
   nav:{home:'سەرەکی',about:'دەربارەمان',services:'خزمەتگوزارییەکان',track:'شوێنکەوتن',contact:'پەیوەندی',signIn:'چوونەژوورەوە',dashboard:'داشبۆرد',quote:'داواکردنی نرخ'},
   hero:{eyebrow:'چین  ·  ئیمارات  ·  ئەمریکا  ·  هەولێر',title:'گەیاندنی بار بە متمانە، خێرایی و بێ سنوور',subtitle:'Globall Cloud کاڵاکانت بە شێوەیەکی ئاسایشدار لە چین، دوبەی و ئەمریکا بۆ هەولێر و هەموو شارەکانی عێراق دەگەیەنێت — بە شوێنکەوتنی ڕاستەوخۆ، ڕێکاری ڕوون و پشتیوانی ٢٤/٧.',ctaTrack:'شوێنکەوتنی بار',ctaQuote:'داواکردنی نرخ',ctaWhatsApp:'پەیوەندی بە واتساپ',route:{a:'گوانگژۆ، چین',b:'دوبەی، ئیمارات',c:'هەولێر، عێراق'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'بارەکەت لە نێوان چین، دوبەی، ئەمریکا و هەولێر بە بەڵگە و شوێنکەوتنی زیندوو بەردەوامە و هەر نوێکارییەک زوو دەردەکەوێت.',routeOrigin:'سەرەتا / Origin Hub',routeTransit:'ترانزیت / Transit Hub',routeDestination:'گەیاندن / Delivery Hub'},
-  trust:{s1v:'+٢٥K',s1l:'بار گەیەنراو',s2v:'١٢+',s2l:'شوێن و بازاڕ',s3v:'٢٤/٧',s3l:'پشتیوانی زیندوو',s4v:'٩٨%',s4l:'گەیاندنی لەکاتی خۆیدا'},
+  trust:{s1v:'Air · Sea · Land',s1l:'شێوازی گواستنەوە',s2v:'چین → عێراق',s2l:'ڕێڕەوی سەرەکی',s3v:'٢٤/٧',s3l:'پشتیوانی زیندوو',s4v:'Live',s4l:'شوێنکەوتنی بار'},
   liveTrack:{heading:'شوێنکەوتنی بارەکەت لە چرکەیەکدا',sub:'ژمارەی شوێنکەوتنەکەت بنووسە و نوێترین دۆخی بارەکەت ببینە',placeholder:'وەک GC10052341',button:'شوێنکەوتن'},
   business:{eyebrow:'پەڕەکانی بازرگانی',heading:'هەموو خزمەتگوزاری و پەڕە گرنگەکان لە یەک شوێن',sub:'بە یەک کلیک بچۆ بۆ خزمەتگوزاری، خەملاندنی نرخ، داشبۆرد، کۆگاکان و پەیوەندی.',
     items:{
@@ -70,7 +70,7 @@ ku:{
       warehouses:{title:'کۆگاکان',desc:'هابەکانی چین، دوبەی، ئەمریکا و هەولێر لە یەک تۆڕدا.',action:'بینینی کۆگاکان',icon:'i-warehouse',route:'contact'},
       contact:{title:'پەیوەندی',desc:'واتساپ، ئیمەیل و ڕێکخستن لە کەمترین کاتدا.',action:'پەیوەندیمان پێوە بکە',icon:'i-chat',route:'contact'}
     }},
-  dashboardPreview:{heading:'پێشبینی داشبۆردی کڕیار',sub:'کڕیاران دەتوانن لێرە بارەکان، نرخ و ئاگادارییەکان بە شێوەی خێرا بەڕێوەببەن.',stats:[{v:'4',l:'بارە چالاکەکان'},{v:'29',l:'گەیشتوو'},{v:'2',l:'چاوەڕوان'},{v:'8',l:'فاکتۆرەکان'}],btnPortal:'کردنەوەی پرۆتال',btnTrack:'شوێنکەوتن بکە'},
+  dashboardPreview:{heading:'پێشبینی داشبۆردی کڕیار',sub:'کڕیاران دەتوانن لێرە بارەکان، نرخ و ئاگادارییەکان بە شێوەی خێرا بەڕێوەببەن.',stats:[{v:'Live',l:'دۆخی بار'},{v:'Private',l:'داتای کڕیار'},{v:'Realtime',l:'نوێکردنەوە'},{v:'Secure',l:'پاراستنی هەژمار'}],btnPortal:'کردنەوەی پرۆتال',btnTrack:'شوێنکەوتن بکە'},
   warehouses:{eyebrow:'کۆگاکان',heading:'تۆڕی کۆگاکانمان',sub:'هابە سەرەکییەکان لە چین، دوبەی، ئەمریکا و هەولێر بۆ جوڵاندنی خێرای بار.',
     items:{
       guangzhou:{tag:'هاب سەرەکی چین',title:'کۆگای گوانگجو',address:'گوانگجو، چین',hours:'دووشەممە - شەممە',features:['کۆکردنەوەی بار','وێنەی QC','پاکەتکردنی خێرا']},
@@ -143,16 +143,7 @@ ku:{
     {flag:'🇮🇶',title:'گەیاندنی هەولێر',meta:'Delivery Hub',desc:'پاش گومرگ و ڕێکخستنی دوایین، بارەکەت بە سەلامەتی دەگات.',tags:['Customs','Door-to-Door','Final Mile']}
   ]},
   footer:{blurb:'Globall Cloud — گەیاندنی بار بە متمانەوە لە چین و ئیمارات بۆ هەموو عێراق.',quick:'بەستەرە خێراکان',servicesH:'خزمەتگوزارییەکان',contactH:'پەیوەندی',address:'هەولێری نوێ، پشت مەعەد گەشە، هەولێر، عێراق',rights:'هەموو مافەکان پارێزراون.',privacy:'ڕێساکانی تایبەتێتی',terms:'مەرجی بەکارهێنان'},
-  testi:{
-    eyebrow:'ڕاوبۆچوونی کڕیاران',
-    heading:'کڕیارانمان چی دەڵێن',
-    sub:'چەند وتەیەک لە کڕیارانێک کە بارەکانیان بە Globall Cloud گەیاندووە.',
-    items:[
-      {quote:'بارەکانم لە گوانجۆوە بۆ هەولێر بە کاتی خۆیان گەیشتن، وشوێنکەوتنەکە زۆر ڕوونبوو — هەموو هەنگاوێکی بارەکەم بە ڕوونی دەبینی.', name:'ئاراس محەمەد', role:'خاوەن فرۆشگای ئەلیکترۆنی، هەولێر', initials:'ئم', stars:5},
-      {quote:'کاری ترخانکردنی گومرگ زۆر سەختە، بەڵام تیمی Globall Cloud هەموو کاغەزەکانیان بۆ ئامادەکرد و کێشەم لەگەڵ نەبوو. زۆر پیشەیین.', name:'سارا ڕەشید', role:'بازرگانی کەلوپەلی ماڵەوە', initials:'سڕ', stars:5},
-      {quote:'لە یەکەم داواکارییەوە هەتا وەرگرتنی بارەکە، هەمیشە وەڵامی پەیوەندییەکانم زوو بوو. ئێستا هەموو هاوردەکانم لە ڕێگەیانەوە دەکەم.', name:'کاروان عەزیز', role:'هاوردەکەری کاڵای تەکنەلۆجیا', initials:'کع', stars:5}
-    ]
-  },
+  testi:{eyebrow:'ڕاوبۆچوونی کڕیاران',heading:'کۆکردنەوەی ڕاوە ڕاستەقینەکان',sub:'ئێمە تەنها لێرە ڕاو و هەڵسەنگاندنی کڕیارانی پشتڕاستکراو پیشان دەدەین.',items:[]},
   legal:{
     updated:'دوایین نوێکردنەوە: ٢٠٢٦',
     privacyEyebrow:'تایبەتێتی',
@@ -201,7 +192,7 @@ en:{
   topbar:{note:'Active lanes across China, Dubai, and Erbil',support:'Live support 24/7'},
   nav:{home:'Home',about:'About Us',services:'Services',track:'Track',contact:'Contact',signIn:'Sign In',dashboard:'Dashboard',quote:'Get a Quote'},
   hero:{eyebrow:'CHINA  ·  UAE  ·  IRAQ',title:'Delivering Trust Across Borders',subtitle:'Globall Cloud moves your cargo safely and quickly from China and the United Arab Emirates to every city in Iraq — with live tracking, clear milestones, and 24/7 support.',ctaTrack:'Track Shipment',ctaQuote:'Get a Quote',ctaWhatsApp:'Chat on WhatsApp',route:{a:'Guangzhou, China',b:'Dubai, UAE',c:'Erbil, Iraq'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'Your cargo is moving through our China → Dubai → Erbil network with live updates.',routeOrigin:'Origin Hub',routeTransit:'Transit Hub',routeDestination:'Delivery Hub'},
-  trust:{s1v:'25K+',s1l:'Delivered shipments',s2v:'12+',s2l:'Connected markets',s3v:'24/7',s3l:'Live support',s4v:'98%',s4l:'On-time delivery'},
+  trust:{s1v:'Air · Sea · Land',s1l:'Transport modes',s2v:'China → Iraq',s2l:'Primary corridor',s3v:'24/7',s3l:'Live support',s4v:'Live',s4l:'Shipment tracking'},
   liveTrack:{heading:'Track in seconds',sub:'Enter your GC customer code or exact shipment ID to see the latest status.',placeholder:'e.g. GC-338 or shipment ID',button:'Track Shipment'},
   business:{eyebrow:'BUSINESS PAGES',heading:'Everything customers need is one tap away',sub:'Jump straight to services, pricing, dashboard tools, warehouses, and support.',
     items:{
@@ -212,7 +203,7 @@ en:{
       warehouses:{title:'Warehouses',desc:'China, Dubai, and Erbil hubs that keep cargo moving.',action:'View network',icon:'i-warehouse',route:'contact'},
       contact:{title:'Contact',desc:'WhatsApp, email, and quick support in one place.',action:'Get in touch',icon:'i-chat',route:'contact'}
     }},
-  dashboardPreview:{heading:'Customer Dashboard Preview',sub:'A quick look at the portal customers use to manage shipments anywhere.',stats:[{v:'4',l:'Active shipments'},{v:'29',l:'Delivered'},{v:'2',l:'Pending'},{v:'8',l:'Invoices'}],btnPortal:'Open portal',btnTrack:'Track a parcel'},
+  dashboardPreview:{heading:'Customer Dashboard Preview',sub:'A quick look at the portal customers use to manage shipments anywhere.',stats:[{v:'Live',l:'Shipment status'},{v:'Private',l:'Customer data'},{v:'Realtime',l:'Updates'},{v:'Secure',l:'Account access'}],btnPortal:'Open portal',btnTrack:'Track a parcel'},
   warehouses:{eyebrow:'WAREHOUSES',heading:'Our Warehouse Network',sub:'Strategic hubs in China, Dubai, and Erbil keep cargo moving smoothly.',
     items:{
       guangzhou:{tag:'Origin Hub',title:'Guangzhou Warehouse',address:'Guangzhou, China',hours:'Mon - Sat',features:['Cargo consolidation','QC photo checks','Fast packing']},
@@ -906,7 +897,14 @@ function renderWhy(){
 function renderTestimonials(){
   const wrap = document.getElementById('testimonialsGrid');
   if(!wrap) return;
-  const items = t('testi.items');
+  const items = Array.isArray(t('testi.items')) ? t('testi.items') : [];
+  const section = wrap.closest('section') || wrap.parentElement;
+  if(!items.length){
+    if(section) section.hidden = true;
+    wrap.innerHTML = '';
+    return;
+  }
+  if(section) section.hidden = false;
   const star = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6.4 7 .7-5.3 4.8 1.6 6.9L12 17.6l-6.2 3.7 1.6-6.9L2.1 9.6l7-.7L12 2.5z"/></svg>`;
   wrap.innerHTML = items.map(it=>`<div class="testimonial-card">
     <div class="testimonial-stars">${star.repeat(it.stars||5)}</div>
