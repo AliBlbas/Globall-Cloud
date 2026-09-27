@@ -127,10 +127,30 @@
   }
 
   function shellHTML() {
+    const icon = (path) => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + path + '"></path></svg>';
+    const icons = {
+      overview: icon('M4 10.5 12 4l8 6.5V20H4z'),
+      shipments: icon('M3 7h18v13H3zM7 7V4h10v3M7 12h10M7 16h6'),
+      alerts: icon('M12 3 21 20H3zM12 9v5M12 17h.01'),
+      customers: icon('M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M17 3.5a4 4 0 0 1 0 7.5'),
+      pricing: icon('M6 3h9l3 3v15H6zM9 8h6M9 12h6M9 16h4'),
+      warehouses: icon('M3 10h18v10H3zM5 10 12 4l7 6M7 13h3v7H7M14 13h3v7h-3'),
+      finance: icon('M4 19V9M10 19V5M16 19v-7M22 19H2'),
+      'staff-chat': icon('M4 5h16v11H8l-4 4z'),
+      'customer-chat': icon('M4 5h16v11H8l-4 4zM8 10h8'),
+      requests: icon('M5 4h14v16H5zM8 8h8M8 12h8M8 16h5'),
+      activity: icon('M6 4h12M6 8h12M6 12h8M6 16h10'),
+      settings: icon('M12 3l1.6 2.8 3.2.5-.8 3.1 2.1 2.3-2.1 2.3.8 3.1-3.2.5L12 21l-1.6-2.8-3.2-.5.8-3.1-2.1-2.3L8 10.1 7.2 7l3.2-.5zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6')
+    };
     const items = [
-      ['overview','01','داشبۆرد',''],['shipments','02','بارەکان',''],['alerts','03','Alerts','alertsBadge'],['customers','04','کڕیاران',''],['pricing','05','نرخەکان',''],['warehouses','06','کۆگاکان',''],['finance','07','دارایی',''],['staff-chat','08','چاتی ستاف','staffChatBadge'],['customer-chat','09','چاتی کڕیار','customerChatBadge'],['requests','10','ئاگاداری / داواکاری','requestBadge'],['activity','11','Audit Log',''],['settings','12','ڕێکخستنەکان','']
+      ['overview','داشبۆرد',''],['shipments','بارەکان',''],['alerts','Alerts','alertsBadge'],['customers','کڕیاران',''],
+      ['pricing','نرخەکان',''],['warehouses','کۆگاكان',''],['finance','دارایی',''],['staff-chat','چاتی ستاف','staffChatBadge'],
+      ['customer-chat','چاتی کڕیار','customerChatBadge'],['requests','ئاگاداری / داواکاری','requestBadge'],['activity','Audit Log',''],['settings','ڕێکخستنەکان','']
     ];
-    return `<div class="gc-shell"><aside class="gc-side"><div class="brand"><div class="brand-row"><div class="brand-logo">GC</div><div><b>Globall Cloud</b><small>STAFF OPERATING SYSTEM · V5</small></div></div></div><nav class="nav">${items.map(([id,no,label,badge]) => `<button class="nav-btn ${state.tab===id?'active':''}" data-tab="${id}"><span class="nav-icon">${no}</span><span>${label}</span>${badge?`<em class="nav-badge ${badge==='alertsBadge'?'hidden':''}" id="${badge}">0</em>`:''}</button>`).join('')}</nav><div class="side-foot"><strong id="sideName">${esc(state.staff?.full_name || 'Staff')}</strong><span id="sideRole" class="role-pill">${esc(roleLabel(state.staff?.role))} · ${esc(state.staff?.branch || 'all')}</span><div style="margin-top:8px">Session: <span style="color:var(--mint)">SECURE</span><br>Actions: <span style="color:var(--cyan2)">AUDITED</span></div><button class="btn" id="logoutBtn" style="width:100%;margin-top:8px">چوونەدەرەوە</button></div></aside><main class="gc-main"><header class="topbar"><div class="top-title"><strong id="pageTitle">Dashboard</strong><span id="pageSub">کۆنترۆڵی یەکگرتووی عملیات و کڕیاران.</span></div><div class="top-actions"><span class="status" id="systemStatus">Supabase · Secure</span><button class="btn" id="refreshBtn">↻ نوێکردنەوە</button></div></header><section class="view" id="view"></section></main></div>`;
+    const navButtons = items.map(([id,label,badge]) =>
+      '<button class="nav-btn '+(state.tab===id?'active':'')+'" data-tab="'+id+'"><span class="nav-icon">'+(icons[id]||'')+'</span><span>'+label+'</span>'+(badge?'<em class="nav-badge '+(badge==='alertsBadge'?'hidden':'')+'" id="'+badge+'">0</em>':'')+'</button>'
+    ).join('');
+    return '<div class="gc-shell"><aside class="gc-side"><div class="brand"><div class="brand-row"><div class="brand-logo">GC</div><div><b>Globall Cloud</b><small>STAFF OPERATING SYSTEM · V5</small></div></div></div><nav class="nav" aria-label="Staff modules">'+navButtons+'</nav><div class="side-foot"><strong id="sideName">'+esc(state.staff?.full_name || 'Staff')+'</strong><span id="sideRole" class="role-pill">'+esc(roleLabel(state.staff?.role))+' · '+esc(state.staff?.branch || 'all')+'</span><div style="margin-top:8px">Session: <span style="color:var(--mint)">SECURE</span><br>Actions: <span style="color:var(--cyan2)">AUDITED</span></div><button class="btn" id="logoutBtn" style="width:100%;margin-top:8px">چوونەدەرەوە</button></div></aside><main class="gc-main"><header class="topbar"><div class="top-title"><strong id="pageTitle">Dashboard</strong><span id="pageSub">کۆنترۆڵی یەکگرتووی عملیات و کڕیاران.</span></div><div class="top-actions"><span class="status" id="systemStatus">Supabase · Secure</span><button class="btn" id="refreshBtn">↻ نوێکردنەوە</button></div></header><section class="view" id="view"></section></main></div>';
   }
 
   function renderApp() {
