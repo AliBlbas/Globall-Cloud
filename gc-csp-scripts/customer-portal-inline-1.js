@@ -87,25 +87,118 @@ const renderNotifications = (items) => setHtml('notifications',
     ? items.map((item) => `<div class="item"><div class="row"><strong>${esc(item.title)}</strong>${item.read_at ? '<span class="pill">خوێندراوە</span>' : `<button class="btn notification-action" type="button" data-read-notification="${esc(item.id)}">خوێندراوە بکە</button>`}</div><div class="muted">${esc(item.body)}</div><small>${esc(date(item.created_at))}</small></div>`).join('')
     : emptyState(EMPTY.bell,'هیچ ئاگادارییەکی نوێ نییە','کاتێک update ـێکی shipment یان پەیامێک هەبێت، لێرە پیشان دەدرێت.')
 );
-const renderQuotes = (items) => setHtml('quotes', items.map((item) => {
-  const canAccept = item.status === 'quoted' && item.valid_until && new Date(item.valid_until) > new Date();
-  return `<div class="item"><div class="row"><strong>${esc(item.origin_key)} → ${esc(item.dest_key)}</strong><span class="pill">${esc(item.status)}</span></div><div class="muted">${esc(item.transport_mode)} · ${esc(item.weight_kg)} kg · ${esc(item.volume_cbm || 0)} CBM</div><div>${item.quoted_amount == null ? 'لەژێر پێداچوونەوە' : money(item.quoted_amount, item.currency)}</div><small>${item.valid_until ? `کاریگەر تا ${esc(date(item.valid_until))}` : ''}</small>${canAccept ? `<div class="actions"><button class="btn primary" type="button" data-accept-quote="${esc(item.id)}">پەسەندکردنی quote</button></div>` : ''}</div>`;
-}).join('') || emptyState(EMPTY.quote,'هیچ داواکاریی نرخ نییە','لە بەشی “داواکاری نرخ” ـەوە دەتوانیت داواکارییەکی نوێ بنێریت.');
-const renderDocuments = (items) => setHtml('docs', items.length
-  ? items.map((item) => `<div class="item"><div class="row"><strong>${esc(item.title || item.document_type)}</strong><span class="pill">${item.is_public ? 'Public' : 'Private'}</span></div><div class="muted">${esc(item.shipment_id)} · ${esc(item.document_status || 'uploaded')}</div><small>${esc(date(item.created_at))}</small>${item.file_url ? ` <a class="download" href="${esc(item.file_url)}" data-document-id="${esc(item.id)}" target="_blank" rel="noopener noreferrer" download>داگرتن</a>` : ''}</div>`).join('')
-  : emptyState(EMPTY.file,'هیچ بەڵگەیەک نییە','کاتێک document ـێک بۆ shipment ـەکەت بڵاوکرایەوە، لێرە دەبینرێت.')
-);
-const renderPods = (items) => setHtml('pods', items.map((item) => `<div class="item"><strong>${esc(item.shipment_id)}</strong><div class="muted">${item.delivered_at ? `گەیەنراو ${esc(date(item.delivered_at))}` : 'Pending'} · ${esc(item.receiver_name || '—')}</div><small>${esc(item.note || '')}${Array.isArray(item.photo_urls) && item.photo_urls.length ? ` · ${item.photo_urls.length} وێنە` : ''}</small></div>`).join('') || '<div class="muted">POD نییە.</div>');
-const renderReceipts = (items) => setHtml('receipts', items.map((item) => { const photos = Array.isArray(item.photos) ? item.photos.filter((url) => typeof url === 'string' && /^https?:\/\//i.test(url)) : []; return `<div class="item"><div class="row"><strong>${esc(item.batch_code || 'Receipt')}</strong><span class="pill">${esc(item.verification_status || 'pending')}</span></div><div class="muted">${esc(item.location || '—')} · ${esc(item.stage || 'received')} · ${esc(date(item.received_at))}</div><small>${item.gc_code_detected ? `GC: ${esc(item.gc_code_detected)} · ` : ''}${photos.length} وێنە</small>${photos.length ? `<div class="photo-grid">${photos.map((url) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img src="${esc(url)}" alt="Receipt ${esc(item.batch_code || '')}" loading="lazy"></a>`).join('')}</div>` : ''}</div>`; }).join('') || '<div class="muted">هێشتا بەڵگەی وەرگرتنی کۆگا نییە.</div>');
-const renderPayments = (invoices, payments) => {
-  const invoiceRows = invoices.map((item) => { const due = Math.max(0, Number(item.total || 0) - Number(item.paid_total || 0)); const paymentAction = due > 0 && item.status !== 'paid' ? `<a class="btn primary payment-action" href="./payment-checkout.html?invoice_id=${encodeURIComponent(item.id)}">پارەدان</a>` : ''; return `<div class="item"><div class="row"><strong>${esc(item.invoice_number)}</strong><span class="pill">${esc(item.status)}</span></div><div class="muted">${esc(item.shipment_id)} · ${money(item.total, item.currency)}</div><small>Paid: ${money(item.paid_total, item.currency)} · Due: ${money(due, item.currency)}</small>${paymentAction ? `<div class="actions">${paymentAction}</div>` : ''}</div>`; });
-  const paymentRows = payments.map((item) => `<div class="item"><div class="row"><strong>${money(item.amount, item.currency)}</strong><span class="pill">${esc(item.status)}</span></div><div class="muted">${esc(item.provider)} · ${esc(item.method || '—')}</div><small>${esc(date(item.paid_at || item.created_at))}</small></div>`);
-  setHtml('payments', invoiceRows.concat(paymentRows).join('') || emptyState(EMPTY.money,'هیچ مامەڵەیەکی دارایی نییە','لە کاتی دروستبوونی invoice یان payment، مێژووی مامەڵەکان لێرە دەردەکەون.'));
+
+const renderQuotes = (items) => {
+  const html = items.map((item) => {
+    const canAccept = item.status === 'quoted' && item.valid_until && new Date(item.valid_until) > new Date();
+    return `<div class="item">
+      <div class="row"><strong>${esc(item.origin_key)} → ${esc(item.dest_key)}</strong><span class="pill">${esc(item.status)}</span></div>
+      <div class="muted">${esc(item.transport_mode)} · ${esc(item.weight_kg || 0)} kg · ${esc(item.volume_cbm || 0)} CBM</div>
+      <div>${item.quoted_amount == null ? 'لەژێر پێداچوونەوە' : money(item.quoted_amount, item.currency)}</div>
+      <small>${item.valid_until ? `کاریگەر تا ${esc(date(item.valid_until))}` : 'هێشتا نرخ دیاری نەکراوە'}</small>
+      ${canAccept ? `<div class="actions"><button class="btn primary" type="button" data-accept-quote="${esc(item.id)}">پەسەندکردنی quote</button></div>` : ''}
+    </div>`;
+  }).join('');
+  setHtml('quotes', html || emptyState(EMPTY.quote, 'هیچ داواکاریی نرخ نییە', 'لە بەشی “داواکاری نرخ” ـەوە دەتوانیت داواکارییەکی نوێ بنێریت.'));
 };
 
-const totalsByCurrency = (items, amountKey) => items.reduce((out, item) => { const currency = String(item.currency || 'USD').toUpperCase(); out[currency] = (out[currency] || 0) + Number(item[amountKey] || 0); return out; }, {});
+const renderDocuments = (items) => {
+  const html = items.map((item) => `<div class="item">
+    <div class="row"><strong>${esc(item.title || item.document_type)}</strong><span class="pill">${item.is_public ? 'Public' : 'Private'}</span></div>
+    <div class="muted">${esc(item.shipment_id)} · ${esc(item.document_status || 'uploaded')}</div>
+    <small>${esc(date(item.created_at))}</small>
+    ${item.file_url ? ` <a class="download" href="${esc(item.file_url)}" data-document-id="${esc(item.id)}" target="_blank" rel="noopener noreferrer" download>داگرتن</a>` : ''}
+  </div>`).join('');
+  setHtml('docs', html || emptyState(EMPTY.file, 'هیچ بەڵگەیەک نییە', 'کاتێک document ـێک بۆ shipment ـەکەت بڵاوکرایەوە، لێرە دەبینرێت.'));
+};
+
+const renderPods = (items) => {
+  const html = items.map((item) => `<div class="item">
+    <div class="row"><strong>${esc(item.shipment_id)}</strong><span class="pill">${item.delivered_at ? 'Delivered' : 'Pending'}</span></div>
+    <div class="muted">${item.delivered_at ? `گەیەنراو ${esc(date(item.delivered_at))}` : 'لە چاوەڕوانیدایە'} · ${esc(item.receiver_name || '—')}</div>
+    <small>${esc(item.note || '')}${Array.isArray(item.photo_urls) && item.photo_urls.length ? ` · ${item.photo_urls.length} وێنە` : ''}</small>
+  </div>`).join('');
+  setHtml('pods', html || emptyState(EMPTY.file, 'هیچ Proof of Delivery نییە', 'دوای گەیاندنی بار، بەڵگەی وەرگرتن لێرە دەردەکەوێت.'));
+};
+
+const renderReceipts = (items) => {
+  const html = items.map((item) => {
+    const photos = Array.isArray(item.photos) ? item.photos.filter((url) => typeof url === 'string' && /^https?:\\/\\//i.test(url)) : [];
+    return `<div class="item">
+      <div class="row"><strong>${esc(item.batch_code || 'Receipt')}</strong><span class="pill">${esc(item.verification_status || 'pending')}</span></div>
+      <div class="muted">${esc(item.location || '—')} · ${esc(item.stage || 'received')} · ${esc(date(item.received_at))}</div>
+      <small>${item.gc_code_detected ? `GC: ${esc(item.gc_code_detected)} · ` : ''}${photos.length} وێنە</small>
+      ${photos.length ? `<div class="photo-grid">${photos.map((url) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img src="${esc(url)}" alt="Receipt ${esc(item.batch_code || '')}" loading="lazy"></a>`).join('')}</div>` : ''}
+    </div>`;
+  }).join('');
+  setHtml('receipts', html || emptyState(EMPTY.file, 'هێشتا warehouse evidence نییە', 'کاتێک بار لە کۆگا وەردەگیرێت، بەڵگە و وێنەکان لێرە دەردەکەون.'));
+};
+
+const renderPayments = (invoices, payments) => {
+  const invoiceRows = invoices.map((item) => {
+    const due = Math.max(0, Number(item.total || 0) - Number(item.paid_total || 0));
+    const paymentAction = due > 0 && item.status !== 'paid'
+      ? `<a class="btn primary payment-action" href="./payment-checkout.html?invoice_id=${encodeURIComponent(item.id)}">پارەدان</a>`
+      : '';
+    return `<div class="item">
+      <div class="row"><strong>${esc(item.invoice_number)}</strong><span class="pill">${esc(item.status)}</span></div>
+      <div class="muted">${esc(item.shipment_id)} · ${money(item.total, item.currency)}</div>
+      <small>Paid: ${money(item.paid_total, item.currency)} · Due: ${money(due, item.currency)}</small>
+      ${paymentAction ? `<div class="actions">${paymentAction}</div>` : ''}
+    </div>`;
+  });
+  const paymentRows = payments.map((item) => `<div class="item">
+    <div class="row"><strong>${money(item.amount, item.currency)}</strong><span class="pill">${esc(item.status)}</span></div>
+    <div class="muted">${esc(item.provider)} · ${esc(item.method || '—')}</div>
+    <small>${esc(date(item.paid_at || item.created_at))}</small>
+  </div>`);
+  setHtml('payments', invoiceRows.concat(paymentRows).join('') || emptyState(EMPTY.money, 'هیچ مامەڵەیەکی دارایی نییە', 'لە کاتی دروستبوونی invoice یان payment، مێژووی مامەڵەکان لێرە دەردەکەوێت.'));
+};
+
+const totalsByCurrency = (items, amountKey) => items.reduce((out, item) => {
+  const currency = String(item.currency || 'USD').toUpperCase();
+  out[currency] = (out[currency] || 0) + Number(item[amountKey] || 0);
+  return out;
+}, {});
+
 const formatBuckets = (buckets) => Object.entries(buckets).map(([currency, amount]) => money(amount, currency)).join(' · ') || '0';
-const renderFinance = (invoices, payments, ledger) => { const billed = totalsByCurrency(invoices, 'total'); const paid = totalsByCurrency(invoices, 'paid_total'); const balance = Object.fromEntries(Object.keys({ ...billed, ...paid }).map((currency) => [currency, Math.max(0, Number(billed[currency] || 0) - Number(paid[currency] || 0))])); const expenseRows = ledger.filter((item) => ['charge', 'adjustment'].includes(item.entry_type)); const expenseTotals = totalsByCurrency(expenseRows, 'amount'); $('billedKpi').textContent = formatBuckets(billed); $('paidKpi').textContent = formatBuckets(paid); $('balanceKpi').textContent = formatBuckets(balance); $('expenseKpi').textContent = formatBuckets(expenseTotals); setHtml('invoices', invoices.map((item) => { const due = Math.max(0, Number(item.total || 0) - Number(item.paid_total || 0)); const action = due > 0 && item.status !== 'paid' ? `<a class="btn primary payment-action" href="./payment-checkout.html?invoice_id=${encodeURIComponent(item.id)}">پارەدان</a>` : ''; return `<div class="item"><div class="row"><strong>${esc(item.invoice_number)}</strong><span class="pill">${esc(item.status)}</span></div><div class="muted">${esc(item.shipment_id)} · ${money(item.total, item.currency)}</div><small>دراو: ${money(item.paid_total, item.currency)} · ماوە: ${money(due, item.currency)}</small>${action ? `<div class="actions">${action}</div>` : ''}</div>`; }).join('') || '<div class="muted">هیچ invoice ـێک نییە.</div>'); setHtml('expenses', expenseRows.map((item) => `<div class="item"><div class="row"><strong>${money(item.amount, item.currency)}</strong><span class="pill">${esc(item.entry_type)}</span></div><div class="muted">${esc(item.shipment_id)}</div><small>${esc(item.note || item.reference || 'خەرجیی تۆمارکراو')} · ${esc(date(item.created_at))}</small></div>`).join('') || '<div class="muted">هیچ خەرجییەکی تۆمارکراو نییە.</div>'); };
+
+const renderFinance = (invoices, payments, ledger) => {
+  const billed = totalsByCurrency(invoices, 'total');
+  const paid = totalsByCurrency(invoices, 'paid_total');
+  const balance = Object.fromEntries(Object.keys({...billed, ...paid}).map((currency) => [
+    currency,
+    Math.max(0, Number(billed[currency] || 0) - Number(paid[currency] || 0))
+  ]));
+  const expenseRows = ledger.filter((item) => ['charge', 'adjustment'].includes(item.entry_type));
+  const expenseTotals = totalsByCurrency(expenseRows, 'amount');
+
+  $('billedKpi').textContent = formatBuckets(billed);
+  $('paidKpi').textContent = formatBuckets(paid);
+  $('balanceKpi').textContent = formatBuckets(balance);
+  $('expenseKpi').textContent = formatBuckets(expenseTotals);
+
+  const invoiceHtml = invoices.map((item) => {
+    const due = Math.max(0, Number(item.total || 0) - Number(item.paid_total || 0));
+    const action = due > 0 && item.status !== 'paid'
+      ? `<a class="btn primary payment-action" href="./payment-checkout.html?invoice_id=${encodeURIComponent(item.id)}">پارەدان</a>`
+      : '';
+    return `<div class="item">
+      <div class="row"><strong>${esc(item.invoice_number)}</strong><span class="pill">${esc(item.status)}</span></div>
+      <div class="muted">${esc(item.shipment_id)} · ${money(item.total, item.currency)}</div>
+      <small>دراو: ${money(item.paid_total, item.currency)} · ماوە: ${money(due, item.currency)}</small>
+      ${action ? `<div class="actions">${action}</div>` : ''}
+    </div>`;
+  }).join('');
+  const expenseHtml = expenseRows.map((item) => `<div class="item">
+    <div class="row"><strong>${money(item.amount, item.currency)}</strong><span class="pill">${esc(item.entry_type)}</span></div>
+    <div class="muted">${esc(item.shipment_id)}</div>
+    <small>${esc(item.note || item.reference || 'خەرجیی تۆمارکراو')} · ${esc(date(item.created_at))}</small>
+  </div>`).join('');
+
+  setHtml('invoices', invoiceHtml || emptyState(EMPTY.file, 'هیچ invoice ـێک نییە', 'کاتێک invoice ـێک بۆ هەژمارەکەت دروست بکرێت، لێرە دەبینرێت.'));
+  setHtml('expenses', expenseHtml || emptyState(EMPTY.money, 'هیچ خەرجییەکی تۆمارکراو نییە', 'خەرجییەکان کاتێک لە ledger تۆمار بکرێن لێرە دەردەکەون.'));
+};
 
 const renderShipmentDetail = (shipment, events, pods) => { const detail = $('shipmentDetail'); if (!detail || !shipment) return; $('detailTitle').textContent = shipment.id || 'Shipment'; $('detailRoute').textContent = `${shipment.origin_key || '—'} → ${shipment.dest_key || '—'}`; $('detailLocation').textContent = shipment.current_location_label || 'شوێنی ئێستا بەردەست نییە'; $('detailStatus').textContent = shipment.operational_status || 'لە پڕۆسەدایە'; $('detailUpdated').textContent = shipment.tracking_updated_at ? `نوێکراوەتەوە: ${date(shipment.tracking_updated_at)}` : `ETA: ${date(shipment.eta)}`; const lat = Number(shipment.current_lat), lng = Number(shipment.current_lng); const map = $('detailMap'); if (map && Number.isFinite(lat) && Number.isFinite(lng)) { map.href = `https://www.google.com/maps?q=${encodeURIComponent(`${lat},${lng}`)}`; map.classList.remove('hidden'); } else if (map) { map.classList.add('hidden'); } const shipmentEvents = events.filter((event) => event.shipment_id === shipment.id); const proof = pods.find((item) => item.shipment_id === shipment.id); const media = [...shipmentEvents.flatMap((event) => Array.isArray(event.photos) ? event.photos : []), ...(proof && Array.isArray(proof.photo_urls) ? proof.photo_urls : [])].filter((url) => typeof url === 'string' && /^https?:\/\//i.test(url)); setHtml('detailPhotos', media.map((url) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img src="${esc(url)}" alt="وێنەی بار ${esc(shipment.id)}" loading="lazy"></a>`).join('') || '<div class="muted">هێشتا وێنەیەک بۆ ئەم بارە نییە.</div>'); setHtml('detailTimeline', shipmentEvents.map((event) => `<div class="timeline-item"><span class="timeline-dot"></span><div><strong>${esc(event.title || event.status_key || 'Shipment update')}</strong><div class="muted">${esc(event.location_label || '—')} · ${esc(date(event.occurred_at))}</div>${event.note ? `<small>${esc(event.note)}</small>` : ''}</div></div>`).join('') || '<div class="muted">مێژووی هەنگاوەکان بەردەست نییە.</div>'); detail.classList.remove('hidden'); detail.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 
