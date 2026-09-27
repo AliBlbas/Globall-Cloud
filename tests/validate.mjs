@@ -81,7 +81,7 @@ if (!staleHits) ok('Live Supabase reference is consistent')
 
 console.log('Public integration guards')
 const publicShell = read('index.html')
-const publicIndex = read('globall-redesign-20260922.js')
+const publicIndex = read('gc-csp-scripts/index-inline-2.js')
 const publicBootstrap = read('public-route-bootstrap.js')
 const publicRuntime = read('public-runtime-guarantee.js')
 const configContracts = [
