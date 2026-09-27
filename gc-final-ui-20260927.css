@@ -629,3 +629,12 @@ body:has(#auth) #gcAssistPanel{z-index:9000!important}
 .gc-data-empty svg{width:19px!important;height:19px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important}
 .gc-data-empty strong{display:block!important;color:#e8f8fa!important;font-size:11px!important}
 .gc-data-empty span{display:block!important;margin-top:2px!important;color:#7995a7!important;font-size:10px!important;line-height:1.6!important}
+
+/* Public map fleet + Leaflet marker icons */
+body:has(#gcApp) .gc-fleet-icon{display:grid!important;place-items:center!important;width:30px!important;height:30px!important;border-radius:10px!important;background:rgba(89,230,238,.07)!important;color:#63e6ee!important;flex:0 0 auto!important}
+body:has(#gcApp) .gc-fleet-icon svg{display:block!important;width:17px!important;height:17px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+body:has(#gcApp) .gc-map-fleet>div{display:grid!important;grid-template-columns:auto 1fr;column-gap:8px!important;align-items:center!important}
+body:has(#gcApp) .gc-map-fleet>div b,body:has(#gcApp) .gc-map-fleet>div small{grid-column:2}
+body:has(#gcApp) .gc-map-fleet>div small{color:#7f9bac!important}
+body:has(#gcApp) .gc-marker-vehicle{display:grid!important;place-items:center!important;width:34px!important;height:34px!important;border-radius:12px!important;background:#061a2b!important;border:1px solid rgba(89,230,238,.28)!important;box-shadow:0 8px 24px rgba(0,0,0,.24)!important;color:#63e6ee!important}
+body:has(#gcApp) .gc-marker-vehicle svg{display:block!important;width:18px!important;height:18px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important}
