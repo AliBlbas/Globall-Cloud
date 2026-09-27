@@ -49,7 +49,7 @@ const required = [
   'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/invoice-ai/index.ts',
   'supabase/functions/customer-debt-assistant/index.ts','supabase/functions/fx-refresh/index.ts','supabase/functions/public-config/index.ts',
   'supabase/functions/public-message/index.ts','supabase/functions/public-quote/index.ts','supabase/functions/public-pricing/index.ts',
-  'supabase/functions/public-track/index.ts','supabase/functions/customer-self/index.ts','supabase/functions/payment-webhook/index.ts',
+  'supabase/functions/public-track/index.ts','supabase/functions/public-health/index.ts','supabase/functions/customer-self/index.ts','supabase/functions/payment-webhook/index.ts',
   'supabase/functions/_shared/payment-providers.ts','tests/validate.mjs','tests/e2e/run.mjs'
 ]
 const missing = required.filter((path) => !exists(path))
@@ -98,7 +98,7 @@ if (!publicBootstrap.includes('/public-runtime-guarantee.js')) fail('public runt
 if (!publicRuntime.includes('renderEmergencyShell')) fail('public emergency shell is missing')
 if (staff.includes('YOUR_PROJECT_ID') || staff.includes('YOUR_ANON_KEY')) fail('Staff OS still contains placeholder Supabase configuration')
 
-const publicFns = ['public-config','public-message','public-quote','public-pricing','public-track','customer-self','staff-directory']
+const publicFns = ['public-config','public-message','public-quote','public-pricing','public-track','public-health','customer-self','staff-directory']
 for (const fn of publicFns) {
   const block = new RegExp(`\\[functions\\.${fn}\\][\\s\\S]*?verify_jwt\\s*=\\s*(true|false)`).exec(config)
   if (!block) fail(`missing explicit verify_jwt setting for ${fn}`)

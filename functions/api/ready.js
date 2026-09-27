@@ -1,4 +1,4 @@
-const SUPABASE_HEALTH_URL = 'https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/system-health';
+const SUPABASE_HEALTH_URL = 'https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/public-health';
 
 const json = (body, status, requestId, extra = {}) => new Response(JSON.stringify(body), {
   status,

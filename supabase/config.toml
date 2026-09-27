@@ -109,3 +109,6 @@ verify_jwt = true
 
 [functions.invoice-ai]
 verify_jwt = true
+
+[functions.public-health]
+verify_jwt = false
