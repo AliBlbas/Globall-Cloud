@@ -48,7 +48,7 @@ export async function onRequest(context) {
     ['src="/public-customer-auth-fix.js',`<script src="/public-customer-auth-fix.js?v=${VERSION}" defer data-gc-customer-auth-fix="1"></script>`],
     ['src="/production-brand-repair.js',`<script src="/production-brand-repair.js?v=${VERSION}" defer data-gc-production-brand-repair="1"></script>`],
     ['src="/gc-final-experience-2026.js',`<script src="/gc-final-experience-2026.js?v=${VERSION}" defer data-gc-final-experience="1"></script>`],
-    ['href="/gc-final-ui-20260927.css',`<link rel="stylesheet" href="/gc-final-ui-20260927.css?v=3" data-gc-final-ui="3">`]
+    ['href="/gc-final-ui-20260927.css',`<link rel="stylesheet" href="/gc-final-ui-20260927.css?v=4" data-gc-final-ui="3">`]
   ];
   for (const [needle,fragment] of headAssets) html = addHeadAsset(html,needle,fragment);
   if (STAFF_V5.test(path)) {
