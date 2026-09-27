@@ -6,7 +6,7 @@
   if (window.__gcPublicMobileSystem) return;
   window.__gcPublicMobileSystem = true;
 
-  const isPublicSurface = () => !document.querySelector('.gc-shell');
+  const isPublicSurface = () => !document.querySelector('.gc-shell') && !/^\/(?:customer-portal|dashboard|portal)(?:\.html)?\/?$/i.test(location.pathname);
 
   const resolveAccount = () => {
     const candidates = [
@@ -27,9 +27,9 @@
   };
 
   const icon = {
-    track: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>',
-    quote: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4z"/><path d="M8 10h8M8 14h5"/></svg>',
-    services: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V9l7-5 7 5v10"/><path d="M8 19v-6h8v6M3 19h18"/></svg>',
+    home: '<img src="/logo-icon.png" alt="" loading="eager">',
+    shipments: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v13H3zM7 7V4h10v3"/></svg>',
+    calculator: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2m2 0h2m2 0h0M8 15h2m2 0h2m2 0h0M8 18h8"/></svg>',
     account: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c.8-4 3-6 7-6s6.2 2 7 6"/></svg>'
   };
 
@@ -42,15 +42,15 @@
     nav.setAttribute('aria-label', 'ناوبەری خێرای Globall Cloud');
 
     const links = [
-      { id: 'track', label: 'شوێنکەوتن', onClick: () => route('', '/track') },
-      { id: 'quote', label: 'داواکاری نرخ', onClick: () => route('', '/request') },
-      { id: 'services', label: 'خزمەتگوزاری', onClick: () => route('', '/services') },
+      { id: 'home', label: 'سەرەکی', onClick: () => route('', '/') },
+      { id: 'shipments', label: 'بارەکان', onClick: () => route('', '/track') },
+      { id: 'calculator', label: 'حاسیبە', onClick: () => route('', '/request') },
       { id: 'account', label: 'هەژمار', onClick: () => { const target = resolveAccount(); if (target) target.click(); else route('', '/dashboard'); } },
     ];
 
     links.forEach(({ id, label, onClick }) => {
       const button = document.createElement('a');
-      button.href = id === 'track' ? '/track' : id === 'quote' ? '/request' : id === 'services' ? '/services' : '/dashboard';
+      button.href = id === 'home' ? '/' : id === 'shipments' ? '/track' : id === 'calculator' ? '/request' : '/dashboard';
       button.dataset.mobileAction = id;
       button.setAttribute('aria-label', label);
       button.innerHTML = `<span class="gc-mobile-nav-icon">${icon[id]}</span><span class="gc-mobile-nav-label">${label}</span>`;
@@ -63,9 +63,9 @@
     const sync = () => {
       const path = window.location.pathname.replace(/\/$/, '') || '/';
       const hash = window.location.hash;
-      const active = hash === '#track' || path === '/track' || path === '/tracking-integration.html' ? 'track'
-        : hash === '#request' || path === '/quote' || path === '/request' ? 'quote'
-        : hash === '#services' || path === '/services' ? 'services'
+      const active = path === '/' ? 'home'
+        : hash === '#track' || path === '/track' || path === '/tracking-integration.html' ? 'shipments'
+        : hash === '#request' || path === '/quote' || path === '/request' ? 'calculator'
         : hash === '#portal' || path === '/dashboard' || path === '/portal' || path === '/login' ? 'account'
         : '';
       nav.querySelectorAll('[data-mobile-action]').forEach((el) => {

@@ -108,3 +108,19 @@ body:has(.gc-rescue-shell) .gc-rescue-card{border-color:rgba(126,225,234,.22)!im
   .gc-hero-actions{gap:9px!important}
   .gc-service{overflow:hidden!important}
 }
+
+/* Customer app navigation — four focused destinations */
+.gc-mobile-nav-icon img,.gc-customer-mobile-dock .dock-icon img{width:24px!important;height:24px!important;display:block!important;object-fit:contain!important;border-radius:7px!important}
+@media(max-width:700px){
+  .gc-customer-mobile-dock{left:12px!important;right:12px!important;bottom:max(10px,env(safe-area-inset-bottom))!important;height:68px!important;padding:5px!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important;border:1px solid rgba(244,201,104,.22)!important;border-radius:22px!important;background:linear-gradient(145deg,rgba(10,28,44,.97),rgba(2,10,18,.98))!important;box-shadow:0 20px 70px rgba(0,0,0,.58),0 0 0 1px rgba(255,255,255,.03) inset!important;backdrop-filter:blur(22px)!important}
+  .gc-customer-mobile-dock a,.gc-customer-mobile-dock button{height:56px!important;min-height:56px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:5px!important;border:1px solid transparent!important;border-radius:16px!important;color:#7893a8!important;overflow:hidden!important;font-size:8.5px!important;line-height:1!important}
+  .gc-customer-mobile-dock .dock-icon{width:23px!important;height:23px!important;display:grid!important;place-items:center!important;flex:0 0 23px!important;font-size:0!important}
+  .gc-customer-mobile-dock .dock-icon svg{width:21px!important;height:21px!important;display:block!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+  .gc-customer-mobile-dock button.active{background:linear-gradient(145deg,rgba(244,201,104,.18),rgba(244,201,104,.05))!important;border-color:rgba(244,201,104,.28)!important;color:#ffe7a7!important}
+  body:has(.gc-customer-mobile-dock){padding-bottom:94px!important}
+}
+
+
+/* Customer quote calculator preview */
+.gc-quote-preview{grid-column:1/-1;display:grid;gap:3px;margin-top:4px;padding:14px 16px;border:1px solid rgba(244,201,104,.25);border-radius:16px;background:radial-gradient(220px 90px at 90% 0%,rgba(244,201,104,.12),transparent 72%),linear-gradient(145deg,rgba(244,201,104,.07),rgba(10,32,52,.66));box-shadow:0 12px 28px rgba(0,0,0,.16)}
+.gc-quote-preview-label{color:#f5d27b;font:800 9px/1.4 'JetBrains Mono',monospace;letter-spacing:.13em}.gc-quote-preview strong{color:#efffff;font-size:22px;line-height:1.25}.gc-quote-preview small{color:#9bb5c8;font-size:10px;line-height:1.7}
