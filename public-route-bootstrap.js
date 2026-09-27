@@ -45,6 +45,7 @@
   addStylesheet(`/production-mobile-ux-v2026.css?v=${RELEASE}`);
   addStylesheet(`/public-live-repair-20260914.css?v=${RELEASE}`);
   addStylesheet(`/site-navigation-20260909.css?v=${RELEASE}`);
+  addStylesheet(`/gc-production-ui-20260927.css?v=${RELEASE}`);
 
   // Critical interaction repair runs independently of the main renderer.
   addScript(`/public-live-repair-20260914.js?v=${RELEASE}`, 'data-gc-public-live-repair');

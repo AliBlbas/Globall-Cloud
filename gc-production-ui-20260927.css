@@ -1,0 +1,207 @@
+/* Globall Cloud — production UI discipline layer
+ * Final visual/interaction layer shared by the public experience, Staff OS and customer portal.
+ * No business logic, no data writes, no authentication behavior.
+ */
+:root{
+  --gc-q-cyan:#0ab7cb;
+  --gc-q-cyan-2:#72eef4;
+  --gc-q-navy:#061a2b;
+  --gc-q-ink:#0a2237;
+  --gc-q-line:rgba(22,91,111,.16);
+  --gc-q-shadow:0 22px 70px rgba(5,28,48,.12);
+  --gc-q-radius:22px;
+}
+html{scroll-padding-top:84px}
+button,a,input,select,textarea{font-family:inherit}
+button:disabled{cursor:not-allowed;opacity:.62}
+img{font-size:10px}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}
+}
+
+/* Public experience */
+body:has(#gcApp) .gc-nav{box-shadow:0 8px 30px rgba(8,33,50,.055)}
+body:has(#gcApp) .gc-nav-inner{min-height:74px}
+body:has(#gcApp) .gc-brand{gap:11px}
+body:has(#gcApp) .gc-brand img{flex:0 0 auto;box-shadow:0 8px 24px rgba(10,183,203,.15)}
+body:has(#gcApp) .gc-desktop-nav a{min-height:40px}
+body:has(#gcApp) .gc-btn{min-height:48px;border-radius:14px}
+body:has(#gcApp) .gc-btn:focus-visible,
+body:has(#gcApp) .gc-menu:focus-visible,
+body:has(#gcApp) .gc-mobile-menu a:focus-visible{
+  outline:3px solid rgba(10,183,203,.23);
+  outline-offset:3px;
+}
+body:has(#gcApp) .gc-hero-rebuild{
+  isolation:isolate;
+  min-height:min(760px,calc(100dvh - 110px));
+  display:grid;
+  align-items:center;
+}
+body:has(#gcApp) .gc-hero-grid{align-items:center}
+body:has(#gcApp) .gc-hero-copy{max-width:830px}
+body:has(#gcApp) .gc-hero-copy h1{max-width:780px}
+body:has(#gcApp) .gc-hero-copy h1 em{color:#0aa2b6}
+body:has(#gcApp) .gc-actions .gc-btn{min-height:52px}
+body:has(#gcApp) .gc-trust-card{min-height:82px;display:flex;flex-direction:column;justify-content:center}
+body:has(#gcApp) .gc-entry-card{isolation:isolate}
+body:has(#gcApp) .gc-entry-card::after{
+  content:"";
+  position:absolute;inset:0;
+  background:linear-gradient(120deg,transparent 28%,rgba(255,255,255,.045),transparent 72%);
+  transform:translateX(-100%);
+  pointer-events:none;
+}
+body:has(#gcApp) .gc-entry-card:hover::after{transform:translateX(100%);transition:transform .7s ease}
+body:has(#gcApp) .gc-service,
+body:has(#gcApp) .gc-platform-card{
+  box-shadow:0 12px 38px rgba(7,31,50,.07);
+}
+body:has(#gcApp) .gc-route-card{
+  overflow:hidden;
+}
+body:has(#gcApp) .gc-route-stop{min-height:82px}
+body:has(#gcApp) .gc-track-panel{box-shadow:0 22px 65px rgba(4,25,43,.18)}
+body:has(#gcApp) .gc-footer{padding-bottom:max(88px,80px)}
+body:has(#gcApp) .gc-bottom-dock{
+  padding-bottom:max(5px,env(safe-area-inset-bottom));
+}
+body:has(#gcApp) .gc-bottom-item{
+  min-height:52px;
+  border:1px solid transparent;
+}
+body:has(#gcApp) .gc-bottom-item.active{
+  border-color:rgba(10,183,203,.14);
+}
+@media(max-width:760px){
+  body:has(#gcApp){padding-bottom:94px}
+  body:has(#gcApp) .gc-hero-rebuild{
+    min-height:auto;
+    padding-top:26px;
+  }
+  body:has(#gcApp) .gc-hero-grid{gap:16px}
+  body:has(#gcApp) .gc-hero-copy h1{max-width:100%}
+  body:has(#gcApp) .gc-hero-visual{min-height:344px}
+  body:has(#gcApp) .gc-route-list{gap:7px}
+  body:has(#gcApp) .gc-route-stop{min-height:72px}
+  body:has(#gcApp) .gc-trust-card strong{font-size:16px}
+  body:has(#gcApp) .gc-section{padding-block:42px 10px}
+}
+@media(max-width:420px){
+  body:has(#gcApp) .gc-nav-inner{min-height:60px}
+  body:has(#gcApp) .gc-brand img{width:36px;height:36px}
+  body:has(#gcApp) .gc-hero-rebuild{padding-top:20px}
+  body:has(#gcApp) .gc-hero-visual{min-height:324px}
+}
+
+/* Staff OS — one authoritative shell */
+body:has(.gc-shell){overscroll-behavior-x:none}
+body:has(.gc-shell) .topbar{min-height:62px}
+body:has(.gc-shell) .top-title strong{font-weight:900}
+body:has(.gc-shell) .top-actions{align-items:center}
+body:has(.gc-shell) .view{box-shadow:0 20px 60px rgba(0,0,0,.18)}
+body:has(.gc-shell) .grid-kpi .kpi{position:relative;overflow:hidden}
+body:has(.gc-shell) .grid-kpi .kpi::after{
+  content:"";
+  position:absolute;
+  width:90px;height:90px;
+  inset-inline-end:-38px;top:-44px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(88,229,239,.10),transparent 70%);
+  pointer-events:none;
+}
+body:has(.gc-shell) .status[data-health="ready"]{border-color:rgba(113,227,164,.3);background:rgba(113,227,164,.08);color:#baf4d4}
+body:has(.gc-shell) .status[data-health="degraded"]{border-color:rgba(246,200,111,.34);background:rgba(246,200,111,.08);color:#ffe2ab}
+body:has(.gc-shell) .status[data-health="error"],
+body:has(.gc-shell) .status[data-health="offline"]{border-color:rgba(255,145,145,.30);background:rgba(255,145,145,.07);color:#ffcaca}
+body:has(.gc-shell) .shipment-card{transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+body:has(.gc-shell) .shipment-card:hover{box-shadow:0 18px 48px rgba(0,0,0,.18)}
+body:has(.gc-shell) .table th{position:sticky;top:0;z-index:1}
+@media(max-width:900px){
+  body:has(.gc-shell){padding:0!important}
+  body:has(.gc-shell) .gc-shell{display:block!important;min-height:100dvh!important}
+  body:has(.gc-shell) .gc-side{display:none!important}
+  body:has(.gc-shell) .gc-main{width:100%!important}
+  body:has(.gc-shell) .topbar{
+    position:sticky!important;top:0!important;z-index:60!important;
+    border-radius:0 0 18px 18px!important;
+    margin:0!important;
+  }
+  body:has(.gc-shell) .view{
+    min-height:calc(100dvh - 64px)!important;
+    padding:12px 9px 104px!important;
+  }
+  body:has(.gc-shell) .grid-kpi{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  body:has(.gc-shell) .shipment-grid{grid-template-columns:1fr!important}
+  body:has(.gc-shell) .three-col,
+  body:has(.gc-shell) .two-col,
+  body:has(.gc-shell) .chat-layout,
+  body:has(.gc-shell) .qr-wrap,
+  body:has(.gc-shell) .form-grid{grid-template-columns:1fr!important}
+  body:has(.gc-shell) .toolbar{grid-template-columns:1fr!important}
+  body:has(.gc-shell) .table-wrap{overflow:auto!important}
+  body:has(.gc-shell) .table{min-width:720px!important}
+}
+@media(max-width:520px){
+  body:has(.gc-shell) .topbar{padding:10px!important}
+  body:has(.gc-shell) .top-actions .btn{min-height:40px!important;padding-inline:10px!important;font-size:11px!important}
+  body:has(.gc-shell) .top-title strong{font-size:16px!important}
+  body:has(.gc-shell) .top-title span{font-size:9px!important}
+  body:has(.gc-shell) .grid-kpi .kpi{min-height:100px!important}
+  body:has(.gc-shell) .view{padding-inline:8px!important}
+  body:has(.gc-shell) .section-head .actions{grid-template-columns:1fr!important}
+}
+
+/* Customer portal */
+body:has(#auth){background:
+  radial-gradient(800px 420px at 100% -10%,rgba(88,229,239,.08),transparent 65%),
+  radial-gradient(700px 380px at 0 100%,rgba(111,138,190,.08),transparent 70%),
+  #061428!important;
+}
+body:has(#auth) .top{
+  box-shadow:0 10px 28px rgba(0,0,0,.15);
+  border-bottom-color:rgba(88,229,239,.14);
+}
+body:has(#auth) .hero .card{
+  background:
+    linear-gradient(135deg,rgba(20,55,87,.94),rgba(9,29,50,.96))!important;
+  border-color:rgba(88,229,239,.16)!important;
+}
+body:has(#auth) .portal-status{min-height:64px}
+body:has(#auth) .card{box-shadow:0 14px 40px rgba(0,0,0,.13)}
+body:has(#auth) .kpi b{letter-spacing:-.03em}
+body:has(#auth) .shipment-card{
+  box-shadow:0 14px 36px rgba(0,0,0,.16);
+}
+body:has(#auth) .shipment-card:focus-visible{
+  outline:3px solid rgba(88,229,239,.25);
+  outline-offset:3px;
+}
+body:has(#auth) .field:focus-visible,
+body:has(#auth) .btn:focus-visible{
+  outline:3px solid rgba(88,229,239,.22);
+  outline-offset:2px;
+}
+@media(max-width:760px){
+  body:has(#auth) .topin{gap:7px}
+  body:has(#auth) .topin>div:last-child{max-width:52%}
+  body:has(#auth) .portal-status{display:grid;grid-template-columns:1fr;gap:9px}
+  body:has(#auth) .portal-status .btn{width:100%}
+  body:has(#auth) .finance-summary{grid-template-columns:1fr 1fr!important}
+  body:has(#auth) .detail-related{grid-template-columns:1fr!important}
+  body:has(#auth) .gc-customer-mobile-dock{
+    bottom:max(7px,env(safe-area-inset-bottom));
+    height:68px;
+  }
+  body:has(#auth) .gc-customer-mobile-dock button{min-height:54px}
+}
+@media(max-width:420px){
+  body:has(#auth) .finance-summary{grid-template-columns:1fr!important}
+}
+
+/* Shared safe-area / tap-target rules */
+@supports(padding:max(0px)){
+  .gc-bottom-dock{bottom:max(7px,env(safe-area-inset-bottom))!important}
+  .gc-customer-mobile-dock{bottom:max(7px,env(safe-area-inset-bottom))!important}
+  .gc-mobile-staff-dock{bottom:max(7px,env(safe-area-inset-bottom))!important}
+}
