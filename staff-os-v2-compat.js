@@ -339,16 +339,8 @@
   function installSystemMonitor() {
     const root = document.documentElement;
     const update = () => {
-      const status = document.getElementById('systemStatus');
-      if (!status) return;
       const sessionState = window.gcSupabase?.auth?.getSession;
-      if (!window.gcSupabase || typeof sessionState !== 'function') {
-        status.textContent = 'Supabase · Waiting';
-        status.classList.add('warn');
-        return;
-      }
-      status.textContent = 'Supabase · Secure';
-      status.classList.remove('warn', 'bad');
+      root.dataset.gcSupabaseClient = window.gcSupabase && typeof sessionState === 'function' ? 'ready' : 'waiting';
     };
     new MutationObserver(update).observe(root, { childList: true, subtree: true });
     setInterval(update, 5000);
@@ -360,7 +352,7 @@
     installResponsiveEnhancements();
     await waitForStaffApp().catch(() => false);
     // Legacy V2 mobile navigation is intentionally disabled.
-    // Staff OS V5 owns the mobile dock/drawer through staff-mobile-command-dock.js.
+    // Staff OS V5 owns the mobile navigation through gc-staff-final-20260922.js.
     installSystemMonitor();
   }
 
