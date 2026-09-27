@@ -16,7 +16,6 @@
     '/staff-os-v5-stability.js?v=20260912-2',
     '/staff-logistics-intelligence.js?v=20260912-2',
     '/staff-os-v2-compat.js?v=20260912-2',
-    '/staff-mobile-command-dock.js?v=20260912-2',
     '/staff-os-pro-20260909.js?v=20260912-2',
     '/staff-shell-polish-20260909.js?v=20260912-2',
     '/staff-workflow-chain.js?v=20260912-2',

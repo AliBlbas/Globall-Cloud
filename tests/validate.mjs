@@ -80,7 +80,8 @@ for (const f of runtimeFiles) {
 if (!staleHits) ok('Live Supabase reference is consistent')
 
 console.log('Public integration guards')
-const publicIndex = read('gc-csp-scripts/index-inline-2.js')
+const publicShell = read('index.html')
+const publicIndex = read('globall-redesign-20260922.js')
 const publicBootstrap = read('public-route-bootstrap.js')
 const publicRuntime = read('public-runtime-guarantee.js')
 const configContracts = [
@@ -99,7 +100,11 @@ const guards = [
   ['ready endpoint uses public-health', read('functions/api/ready.js').includes('/functions/v1/public-health')],
   ['health endpoint is present', existsSync(join(ROOT, 'functions/api/health.js'))],
   ['staff route is isolated', read('_redirects').includes('/staff /staff-os-v5.html 200')],
-  ['staff entry has mobile shell', /staff-premium-mobile-20260909\.css\?v=/.test(read('staff-os-v5.html'))],
+  ['staff entry has final mobile shell', /gc-staff-final-20260922\.js\?v=/.test(read('staff-os-v5.html'))],
+  ['staff entry has no competing legacy mobile JS', !/staff-reference-mobile-20260922\.js\?v=|staff-premium-mobile-20260909\.js\?v=/.test(read('staff-os-v5.html'))],
+  ['staff loader has no legacy mobile command dock', !/staff-mobile-command-dock\.js\?v=/.test(read('staff-os-v5-enhancement-loader.js'))],
+  ['active homepage uses current experience script', publicShell.includes('/globall-redesign-20260922.js')],
+  ['active homepage avoids legacy monolithic script', !publicShell.includes('gc-csp-scripts/index-inline-2.js')],
   ['public bootstrap loads runtime guarantee', publicBootstrap.includes('/public-runtime-guarantee.js')],
   ['public runtime has emergency fallback', publicRuntime.includes('renderEmergencyShell')],
 ]

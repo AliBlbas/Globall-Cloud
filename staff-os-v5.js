@@ -241,11 +241,11 @@
       else if (tab==='requests') await renderRequests();
       else if (tab==='activity') await renderActivity();
       else if (tab==='settings') await renderSettings();
-      document.getElementById('systemStatus').textContent = 'Supabase · Live';
+      void refreshRuntimeHealth();
     } catch (err) {
       view.innerHTML = `<div class="empty"><strong style="color:var(--red)">هەڵەی module</strong><div style="margin-top:5px">${esc(err.message)}</div><button class="btn" data-retry style="margin-top:10px">↻ دووبارە هەوڵدان</button></div>`;
       view.querySelector('[data-retry]')?.addEventListener('click', () => loadTab(tab, true));
-      document.getElementById('systemStatus').textContent = 'Supabase · Error';
+      void refreshRuntimeHealth();
     }
     updateBadges();
   }

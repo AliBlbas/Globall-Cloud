@@ -1,4 +1,4 @@
-const SUPABASE_HEALTH_URL = 'https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/public-health';
+const SUPABASE_PUBLIC_HEALTH_URL = 'https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/public-health';
 
 const json = (body, status, requestId, extra = {}) => new Response(JSON.stringify(body), {
   status,
@@ -43,7 +43,7 @@ export async function onRequestGet(context) {
   const local = { ok: true, status: 200, latency_ms: 0, body: { ok: true, service: 'globall-cloud', edge: 'ok' } };
   let supabase;
   try {
-    const url = context.env?.SUPABASE_SYSTEM_HEALTH_URL || SUPABASE_HEALTH_URL;
+    const url = context.env?.SUPABASE_PUBLIC_HEALTH_URL || context.env?.SUPABASE_SYSTEM_HEALTH_URL || SUPABASE_PUBLIC_HEALTH_URL;
     supabase = await fetchJson(url, requestId);
   } catch (error) {
     supabase = {
