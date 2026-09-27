@@ -49,6 +49,7 @@
     window.__gcStaffEnhancementsLoaded = true;
     enhancementStyles.forEach(loadStyle);
     for (const src of enhancementScripts) await loadOne(src);
+    loadStyle('/gc-final-ui-20260927.css?v=3');
   };
 
   const waitForShell = () => {
