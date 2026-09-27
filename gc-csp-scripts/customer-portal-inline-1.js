@@ -123,7 +123,7 @@ const renderPods = (items) => {
 
 const renderReceipts = (items) => {
   const html = items.map((item) => {
-    const photos = Array.isArray(item.photos) ? item.photos.filter((url) => typeof url === 'string' && /^https?:\\/\\//i.test(url)) : [];
+    const photos = Array.isArray(item.photos) ? item.photos.filter((url) => typeof url === 'string' && url.startsWith('http')) : [];
     return `<div class="item">
       <div class="row"><strong>${esc(item.batch_code || 'Receipt')}</strong><span class="pill">${esc(item.verification_status || 'pending')}</span></div>
       <div class="muted">${esc(item.location || '—')} · ${esc(item.stage || 'received')} · ${esc(date(item.received_at))}</div>
