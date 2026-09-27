@@ -37,7 +37,7 @@ if (sw.includes("fetch(request, { cache: 'no-store' })") && sw.includes('self.sk
 else fail('Service Worker network-first/lifecycle contract is incomplete')
 
 const required = [
-  'index.html','sw.js','production-bridge.js','runtime-guard.js','_headers','_redirects','public-route-bootstrap.js','public-runtime-guarantee.js',
+  'index.html','sw.js','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js','public-route-bootstrap.js','public-runtime-guarantee.js',
   'public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js','tracking-integration.html','tracking-intelligence.js',
   'tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os-v5.html','staff-os-v5.css','staff-os-v5.js',
   'staff-os-v5-rescue.js','staff-logistics-intelligence.css','staff-logistics-intelligence.js','staff-mobile-command-dock.css','staff-mobile-command-dock.js',
@@ -87,6 +87,9 @@ const publicIndex = read('gc-csp-scripts/index-inline-2.js')
 const publicBootstrap = read('public-route-bootstrap.js')
 const publicRuntime = read('public-runtime-guarantee.js')
 if (!bridge.includes('https://ahslifnthiwfkmaswjno.supabase.co')) fail('production bridge points at the wrong Supabase project')
+if (!/^\[functions\.customer-self\]\s*verify_jwt\s*=\s*true$/m.test(config)) fail('customer-self verify_jwt must remain true')
+if (!/^\[functions\.public-health\]\s*verify_jwt\s*=\s*false$/m.test(config)) fail('public-health verify_jwt must remain false')
+if (!read('functions/api/ready.js').includes('/functions/v1/public-health')) fail('ready endpoint points at the wrong Supabase health function')
 if (!bridge.includes('SUPABASE_PUBLISHABLE_KEY')) fail('production bridge publishable key marker missing')
 if (!staff.includes('staff-premium-mobile-20260909.css?v=')) fail('Staff premium mobile CSS is not loaded')
 if (!staff.includes('staff-premium-mobile-20260909.js?v=')) fail('Staff premium mobile JS is not loaded')
