@@ -643,3 +643,8 @@ body:has(#gcApp) .gc-marker-vehicle svg{display:block!important;width:18px!impor
 body:has(#auth) .gc-vx-cmd,
 body:has(#auth) [data-gc-vx-cmd],
 body:has(#auth) .gc-command-launcher{display:none!important}
+
+/* Staff OS: keep legacy command launcher out of the authenticated shell. */
+body:has(.gc-shell) .gc-vx-cmd,
+body:has(.gc-shell) [data-gc-vx-cmd],
+body:has(.gc-shell) .gc-command-launcher{display:none!important}
