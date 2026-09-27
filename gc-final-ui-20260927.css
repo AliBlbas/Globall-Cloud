@@ -638,3 +638,8 @@ body:has(#gcApp) .gc-map-fleet>div b,body:has(#gcApp) .gc-map-fleet>div small{gr
 body:has(#gcApp) .gc-map-fleet>div small{color:#7f9bac!important}
 body:has(#gcApp) .gc-marker-vehicle{display:grid!important;place-items:center!important;width:34px!important;height:34px!important;border-radius:12px!important;background:#061a2b!important;border:1px solid rgba(89,230,238,.28)!important;box-shadow:0 8px 24px rgba(0,0,0,.24)!important;color:#63e6ee!important}
 body:has(#gcApp) .gc-marker-vehicle svg{display:block!important;width:18px!important;height:18px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+
+/* Customer portal: remove the old command-palette launcher from the customer surface. */
+body:has(#auth) .gc-vx-cmd,
+body:has(#auth) [data-gc-vx-cmd],
+body:has(#auth) .gc-command-launcher{display:none!important}
