@@ -25,6 +25,11 @@
     publicRedesign.href = '/gc-redesign-v2026.css?v=20260927-3';
     publicRedesign.dataset.gcRedesignV2026 = '1';
     document.head.appendChild(publicRedesign);
+    const referenceApp = document.createElement('link');
+    referenceApp.rel = 'stylesheet';
+    referenceApp.href = '/gc-reference-app-20260927.css?v=1';
+    referenceApp.dataset.gcReferenceApp = '1';
+    document.head.appendChild(referenceApp);
   };
 
   const syncPages = (id) => {
