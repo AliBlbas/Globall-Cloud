@@ -239,7 +239,11 @@ const load = async () => {
   $('portalStatus')?.classList.add('hidden');
   $('hello').textContent = 'بەخێربێیت';
   const welcome = $('customerWelcome');
-  if (welcome) welcome.textContent = session.user.email || 'Customer';
+  if (welcome) {
+    const displayName = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
+    welcome.textContent = displayName || session.user.email || 'Customer';
+    welcome.title = session.user.email || '';
+  }
   const dashboard = await customerApi();
   const rows = dashboard.shipments || [];
   const invoicesRows = dashboard.invoices || [];
@@ -323,10 +327,14 @@ const acceptQuote = async (quoteId) => {
   showMessage('Quote پەسەندکرا.', 'success'); await load();
 };
 
-$('loginBtn').addEventListener('click', () => $('auth').classList.remove('hidden'));
-$('loginPromptBtn')?.addEventListener('click', () => $('auth').classList.remove('hidden'));
-$('close').addEventListener('click', () => $('auth').classList.add('hidden'));
-$('signIn').addEventListener('click', async () => { $('msg').textContent = '…'; const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('password').value }); $('msg').textContent = error ? error.message : 'سەرکەوتوو'; if (!error) { $('auth').classList.add('hidden'); await load(); } });
+$('authForm')?.addEventListener('submit', (event) => { event.preventDefault(); $('signIn').click(); });
+$('loginBtn').addEventListener('click', () => { $('auth').classList.remove('hidden'); $('email')?.focus(); });
+$('loginPromptBtn')?.addEventListener('click', () => { $('auth').classList.remove('hidden'); $('email')?.focus(); });
+$('close').addEventListener('click', () => { $('auth').classList.add('hidden'); $('loginBtn')?.focus(); });
+$('auth').addEventListener('click', (event) => { if (event.target === $('auth')) $('close').click(); });
+$('password').addEventListener('keydown', (event) => { if (event.key === 'Enter') $('signIn').click(); });
+$('signIn').addEventListener('click', async () => { if (!$('email').value.trim() || !$('password').value) { $('msg').textContent = 'ئیمەیل و وشەی نهێنی پڕبکەرەوە.'; return; } $('signIn').disabled = true; $('signIn').setAttribute('aria-busy', 'true'); $('msg').textContent = '…'; const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('password').value }); $('msg').textContent = error ? error.message : 'سەرکەوتوو'; $('signIn').disabled = false; $('signIn').removeAttribute('aria-busy'); if (!error) { $('auth').classList.add('hidden'); $('loginBtn')?.focus(); await load(); } });
+document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !$('auth').classList.contains('hidden')) $('close').click(); });
 $('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
 $('trackBtn').addEventListener('click', () => { location.href = './index.html#track'; });
 $('quoteBtn').addEventListener('click', () => { $('quoteForm').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('quoteOrigin').focus(); });
