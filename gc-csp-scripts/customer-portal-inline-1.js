@@ -2,6 +2,10 @@ const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
 const CUSTOMER_SELF = `${SUPABASE_URL}/functions/v1/customer-self`;
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+// Classic-script const bindings are not window properties; expose the same
+// session-aware client to independently loaded account modules.
+window.sb = sb;
+window.gcSupabase = sb;
 
 const customerApi = async ({ method = 'GET', body } = {}) => {
   const { data: sessionResult } = await sb.auth.getSession();
