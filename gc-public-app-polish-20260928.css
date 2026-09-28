@@ -46,3 +46,15 @@ body:has(#gcApp) .gc-section-head h2,body:has(#gcApp) .gc-section-head p{color:#
   body:has(#gcApp) .gc-active-route>span{font-size:18px!important}
 }
 @media(max-width:390px){body:has(#gcApp) .gc-app-greeting{display:block}body:has(#gcApp) .gc-app-live-badge{display:inline-flex;margin-top:10px}body:has(#gcApp) .gc-app-quick-grid>a{min-height:91px!important}}
+
+
+/* Customer tracking prompt replaces the disconnected sample-shipment card. */
+body:has(#gcApp) .gc-track-prompt{display:block;margin-top:12px;padding:15px;border:1px solid rgba(119,192,235,.18);border-radius:18px;background:linear-gradient(145deg,rgba(14,48,77,.9),rgba(5,21,36,.94));color:#fff;text-decoration:none;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+body:has(#gcApp) .gc-track-prompt:hover{transform:translateY(-1px);border-color:rgba(244,199,102,.48);box-shadow:0 14px 28px rgba(3,15,28,.22)}
+body:has(#gcApp) .gc-track-prompt:focus-visible{outline:2px solid #56dcea;outline-offset:3px}
+body:has(#gcApp) .gc-track-prompt .gc-active-head strong{color:#f1cc75}
+body:has(#gcApp) .gc-track-prompt .gc-active-progress{color:#a9c4d3}
+body:has(#gcApp) .gc-track-prompt .gc-active-progress strong{color:#f1cc75}
+@media(max-width:760px){body:has(#gcApp) .gc-track-prompt{padding:13px!important;border-radius:16px!important}}
+
+body:has(#gcApp) .gc-trust-card.gc-trust-contact strong{font-size:13px!important;white-space:nowrap;letter-spacing:-.2px}

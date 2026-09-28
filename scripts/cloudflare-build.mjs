@@ -9,7 +9,7 @@ const root = process.cwd();
 const out = path.join(root, 'public');
 
 const skippedDirectories = new Set([
-  '.git','.github','.devcontainer','.vscode','node_modules','dist','public','scripts','supabase','tests','docs'
+  '.git','.github','.devcontainer','.vscode','node_modules','dist','public','Build','scripts','supabase','tests','docs'
 ]);
 const skippedSuffixes = ['.md','.MD','.txt','.patch','.sql','.dump','.bak','.log','.pem','.key','.crt','.tf','.tfvars'];
 const keepFiles = new Set(['package.json']);
