@@ -1,0 +1,20 @@
+/* Globall Cloud — app reference polish pass · 2026-09-28 */
+@media(max-width:760px){
+  body:has(#gcApp) #gcMain{display:flex!important;flex-direction:column!important;gap:0!important}
+  body:has(#gcApp) #gcMain>.gc-app-dashboard-preview{order:1!important}
+  body:has(#gcApp) #gcMain>.gc-hero-rebuild{order:2!important}
+  body:has(#gcApp) #gcMain>.gc-entry-wrap{order:3!important}
+  body:has(#gcApp) #gcMain>.gc-track-panel,body:has(#gcApp) #gcMain>.gc-container:not(.gc-app-dashboard-preview):not(.gc-entry-wrap){order:4!important}
+  body:has(#gcApp) .gc-app-dashboard-preview{margin-top:14px!important}
+  body:has(#gcApp) .gc-app-greeting{position:relative;padding-bottom:4px}
+  body:has(#gcApp) .gc-app-greeting:after{content:'⌁';position:absolute;inset-inline-end:4px;top:-9px;color:rgba(244,199,102,.23);font:900 54px Georgia,serif;transform:rotate(-18deg);pointer-events:none}
+  body:has(#gcApp) .gc-app-kicker{font-size:8px!important;letter-spacing:1.25px!important}
+  body:has(#gcApp) .gc-app-greeting h2{max-width:14ch!important;line-height:1.35!important;letter-spacing:-.7px!important}
+  body:has(#gcApp) .gc-app-quick-grid>a{position:relative!important;overflow:hidden!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 8px 18px rgba(0,0,0,.10)!important}
+  body:has(#gcApp) .gc-app-quick-grid>a:after{content:'';position:absolute;inset-inline-end:-25px;bottom:-28px;width:75px;height:75px;border-radius:50%;border:1px solid rgba(244,199,102,.12);pointer-events:none}
+  body:has(#gcApp) .gc-app-action-icon{box-shadow:0 0 16px rgba(244,199,102,.08)!important}
+  body:has(#gcApp) .gc-app-active-shipment{box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 13px 25px rgba(0,0,0,.16)!important}
+  body:has(#gcApp) .gc-active-head strong{padding:4px 7px;border-radius:7px;background:rgba(85,229,238,.08)!important}
+  body:has(#gcApp) .gc-hero-rebuild{margin-top:6px!important}
+  body:has(#gcApp) .gc-hero-visual{min-height:260px!important}
+}
