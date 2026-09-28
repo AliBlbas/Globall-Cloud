@@ -1,4 +1,15 @@
 /* Globall Cloud — app reference polish pass · 2026-09-28 */
+body:has(#gcApp){background:#061625!important;color:#f7fbff!important}
+body:has(#gcApp) .gc-app{background:radial-gradient(900px 520px at 6% 0%,rgba(18,83,126,.24),transparent 62%),linear-gradient(180deg,#061625 0%,#071c2f 58%,#061625 100%)!important;color:#f7fbff!important}
+body:has(#gcApp) .gc-hero-rebuild{background:linear-gradient(135deg,rgba(10,35,57,.96),rgba(5,21,36,.98))!important;border-top:1px solid rgba(119,192,235,.10)!important;border-bottom:1px solid rgba(119,192,235,.12)!important}
+body:has(#gcApp) .gc-hero-copy h1{color:#f5f9fc!important;text-shadow:0 8px 32px rgba(0,0,0,.32)!important}.gc-hero-copy h1 em{color:#56dcea!important}.gc-hero-copy>p{color:#a7bbc9!important}
+body:has(#gcApp) .gc-eyebrow{background:rgba(244,199,102,.10)!important;color:#f1cc75!important;border-color:rgba(244,199,102,.25)!important}
+body:has(#gcApp) .gc-actions .gc-btn:first-child{background:linear-gradient(135deg,#f7d47d,#e9ae40)!important;color:#061625!important;box-shadow:0 10px 26px rgba(233,174,64,.16)!important}
+body:has(#gcApp) .gc-actions .gc-btn:nth-child(2),body:has(#gcApp) .gc-actions .gc-btn:nth-child(3){background:rgba(255,255,255,.04)!important;border-color:rgba(119,192,235,.22)!important;color:#8fe6ef!important}
+body:has(#gcApp) .gc-trust-card,body:has(#gcApp) .gc-entry-card,body:has(#gcApp) .gc-service,body:has(#gcApp) .gc-platform-card{background:linear-gradient(145deg,#12324e,#081b2d)!important;border-color:rgba(119,192,235,.16)!important;color:#f5f9fc!important;box-shadow:0 16px 36px rgba(0,0,0,.12)!important}
+body:has(#gcApp) .gc-trust-card p,body:has(#gcApp) .gc-entry-card p,body:has(#gcApp) .gc-service p,body:has(#gcApp) .gc-platform-card p{color:#9db4c3!important}
+body:has(#gcApp) .gc-section-head h2,body:has(#gcApp) .gc-section-head p{color:#f5f9fc!important}
+
 @media(max-width:760px){
   body:has(#gcApp) #gcMain{display:flex!important;flex-direction:column!important;gap:0!important}
   body:has(#gcApp) #gcMain>.gc-app-dashboard-preview{order:1!important}
@@ -15,6 +26,23 @@
   body:has(#gcApp) .gc-app-action-icon{box-shadow:0 0 16px rgba(244,199,102,.08)!important}
   body:has(#gcApp) .gc-app-active-shipment{box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 13px 25px rgba(0,0,0,.16)!important}
   body:has(#gcApp) .gc-active-head strong{padding:4px 7px;border-radius:7px;background:rgba(85,229,238,.08)!important}
-  body:has(#gcApp) .gc-hero-rebuild{margin-top:6px!important}
+  body:has(#gcApp) .gc-hero-rebuild{margin-top:6px!important;padding:34px 0 20px!important}
+  body:has(#gcApp) .gc-hero-copy{padding:0 18px!important}
+  body:has(#gcApp) .gc-hero-copy h1{color:#f5f9fc!important}
   body:has(#gcApp) .gc-hero-visual{min-height:260px!important}
+  body:has(#gcApp) .gc-app-dashboard-preview{width:calc(100% - 24px)!important;margin:7px auto 22px!important;padding:17px!important;border-radius:24px!important}
+  body:has(#gcApp) .gc-app-greeting h2{font-size:22px!important}
+  body:has(#gcApp) .gc-app-greeting p{font-size:10px!important}
+  body:has(#gcApp) .gc-app-live-badge{padding:7px 8px!important;font-size:8px!important}
+  body:has(#gcApp) .gc-app-quick-grid{grid-template-columns:repeat(3,1fr)!important;gap:7px!important;margin-top:18px!important}
+  body:has(#gcApp) .gc-app-quick-grid>a{min-height:96px!important;padding:10px 8px!important;border-radius:14px!important;align-items:center!important;text-align:center!important}
+  body:has(#gcApp) .gc-app-action-icon{width:31px!important;height:31px!important}
+  body:has(#gcApp) .gc-app-quick-grid b{font-size:9px!important;line-height:1.35!important}
+  body:has(#gcApp) .gc-app-quick-grid small{font-size:7.5px!important}
+  body:has(#gcApp) .gc-app-active-shipment{padding:13px!important;border-radius:16px!important}
+  body:has(#gcApp) .gc-active-route{gap:7px!important}
+  body:has(#gcApp) .gc-active-route b{font-size:10px!important}
+  body:has(#gcApp) .gc-active-route small{font-size:8px!important}
+  body:has(#gcApp) .gc-active-route>span{font-size:18px!important}
 }
+@media(max-width:390px){body:has(#gcApp) .gc-app-greeting{display:block}body:has(#gcApp) .gc-app-live-badge{display:inline-flex;margin-top:10px}body:has(#gcApp) .gc-app-quick-grid>a{min-height:91px!important}}
