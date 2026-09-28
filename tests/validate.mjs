@@ -35,15 +35,16 @@ console.log('TypeScript syntax')
 let ts
 try { ts = await import('typescript') } catch { fail('TypeScript validator unavailable; run npm ci before validation') }
 if (ts) {
+  const compiler = ts.default || ts
   const tsFiles = walk(join(ROOT, 'supabase', 'functions'), ['.ts'])
   const before = failures
   for (const f of tsFiles) {
     const result = ts.transpileModule(readFileSync(f, 'utf8'), {
-      compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
+      compilerOptions: { target: compiler.ScriptTarget.ES2022, module: compiler.ModuleKind.ESNext },
       reportDiagnostics: true,
     })
-    const errs = (result.diagnostics || []).filter((d) => d.category === ts.DiagnosticCategory.Error)
-    if (errs.length) fail(`${relative(ROOT, f)}: ${errs.map((d) => ts.flattenDiagnosticMessageText(d.messageText, '\n')).join('; ')}`)
+    const errs = (result.diagnostics || []).filter((d) => d.category === compiler.DiagnosticCategory.Error)
+    if (errs.length) fail(`${relative(ROOT, f)}: ${errs.map((d) => compiler.flattenDiagnosticMessageText(d.messageText, '\n')).join('; ')}`)
   }
   if (failures === before) ok(`${tsFiles.length} TypeScript files OK`)
 }

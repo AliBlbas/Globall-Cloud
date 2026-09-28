@@ -7,7 +7,7 @@
     "node": ">=20"
   },
   "devDependencies": {
-    "typescript": "^7.0.2"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "node scripts/cloudflare-build.mjs",
