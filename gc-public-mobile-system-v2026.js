@@ -27,8 +27,9 @@
   };
 
   const icon = {
-    home: '<img src="/logo-icon.png" alt="" loading="eager">',
+    home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-7 9 7"></path><path d="M5 10v10h14V10"></path></svg>',
     shipments: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v13H3zM7 7V4h10v3"/></svg>',
+    track: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="2"></circle><path d="m12 4 2 6 6 2-6 2-2 6-2-6-6-2 6-2z"></path></svg>',
     calculator: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2m2 0h2m2 0h0M8 15h2m2 0h2m2 0h0M8 18h8"/></svg>',
     account: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c.8-4 3-6 7-6s6.2 2 7 6"/></svg>'
   };
@@ -43,14 +44,15 @@
 
     const links = [
       { id: 'home', label: 'سەرەکی', onClick: () => route('', '/') },
-      { id: 'shipments', label: 'بارەکان', onClick: () => route('', '/track') },
+      { id: 'shipments', label: 'بارەکان', onClick: () => route('', '/dashboard') },
+      { id: 'track', label: 'Tracking', onClick: () => route('', '/track') },
       { id: 'calculator', label: 'حاسیبە', onClick: () => route('', '/request') },
       { id: 'account', label: 'هەژمار', onClick: () => { const target = resolveAccount(); if (target) target.click(); else route('', '/dashboard'); } },
     ];
 
     links.forEach(({ id, label, onClick }) => {
       const button = document.createElement('a');
-      button.href = id === 'home' ? '/' : id === 'shipments' ? '/track' : id === 'calculator' ? '/request' : '/dashboard';
+      button.href = id === 'home' ? '/' : id === 'shipments' ? '/dashboard' : id === 'track' ? '/track' : id === 'calculator' ? '/request' : '/dashboard';
       button.dataset.mobileAction = id;
       button.setAttribute('aria-label', label);
       button.innerHTML = `<span class="gc-mobile-nav-icon">${icon[id]}</span><span class="gc-mobile-nav-label">${label}</span>`;
@@ -64,7 +66,7 @@
       const path = window.location.pathname.replace(/\/$/, '') || '/';
       const hash = window.location.hash;
       const active = path === '/' ? 'home'
-        : hash === '#track' || path === '/track' || path === '/tracking-integration.html' ? 'shipments'
+        : hash === '#track' || path === '/track' || path === '/tracking-integration.html' ? 'track'
         : hash === '#request' || path === '/quote' || path === '/request' ? 'calculator'
         : hash === '#portal' || path === '/dashboard' || path === '/portal' || path === '/login' ? 'account'
         : '';
