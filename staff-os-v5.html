@@ -57,10 +57,13 @@
   <link rel="stylesheet" href="/staff-shell-polish-20260909.css?v=20260927-1">
   <link rel="stylesheet" href="/gc-final-ui-20260927.css?v=4">
   <link rel="stylesheet" href="/staff-os-advanced-v4.css?v=20260928-4">
+  <link rel="stylesheet" href="/gc-staff-ops-command-v1.css?v=20260928-1">
 </head>
 <body>
   <div id="app">
     <main class="gc-rescue-shell" dir="rtl" style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#03101f;color:#f5f9fd;font-family:Vazirmatn,Noto Sans Arabic,system-ui,sans-serif">
+<section class="staff-command-matrix" aria-label="Operations command matrix" <!-- GC-OPS-COMMAND-MATRIX -->><a class="cmd" href="?tab=overview"><svg viewBox="0 0 24 24"><path d="M4 19V9l8-5 8 5v10"/><path d="M8 19v-6h8v6"/></svg><b>Control Tower</b><small>Operational overview & alerts</small></a><a class="cmd" href="?tab=shipments"><svg viewBox="0 0 24 24"><path d="M3 7h13v11H3zM16 10h3l2 3v5h-5z"/><circle cx="7" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg><b>Shipments</b><small>Cargo lifecycle & status</small></a><a class="cmd" href="?tab=warehouse"><svg viewBox="0 0 24 24"><path d="M3 10 12 4l9 6v9H3z"/><path d="M8 19v-5h8v5"/></svg><b>Warehouse</b><small>Receipts & cargo evidence</small></a><a class="cmd" href="?tab=customers"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 11a3 3 0 1 0 0-6M17 14a5 5 0 0 1 4 6"/></svg><b>Customers</b><small>Accounts & shipment ownership</small></a></section>
+
       <section style="width:min(560px,100%);padding:34px;border:1px solid rgba(111,145,180,.35);border-radius:24px;background:rgba(8,24,44,.94);box-shadow:0 24px 80px rgba(0,0,0,.4);text-align:center">
         <div style="width:64px;height:64px;margin:0 auto 16px;display:grid;place-items:center;border-radius:18px;background:linear-gradient(135deg,#4fe3f0,#00a8bd);color:#03101f;font-weight:900;font-size:20px">GC</div>
         <div style="font:700 11px/1.4 JetBrains Mono,monospace;letter-spacing:1.5px;color:#4fe3f0;margin-bottom:10px">STAFF OPERATING SYSTEM · V5</div>
