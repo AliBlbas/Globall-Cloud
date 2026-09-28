@@ -3,7 +3,7 @@
 
 /* The customer dock is mobile navigation only. Older layers used body:has(#auth)
    and accidentally made it visible on desktop; this layer is intentionally last. */
-.gc-customer-mobile-dock{display:none!important}
+body:has(#auth) .gc-customer-mobile-dock,.gc-customer-mobile-dock{display:none!important}
 @media (max-width:760px){
   body:has(#auth){padding-bottom:96px!important}
   .gc-customer-mobile-dock{
@@ -39,6 +39,13 @@
   .gc-customer-mobile-dock .dock-icon{width:25px!important;height:25px!important;display:grid!important;place-items:center!important;flex:0 0 25px!important;color:var(--dock-accent)!important}
   .gc-customer-mobile-dock .dock-icon svg{width:21px!important;height:21px!important;display:block!important;fill:none!important;stroke:currentColor!important;stroke-width:1.75!important;stroke-linecap:round!important;stroke-linejoin:round!important;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--dock-accent) 34%,transparent))!important}
   .gc-customer-mobile-dock .dock-label{display:block!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;color:inherit!important;letter-spacing:.01em!important}
+
+  /* Match the specificity of legacy body:has(#auth) rules loaded by the app shell. */
+  body:has(#auth) .gc-customer-mobile-dock{display:grid!important}
+  body:has(#auth) .gc-customer-mobile-dock button{color:var(--dock-accent)!important;background:linear-gradient(180deg,var(--dock-wash),rgba(255,255,255,.015))!important;border-color:rgba(225,185,79,.16)!important}
+  body:has(#auth) .gc-customer-mobile-dock button.active{color:var(--dock-accent)!important;border-color:color-mix(in srgb,var(--dock-accent) 74%,transparent)!important;background:linear-gradient(145deg,color-mix(in srgb,var(--dock-accent) 24%,transparent),color-mix(in srgb,var(--dock-accent) 6%,transparent))!important}
+  body:has(#auth) .gc-customer-mobile-dock .dock-icon{color:var(--dock-accent)!important}
+  body:has(#auth) .gc-customer-mobile-dock .dock-icon svg{stroke:currentColor!important;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--dock-accent) 34%,transparent))!important}
 }
 
 /* Keep the support action separate from the five navigation destinations. */

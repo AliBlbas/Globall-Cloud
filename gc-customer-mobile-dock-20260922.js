@@ -50,7 +50,7 @@
     if (dock || !document.body) return;
     const finalIconLayer = document.createElement('link');
     finalIconLayer.rel = 'stylesheet';
-    finalIconLayer.href = '/gc-customer-dashboard-icons-20260928.css?v=2';
+    finalIconLayer.href = '/gc-customer-dashboard-icons-20260928.css?v=3';
     document.head.appendChild(finalIconLayer);
     dock = document.createElement('nav');
     dock.className = 'gc-customer-mobile-dock';
