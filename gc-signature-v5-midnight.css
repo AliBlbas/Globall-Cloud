@@ -1,0 +1,89 @@
+/* Globall Cloud — Signature Concept V5: Midnight Logistics Network
+   Distinct visual direction; preserves existing HTML, routes, auth and backend.
+*/
+:root{
+  --gc-v5-bg:#05090d;--gc-v5-panel:#0a1118;--gc-v5-panel2:#0d1720;
+  --gc-v5-line:rgba(143,176,194,.16);--gc-v5-text:#eef7f8;--gc-v5-muted:#8da4ae;
+  --gc-v5-cyan:#58e5ef;--gc-v5-amber:#f1c46b;--gc-v5-green:#72e1a7;
+}
+html:has(#gcApp),body:has(#gcApp){background:var(--gc-v5-bg)!important;color:var(--gc-v5-text)!important}
+body:has(#gcApp){font-family:'Vazirmatn',system-ui,sans-serif}
+body:has(#gcApp) .gc-app{background:
+ radial-gradient(900px 500px at 90% -5%,rgba(46,190,209,.09),transparent 62%),
+ radial-gradient(700px 500px at 0 28%,rgba(50,93,125,.08),transparent 62%),
+ var(--gc-v5-bg)!important}
+body:has(#gcApp) .gc-announcement{background:#070d12!important;border-bottom:1px solid var(--gc-v5-line)!important}
+body:has(#gcApp) .gc-announcement-inner{min-height:28px!important}
+body:has(#gcApp) .gc-live-pill{background:rgba(114,225,167,.06)!important;border-color:rgba(114,225,167,.18)!important;color:#a9edc8!important}
+body:has(#gcApp) .gc-nav{background:rgba(5,9,13,.82)!important;border-bottom:1px solid var(--gc-v5-line)!important;box-shadow:0 14px 40px rgba(0,0,0,.22)!important;backdrop-filter:blur(22px)!important}
+body:has(#gcApp) .gc-brand{color:var(--gc-v5-text)!important}
+body:has(#gcApp) .gc-brand img{border-radius:12px!important;box-shadow:0 0 0 1px rgba(88,229,239,.22),0 0 30px rgba(88,229,239,.08)!important}
+body:has(#gcApp) .gc-brand small{color:#637984!important}
+body:has(#gcApp) .gc-desktop-nav a{color:#8ea5ae!important;font-size:12px!important}
+body:has(#gcApp) .gc-desktop-nav a:hover{color:var(--gc-v5-cyan)!important}
+body:has(#gcApp) .gc-btn{border-radius:10px!important}
+body:has(#gcApp) .gc-btn-primary{background:linear-gradient(135deg,#7ef1f7,#2bc7d6)!important;color:#041115!important;border:0!important;box-shadow:0 10px 28px rgba(43,199,214,.16)!important}
+body:has(#gcApp) .gc-btn-soft{background:rgba(255,255,255,.045)!important;color:#d7e8eb!important;border-color:var(--gc-v5-line)!important}
+body:has(#gcApp) .gc-staff{color:#9bb0b8!important}
+body:has(#gcApp) .gc-socials a{background:rgba(255,255,255,.035)!important;border-color:var(--gc-v5-line)!important;color:#8eeaf0!important}
+
+body:has(#gcApp) .gc-hero-rebuild{padding:76px 0 54px!important;background:transparent!important;border:0!important;position:relative}
+body:has(#gcApp) .gc-hero-rebuild:before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(117,161,176,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(117,161,176,.045) 1px,transparent 1px);background-size:46px 46px;mask-image:linear-gradient(180deg,#000,transparent 78%)}
+body:has(#gcApp) .gc-hero-grid{max-width:1240px!important;grid-template-columns:minmax(0,.84fr) minmax(430px,1.16fr)!important;gap:58px!important}
+body:has(#gcApp) .gc-hero-copy{position:relative;z-index:2;padding:18px 0!important}
+body:has(#gcApp) .gc-eyebrow{color:var(--gc-v5-cyan)!important;font:800 9px/1 'JetBrains Mono',monospace!important;letter-spacing:2px!important}
+body:has(#gcApp) .gc-hero-copy h1{color:#f2f8f8!important;font-size:clamp(44px,5.5vw,78px)!important;line-height:1.08!important;letter-spacing:-.065em!important;font-weight:900!important;text-shadow:none!important}
+body:has(#gcApp) .gc-hero-copy h1 em{color:var(--gc-v5-cyan)!important;-webkit-text-fill-color:var(--gc-v5-cyan)!important}
+body:has(#gcApp) .gc-hero-copy>p{color:#91a9b2!important;max-width:590px!important;line-height:2!important}
+body:has(#gcApp) .gc-hero-copy:after{color:#526b76!important}
+body:has(#gcApp) .gc-actions{margin-top:26px!important}
+body:has(#gcApp) .gc-trust{gap:8px!important}
+body:has(#gcApp) .gc-trust-card{background:rgba(11,21,29,.82)!important;border:1px solid var(--gc-v5-line)!important;color:#dce9eb!important;border-radius:12px!important;box-shadow:none!important}
+body:has(#gcApp) .gc-trust-card strong{color:var(--gc-v5-amber)!important}
+body:has(#gcApp) .gc-trust-card span{color:#718993!important}
+
+body:has(#gcApp) .gc-hero-visual{background:#071016!important;border:1px solid rgba(88,229,239,.18)!important;border-radius:28px!important;box-shadow:0 35px 90px rgba(0,0,0,.38)!important;min-height:520px!important}
+body:has(#gcApp) .gc-map-shell{background:linear-gradient(155deg,#09151d,#061017)!important;border:0!important;padding:14px!important}
+body:has(#gcApp) .gc-map-topbar{color:#b7dce1!important}
+body:has(#gcApp) .gc-map-topbar:after{color:#526f79!important}
+body:has(#gcApp) .gc-map-shell .route-map{filter:saturate(.82) contrast(1.02)!important;border:1px solid rgba(143,176,194,.13)!important;border-radius:16px!important}
+body:has(#gcApp) .gc-map-fleet>div{background:rgba(255,255,255,.025)!important;border:1px solid rgba(143,176,194,.13)!important;border-radius:12px!important}
+body:has(#gcApp) .gc-map-fleet b{color:#dcebee!important}
+body:has(#gcApp) .gc-map-fleet small{color:#6f8791!important}
+
+body:has(#gcApp) .gc-entry-wrap,body:has(#gcApp) .gc-section{background:transparent!important;border:0!important}
+body:has(#gcApp) .gc-section-head h2{color:#eef7f8!important;font-size:30px!important;letter-spacing:-.04em!important}
+body:has(#gcApp) .gc-section-head p{color:#728892!important}
+body:has(#gcApp) .gc-entry-card,body:has(#gcApp) .gc-service,body:has(#gcApp) .gc-platform-card{background:linear-gradient(150deg,#0c171f,#081017)!important;color:#e8f2f3!important;border:1px solid var(--gc-v5-line)!important;border-radius:18px!important;box-shadow:none!important}
+body:has(#gcApp) .gc-entry-card:hover,body:has(#gcApp) .gc-service:hover,body:has(#gcApp) .gc-platform-card:hover{border-color:rgba(88,229,239,.35)!important;box-shadow:0 24px 50px rgba(0,0,0,.24)!important;transform:translateY(-3px)}
+body:has(#gcApp) .gc-entry-card.customer{background:linear-gradient(145deg,#0c5360,#092b35)!important}
+body:has(#gcApp) .gc-entry-card.staff{background:linear-gradient(145deg,#152c3b,#0b1822)!important}
+body:has(#gcApp) .gc-service b,body:has(#gcApp) .gc-platform-card h3{color:#eaf5f6!important}
+body:has(#gcApp) .gc-service p,body:has(#gcApp) .gc-platform-card p{color:#7d949d!important}
+body:has(#gcApp) .gc-icon-box{background:rgba(88,229,239,.08)!important;color:var(--gc-v5-cyan)!important;border:1px solid rgba(88,229,239,.12)!important}
+body:has(#gcApp) .gc-track-panel{background:linear-gradient(145deg,#0d2831,#08161e)!important;border:1px solid rgba(88,229,239,.18)!important;border-radius:20px!important;box-shadow:none!important}
+body:has(#gcApp) .gc-track-panel h2{color:#effafb!important}
+body:has(#gcApp) .gc-track-panel p{color:#91aab2!important}
+body:has(#gcApp) .gc-track-form input{background:#061017!important;border:1px solid rgba(143,176,194,.18)!important;color:#effafb!important}
+body:has(#gcApp) .gc-footer{background:#03070a!important;border-top:1px solid var(--gc-v5-line)!important}
+body:has(#gcApp) .gc-footer:before{color:#36505b!important}
+
+@media(max-width:1020px){
+ body:has(#gcApp) .gc-hero-grid{grid-template-columns:1fr!important;gap:26px!important}
+ body:has(#gcApp) .gc-hero-copy{max-width:760px!important}
+}
+@media(max-width:760px){
+ body:has(#gcApp) .gc-hero-rebuild{padding:34px 0 22px!important}
+ body:has(#gcApp) .gc-hero-grid{gap:18px!important}
+ body:has(#gcApp) .gc-hero-copy h1{font-size:clamp(36px,11vw,52px)!important;line-height:1.08!important}
+ body:has(#gcApp) .gc-hero-copy>p{font-size:13px!important}
+ body:has(#gcApp) .gc-hero-visual{min-height:0!important;border-radius:22px!important}
+ body:has(#gcApp) .gc-map-shell{padding:8px!important}
+ body:has(#gcApp) .gc-section-head h2{font-size:24px!important}
+ body:has(#gcApp) .gc-entry-card,body:has(#gcApp) .gc-service,body:has(#gcApp) .gc-platform-card{border-radius:15px!important}
+ body:has(#gcApp) .gc-mobile-dock-v3{background:rgba(5,10,14,.97)!important;border-color:rgba(88,229,239,.17)!important;box-shadow:0 18px 46px rgba(0,0,0,.5)!important}
+ body:has(#gcApp) .gc-mobile-dock-v3 a{color:#78909a!important}
+ body:has(#gcApp) .gc-mobile-dock-v3 a.active{color:var(--gc-v5-cyan)!important;background:rgba(88,229,239,.07)!important}
+ body:has(#gcApp) .gc-mobile-dock-v3 a.primary{background:linear-gradient(135deg,#9af7ff,#37cedd)!important;color:#041114!important}
+}
+@media(prefers-reduced-motion:reduce){body:has(#gcApp) .gc-entry-card:hover,body:has(#gcApp) .gc-service:hover,body:has(#gcApp) .gc-platform-card:hover{transform:none!important}}
