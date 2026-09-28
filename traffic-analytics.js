@@ -2,6 +2,15 @@
   'use strict';
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+  function installThemeGuard() {
+    const style = document.createElement('style');
+    style.id = 'traffic-analytics-theme-guard';
+    style.textContent = `.analytics-app{color-scheme:dark!important;background:#07111f!important;color:#f4f8fd!important}.analytics-app .main{color:#f4f8fd!important}.analytics-app .panel,.analytics-app .kpi-card,.analytics-app .control-bar{color:#f4f8fd!important}.analytics-app .panel p,.analytics-app .section-intro p,.analytics-app .page-head p,.analytics-app .updated,.analytics-app .panel-head p{color:#8fa7bf!important}.analytics-app input,.analytics-app select{color:#f4f8fd!important;background:#081727!important}.analytics-app h1,.analytics-app h2,.analytics-app h3,.analytics-app strong,.analytics-app b{color:inherit!important}.analytics-app .page-head h1 em,.analytics-app .eyebrow,.analytics-app .text-btn,.analytics-app .more-btn{color:#f5c76b!important}`;
+    document.head.append(style);
+    document.documentElement.style.setProperty('background', '#07111f', 'important');
+    document.body.style.setProperty('background', '#07111f', 'important');
+    document.body.style.setProperty('color', '#f4f8fd', 'important');
+  }
   const state = { section: 'overview', domain: 'globall-cloud.pages.dev', refreshed: false, requestId: 0, status: 'checking', payload: null };
   const chartData = { visits: [24, 27, 26, 33, 38, 45], unique: [17, 19, 20, 24, 29, 34] };
   const toast = (message) => { const node = $('#toast'); node.textContent = message; node.classList.add('show'); window.clearTimeout(toast.timer); toast.timer = window.setTimeout(() => node.classList.remove('show'), 2600); };
@@ -68,5 +77,5 @@
     $('#pageSearch').addEventListener('input', (event) => { const query = event.target.value.toLowerCase(); $$('tbody tr', $('#pagesTable')).forEach((row) => { row.hidden = !row.textContent.toLowerCase().includes(query); }); });
   }
   function downloadReport(filename) { const csv = 'Metric,Value,Period\nTotal visits,184600,Last 6 months\nUnique visitors,126200,Last 6 months\nBounce rate,38.7%,Last 6 months\nMobile share,68.4%,Last 6 months\n'; const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = filename; link.click(); URL.revokeObjectURL(url); toast('Report downloaded'); }
-  renderChart(); bindNavigation(); bindControls(); loadLiveData();
+  installThemeGuard(); renderChart(); bindNavigation(); bindControls(); loadLiveData();
 })();
