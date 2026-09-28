@@ -1,0 +1,10 @@
+/* Staff Operations Command Matrix — UI only */
+.staff-command-matrix{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
+.staff-command-matrix .cmd{min-height:108px;padding:14px;border:1px solid rgba(120,180,205,.14);border-radius:16px;background:linear-gradient(145deg,rgba(15,42,64,.82),rgba(5,18,30,.94));color:#dcecf4;text-decoration:none;position:relative;overflow:hidden}
+.staff-command-matrix .cmd:before{content:"";position:absolute;top:0;inset-inline:0;height:2px;background:linear-gradient(90deg,transparent,#50e3ef,transparent)}
+.staff-command-matrix .cmd b{display:block;margin-top:10px;font-size:13px}
+.staff-command-matrix .cmd small{display:block;margin-top:5px;color:#6d8ea0;font-size:9px;line-height:1.6}
+.staff-command-matrix .cmd svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7}
+.staff-command-matrix .cmd:hover{transform:translateY(-2px);border-color:rgba(80,227,239,.34)}
+@media(max-width:760px){.staff-command-matrix{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.staff-command-matrix .cmd{min-height:92px;padding:12px}.staff-command-matrix .cmd b{font-size:12px}}
+@media(max-width:420px){.staff-command-matrix{grid-template-columns:1fr 1fr}.staff-command-matrix .cmd small{font-size:8px}}
