@@ -115,6 +115,26 @@ const guards = [
 for (const [label, passed] of guards) if (!passed) fail(label)
 if (!failures) ok('Public and Staff integration guards OK')
 
+console.log('Homepage trust and tracking')
+const liveMap = read('live-logistics-map.js')
+const homepageChecks = [
+  ['shipment prompt links to the real tracking route', /class="gc-track-prompt" href="\/track"/.test(publicShell)],
+  ['no fabricated active-shipment preview remains', !/ACTIVE SHIPMENT|GLC — LIVE CARGO|ETA: 5 days/.test(publicShell)],
+  ['no generic social profile placeholders remain', !/https:\/\/www\.(facebook|instagram)\.com\/?["']/i.test(publicShell)],
+  ['homepage does not claim unverified 24/7 support', !/24\/7/i.test(publicShell)],
+  ['route map distinguishes a route overview from live tracking', liveMap.includes("'ROUTE OVERVIEW'") && liveMap.includes("'LIVE TRACKING'")],
+  ['route map does not synthesize a shipment location', !liveMap.includes('شوێنی پێشبینیکراوی بار')],
+  ['mobile menu exposes and synchronizes its expanded state', publicShell.includes('aria-controls="gcMobileMenu"') && publicShell.includes('aria-expanded="false"') && read('gc-final-experience-2026.js').includes("button.setAttribute('aria-expanded', String(open))")],
+]
+for (const [label, passed] of homepageChecks) if (!passed) fail(label)
+if (homepageChecks.every(([, passed]) => passed)) ok('Homepage trust, tracking, and navigation checks OK')
+
+console.log('Pages build output protection')
+const buildScript = read('scripts/cloudflare-build.mjs')
+const skipsLegacyBuild = /const skippedDirectories = new Set\(\[[^\]]*['"]Build['"][^\]]*\]\)/.test(buildScript)
+if (!skipsLegacyBuild) fail('legacy Build output is not excluded from Pages bundle input')
+else ok('Legacy Build output is excluded from the deployment bundle')
+
 console.log('Migration naming and presence')
 const migDir = join(ROOT, 'supabase', 'migrations')
 const migrations = existsSync(migDir) ? readdirSync(migDir).filter((x) => x.endsWith('.sql')) : []

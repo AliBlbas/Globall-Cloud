@@ -89,18 +89,29 @@
   function setInfo(root, shipment, origin, dest, current){
     const info=root.querySelector('.gc-map-info b'); const sub=root.querySelector('.gc-map-info small');
     if(info) info.textContent=`${origin.label} → ${dest.label}`;
-    if(sub){ const eta=shipment?.eta?new Date(shipment.eta):null; sub.textContent=eta&&!Number.isNaN(eta.valueOf())?`ETA · ${eta.toLocaleDateString('ckb-IQ')}`:`شوێنی ئێستا · ${current?.label||'لە ڕێگادایە'}`; }
+    if(sub){
+      const eta=shipment?.eta?new Date(shipment.eta):null;
+      if(eta&&!Number.isNaN(eta.valueOf())) sub.textContent=`ETA · ${eta.toLocaleDateString('ckb-IQ')}`;
+      else if(current) sub.textContent=`شوێنی ئێستا · ${current.label}`;
+      else if(shipment?.id) sub.textContent='داتای شوێنی ئێستا بۆ ئەم بارە بەردەست نییە';
+      else sub.textContent='نەخشەی گشتیی ڕێگا؛ داتای شوێنی بار نییە';
+    }
   }
   async function initRouteMap(root,payload){
     const L=await loadLeaflet(); if(!root||root.dataset.mapReady==='1') return;
     root.dataset.mapReady='1';
     const shipment=payload?.shipment||payload||null;
-    root.innerHTML='<div class="gc-map" aria-label="نەخشەی ڕاستەقینەی گەیاندنی بار"></div><div class="gc-map-overlay"><div class="gc-map-live"><span class="gc-live-dot"></span><span>LIVE TRACKING</span></div><div class="gc-map-info"><b>China → Dubai → Erbil</b><small>نەخشەی ڕاستەقینەی مسیر</small></div></div><div class="gc-map-legend"><span><i class="gc-leg-dot gc-leg-current"></i> شوێنی ئێستا</span><span><i class="gc-leg-line"></i> ڕێگا</span><span><i class="gc-leg-hub"></i> هاب</span></div>';
+    const {origin,dest,current}=coordsFromShipment(shipment);
+    const hasLiveLocation=Boolean(shipment?.id&&current);
+    const mapLabel=hasLiveLocation?'نەخشەی شوێنی بار':'نەخشەی ڕێگای گشتیی گواستنەوە';
+    const mapStatus=hasLiveLocation?'LIVE TRACKING':shipment?.id?'SHIPMENT ROUTE':'ROUTE OVERVIEW';
+    const currentLegend=current?'<span><i class="gc-leg-dot gc-leg-current"></i> شوێنی ئێستا</span>':'';
+    root.innerHTML=`<div class="gc-map" aria-label="${mapLabel}"></div><div class="gc-map-overlay"><div class="gc-map-live">${hasLiveLocation?'<span class="gc-live-dot"></span>':''}<span>${mapStatus}</span></div><div class="gc-map-info"><b>China → Dubai → Erbil</b><small>نەخشەی گشتیی ڕێگا</small></div></div><div class="gc-map-legend">${currentLegend}<span><i class="gc-leg-line"></i> ڕێگا</span><span><i class="gc-leg-hub"></i> هاب</span></div>`;
     const map=L.map(root.querySelector('.gc-map'),{zoomControl:false,attributionControl:true,scrollWheelZoom:false,dragging:true,tap:true,minZoom:2,maxZoom:16});
     L.control.zoom({position:'bottomright'}).addTo(map);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors',detectRetina:true}).addTo(map);
 
-    const {origin,dest,current}=coordsFromShipment(shipment); const addMarker=(point,mode)=>{const m=L.marker([point.lat,point.lng],{icon:markerIcon(L,mode),keyboard:false}).addTo(map);m.bindTooltip(esc(point.label),{direction:'top',offset:[0,-14],className:'gc-map-tooltip',opacity:.96});return m;};
+    const addMarker=(point,mode)=>{const m=L.marker([point.lat,point.lng],{icon:markerIcon(L,mode),keyboard:false}).addTo(map);m.bindTooltip(esc(point.label),{direction:'top',offset:[0,-14],className:'gc-map-tooltip',opacity:.96});return m;};
     addMarker(origin,'node'); addMarker(ROUTE.dubai,'hub'); addMarker(dest,'node');
     const leg1=greatCircle(origin,ROUTE.dubai,90); const leg2=await roadRoute(ROUTE.dubai,dest);
     L.polyline(leg1,{color:'#39e4f1',weight:3,opacity:.82,dashArray:'7 8'}).addTo(map);
@@ -113,11 +124,6 @@
 
     let currentMarker;
     if(current) currentMarker=addMarker(current,'current');
-    else {
-      const idx=Math.max(0,Math.min(5,Number(shipment?.current_step_index??2))); const t=idx/5;
-      const fallback=idx<3?leg1[Math.floor(t*(leg1.length-1))]:leg2[Math.floor(((t-.4)/.6)*(leg2.length-1))]||leg2[Math.floor(leg2.length/2)];
-      if(fallback) currentMarker=addMarker({lat:fallback[0],lng:fallback[1],label:'شوێنی پێشبینیکراوی بار'},'current');
-    }
 
     // Public event markers provide a visual history and photo-ready timeline source.
     const events=Array.isArray(payload?.events)?payload.events:[];
