@@ -7,18 +7,4 @@
   }catch(e){}
 })();
 
-/* Load the visual redesign after the page stylesheet so it can override the legacy visual layer without changing app logic. */
-(function(){
-  try{
-    var load = function(){
-      if(document.getElementById('gcPremiumStyles')) return;
-      var link = document.createElement('link');
-      link.id = 'gcPremiumStyles';
-      link.rel = 'stylesheet';
-      link.href = '/gc-premium.css?v=20260928-1';
-      document.head.appendChild(link);
-    };
-    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load, {once:true});
-    else load();
-  }catch(e){}
-})();
+/* Premium visual CSS is linked directly in index.html to avoid late mobile paint and FOUS. */
