@@ -1,3 +1,0 @@
-Globall Cloud Ultimate Package
-Built from: Globall-Cloud-2 hardened core + KAML concepts from all supplied ZIP files
-Deployment root: this directory

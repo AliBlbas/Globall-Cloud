@@ -1,18 +1,4 @@
 {
-  "name": "Globall Cloud",
-  "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "22"
-    }
-  },
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode"
-      ]
-    }
-  },
-  "postCreateCommand": "npm ci --ignore-scripts",
-  "remoteUser": "codespace"
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "features": {}
 }

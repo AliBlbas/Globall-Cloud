@@ -52,15 +52,10 @@ class EnhancedTracking {
     if (!sb) throw new Error('Supabase client not available');
 
     const shipment = await this.fetchShipmentData(sb, shipmentId);
-    const resolvedId = shipment.id || shipmentId;
     this.shipments.set(shipmentId, shipment);
-    if (resolvedId !== shipmentId) this.shipments.set(resolvedId, shipment);
-    if (containerId) {
-      this.initializeMap(containerId, shipmentId);
-      if (resolvedId !== shipmentId) this.initializeMap(containerId, resolvedId);
-    }
+    if (containerId) this.initializeMap(containerId, shipmentId);
     await this.loadPublicEvents(shipmentId);
-    this.subscribeToRealtime(sb, resolvedId);
+    this.subscribeToRealtime(sb, shipmentId);
     return shipment;
   }
 
@@ -244,18 +239,10 @@ class EnhancedTracking {
   }
 
   cleanup(shipmentId) {
-    const shipment = this.shipments.get(shipmentId);
-    const resolvedId = shipment?.id || shipmentId;
     this.unsubscribeChannel(shipmentId);
-    if (resolvedId !== shipmentId) this.unsubscribeChannel(resolvedId);
     this.shipments.delete(shipmentId);
     this.containers.delete(shipmentId);
     this.lastEventIds.delete(shipmentId);
-    if (resolvedId !== shipmentId) {
-      this.shipments.delete(resolvedId);
-      this.containers.delete(resolvedId);
-      this.lastEventIds.delete(resolvedId);
-    }
   }
 }
 

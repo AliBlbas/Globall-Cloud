@@ -20,7 +20,7 @@ const cors = (req: Request) => {
   return {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': ORIGINS.has(origin) ? origin : 'https://globall-cloud.pages.dev',
-    'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info, x-idempotency-key, x-supabase-auth-token, traceparent, tracestate, baggage',
+    'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info, x-idempotency-key',
     'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
     'Cache-Control': 'no-store',
     'Vary': 'Origin',
@@ -46,25 +46,9 @@ const numberOrNull = (value: unknown) => {
   return number
 }
 
-const resolveServiceKey = () => {
-  const direct = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-  if (direct) return direct
-  const raw = Deno.env.get('SUPABASE_SECRET_KEYS')
-  if (!raw) return null
-  try {
-    const parsed = JSON.parse(raw)
-    if (typeof parsed === 'string') return parsed
-    if (parsed?.default) return String(parsed.default)
-    const first = Object.values(parsed ?? {})[0]
-    return first ? String(first) : null
-  } catch {
-    return null
-  }
-}
-
 const serviceClient = () => {
   const url = Deno.env.get('SUPABASE_URL')
-  const secret = resolveServiceKey()
+  const secret = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_SECRET_KEY')
   if (!url || !secret) throw new Error('Supabase service configuration is unavailable')
   return createClient(url, secret, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
@@ -415,72 +399,12 @@ const report = async (service: ReturnType<typeof serviceClient>, staff: Staff, r
   return result.data
 }
 
-const listOperationalAlerts = async (service: ReturnType<typeof serviceClient>, staff: Staff) => {
-  const [shipments, exceptions] = await Promise.all([
-    service.from('shipments').select('id,branch,archived_at,operational_status,current_step_index,eta,current_location_label,tracking_updated_at,priority,updated_at').order('updated_at', { ascending: false }).limit(200),
-    service.from('logistics_exceptions').select('id,shipment_id,severity,title,note,status,created_at,updated_at,due_at').in('status', ['open','acknowledged']).order('created_at', { ascending: false }).limit(200),
-  ])
-  if (shipments.error) throw shipments.error
-  if (exceptions.error) throw exceptions.error
-  const visible = (branch: unknown) => staff.branch === 'all' || branch == null || String(branch) === String(staff.branch)
-  const now = Date.now()
-  const alerts: Array<Record<string, unknown>> = []
-  for (const row of (shipments.data || []) as Array<Record<string, unknown>>) {
-    if (!visible(row.branch) || row.archived_at) continue
-    const id = String(row.id || '')
-    const status = String(row.operational_status || '').toLowerCase()
-    const step = Number(row.current_step_index || 0)
-    if (!id || step >= 5 || ['delivered','cancelled','closed'].includes(status)) continue
-    const eta = row.eta ? new Date(String(row.eta)).getTime() : NaN
-    if (Number.isFinite(eta) && eta < now - 2 * 60 * 60 * 1000) {
-      const critical = eta < now - 24 * 60 * 60 * 1000
-      alerts.push({ id: `eta:${id}:${row.eta}`, source: 'eta_monitor', type: 'eta_breach', severity: critical ? 'critical' : 'high', status: 'open', title: critical ? 'Critical ETA breach' : 'Shipment ETA breach', note: `Shipment ${id} is overdue beyond its ETA.`, shipment_id: id, location: row.current_location_label, occurred_at: row.eta, action_url: `/staff-os?tab=shipments&shipment_id=${encodeURIComponent(id)}` })
-    }
-    const tracking = row.tracking_updated_at ? new Date(String(row.tracking_updated_at)).getTime() : NaN
-    if (Number.isFinite(tracking) && tracking < now - 24 * 60 * 60 * 1000) {
-      alerts.push({ id: `tracking:${id}:${new Date(tracking).toISOString().slice(0,10)}`, source: 'tracking_heartbeat', type: 'stale_tracking', severity: 'medium', status: 'open', title: 'Tracking heartbeat is stale', note: `Shipment ${id} has had no tracking update for more than 24 hours.`, shipment_id: id, location: row.current_location_label, occurred_at: row.tracking_updated_at, action_url: `/staff-os?tab=shipments&shipment_id=${encodeURIComponent(id)}` })
-    }
-    const priority = String(row.priority || '').toLowerCase()
-    if (['critical','high'].includes(priority)) {
-      alerts.push({ id: `priority:${id}:${priority}`, source: 'shipment_priority', type: 'priority_attention', severity: priority, status: 'open', title: priority === 'critical' ? 'Critical-priority shipment' : 'High-priority shipment', note: `Shipment ${id} is marked ${priority} priority and remains active.`, shipment_id: id, location: row.current_location_label, occurred_at: row.updated_at, action_url: `/staff-os?tab=shipments&shipment_id=${encodeURIComponent(id)}` })
-    }
-  }
-  const shipmentBranch = new Map(((shipments.data || []) as Array<Record<string, unknown>>).map(row => [String(row.id), row.branch]))
-  for (const row of (exceptions.data || []) as Array<Record<string, unknown>>) {
-    const branch = row.shipment_id ? shipmentBranch.get(String(row.shipment_id)) : null
-    if (!visible(branch) && !(branch == null && ['admin','super_admin','accountant','operations'].includes(staff.role))) continue
-    alerts.push({ id: `exception:${row.id}:${row.status}`, source: 'logistics_exceptions', type: 'exception', severity: row.severity || 'medium', status: row.status || 'open', title: row.title || 'Logistics exception', note: row.note || '', shipment_id: row.shipment_id, occurred_at: row.updated_at || row.created_at, due_at: row.due_at, action_url: row.shipment_id ? `/staff-os?tab=shipments&shipment_id=${encodeURIComponent(String(row.shipment_id))}` : '/staff-os?tab=alerts' })
-  }
-  alerts.sort((a, b) => new Date(String(b.occurred_at || 0)).getTime() - new Date(String(a.occurred_at || 0)).getTime())
-  return { kind: 'alerts', items: alerts.slice(0, 200), generated_at: new Date().toISOString() }
-}
-
 const list = async (service: ReturnType<typeof serviceClient>, staff: Staff, requestUrl: URL) => {
   const kind = requestUrl.searchParams.get('kind') || 'shipments'
-  if (kind === 'alerts') return listOperationalAlerts(service, staff)
-  if (kind === 'events') {
-    const shipmentId = text(requestUrl.searchParams.get('shipment_id'), 128)
-    if (!shipmentId) throw new Error('shipment_id is required')
-    const shipment = await service.from('shipments').select('id,branch,archived_at').eq('id', shipmentId).maybeSingle()
-    if (shipment.error) throw shipment.error
-    if (!shipment.data || shipment.data.archived_at || (staff.branch !== 'all' && shipment.data.branch && String(shipment.data.branch) !== String(staff.branch))) return { kind, items: [], offset: 0, limit: 0 }
-    const limit = Math.min(200, Math.max(1, Number(requestUrl.searchParams.get('limit') || 100)))
-    const offset = Math.max(0, Number(requestUrl.searchParams.get('offset') || 0))
-    const result = await service.from('shipment_events').select('id,shipment_id,event_type,status,location,note,occurred_at,created_by,created_by_name,metadata').eq('shipment_id', shipmentId).order('occurred_at', { ascending: false }).range(offset, offset + limit - 1)
-    if (result.error) throw result.error
-    return { kind, items: result.data || [], offset, limit }
-  }
   const limit = Math.min(200, Math.max(1, Number(requestUrl.searchParams.get('limit') || 50)))
   const offset = Math.max(0, Number(requestUrl.searchParams.get('offset') || 0))
-  const allowed = new Set(['shipments', 'events', 'packages', 'customs', 'consolidations', 'invoices', 'payments', 'exceptions', 'outbox', 'status_history', 'quotes', 'documents', 'movements', 'route_legs', 'manifests', 'alerts'])
+  const allowed = new Set(['shipments', 'packages', 'customs', 'consolidations', 'invoices', 'payments', 'exceptions', 'outbox', 'status_history', 'quotes', 'documents', 'movements', 'route_legs', 'manifests'])
   if (!allowed.has(kind)) throw new Error('Unsupported list kind')
-  const scopedKinds = new Set(['packages', 'customs', 'invoices', 'payments', 'exceptions', 'status_history', 'documents', 'movements', 'route_legs', 'manifests'])
-  const shipmentId = text(requestUrl.searchParams.get('shipment_id'), 128)
-  if (shipmentId && scopedKinds.has(kind)) {
-    const shipment = await service.from('shipments').select('id,branch,archived_at').eq('id', shipmentId).maybeSingle()
-    if (shipment.error) throw shipment.error
-    if (!shipment.data || shipment.data.archived_at || (staff.branch !== 'all' && shipment.data.branch && String(shipment.data.branch) !== String(staff.branch))) return { kind, items: [], offset: 0, limit: 0 }
-  }
   const from = offset
   const to = offset + limit - 1
   let query: any
@@ -516,7 +440,6 @@ const list = async (service: ReturnType<typeof serviceClient>, staff: Staff, req
   } else {
     query = service.from('shipment_status_history').select('*').order('occurred_at', { ascending: false })
   }
-  if (shipmentId && scopedKinds.has(kind)) query = query.eq('shipment_id', shipmentId)
   const result = await query.range(from, to)
   if (result.error) throw result.error
   return { kind, items: result.data || [], offset, limit }

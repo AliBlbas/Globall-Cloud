@@ -1,4 +1,0 @@
-چۆن Deploy بکەیت:
-1. Cloudflare Pages بکەرەوە
-2. 01-FINAL/index.html upload بکە
-3. Done!

@@ -3,9 +3,9 @@
 const I18N = {
 ku:{
   brand:{tagline:'لۆجستیک'},
-  topbar:{note:'ڕێڕەوەکانی چین، دوبەی، ئەمریکا و هەولێر بەبەردەوامی چالاکن',support:'پشتیوانی زیندوو ٢٤/٧'},
+  topbar:{note:'سەرەکییەکانی چین، دوبەی و هەولێر بەبەردەوامی چالاکن',support:'پشتیوانی زیندوو ٢٤/٧'},
   nav:{home:'سەرەکی',about:'دەربارەمان',services:'خزمەتگوزارییەکان',track:'شوێنکەوتن',contact:'پەیوەندی',signIn:'چوونەژوورەوە',dashboard:'داشبۆرد',quote:'داواکردنی نرخ'},
-  hero:{eyebrow:'چین  ·  ئیمارات  ·  ئەمریکا  ·  هەولێر',title:'گەیاندنی بار بە متمانە، خێرایی و بێ سنوور',subtitle:'Globall Cloud کاڵاکانت بە شێوەیەکی ئاسایشدار لە چین، دوبەی و ئەمریکا بۆ هەولێر و هەموو شارەکانی عێراق دەگەیەنێت — بە شوێنکەوتنی ڕاستەوخۆ، ڕێکاری ڕوون و پشتیوانی ٢٤/٧.',ctaTrack:'شوێنکەوتنی بار',ctaQuote:'داواکردنی نرخ',ctaWhatsApp:'پەیوەندی بە واتساپ',route:{a:'گوانگژۆ، چین',b:'دوبەی، ئیمارات',c:'هەولێر، عێراق'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'بارەکەت لە نێوان چین، دوبەی، ئەمریکا و هەولێر بە بەڵگە و شوێنکەوتنی زیندوو بەردەوامە و هەر نوێکارییەک زوو دەردەکەوێت.',routeOrigin:'سەرەتا / Origin Hub',routeTransit:'ترانزیت / Transit Hub',routeDestination:'گەیاندن / Delivery Hub'},
+  hero:{eyebrow:'چین  ·  ئیمارات  ·  عێراق',title:'گەیاندنی بار بە متمانە، خێرایی و بێ سنوور',subtitle:'Globall Cloud بارت بە شێوەیەکی ئاسایشدار لە چین و ئیمارات بۆ هەموو شارەکانی عێراق دەگەیەنێت — بە شوێنکەوتنی ڕاستەوخۆ، ڕێکاری ڕوون و پشتیوانی ٢٤/٧.',ctaTrack:'شوێنکەوتنی بار',ctaQuote:'داواکردنی نرخ',route:{a:'گوانگژۆ، چین',b:'دوبەی، ئیمارات',c:'هەولێر، عێراق'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'بارەکەت لە نێوان چین → دوبەی → هەولێر بەردەوامە و هەر نوێکارییەک زوو دەردەکەوێت.',routeOrigin:'سەرەتا / Origin Hub',routeTransit:'ترانزیت / Transit Hub',routeDestination:'گەیاندن / Delivery Hub'},
   trust:{s1v:'+٢٥K',s1l:'بار گەیەنراو',s2v:'١٢+',s2l:'شوێن و بازاڕ',s3v:'٢٤/٧',s3l:'پشتیوانی زیندوو',s4v:'٩٨%',s4l:'گەیاندنی لەکاتی خۆیدا'},
   liveTrack:{heading:'شوێنکەوتنی بارەکەت لە چرکەیەکدا',sub:'ژمارەی شوێنکەوتنەکەت بنووسە و نوێترین دۆخی بارەکەت ببینە',placeholder:'وەک GC10052341',button:'شوێنکەوتن'},
   business:{eyebrow:'پەڕەکانی بازرگانی',heading:'هەموو خزمەتگوزاری و پەڕە گرنگەکان لە یەک شوێن',sub:'بە یەک کلیک بچۆ بۆ خزمەتگوزاری، خەملاندنی نرخ، داشبۆرد، کۆگاکان و پەیوەندی.',
@@ -18,10 +18,9 @@ ku:{
       contact:{title:'پەیوەندی',desc:'واتساپ، ئیمەیل و ڕێکخستن لە کەمترین کاتدا.',action:'پەیوەندیمان پێوە بکە',icon:'i-chat',route:'contact'}
     }},
   dashboardPreview:{heading:'پێشبینی داشبۆردی کڕیار',sub:'کڕیاران دەتوانن لێرە بارەکان، نرخ و ئاگادارییەکان بە شێوەی خێرا بەڕێوەببەن.',stats:[{v:'4',l:'بارە چالاکەکان'},{v:'29',l:'گەیشتوو'},{v:'2',l:'چاوەڕوان'},{v:'8',l:'فاکتۆرەکان'}],btnPortal:'کردنەوەی پرۆتال',btnTrack:'شوێنکەوتن بکە'},
-  warehouses:{eyebrow:'کۆگاکان',heading:'تۆڕی کۆگاکانمان',sub:'هابە سەرەکییەکان لە چین، دوبەی، ئەمریکا و هەولێر بۆ جوڵاندنی خێرای بار.',
+  warehouses:{eyebrow:'کۆگاکان',heading:'تۆڕی کۆگاکانمان',sub:'هابە سەرەکییەکان لە چین، دوبەی و هەولێر بۆ جوڵاندنی خێرای بار.',
     items:{
       guangzhou:{tag:'هاب سەرەکی چین',title:'کۆگای گوانگجو',address:'گوانگجو، چین',hours:'دووشەممە - شەممە',features:['کۆکردنەوەی بار','وێنەی QC','پاکەتکردنی خێرا']},
-      usa:{tag:'سەرچاوەی ئەمریکا',title:'هابەکانی ئەمریکا',address:'ئەمریکا',hours:'دووشەممە - شەممە',features:['کۆکردنەوەی کاڵا','پشکنینی بەڵگە','ئامادەکردن بۆ گواستنەوە']},
       dubai:{tag:'هاب ترانزیت',title:'کۆگای دوبەی',address:'دوبەی، ئیمارات',hours:'دووشەممە - شەممە',features:['ترانزیتی خێرا','بەڕێوەبردنی هەلومەرج','ئاسایشی باش']},
       erbil:{tag:'هابی دابەشکردن',title:'کۆگای هەولێر',address:'هەولێر، عێراق',hours:'شەممە - پێنجشەممە',features:['دابەشکردنی ناوخۆیی','پێشوازی کڕیار','گواستنەوەی خێرا']}
     }},
@@ -32,11 +31,11 @@ ku:{
       {icon:'i-warehouse',title:'وەسڵی کۆگا',desc:'ورودبوونی بار لە هەر هابێکدا تۆمار بکە و بەڵگەکەی بخەوە.',points:['وێنەی بار','تۆماری هاتن','لێدانی پارچە']},
       {icon:'i-chat',title:'ڕیزبەندی پشتگیری',desc:'پەیامی کڕیاران بە خێرایی وەربگرە و هەموو گفتوگۆکان لە شوێنێکدا پارێزە.',points:['هەواڵی واتساپ','تێبینی دۆخ','وەڵامی ئامادە']}
     ]},
-  services:{eyebrow:'خزمەتگوزاری',heading:'خزمەتگوزارییەکانمان',sub:'چارەسەری تەواو بۆ گەیاندنی کاڵا لە چین، دوبەی و ئەمریکا بۆ هەولێر و ناو عێراق',learnMore:'زیاتر بزانە',
-    quote:{eyebrow:'تەخمینی نرخ',heading:'حساباتی نرخی گەیاندن',origin:'شوێنی سەرچاوەی بار',type:'جۆری گەیاندن',air:'ئاسمانی (Air)',sea:'دەریایی (Sea)',land:'وشکانی (Land)',
+  services:{eyebrow:'خزمەتگوزاری',heading:'خزمەتگوزارییەکانمان',sub:'چارەسەری تەواو بۆ گەیاندنی بار لە دەرەوە بۆ ناو عێراق',learnMore:'زیاتر بزانە',
+    quote:{eyebrow:'تەخمینی نرخ',heading:'حساباتی نرخی گەیاندن',type:'جۆری گەیاندن',air:'ئاسمانی (Air)',sea:'دەریایی (Sea)',land:'وشکانی (Land)',
       weight:'کێش (کیلۆگرام)',weightPh:'بۆ نموونە 50',dest:'شاری مەبەست لە عێراق',btn:'حسابکردنی تەخمین',
       needWeight:'تکایە کێشی بار بنووسە.',resultLabel:'تەخمینی نرخ',cta:'داواکردنی نرخی وردتر',
-      note:'* ئەمە تەخمینێکی گشتییە و نرخی کۆتایی بە origin، جۆری بار، کێش، قەبارە، گومرگ و ڕێڕەوی ڕاستەقینە لەلایەن ستافمانەوە پشتڕاست دەکرێت — نرخی کۆتایی دوای پشکنینی وردی بار لەلایەن ستافمانەوە دیاری دەکرێت.'},
+      note:'* ئەمە تەنها تەخمینێکی گشتییە — نرخی کۆتایی دوای پشکنینی وردی بار لەلایەن ستافمانەوە دیاری دەکرێت.'},
     items:{
       air:{title:'گەیاندنی ئاسمانی',desc:'خێراترین ڕێگا بۆ بارە پەلەیەکان.',features:['کاتی گەیشتن: ١-٣ ڕۆژ','گونجاو بۆ بارە بەنرخ و پەلەکان','شوێنکەوتنی ڕاستەوخۆ']},
       sea:{title:'گەیاندنی دەریایی',desc:'گونجاوترین تێچوون بۆ بارە قورس و گەورەکان.',features:['کاتی گەیشتن: ١٢-١٨ ڕۆژ','باشترین تێچوون بۆ بارە قورسەکان','گونجاو بۆ کۆنتەینەری تەواو یان بەشی کۆنتەینەر']},
@@ -64,7 +63,7 @@ ku:{
     {title:'باشترین نرخ',desc:'نرخی ڕکابەرانە بەبێ کێشەی شاراوە.',icon:'i-card'},
     {title:'پشتگیری ٢٤/٧',desc:'تیمی پشتگیریمان هەمیشە ئامادەیە بۆ یارمەتیدانت.',icon:'i-clock'}
   ]},
-  about:{eyebrow:'دەربارەمان',heading:'دەربارەی Globall Cloud',sub:'هاوبەشی متمانەپێکراوت بۆ هێنانی کاڵا لە چین، ئیمارات و ئەمریکا بۆ هەولێر و عێراق.',
+  about:{eyebrow:'دەربارەمان',heading:'دەربارەی Globall Cloud',sub:'هاوبەشی متمانەپێکراوت بۆ گەیاندنی بار لەنێوان چین، ئیمارات و عێراق.',
     missionTitle:'ئەرکمان',missionBody:'ئەرکی Globall Cloud گەیاندنی خزمەتگوزاری گەیاندنی بارە بە ستانداردی نێودەوڵەتی، بە شەفافیەت و متمانەوە، بۆ هەموو کڕیارێک لە هەرێمی کوردستان و عێراق.',
     visionTitle:'ئاواتمان',visionBody:'ئامانجمان ئەوەیە ببینە باشترین و متمانەپێکراوترین کۆمپانیای لۆجستیک لە هەرێم، بە بەکارهێنانی تەکنەلۆجیای نوێ و خزمەتگوزاریەکی کڕیار-ناوەندی.',
     valuesEyebrow:'بەهاکانمان',valuesHeading:'ئەوەی ڕێنماییمان دەکات',values:[
@@ -74,8 +73,8 @@ ku:{
       {title:'ڕێزگرتن لە کڕیار',desc:'کاتی کڕیار و پێداویستیەکانی لە پێشینەن.',icon:'i-user'}
     ],
     storyTitle:'چیرۆکمان',storyBody:'Globall Cloud وەک هاوبەشێکی گەیاندنی بار دەستی کرد بۆ چارەسەرکردنی کێشەی گەیاندنی بار لەنێوان بازاڕەکانی چین و ئیمارات و شارەکانی عێراق. لە ڕێگەی کارامەیی و پابەندبوونمانەوە، بووینەتە هەڵبژاردەیەکی متمانەپێکراو بۆ کۆمپانیا و کەسانی زۆر کە پێویستیان بە گەیاندنی بارێکی ئارام و خێرایە. بەردەوامین لە پەرەپێدانی خزمەتگوزارییەکانمان بۆ باشترکردنی ئەزموونی هەر کڕیارێک.'},
-  cta:{heading:'ئامادەیت بار بنێریت؟',sub:'ئەمڕۆ داواکاریەکەت بنێرە و لە کەمترین کات نرخێک وەربگرە.',b1:'داواکردنی نرخ',b2:'پەیوەندیمان پێوە بکە',whatsapp:'پەیوەندی بە واتساپ'},
-  corridor:{eyebrow:'ڕێڕەوی کارەکە',heading:'لە چین، دوبەی و ئەمریکا بۆ هەولێر',sub:'سێ هەنگاوی سەرەکی بە ڕوونی و بە شێوازی کۆمپانیایەکی نێودەوڵەتی ببینە.',badge:'ڕێڕەوی زیندوو',items:[
+  cta:{heading:'ئامادەیت بار بنێریت؟',sub:'ئەمڕۆ داواکاریەکەت بنێرە و لە کەمترین کات نرخێک وەربگرە.',b1:'داواکردنی نرخ',b2:'پەیوەندیمان پێوە بکە'},
+  corridor:{eyebrow:'ڕێڕەوی کارەکە',heading:'لە چین بۆ دوبەی بۆ هەولێر',sub:'سێ هەنگاوی سەرەکی بە ڕوونی و بە شێوازی کۆمپانیایەکی نێودەوڵەتی ببینە.',badge:'ڕێڕەوی زیندوو',items:[
     {flag:'🇨🇳',title:'گەیاندن لە چین',meta:'Origin Hub',desc:'بارەکەت وەردەگیرێت، QC دەکرێت و بۆ ترانزیت ئامادە دەبێت.',tags:['QC','Packing','Pickup']},
     {flag:'🇦🇪',title:'هابەی دوبەی',meta:'Transit Hub',desc:'لە دوبەیدا ڕێکخستن و بەڕێوەبردنی ڕێگەی گواستنەوە بە شێوەی خێرا.',tags:['Transit','Air Cargo','Sea Cargo']},
     {flag:'🇮🇶',title:'گەیاندنی هەولێر',meta:'Delivery Hub',desc:'پاش گومرگ و ڕێکخستنی دوایین، بارەکەت بە سەلامەتی دەگات.',tags:['Customs','Door-to-Door','Final Mile']}
@@ -137,7 +136,7 @@ en:{
   brand:{tagline:'LOGISTICS'},
   topbar:{note:'Active lanes across China, Dubai, and Erbil',support:'Live support 24/7'},
   nav:{home:'Home',about:'About Us',services:'Services',track:'Track',contact:'Contact',signIn:'Sign In',dashboard:'Dashboard',quote:'Get a Quote'},
-  hero:{eyebrow:'CHINA  ·  UAE  ·  IRAQ',title:'Delivering Trust Across Borders',subtitle:'Globall Cloud moves your cargo safely and quickly from China and the United Arab Emirates to every city in Iraq — with live tracking, clear milestones, and 24/7 support.',ctaTrack:'Track Shipment',ctaQuote:'Get a Quote',ctaWhatsApp:'Chat on WhatsApp',route:{a:'Guangzhou, China',b:'Dubai, UAE',c:'Erbil, Iraq'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'Your cargo is moving through our China → Dubai → Erbil network with live updates.',routeOrigin:'Origin Hub',routeTransit:'Transit Hub',routeDestination:'Delivery Hub'},
+  hero:{eyebrow:'CHINA  ·  UAE  ·  IRAQ',title:'Delivering Trust Across Borders',subtitle:'Globall Cloud moves your cargo safely and quickly from China and the United Arab Emirates to every city in Iraq — with live tracking, clear milestones, and 24/7 support.',ctaTrack:'Track Shipment',ctaQuote:'Get a Quote',route:{a:'Guangzhou, China',b:'Dubai, UAE',c:'Erbil, Iraq'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'Your cargo is moving through our China → Dubai → Erbil network with live updates.',routeOrigin:'Origin Hub',routeTransit:'Transit Hub',routeDestination:'Delivery Hub'},
   trust:{s1v:'25K+',s1l:'Delivered shipments',s2v:'12+',s2l:'Connected markets',s3v:'24/7',s3l:'Live support',s4v:'98%',s4l:'On-time delivery'},
   liveTrack:{heading:'Track in seconds',sub:'Enter your tracking number to see the latest shipment status instantly.',placeholder:'e.g. GC10052341',button:'Track Shipment'},
   business:{eyebrow:'BUSINESS PAGES',heading:'Everything customers need is one tap away',sub:'Jump straight to services, pricing, dashboard tools, warehouses, and support.',
@@ -205,7 +204,7 @@ en:{
       {title:'Customer Respect',desc:'Your time and needs always come first.',icon:'i-user'}
     ],
     storyTitle:'Our Story',storyBody:'Globall Cloud started as a shipping partner focused on solving cargo movement between the markets of China and the UAE and the cities of Iraq. Through efficiency and commitment, we have become a trusted choice for businesses and individuals who need reliable, fast cargo delivery. We continue to grow our services to improve the experience of every client.'},
-  cta:{heading:'Ready to Ship?',sub:'Submit your request today and get a quote in minutes.',b1:'Get a Quote',b2:'Contact Us',whatsapp:'Chat on WhatsApp'},
+  cta:{heading:'Ready to Ship?',sub:'Submit your request today and get a quote in minutes.',b1:'Get a Quote',b2:'Contact Us'},
   corridor:{eyebrow:'Operational Corridor',heading:'China → Dubai → Erbil',sub:'See the three stages of the network at a glance, presented like a premium logistics brand.',badge:'Live Corridor',items:[
     {flag:'🇨🇳',title:'China pickup',meta:'Origin Hub',desc:'Cargo is received, checked, and prepared for the next leg.',tags:['QC','Packing','Pickup']},
     {flag:'🇦🇪',title:'Dubai transit hub',meta:'Transit Hub',desc:'Fast handling and re-routing through our UAE operations center.',tags:['Transit','Air Cargo','Sea Cargo']},

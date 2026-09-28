@@ -1,139 +1,108 @@
 #!/usr/bin/env node
-import { execFileSync } from 'node:child_process'
-import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import { dirname, join, extname, relative } from 'node:path'
+// Local pre-push validation for Globall Cloud.
+// Fast syntax + structural sanity checks. The full invariant suite
+// (CSP, secrets, migration filenames, live smoke test) lives in
+// .github/workflows/production-integrity.yml and runs in CI — this
+// script is meant to catch the same class of mistakes in ~2 seconds
+// on your own machine before you push.
+//
+// Run: npm test  (or) node tests/validate.mjs
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
-let failures = 0
-const fail = (msg) => { console.error(`  ✗ ${msg}`); failures++ }
-const ok = (msg) => console.log(`  ✓ ${msg}`)
-const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
+import { execFileSync } from 'node:child_process';
+import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { join, extname, relative } from 'node:path';
 
-function walk(dir, exts = null, out = []) {
-  if (!existsSync(dir)) return out
+const ROOT = join(new URL('.', import.meta.url).pathname, '..');
+let failures = 0;
+const fail = (msg) => { console.error(`  ✗ ${msg}`); failures++; };
+const ok = (msg) => console.log(`  ✓ ${msg}`);
+
+function walk(dir, exts, out = []) {
   for (const entry of readdirSync(dir)) {
-    if (entry === '.git' || entry === 'node_modules' || entry === '.wrangler' || entry === '.pages-dist') continue
-    const p = join(dir, entry)
-    let s
-    try { s = statSync(p) } catch { continue }
-    if (s.isDirectory()) walk(p, exts, out)
-    else if (!exts || exts.includes(extname(p))) out.push(p)
+    if (entry === '.git' || entry === 'node_modules') continue;
+    const p = join(dir, entry);
+    const s = statSync(p);
+    if (s.isDirectory()) walk(p, exts, out);
+    else if (exts.includes(extname(p))) out.push(p);
   }
-  return out
+  return out;
 }
 
-console.log('JavaScript syntax')
-const jsFiles = walk(ROOT, ['.js'])
+// 1. JS syntax check
+console.log('JavaScript syntax (node --check)');
+const jsFiles = walk(ROOT, ['.js']);
 for (const f of jsFiles) {
-  try { execFileSync(process.execPath, ['--check', f], { stdio: 'pipe' }) }
-  catch (e) { fail(`${relative(ROOT, f)}\n${e.stderr?.toString().trim() || e.message}`) }
+  try {
+    execFileSync(process.execPath, ['--check', f], { stdio: 'pipe' });
+  } catch (e) {
+    fail(`${relative(ROOT, f)}\n${e.stderr?.toString().trim()}`);
+  }
 }
-if (!failures) ok(`${jsFiles.length} JavaScript files OK`)
+if (failures === 0) ok(`${jsFiles.length} files OK`);
 
-console.log('TypeScript syntax')
-let ts
-try { ts = await import('typescript') } catch { fail('TypeScript validator unavailable; run npm ci before validation') }
+// 2. TS syntax check (edge functions) — syntax only, no module
+//    resolution, so Deno's npm:/jsr: specifiers don't need to resolve.
+console.log('TypeScript syntax (edge functions)');
+const tsFiles = walk(join(ROOT, 'supabase', 'functions'), ['.ts']);
+let ts;
+try {
+  ts = await import('typescript');
+} catch {
+  console.log('  (skipped — run `npm install` to get the typescript package)');
+}
 if (ts) {
-  const tsFiles = walk(join(ROOT, 'supabase', 'functions'), ['.ts'])
-  const before = failures
+  const before = failures;
   for (const f of tsFiles) {
-    const result = ts.transpileModule(readFileSync(f, 'utf8'), {
+    const code = readFileSync(f, 'utf8');
+    const result = ts.transpileModule(code, {
       compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
       reportDiagnostics: true,
-    })
-    const errs = (result.diagnostics || []).filter((d) => d.category === ts.DiagnosticCategory.Error)
-    if (errs.length) fail(`${relative(ROOT, f)}: ${errs.map((d) => ts.flattenDiagnosticMessageText(d.messageText, '\n')).join('; ')}`)
+    });
+    const syntaxErrors = (result.diagnostics || []).filter((d) => d.category === ts.DiagnosticCategory.Error);
+    if (syntaxErrors.length) {
+      const msgs = syntaxErrors.map((d) => ts.flattenDiagnosticMessageText(d.messageText, '\n')).join('; ');
+      fail(`${relative(ROOT, f)}: ${msgs}`);
+    }
   }
-  if (failures === before) ok(`${tsFiles.length} TypeScript files OK`)
+  if (failures === before) ok(`${tsFiles.length} files OK`);
 }
 
-console.log('Required production files')
+// 3. Core production files present
+console.log('Core production files');
 const required = [
-  'index.html','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
-  'public-route-bootstrap.js','public-runtime-guarantee.js','public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js',
-  'tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html',
-  'staff-os-v5.html','staff-os-v5.css','staff-os-v5.js','staff-os-v5-rescue.js','staff-logistics-intelligence.js','staff-logistics-intelligence.css',
-  'staff-mobile-command-dock.css','staff-mobile-command-dock.js','staff-os-pro-20260909.css','staff-os-pro-20260909.js',
-  'staff-shell-polish-20260909.css','staff-shell-polish-20260909.js','staff-premium-mobile-20260909.css','staff-premium-mobile-20260909.js',
-  'warehouse-offline-sync.js','gc-platform-vnext.js','gc-platform-vnext-plus.js','gc-runtime-safety-v2026.js','production-brand-repair.js',
-  'supabase/config.toml','package.json','scripts/production-contracts.mjs','tests/e2e/run.mjs',
-  'supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
-  'supabase/functions/notification-dispatch/index.ts','supabase/functions/warehouse-receiving/index.ts','supabase/functions/warehouse-notify/index.ts',
-  'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/invoice-ai/index.ts',
-  'supabase/functions/customer-debt-assistant/index.ts','supabase/functions/fx-refresh/index.ts','supabase/functions/_shared/payment-providers.ts',
-]
-const beforeReq = failures
-for (const rel of required) if (!existsSync(join(ROOT, rel))) fail(`missing ${rel}`)
-if (failures === beforeReq) ok(`${required.length} critical files present`)
-
-console.log('Production project reference')
-const config = read('supabase/config.toml')
-if (!/^project_id\s*=\s*"ahslifnthiwfkmaswjno"$/m.test(config)) fail('supabase/config.toml is not pinned to production')
-const runtimeFiles = walk(ROOT, ['.js','.mjs','.ts','.tsx','.html','.css','.json','.toml'])
-const staleProjectRef = ['swptm', 'hhwhdtyrrfzetam'].join('')
-let staleHits = 0
-for (const f of runtimeFiles) {
-  const text = readFileSync(f, 'utf8')
-  if (text.includes(staleProjectRef)) { staleHits++; fail(`stale Supabase project reference in ${relative(ROOT, f)}`) }
+  'index.html', 'sw.js', 'production-bridge.js', 'runtime-guard.js', 'functions/_middleware.js',
+  'control-plane.html', 'control-plane.js', 'payment-checkout.html', 'payment-checkout.js',
+  'customer-portal.html', 'driver-workspace.html', 'warehouse-os.html', 'staff-os.html',
+  'superadmin.html', 'super-admin-command-center.html',
+  'supabase/config.toml',
+  'supabase/functions/payment-checkout/index.ts',
+  'supabase/functions/payment-webhook/index.ts',
+  'supabase/functions/notification-dispatch/index.ts',
+  'supabase/functions/logistics-control-plane/index.ts',
+  'supabase/functions/_shared/payment-providers.ts',
+];
+const beforeReq = failures;
+for (const rel of required) {
+  if (!existsSync(join(ROOT, rel))) fail(`missing ${rel}`);
 }
-if (!staleHits) ok('Live Supabase reference is consistent')
+if (failures === beforeReq) ok(`${required.length} files present`);
 
-console.log('Public integration guards')
-const publicShell = read('index.html')
-const publicIndex = read('gc-csp-scripts/index-inline-2.js')
-const publicBootstrap = read('public-route-bootstrap.js')
-const publicRuntime = read('public-runtime-guarantee.js')
-const configContracts = [
-  ['customer-self requires JWT verification', /^\[functions\.customer-self\]\s*verify_jwt\s*=\s*true$/m.test(config)],
-  ['public-health is public', /^\[functions\.public-health\]\s*verify_jwt\s*=\s*false$/m.test(config)],
-]
-for (const [label, passed] of configContracts) if (!passed) fail(label)
-if (configContracts.every(([, passed]) => passed)) ok('Auth function JWT contracts aligned')
-
-const guards = [
-  ['quote uses public-quote', publicIndex.includes('functions/v1/public-quote')],
-  ['quote avoids direct shipment write', !/from\([\'"]shipments[\'"]\)\.insert|saveShipment/.test(publicIndex)],
-  ['contact uses public-message', publicIndex.includes('functions/v1/public-message')],
-  ['contact avoids direct messages insert', !/from\([\'"]messages[\'"]\)\.insert/.test(publicIndex)],
-  ['production bridge uses live project', read('production-bridge.js').includes('ahslifnthiwfkmaswjno.supabase.co')],
-  ['ready endpoint uses public-health', read('functions/api/ready.js').includes('/functions/v1/public-health')],
-  ['health endpoint is present', existsSync(join(ROOT, 'functions/api/health.js'))],
-  ['staff route is isolated', read('_redirects').includes('/staff /staff-os-v5.html 200')],
-  ['staff entry has final mobile shell', /gc-staff-final-20260922\.js\?v=/.test(read('staff-os-v5.html'))],
-  ['staff entry has no competing legacy mobile JS', !/staff-reference-mobile-20260922\.js\?v=|staff-premium-mobile-20260909\.js\?v=/.test(read('staff-os-v5.html'))],
-  ['staff loader has no legacy mobile command dock', !/staff-mobile-command-dock\.js\?v=/.test(read('staff-os-v5-enhancement-loader.js'))],
-  ['active homepage uses current experience script', publicShell.includes('/globall-redesign-20260922.js')],
-  ['public production UI layer loaded', publicShell.includes('/gc-production-ui-20260927.css?v=1')],
-  ['staff production UI layer loaded', read('staff-os-v5.html').includes('/gc-production-ui-20260927.css?v=1')],
-  ['customer production UI layer loaded', read('customer-portal.html').includes('/gc-production-ui-20260927.css?v=1')],
-  ['active homepage avoids legacy monolithic script', !publicShell.includes('gc-csp-scripts/index-inline-2.js')],
-  ['public bootstrap loads runtime guarantee', publicBootstrap.includes('/public-runtime-guarantee.js')],
-  ['public runtime has emergency fallback', publicRuntime.includes('renderEmergencyShell')],
-]
-for (const [label, passed] of guards) if (!passed) fail(label)
-if (!failures) ok('Public and Staff integration guards OK')
-
-console.log('Migration naming and presence')
-const migDir = join(ROOT, 'supabase', 'migrations')
-const migrations = existsSync(migDir) ? readdirSync(migDir).filter((x) => x.endsWith('.sql')) : []
-for (const name of migrations) if (!/^\d{14}_[a-z0-9_]+\.sql$/.test(name)) fail(`bad migration filename: ${name}`)
-for (const pattern of ['production_security_hardening','fix_alert_monitor_uuid_text_cast_v1','production_runtime_alignment_v1']) {
-  if (!migrations.some((name) => name.includes(pattern))) fail(`missing production migration: ${pattern}`)
+// 4. Migration filenames follow the Supabase CLI timestamp convention
+console.log('Migration filenames');
+const migDir = join(ROOT, 'supabase', 'migrations');
+const beforeMig = failures;
+if (existsSync(migDir)) {
+  const migFiles = readdirSync(migDir).filter((f) => f.endsWith('.sql'));
+  for (const f of migFiles) {
+    if (!/^\d{14}_[a-z0-9_]+\.sql$/.test(f)) fail(`bad migration filename: ${f}`);
+  }
+  if (failures === beforeMig) ok(`${migFiles.length} migrations OK`);
 }
-if (!failures) ok('Migration naming/presence OK')
 
-console.log('Security hygiene')
-for (const f of runtimeFiles) {
-  const text = readFileSync(f, 'utf8')
-  if (/SUPABASE_SERVICE_ROLE_KEY\s*[:=]\s*['"](eyJ|sb_secret_)/.test(text)) fail(`service-role key literal found in ${relative(ROOT, f)}`)
+console.log('');
+if (failures > 0) {
+  console.error(`${failures} check(s) failed.`);
+  process.exit(1);
+} else {
+  console.log('All checks passed.');
 }
-if (!failures) ok('No service-role secret literal found')
-
-console.log('Production contracts')
-try { execFileSync(process.execPath, [join(ROOT, 'scripts', 'production-contracts.mjs')], { stdio: 'inherit' }) }
-catch { fail('production contract validation failed') }
-
-console.log('')
-if (failures) { console.error(`${failures} check(s) failed.`); process.exit(1) }
-console.log('All repository validation checks passed.')

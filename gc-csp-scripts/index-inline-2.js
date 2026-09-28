@@ -7,17 +7,10 @@
    schema file, not by hiding this key. Never put your "service_role" key here. */
 const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
-let sb = (SUPABASE_URL.startsWith('http') && window.supabase)
+const sb = (SUPABASE_URL.startsWith('http') && window.supabase)
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
-  : window.gcSupabase || null;
+  : null;
 if (sb) window.sb = sb;
-window.addEventListener('gc:supabase-ready', (event) => {
-  sb = event.detail?.client || window.gcSupabase || sb;
-  if (sb) {
-    window.sb = sb;
-    if (typeof renderAdminGate === 'function') void renderAdminGate();
-  }
-}, { once: true });
 const STEP_KEYS = ['placed','pickedUp','transit','customs','outForDelivery','delivered'];
 
 /* ================= OWNER NOTIFICATIONS =================
@@ -56,10 +49,10 @@ async function notifyOwner(subject, fields){
 const I18N = {
 ku:{
   brand:{tagline:'لۆجستیک'},
-  topbar:{note:'ڕێڕەوەکانی چین، دوبەی، ئەمریکا و هەولێر بەبەردەوامی چالاکن',support:'پشتیوانی زیندوو ٢٤/٧'},
+  topbar:{note:'سەرەکییەکانی چین، دوبەی و هەولێر بەبەردەوامی چالاکن',support:'پشتیوانی زیندوو ٢٤/٧'},
   nav:{home:'سەرەکی',about:'دەربارەمان',services:'خزمەتگوزارییەکان',track:'شوێنکەوتن',contact:'پەیوەندی',signIn:'چوونەژوورەوە',dashboard:'داشبۆرد',quote:'داواکردنی نرخ'},
-  hero:{eyebrow:'چین  ·  ئیمارات  ·  ئەمریکا  ·  هەولێر',title:'گەیاندنی بار بە متمانە، خێرایی و بێ سنوور',subtitle:'Globall Cloud کاڵاکانت بە شێوەیەکی ئاسایشدار لە چین، دوبەی و ئەمریکا بۆ هەولێر و هەموو شارەکانی عێراق دەگەیەنێت — بە شوێنکەوتنی ڕاستەوخۆ، ڕێکاری ڕوون و پشتیوانی ٢٤/٧.',ctaTrack:'شوێنکەوتنی بار',ctaQuote:'داواکردنی نرخ',ctaWhatsApp:'پەیوەندی بە واتساپ',route:{a:'گوانگژۆ، چین',b:'دوبەی، ئیمارات',c:'هەولێر، عێراق'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'بارەکەت لە نێوان چین، دوبەی، ئەمریکا و هەولێر بە بەڵگە و شوێنکەوتنی زیندوو بەردەوامە و هەر نوێکارییەک زوو دەردەکەوێت.',routeOrigin:'سەرەتا / Origin Hub',routeTransit:'ترانزیت / Transit Hub',routeDestination:'گەیاندن / Delivery Hub'},
-  trust:{s1v:'Air · Sea · Land',s1l:'شێوازی گواستنەوە',s2v:'چین → عێراق',s2l:'ڕێڕەوی سەرەکی',s3v:'٢٤/٧',s3l:'پشتیوانی زیندوو',s4v:'Live',s4l:'شوێنکەوتنی بار'},
+  hero:{eyebrow:'چین  ·  ئیمارات  ·  عێراق',title:'گەیاندنی بار بە متمانە، خێرایی و بێ سنوور',subtitle:'Globall Cloud بارت بە شێوەیەکی ئاسایشدار لە چین و ئیمارات بۆ هەموو شارەکانی عێراق دەگەیەنێت — بە شوێنکەوتنی ڕاستەوخۆ، ڕێکاری ڕوون و پشتیوانی ٢٤/٧.',ctaTrack:'شوێنکەوتنی بار',ctaQuote:'داواکردنی نرخ',route:{a:'گوانگژۆ، چین',b:'دوبەی، ئیمارات',c:'هەولێر، عێراق'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'بارەکەت لە نێوان چین → دوبەی → هەولێر بەردەوامە و هەر نوێکارییەک زوو دەردەکەوێت.',routeOrigin:'سەرەتا / Origin Hub',routeTransit:'ترانزیت / Transit Hub',routeDestination:'گەیاندن / Delivery Hub'},
+  trust:{s1v:'+٢٥K',s1l:'بار گەیەنراو',s2v:'١٢+',s2l:'شوێن و بازاڕ',s3v:'٢٤/٧',s3l:'پشتیوانی زیندوو',s4v:'٩٨%',s4l:'گەیاندنی لەکاتی خۆیدا'},
   liveTrack:{heading:'شوێنکەوتنی بارەکەت لە چرکەیەکدا',sub:'ژمارەی شوێنکەوتنەکەت بنووسە و نوێترین دۆخی بارەکەت ببینە',placeholder:'وەک GC10052341',button:'شوێنکەوتن'},
   business:{eyebrow:'پەڕەکانی بازرگانی',heading:'هەموو خزمەتگوزاری و پەڕە گرنگەکان لە یەک شوێن',sub:'بە یەک کلیک بچۆ بۆ خزمەتگوزاری، خەملاندنی نرخ، داشبۆرد، کۆگاکان و پەیوەندی.',
     items:{
@@ -67,29 +60,28 @@ ku:{
       quote:{title:'نرخی بار',desc:'نرخی خێرا و خەمڵێنراو بزانە پێش داواکاری.',action:'خەملاندنی نرخ',icon:'i-card',route:'services'},
       dashboard:{title:'داشبۆردی کڕیار',desc:'بارەکان، ئاگادارییەکان و هەژمارەکانت بەڕێوەببە.',action:'کردنەوەی داشبۆرد',icon:'i-user',route:'portal'},
       track:{title:'شوێنکەوتن',desc:'ژمارەی شوێنکەوتن داخڵ بکە و دۆخی بار ببینە.',action:'شوێنکەوتن بکە',icon:'i-search',route:'track'},
-      warehouses:{title:'کۆگاکان',desc:'هابەکانی چین، دوبەی، ئەمریکا و هەولێر لە یەک تۆڕدا.',action:'بینینی کۆگاکان',icon:'i-warehouse',route:'contact'},
+      warehouses:{title:'کۆگاکان',desc:'هابەکانی چین، دوبەی و هەولێر لە یەک تۆڕدا.',action:'بینینی کۆگاکان',icon:'i-warehouse',route:'contact'},
       contact:{title:'پەیوەندی',desc:'واتساپ، ئیمەیل و ڕێکخستن لە کەمترین کاتدا.',action:'پەیوەندیمان پێوە بکە',icon:'i-chat',route:'contact'}
     }},
-  dashboardPreview:{heading:'پێشبینی داشبۆردی کڕیار',sub:'کڕیاران دەتوانن لێرە بارەکان، نرخ و ئاگادارییەکان بە شێوەی خێرا بەڕێوەببەن.',stats:[{v:'Live',l:'دۆخی بار'},{v:'Private',l:'داتای کڕیار'},{v:'Realtime',l:'نوێکردنەوە'},{v:'Secure',l:'پاراستنی هەژمار'}],btnPortal:'کردنەوەی پرۆتال',btnTrack:'شوێنکەوتن بکە'},
-  warehouses:{eyebrow:'کۆگاکان',heading:'تۆڕی کۆگاکانمان',sub:'هابە سەرەکییەکان لە چین، دوبەی، ئەمریکا و هەولێر بۆ جوڵاندنی خێرای بار.',
+  dashboardPreview:{heading:'پێشبینی داشبۆردی کڕیار',sub:'کڕیاران دەتوانن لێرە بارەکان، نرخ و ئاگادارییەکان بە شێوەی خێرا بەڕێوەببەن.',stats:[{v:'4',l:'بارە چالاکەکان'},{v:'29',l:'گەیشتوو'},{v:'2',l:'چاوەڕوان'},{v:'8',l:'فاکتۆرەکان'}],btnPortal:'کردنەوەی پرۆتال',btnTrack:'شوێنکەوتن بکە'},
+  warehouses:{eyebrow:'کۆگاکان',heading:'تۆڕی کۆگاکانمان',sub:'هابە سەرەکییەکان لە چین، دوبەی و هەولێر بۆ جوڵاندنی خێرای بار.',
     items:{
       guangzhou:{tag:'هاب سەرەکی چین',title:'کۆگای گوانگجو',address:'گوانگجو، چین',hours:'دووشەممە - شەممە',features:['کۆکردنەوەی بار','وێنەی QC','پاکەتکردنی خێرا']},
-      usa:{tag:'سەرچاوەی ئەمریکا',title:'هابەکانی ئەمریکا',address:'ئەمریکا',hours:'دووشەممە - شەممە',features:['کۆکردنەوەی کاڵا','پشکنینی بەڵگە','ئامادەکردن بۆ گواستنەوە']},
       dubai:{tag:'هاب ترانزیت',title:'کۆگای دوبەی',address:'دوبەی، ئیمارات',hours:'دووشەممە - شەممە',features:['ترانزیتی خێرا','بەڕێوەبردنی هەلومەرج','ئاسایشی باش']},
       erbil:{tag:'هابی دابەشکردن',title:'کۆگای هەولێر',address:'هەولێر، عێراق',hours:'شەممە - پێنجشەممە',features:['دابەشکردنی ناوخۆیی','پێشوازی کڕیار','گواستنەوەی خێرا']}
     }},
   ops:{eyebrow:'بەڕێوەبردنی ناوخۆ',heading:'کۆنسۆڵی ستاف و کارگێڕی',sub:'هەموو کارە سەرەکییەکان لە یەک دەشبووردا ببینە: بارەکان، دارایی، کۆگا و پشتگیری.',
-    metrics:[{v:'Live',l:'داتای عملیات'},{v:'Role-aware',l:'دەسەڵات'},{v:'Audit',l:'تۆمارکردنی کردار'},{v:'Multi-hub',l:'تۆڕی کۆگا'}],
+    metrics:[{v:'12',l:'باری چاوەڕوان'},{v:'98%',l:'ڕێژەی سەرکەوتن'},{v:'7',l:'تیکەتی کراوە'},{v:'3',l:'ژمارەی کۆگا'}],
     cards:[
       {icon:'i-card',title:'دارایی و وەسڵەکان',desc:'داهات، وەسڵە PDF و پارەی لەبەردەست نەماوەکان بە شێوەی ڕوون ببینە.',points:['وەسڵی PDF','ڕاپۆرتی داهات','داواکاری پارەدان']},
       {icon:'i-warehouse',title:'وەسڵی کۆگا',desc:'ورودبوونی بار لە هەر هابێکدا تۆمار بکە و بەڵگەکەی بخەوە.',points:['وێنەی بار','تۆماری هاتن','لێدانی پارچە']},
       {icon:'i-chat',title:'ڕیزبەندی پشتگیری',desc:'پەیامی کڕیاران بە خێرایی وەربگرە و هەموو گفتوگۆکان لە شوێنێکدا پارێزە.',points:['هەواڵی واتساپ','تێبینی دۆخ','وەڵامی ئامادە']}
     ]},
   services:{eyebrow:'خزمەتگوزاری',heading:'خزمەتگوزارییەکانمان',sub:'چارەسەری تەواو بۆ گەیاندنی بار لە دەرەوە بۆ ناو عێراق',learnMore:'زیاتر بزانە',
-    quote:{eyebrow:'تەخمینی نرخ',heading:'حساباتی نرخی گەیاندن',origin:'شوێنی سەرچاوەی بار',type:'جۆری گەیاندن',air:'ئاسمانی (Air)',sea:'دەریایی (Sea)',land:'وشکانی (Land)',
+    quote:{eyebrow:'تەخمینی نرخ',heading:'حساباتی نرخی گەیاندن',type:'جۆری گەیاندن',air:'ئاسمانی (Air)',sea:'دەریایی (Sea)',land:'وشکانی (Land)',
       weight:'کێش (کیلۆگرام)',weightPh:'بۆ نموونە 50',dest:'شاری مەبەست لە عێراق',btn:'حسابکردنی تەخمین',
       needWeight:'تکایە کێشی بار بنووسە.',resultLabel:'تەخمینی نرخ',cta:'داواکردنی نرخی وردتر',
-      note:'* ئەمە تەخمینێکی گشتییە و نرخی کۆتایی بە origin، جۆری بار، کێش، قەبارە، گومرگ و ڕێڕەوی ڕاستەقینە لەلایەن ستافمانەوە پشتڕاست دەکرێت.'},
+      note:'* ئەمە تەنها تەخمینێکی گشتییە — نرخی کۆتایی دوای پشکنینی وردی بار لەلایەن ستافمانەوە دیاری دەکرێت.'},
     items:{
       air:{title:'گەیاندنی ئاسمانی',desc:'خێراترین ڕێگا بۆ بارە پەلەیەکان.',features:['کاتی گەیشتن: ١-٣ ڕۆژ','گونجاو بۆ بارە بەنرخ و پەلەکان','شوێنکەوتنی ڕاستەوخۆ']},
       sea:{title:'گەیاندنی دەریایی',desc:'گونجاوترین تێچوون بۆ بارە قورس و گەورەکان.',features:['کاتی گەیشتن: ١٢-١٨ ڕۆژ','باشترین تێچوون بۆ بارە قورسەکان','گونجاو بۆ کۆنتەینەری تەواو یان بەشی کۆنتەینەر']},
@@ -97,14 +89,6 @@ ku:{
       customs:{title:'ئاسانکاری گومرگی',desc:'کارگێڕی تەواوی مامەڵەی گومرگ لە بەندەرەکانی عێراق.',features:['کارگێڕی بەڵگەنامەکان','پارەدانی باج و تێچووەکان','ڕاوێژکاری یاسایی گومرگ']},
       warehouse:{title:'کۆگاداری',desc:'کۆگای پارێزراو و چاودێریکراو لە ئیمارات و عێراق.',features:['چاودێری ٢٤/٧','سیستەمی بەڕێوەبردنی کۆگا','بیمەی گونجاو بۆ کاڵاکان']},
       door:{title:'گەیاندن بۆ بەردەرگا',desc:'گەیاندنی کۆتایی بارەکەت ڕاستەوخۆ بۆ ماڵ یان کۆمپانیاکەت.',features:['گەیاندن بۆ هەموو شارەکانی عێراق','ڕێکخستنی کاتی گەیاندن','پشتڕاستکردنەوەی وەرگرتن']}
-    },
-    details:{
-      air:{audience:'بارە پەلە و بەنرخەکان',timing:'١-٣ ڕۆژ',faqQ:'کەی گەیاندنی ئاسمانی باشترە؟',faqA:'کاتێک بارەکەت پەلەیە یان بەنرخە، گەیاندنی ئاسمانی ڕێگای خێراتر و گونجاوترە.'},
-      sea:{audience:'بارە قورس و کۆنتەینەرەکان',timing:'١٢-١٨ ڕۆژ',faqQ:'ئایا دەریایی بۆ بارە گەورەکان گونجاوە؟',faqA:'بەڵێ، بەتایبەتی بۆ بارە قورسەکان و کۆنتەینەرە تەواو یان هاوبەشەکان.'},
-      land:{audience:'بارە مامناوەندەکان',timing:'٧-١٠ ڕۆژ',faqQ:'ڕێڕەوی گەیاندنی وشکانی چییە؟',faqA:'بارەکان لە دوبەیەوە بە ڕێگەی سعودیە بەرەو عێراق و پاشان شارەکەی مەبەست دەگوازنەوە.'},
-      customs:{audience:'کۆمپانیا و بازرگانەکان',timing:'بەپێی بەڵگەکان',faqQ:'ئایا بەڵگەنامەکانتان ئامادە دەکەن؟',faqA:'تیمەکەمان بەڵگەنامە سەرەکییەکان پشکنین و ڕێکدەخات و ڕێنماییی گومرگی پێشکەش دەکات.'},
-      warehouse:{audience:'بارە چاوەڕوانەکان',timing:'کاتی گونجاو',faqQ:'بارەکەم لە کوێ پارێزراو دەبێت؟',faqA:'کۆگا و هابەکانمان لە ئیمارات و عێراق چاودێری کراون و بۆ کاتی چاوەڕوانی بارەکەت ئامادەن.'},
-      door:{audience:'کڕیارانی کۆتایی',timing:'بەپێی شار',faqQ:'ئایا بۆ هەموو شارەکانی عێراق دەگەیەنن؟',faqA:'بەڵێ، گەیاندنی کۆتایی بۆ هەموو شارە سەرەکییەکان و زۆربەی ناوچەکانی عێراق ڕێکدەخەین.'}
     },
     faqEyebrow:'پرسیارە باوەکان',faqHeading:'پرسیار و وەڵام',faq:[
       {q:'چەند کات دەخایەنێت لە دوبەی بۆ هەولێر؟',a:'گەیاندنی ئاسمانی ١-٣ ڕۆژ، وشکانی ٧-١٠ ڕۆژ (بەڕێکەوتن بە سعودیە)، دەریایی ١٢-١٨ ڕۆژ بەپێی جۆری بار.'},
@@ -125,7 +109,7 @@ ku:{
     {title:'باشترین نرخ',desc:'نرخی ڕکابەرانە بەبێ کێشەی شاراوە.',icon:'i-card'},
     {title:'پشتگیری ٢٤/٧',desc:'تیمی پشتگیریمان هەمیشە ئامادەیە بۆ یارمەتیدانت.',icon:'i-clock'}
   ]},
-  about:{eyebrow:'دەربارەمان',heading:'دەربارەی Globall Cloud',sub:'هاوبەشی متمانەپێکراوت بۆ هێنانی کاڵا لە چین، ئیمارات و ئەمریکا بۆ هەولێر و عێراق.',
+  about:{eyebrow:'دەربارەمان',heading:'دەربارەی Globall Cloud',sub:'هاوبەشی متمانەپێکراوت بۆ گەیاندنی بار لەنێوان چین، ئیمارات و عێراق.',
     missionTitle:'ئەرکمان',missionBody:'ئەرکی Globall Cloud گەیاندنی خزمەتگوزاری گەیاندنی بارە بە ستانداردی نێودەوڵەتی، بە شەفافیەت و متمانەوە، بۆ هەموو کڕیارێک لە هەرێمی کوردستان و عێراق.',
     visionTitle:'ئاواتمان',visionBody:'ئامانجمان ئەوەیە ببینە باشترین و متمانەپێکراوترین کۆمپانیای لۆجستیک لە هەرێم، بە بەکارهێنانی تەکنەلۆجیای نوێ و خزمەتگوزاریەکی کڕیار-ناوەندی.',
     valuesEyebrow:'بەهاکانمان',valuesHeading:'ئەوەی ڕێنماییمان دەکات',values:[
@@ -135,15 +119,23 @@ ku:{
       {title:'ڕێزگرتن لە کڕیار',desc:'کاتی کڕیار و پێداویستیەکانی لە پێشینەن.',icon:'i-user'}
     ],
     storyTitle:'چیرۆکمان',storyBody:'Globall Cloud وەک هاوبەشێکی گەیاندنی بار دەستی کرد بۆ چارەسەرکردنی کێشەی گەیاندنی بار لەنێوان بازاڕەکانی چین و ئیمارات و شارەکانی عێراق. لە ڕێگەی کارامەیی و پابەندبوونمانەوە، بووینەتە هەڵبژاردەیەکی متمانەپێکراو بۆ کۆمپانیا و کەسانی زۆر کە پێویستیان بە گەیاندنی بارێکی ئارام و خێرایە. بەردەوامین لە پەرەپێدانی خزمەتگوزارییەکانمان بۆ باشترکردنی ئەزموونی هەر کڕیارێک.'},
-  cta:{heading:'ئامادەیت بار بنێریت؟',sub:'ئەمڕۆ داواکاریەکەت بنێرە و لە کەمترین کات نرخێک وەربگرە.',b1:'داواکردنی نرخ',b2:'پەیوەندیمان پێوە بکە',whatsapp:'پەیوەندی بە واتساپ'},
-  corridor:{eyebrow:'ڕێڕەوی کارەکە',heading:'لە چین، دوبەی و ئەمریکا بۆ هەولێر',sub:'چوار هەنگاوی سەرەکی بە ڕوونی و بە شێوازی کۆمپانیایەکی نێودەوڵەتی ببینە.',badge:'ڕێڕەوی زیندوو',items:[
+  cta:{heading:'ئامادەیت بار بنێریت؟',sub:'ئەمڕۆ داواکاریەکەت بنێرە و لە کەمترین کات نرخێک وەربگرە.',b1:'داواکردنی نرخ',b2:'پەیوەندیمان پێوە بکە'},
+  corridor:{eyebrow:'ڕێڕەوی کارەکە',heading:'لە چین بۆ دوبەی بۆ هەولێر',sub:'سێ هەنگاوی سەرەکی بە ڕوونی و بە شێوازی کۆمپانیایەکی نێودەوڵەتی ببینە.',badge:'ڕێڕەوی زیندوو',items:[
     {flag:'🇨🇳',title:'گەیاندن لە چین',meta:'Origin Hub',desc:'بارەکەت وەردەگیرێت، QC دەکرێت و بۆ ترانزیت ئامادە دەبێت.',tags:['QC','Packing','Pickup']},
-    {flag:'🇺🇸',title:'سەرچاوەی ئەمریکا',meta:'Origin Hub',desc:'کۆکردنەوەی کاڵا، پشکنینی بەڵگە و ئامادەکردنی بار بۆ گواستنەوەی نێودەوڵەتی.',tags:['Pickup','Verification','Export']},
     {flag:'🇦🇪',title:'هابەی دوبەی',meta:'Transit Hub',desc:'لە دوبەیدا ڕێکخستن و بەڕێوەبردنی ڕێگەی گواستنەوە بە شێوەی خێرا.',tags:['Transit','Air Cargo','Sea Cargo']},
     {flag:'🇮🇶',title:'گەیاندنی هەولێر',meta:'Delivery Hub',desc:'پاش گومرگ و ڕێکخستنی دوایین، بارەکەت بە سەلامەتی دەگات.',tags:['Customs','Door-to-Door','Final Mile']}
   ]},
   footer:{blurb:'Globall Cloud — گەیاندنی بار بە متمانەوە لە چین و ئیمارات بۆ هەموو عێراق.',quick:'بەستەرە خێراکان',servicesH:'خزمەتگوزارییەکان',contactH:'پەیوەندی',address:'هەولێری نوێ، پشت مەعەد گەشە، هەولێر، عێراق',rights:'هەموو مافەکان پارێزراون.',privacy:'ڕێساکانی تایبەتێتی',terms:'مەرجی بەکارهێنان'},
-  testi:{eyebrow:'ڕاوبۆچوونی کڕیاران',heading:'کۆکردنەوەی ڕاوە ڕاستەقینەکان',sub:'ئێمە تەنها لێرە ڕاو و هەڵسەنگاندنی کڕیارانی پشتڕاستکراو پیشان دەدەین.',items:[]},
+  testi:{
+    eyebrow:'ڕاوبۆچوونی کڕیاران',
+    heading:'کڕیارانمان چی دەڵێن',
+    sub:'چەند وتەیەک لە کڕیارانێک کە بارەکانیان بە Globall Cloud گەیاندووە.',
+    items:[
+      {quote:'بارەکانم لە گوانجۆوە بۆ هەولێر بە کاتی خۆیان گەیشتن، وشوێنکەوتنەکە زۆر ڕوونبوو — هەموو هەنگاوێکی بارەکەم بە ڕوونی دەبینی.', name:'ئاراس محەمەد', role:'خاوەن فرۆشگای ئەلیکترۆنی، هەولێر', initials:'ئم', stars:5},
+      {quote:'کاری ترخانکردنی گومرگ زۆر سەختە، بەڵام تیمی Globall Cloud هەموو کاغەزەکانیان بۆ ئامادەکرد و کێشەم لەگەڵ نەبوو. زۆر پیشەیین.', name:'سارا ڕەشید', role:'بازرگانی کەلوپەلی ماڵەوە', initials:'سڕ', stars:5},
+      {quote:'لە یەکەم داواکارییەوە هەتا وەرگرتنی بارەکە، هەمیشە وەڵامی پەیوەندییەکانم زوو بوو. ئێستا هەموو هاوردەکانم لە ڕێگەیانەوە دەکەم.', name:'کاروان عەزیز', role:'هاوردەکەری کاڵای تەکنەلۆجیا', initials:'کع', stars:5}
+    ]
+  },
   legal:{
     updated:'دوایین نوێکردنەوە: ٢٠٢٦',
     privacyEyebrow:'تایبەتێتی',
@@ -166,7 +158,7 @@ ku:{
       {h:'٦. گۆڕانکاری مەرجەکان', p:'Globall Cloud مافی خۆی هەیە ئەم مەرجانە لە هەر کاتێکدا نوێ بکاتەوە. بەردەوامبوون لە بەکارهێنانی خزمەتگوزارییەکانمان دوای نوێکردنەوە بە واتای قبوڵکردنی مەرجە نوێیەکانە.'}
     ]
   },
-  track:{heading:'شوێنکەوتنی بار',sub:'کۆدی کڕیاری GC-### یان shipment ID ـەکەت بنووسە بۆ زانینی دۆخی ئێستا',searchPh:'وەک GC-338 یان shipment ID',searchBtn:'بگەڕێ',
+  track:{heading:'شوێنکەوتنی بار',sub:'ژمارەی شوێنکەوتنی بارەکەت بنووسە بۆ زانینی دۆخی ئێستا',searchPh:'وەک GC10052341',searchBtn:'بگەڕێ',
     notFoundTitle:'هیچ بارێک نەدۆزرایەوە',notFoundBody:'تکایە ژمارەی شوێنکەوتن بپشکنە، یان داواکارییەکی نوێ تۆمار بکە.',requestInstead:'داواکاری نوێ بکە',
     detailsH:'زانیاری بارکردن',timelineH:'هێڵی کات',save:'زیادکردن بۆ بارەکانم',saved:'زیادکرا ✓',signInToSave:'چوونەژوورەوە بۆ هەڵگرتن',
     status:{pending:'چاوەڕوانە',transit:'لە ڕێگادایە',delivered:'گەیشت'},
@@ -174,10 +166,9 @@ ku:{
     type:{air:'گەیاندنی ئاسمانی',sea:'گەیاندنی دەریایی',land:'گەیاندنی وشکانی'},
     weight:'کێش',volume:'قەبارە',items:'ژمارەی کاڵا',total:'کۆی گشتی',paid:'دراوە',due:'ماوە',eta:'خەمڵێنراو:',pendingValue:'دوای پێداچوونەوە'},
   invoice:{downloadBtn:'دابەزاندنی وەسڵ (PDF)',generating:'خەریکی ئامادەکردنە...',title:'وەسڵی گەیاندن',trackingId:'ژمارەی شوێنکەوتن',dateIssued:'بەرواری دەرکردن',billTo:'کڕیار',route:'ڕێگا',serviceType:'جۆری خزمەتگوزاری',statusLabel:'دۆخ',thanks:'سوپاس بۆ باوەڕپێکردنتان بە Globall Cloud',failMsg:'دروستکردنی وەسڵ سەرکەوتوو نەبوو، تکایە دووبارە هەوڵبدەرەوە.'},
-      request:{heading:'داواکردنی نرخ / بارکردنی نوێ',sub:'وردەکاری بارەکەت پڕبکەرەوە و ژمارەی داواکارییەکەت بۆ پێداچوونەوە وەربگرە.',
-
+  request:{heading:'داواکردنی نرخ / بارکردنی نوێ',sub:'وردەکاری بارەکەت پڕبکەرەوە، ڕاستەوخۆ ژمارەی شوێنکەوتن وەردەگریت.',
     name:'ناوی تەواو',phone:'ژمارەی مۆبایل',email:'ئیمەیل (ئارەزوومەندانە)',origin:'لە کوێوە',destination:'بۆ کوێ',type:'جۆری گەیاندن',weight:'کێشی خەمڵێنراو (کیلۆگرام)',notes:'تێبینی زیاتر',
-    submit:'ناردنی داواکاری',sending:'دەنێردرێت...',successTitle:'داواکاریەکەت وەرگیرا 🎉',successBody:'ژمارەی داواکارییەکەت ئەمەیە، هەڵیبگرە بۆ پێداچوونەوەی داهاتوو:',trackNow:'شوێنکەوتنی بار',backHome:'گەڕانەوە بۆ سەرەکی',waConfirm:'پشتڕاستکردنەوە بە واتساپ',waPrefix:'سڵاو، داواکارییەکم ناردووە — ژمارەی داواکاری:'},
+    submit:'ناردنی داواکاری',sending:'دەنێردرێت...',successTitle:'داواکاریەکەت وەرگیرا 🎉',successBody:'ژمارەی شوێنکەوتنت ئەمەیە، هەڵیبگرە بۆ داهاتوو:',trackNow:'ئێستا شوێنی بکەوە',backHome:'گەڕانەوە بۆ سەرەکی',waConfirm:'پشتڕاستکردنەوە بە واتساپ',waPrefix:'سڵاو، داواکارییەکم ناردووە — ژمارەی شوێنکەوتن:'},
   portal:{signInH:'چوونەژوورەوە',signInSub:'ناو و ئیمەیلت بنووسە بۆ بینینی بارەکانت',dashboardSub:'داشبۆردی هەژمارەکەت',name:'ناو',email:'ئیمەیل',phone:'ژمارەی مۆبایل (ئارەزوومەندانە)',continueBtn:'بەردەوامبە',trustNote:'زانیارییەکانت تایبەتن و لەگەڵ کەس هاوبەش ناکرێن',
     hi:'سڵاو',myShipments:'بارەکانم',emptyTitle:'هێشتا هیچ بارێکت نییە',emptyBody:'بارێک بشوێنەوە یان داواکارییەکی نوێ بکە بۆ ئەوەی لێرە دەربکەوێت.',
     qTrack:'شوێنکەوتنی بار',qRequest:'داواکاری نوێ',qEdit:'دەستکاری پرۆفایل',save:'پاشکەوتکردن',cancel:'پاشگەزبوونەوە',signOut:'چوونەدەرەوە'},
@@ -191,9 +182,9 @@ en:{
   brand:{tagline:'LOGISTICS'},
   topbar:{note:'Active lanes across China, Dubai, and Erbil',support:'Live support 24/7'},
   nav:{home:'Home',about:'About Us',services:'Services',track:'Track',contact:'Contact',signIn:'Sign In',dashboard:'Dashboard',quote:'Get a Quote'},
-  hero:{eyebrow:'CHINA  ·  UAE  ·  IRAQ',title:'Delivering Trust Across Borders',subtitle:'Globall Cloud moves your cargo safely and quickly from China and the United Arab Emirates to every city in Iraq — with live tracking, clear milestones, and 24/7 support.',ctaTrack:'Track Shipment',ctaQuote:'Get a Quote',ctaWhatsApp:'Chat on WhatsApp',route:{a:'Guangzhou, China',b:'Dubai, UAE',c:'Erbil, Iraq'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'Your cargo is moving through our China → Dubai → Erbil network with live updates.',routeOrigin:'Origin Hub',routeTransit:'Transit Hub',routeDestination:'Delivery Hub'},
-  trust:{s1v:'Air · Sea · Land',s1l:'Transport modes',s2v:'China → Iraq',s2l:'Primary corridor',s3v:'24/7',s3l:'Live support',s4v:'Live',s4l:'Shipment tracking'},
-  liveTrack:{heading:'Track in seconds',sub:'Enter your GC customer code or exact shipment ID to see the latest status.',placeholder:'e.g. GC-338 or shipment ID',button:'Track Shipment'},
+  hero:{eyebrow:'CHINA  ·  UAE  ·  IRAQ',title:'Delivering Trust Across Borders',subtitle:'Globall Cloud moves your cargo safely and quickly from China and the United Arab Emirates to every city in Iraq — with live tracking, clear milestones, and 24/7 support.',ctaTrack:'Track Shipment',ctaQuote:'Get a Quote',route:{a:'Guangzhou, China',b:'Dubai, UAE',c:'Erbil, Iraq'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'Your cargo is moving through our China → Dubai → Erbil network with live updates.',routeOrigin:'Origin Hub',routeTransit:'Transit Hub',routeDestination:'Delivery Hub'},
+  trust:{s1v:'25K+',s1l:'Delivered shipments',s2v:'12+',s2l:'Connected markets',s3v:'24/7',s3l:'Live support',s4v:'98%',s4l:'On-time delivery'},
+  liveTrack:{heading:'Track in seconds',sub:'Enter your tracking number to see the latest shipment status instantly.',placeholder:'e.g. GC10052341',button:'Track Shipment'},
   business:{eyebrow:'BUSINESS PAGES',heading:'Everything customers need is one tap away',sub:'Jump straight to services, pricing, dashboard tools, warehouses, and support.',
     items:{
       services:{title:'Services',desc:'Air, sea, land, customs, and door-to-door delivery.',action:'View services',icon:'i-box',route:'services'},
@@ -203,7 +194,7 @@ en:{
       warehouses:{title:'Warehouses',desc:'China, Dubai, and Erbil hubs that keep cargo moving.',action:'View network',icon:'i-warehouse',route:'contact'},
       contact:{title:'Contact',desc:'WhatsApp, email, and quick support in one place.',action:'Get in touch',icon:'i-chat',route:'contact'}
     }},
-  dashboardPreview:{heading:'Customer Dashboard Preview',sub:'A quick look at the portal customers use to manage shipments anywhere.',stats:[{v:'Live',l:'Shipment status'},{v:'Private',l:'Customer data'},{v:'Realtime',l:'Updates'},{v:'Secure',l:'Account access'}],btnPortal:'Open portal',btnTrack:'Track a parcel'},
+  dashboardPreview:{heading:'Customer Dashboard Preview',sub:'A quick look at the portal customers use to manage shipments anywhere.',stats:[{v:'4',l:'Active shipments'},{v:'29',l:'Delivered'},{v:'2',l:'Pending'},{v:'8',l:'Invoices'}],btnPortal:'Open portal',btnTrack:'Track a parcel'},
   warehouses:{eyebrow:'WAREHOUSES',heading:'Our Warehouse Network',sub:'Strategic hubs in China, Dubai, and Erbil keep cargo moving smoothly.',
     items:{
       guangzhou:{tag:'Origin Hub',title:'Guangzhou Warehouse',address:'Guangzhou, China',hours:'Mon - Sat',features:['Cargo consolidation','QC photo checks','Fast packing']},
@@ -229,14 +220,6 @@ en:{
       customs:{title:'Customs Clearance',desc:'Complete customs handling at Iraqi ports of entry.',features:['Documentation handling','Duty and tax payment','Customs legal consultation']},
       warehouse:{title:'Warehousing',desc:'Secure, monitored storage in the UAE and Iraq.',features:['24/7 monitoring','Warehouse management system','Optional cargo insurance']},
       door:{title:'Door-to-Door Delivery',desc:'Final-mile delivery straight to your home or business.',features:['Delivery to every city in Iraq','Scheduled delivery windows','Delivery confirmation']}
-    },
-    details:{
-      air:{audience:'Urgent and high-value cargo',timing:'1–3 days',faqQ:'When is air freight the best choice?',faqA:'Choose air freight when delivery speed matters or the shipment is high-value and time-sensitive.'},
-      sea:{audience:'Heavy cargo and containers',timing:'12–18 days',faqQ:'Is sea freight suitable for large shipments?',faqA:'Yes. It is designed for heavy cargo and full-container or shared-container shipments.'},
-      land:{audience:'Mid-sized shipments',timing:'7–10 days',faqQ:'What is the land-freight route?',faqA:'Cargo travels from Dubai through Saudi Arabia into Iraq, then continues to the destination city.'},
-      customs:{audience:'Importers and businesses',timing:'Document-dependent',faqQ:'Can you prepare the customs documents?',faqA:'Our team reviews the required documents, guides the process, and supports duty and customs handling.'},
-      warehouse:{audience:'Cargo awaiting dispatch',timing:'Flexible storage',faqQ:'Where is cargo stored securely?',faqA:'Our UAE and Iraq hubs provide monitored storage while cargo waits for the next route or final delivery.'},
-      door:{audience:'End customers and businesses',timing:'City-dependent',faqQ:'Do you deliver across Iraq?',faqA:'Yes. We coordinate final-mile delivery across major Iraqi cities and many surrounding areas.'}
     },
     faqEyebrow:'FAQ',faqHeading:'Frequently Asked Questions',faq:[
       {q:'How long does shipping take from Dubai to Erbil?',a:'Air freight takes 1-3 days, land freight (via Saudi Arabia) takes 7-10 days, sea freight takes 12-18 days depending on cargo type.'},
@@ -267,7 +250,7 @@ en:{
       {title:'Customer Respect',desc:'Your time and needs always come first.',icon:'i-user'}
     ],
     storyTitle:'Our Story',storyBody:'Globall Cloud started as a shipping partner focused on solving cargo movement between the markets of China and the UAE and the cities of Iraq. Through efficiency and commitment, we have become a trusted choice for businesses and individuals who need reliable, fast cargo delivery. We continue to grow our services to improve the experience of every client.'},
-  cta:{heading:'Ready to Ship?',sub:'Submit your request today and get a quote in minutes.',b1:'Get a Quote',b2:'Contact Us',whatsapp:'Chat on WhatsApp'},
+  cta:{heading:'Ready to Ship?',sub:'Submit your request today and get a quote in minutes.',b1:'Get a Quote',b2:'Contact Us'},
   corridor:{eyebrow:'Operational Corridor',heading:'China → Dubai → Erbil',sub:'See the three stages of the network at a glance, presented like a premium logistics brand.',badge:'Live Corridor',items:[
     {flag:'🇨🇳',title:'China pickup',meta:'Origin Hub',desc:'Cargo is received, checked, and prepared for the next leg.',tags:['QC','Packing','Pickup']},
     {flag:'🇦🇪',title:'Dubai transit hub',meta:'Transit Hub',desc:'Fast handling and re-routing through our UAE operations center.',tags:['Transit','Air Cargo','Sea Cargo']},
@@ -306,7 +289,7 @@ en:{
       {h:'6. Changes to These Terms', p:'Globall Cloud reserves the right to update these terms at any time. Continued use of our services after an update constitutes acceptance of the revised terms.'}
     ]
   },
-  track:{heading:'Track Shipment',sub:'Enter your GC customer code or exact shipment ID to see its current status',searchPh:'e.g. GC-338 or shipment ID',searchBtn:'Track',
+  track:{heading:'Track Shipment',sub:'Enter your tracking ID to see its current status',searchPh:'e.g. GC10052341',searchBtn:'Track',
     notFoundTitle:'No shipment found',notFoundBody:'Please check the tracking ID, or submit a new request.',requestInstead:'Request a Shipment',
     detailsH:'Shipment Details',timelineH:'Timeline',save:'Add to My Shipments',saved:'Saved ✓',signInToSave:'Sign in to save',
     status:{pending:'Pending',transit:'In Transit',delivered:'Delivered'},
@@ -314,9 +297,9 @@ en:{
     type:{air:'Air Freight',sea:'Sea Freight',land:'Land Freight'},
     weight:'Weight',volume:'Volume',items:'Items',total:'Total',paid:'Paid',due:'Due',eta:'Expected:',pendingValue:'To be confirmed'},
   invoice:{downloadBtn:'Download Invoice (PDF)',generating:'Generating...',title:'Shipping Invoice',trackingId:'Tracking ID',dateIssued:'Date Issued',billTo:'Bill To',route:'Route',serviceType:'Service Type',statusLabel:'Status',thanks:'Thank you for trusting Globall Cloud',failMsg:'Invoice generation failed, please try again.'},
-  request:{heading:'Get a Quote / New Shipment',sub:'Fill in your shipment details and receive a request number for review.',
+  request:{heading:'Get a Quote / New Shipment',sub:'Fill in your shipment details and get a tracking ID instantly.',
     name:'Full Name',phone:'Phone Number',email:'Email (optional)',origin:'Origin',destination:'Destination',type:'Shipping Type',weight:'Estimated Weight (kg)',notes:'Additional Notes',
-    submit:'Submit Request',sending:'Sending...',successTitle:'Request received 🎉',successBody:'Your request number is — save it for follow-up:',trackNow:'Track Shipment',backHome:'Back to Home',waConfirm:'Confirm via WhatsApp',waPrefix:'Hi, I just submitted a request — request number:'},
+    submit:'Submit Request',sending:'Sending...',successTitle:'Request received 🎉',successBody:'Your tracking number is — save it for later:',trackNow:'Track It Now',backHome:'Back to Home',waConfirm:'Confirm via WhatsApp',waPrefix:'Hi, I just submitted a request — tracking number:'},
   portal:{signInH:'Sign In',signInSub:'Enter your name and email to see your shipments',dashboardSub:'Your account dashboard',name:'Name',email:'Email',phone:'Phone (optional)',continueBtn:'Continue',trustNote:'Your info stays private and is never shared',
     hi:'Hi',myShipments:'My Shipments',emptyTitle:'No shipments yet',emptyBody:'Track a shipment or submit a new request to see it here.',
     qTrack:'Track Shipment',qRequest:'New Request',qEdit:'Edit Profile',save:'Save',cancel:'Cancel',signOut:'Sign Out'},
@@ -560,18 +543,12 @@ async function getShipment(id){
       if(!error && data) return rowToShipment(data);
     }
     const {data} = await sb.rpc('track_shipment', {p_id:id});
-    if(data && data[0]) return rowToShipment(data[0]);
-    try{
-      const projectUrl = window.gcSupabaseConfig?.url || SUPABASE_URL;
-      const response = await fetch(`${projectUrl}/functions/v1/public-track?id=${encodeURIComponent(id)}`, { method:'GET', headers:{Accept:'application/json',apikey:SUPABASE_PUBLISHABLE_KEY}, cache:'no-store' });
-      const body = await response.json().catch(()=>({}));
-      return response.ok && body?.shipment ? rowToShipment(body.shipment) : null;
-    }catch(_error){ return null; }
+    return (data && data[0]) ? rowToShipment(data[0]) : null;
   }
   const val = await safeGet('shipment:'+id, true);
   return val ? JSON.parse(val) : null;
 }
-async function persistShipment(s){
+async function saveShipment(s){
   if(sb){ const {error} = await sb.from('shipments').upsert(shipmentToRow(s)); return {error}; }
   await safeSet('shipment:'+s.id, JSON.stringify(s), true);
   return {error:null};
@@ -897,14 +874,7 @@ function renderWhy(){
 function renderTestimonials(){
   const wrap = document.getElementById('testimonialsGrid');
   if(!wrap) return;
-  const items = Array.isArray(t('testi.items')) ? t('testi.items') : [];
-  const section = wrap.closest('section') || wrap.parentElement;
-  if(!items.length){
-    if(section) section.hidden = true;
-    wrap.innerHTML = '';
-    return;
-  }
-  if(section) section.hidden = false;
+  const items = t('testi.items');
   const star = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6.4 7 .7-5.3 4.8 1.6 6.9L12 17.6l-6.2 3.7 1.6-6.9L2.1 9.6l7-.7L12 2.5z"/></svg>`;
   wrap.innerHTML = items.map(it=>`<div class="testimonial-card">
     <div class="testimonial-stars">${star.repeat(it.stars||5)}</div>
@@ -943,70 +913,16 @@ function renderFooterServices(){
 }
 function renderServicesDetail(){
   const wrap = document.getElementById('servicesDetailWrap');
-  if(!wrap) return;
-  const ku = currentLang === 'ku';
-  const copy = ku ? {
-    eyebrow:'خزمەتگوزاریی تایبەت',
-    benefits:'سوودە سەرەکییەکان',
-    trust:'ڕوونی، شوێنکەوتن و پشتگیری لە هەموو هەنگاوێکدا.',
-    quote:'داواکردنی نرخ',
-    track:'شوێنکەوتنی بار'
-  } : {
-    eyebrow:'SPECIALIZED SERVICE',
-    benefits:'KEY BENEFITS',
-    trust:'Clear updates, live tracking and support at every step.',
-    quote:'Request a quote',
-    track:'Track shipment'
-  };
-  const routes = ku ? {
-    air:['چین / دوبەی','هەولێر و هەموو عێراق'],
-    sea:['چین / دوبەی','هەولێر و هەموو عێراق'],
-    land:['دوبەی','سعودیە ← عێراق'],
-    customs:['بەندر و سنوور','ناوخۆی عێراق'],
-    warehouse:['ئیمارات / عێراق','کۆگا و هابەکان'],
-    door:['هابە سەرەکییەکان','بەردەری ماڵ یان کۆمپانیا']
-  } : {
-    air:['China / UAE','Erbil & Iraq'],
-    sea:['China / UAE','Erbil & Iraq'],
-    land:['Dubai','Saudi Arabia → Iraq'],
-    customs:['Ports & borders','Iraq inland'],
-    warehouse:['UAE / Iraq','Warehouses & hubs'],
-    door:['Main hubs','Home or business door']
-  };
-  wrap.innerHTML = SERVICE_ORDER.map((key,index)=>{
+  wrap.innerHTML = SERVICE_ORDER.map(key=>{
     const item = t('services.items.'+key);
-    const detail = t('services.details.'+key) || {};
-    const lane = routes[key] || routes.air;
-    const number = String(index + 1).padStart(2,'0');
-    const metaAudience = ku ? 'گونجاو بۆ' : 'Best for';
-    const metaTiming = ku ? 'کاتی گەیشتن' : 'Typical timing';
-    return `<article class="service-detail reveal in-view" data-service="${key}">
-      <div class="service-detail-main">
-        <div class="service-detail-kicker"><span class="service-detail-index">${number}</span><span>${copy.eyebrow}</span></div>
+    return `<div class="service-detail reveal in-view">
+      <div class="service-icon"><svg class="icon-lg"><use href="#${SERVICE_ICONS[key]}"></use></svg></div>
+      <div>
         <h3>${item.title}</h3>
         <p class="desc">${item.desc}</p>
-        <div class="service-detail-route" aria-label="${ku ? 'ڕێڕەوی خزمەتگوزاری' : 'Service route'}">
-          <span>${lane[0]}</span><span class="route-arrow" aria-hidden="true">→</span><span>${lane[1]}</span>
-        </div>
-        <div class="service-detail-meta">
-          <div class="service-meta-item"><small>${metaAudience}</small><b>${detail.audience || ''}</b></div>
-          <div class="service-meta-item"><small>${metaTiming}</small><b>${detail.timing || ''}</b></div>
-        </div>
-        <div class="service-detail-benefit-title">${copy.benefits}</div>
-        <ul class="feature-list">${item.features.map(f=>`<li><svg class="icon-sm"><use href="#i-check"></use></svg><span>${f}</span></li>`).join('')}</ul>
-        ${detail.faqQ ? `<details class="service-inline-faq"><summary>${detail.faqQ}</summary><p>${detail.faqA || ''}</p></details>` : ''}
+        <ul class="feature-list">${item.features.map(f=>`<li><svg class="icon-sm"><use href="#i-check"></use></svg>${f}</li>`).join('')}</ul>
       </div>
-      <aside class="service-detail-side">
-        <div>
-          <div class="service-icon"><svg class="icon-lg"><use href="#${SERVICE_ICONS[key]}"></use></svg></div>
-          <p>${copy.trust}</p>
-        </div>
-        <div style="display:grid; gap:8px; width:100%;">
-          <button class="btn btn-primary" data-gc-onclick="route('request')">${copy.quote}</button>
-          <button class="btn btn-outline" data-gc-onclick="route('track')">${copy.track}</button>
-        </div>
-      </aside>
-    </article>`;
+    </div>`;
   }).join('');
   renderServicesFaq();
 }
@@ -1049,14 +965,6 @@ async function copyTrackingId(id){
   try{
     await navigator.clipboard.writeText(id);
     showToast(currentLang==='ku' ? 'ژمارەی شوێنکەوتن کۆپی کرا.' : 'Tracking ID copied.', 'success');
-  }catch(e){
-    showToast(currentLang==='ku' ? 'کۆپیکردن سەرکەوتوو نەبوو.' : 'Copy failed.', 'error');
-  }
-}
-async function copyRequestId(id){
-  try{
-    await navigator.clipboard.writeText(id);
-    showToast(currentLang==='ku' ? 'ژمارەی داواکاری کۆپی کرا.' : 'Request number copied.', 'success');
   }catch(e){
     showToast(currentLang==='ku' ? 'کۆپیکردن سەرکەوتوو نەبوو.' : 'Copy failed.', 'error');
   }
@@ -1333,37 +1241,9 @@ function selectRouteCard(wrapId, hiddenInputId, key){
   document.getElementById(hiddenInputId).value = key;
   document.querySelectorAll('#'+wrapId+' .route-card').forEach(el=>el.classList.toggle('active', el.dataset.key===key));
 }
-function requestRatesForForm(){
-  const origin = String(document.getElementById('reqOrigin')?.value || 'china').toLowerCase();
-  const mode = document.getElementById('reqType')?.value || 'air';
-  const destination = String(document.getElementById('reqDestination')?.value || 'hawler').toLowerCase();
-  return quoteCatalogState.rates.filter(rate => String(rate.origin_key||'').toLowerCase() === quoteOriginKey(origin).toLowerCase() && String(rate.transport_mode||'').toLowerCase() === mode && String(rate.destination_key||'').toLowerCase() === (destination === 'hawler' ? 'erbil' : destination));
-}
-function syncRequestQuoteFields(){
-  const type = document.getElementById('reqType')?.value || 'air';
-  const productEl = document.getElementById('reqProduct');
-  const weightEl = document.getElementById('reqWeight');
-  const volumeEl = document.getElementById('reqVolume');
-  const volumeRow = document.getElementById('reqVolumeRow');
-  if(!productEl) return;
-  const rows = requestRatesForForm();
-  const previous = productEl.value;
-  productEl.innerHTML = rows.length ? rows.map(rate => `<option value="${escapeHtml(rate.product_type)}">${escapeHtml(rate.product_type)}</option>`).join('') : `<option value="">${currentLang === 'ku' ? 'جۆری کاڵا هەڵبژێرە' : 'Select a product type'}</option>`;
-  if(rows.some(row => row.product_type === previous)) productEl.value = previous;
-  const sea = type === 'sea';
-  if(volumeRow) volumeRow.style.display = sea ? '' : 'none';
-  if(volumeEl) volumeEl.required = sea;
-  if(weightEl) weightEl.required = !sea;
-}
 function populateRequestSelects(){
   renderRoutePicker('reqOriginPicker', 'reqOrigin', ORIGIN_KEYS);
   renderRoutePicker('reqDestPicker', 'reqDestination', DEST_KEYS);
-  syncRequestQuoteFields();
-  const type = document.getElementById('reqType');
-  if(type && type.dataset.gcRequestWired !== '1'){
-    type.dataset.gcRequestWired = '1';
-    type.addEventListener('change', syncRequestQuoteFields);
-  }
 }
 
 async function handleRequestSubmit(e){
@@ -1378,58 +1258,36 @@ async function handleRequestSubmit(e){
   const originKey = document.getElementById('reqOrigin').value;
   const destKey = document.getElementById('reqDestination').value;
   const type = document.getElementById('reqType').value;
-  const product = document.getElementById('reqProduct')?.value || '';
-  const weightRaw = Number(document.getElementById('reqWeight').value);
-  const volumeRaw = Number(document.getElementById('reqVolume')?.value);
-  const weightKg = Number.isFinite(weightRaw) && weightRaw > 0 ? weightRaw : null;
-  const volumeCbm = Number.isFinite(volumeRaw) && volumeRaw > 0 ? volumeRaw : null;
+  const weightKg = Number(document.getElementById('reqWeight').value) || 0;
   const notes = document.getElementById('reqNotes').value.trim();
-  if(type === 'sea' && !volumeCbm){
-    btn.disabled = false; btn.textContent = originalLabel;
-    showToast('تکایە حەجمی CBM ـی کاڵاکە بنووسە.', 'error');
-    document.getElementById('reqVolume')?.focus();
-    return;
-  }
-  if(type !== 'sea' && !weightKg){
-    btn.disabled = false; btn.textContent = originalLabel;
-    showToast(t('services.quote.needWeight'), 'error');
-    document.getElementById('reqWeight')?.focus();
-    return;
-  }
-  const payload = {
-    name, phone, email, origin_key: originKey, dest_key: destKey,
-    transport_mode: type, product_type: product, weight_kg: weightKg,
-    volume_cbm: type === 'sea' ? volumeCbm : (weightKg ? Math.round((weightKg / 500) * 10) / 10 : null),
-    items_count: null, service_level: 'standard', incoterm: 'EXW', notes
-  };
 
-  let requestId = '';
-  try {
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/public-quote`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_PUBLISHABLE_KEY },
-      body: JSON.stringify(payload)
-    });
-    const body = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(body.error || 'Unable to submit quote request right now.');
-    requestId = String(body.request?.id || '').trim();
-    if (!requestId) throw new Error('Quote request was accepted without a request number.');
-  } catch (error) {
-    btn.disabled = false; btn.textContent = originalLabel;
-    const message = (error?.message || '').includes('Too many')
+  const id = await generateUniqueTrackingId();
+  const session = sb ? (await sb.auth.getSession()).data.session : null;
+  const directoryCustomerId = await lookupDirectoryCustomerId(phone);
+  const shipment = {
+    id, originKey, destKey, type, weightKg,
+    volumeCbm: Math.round((weightKg/500)*10)/10,
+    itemsCount: null, totalAmount: null, paidAmount: 0,
+    currentStepIndex: 0, stepDates:{placed: new Date().toISOString()},
+    requester:{name, phone, email, notes},
+    customerUserId: session ? session.user.id : null,
+    directoryCustomerId
+  };
+  const {error} = await saveShipment(shipment);
+  btn.disabled = false; btn.textContent = originalLabel;
+  if(error){
+    const friendly = (error.message||'').includes('Too many')
       ? 'داواکاری زۆر لە کاتێکی کورتدا نێردراوە. تکایە چەند خولەکێک چاوەڕێبە و دووبارە هەوڵبدەرەوە.'
-      : 'هەڵەیەک ڕوویدا، داواکارییەکە نەنێردرا. تکایە دووبارە هەوڵبدەرەوە یان پەیوەندیمان پێوە بکە.';
-    showToast(message, 'error');
+      : 'هەڵەیەک ڕوویدا، داواکارییەکە پاشەکەوت نەکرا. تکایە دووبارە هەوڵبدەرەوە یان پەیوەندیمان پێوە بکە.';
+    showToast(friendly, 'error');
     return;
   }
-  btn.disabled = false; btn.textContent = originalLabel;
-  notifyOwner('داواکاریی نوێی نرخ — '+requestId, {
-    'ژمارەی داواکاری':requestId, 'ناو':name, 'مۆبایل':phone, 'ئیمەیل':(email||'—'),
+  notifyOwner('داواکاریی نوێی بارکردن — '+id, {
+    'ژمارەی شوێنکەوتن':id, 'ناو':name, 'مۆبایل':phone, 'ئیمەیل':(email||'—'),
     'لە':placeLabel(originKey), 'بۆ':placeLabel(destKey),
-    'جۆر':t('track.type.'+type), 'جۆری کاڵا':(product||'—'), 'کێش (kg)':(weightKg||'—'), 'حەجم (CBM)':(volumeCbm||'—'), 'تێبینی':(notes||'—')
+    'جۆر':t('track.type.'+type), 'کێش (kg)':weightKg, 'تێبینی':(notes||'—')
   });
 
-  const safeRequestId = requestId.replace(/'/g, "\\'");
   const successWrap = document.getElementById('requestSuccessWrap');
   document.getElementById('requestFormWrap').style.display = 'none';
   successWrap.style.display = 'block';
@@ -1437,11 +1295,12 @@ async function handleRequestSubmit(e){
     <svg class="icon-lg"><use href="#i-check"></use></svg>
     <h3 style="font-size:19px; font-weight:800;">${t('request.successTitle')}</h3>
     <p style="color:var(--muted); margin-top:8px;">${t('request.successBody')}</p>
-    <div class="success-id mono" data-gc-onclick="copyRequestId('${safeRequestId}')" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;" title="Copy">${escapeHtml(requestId)} <svg class="icon-sm" style="width:15px; height:15px;"><use href="#i-copy"></use></svg></div>
+    <div class="success-id mono" data-gc-onclick="copyTrackingId('${id}')" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;" title="Copy">${id} <svg class="icon-sm" style="width:15px; height:15px;"><use href="#i-copy"></use></svg></div>
     <div class="success-actions">
+      <button class="btn btn-primary" data-gc-onclick="resetRequestForm(); goTrack('${id}')">${t('request.trackNow')}</button>
       <button class="btn btn-outline" data-gc-onclick="resetRequestForm(); route('home')">${t('request.backHome')}</button>
     </div>
-    <a class="btn btn-ghost btn-block" style="margin-top:12px;" target="_blank" rel="noopener" href="https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(t('request.waPrefix')+' '+requestId)}">
+    <a class="btn btn-ghost btn-block" style="margin-top:12px;" target="_blank" rel="noopener" href="https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(t('request.waPrefix')+' '+id)}">
       <svg class="icon-sm"><use href="#i-chat"></use></svg> ${t('request.waConfirm')}
     </a>
   </div>`;
@@ -1644,18 +1503,9 @@ async function handleContactSubmit(e){
   const requestType = document.getElementById('cType').value;
   const email = document.getElementById('cEmail').value.trim();
   const message = document.getElementById('cMsg').value.trim();
+  await safeSet('message:'+Date.now(), JSON.stringify({name,company,requestType,email,message,at:new Date().toISOString()}), true);
   let insertError = null;
-  try {
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/public-message`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_PUBLISHABLE_KEY },
-      body: JSON.stringify({ name, company, request_type: requestType, email, message })
-    });
-    const body = await response.json().catch(() => ({}));
-    if (!response.ok) insertError = new Error(body.error || 'Unable to send message right now.');
-  } catch (error) {
-    insertError = error;
-  }
+  if(sb){ const {error} = await sb.from('messages').insert({name, email, message, company, request_type:requestType}); insertError = error; }
   btn.disabled = false; btn.textContent = original;
   if(insertError){
     const friendly = (insertError.message||'').includes('Too many')
@@ -1872,7 +1722,7 @@ async function handleStaffSignIn(e){
   setStaffAttempts(0);
   setStaffLockoutUntil(0);
   document.getElementById('attemptsHint').style.display = 'none';
-  window.location.assign('/staff-os');
+  await renderAdminGate();
 }
 async function handleStaffSignOut(){ await sb.auth.signOut(); await renderAdminGate(); stopInactivityTimer(); }
 
@@ -2080,7 +1930,7 @@ async function bulkMarkDelivered(){
     s.currentStepIndex = 5;
     s.stepDates = s.stepDates || {};
     if(!s.stepDates.delivered) s.stepDates.delivered = new Date().toISOString();
-    await persistShipment(s);
+    await saveShipment(s);
     logActivity('update_status', id, 'status → گەیشت (bulk)');
   }
   showToast(`${ids.length} بار وەک گەیشتوو نیشانکرا.`, 'success');
@@ -2715,7 +2565,7 @@ async function uploadStepPhoto(shipmentId, fileList){
   }
   if(uploadedCount === 0){ showToast('هەڵەیەک ڕوویدا لە بارکردنی وێنەکان.', 'error'); return; }
 
-  const {error} = await persistShipment(s);
+  const {error} = await saveShipment(s);
   if(error){ showToast('وێنەکان بارکران بەڵام پاشەکەوت نەکران.', 'error'); return; }
   logActivity('upload_photo', shipmentId, stepKey+' ('+uploadedCount+' وێنە)');
   const idx = currentShipmentsCache.findIndex(x=>x.id===shipmentId);
@@ -2813,110 +2663,36 @@ function printShipmentLabel(shipmentId){
   setTimeout(()=>window.print(), 250);
 }
 
-/* ================= VERIFIED QUOTE ESTIMATOR =================
-   The public calculator reads the active, staff-managed pricing catalog from
-   public-quote?catalog=1. It never invents a number for an unconfigured route
-   or product; customers are directed to the request/WhatsApp path instead. */
-let quoteCatalogState = { rates: [], loaded: false, loading: null };
-const quoteOriginKey = (value) => ({ china:'China', uae:'UAE', usa:'USA' }[value] || value);
-const quoteOriginLabels = { china:'چین', uae:'دوبەی / ئیمارات', usa:'ئەمریکا' };
-const quoteDestLabels = { hawler:'هەولێر', slimani:'سلێمانی', duhok:'دهۆک', bakhdad:'بەغدا', kerkuk:'کەرکووک', mosul:'موسڵ', basra:'بەسرە' };
-const quoteModeLabels = { air:'ئاسمانی', sea:'دەریایی', land:'وشکانی / زمینی' };
-
-async function loadQuoteCatalog(){
-  if(quoteCatalogState.loaded) return quoteCatalogState.rates;
-  if(quoteCatalogState.loading) return quoteCatalogState.loading;
-  quoteCatalogState.loading = (async()=>{
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/public-quote?catalog=1`, { method:'GET', headers:{Accept:'application/json', apikey:SUPABASE_PUBLISHABLE_KEY}, cache:'no-store' });
-    const body = await response.json().catch(()=>({}));
-    if(!response.ok || !Array.isArray(body.rates)) throw new Error(body.error || 'Verified pricing is unavailable');
-    quoteCatalogState.rates = body.rates.filter(row => row && row.is_active !== false);
-    quoteCatalogState.loaded = true;
-    syncQuoteForm();
-    return quoteCatalogState.rates;
-  })().finally(()=>{ quoteCatalogState.loading = null; });
-  return quoteCatalogState.loading;
-}
-
-function quoteRatesForForm(){
-  const origin = quoteOriginKey(document.getElementById('quoteOrigin')?.value || 'china');
-  const mode = document.getElementById('quoteType')?.value || 'air';
-  const destination = String(document.getElementById('quoteDest')?.value || 'hawler').toLowerCase();
-  return quoteCatalogState.rates.filter(rate => String(rate.origin_key||'').toLowerCase() === origin.toLowerCase() && String(rate.transport_mode||'').toLowerCase() === mode && String(rate.destination_key||'').toLowerCase() === (destination === 'hawler' ? 'erbil' : destination));
-}
-
-function syncQuoteForm(){
-  const mode = document.getElementById('quoteType')?.value || 'air';
-  const productEl = document.getElementById('quoteProduct');
-  const weightLabel = document.getElementById('quoteWeightLabel');
-  const weightHint = document.getElementById('quoteWeightHint');
-  const volumeRow = document.getElementById('quoteVolumeRow');
-  const weightEl = document.getElementById('quoteWeight');
-  if(!productEl) return;
-  const rows = quoteRatesForForm();
-  const previous = productEl.value;
-  productEl.innerHTML = rows.length ? rows.map(rate => `<option value="${escapeHtml(rate.product_type)}">${escapeHtml(rate.product_type)} · $${Number(rate.amount).toLocaleString('en-US',{maximumFractionDigits:2})}/${escapeHtml(rate.unit)}</option>`).join('') : `<option value="">${currentLang === 'ku' ? 'نرخی پشتڕاستکراو بۆ ئەم ڕێگایە نییە' : 'No verified rate for this route'}</option>`;
-  if(rows.some(row => row.product_type === previous)) productEl.value = previous;
-  const sea = mode === 'sea';
-  if(volumeRow) volumeRow.style.display = sea ? '' : 'none';
-  if(weightEl) weightEl.required = !sea;
-  if(weightLabel) weightLabel.textContent = sea ? 'کێشی کاڵا (kg)' : 'کێش (kg)';
-  if(weightHint) weightHint.textContent = sea ? 'بۆ زانیاری؛ بڕی نرخ بە CBM ـە.' : '0.1–50,000 kg';
-  const hint = document.getElementById('quoteProductHint');
-  if(hint) hint.textContent = rows.length ? (currentLang === 'ku' ? 'نرخەکان لە catalog ـی چالاکی سیستەمەوە دێن.' : 'Rates are loaded from the active system catalog.') : (currentLang === 'ku' ? 'بۆ نرخی ئەم ڕێگا/جۆرە تکایە داواکاری بنێرە.' : 'Request a quote for this route or product.');
-}
-
-function quoteUnavailableHTML(origin, dest, mode){
-  return `<div class="quote-result-card quote-result-card--notice"><div class="quote-route">${escapeHtml(quoteOriginLabels[origin] || origin)} → ${escapeHtml(quoteDestLabels[dest] || dest)} · ${escapeHtml(quoteModeLabels[mode] || mode)}</div><div class="quote-price">${currentLang === 'ku' ? 'نرخ بەردەست نییە' : 'Quote required'}</div><div class="hint">${currentLang === 'ku' ? 'نرخی پشتڕاستکراو بۆ ئەم route/product ـە لە catalog ـدا نییە. داواکارییەکە بنێرە یان لە WhatsApp پەیوەندی بکە.' : 'There is no verified catalog rate for this route/product. Send a quote request or contact WhatsApp.'}</div><div class="quote-result-actions"><button class="btn btn-primary" data-gc-onclick="route('request')">${t('services.quote.cta')}</button><a class="btn btn-outline" href="https://wa.me/message/4P6O3FXDR4HUA1" target="_blank" rel="noopener">WhatsApp</a></div></div>`;
-}
-
-async function calcQuote(){
-  const origin = document.getElementById('quoteOrigin')?.value || 'china';
-  const type = document.getElementById('quoteType')?.value || 'air';
-  const product = document.getElementById('quoteProduct')?.value || '';
-  const dest = document.getElementById('quoteDest')?.value || 'hawler';
-  const weightEl = document.getElementById('quoteWeight');
-  const volumeEl = document.getElementById('quoteVolume');
-  const weight = Number(weightEl?.value);
-  const volume = Number(volumeEl?.value);
+/* ================= QUOTE ESTIMATOR =================
+   Configurable per-kg base rates and per-city multipliers.
+   Ali: edit QUOTE_RATES / QUOTE_CITY_FACTOR below to match real pricing. */
+const QUOTE_RATES = { air: 6.5, sea: 1.8, land: 3.2 };       // $ per kg, base rate from China/UAE
+const QUOTE_MIN_CHARGE = { air: 35, sea: 60, land: 25 };      // minimum charge per shipment ($)
+const QUOTE_CITY_FACTOR = {                                    // distance/access multiplier from Erbil hub
+  hawler:1, slimani:1.05, duhok:1.1, bakhdad:1.2, kerkuk:1.1, mosul:1.15, basra:1.35
+};
+function calcQuote(){
+  const type = document.getElementById('quoteType').value;
+  const weight = Number(document.getElementById('quoteWeight').value);
+  const dest = document.getElementById('quoteDest').value;
   const resultEl = document.getElementById('quoteResult');
-  const calcBtn = document.getElementById('quoteCalcBtn');
-  if(calcBtn){ calcBtn.disabled = true; calcBtn.classList.add('is-loading'); calcBtn.setAttribute('aria-busy','true'); }
-  if(resultEl) resultEl.innerHTML = `<p class="hint" style="margin-top:14px;">${currentLang === 'ku' ? 'نرخی پشتڕاستکراو لە سیستەمەوە وەردەگیرێت...' : 'Loading verified rates…'}</p>`;
-  try{
-    await loadQuoteCatalog();
-    syncQuoteForm();
-    const rows = quoteRatesForForm();
-    const rate = rows.find(row => row.product_type === product) || rows[0];
-    if(!rate){ if(resultEl) resultEl.innerHTML = quoteUnavailableHTML(origin,dest,type); return; }
-    const units = type === 'sea' ? volume : weight;
-    const max = type === 'sea' ? 100000 : 50000;
-    if(!Number.isFinite(units) || units <= 0 || units > max){
-      const field = type === 'sea' ? volumeEl : weightEl;
-      if(field) field.focus();
-      if(resultEl) resultEl.innerHTML = `<p class="admin-error" style="display:block; margin-top:12px;" role="alert">${type === 'sea' ? (currentLang === 'ku' ? 'تکایە حەجمی CBM ـی دروست بنووسە.' : 'Enter a valid CBM volume.') : t('services.quote.needWeight')}</p>`;
-      return;
-    }
-    const total = Math.round(units * Number(rate.amount) * 100) / 100;
-    const iqd = Math.round(total * getExchangeRate());
-    const transit = rate.transit_min_days != null ? `${rate.transit_min_days}${rate.transit_max_days != null && rate.transit_max_days !== rate.transit_min_days ? `–${rate.transit_max_days}` : ''} ${currentLang === 'ku' ? 'ڕۆژ' : 'days'}` : '';
-    if(resultEl) resultEl.innerHTML = `<div class="quote-result-card"><div class="quote-route">${escapeHtml(quoteOriginLabels[origin] || origin)} → ${escapeHtml(quoteDestLabels[dest] || dest)} · ${escapeHtml(rate.product_type)}</div><div class="quote-price">$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div class="hint">≈ ${iqd.toLocaleString()} د.ع · ${units.toLocaleString('en-US',{maximumFractionDigits:4})} ${escapeHtml(rate.unit)} × $${Number(rate.amount).toLocaleString('en-US',{maximumFractionDigits:2})}</div>${transit ? `<div class="hint">${currentLang === 'ku' ? 'ماوەی خەملێنراو' : 'Estimated transit'}: ${escapeHtml(transit)}</div>` : ''}<div class="quote-result-actions"><button class="btn btn-primary" data-gc-onclick="route('request')">${t('services.quote.cta')}</button><button class="btn btn-outline" data-gc-onclick="route('track')">${currentLang === 'ku' ? 'شوێنکەوتنی بار' : 'Track shipment'}</button></div></div>`;
-  }catch(error){
-    if(resultEl) resultEl.innerHTML = `<div class="quote-result-card quote-result-card--notice"><div class="quote-price">${currentLang === 'ku' ? 'نرخی کاتیی بەردەست نییە' : 'Verified rate unavailable'}</div><div class="hint">${currentLang === 'ku' ? 'سیستەمی نرخەکان ئێستا وەڵام ناداتەوە؛ داواکاری نرخ بنێرە بۆ پێداچوونەوەی ستاف.' : 'The rate catalog is temporarily unavailable; send a quote request for staff review.'}</div><div class="quote-result-actions"><button class="btn btn-primary" data-gc-onclick="route('request')">${t('services.quote.cta')}</button></div></div>`;
-  }finally{
-    if(calcBtn){ calcBtn.disabled = false; calcBtn.classList.remove('is-loading'); calcBtn.removeAttribute('aria-busy'); }
+  if(!weight || weight <= 0){
+    resultEl.innerHTML = `<p class="admin-error" style="display:block; margin-top:12px;">${t('services.quote.needWeight')}</p>`;
+    return;
   }
-}
-
-function initQuotePricingUI(){
-  const origin = document.getElementById('quoteOrigin');
-  const type = document.getElementById('quoteType');
-  const dest = document.getElementById('quoteDest');
-  if(!origin || !type || !dest || origin.dataset.gcQuoteWired === '1') return;
-  origin.dataset.gcQuoteWired = '1';
-  [origin,type,dest].forEach(el => el.addEventListener('change', ()=>{ syncQuoteForm(); const result=document.getElementById('quoteResult'); if(result) result.innerHTML=''; }));
-  syncQuoteForm();
-  loadQuoteCatalog().catch(()=>syncQuoteForm());
+  const base = weight * QUOTE_RATES[type] * QUOTE_CITY_FACTOR[dest];
+  const est = Math.max(base, QUOTE_MIN_CHARGE[type]);
+  const low = Math.round(est * 0.9);
+  const high = Math.round(est * 1.15);
+  const lowIqd = Math.round(low * getExchangeRate());
+  const highIqd = Math.round(high * getExchangeRate());
+  resultEl.innerHTML = `
+    <div style="margin-top:16px; padding:16px; background:var(--surface-2); border-radius:var(--radius-m); text-align:center;">
+      <span class="hint">${t('services.quote.resultLabel')}</span>
+      <div style="font-size:26px; font-weight:800; color:var(--teal-l); margin:6px 0;">$${low} – $${high}</div>
+      <div class="hint">≈ ${lowIqd.toLocaleString()} – ${highIqd.toLocaleString()} د.ع</div>
+      <a class="btn btn-primary" style="margin-top:8px;" data-gc-onclick="route('request')">${t('services.quote.cta')}</a>
+    </div>`;
 }
 
 let batchLookupTimer = null;
@@ -2943,7 +2719,7 @@ async function editBatchCode(shipmentId){
   const val = window.prompt('کۆدی کڕیار لە کۆگا (GC-XXX):', s.batchCode || '');
   if(val === null) return;
   s.batchCode = val.trim() || null;
-  const {error} = await persistShipment(s);
+  const {error} = await saveShipment(s);
   if(error){ showToast('هەڵەیەک ڕوویدا.', 'error'); return; }
   logActivity('update_batch_code', shipmentId, s.batchCode||'(لابرا)');
   const idx = currentShipmentsCache.findIndex(x=>x.id===shipmentId);
@@ -3075,7 +2851,7 @@ async function submitNewShipment(){
     requester: {name, phone, email:'', notes:''},
     directoryCustomerId: await lookupDirectoryCustomerId(phone)
   };
-  const {error} = await persistShipment(newShipment);
+  const {error} = await saveShipment(newShipment);
   if(error){
     msgEl.textContent = 'هەڵەیەک ڕوویدا، بارکردنەکە پاشەکەوت نەکرا.';
     msgEl.style.display = 'block';
@@ -3228,7 +3004,7 @@ async function updateShipmentStep(id, stepIndex){
   s.currentStepIndex = stepIndex;
   s.stepDates = s.stepDates || {};
   if(!s.stepDates[STEP_KEYS[stepIndex]]) s.stepDates[STEP_KEYS[stepIndex]] = new Date().toISOString();
-  const {error} = await persistShipment(s);
+  const {error} = await saveShipment(s);
   if(error){ showToast('هەڵەیەک ڕوویدا، دۆخی بار پاشەکەوت نەکرا.', 'error'); return; }
   logActivity('update_status', id, 'status → '+(STEP_LABELS_KU[stepIndex]||stepIndex));
   const idx = currentShipmentsCache.findIndex(x=>x.id===id);
@@ -3307,7 +3083,7 @@ async function updateShipmentFinance(id){
   if(!s) return;
   s.totalAmount = Number(document.getElementById('tot-'+id).value) || 0;
   s.paidAmount = Number(document.getElementById('paid-'+id).value) || 0;
-  const {error} = await persistShipment(s);
+  const {error} = await saveShipment(s);
   if(error){ showToast('هەڵەیەک ڕوویدا، دارایی پاشەکەوت نەکرا.', 'error'); return; }
   logActivity('update_finance', id, 'total=$'+s.totalAmount+' paid=$'+s.paidAmount);
   const idx = currentShipmentsCache.findIndex(x=>x.id===id);
@@ -3363,19 +3139,18 @@ async function init(){
   setThemeIcon();
 
   await loadExchangeRate();
-  initQuotePricingUI();
   await initShipments();
   applyI18n();
   await updateNavAuthState();
   setupReveal();
   const initialRoute = location.hash.replace('#','');
-  const pathRoutes = {'/quote':'request','/request':'request','/dashboard':'portal','/portal':'portal','/services':'services','/about':'about','/contact':'contact'};
-  // Supports real, clickable links from outside the app. The query aliases
-  // keep QR/WhatsApp links compatible with the public tracking page.
-  const params = new URLSearchParams(location.search);
-  const trackParam = params.get('track') || params.get('id') || params.get('gc');
-  const pathRoute = pathRoutes[location.pathname.replace(/\/$/,'')];
-  route(trackParam ? 'track' : (VALID_ROUTES.includes(initialRoute) ? initialRoute : (pathRoute || 'home')));
+  // Supports a real, clickable tracking link from outside the app (e.g. a
+  // WhatsApp message): ?track=<ID>#track. Without this, goTrack(prefill)
+  // only works as an in-app JS call — there was no URL a customer could
+  // actually tap from their phone that would land pre-filled on their
+  // shipment. See getTrackingShareLink() near sendWhatsAppUpdate().
+  const trackParam = new URLSearchParams(location.search).get('track');
+  route(trackParam ? 'track' : (VALID_ROUTES.includes(initialRoute) ? initialRoute : 'home'));
   if(trackParam){
     document.getElementById('trackInput').value = trackParam;
     doTrackSearch();

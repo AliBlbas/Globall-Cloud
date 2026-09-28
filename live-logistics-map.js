@@ -58,15 +58,9 @@
     }catch(_){ return greatCircle(a,b,60); }
   }
   function markerIcon(L,mode){
-    const icons={
-      air:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 13 8-2 3-7 2 .8-1.7 6.5 6.7 2.6c1 .4 1.2 1.5.3 2l-7.2 4-1.2-1.2 2.1-3.6-7.1 1.2-2.4-1.1.8-2.2Z"></path></svg>',
-      sea:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14h16l-2 4H6l-2-4Z"></path><path d="M8 14V7h8v7M10 7V4h4v3"></path><path d="M3 20c1.5 1.2 3 1.2 4.5 0 1.5 1.2 3 1.2 4.5 0 1.5 1.2 3 3 4.5 0 1.5 1.2 3 3 0"></path></svg>',
-      land:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h11v10H3z"></path><path d="M14 10h4l3 3v3h-7z"></path><circle cx="7" cy="18" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>'
-    };
-    const fallback='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle></svg>';
-    const vehicle=icons[mode]||fallback;
-    const cls=icons[mode]?`gc-marker-vehicle gc-marker-${mode}`:mode==='current'?'gc-marker-current':mode==='hub'?'gc-marker-hub':'gc-marker-node';
-    return L.divIcon({className:'',html:`<div class="${cls}">${vehicle}</div>`,iconSize:[34,34],iconAnchor:[17,17]});
+    const emoji=mode==='current'?'✈':mode==='hub'?'◇':'●';
+    const cls=mode==='current'?'gc-marker-current':mode==='hub'?'gc-marker-hub':'gc-marker-node';
+    return L.divIcon({className:'',html:`<div class="${cls}">${emoji}</div>`,iconSize:[34,34],iconAnchor:[17,17]});
   }
   async function fetchShipment(id){
     if(!id) return null;
@@ -105,11 +99,6 @@
     const leg1=greatCircle(origin,ROUTE.dubai,90); const leg2=await roadRoute(ROUTE.dubai,dest);
     L.polyline(leg1,{color:'#39e4f1',weight:3,opacity:.82,dashArray:'7 8'}).addTo(map);
     L.polyline(leg2,{color:'#ffc15c',weight:4,opacity:.88,lineCap:'round',lineJoin:'round'}).addTo(map);
-    const midpoint=(points,f)=>points[Math.max(0,Math.min(points.length-1,Math.floor(points.length*f)))];
-    const addVehicle=(point,mode,label)=>{if(!point)return;const m=addMarker({lat:point[0],lng:point[1],label},mode);m.bindTooltip(label,{direction:'top',offset:[0,-15],className:'gc-map-tooltip',opacity:.96});};
-    addVehicle(midpoint(leg1,.48),'air','باری فڕۆکە · Air cargo');
-    addVehicle(midpoint(leg1,.92),'sea','باری کەشتی · Sea cargo');
-    addVehicle(midpoint(leg2,.52),'land','ترێلەی دوبەی → هەولێر · Land cargo');
 
     let currentMarker;
     if(current) currentMarker=addMarker(current,'current');
