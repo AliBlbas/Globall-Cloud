@@ -7,12 +7,12 @@
 
   const ROUTES = {
     home:    { href: '/',          key: 'nav.home',      fallback: 'سەرەکی',    icon: '⌂' },
-    about:   { href: '/about',     key: 'nav.about',     fallback: 'دەربارەمان', icon: '◉' },
-    services:{ href: '/services',  key: 'nav.services',  fallback: 'خزمەتگوزاری', icon: '▣' },
+    about:   { href: '/#about',     key: 'nav.about',     fallback: 'دەربارەمان', icon: '◉' },
+    services:{ href: '/#services',  key: 'nav.services',  fallback: 'خزمەتگوزاری', icon: '▣' },
     track:   { href: '/#track',    key: 'nav.track',     fallback: 'شوێنکەوتن', icon: '⌁' },
-    request: { href: '/quote',     key: 'nav.quote',     fallback: 'داواکردنی نرخ', icon: '₿' },
+    request: { href: '/#request',     key: 'nav.quote',     fallback: 'داواکردنی نرخ', icon: '₿' },
     portal:  { href: '/dashboard', key: 'nav.dashboard',  fallback: 'داشبۆرد',    icon: '♙' },
-    contact: { href: '/contact',   key: 'nav.contact',   fallback: 'پەیوەندی',  icon: '✉' },
+    contact: { href: '/#contact',   key: 'nav.contact',   fallback: 'پەیوەندی',  icon: '✉' },
     privacy: { href: '/#privacy',  key: 'legal.privacyTitle', fallback: 'تایبەتێتی', icon: '◌' },
     terms:   { href: '/#terms',    key: 'legal.termsTitle',   fallback: 'مەرجەکان', icon: '§' },
     staff:   { href: '/staff',     fallback: 'بەشی ستاف', icon: '◈' }
