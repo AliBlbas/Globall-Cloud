@@ -3,7 +3,7 @@
   const URL = 'https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/public-pricing';
   const KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
   const $ = (id) => document.getElementById(id);
-  const money = (value) => `${Number(value || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })} USD`;
+  const money = (value, currency = 'USD') => `${Number(value || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })} ${currency}`;
   const fallback = ({ mode, origin, weight, volume }) => {
     const o = String(origin || '').toLowerCase();
     const w = Number(weight || 0);
@@ -38,10 +38,12 @@
         const data = await response.json().catch(() => ({}));
         if (!response.ok || data.allowed === false) throw new Error(data.message_ku || data.error || 'fallback');
         const quote = data.quote || data;
-        const total = quote.total ?? quote.total_cost ?? quote.amount ?? quote.price;
+        const total = quote.total ?? quote.total_cost ?? quote.amount ?? quote.price ?? quote.usd;
         if (!Number.isFinite(Number(total))) throw new Error('fallback');
+        const primary = quote.usd !== undefined ? money(quote.usd, 'USD') : money(total, quote.currency || 'USD');
+        const iqD = quote.iqd !== undefined ? ` · ${money(quote.iqd, 'IQD')}` : '';
         const days = quote.delivery_days || quote.estimated_days || quote.transit_time || 'بەپێی route';
-        box.innerHTML = `<span class="gc-quote-preview-label">LIVE ESTIMATE · ${mode.toUpperCase()}</span><strong>${money(total)}</strong><small>${String(origin || 'Origin')} → ${String(destination)} · گەیشتن: ${String(days)} · نرخی production</small>`;
+        box.innerHTML = `<span class="gc-quote-preview-label">LIVE ESTIMATE · ${mode.toUpperCase()}</span><strong>${primary}${iqD}</strong><small>${String(origin || 'Origin')} → ${String(destination)} · گەیشتن: ${String(days)} · نرخی production</small>`;
       } catch {
         const result = fallback({ mode, origin, weight, volume });
         box.innerHTML = `<span class="gc-quote-preview-label">ESTIMATE · ${mode.toUpperCase()}</span><strong>${money(result.total)}</strong><small>${result.note} · ${result.days} · نرخەکە پێش ناردنی invoice پشتڕاست دەکرێتەوە.</small>`;

@@ -4,6 +4,7 @@ const ALLOWED_ORIGINS = new Set(['https://globall-cloud.pages.dev', 'https://glo
 const WINDOW_SECONDS = 10 * 60
 const MAX_PER_WINDOW = 30
 const RATE_LIMIT_PREFIX = 'globall-cloud:public-pricing:v1:'
+const edgeRate = new Map<string, { started: number; count: number }>()
 
 type Json = Record<string, unknown>
 const text = (value: unknown, max = 120) => String(value ?? '').trim().slice(0, max)
@@ -36,7 +37,21 @@ const headers = (req: Request) => {
   }
 }
 const reply = (req: Request, body: Json, status = 200) => new Response(JSON.stringify(body), { status, headers: headers(req) })
-const service = () => createClient(env('SUPABASE_URL'), env('SUPABASE_SERVICE_ROLE_KEY'), { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } })
+const service = () => {
+  const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')?.trim() || Deno.env.get('SUPABASE_SECRET_KEY')?.trim()
+  if (!key) throw new Error('Supabase service key is not configured')
+  return createClient(env('SUPABASE_URL'), key, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } })
+}
+const edgeAllowed = (key: string) => {
+  const now = Date.now()
+  const current = edgeRate.get(key)
+  if (!current || now - current.started >= WINDOW_SECONDS * 1000) {
+    edgeRate.set(key, { started: now, count: 1 })
+    return true
+  }
+  current.count += 1
+  return current.count <= MAX_PER_WINDOW
+}
 
 Deno.serve(async (req) => {
   const origin = req.headers.get('origin') || ''
@@ -52,8 +67,10 @@ Deno.serve(async (req) => {
       p_window_seconds: WINDOW_SECONDS,
       p_max_requests: MAX_PER_WINDOW,
     })
-    if (limit.error) throw limit.error
-    if (limit.data !== true) return reply(req, { error: 'Too many requests. Please try again later.' }, 429)
+    if (limit.error) {
+      console.warn('[public-pricing] shared rate limiter unavailable; using edge limiter', limit.error.message || String(limit.error))
+      if (!edgeAllowed(keyHash)) return reply(req, { error: 'Too many requests. Please try again later.' }, 429)
+    } else if (limit.data !== true) return reply(req, { error: 'Too many requests. Please try again later.' }, 429)
 
     const body = await req.json().catch(() => ({})) as Json
     const product = text(body.product_type, 80).toLowerCase() || 'general'
@@ -89,7 +106,8 @@ Deno.serve(async (req) => {
     if (result.error) throw result.error
     return reply(req, { allowed: true, quote: result.data || null }, 200)
   } catch (error) {
-    console.error('[public-pricing]', error instanceof Error ? error.message : String(error))
+    const message = error instanceof Error ? error.message : JSON.stringify(error)
+    console.error('[public-pricing]', message)
     return reply(req, { error: 'Unable to calculate price right now.' }, 500)
   }
 })
