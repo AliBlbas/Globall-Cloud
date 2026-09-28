@@ -48,6 +48,10 @@
 
   const install = () => {
     if (dock || !document.body) return;
+    const finalIconLayer = document.createElement('link');
+    finalIconLayer.rel = 'stylesheet';
+    finalIconLayer.href = '/gc-customer-dashboard-icons-20260928.css?v=2';
+    document.head.appendChild(finalIconLayer);
     dock = document.createElement('nav');
     dock.className = 'gc-customer-mobile-dock';
     dock.setAttribute('aria-label', 'Customer quick navigation');
