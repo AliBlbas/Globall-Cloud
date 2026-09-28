@@ -80,6 +80,12 @@ Deno.serve(async (req) => {
     const weight = num(body.weight_kg)
     const volume = num(body.volume_cbm)
 
+    if (!originKey) return reply(req, { error: 'Origin is required.', code: 'ORIGIN_REQUIRED' }, 400)
+    if (!['air', 'land', 'sea'].includes(mode)) return reply(req, { error: 'Unsupported transport mode.', code: 'MODE_UNSUPPORTED' }, 400)
+    if (!['china', 'cn', 'foshan', 'guangzhou', 'dubai', 'uae', 'united arab emirates', 'unitedarabemirates', 'usa', 'us', 'america'].includes(originKey)) {
+      return reply(req, { allowed: false, code: 'ORIGIN_UNAVAILABLE', message_ku: 'ئەم شوێنە لە کاتی ئێستادا لە لیستی گواستنەوەدا نییە.' }, 200)
+    }
+
     const compliance = await db.rpc('validate_logistics_cargo', {
       p_product_type: product,
       p_has_battery: body.has_battery === true,
@@ -103,7 +109,17 @@ Deno.serve(async (req) => {
       p_volume_cbm: volume,
       p_rate_key: null,
     })
-    if (result.error) throw result.error
+    if (result.error) {
+      const detail = String(result.error.message || result.error).toLowerCase()
+      if (detail.includes('no active rate') || detail.includes('requested route/category') || detail.includes('not configured')) {
+        return reply(req, {
+          allowed: false,
+          code: 'RATE_UNAVAILABLE',
+          message_ku: 'بۆ ئەم ڕێگا و جۆری بارە نرخێکی چالاک نییە؛ تکایە ڕێگایەکی تری هەڵبژێرە یان داوای نرخ بنێرە.'
+        }, 200)
+      }
+      throw result.error
+    }
     return reply(req, { allowed: true, quote: result.data || null }, 200)
   } catch (error) {
     const message = error instanceof Error ? error.message : JSON.stringify(error)
