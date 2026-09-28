@@ -813,6 +813,25 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
   </div>
 </nav>
 
+<div class="gc-mobile-dock" id="gcMobileDock" aria-label="Globall Cloud mobile navigation">
+  <button class="gc-dock-item" data-route="home" data-gc-onclick="route('home')" type="button">
+    <svg><use href="#i-home"></use></svg><span data-i18n="nav.home"></span>
+  </button>
+  <button class="gc-dock-item" data-route="track" data-gc-onclick="route('track')" type="button">
+    <svg><use href="#i-search"></use></svg><span data-i18n="nav.track"></span>
+  </button>
+  <button class="gc-dock-action" data-gc-onclick="route('request')" type="button" aria-label="Request a quote">
+    <span class="gc-dock-action-icon"><svg><use href="#i-plus"></use></svg></span>
+    <span data-i18n="nav.quote"></span>
+  </button>
+  <button class="gc-dock-item" data-route="services" data-gc-onclick="route('services')" type="button">
+    <svg><use href="#i-box"></use></svg><span data-i18n="nav.services"></span>
+  </button>
+  <button class="gc-dock-item" data-route="portal" data-gc-onclick="route('portal')" type="button">
+    <svg><use href="#i-user"></use></svg><span id="gcDockAccountLabel"></span>
+  </button>
+</div>
+
 <main>
 
 <!-- ============ HOME ============ -->
