@@ -47,6 +47,7 @@
   addStylesheet(`/site-navigation-20260909.css?v=${RELEASE}`);
   addStylesheet(`/gc-production-ui-20260927.css?v=${RELEASE}`);
   addStylesheet(`/gc-final-ui-20260927.css?v=4`);
+  addStylesheet(`/gc-reference-inspired-20260928.css?v=20260928-1`);
 
   // Critical interaction repair runs independently of the main renderer.
   addScript(`/public-live-repair-20260914.js?v=${RELEASE}`, 'data-gc-public-live-repair');
