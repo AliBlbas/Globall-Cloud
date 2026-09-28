@@ -9,7 +9,7 @@
 <meta name="description" content="Globall Cloud — سیستەمی لۆجستیکی چین، ئەمریکا، دوبەی و عێراق؛ بە Air، Sea، Land، tracking، payment و customer operations.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Globall Cloud — China · USA · Dubai · Iraq Logistics">
-<meta property="og:description" content="Air، Sea و Land لە چین، ئەمریکا و دوبەی بۆ هەولێر و هەموو عێراق، بە tracking و پشتیوانی ٢٤/٧.">
+<meta property="og:description" content="Air، Sea و Land لە چین، ئەمریکا و دوبەی بۆ هەولێر و هەموو عێراق، بە tracking و پشتیوانی واتساپ.">
 <meta property="og:url" content="https://globall-cloud.pages.dev/">
 <meta property="og:image" content="https://globall-cloud.pages.dev/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -36,6 +36,7 @@
   <link rel="stylesheet" href="/gc-public-social-20260928.css?v=20260928-1">
   <link rel="stylesheet" href="/gc-public-app-reference-20260928.css?v=20260928-1">
 	  <link rel="stylesheet" href="/gc-public-app-polish-20260928.css?v=20260928-1">
+  <link rel="stylesheet" href="/gc-live-mobile-v3.css?v=20260928-3">
 	  <link rel="stylesheet" href="/gc-reference-inspired-20260928.css?v=20260928-1">
 	  <script src="/live-logistics-map.js?v=20260927-2" defer></script>
 </head>
@@ -48,12 +49,20 @@
       <nav class="gc-desktop-nav" aria-label="ناڤیگەیشن">
         <a href="/" data-gc-route="home">سەرەکی</a><a href="/#services" data-gc-route="services">خزمەتگوزاری</a><a href="/track" data-gc-route="track">شوێنکەوتن</a><a href="/#request" data-gc-route="request">داواکردنی نرخ</a><a href="/#contact" data-gc-route="contact">پەیوەندی</a>
       </nav>
-      <div class="gc-nav-actions"><div class="gc-socials" aria-label="سۆشیال میدیا"><a href="https://www.facebook.com/" target="_blank" rel="noreferrer" aria-label="Facebook">f</a><a href="https://www.instagram.com/" target="_blank" rel="noreferrer" aria-label="Instagram">◎</a><a href="https://wa.me/9647507577137" target="_blank" rel="noreferrer" aria-label="WhatsApp">◔</a></div><a class="gc-staff" href="/staff">▣ بەشی ستاف</a><a class="gc-btn gc-btn-primary" href="/dashboard">چوونەژوورەوە</a><a class="gc-btn gc-btn-soft gc-register-link" href="/dashboard#register">تۆمارکردن</a><button class="gc-menu" type="button" data-gc-menu aria-label="menu">☰</button></div>
+      <div class="gc-nav-actions"><div class="gc-socials" aria-label="WhatsApp"><a href="https://wa.me/9647507577137" target="_blank" rel="noreferrer" aria-label="WhatsApp">◔</a></div><a class="gc-staff" href="/staff">▣ بەشی ستاف</a><a class="gc-btn gc-btn-primary" href="/dashboard">چوونەژوورەوە</a><a class="gc-btn gc-btn-soft gc-register-link" href="/dashboard#register">تۆمارکردن</a><button class="gc-menu" type="button" data-gc-menu aria-label="menu">☰</button></div>
     </div>
     <div class="gc-mobile-menu" data-gc-mobile-menu hidden>
       <a href="/">سەرەکی</a><a href="/#services">خزمەتگوزاری</a><a href="/track">شوێنکەوتن</a><a href="/#request">داواکردنی نرخ</a><a href="/dashboard">هەژماری کڕیار</a><a href="/staff">کۆنسۆڵی ستاف</a><a href="/#contact">پەیوەندی</a>
     </div>
   </header>
+
+  <nav class="gc-mobile-dock-v3" aria-label="ناڤیگەیشنی مۆبایلی Globall Cloud">
+    <a href="/" data-dock="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 10 8-7 8 7v10H4z"/><path d="M9 20v-6h6v6"/></svg><span>سەرەکی</span></a>
+    <a href="/track" data-dock="track"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 5 5"/></svg><span>شوێنکەوتن</span></a>
+    <a href="/#request" class="primary" data-dock="quote"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>داواکردنی نرخ</span></a>
+    <a href="/#services" data-dock="services"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4-8 4-8-4 8-4Z"/><path d="M4 7v9l8 4 8-4V7M12 11v9"/></svg><span>خزمەتگوزاری</span></a>
+    <a href="/dashboard" data-dock="account"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg><span>هەژمار</span></a>
+  </nav>
 
   <main id="gcMain" class="gc-home">
     <section class="gc-hero-rebuild">
@@ -71,12 +80,12 @@
             <div class="gc-trust-card"><strong>Air</strong><span>خێراترین ڕێگا</span></div>
             <div class="gc-trust-card"><strong>Sea</strong><span>بارە قورسەکان</span></div>
             <div class="gc-trust-card"><strong>Land</strong><span>گواستنەوەی وشکانی</span></div>
-            <div class="gc-trust-card"><strong>24/7</strong><span>پشتیوانی زیندوو</span></div>
+            <div class="gc-trust-card"><strong>WA</strong><span>پشتیوانی لە WhatsApp</span></div>
           </div>
         </div>
         <div class="gc-hero-visual gc-command-map">
           <div class="gc-map-shell">
-            <div class="gc-map-topbar"><span class="gc-live-status"><i></i> LIVE FLEET NETWORK</span><span class="gc-map-clock">UPDATED JUST NOW</span></div>
+            <div class="gc-map-topbar"><span class="gc-live-status"><i></i> ROUTE OVERVIEW</span><span class="gc-map-clock">CHINA · DUBAI · ERBIL</span></div>
             <div class="route-map" aria-label="نەخشەی زیندووی گواستنەوەی Globall Cloud"></div>
             <div class="gc-map-fleet"><div><span class="gc-fleet-icon air" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 13 8-2 3-7 2 .8-1.7 6.5 6.7 2.6c1 .4 1.2 1.5.3 2l-7.2 4-1.2-1.2 2.1-3.6-7.1 1.2-2.4-1.1.8-2.2Z"></path></svg></span><b>Air cargo</b><small>گوانگژۆ → دوبەی</small></div><div><span class="gc-fleet-icon sea" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 14h16l-2 4H6l-2-4Z"></path><path d="M8 14V7h8v7M10 7V4h4v3"></path><path d="M3 20c1.5 1.2 3 1.2 4.5 0 1.5 1.2 3 1.2 4.5 0 1.5 1.2 3 3 4.5 0 1.5 1.2 3 3 0"></path></svg></span><b>Sea cargo</b><small>لە ڕێگای دەریا</small></div><div><span class="gc-fleet-icon land" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h11v10H3z"></path><path d="M14 10h4l3 3v3h-7z"></path><circle cx="7" cy="18" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg></span><b>Land fleet</b><small>دوبەی → هەولێر</small></div></div>
           </div>
@@ -215,6 +224,7 @@
 
 
 </div>
+<script src="/gc-live-mobile-v3.js?v=20260928-3" defer></script>
 <script src="/gc-redesign-loader.js?v=20260927-1"></script>
 </body>
 </html>
