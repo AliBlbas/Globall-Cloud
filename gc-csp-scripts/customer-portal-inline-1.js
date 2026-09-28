@@ -237,7 +237,9 @@ const load = async () => {
   $('loginBtn').classList.add('hidden');
   $('logoutBtn').classList.remove('hidden');
   $('portalStatus')?.classList.add('hidden');
-  $('hello').textContent = `بەخێربێیت — ${session.user.email || 'Customer'}`;
+  $('hello').textContent = 'بەخێربێیت';
+  const welcome = $('customerWelcome');
+  if (welcome) welcome.textContent = session.user.email || 'Customer';
   const dashboard = await customerApi();
   const rows = dashboard.shipments || [];
   const invoicesRows = dashboard.invoices || [];

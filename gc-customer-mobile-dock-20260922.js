@@ -3,15 +3,12 @@
   let dock = null;
 
   const go = (key) => {
-    if (key === 'home') { location.href = '/'; return; }
-    if (key === 'shipments') { document.getElementById('shipments')?.scrollIntoView({behavior:'smooth',block:'start'}); return; }
-    if (key === 'quotes') { document.getElementById('quoteForm')?.scrollIntoView({behavior:'smooth',block:'start'}); return; }
+    const routes = {home:'#home',shipments:'#shipments',quotes:'#quotes',account:'#account'};
     if (key === 'track') { location.href = '/track'; return; }
-    if (key === 'account') {
-      const target = document.getElementById('gcAccountSettings');
-      if (target) { target.scrollIntoView({behavior:'smooth',block:'start'}); return; }
-      document.getElementById('loginBtn')?.click();
-    }
+    if (routes[key]) history.pushState({tab:key},'',`/customer-portal${routes[key]}`);
+    const targets = {home:'.hero',shipments:'#shipments',quotes:'#quoteForm',account:'#gcAccountSettings'};
+    document.querySelector(targets[key])?.scrollIntoView({behavior:'smooth',block:'start'});
+    sync();
   };
 
   const icon = {
@@ -33,18 +30,20 @@
   const sync = () => {
     if (!dock) return;
     const y = window.scrollY + window.innerHeight * 0.45;
-    const sections = [
-      ['shipments','shipments'],
-      ['quotes','quoteForm'],
-      ['track','trackBtn'],
-      ['account','gcAccountSettings']
-    ];
-    let active = 'home';
-    for (const [key,id] of sections) {
-      const node = document.getElementById(id);
-      if (node && node.getBoundingClientRect().top + window.scrollY <= y) active = key;
+    const hash = String(location.hash || '').replace(/^#/,'');
+    let active = ['home','shipments','quotes','account'].includes(hash) ? hash : 'home';
+    if (!hash) {
+      const sections = [['shipments','shipments'],['quotes','quoteForm'],['track','trackBtn'],['account','gcAccountSettings']];
+      for (const [key,id] of sections) {
+        const node = document.getElementById(id);
+        if (node && node.getBoundingClientRect().top + window.scrollY <= y) active = key;
+      }
     }
-    dock.querySelectorAll('[data-dock]').forEach((b) => b.classList.toggle('active', b.dataset.dock === active));
+    dock.querySelectorAll('[data-dock]').forEach((b) => {
+      const isActive = b.dataset.dock === active;
+      b.classList.toggle('active', isActive);
+      if (isActive) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+    });
   };
 
   const install = () => {
@@ -63,6 +62,8 @@
     });
     window.addEventListener('scroll', sync, {passive:true});
     window.addEventListener('resize', sync, {passive:true});
+    window.addEventListener('hashchange', sync);
+    window.addEventListener('popstate', sync);
     sync();
   };
 
