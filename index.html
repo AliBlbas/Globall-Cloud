@@ -7,6 +7,205 @@
 <link rel="stylesheet" href="tracking-styles.css">
 <link rel="stylesheet" href="/gc-premium.css?v=20260928-2" data-gc-premium="1">
 <link rel="stylesheet" href="/gc-visual-v2.css?v=20260928-1" data-gc-visual-v2="1">
+<style id="gc-production-polish-v3">
+/* Globall Cloud production polish v3 — interaction, hierarchy and mobile app ergonomics */
+:root{
+  --gc-v3-ring:rgba(34,211,238,.18);
+  --gc-v3-panel:rgba(255,255,255,.035);
+  --gc-v3-panel-2:rgba(255,255,255,.055);
+}
+html,body{overscroll-behavior-x:none;}
+body{-webkit-tap-highlight-color:transparent;}
+button,.btn,a,.service-card,.hub-card,.warehouse-card,.track-row,.pbn-item,.gc-dock-item{
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+.btn,.pbn-item,.gc-dock-item{min-height:46px;}
+.nav{box-shadow:0 8px 24px rgba(0,0,0,.08);}
+.nav-inner{min-height:66px;}
+.brand-logo{filter:drop-shadow(0 8px 16px rgba(34,211,238,.12));}
+.hero{position:relative;}
+.hero::before{
+  content:"";
+  position:absolute;
+  inset:8% 4%;
+  pointer-events:none;
+  background:radial-gradient(circle at 50% 50%,rgba(34,211,238,.045),transparent 56%);
+}
+.hero > *{position:relative;z-index:1;}
+.hero-ctas .btn{min-width:150px;}
+.trust-item{min-height:96px;display:flex;flex-direction:column;justify-content:center;}
+.live-track-inner{position:relative;}
+.live-track-inner::before{
+  content:"LIVE";
+  position:absolute;
+  top:16px;
+  inset-inline-end:20px;
+  font:800 9px var(--mono);
+  letter-spacing:1.4px;
+  color:var(--mint);
+  border:1px solid rgba(52,211,153,.24);
+  background:rgba(52,211,153,.06);
+  padding:5px 8px;
+  border-radius:999px;
+}
+.track-search{padding:7px;border:1px solid var(--line-soft);border-radius:18px;background:var(--surface);box-shadow:0 14px 30px rgba(0,0,0,.12);}
+.track-search .field{border:0!important;background:transparent!important;box-shadow:none!important;}
+.track-search .btn{flex:0 0 auto;}
+.service-card,.hub-card,.warehouse-card,.track-row,.ops-card,.testimonial-card,.step-card,.feature-card{
+  box-shadow:0 10px 26px rgba(0,0,0,.10);
+}
+.service-card:focus-within,.hub-card:focus-within,.warehouse-card:focus-within,.track-row:focus-within{
+  border-color:var(--teal);
+  box-shadow:0 0 0 4px var(--gc-v3-ring);
+}
+.service-icon,.hub-icon{box-shadow:0 8px 18px rgba(34,211,238,.08);}
+.section{scroll-margin-top:86px;}
+.page-head{scroll-margin-top:86px;}
+.card,.track-hero-card,.success-panel,.request-panel,.auth-card,.dash-head,.portal-dash{
+  box-shadow:0 16px 38px rgba(0,0,0,.12);
+}
+.cta-band{box-shadow:0 18px 44px rgba(0,0,0,.12);}
+footer{margin-top:48px;}
+.gc-mobile-dock{
+  backdrop-filter:blur(22px) saturate(145%);
+  -webkit-backdrop-filter:blur(22px) saturate(145%);
+}
+.gc-dock-item,.pbn-item{font-weight:800;}
+.gc-dock-item svg,.pbn-item svg{stroke-width:1.9;}
+.gc-dock-action{transform:translateY(-1px);}
+.gc-dock-action-icon{border:3px solid var(--ink)!important;}
+@media (max-width:760px){
+  body{
+    padding-bottom:calc(92px + env(safe-area-inset-bottom))!important;
+    font-size:15px;
+  }
+  .container{padding-inline:16px!important;}
+  .section{padding-block:34px;}
+  .section-head{margin-bottom:26px;}
+  .section-head h2{font-size:23px;}
+  .section-head p{font-size:13px;}
+  .nav{backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);}
+  .nav-inner{padding:9px 14px;min-height:58px;}
+  .brand{gap:8px;}
+  .brand-logo{width:32px;height:32px;}
+  .brand b{font-size:15px;}
+  .brand small{display:none;}
+  .burger{width:42px;height:42px;border-radius:12px;}
+  .mobile-menu{padding:10px 16px 16px;}
+  .mobile-menu a{min-height:48px;padding:13px 4px;}
+  .top-announcement-inner{padding-inline:14px!important;}
+  .hero{
+    padding:26px 16px 14px!important;
+    gap:16px!important;
+  }
+  .hero h1{
+    max-width:none!important;
+    font-size:clamp(32px,9vw,42px)!important;
+    line-height:1.12!important;
+    letter-spacing:-.6px!important;
+  }
+  .hero .sub{font-size:14px;line-height:1.85;margin-bottom:20px;}
+  .hero-ctas{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .hero-ctas .btn{min-width:0;width:100%;padding-inline:12px;}
+  .route-map{min-height:330px!important;border-radius:22px!important;padding:10px!important;}
+  .route-map > img{min-height:260px;object-fit:cover;}
+  .hero-status-card{max-width:none;padding:13px 14px;}
+  .hero-route-stack{width:100%;grid-template-columns:1fr 1fr;align-self:auto;}
+  .route-chip{padding:10px 11px;}
+  .route-chip-num{width:30px;height:30px;}
+  .route-chip b{font-size:12px;}
+  .route-chip small{font-size:10.5px;}
+  .trust-bar{padding:0 16px!important;gap:8px!important;}
+  .trust-item{min-height:82px;padding:15px 8px;border-radius:15px;}
+  .trust-item b{font-size:20px;}
+  .trust-item span{font-size:10.5px;line-height:1.45;}
+  .live-track-inner{padding:34px 16px;}
+  .live-track-inner::before{top:12px;inset-inline-end:14px;}
+  .track-search{
+    display:flex;
+    gap:6px;
+    padding:6px;
+    border-radius:15px;
+  }
+  .track-search .btn{min-height:48px;padding-inline:13px;}
+  .corridor-strip,.cta-band{border-radius:22px;padding:22px 16px;}
+  .corridor-head{gap:12px;margin-bottom:14px;}
+  .corridor-head h3{font-size:21px;}
+  .corridor-head p{font-size:12.5px;}
+  .corridor-list{gap:8px;}
+  .corridor-item{padding:15px 14px;border-radius:15px;}
+  .business-hub-layout,.ops-layout{gap:12px;}
+  .business-hub-grid{grid-template-columns:1fr 1fr!important;gap:8px!important;}
+  .hub-card{padding:16px 13px;gap:9px;border-radius:15px;min-height:150px;}
+  .hub-icon{width:40px;height:40px;border-radius:12px;}
+  .hub-card h4{font-size:13px;}
+  .hub-card p{font-size:11.5px;line-height:1.65;}
+  .hub-link{font-size:11px;}
+  .warehouse-list,.grid-3,.grid-5{gap:9px;}
+  .warehouse-card{padding:16px;border-radius:15px;}
+  .warehouse-card p{font-size:12px;}
+  .ops-metrics{gap:8px;}
+  .ops-metric{padding:14px;border-radius:15px;}
+  .ops-metric b{font-size:20px;}
+  .ops-metric span{font-size:10.5px;}
+  .service-card{padding:17px 15px;border-radius:16px;}
+  .service-card h4{font-size:14px;}
+  .service-card p{font-size:12px;line-height:1.7;}
+  .service-icon{width:42px;height:42px;border-radius:12px;margin-bottom:12px;}
+  .step-card,.feature-card,.testimonial-card{padding:18px 15px;border-radius:16px;}
+  .track-hero-card,.success-panel,.auth-card,.card{border-radius:18px!important;padding:19px!important;}
+  .request-panel,.portal-panel,.portal-dash{padding-inline:16px!important;}
+  .page-head{padding:30px 16px 10px!important;}
+  .page-head h1{font-size:26px;}
+  .page-head p{font-size:13px;}
+  .cta-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .cta-actions .btn{width:100%;}
+  footer{margin-top:28px;}
+  .footer-grid{gap:18px!important;padding-block:30px!important;}
+  .whatsapp-float{
+    width:48px!important;height:48px!important;
+    bottom:calc(98px + env(safe-area-inset-bottom))!important;
+    inset-inline-start:14px!important;
+  }
+  .whatsapp-float svg{width:24px;height:24px;}
+  /* One mobile navigation only: portal owns its own dock. */
+  body:has(#page-portal.active) .gc-mobile-dock{display:none!important;}
+  body:has(#page-portal.active){padding-bottom:calc(72px + env(safe-area-inset-bottom))!important;}
+  body:has(#page-portal.active) .whatsapp-float{bottom:calc(84px + env(safe-area-inset-bottom))!important;}
+  .gc-mobile-dock{
+    left:10px!important;right:10px!important;bottom:calc(8px + env(safe-area-inset-bottom))!important;
+    border-radius:22px!important;
+    padding:4px!important;
+  }
+  .gc-dock-item{min-height:58px!important;}
+  .gc-dock-item svg{width:20px;height:20px;}
+  .gc-dock-action-icon{width:54px!important;height:54px!important;}
+}
+@media (max-width:430px){
+  .hero{padding-inline:12px!important;}
+  .hero-ctas,.cta-actions{grid-template-columns:1fr;}
+  .hero h1{font-size:31px!important;}
+  .route-map{min-height:300px!important;}
+  .hero-route-stack{grid-template-columns:1fr;}
+  .business-hub-grid{grid-template-columns:1fr!important;}
+  .trust-bar{grid-template-columns:1fr 1fr!important;}
+  .track-search{flex-direction:column;}
+  .track-search .btn{width:100%;}
+}
+@media (min-width:761px){
+  .gc-mobile-dock{display:none!important;}
+}
+[data-theme="light"] .gc-mobile-dock{
+  background:rgba(255,255,255,.94)!important;
+  border-color:rgba(52,83,120,.12)!important;
+  box-shadow:0 16px 40px rgba(38,63,88,.16)!important;
+}
+[data-theme="light"] .gc-dock-action-icon{border-color:#F5F8FC!important;}
+@media (prefers-reduced-motion:reduce){
+  .hero::before{display:none;}
+}
+</style>
 <meta name="theme-color" content="#061428">
 <title>Globall Cloud — China · USA · UAE · Iraq Logistics</title>
 <meta name="description" content="Globall Cloud: air, sea, customs and door-to-door logistics from China, the USA and the UAE to every city in Iraq. Real-time tracking, competitive rates.">
