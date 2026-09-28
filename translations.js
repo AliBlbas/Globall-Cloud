@@ -3,9 +3,9 @@
 const I18N = {
 ku:{
   brand:{tagline:'لۆجستیک'},
-  topbar:{note:'سەرەکییەکانی چین، دوبەی و هەولێر بەبەردەوامی چالاکن',support:'پشتیوانی زیندوو ٢٤/٧'},
+  topbar:{note:'ڕێڕەوی چین، ئەمریکا، دوبەی و هەولێر بەبەردەوامی چالاکە',support:'پشتیوانی زیندوو ٢٤/٧'},
   nav:{home:'سەرەکی',about:'دەربارەمان',services:'خزمەتگوزارییەکان',track:'شوێنکەوتن',contact:'پەیوەندی',signIn:'چوونەژوورەوە',dashboard:'داشبۆرد',quote:'داواکردنی نرخ'},
-  hero:{eyebrow:'چین  ·  ئیمارات  ·  عێراق',title:'گەیاندنی بار بە متمانە، خێرایی و بێ سنوور',subtitle:'Globall Cloud بارت بە شێوەیەکی ئاسایشدار لە چین و ئیمارات بۆ هەموو شارەکانی عێراق دەگەیەنێت — بە شوێنکەوتنی ڕاستەوخۆ، ڕێکاری ڕوون و پشتیوانی ٢٤/٧.',ctaTrack:'شوێنکەوتنی بار',ctaQuote:'داواکردنی نرخ',route:{a:'گوانگژۆ، چین',b:'دوبەی، ئیمارات',c:'هەولێر، عێراق'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'بارەکەت لە نێوان چین → دوبەی → هەولێر بەردەوامە و هەر نوێکارییەک زوو دەردەکەوێت.',routeOrigin:'سەرەتا / Origin Hub',routeTransit:'ترانزیت / Transit Hub',routeDestination:'گەیاندن / Delivery Hub'},
+  hero:{eyebrow:'چین  ·  ئەمریکا  ·  ئیمارات  ·  عێراق',title:'لە چین، ئەمریکا و دوبەی بۆ عێراق — بە متمانە و کۆنترۆڵی تەواو',subtitle:'Globall Cloud بارت بە شێوەیەکی ئاسایشدار لە چین، ئەمریکا و ئیمارات بۆ هەموو شارەکانی عێراق دەگەیەنێت — بە شوێنکەوتنی ڕاستەوخۆ، ڕێکاری ڕوون و پشتیوانی ٢٤/٧.',ctaTrack:'شوێنکەوتنی بار',ctaQuote:'داواکردنی نرخ',route:{a:'گوانگژۆ، چین',us:'ئەمریکا · USA',b:'دوبەی، ئیمارات',c:'هەولێر، عێراق'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'بارەکەت لە نێوان چین/ئەمریکا → دوبەی → هەولێر بەردەوامە و هەر نوێکارییەک زوو دەردەکەوێت.',routeOrigin:'سەرەتا / Origin Hub',routeTransit:'ترانزیت / Transit Hub',routeDestination:'گەیاندن / Delivery Hub'},
   trust:{s1v:'+٢٥K',s1l:'بار گەیەنراو',s2v:'١٢+',s2l:'شوێن و بازاڕ',s3v:'٢٤/٧',s3l:'پشتیوانی زیندوو',s4v:'٩٨%',s4l:'گەیاندنی لەکاتی خۆیدا'},
   liveTrack:{heading:'شوێنکەوتنی بارەکەت لە چرکەیەکدا',sub:'ژمارەی شوێنکەوتنەکەت بنووسە و نوێترین دۆخی بارەکەت ببینە',placeholder:'وەک GC10052341',button:'شوێنکەوتن'},
   business:{eyebrow:'پەڕەکانی بازرگانی',heading:'هەموو خزمەتگوزاری و پەڕە گرنگەکان لە یەک شوێن',sub:'بە یەک کلیک بچۆ بۆ خزمەتگوزاری، خەملاندنی نرخ، داشبۆرد، کۆگاکان و پەیوەندی.',
@@ -74,12 +74,12 @@ ku:{
     ],
     storyTitle:'چیرۆکمان',storyBody:'Globall Cloud وەک هاوبەشێکی گەیاندنی بار دەستی کرد بۆ چارەسەرکردنی کێشەی گەیاندنی بار لەنێوان بازاڕەکانی چین و ئیمارات و شارەکانی عێراق. لە ڕێگەی کارامەیی و پابەندبوونمانەوە، بووینەتە هەڵبژاردەیەکی متمانەپێکراو بۆ کۆمپانیا و کەسانی زۆر کە پێویستیان بە گەیاندنی بارێکی ئارام و خێرایە. بەردەوامین لە پەرەپێدانی خزمەتگوزارییەکانمان بۆ باشترکردنی ئەزموونی هەر کڕیارێک.'},
   cta:{heading:'ئامادەیت بار بنێریت؟',sub:'ئەمڕۆ داواکاریەکەت بنێرە و لە کەمترین کات نرخێک وەربگرە.',b1:'داواکردنی نرخ',b2:'پەیوەندیمان پێوە بکە'},
-  corridor:{eyebrow:'ڕێڕەوی کارەکە',heading:'لە چین بۆ دوبەی بۆ هەولێر',sub:'سێ هەنگاوی سەرەکی بە ڕوونی و بە شێوازی کۆمپانیایەکی نێودەوڵەتی ببینە.',badge:'ڕێڕەوی زیندوو',items:[
+  corridor:{eyebrow:'ڕێڕەوی کارەکە',heading:'لە چین و ئەمریکا بۆ دوبەی بۆ هەولێر',sub:'سێ هەنگاوی سەرەکی بە ڕوونی و بە شێوازی کۆمپانیایەکی نێودەوڵەتی ببینە.',badge:'ڕێڕەوی زیندوو',items:[
     {flag:'🇨🇳',title:'گەیاندن لە چین',meta:'Origin Hub',desc:'بارەکەت وەردەگیرێت، QC دەکرێت و بۆ ترانزیت ئامادە دەبێت.',tags:['QC','Packing','Pickup']},
     {flag:'🇦🇪',title:'هابەی دوبەی',meta:'Transit Hub',desc:'لە دوبەیدا ڕێکخستن و بەڕێوەبردنی ڕێگەی گواستنەوە بە شێوەی خێرا.',tags:['Transit','Air Cargo','Sea Cargo']},
     {flag:'🇮🇶',title:'گەیاندنی هەولێر',meta:'Delivery Hub',desc:'پاش گومرگ و ڕێکخستنی دوایین، بارەکەت بە سەلامەتی دەگات.',tags:['Customs','Door-to-Door','Final Mile']}
   ]},
-  footer:{blurb:'Globall Cloud — گەیاندنی بار بە متمانەوە لە چین و ئیمارات بۆ هەموو عێراق.',quick:'بەستەرە خێراکان',servicesH:'خزمەتگوزارییەکان',contactH:'پەیوەندی',address:'هەولێری نوێ، پشت مەعەد گەشە، هەولێر، عێراق',rights:'هەموو مافەکان پارێزراون.',privacy:'ڕێساکانی تایبەتێتی',terms:'مەرجی بەکارهێنان'},
+  footer:{blurb:'Globall Cloud — گەیاندنی بار بە متمانەوە لە چین، ئەمریکا و ئیمارات بۆ هەموو عێراق.',quick:'بەستەرە خێراکان',servicesH:'خزمەتگوزارییەکان',contactH:'پەیوەندی',address:'هەولێری نوێ، پشت مەعەد گەشە، هەولێر، عێراق',rights:'هەموو مافەکان پارێزراون.',privacy:'ڕێساکانی تایبەتێتی',terms:'مەرجی بەکارهێنان'},
   testi:{
     eyebrow:'ڕاوبۆچوونی کڕیاران',
     heading:'کڕیارانمان چی دەڵێن',
@@ -134,9 +134,9 @@ ku:{
 },
 en:{
   brand:{tagline:'LOGISTICS'},
-  topbar:{note:'Active lanes across China, Dubai, and Erbil',support:'Live support 24/7'},
+  topbar:{note:'Active lanes across China, USA, Dubai, and Erbil',support:'Live support 24/7'},
   nav:{home:'Home',about:'About Us',services:'Services',track:'Track',contact:'Contact',signIn:'Sign In',dashboard:'Dashboard',quote:'Get a Quote'},
-  hero:{eyebrow:'CHINA  ·  UAE  ·  IRAQ',title:'Delivering Trust Across Borders',subtitle:'Globall Cloud moves your cargo safely and quickly from China and the United Arab Emirates to every city in Iraq — with live tracking, clear milestones, and 24/7 support.',ctaTrack:'Track Shipment',ctaQuote:'Get a Quote',route:{a:'Guangzhou, China',b:'Dubai, UAE',c:'Erbil, Iraq'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'Your cargo is moving through our China → Dubai → Erbil network with live updates.',routeOrigin:'Origin Hub',routeTransit:'Transit Hub',routeDestination:'Delivery Hub'},
+  hero:{eyebrow:'CHINA  ·  USA  ·  UAE  ·  IRAQ',title:'China, USA and Dubai to Iraq — fully tracked.',subtitle:'Globall Cloud moves your cargo safely and quickly from China, the USA and the United Arab Emirates to every city in Iraq — with live tracking, clear milestones, and 24/7 support.',ctaTrack:'Track Shipment',ctaQuote:'Get a Quote',route:{a:'Guangzhou, China',us:'USA',b:'Dubai, UAE',c:'Erbil, Iraq'},badge:'LIVE CORRIDOR',liveStatus:'Shipment moving right now',liveSub:'Your cargo is moving through our China / USA → Dubai → Erbil network with live updates.',routeOrigin:'Origin Hub',routeTransit:'Transit Hub',routeDestination:'Delivery Hub'},
   trust:{s1v:'25K+',s1l:'Delivered shipments',s2v:'12+',s2l:'Connected markets',s3v:'24/7',s3l:'Live support',s4v:'98%',s4l:'On-time delivery'},
   liveTrack:{heading:'Track in seconds',sub:'Enter your tracking number to see the latest shipment status instantly.',placeholder:'e.g. GC10052341',button:'Track Shipment'},
   business:{eyebrow:'BUSINESS PAGES',heading:'Everything customers need is one tap away',sub:'Jump straight to services, pricing, dashboard tools, warehouses, and support.',
@@ -203,14 +203,14 @@ en:{
       {title:'Accountability',desc:'We own every shipment until it arrives safely.',icon:'i-box'},
       {title:'Customer Respect',desc:'Your time and needs always come first.',icon:'i-user'}
     ],
-    storyTitle:'Our Story',storyBody:'Globall Cloud started as a shipping partner focused on solving cargo movement between the markets of China and the UAE and the cities of Iraq. Through efficiency and commitment, we have become a trusted choice for businesses and individuals who need reliable, fast cargo delivery. We continue to grow our services to improve the experience of every client.'},
+    storyTitle:'Our Story',storyBody:'Globall Cloud started as a shipping partner focused on solving cargo movement between the markets of China, the USA and the UAE and the cities of Iraq. Through efficiency and commitment, we have become a trusted choice for businesses and individuals who need reliable, fast cargo delivery. We continue to grow our services to improve the experience of every client.'},
   cta:{heading:'Ready to Ship?',sub:'Submit your request today and get a quote in minutes.',b1:'Get a Quote',b2:'Contact Us'},
-  corridor:{eyebrow:'Operational Corridor',heading:'China → Dubai → Erbil',sub:'See the three stages of the network at a glance, presented like a premium logistics brand.',badge:'Live Corridor',items:[
+  corridor:{eyebrow:'Operational Corridor',heading:'China / USA → Dubai → Erbil',sub:'See the three stages of the network at a glance, presented like a premium logistics brand.',badge:'Live Corridor',items:[
     {flag:'🇨🇳',title:'China pickup',meta:'Origin Hub',desc:'Cargo is received, checked, and prepared for the next leg.',tags:['QC','Packing','Pickup']},
     {flag:'🇦🇪',title:'Dubai transit hub',meta:'Transit Hub',desc:'Fast handling and re-routing through our UAE operations center.',tags:['Transit','Air Cargo','Sea Cargo']},
     {flag:'🇮🇶',title:'Erbil delivery',meta:'Delivery Hub',desc:'After customs and final sorting, the shipment reaches your customer safely.',tags:['Customs','Door-to-Door','Final Mile']}
   ]},
-  footer:{blurb:'Globall Cloud — Shipping you can trust, from China and the UAE to all of Iraq.',quick:'Quick Links',servicesH:'Services',contactH:'Contact',address:'New Erbil, behind Ma\u2019ad Gasha, Erbil, Iraq',rights:'All rights reserved.',privacy:'Privacy Policy',terms:'Terms of Service'},
+  footer:{blurb:'Globall Cloud — Shipping you can trust, from China, the USA and the UAE to all of Iraq.',quick:'Quick Links',servicesH:'Services',contactH:'Contact',address:'New Erbil, behind Ma\u2019ad Gasha, Erbil, Iraq',rights:'All rights reserved.',privacy:'Privacy Policy',terms:'Terms of Service'},
   testi:{
     eyebrow:'Client Reviews',
     heading:'What Our Clients Say',
