@@ -30,6 +30,11 @@
     referenceApp.href = '/gc-reference-app-20260927.css?v=1';
     referenceApp.dataset.gcReferenceApp = '1';
     document.head.appendChild(referenceApp);
+    const referenceInspired = document.createElement('link');
+    referenceInspired.rel = 'stylesheet';
+    referenceInspired.href = '/gc-reference-inspired-20260928.css?v=20260928-2';
+    referenceInspired.dataset.gcReferenceInspired = '1';
+    document.head.appendChild(referenceInspired);
   };
 
   const syncPages = (id) => {
