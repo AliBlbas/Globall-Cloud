@@ -715,7 +715,12 @@ function route(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const target = document.getElementById('page-'+id);
   if(target) target.classList.add('active');
-  document.querySelectorAll('.nav-links a, .mobile-menu a[data-route]').forEach(a=>a.classList.toggle('active', a.dataset.route===id));
+  document.querySelectorAll('.nav-links a[data-route], .nav-links a[data-gc-route], .mobile-menu a[data-route]').forEach(a=>{
+    const isActive = (a.dataset.route || a.dataset.gcRoute) === id;
+    a.classList.toggle('active', isActive);
+    if(isActive) a.setAttribute('aria-current', 'page');
+    else a.removeAttribute('aria-current');
+  });
   window.scrollTo({top:0, behavior:'auto'});
   closeMobileMenu();
   // Keep the URL shareable/bookmarkable (e.g. #services) without adding a
