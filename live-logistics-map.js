@@ -95,7 +95,8 @@
     const L=await loadLeaflet(); if(!root||root.dataset.mapReady==='1') return;
     root.dataset.mapReady='1';
     const shipment=payload?.shipment||payload||null;
-    root.innerHTML='<div class="gc-map" aria-label="نەخشەی ڕاستەقینەی گەیاندنی بار"></div><div class="gc-map-overlay"><div class="gc-map-live"><span class="gc-live-dot"></span><span>LIVE TRACKING</span></div><div class="gc-map-info"><b>China → Dubai → Erbil</b><small>نەخشەی ڕاستەقینەی مسیر</small></div></div><div class="gc-map-legend"><span><i class="gc-leg-dot gc-leg-current"></i> شوێنی ئێستا</span><span><i class="gc-leg-line"></i> ڕێگا</span><span><i class="gc-leg-hub"></i> هاب</span></div>';
+    const hasShipment=Boolean(shipment?.id);
+    root.innerHTML='<div class="gc-map" aria-label="نەخشەی ڕاستەقینەی گەیاندنی بار"></div><div class="gc-map-overlay"><div class="gc-map-live"><span class="gc-live-dot"></span><span>'+(hasShipment?'LIVE TRACKING':'ROUTE OVERVIEW')+'</span></div><div class="gc-map-info"><b>China → Dubai → Erbil</b><small>'+(hasShipment?'چاوەڕێی داتای شوێنی بار':'نەخشەی گشتیی مسیر؛ بۆ شوێنی زیندوو ژمارەی بار هەڵبژێرە')+'</small></div></div><div class="gc-map-legend"><span><i class="gc-leg-dot gc-leg-current"></i> شوێنی ئێستا</span><span><i class="gc-leg-line"></i> ڕێگا</span><span><i class="gc-leg-hub"></i> هاب</span></div>';
     const map=L.map(root.querySelector('.gc-map'),{zoomControl:false,attributionControl:true,scrollWheelZoom:false,dragging:true,tap:true,minZoom:2,maxZoom:16});
     L.control.zoom({position:'bottomright'}).addTo(map);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors',detectRetina:true}).addTo(map);
@@ -105,19 +106,9 @@
     const leg1=greatCircle(origin,ROUTE.dubai,90); const leg2=await roadRoute(ROUTE.dubai,dest);
     L.polyline(leg1,{color:'#39e4f1',weight:3,opacity:.82,dashArray:'7 8'}).addTo(map);
     L.polyline(leg2,{color:'#ffc15c',weight:4,opacity:.88,lineCap:'round',lineJoin:'round'}).addTo(map);
-    const midpoint=(points,f)=>points[Math.max(0,Math.min(points.length-1,Math.floor(points.length*f)))];
-    const addVehicle=(point,mode,label)=>{if(!point)return;const m=addMarker({lat:point[0],lng:point[1],label},mode);m.bindTooltip(label,{direction:'top',offset:[0,-15],className:'gc-map-tooltip',opacity:.96});};
-    addVehicle(midpoint(leg1,.48),'air','باری فڕۆکە · Air cargo');
-    addVehicle(midpoint(leg1,.92),'sea','باری کەشتی · Sea cargo');
-    addVehicle(midpoint(leg2,.52),'land','ترێلەی دوبەی → هەولێر · Land cargo');
 
     let currentMarker;
     if(current) currentMarker=addMarker(current,'current');
-    else {
-      const idx=Math.max(0,Math.min(5,Number(shipment?.current_step_index??2))); const t=idx/5;
-      const fallback=idx<3?leg1[Math.floor(t*(leg1.length-1))]:leg2[Math.floor(((t-.4)/.6)*(leg2.length-1))]||leg2[Math.floor(leg2.length/2)];
-      if(fallback) currentMarker=addMarker({lat:fallback[0],lng:fallback[1],label:'شوێنی پێشبینیکراوی بار'},'current');
-    }
 
     // Public event markers provide a visual history and photo-ready timeline source.
     const events=Array.isArray(payload?.events)?payload.events:[];
@@ -129,6 +120,9 @@
     }
 
     map.fitBounds([origin,ROUTE.dubai,dest].map(p=>[p.lat,p.lng]),{padding:[22,22]}); setTimeout(()=>map.invalidateSize(),250); setInfo(root,shipment,origin,dest,current);
+    const liveLabel=root.querySelector('.gc-map-live span:last-child'); const mapSub=root.querySelector('.gc-map-info small');
+    if(liveLabel) liveLabel.textContent=current?'LIVE TRACKING':(hasShipment?'TRACKING READY':'ROUTE OVERVIEW');
+    if(mapSub && hasShipment && !current) mapSub.textContent='شوێنی ئێستا هێشتا نەنێردراوە؛ داتا بە Realtime نوێ دەکرێتەوە.';
 
     const sb=window.sb||window.supabase;
     if(sb&&shipment?.id){
