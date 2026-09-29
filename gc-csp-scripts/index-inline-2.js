@@ -769,13 +769,16 @@ function goTrack(prefill){
 /* ================= RENDER: HOME BLOCKS ================= */
 function renderHomeServices(){
   const wrap = document.getElementById('homeServicesGrid');
+  if(!wrap) return;
+  const visualMap = { air:'/assets/service-air.jpg', sea:'/assets/service-sea.jpg', land:'/assets/service-land.jpg' };
   wrap.innerHTML = SERVICE_ORDER.map(key=>{
     const item = t('services.items.'+key);
-    return `<div class="service-card" data-gc-onclick="route('services')">
-      <div class="service-icon"><svg class="icon-lg"><use href="#${SERVICE_ICONS[key]}"></use></svg></div>
-      <h4>${item.title}</h4>
+    const visual = visualMap[key];
+    return `<div class="service-card ${visual ? 'service-card-visual' : ''}" data-gc-onclick="route('services')" role="button" tabindex="0" aria-label="${item.title}">
+      ${visual ? `<div class="service-card-media"><img src="${visual}" alt="${item.title}" loading="lazy"><span class="service-card-mode">${key.toUpperCase()}</span></div>` : `<div class="service-icon"><svg class="icon-lg"><use href="#${SERVICE_ICONS[key]}"></use></svg></div>`}
+      <div class="service-card-body"><h4>${item.title}</h4>
       <p>${item.desc}</p>
-      <span class="learn">${t('services.learnMore')} <svg class="icon-sm"><use href="#i-arrow"></use></svg></span>
+      <span class="learn">${t('services.learnMore')} <svg class="icon-sm"><use href="#i-arrow"></use></svg></span></div>
     </div>`;
   }).join('');
 }
@@ -915,8 +918,9 @@ function renderServicesDetail(){
   const wrap = document.getElementById('servicesDetailWrap');
   wrap.innerHTML = SERVICE_ORDER.map(key=>{
     const item = t('services.items.'+key);
+    const visual = ({air:'/assets/service-air.jpg',sea:'/assets/service-sea.jpg',land:'/assets/service-land.jpg'})[key];
     return `<div class="service-detail reveal in-view">
-      <div class="service-icon"><svg class="icon-lg"><use href="#${SERVICE_ICONS[key]}"></use></svg></div>
+      ${visual ? `<div class="service-detail-media"><img src="${visual}" alt="${item.title}" loading="lazy"></div>` : `<div class="service-icon"><svg class="icon-lg"><use href="#${SERVICE_ICONS[key]}"></use></svg></div>`}
       <div>
         <h3>${item.title}</h3>
         <p class="desc">${item.desc}</p>

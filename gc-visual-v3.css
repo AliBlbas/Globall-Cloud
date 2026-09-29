@@ -1,0 +1,25 @@
+/* Globall Cloud visual system v3 — public service clarity */
+.home-service-bridge{padding-top:0!important;padding-bottom:8px!important;}
+.home-service-bridge-inner{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:24px 26px;border:1px solid var(--gc-v2-border);border-radius:20px;background:linear-gradient(120deg,#0d2236,#091522);}
+.home-service-bridge h3{font-size:clamp(20px,2.4vw,28px);margin:5px 0 7px;letter-spacing:-.35px;}
+.home-service-bridge p{color:var(--gc-v2-muted);font-size:13px;line-height:1.8;max-width:62ch;}
+.home-service-bridge-actions{display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;}
+.home-service-bridge-actions .btn{white-space:nowrap;}
+.service-card-visual{padding:0!important;overflow:hidden;display:flex;flex-direction:column;min-height:100%;}
+.service-card-media{position:relative;aspect-ratio:16/8;overflow:hidden;background:#081522;}
+.service-card-media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,rgba(4,14,25,.72));pointer-events:none;}
+.service-card-media img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .5s ease,filter .5s ease;}
+.service-card-visual:hover .service-card-media img{transform:scale(1.045);filter:saturate(1.08);}
+.service-card-mode{position:absolute;top:12px;inset-inline-start:12px;z-index:1;padding:5px 8px;border:1px solid rgba(154,247,255,.35);border-radius:999px;background:rgba(4,18,30,.68);color:#baf8ff;font:700 9px var(--mono);letter-spacing:1.2px;}
+.service-card-body{padding:18px 20px 20px;display:flex;flex:1;flex-direction:column;}
+.service-card-body .learn{margin-top:auto;padding-top:13px;}
+.service-detail-media{width:190px;min-height:132px;border-radius:15px;overflow:hidden;flex-shrink:0;border:1px solid var(--gc-v2-border);}
+.service-detail-media img{width:100%;height:100%;display:block;object-fit:cover;}
+@media(max-width:760px){
+ .home-service-bridge-inner{display:block;padding:19px 16px;}
+ .home-service-bridge-actions{margin-top:15px;display:grid;grid-template-columns:1fr 1fr;}
+ .home-service-bridge-actions .btn{width:100%;padding-inline:9px;}
+ .service-card-body{padding:15px;}
+ .service-detail-media{width:100%;min-height:165px;max-height:190px;}
+}
+@media(max-width:430px){.home-service-bridge-actions{grid-template-columns:1fr;}}

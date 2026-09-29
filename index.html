@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="tracking-styles.css">
 <link rel="stylesheet" href="/gc-premium.css?v=20260928-2" data-gc-premium="1">
 <link rel="stylesheet" href="/gc-visual-v2.css?v=20260928-1" data-gc-visual-v2="1">
+<link rel="stylesheet" href="/gc-visual-v3.css?v=20260929-1" data-gc-visual-v3="1">
 <style id="gc-production-polish-v3">
 /* Globall Cloud production polish v3 — interaction, hierarchy and mobile app ergonomics */
 :root{
@@ -1103,14 +1104,17 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
     <div class="trust-item"><b data-i18n="trust.s4v"></b><span data-i18n="trust.s4l"></span></div>
   </div>
 
-  <div class="live-track" style="margin-top:56px;">
-    <div class="live-track-inner reveal">
-      <h3 data-i18n="liveTrack.heading"></h3>
-      <p data-i18n="liveTrack.sub"></p>
-      <form class="track-search" data-gc-onsubmit="event.preventDefault(); goTrack(document.getElementById('heroTrackInput').value);">
-        <input class="field" id="heroTrackInput" data-i18n-ph="liveTrack.placeholder">
-        <button class="btn btn-primary" type="submit"><svg class="icon-sm"><use href="#i-search"></use></svg><span data-i18n="liveTrack.button"></span></button>
-      </form>
+  <div class="home-service-bridge section container">
+    <div class="home-service-bridge-inner reveal">
+      <div>
+        <span class="eyebrow">GLOBALL CLOUD NETWORK</span>
+        <h3>هەموو جۆرەکانی گەیاندن، لە یەک تۆڕی پیشەیی</h3>
+        <p>Air، Sea و Land بە ڕێڕەوی ڕوون، کۆگا و گومرگ و پشتگیرییەکی یەکگرتووەوە کار دەکەن.</p>
+      </div>
+      <div class="home-service-bridge-actions">
+        <button class="btn btn-primary" data-gc-onclick="route('services')"><svg class="icon-sm"><use href="#i-box"></use></svg> بینینی خزمەتگوزارییەکان</button>
+        <button class="btn btn-outline" data-gc-onclick="goTrack()"><svg class="icon-sm"><use href="#i-search"></use></svg> شوێنکەوتنی بار</button>
+      </div>
     </div>
   </div>
 
