@@ -1,6 +1,6 @@
 /* Globall Cloud — production HTML middleware. */
 const HTML_ACCEPT = 'text/html';
-const VERSION = '20260929-3';
+const VERSION = '20260929-4';
 const VISUAL_REFRESH = `<link rel="stylesheet" href="/globall-visual-refresh-20260921.css?v=20260921-1" data-gc-visual-refresh="20260921-1">`;
 const ENTERPRISE_SHELL = `<link rel="stylesheet" href="/enterprise-shell-v2026.css?v=${VERSION}" data-gc-enterprise-shell="1">`;
 const THEME_CSS = `<link rel="stylesheet" href="/gc-theme-sync.css?v=${VERSION}" data-gc-theme-css="1">`;
