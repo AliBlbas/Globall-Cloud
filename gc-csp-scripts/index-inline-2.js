@@ -742,6 +742,7 @@ function route(id){
 const PBN_GUEST_TAB_FOR_PAGE = {home:'home', services:'shipments', track:'track', portal:'profile'};
 async function updatePortalBottomNavVisibility(pageId){
   const nav = document.getElementById('portalBottomNav');
+  if(!nav) return;
   if(pageId==='admin'){ nav.classList.remove('active'); return; }
   nav.classList.add('active');
   const profile = await getProfile();

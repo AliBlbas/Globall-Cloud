@@ -367,7 +367,7 @@ body:has(#gcApp) :where(a,button,input,select,textarea):focus-visible{
   .gc-platform-grid{grid-template-columns:1fr 1fr !important;}
 }
 @media(max-width:680px){
-  body:has(#gcApp){padding-bottom:78px !important;}
+  body:has(#gcApp){padding-bottom:env(safe-area-inset-bottom) !important;}
   body:has(#gcApp) .gc-container{width:calc(100% - 20px) !important;}
   .gc-nav{
     width:calc(100% - 12px) !important;
@@ -376,6 +376,8 @@ body:has(#gcApp) :where(a,button,input,select,textarea):focus-visible{
     border-radius:15px !important;
   }
   .gc-nav-inner{min-height:55px !important;}
+  .gc-menu{min-width:44px !important;min-height:44px !important;}
+  .gc-mobile-menu a{display:flex !important;align-items:center !important;min-height:44px !important;padding-block:10px !important;}
   .gc-brand img{width:31px !important;height:31px !important;}
   .gc-brand b{font-size:14px !important;}
   .gc-brand small{display:none !important;}
@@ -391,6 +393,7 @@ body:has(#gcApp) :where(a,button,input,select,textarea):focus-visible{
   .gc-actions .gc-btn{width:100% !important;}
   .gc-trust{grid-template-columns:1fr 1fr !important;gap:6px !important;}
   .gc-trust-card{min-height:68px !important;padding:10px 8px !important;}
+  .gc-trust-card,.gc-app-quick-grid>a{touch-action:manipulation !important;-webkit-tap-highlight-color:rgba(41,216,236,.14) !important;}
   .gc-trust-card strong{font-size:14px !important;}
   .gc-trust-card span{font-size:8.5px !important;}
   .gc-hero-visual{min-height:330px !important;border-radius:19px !important;}
@@ -403,7 +406,7 @@ body:has(#gcApp) :where(a,button,input,select,textarea):focus-visible{
   .gc-app-greeting p{font-size:10px !important;}
   .gc-app-live-badge{display:none !important;}
   .gc-app-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:6px !important;}
-  .gc-app-quick-grid>a{min-height:88px !important;padding:10px 7px !important;}
+  .gc-app-quick-grid>a{min-height:96px !important;padding:10px 7px !important;}
   .gc-app-action-icon{width:31px !important;height:31px !important;}
   .gc-app-quick-grid b{font-size:10px !important;}
   .gc-app-quick-grid small{font-size:8px !important;}
@@ -416,6 +419,8 @@ body:has(#gcApp) :where(a,button,input,select,textarea):focus-visible{
   .gc-track-panel{grid-template-columns:1fr !important;padding:15px !important;}
   .gc-track-panel h2{font-size:20px !important;}
   .gc-track-form{display:grid !important;grid-template-columns:1fr !important;}
+  .gc-track-form input{min-height:48px !important;}
+  .gc-track-form .gc-btn{min-height:48px !important;}
   .gc-track-form .gc-btn{width:100% !important;}
   .gc-section,.gc-entry-wrap{padding-top:38px !important;}
   .gc-section-head{text-align:start !important;margin-bottom:16px !important;}
@@ -427,7 +432,7 @@ body:has(#gcApp) :where(a,button,input,select,textarea):focus-visible{
   .gc-platform-grid{grid-template-columns:1fr !important;}
   .gc-platform-card{min-height:145px !important;}
   .gc-footer-grid{grid-template-columns:1fr 1fr !important;}
-  .gc-footer{padding-bottom:82px !important;}
+  .gc-footer{padding-bottom:calc(28px + env(safe-area-inset-bottom)) !important;}
   .gc-bottom-dock{
     left:7px !important;right:7px !important;bottom:6px !important;
     height:62px !important;border-radius:18px !important;
