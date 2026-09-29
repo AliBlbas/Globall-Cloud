@@ -1,9 +1,9 @@
 /* Premium landing transport studio. */
 (() => {
   const data = {
-    air: { label:'AIR · PRIORITY LANE', title:'بارە پەلەدارەکەت لە چەند ڕۆژێکدا دەگات.', text:'بۆ کاڵای کەم‌قەبارە و time-sensitive، Air Freight ڕێگایەکی خێرا و بەدواداچوون‌پێکراوە لە چین و دوبەی بۆ هەولێر.', eta:'٢–٥', coverage:'٣', image:'/assets/gc-air-freight-hero.png' },
-    sea: { label:'SEA · OCEAN VALUE', title:'بۆ بارە قورسەکان، تێچووی زیرەک هەڵبژێرە.', text:'Sea Freight بۆ بارە قورس و کۆکراوەکانە؛ بە capacity ـی زیاتر، route ـی ڕوون و پشتیوانی تا کۆتایی.', eta:'٢٠–٣٥', coverage:'٤', image:'/assets/gc-sea-freight-hero.png' },
-    land: { label:'LAND · FINAL MILE', title:'لە hub ـەوە تا دەرگای کڕیار.', text:'Land Freight هەموو ئەو پەیوەندییەیە کە shipment ـەکەت لە دوبەی و هەولێر بە شێوەیەکی منظم دەگەیەنێت.', eta:'٣–٧', coverage:'٥', image:'/assets/gc-land-freight-hero.png' }
+    air: { label:'AIR · PRIORITY LANE', title:'بارە پەلەدارەکەت لە چەند ڕۆژێکدا دەگات.', text:'بۆ کاڵای کەم‌قەبارە و time-sensitive، Air Freight ڕێگایەکی خێرا و بەدواداچوون‌پێکراوە لە چین و دوبەی بۆ هەولێر.', eta:'٢–٥', coverage:'٣', image:'/assets/gc-air-freight-hero-1440.webp' },
+    sea: { label:'SEA · OCEAN VALUE', title:'بۆ بارە قورسەکان، تێچووی زیرەک هەڵبژێرە.', text:'Sea Freight بۆ بارە قورس و کۆکراوەکانە؛ بە capacity ـی زیاتر، route ـی ڕوون و پشتیوانی تا کۆتایی.', eta:'٢٠–٣٥', coverage:'٤', image:'/assets/gc-sea-freight-hero-1440.webp' },
+    land: { label:'LAND · FINAL MILE', title:'لە hub ـەوە تا دەرگای کڕیار.', text:'Land Freight هەموو ئەو پەیوەندییەیە کە shipment ـەکەت لە دوبەی و هەولێر بە شێوەیەکی منظم دەگەیەنێت.', eta:'٣–٧', coverage:'٥', image:'/assets/gc-land-freight-hero-1440.webp' }
   };
   const boot = () => {
     const root = document.getElementById('gcTransportStudio'); if (!root) return;
