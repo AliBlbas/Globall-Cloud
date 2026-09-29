@@ -13,7 +13,7 @@
   const loadPremiumHomepageScripts = () => {
     const scripts = [
       ['/gc-customer-login-2026.js?v=20260918-1', 'data-gc-customer-login-premium'],
-      ['/gc-public-mobile-system-v2026.js?v=20260918-2', 'data-gc-mobile-system-premium'],
+      ['/gc-public-mobile-system-v2026.js?v=20260929-4', 'data-gc-mobile-system-premium'],
       ['/gc-icon-polish-2026.js?v=20260918-1', 'data-gc-icon-polish-premium'],
     ];
     for (const [src, attr] of scripts) {
