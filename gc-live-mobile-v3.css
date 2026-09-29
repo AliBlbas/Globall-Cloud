@@ -55,7 +55,7 @@
     bottom:calc(7px + env(safe-area-inset-bottom))!important;
     z-index:650!important;
     display:grid!important;
-    grid-template-columns:1fr 1fr 1.14fr 1fr 1fr!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
     align-items:end!important;
     gap:4px!important;
     padding:5px!important;
