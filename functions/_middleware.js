@@ -65,6 +65,7 @@ export async function onRequest(context) {
     return new Response(html,{status:response.status,statusText:response.statusText,headers});
   }
   if (OPERATIONAL_PAGE.test(path)) html=addHeadAsset(html,'src="/runtime-guard.js',`<script src="/runtime-guard.js?v=${VERSION}" defer data-gc-runtime-guard="1"></script>`);
+  if (/^\/(?:tracking|track|tracking-integration)(?:\.html)?\/?$/i.test(path)) html=addHeadAsset(html,'src="/gc-tracking-deeplink.js',`<script src="/gc-tracking-deeplink.js?v=${VERSION}" defer data-gc-tracking-deeplink="1"></script>`);
   if (!OPERATIONAL_PAGE.test(path) || /^\/(?:customer-portal|tracking|tracking-integration)(?:\.html)?\/?$/i.test(path)) html=addHeadAsset(html,'href="/globall-realistic-design-20260919.css',`<link rel="stylesheet" href="/globall-realistic-design-20260919.css?v=${VERSION}" data-gc-realistic-design="1">`);
   if (path === '/' || path === '/index.html') {
     html=addHeadAsset(html,'src="/staff-auth-runtime-fix.js',`<script src="/staff-auth-runtime-fix.js?v=${VERSION}" defer data-gc-staff-auth-runtime="1"></script>`);
