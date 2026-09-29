@@ -42,11 +42,12 @@
   <link rel="stylesheet" href="/gc-advanced-customer-v4.css?v=20260928-4">
   <link rel="stylesheet" href="/gc-customer-dashboard-polish-20260929.css?v=1">
   <link rel="stylesheet" href="/gc-customer-dashboard-v2-20260929.css?v=1">
+  <link rel="stylesheet" href="/gc-brand-system-20260929.css?v=1">
 </head>
 <body>
   <header class="top"><div class="wrap topin"><a class="brand" href="/"><img src="logo-icon.png" alt="Globall Cloud"><span><b>Globall Cloud</b><small>CUSTOMER WORKSPACE</small></span></a><div><button id="loginBtn" class="btn primary" type="button">چوونەژوورەوە</button><button id="logoutBtn" class="btn hidden" type="button">دەرچوون</button></div></div></header>
   <main class="wrap">
-    <section class="hero"><div class="card"><div class="muted">CUSTOMER CONTROL CENTER · GLOBALL CLOUD</div><h1 id="hello">بەخێربێیت بۆ ناوەندی کڕیار</h1><div id="customerWelcome" class="customer-welcome" aria-live="polite"></div><p class="muted">هەموو shipment، نرخ، بەڵگە، payment و پشتیوانییەکانت لە یەک شوێنی ڕوون و پارێزراودا بەڕێوەببە.</p><div class="gc-hero-routes" aria-label="Customer workspace shortcuts"><div class="gc-route-chip"><i>◈</i><span>Shipment ـەکان<small>شوێنکەوتن و دۆخ</small></span></div><div class="gc-route-chip"><i>₿</i><span>نرخ و پارەدان<small>Quote و invoice</small></span></div><div class="gc-route-chip"><i>⌁</i><span>پشتیوانی<small>یارمەتیی خێرا</small></span></div></div></div></section>
+    <section class="hero"><div class="card"><div class="muted">CUSTOMER CONTROL CENTER · GLOBALL CLOUD</div><h1 id="hello">بەخێربێیت بۆ ناوەندی کڕیار</h1><div id="customerWelcome" class="customer-welcome" aria-live="polite"></div><p class="muted">هەموو shipment، نرخ، بەڵگە، payment و پشتیوانییەکانت لە یەک شوێنی ڕوون و پارێزراودا بەڕێوەببە.</p><div class="gc-hero-routes" aria-label="Customer workspace shortcuts"><div class="gc-route-chip"><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h18v13H3zM7 7V4h10v3M7 12h10M7 16h6"/></svg></i><span>Shipment ـەکان<small>شوێنکەوتن و دۆخ</small></span></div><div class="gc-route-chip"><i aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h5"/></svg></i><span>نرخ و پارەدان<small>Quote و invoice</small></span></div><div class="gc-route-chip"><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5h14v10H9l-4 4z"/><path d="M8 9h8M8 12h5"/></svg></i><span>پشتیوانی<small>یارمەتیی خێرا</small></span></div></div></div></section>
     <div id="portalStatus" class="portal-status" role="status"><div><strong>بەخێرایی دەست پێ بکە</strong><span>بچۆ ژوورەوە بۆ بینینی shipment، quote، invoice و ئاگادارییە تایبەتییەکانت.</span></div><button id="loginPromptBtn" class="btn primary" type="button">چوونەژوورەوە</button></div>
     <section class="grid"><div class="card kpi"><span class="muted">Shipment ـەکان</span><b id="shipKpi">—</b></div><div class="card kpi"><span class="muted">لە گواستنەوە</span><b id="movingKpi">—</b></div><div class="card kpi"><span class="muted">پارەی ماوە</span><b id="dueKpi">—</b></div><div class="card kpi"><span class="muted">ئاگادارییەکان</span><b id="notifKpi">—</b></div></section>
     <div class="portal-section-heading"><span>LIVE OPERATIONS</span><h2>شوێنکەوتن و ئاگادارکردنەوە</h2><p>دۆخی shipment و پەیامە نوێکانت لە یەک شوێن.</p></div><section class="grid3" style="margin-top:14px"><div class="card"><div class="section-head"><h2>Shipment ـەکانت</h2></div><div id="shipments" class="list"><div class="muted">Login بکە.</div></div></div><div class="card"><h2>Notifications</h2><div id="notifications" class="list"><div class="muted">—</div></div></div><div class="card"><h2>Quotes</h2><div id="quotes" class="list"><div class="muted">—</div></div></div></section>
@@ -63,5 +64,6 @@
   <script src="/gc-customer-live-chat-20260928.js?v=1" defer></script>
   <script src="/gc-customer-dashboard-polish-20260929.js?v=1" defer></script>
   <script src="/gc-customer-dashboard-v2-20260929.js?v=1" defer></script>
+  <script src="/gc-whatsapp-float-20260929.js?v=1" defer></script>
 </body>
 </html>
