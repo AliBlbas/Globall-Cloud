@@ -25,17 +25,22 @@
       }, true);
     }
     if (dock) {
-      const current = (location.pathname.replace(/\/$/, '') || '/') + (location.hash || '');
-      dock.querySelectorAll('a[data-dock]').forEach((a) => {
-        const href = a.getAttribute('href') || '';
-        const route = href === '/' ? '/' : href.startsWith('/track') ? '/track' : href.startsWith('/services') ? '/services' : href.startsWith('/dashboard') ? '/dashboard' : href.startsWith('/#') ? '/#' + href.slice(2) : href;
-        if ((route === '/' && (location.pathname === '/' || location.pathname === '')) ||
-            (route !== '/' && location.pathname.startsWith(route.split('#')[0] || route))) {
-          a.classList.add('active');
-        }
+      const path = location.pathname.replace(/\/$/, '') || '/';
+      const hash = location.hash || '';
+      const routeKey = path === '/track' ? 'track'
+        : path === '/dashboard' ? 'account'
+        : path === '/' && hash === '#request' ? 'quote'
+        : path === '/' && hash === '#services' ? 'services'
+        : 'home';
+      dock.querySelectorAll('a[data-dock]').forEach((item) => {
+        const isActive = item.dataset.dock === routeKey;
+        item.classList.toggle('active', isActive);
+        if (isActive) item.setAttribute('aria-current', 'page');
+        else item.removeAttribute('aria-current');
       });
-    }
-  };
+    }  };
+  window.addEventListener('hashchange', boot);
+  window.addEventListener('popstate', boot);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
   else boot();
 })();
