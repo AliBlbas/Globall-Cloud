@@ -3,3 +3,54 @@
 
 /* Globall Cloud — Customer Portal premium UX layer 2026-09-23 */
 body{background:radial-gradient(850px 420px at 78% -8%,rgba(88,229,239,.16),transparent 62%),radial-gradient(650px 360px at 8% 35%,rgba(43,96,145,.16),transparent 62%),#061428}.top{border-bottom-color:rgba(124,240,246,.12);box-shadow:0 12px 40px rgba(0,0,0,.18)}.topin{min-height:72px}.brand img{width:42px;height:42px;border-radius:13px;box-shadow:0 10px 28px rgba(88,229,239,.12)}.hero{margin:28px 0 18px}.hero .card{padding:24px;background:linear-gradient(145deg,rgba(18,55,86,.98),rgba(7,25,43,.98));border-color:rgba(124,240,246,.15)}.hero h1{margin:6px 0 8px;font-size:clamp(28px,6vw,46px);letter-spacing:-.04em}.grid{gap:10px}.kpi{min-height:128px;display:flex;flex-direction:column;justify-content:space-between}.kpi b{font-size:30px}.card{border-color:rgba(124,240,246,.12);box-shadow:0 18px 50px rgba(0,0,0,.16)}.card:hover{transform:translateY(-3px);border-color:rgba(124,240,246,.3)}.portal-section-heading{position:relative;margin-top:34px}.portal-section-heading:before{content:"";position:absolute;inset-inline-start:0;top:-8px;width:48px;height:2px;background:linear-gradient(90deg,var(--accent),transparent);border-radius:3px}.section-head h2{font-size:19px}.shipment-card{background:linear-gradient(145deg,rgba(17,43,73,.82),rgba(9,27,47,.92))!important}.gc-account-card{position:relative;overflow:hidden}.gc-account-card:before{content:"";position:absolute;inset:-90px auto auto -70px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(88,229,239,.10),transparent 68%);pointer-events:none}.gc-account-head{position:relative}.gc-settings-tabs{position:sticky;top:78px;z-index:4;padding:5px;border-radius:15px;background:rgba(6,20,40,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}.gc-settings-tabs button{min-height:42px;cursor:pointer;transition:.16s ease}.gc-settings-tabs button:hover{transform:translateY(-1px)}.gc-balance>div{min-height:74px}.gc-pay-methods a{min-height:48px;display:grid;place-items:center}.gc-security-note{border-radius:14px}@media(max-width:760px){.wrap{width:100%;max-width:none;padding:10px}.topin{min-height:60px}.hero{margin-top:16px}.hero .card{padding:18px}.grid{grid-template-columns:repeat(2,1fr)}.kpi{min-height:112px;padding:14px}.kpi b{font-size:23px}.gc-account-shell{margin-top:12px}.gc-account-card{padding:15px}.gc-settings-tabs{top:66px}.gc-settings-tabs button{font-size:11px}.gc-balance{grid-template-columns:1fr 1fr}}@media(max-width:420px){.grid{grid-template-columns:1fr 1fr}.kpi span{font-size:10px}.kpi b{font-size:20px}}@media(prefers-reduced-motion:reduce){.card,.gc-settings-tabs button{transition:none}}
+
+/* 2026-09-29 account polish: one calm control center for profile and settings. */
+.gc-account-shell{margin-top:20px!important}
+.gc-account-shell>.portal-section-heading{margin-bottom:12px!important}
+.gc-account-shell>.portal-section-heading h2{font-size:25px!important;letter-spacing:-.5px!important}
+.gc-account-shell>.portal-section-heading p{max-width:620px!important;line-height:1.8!important}
+.gc-account-grid{grid-template-columns:minmax(280px,.82fr) minmax(0,1.18fr)!important;gap:14px!important;align-items:start!important}
+.gc-account-card{border-radius:24px!important;padding:20px!important;border-color:rgba(124,240,246,.22)!important;box-shadow:0 24px 60px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.035)!important}
+.gc-account-card:first-child{background:radial-gradient(280px 180px at 16% 0%,rgba(88,229,239,.15),transparent 70%),linear-gradient(150deg,rgba(18,61,91,.98),rgba(7,26,45,.99))!important}
+.gc-account-card:nth-child(2){background:linear-gradient(150deg,rgba(13,42,68,.98),rgba(7,24,42,.99))!important}
+.gc-account-head{gap:13px!important;padding-bottom:14px!important;border-bottom:1px solid rgba(124,240,246,.12)!important}
+.gc-avatar{width:72px!important;height:72px!important;border-radius:22px!important;border:2px solid rgba(124,240,246,.48)!important;box-shadow:0 0 0 6px rgba(88,229,239,.07),0 12px 30px rgba(0,0,0,.22)!important}
+.gc-account-head h3{font-size:21px!important;letter-spacing:-.3px!important}
+.gc-account-head p{font-size:11px!important;line-height:1.55!important;overflow-wrap:anywhere!important}
+.gc-account-head strong{color:var(--accent-strong)!important;font-family:'JetBrains Mono',monospace!important;font-size:11px!important}
+.gc-balance{grid-template-columns:repeat(3,1fr)!important;gap:7px!important;margin-top:15px!important}
+.gc-balance>div{min-height:82px!important;padding:11px 9px!important;border-radius:15px!important;background:rgba(2,15,28,.28)!important;border-color:rgba(124,240,246,.16)!important}
+.gc-balance span{font-size:9px!important;line-height:1.35!important}
+.gc-balance strong{font-size:15px!important;line-height:1.25!important;overflow-wrap:anywhere!important}
+.gc-pay-methods{gap:8px!important;margin-top:13px!important}
+.gc-pay-methods a{min-height:52px!important;border-radius:15px!important;background:rgba(255,255,255,.045)!important;border-color:rgba(124,240,246,.16)!important;transition:transform .18s ease,border-color .18s ease,background .18s ease!important}
+.gc-pay-methods a:hover{transform:translateY(-2px)!important;background:rgba(88,229,239,.11)!important}
+.gc-security-note{margin-top:13px!important;padding:11px 12px!important;border-radius:14px!important;font-size:10px!important;line-height:1.85!important}
+.gc-settings-tabs{top:76px!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important;margin:-1px 0 18px!important;padding:5px!important;border:1px solid rgba(124,240,246,.14)!important;background:rgba(3,16,31,.72)!important;box-shadow:0 10px 24px rgba(0,0,0,.16)!important}
+.gc-settings-tabs button{min-height:44px!important;padding:8px 5px!important;border:1px solid transparent!important;border-radius:11px!important;font-size:11px!important;white-space:nowrap!important}
+.gc-settings-tabs button.active{background:linear-gradient(135deg,rgba(88,229,239,.20),rgba(88,229,239,.06))!important;border-color:rgba(88,229,239,.34)!important;color:#d9fdff!important;box-shadow:0 6px 18px rgba(88,229,239,.08)!important}
+.gc-settings-pane.active{animation:gcAccountPaneIn .18s ease-out both}
+@keyframes gcAccountPaneIn{from{opacity:.35;transform:translateY(4px)}to{opacity:1;transform:none}}
+.gc-setting-row{gap:6px!important;margin-bottom:13px!important}
+.gc-setting-row label{font-size:11px!important;color:#a9c1d4!important}
+.gc-setting-row input,.gc-setting-row select{min-height:48px!important;padding:11px 12px!important;border-radius:13px!important;background:rgba(3,16,30,.72)!important;border-color:rgba(124,240,246,.16)!important;transition:border-color .16s ease,box-shadow .16s ease,background .16s ease!important}
+.gc-setting-row input:focus,.gc-setting-row select:focus{border-color:rgba(88,229,239,.58)!important;box-shadow:0 0 0 4px rgba(88,229,239,.09)!important;background:rgba(4,20,36,.92)!important;outline:none!important}
+.gc-setting-row input[type=file]{padding:8px!important;font-size:11px!important;color:#9db6cf!important}
+.gc-setting-row input[type=checkbox]{width:18px!important;min-height:18px!important;accent-color:#58e5ef!important;vertical-align:middle!important;margin-inline-end:6px!important}
+.gc-account-actions{margin-top:16px!important}
+.gc-account-actions .btn{min-height:48px!important;border-radius:14px!important;box-shadow:0 10px 24px rgba(0,0,0,.14)!important}
+.gc-setting-status{padding-top:5px!important;min-height:27px!important;color:#9fe8c1!important;line-height:1.6!important}
+.gc-account-error{display:flex;align-items:flex-start;gap:13px;padding:18px;border:1px solid rgba(255,210,122,.24);border-radius:20px;background:linear-gradient(145deg,rgba(63,48,26,.58),rgba(28,28,30,.7));box-shadow:0 18px 45px rgba(0,0,0,.18)}
+.gc-account-error-icon{width:38px;height:38px;display:grid;place-items:center;flex:0 0 auto;border-radius:13px;background:rgba(255,210,122,.16);color:#ffd27a;font-weight:900}
+.gc-account-error strong{display:block;color:#ffe2a3;font-size:14px}.gc-account-error p{margin:4px 0 12px;color:#c6b895;font-size:11px;line-height:1.8}
+html[data-gc-theme=light] .gc-account-card:first-child{background:linear-gradient(145deg,#e8f9fb,#f8fcfd)!important;border-color:#c5e4eb!important;box-shadow:0 18px 44px rgba(30,93,119,.12)!important}
+html[data-gc-theme=light] .gc-account-card:nth-child(2){background:linear-gradient(145deg,#fff,#eef7fb)!important;border-color:#cfe2ec!important}
+html[data-gc-theme=light] .gc-account-head{border-bottom-color:#d7e7ee!important}
+html[data-gc-theme=light] .gc-balance>div{background:rgba(226,243,248,.75)!important;border-color:#cde5ec!important}
+html[data-gc-theme=light] .gc-settings-tabs{background:rgba(235,246,250,.9)!important;border-color:#cfe3ea!important;box-shadow:0 8px 20px rgba(42,91,118,.08)!important}
+html[data-gc-theme=light] .gc-settings-tabs button.active{color:#075e72!important;background:#d9f4f7!important;border-color:#8bdce5!important}
+html[data-gc-theme=light] .gc-setting-row label{color:#587187!important}
+html[data-gc-theme=light] .gc-setting-row input,html[data-gc-theme=light] .gc-setting-row select{background:#fff!important;color:#10253b!important;border-color:#c7dce6!important}
+@media(max-width:900px){.gc-account-grid{grid-template-columns:1fr!important}.gc-account-card:nth-child(2){min-width:0!important}.gc-settings-tabs{top:66px!important}}
+@media(max-width:620px){.gc-account-shell{margin-top:15px!important}.gc-account-shell>.portal-section-heading h2{font-size:22px!important}.gc-account-card{padding:15px!important;border-radius:20px!important}.gc-account-head{align-items:flex-start!important}.gc-avatar{width:60px!important;height:60px!important;border-radius:18px!important}.gc-account-head h3{font-size:18px!important}.gc-balance{gap:6px!important}.gc-balance>div{min-height:74px!important;padding:9px 7px!important}.gc-balance strong{font-size:13px!important}.gc-settings-tabs{margin-bottom:14px!important;border-radius:14px!important}.gc-settings-tabs button{font-size:10px!important;min-height:42px!important}.gc-setting-row{margin-bottom:11px!important}.gc-account-error{padding:14px!important}}
+@media(max-width:390px){.gc-account-head{gap:9px!important}.gc-account-head p{font-size:10px!important}.gc-balance span{font-size:8px!important}.gc-balance strong{font-size:12px!important}.gc-settings-tabs button{font-size:9px!important;padding-inline:2px!important}}
