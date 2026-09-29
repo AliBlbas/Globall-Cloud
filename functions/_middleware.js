@@ -3,6 +3,8 @@ const HTML_ACCEPT = 'text/html';
 const VERSION = '20260923-2';
 const VISUAL_REFRESH = `<link rel="stylesheet" href="/globall-visual-refresh-20260921.css?v=20260921-1" data-gc-visual-refresh="20260921-1">`;
 const ENTERPRISE_SHELL = `<link rel="stylesheet" href="/enterprise-shell-v2026.css?v=${VERSION}" data-gc-enterprise-shell="1">`;
+const THEME_CSS = `<link rel="stylesheet" href="/gc-theme-sync.css?v=${VERSION}" data-gc-theme-css="1">`;
+const THEME_JS = `<script src="/gc-theme-sync.js?v=${VERSION}" defer data-gc-theme-sync="1"></script>`;
 const LEGACY_SUPABASE_NOTICE = 'Supabase هێشتا پەیوەست نەکراوە — URL و publishable key لە کۆدەکەدا زیادبکە (سەرەتای script tag).';
 const CSP = "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rum-static.pingdom.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.supabase.co https://rum-ingest.pingdom.net https://*.sentry.io https://sentry.io; frame-src 'self' https://www.google.com; worker-src 'self' blob:";
 const STAFF_V5 = /^\/(?:staff|staff-os)(?:\.html)?\/?$/i;
@@ -34,6 +36,8 @@ export async function onRequest(context) {
   if (path === '/' || path === '/index.html') html = rewriteRootHtml(html); else html = html.split(LEGACY_SUPABASE_NOTICE).join('');
   const headAssets = [
     ['name="color-scheme"','<meta name="color-scheme" content="dark light">'],
+    ['href="/gc-theme-sync.css',THEME_CSS],
+    ['src="/gc-theme-sync.js',THEME_JS],
     ['href="/globall-visual-refresh-20260921.css',VISUAL_REFRESH],
     ['href="/enterprise-shell-v2026.css',ENTERPRISE_SHELL],
     ['href="/browser-compat.css',`<link rel="stylesheet" href="/browser-compat.css?v=${VERSION}" data-gc-browser-compat="1">`],
