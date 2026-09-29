@@ -45,6 +45,7 @@
   <link rel="stylesheet" href="/gc-mobile-hero-fix-20260929.css?v=1">
   <link rel="stylesheet" href="/gc-live-service-visuals-20260930.css?v=1">
   <link rel="stylesheet" href="/gc-interactive-rates-20260930.css?v=1">
+  <link rel="stylesheet" href="/gc-landing-premium-20260929.css?v=1">
 </head>
 <body>
 <div class="gc-app" id="gcApp">
@@ -95,6 +96,19 @@
             <div class="gc-map-fleet"><div><span class="gc-fleet-icon air" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 13 8-2 3-7 2 .8-1.7 6.5 6.7 2.6c1 .4 1.2 1.5.3 2l-7.2 4-1.2-1.2 2.1-3.6-7.1 1.2-2.4-1.1.8-2.2Z"></path></svg></span><b>Air cargo</b><small>گوانگژۆ → دوبەی</small></div><div><span class="gc-fleet-icon sea" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 14h16l-2 4H6l-2-4Z"></path><path d="M8 14V7h8v7M10 7V4h4v3"></path><path d="M3 20c1.5 1.2 3 1.2 4.5 0 1.5 1.2 3 1.2 4.5 0 1.5 1.2 3 3 4.5 0 1.5 1.2 3 3 0"></path></svg></span><b>Sea cargo</b><small>لە ڕێگای دەریا</small></div><div><span class="gc-fleet-icon land" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h11v10H3z"></path><path d="M14 10h4l3 3v3h-7z"></path><circle cx="7" cy="18" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg></span><b>Land fleet</b><small>دوبەی → هەولێر</small></div></div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="gc-transport-studio gc-container" id="gcTransportStudio" aria-labelledby="gcTransportStudioTitle">
+      <div class="gc-studio-head"><div><span class="gc-eyebrow">THE GLOBALL ROUTE STUDIO</span><h2 id="gcTransportStudioTitle">هەر شێوازێک، هەر بارێک، <em>ڕێگای خۆی هەیە.</em></h2><p>Air، Sea و Land بە شێوەیەکی زیندوو هەڵبژێرە و ببینە چۆن Globall Cloud ڕێگاکە بۆ بارەکەت ڕێکدەخات.</p></div><span class="gc-studio-signal"><i></i> ROUTE ENGINE ONLINE</span></div>
+      <div class="gc-studio-tabs" role="tablist" aria-label="هەڵبژاردنی شێوازی گواستنەوە">
+        <button type="button" class="gc-studio-tab active" data-studio-mode="air" role="tab" aria-selected="true"><span class="gc-studio-tab-no">01</span><span class="gc-studio-tab-icon">✈</span><span><b>Air Freight</b><small>خێراترین هەڵبژاردە</small></span><strong>→</strong></button>
+        <button type="button" class="gc-studio-tab" data-studio-mode="sea" role="tab" aria-selected="false"><span class="gc-studio-tab-no">02</span><span class="gc-studio-tab-icon">◒</span><span><b>Sea Freight</b><small>بۆ بارە قورسەکان</small></span><strong>→</strong></button>
+        <button type="button" class="gc-studio-tab" data-studio-mode="land" role="tab" aria-selected="false"><span class="gc-studio-tab-no">03</span><span class="gc-studio-tab-icon">▣</span><span><b>Land Freight</b><small>تا دەرگای کڕیار</small></span><strong>→</strong></button>
+      </div>
+      <div class="gc-studio-stage" data-studio-active="air">
+        <div class="gc-studio-content"><span class="gc-studio-mode-label" id="gcStudioModeLabel">AIR · PRIORITY LANE</span><h3 id="gcStudioTitle">بارە پەلەدارەکەت لە چەند ڕۆژێکدا دەگات.</h3><p id="gcStudioText">بۆ کاڵای کەم‌قەبارە و time-sensitive، Air Freight ڕێگایەکی خێرا و بەدواداچوون‌پێکراوە لە چین و دوبەی بۆ هەولێر.</p><div class="gc-studio-stats"><div><strong id="gcStudioEta">٢–٥</strong><small>ڕۆژی گەیاندن</small></div><div><strong id="gcStudioCoverage">٣</strong><small>هەڵبژاردەی route</small></div><div><strong>٢٤/٧</strong><small>پشتیوانی</small></div></div><div class="gc-studio-actions"><a class="gc-btn gc-btn-primary" href="/#request">نرخی ئەم ڕێگایە ببینە <span>←</span></a><button type="button" class="gc-studio-sync" data-studio-sync>Sync with Rate Explorer <span>↗</span></button></div></div>
+        <div class="gc-studio-visual"><div class="gc-studio-glow"></div><div class="gc-studio-coordinate">35.4676° N · 44.3922° E</div><img id="gcStudioImage" src="/assets/gc-air-freight-hero.png" alt="Air Freight route visual"><div class="gc-studio-orbit orbit-one"></div><div class="gc-studio-orbit orbit-two"></div><div class="gc-studio-ping"><i></i> ERBIL HUB</div><div class="gc-studio-route-line"><span>ORIGIN</span><i></i><b>GLOBALL</b><i></i><span>DESTINATION</span></div></div>
       </div>
     </section>
 
@@ -222,5 +236,6 @@
 </div>
 <script src="/gc-live-mobile-v3.js?v=20260929-4" defer></script>
 <script src="/gc-redesign-loader.js?v=20260927-1"></script>
+<script src="/gc-landing-premium-20260929.js?v=1"></script>
 </body>
 </html>
