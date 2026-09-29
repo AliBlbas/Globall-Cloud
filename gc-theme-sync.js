@@ -34,6 +34,8 @@
     }
     applyTheme(root.dataset.gcTheme || getTheme());
   };
+  window.gcSetTheme = applyTheme;
+  window.gcGetTheme = getTheme;
   root.dataset.gcTheme = getTheme();
   root.style.colorScheme = root.dataset.gcTheme;
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount, { once: true });

@@ -5,6 +5,9 @@ const VISUAL_REFRESH = `<link rel="stylesheet" href="/globall-visual-refresh-202
 const ENTERPRISE_SHELL = `<link rel="stylesheet" href="/enterprise-shell-v2026.css?v=${VERSION}" data-gc-enterprise-shell="1">`;
 const THEME_CSS = `<link rel="stylesheet" href="/gc-theme-sync.css?v=${VERSION}" data-gc-theme-css="1">`;
 const THEME_JS = `<script src="/gc-theme-sync.js?v=${VERSION}" defer data-gc-theme-sync="1"></script>`;
+const SETTINGS_CSS = `<link rel="stylesheet" href="/gc-settings-hub.css?v=${VERSION}" data-gc-settings-css="1">`;
+const SETTINGS_JS = `<script src="/gc-settings-hub.js?v=${VERSION}" defer data-gc-settings-hub="1"></script>`;
+const ACCOUNT_ENTRY_JS = `<script src="/gc-account-entry.js?v=${VERSION}" defer data-gc-account-entry="1"></script>`;
 const LEGACY_SUPABASE_NOTICE = 'Supabase هێشتا پەیوەست نەکراوە — URL و publishable key لە کۆدەکەدا زیادبکە (سەرەتای script tag).';
 const CSP = "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rum-static.pingdom.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.supabase.co https://rum-ingest.pingdom.net https://*.sentry.io https://sentry.io; frame-src 'self' https://www.google.com; worker-src 'self' blob:";
 const STAFF_V5 = /^\/(?:staff|staff-os)(?:\.html)?\/?$/i;
@@ -38,6 +41,8 @@ export async function onRequest(context) {
     ['name="color-scheme"','<meta name="color-scheme" content="dark light">'],
     ['href="/gc-theme-sync.css',THEME_CSS],
     ['src="/gc-theme-sync.js',THEME_JS],
+    ['href="/gc-settings-hub.css',SETTINGS_CSS],
+    ['src="/gc-settings-hub.js',SETTINGS_JS],
     ['href="/globall-visual-refresh-20260921.css',VISUAL_REFRESH],
     ['href="/enterprise-shell-v2026.css',ENTERPRISE_SHELL],
     ['href="/browser-compat.css',`<link rel="stylesheet" href="/browser-compat.css?v=${VERSION}" data-gc-browser-compat="1">`],
@@ -88,6 +93,7 @@ export async function onRequest(context) {
     html=addBodyAsset(html,'src="/gc-csp-scripts/warehouse-receiving-chain-bridge.js',`<script src="/gc-csp-scripts/warehouse-receiving-chain-bridge.js?v=${VERSION}" defer data-gc-warehouse-receiving-chain="1"></script>`);
   }
   if (/^\/customer-portal(?:\.html)?\/?$/i.test(path)) {
+    html=addHeadAsset(html,'src="/gc-account-entry.js',ACCOUNT_ENTRY_JS);
     html=addHeadAsset(html,'href="/customer-receipt-evidence.css',`<link rel="stylesheet" href="/customer-receipt-evidence.css?v=${VERSION}" data-gc-customer-receipt-evidence="1">`);
     html=addBodyAsset(html,'src="/gc-csp-scripts/customer-receipt-evidence-enhancement.js',`<script src="/gc-csp-scripts/customer-receipt-evidence-enhancement.js?v=${VERSION}" defer data-gc-customer-receipt-evidence="1"></script>`);
     html=addBodyAsset(html,'src="/customer-debt-chat.js',`<script src="/customer-debt-chat.js?v=${VERSION}" defer data-gc-customer-debt-chat="1"></script>`);
