@@ -237,7 +237,7 @@ const load = async () => {
   $('loginBtn').classList.add('hidden');
   $('logoutBtn').classList.remove('hidden');
   $('portalStatus')?.classList.add('hidden');
-  $('hello').textContent = 'بەخێربێیت';
+  $('hello').textContent = 'بەخێربێیت بۆ ناوەندی کڕیار';
   const welcome = $('customerWelcome');
   if (welcome) {
     const displayName = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
