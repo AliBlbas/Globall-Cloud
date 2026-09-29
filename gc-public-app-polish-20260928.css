@@ -83,3 +83,8 @@ body:has(#gcApp) .gc-mode-page-card p{margin:0;color:#61798a;font-size:11px;line
 @media(max-width:980px){body:has(#gcApp) .gc-mode-grid,body:has(#gcApp) .gc-mode-page-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){body:has(#gcApp) .gc-mode-grid,body:has(#gcApp) .gc-mode-page-grid{grid-template-columns:1fr;gap:13px}body:has(#gcApp) .gc-mode-image{aspect-ratio:16/9}body:has(#gcApp) .gc-mode-copy{padding:16px}body:has(#gcApp) .gc-mode-intro{min-height:0}body:has(#gcApp) .gc-mode-details{padding:13px 16px 16px}body:has(#gcApp) .gc-mode-extras{gap:7px}body:has(#gcApp) .gc-mode-extras span{padding:8px 10px}}
 @media(prefers-reduced-motion:reduce){body:has(#gcApp) .gc-mode-card,body:has(#gcApp) .gc-mode-page-card,body:has(#gcApp) .gc-mode-image img,body:has(#gcApp) .gc-mode-expand{transition:none}}
+
+
+/* Preserve readable contrast on the light public-content canvas after the delayed clean theme loads. */
+body:has(#gcApp) #gcMain .gc-section-head h2,body:has(#gcApp) #gcMain .gc-page h1{color:#08273c!important;text-shadow:none!important}
+body:has(#gcApp) #gcMain .gc-section-head p,body:has(#gcApp) #gcMain .gc-page>p{color:#526b7d!important}

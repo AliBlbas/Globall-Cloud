@@ -130,11 +130,13 @@ console.log('Homepage trust, transport cards, and tracking separation')
 const liveMap = read('live-logistics-map.js')
 const homepageBeforeTrackingPage = publicShell.split('<section class="gc-container gc-page" id="page-track"')[0]
 const modeSection = homepageBeforeTrackingPage.match(/<section class="gc-container gc-section gc-modes-section"[\s\S]*?<\/section>/)?.[0] || ''
+const publicPolish = read('gc-public-app-polish-20260928.css')
 const homepageChecks = [
   ['homepage has no embedded tracking panel or tracking prompt', !/gc-track-panel|gc-track-prompt|data-gc-track-form/.test(homepageBeforeTrackingPage)],
   ['dedicated tracking page and site navigation remain available', publicShell.includes('href="/track"') && (publicShell.match(/data-gc-track-form/g) || []).length === 1],
   ['Air, Sea, and Land photo cards use optimized images', ['air-cargo','sea-cargo','land-cargo'].every(mode => modeSection.includes(`/assets/homepage/${mode}.webp`) && existsSync(join(ROOT, 'assets', 'homepage', `${mode}.webp`)))],
   ['transport cards use native accessible disclosure controls', (modeSection.match(/<details class="gc-mode-card">/g) || []).length === 3 && (modeSection.match(/<summary class="gc-mode-summary">/g) || []).length === 3],
+  ['public headings retain contrast on the light content canvas', publicPolish.includes('body:has(#gcApp) #gcMain .gc-section-head h2') && publicPolish.includes('body:has(#gcApp) #gcMain .gc-page h1')],
   ['no fabricated active-shipment preview remains', !/ACTIVE SHIPMENT|GLC — LIVE CARGO|ETA: 5 days/.test(publicShell)],
   ['no generic social profile placeholders remain', !/https:\/\/www\.(facebook|instagram)\.com\/?["']/i.test(publicShell)],
   ['homepage does not claim unverified 24/7 support', !/24\/7/i.test(publicShell)],
