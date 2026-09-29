@@ -188,8 +188,8 @@
     loadAsset({tag:'link', rel:'stylesheet', href:'/gc-mobile-visual-rebuild-2026.css?v=20260918-1', attr:'data-gc-mobile-visual-rebuild'});
     loadAsset({tag:'link', rel:'stylesheet', href:'/mobile-premium-responsive-v2026.css?v=20260908-1', attr:'data-gc-mobile-premium'});
     if (!isOperational()) {
-      loadAsset({tag:'link', rel:'stylesheet', href:'/gc-public-mobile-system-v2026.css?v=20260908-1', attr:'data-gc-public-mobile-system'});
-      loadAsset({tag:'script', src:'/gc-public-mobile-system-v2026.js?v=20260908-1', attr:'data-gc-public-mobile-system-js'});
+      loadAsset({tag:'link', rel:'stylesheet', href:'/gc-public-mobile-system-v2026.css?v=20260929-4', attr:'data-gc-public-mobile-system'});
+      loadAsset({tag:'script', src:'/gc-public-mobile-system-v2026.js?v=20260929-4', attr:'data-gc-public-mobile-system-js'});
     }
     // Final public visual layer intentionally loads last so it wins over legacy responsive layers.
     loadAsset({tag:'link', rel:'stylesheet', href:'/gc-public-visual-system-2026.css?v=20260918-1', attr:'data-gc-public-visual-system'});
