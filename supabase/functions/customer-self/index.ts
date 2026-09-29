@@ -111,11 +111,6 @@ Deno.serve(async (req) => {
     if (!customer || customer.is_active !== true) return json(req, {error: 'Customer account is not active.'}, 403)
 
     if (req.method === 'POST') {
-      let body: Record<string, unknown> = {}
-      try { body = await req.json() } catch { return json(req, {error: 'Invalid JSON body.'}, 400) }
-      const action = text(body.action, 60)
-      const data = (body.data && typeof body.data === 'object') ? body.data as Record<string, unknown> : {}
-
       if (action === 'update_profile') {
         const name = text(data.full_name, 160)
         const phone = text(data.phone, 40)

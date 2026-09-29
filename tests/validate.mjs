@@ -115,10 +115,26 @@ const guards = [
 for (const [label, passed] of guards) if (!passed) fail(label)
 if (!failures) ok('Public and Staff integration guards OK')
 
-console.log('Homepage trust and tracking')
+console.log('Customer API request handling')
+const customerSelf = read('supabase/functions/customer-self/index.ts')
+const customerSelfBodyParses = [...customerSelf.matchAll(/await req\.json\(\)/g)].length
+if (customerSelfBodyParses !== 1) fail(`customer-self must parse the request body once; found ${customerSelfBodyParses} parses`)
+else ok('customer-self parses the request body once')
+
+console.log('Customer mobile navigation')
+const customerDock = read('gc-customer-mobile-dock-20260922.js')
+if (!customerDock.includes("if (key === 'home') { window.scrollTo({top:0,behavior:'smooth'}); return; }")) fail('customer mobile Home must stay inside the portal')
+else ok('customer mobile Home stays inside the portal')
+
+console.log('Homepage trust, transport cards, and tracking separation')
 const liveMap = read('live-logistics-map.js')
+const homepageBeforeTrackingPage = publicShell.split('<section class="gc-container gc-page" id="page-track"')[0]
+const modeSection = homepageBeforeTrackingPage.match(/<section class="gc-container gc-section gc-modes-section"[\s\S]*?<\/section>/)?.[0] || ''
 const homepageChecks = [
-  ['shipment prompt links to the real tracking route', /class="gc-track-prompt" href="\/track"/.test(publicShell)],
+  ['homepage has no embedded tracking panel or tracking prompt', !/gc-track-panel|gc-track-prompt|data-gc-track-form/.test(homepageBeforeTrackingPage)],
+  ['dedicated tracking page and site navigation remain available', publicShell.includes('href="/track"') && (publicShell.match(/data-gc-track-form/g) || []).length === 1],
+  ['Air, Sea, and Land photo cards use optimized images', ['air-cargo','sea-cargo','land-cargo'].every(mode => modeSection.includes(`/assets/homepage/${mode}.webp`) && existsSync(join(ROOT, 'assets', 'homepage', `${mode}.webp`)))],
+  ['transport cards use native accessible disclosure controls', (modeSection.match(/<details class="gc-mode-card">/g) || []).length === 3 && (modeSection.match(/<summary class="gc-mode-summary">/g) || []).length === 3],
   ['no fabricated active-shipment preview remains', !/ACTIVE SHIPMENT|GLC — LIVE CARGO|ETA: 5 days/.test(publicShell)],
   ['no generic social profile placeholders remain', !/https:\/\/www\.(facebook|instagram)\.com\/?["']/i.test(publicShell)],
   ['homepage does not claim unverified 24/7 support', !/24\/7/i.test(publicShell)],
@@ -127,7 +143,7 @@ const homepageChecks = [
   ['mobile menu exposes and synchronizes its expanded state', publicShell.includes('aria-controls="gcMobileMenu"') && publicShell.includes('aria-expanded="false"') && read('gc-final-experience-2026.js').includes("button.setAttribute('aria-expanded', String(open))")],
 ]
 for (const [label, passed] of homepageChecks) if (!passed) fail(label)
-if (homepageChecks.every(([, passed]) => passed)) ok('Homepage trust, tracking, and navigation checks OK')
+if (homepageChecks.every(([, passed]) => passed)) ok('Homepage trust, transport, tracking separation, and navigation checks OK')
 
 console.log('Pages build output protection')
 const buildScript = read('scripts/cloudflare-build.mjs')
@@ -143,6 +159,17 @@ for (const pattern of ['production_security_hardening','fix_alert_monitor_uuid_t
   if (!migrations.some((name) => name.includes(pattern))) fail(`missing production migration: ${pattern}`)
 }
 if (!failures) ok('Migration naming/presence OK')
+
+console.log('Public pricing RPC permission boundary')
+const pricingAccessMigration = migrations.find((name) => name.includes('restrict_direct_pricing_rpc_access_v1'))
+const pricingAccessSql = pricingAccessMigration ? read(`supabase/migrations/${pricingAccessMigration}`) : ''
+const publicPricingFunction = read('supabase/functions/public-pricing/index.ts')
+const pricingRpcProtected = /revoke\s+all\s+on\s+function\s+public\.calculate_logistics_price\s*\([\s\S]*?\)\s+from\s+public\s*,\s*anon\s*,\s*authenticated/i.test(pricingAccessSql)
+  && /grant\s+execute\s+on\s+function\s+public\.calculate_logistics_price\s*\([\s\S]*?\)\s+to\s+service_role/i.test(pricingAccessSql)
+  && publicPricingFunction.includes("rpc('calculate_logistics_price'")
+  && publicPricingFunction.includes('SUPABASE_SERVICE_ROLE_KEY')
+if (!pricingRpcProtected) fail('direct pricing RPC must be restricted to service_role while public pricing uses the protected Edge Function')
+else ok('direct pricing RPC is restricted to service_role; public quotes remain routed through the Edge Function')
 
 console.log('Security hygiene')
 for (const f of runtimeFiles) {

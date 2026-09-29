@@ -48,13 +48,38 @@ body:has(#gcApp) .gc-section-head h2,body:has(#gcApp) .gc-section-head p{color:#
 @media(max-width:390px){body:has(#gcApp) .gc-app-greeting{display:block}body:has(#gcApp) .gc-app-live-badge{display:inline-flex;margin-top:10px}body:has(#gcApp) .gc-app-quick-grid>a{min-height:91px!important}}
 
 
-/* Customer tracking prompt replaces the disconnected sample-shipment card. */
-body:has(#gcApp) .gc-track-prompt{display:block;margin-top:12px;padding:15px;border:1px solid rgba(119,192,235,.18);border-radius:18px;background:linear-gradient(145deg,rgba(14,48,77,.9),rgba(5,21,36,.94));color:#fff;text-decoration:none;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
-body:has(#gcApp) .gc-track-prompt:hover{transform:translateY(-1px);border-color:rgba(244,199,102,.48);box-shadow:0 14px 28px rgba(3,15,28,.22)}
-body:has(#gcApp) .gc-track-prompt:focus-visible{outline:2px solid #56dcea;outline-offset:3px}
-body:has(#gcApp) .gc-track-prompt .gc-active-head strong{color:#f1cc75}
-body:has(#gcApp) .gc-track-prompt .gc-active-progress{color:#a9c4d3}
-body:has(#gcApp) .gc-track-prompt .gc-active-progress strong{color:#f1cc75}
-@media(max-width:760px){body:has(#gcApp) .gc-track-prompt{padding:13px!important;border-radius:16px!important}}
-
 body:has(#gcApp) .gc-trust-card.gc-trust-contact strong{font-size:13px!important;white-space:nowrap;letter-spacing:-.2px}
+
+/* Photo-led service choices: native details keep the cards accessible without JavaScript. */
+body:has(#gcApp) .gc-modes-section{scroll-margin-top:90px}
+body:has(#gcApp) .gc-mode-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+body:has(#gcApp) .gc-mode-card,body:has(#gcApp) .gc-mode-page-card{overflow:hidden;border:1px solid rgba(8,42,63,.12);border-radius:22px;background:#fff;box-shadow:0 18px 46px rgba(8,33,52,.085);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+body:has(#gcApp) .gc-mode-card:hover,body:has(#gcApp) .gc-mode-page-card:hover{transform:translateY(-3px);border-color:rgba(17,191,208,.34);box-shadow:0 24px 58px rgba(8,33,52,.13)}
+body:has(#gcApp) .gc-mode-card>summary{display:block;cursor:pointer;list-style:none}
+body:has(#gcApp) .gc-mode-card>summary::-webkit-details-marker{display:none}
+body:has(#gcApp) .gc-mode-card>summary:focus-visible{outline:3px solid #19b9cd;outline-offset:-4px;border-radius:20px}
+body:has(#gcApp) .gc-mode-image{position:relative;display:block;overflow:hidden;aspect-ratio:4/2.7;background:#071c2e}
+body:has(#gcApp) .gc-mode-image img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .45s ease}
+body:has(#gcApp) .gc-mode-image:after{position:absolute;inset:0;content:"";background:linear-gradient(180deg,rgba(3,18,32,.08) 28%,rgba(3,18,32,.62) 100%);pointer-events:none}
+body:has(#gcApp) .gc-mode-image-label{position:absolute;z-index:1;inset-inline-start:16px;bottom:15px;color:#fff;font:700 10px/1.2 "JetBrains Mono",monospace;letter-spacing:.11em;text-shadow:0 2px 9px rgba(0,0,0,.38)}
+body:has(#gcApp) .gc-mode-expand{position:absolute;z-index:1;inset-inline-end:14px;top:14px;display:grid;place-items:center;width:34px;height:34px;border:1px solid rgba(255,255,255,.28);border-radius:50%;background:rgba(4,23,39,.64);color:#fff;font-size:21px;line-height:1;transition:transform .2s ease,background .2s ease}
+body:has(#gcApp) .gc-mode-card[open] .gc-mode-expand{transform:rotate(45deg);background:#087f9b}
+body:has(#gcApp) .gc-mode-card:hover .gc-mode-image img{transform:scale(1.035)}
+body:has(#gcApp) .gc-mode-copy{display:grid;gap:9px;padding:18px 18px 17px}
+body:has(#gcApp) .gc-mode-title{color:#08273c;font-size:17px;font-weight:800;line-height:1.55}
+body:has(#gcApp) .gc-mode-intro{min-height:44px;color:#637b8d;font-size:12px;line-height:1.85}
+body:has(#gcApp) .gc-mode-hint{display:flex;align-items:center;justify-content:space-between;margin-top:3px;padding-top:12px;border-top:1px solid #eaf0f3;color:#087f9b;font-size:11px;font-weight:800}
+body:has(#gcApp) .gc-mode-details{padding:14px 18px 18px;border-top:1px solid #eaf0f3;background:linear-gradient(180deg,#fbfdfe,#fff)}
+body:has(#gcApp) .gc-mode-details p{margin:0 0 14px;color:#526b7d;font-size:12px;line-height:1.9}
+body:has(#gcApp) .gc-mode-details .gc-btn{width:100%;min-height:46px;justify-content:center;text-align:center;font-size:12px}
+body:has(#gcApp) .gc-mode-extras{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}
+body:has(#gcApp) .gc-mode-extras span{padding:9px 13px;border:1px solid rgba(8,42,63,.10);border-radius:999px;background:#fff;color:#567083;font-size:10px;font-weight:700}
+body:has(#gcApp) .gc-mode-page-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:24px 0}
+body:has(#gcApp) .gc-mode-page-card img{display:block;width:100%;aspect-ratio:4/2.65;object-fit:cover}
+body:has(#gcApp) .gc-mode-page-card>div{padding:17px}
+body:has(#gcApp) .gc-mode-page-card>div>span{color:#087f9b;font:700 9px/1.4 "JetBrains Mono",monospace;letter-spacing:.1em}
+body:has(#gcApp) .gc-mode-page-card h2{margin:8px 0;color:#08273c;font-size:17px}
+body:has(#gcApp) .gc-mode-page-card p{margin:0;color:#61798a;font-size:11px;line-height:1.9}
+@media(max-width:980px){body:has(#gcApp) .gc-mode-grid,body:has(#gcApp) .gc-mode-page-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){body:has(#gcApp) .gc-mode-grid,body:has(#gcApp) .gc-mode-page-grid{grid-template-columns:1fr;gap:13px}body:has(#gcApp) .gc-mode-image{aspect-ratio:16/9}body:has(#gcApp) .gc-mode-copy{padding:16px}body:has(#gcApp) .gc-mode-intro{min-height:0}body:has(#gcApp) .gc-mode-details{padding:13px 16px 16px}body:has(#gcApp) .gc-mode-extras{gap:7px}body:has(#gcApp) .gc-mode-extras span{padding:8px 10px}}
+@media(prefers-reduced-motion:reduce){body:has(#gcApp) .gc-mode-card,body:has(#gcApp) .gc-mode-page-card,body:has(#gcApp) .gc-mode-image img,body:has(#gcApp) .gc-mode-expand{transition:none}}

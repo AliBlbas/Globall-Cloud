@@ -3,7 +3,7 @@
   let dock = null;
 
   const go = (key) => {
-    if (key === 'home') { location.href = '/'; return; }
+    if (key === 'home') { window.scrollTo({top:0,behavior:'smooth'}); return; }
     if (key === 'shipments') { document.getElementById('shipments')?.scrollIntoView({behavior:'smooth',block:'start'}); return; }
     if (key === 'quotes') { document.getElementById('quoteForm')?.scrollIntoView({behavior:'smooth',block:'start'}); return; }
     if (key === 'track') { location.href = '/track'; return; }
