@@ -4,7 +4,12 @@
  * off public/customer/payment surfaces.
  */
 const HTML_ACCEPT = 'text/html'
-const VERSION = '20260816-4'
+const VERSION = '20260929-1'
+const THEME_CSS = `<link rel="stylesheet" href="/gc-theme-sync.css?v=${VERSION}" data-gc-theme-css="1">`
+const THEME_JS = `<script src="/gc-theme-sync.js?v=${VERSION}" defer data-gc-theme-sync="1"></script>`
+const SETTINGS_CSS = `<link rel="stylesheet" href="/gc-settings-hub.css?v=${VERSION}" data-gc-settings-css="1">`
+const SETTINGS_JS = `<script src="/gc-settings-hub.js?v=${VERSION}" defer data-gc-settings-hub="1"></script>`
+const ACCOUNT_ENTRY_JS = `<script src="/gc-account-entry.js?v=${VERSION}" defer data-gc-account-entry="1"></script>`
 const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`)
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`)
 
@@ -18,6 +23,10 @@ export async function onRequest(context) {
 
   let html = await response.text()
   const headAssets = [
+    ['href="/gc-theme-sync.css', THEME_CSS],
+    ['src="/gc-theme-sync.js', THEME_JS],
+    ['href="/gc-settings-hub.css', SETTINGS_CSS],
+    ['src="/gc-settings-hub.js', SETTINGS_JS],
     ['name="color-scheme"', '<meta name="color-scheme" content="dark light">'],
     ['href="/browser-compat.css', `<link rel="stylesheet" href="/browser-compat.css?v=${VERSION}" data-gc-browser-compat="1">`],
     ['href="/safari-compat-elite.css', `<link rel="stylesheet" href="/safari-compat-elite.css?v=${VERSION}" data-gc-safari-elite="1">`],
@@ -30,6 +39,11 @@ export async function onRequest(context) {
     ['src="/runtime-guard.js', `<script src="/runtime-guard.js?v=${VERSION}" defer data-gc-runtime-guard="1"></script>`],
   ]
   for (const [needle, fragment] of headAssets) html = addHeadAsset(html, needle, fragment)
+  if (path === '/customer-portal.html') {
+    html = addHeadAsset(html, 'src="/gc-account-entry.js', ACCOUNT_ENTRY_JS)
+    html = addHeadAsset(html, 'href="/gc-customer-account-20260923.css', `<link rel="stylesheet" href="/gc-customer-account-20260923.css?v=${VERSION}" data-gc-customer-account-css="1">`)
+    html = addBodyAsset(html, 'src="/gc-customer-account-20260923.js', `<script src="/gc-customer-account-20260923.js?v=${VERSION}" defer data-gc-customer-account="1"></script>`)
+  }
 
   const adminSurface = /^\/(management|accounts-console|operations-suite|operations-command-center|operations-control|operations-control-v2|staff-os|staff-portal|warehouse-os|superadmin|super-admin-command-center)\.html$/.test(path)
   if (adminSurface) {
