@@ -1,0 +1,11 @@
+/* Globall Cloud visual refresh — generated transport artwork and settings icon. */
+body:has(#gcApp) .gc-trust-card.gc-transport-card{overflow:hidden;position:relative;isolation:isolate}
+body:has(#gcApp) .gc-trust-card.gc-transport-card img{width:48px!important;height:48px!important;object-fit:cover!important;border-radius:14px!important;flex:0 0 48px!important;box-shadow:0 8px 20px rgba(0,0,0,.24);filter:saturate(1.06) contrast(1.03)}
+body:has(#gcApp) .gc-trust-card.gc-transport-card:after{content:"";position:absolute;inset:auto -24px -28px auto;width:96px;height:96px;border-radius:50%;background:radial-gradient(circle,rgba(71,225,238,.20),transparent 68%);pointer-events:none;z-index:-1}
+body:has(#gcApp) .gc-service-visual .gc-service-media img{filter:saturate(1.02) contrast(1.05) brightness(.84)}
+body:has(#gcApp) .gc-service-visual:hover .gc-service-media img{filter:saturate(1.12) contrast(1.08) brightness(.94)}
+body:has(#gcApp) .gc-service-visual .gc-service-media:after{background:linear-gradient(180deg,rgba(4,14,27,.06),rgba(4,14,27,.76))}
+body:has(#gcApp) .gc-service-visual .gc-icon-box{background:linear-gradient(145deg,rgba(54,215,228,.18),rgba(87,94,244,.16));border:1px solid rgba(118,232,239,.16);box-shadow:0 8px 20px rgba(17,110,141,.14)}
+.gc-settings-trigger img{width:26px;height:26px;display:block;object-fit:cover;border-radius:8px;filter:saturate(1.15) contrast(1.03);box-shadow:0 4px 12px rgba(34,211,238,.22)}
+.gc-settings-trigger{padding:7px!important}
+@media(max-width:760px){.gc-settings-trigger img{width:24px;height:24px}.gc-settings-trigger{padding:6px!important}}
