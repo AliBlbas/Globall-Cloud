@@ -50,7 +50,54 @@
   menu?.addEventListener('click', () => { if (mobile) mobile.hidden = !mobile.hidden; });
   document.querySelectorAll('[data-gc-mobile-menu] a').forEach(a => a.addEventListener('click', () => { if (mobile) mobile.hidden = true; }));
 
-  document.querySelectorAll('#page-request a, #page-request button').forEach(() => {});
+  const rateData = {
+    air: { label: 'AIR · EXPRESS', eta: '٢–٥ ڕۆژ', base: 22, perKg: 4.8, service: 'Air Freight · خێرایی بۆ بارە پەلەکان', text: 'باشترین هەڵبژاردەیە بۆ بارە کەم‌قەبارە و پەلەدارەکان، بە ڕێگای ڕوون لە source تا Erbil.' },
+    sea: { label: 'SEA · ECONOMY', eta: '٢٠–٣٥ ڕۆژ', base: 68, perKg: 1.1, service: 'Sea Freight · بۆ بارە قورسەکان', text: 'بۆ بارە قورس و کۆکراوەکان، بە تێچووی گونجاو و پلانی ڕوون بۆ هەر route leg.' },
+    land: { label: 'LAND · DOOR-TO-DOOR', eta: '٣–٧ ڕۆژ', base: 40, perKg: 2.1, service: 'Land Freight · گەیاندنی وشکانی', text: 'بۆ گواستنەوەی ناوخۆیی و گەیاندن تا دەرگای کڕیار لە هەموو عێراق.' }
+  };
+  const money = value => '$' + Math.round(value).toLocaleString('en-US');
+  const updateRate = (mode, weight) => {
+    const data = rateData[mode] || rateData.air;
+    const kg = Math.max(1, Number(weight) || 10);
+    const price = data.base + data.perKg * kg;
+    const weightValue = document.getElementById('gcRateWeightValue');
+    const priceEl = document.getElementById('gcRatePrice');
+    const subEl = document.getElementById('gcRateSub');
+    const labelEl = document.getElementById('gcRateModeLabel');
+    const etaEl = document.getElementById('gcRateEta');
+    if (weightValue) weightValue.textContent = kg + ' KG';
+    if (priceEl) priceEl.textContent = money(price);
+    if (subEl) subEl.textContent = 'نرخی دەستپێک بۆ ' + kg + ' KG';
+    if (labelEl) labelEl.textContent = data.label;
+    if (etaEl) etaEl.textContent = data.eta;
+    const active = document.querySelector('[data-rate-mode].active');
+    if (active) active.setAttribute('aria-selected', 'true');
+  };
+  const mountLandingInteractions = () => {
+    let mode = 'air';
+    const weight = document.getElementById('gcRateWeight');
+    document.querySelectorAll('[data-rate-mode]').forEach(button => button.addEventListener('click', () => {
+      mode = button.dataset.rateMode || 'air';
+      document.querySelectorAll('[data-rate-mode]').forEach(item => { item.classList.toggle('active', item === button); item.setAttribute('aria-selected', item === button ? 'true' : 'false'); });
+      updateRate(mode, weight?.value || 10);
+    }));
+    weight?.addEventListener('input', () => updateRate(mode, weight.value));
+    document.querySelectorAll('[data-rate-weight]').forEach(button => button.addEventListener('click', () => { if (weight) weight.value = button.dataset.rateWeight; updateRate(mode, button.dataset.rateWeight); }));
+    updateRate(mode, weight?.value || 10);
+    const titles = { air: rateData.air.service, sea: rateData.sea.service, land: rateData.land.service, customs: 'Customs & Documents · بەڵگە و گومرگ' };
+    const texts = { air: rateData.air.text, sea: rateData.sea.text, land: rateData.land.text, customs: 'بەڵگە، invoice و پڕۆسەی گومرگ بە شێوەی ڕێکخراو و قابل‌پێشبینین بەڕێوەدەبرێت.' };
+    document.querySelectorAll('[data-gc-service]').forEach(card => card.addEventListener('click', event => {
+      event.preventDefault();
+      const key = card.dataset.gcService || 'air';
+      const title = document.getElementById('gcServiceTitle');
+      const text = document.getElementById('gcServiceText');
+      if (title) title.textContent = titles[key] || titles.air;
+      if (text) text.textContent = texts[key] || texts.air;
+      document.querySelectorAll('[data-gc-service]').forEach(item => item.classList.toggle('is-selected', item === card));
+      document.getElementById('gcServiceInspector')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }));
+  };
+  mountLandingInteractions();
   const requestForm = document.getElementById('requestForm');
   requestForm?.addEventListener('submit', (event) => {
     const fn = window.handleRequestSubmit;
