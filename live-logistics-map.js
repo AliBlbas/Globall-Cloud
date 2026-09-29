@@ -137,17 +137,33 @@
     const roots=Array.from(document.querySelectorAll('.route-map')); if(!roots.length)return;
     const id=new URLSearchParams(location.search).get('tracking')||localStorage.getItem('gc-last-tracking-id')||'';
     let started=false;
+    let observer=null;
+    const cleanup=()=>{
+      observer?.disconnect();
+      roots.forEach(root=>['pointerdown','focusin','click','touchstart'].forEach(event=>root.removeEventListener(event,start)));
+    };
     const start=async()=>{
       if(started)return; started=true;
+      cleanup();
+      roots.forEach(root=>{root.dataset.mapState='loading';});
       const payload=id?await fetchShipment(id):null;
-      for(const root of roots){try{await initRouteMap(root,payload);}catch(error){root.classList.add('gc-map-fallback');root.innerHTML='<div class="gc-map-error"><b>نەخشەکە بەردەست نەبوو</b><small>دواتر هەوڵبدەوە؛ داتا و شوێنی بار پارێزراون.</small></div>';console.error('Globall Cloud live map:',error);}}
+      for(const root of roots){try{await initRouteMap(root,payload);root.dataset.mapState='ready';}catch(error){root.dataset.mapState='error';root.classList.add('gc-map-fallback');root.innerHTML='<div class="gc-map-error"><b>نەخشەکە بەردەست نەبوو</b><small>دواتر هەوڵبدەوە؛ داتا و شوێنی بار پارێزراون.</small></div>';console.error('Globall Cloud live map:',error);}}
     };
-    // Keep the first paint lightweight. Tracking links still initialize immediately;
-    // the public overview map waits for idle time or an explicit user intent.
+    roots.forEach(root=>{
+      root.dataset.mapState='waiting';
+      ['pointerdown','focusin','click','touchstart'].forEach(event=>root.addEventListener(event,start,{once:true,passive:true}));
+    });
+    // Tracking links still initialize immediately. The public overview map waits
+    // until it is near the viewport or the user explicitly interacts with it.
     if(id){start();return;}
-    roots.forEach(root=>['pointerenter','focusin','click','touchstart'].forEach(event=>root.addEventListener(event,start,{once:true,passive:true})));
-    if('requestIdleCallback' in window) window.requestIdleCallback(start,{timeout:1800});
-    else window.setTimeout(start,900);
+    if('IntersectionObserver' in window){
+      observer=new IntersectionObserver(entries=>{
+        if(entries.some(entry=>entry.isIntersecting))start();
+      },{rootMargin:'200px 0px',threshold:0.01});
+      roots.forEach(root=>observer.observe(root));
+    }else{
+      window.addEventListener('scroll',start,{once:true,passive:true});
+    }
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
