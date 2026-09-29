@@ -1,0 +1,540 @@
+/* Globall Cloud — mobile app shell v4
+ * Additive visual layer. No shipment/auth/backend logic is changed.
+ * Focus: clean section separation, single floating 5-tab navigation,
+ * touch ergonomics, iPhone safe-area support, and clearer hierarchy.
+ */
+
+:root{
+  --gc-v4-border:rgba(164,192,221,.14);
+  --gc-v4-border-strong:rgba(79,227,240,.26);
+  --gc-v4-glass:rgba(7,18,32,.92);
+  --gc-v4-glass-soft:rgba(7,18,32,.76);
+  --gc-v4-shadow:0 22px 60px rgba(1,8,18,.34);
+}
+
+/* ---------- public mobile shell ---------- */
+@media (max-width: 760px){
+  html,body{
+    max-width:100%;
+    overflow-x:hidden;
+  }
+
+  main{
+    width:100%;
+    max-width:100%;
+    overflow:clip;
+  }
+
+  /* Give every homepage block its own visual boundary.
+     This removes the 'everything is inside one surface' feeling. */
+  #page-home > .section{
+    width:calc(100% - 24px);
+    max-width:1180px;
+    margin:0 auto 12px;
+    padding:28px 14px 30px !important;
+    border:1px solid var(--gc-v4-border);
+    border-radius:24px;
+    background:
+      linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.014)),
+      rgba(7,18,32,.72);
+    box-shadow:0 14px 34px rgba(1,8,18,.18);
+    overflow:hidden;
+  }
+
+  #page-home > .home-service-bridge.section{
+    padding:18px 14px 20px !important;
+  }
+
+  /* Alternating surface rhythm so long pages are easy to scan. */
+  #page-home > .section:nth-of-type(4),
+  #page-home > .section:nth-of-type(6),
+  #page-home > .section:nth-of-type(8),
+  #page-home > .section:nth-of-type(10){
+    background:
+      linear-gradient(180deg,rgba(34,211,238,.045),rgba(255,255,255,.012)),
+      rgba(7,18,32,.78);
+  }
+
+  [data-theme="light"] #page-home > .section{
+    background:rgba(255,255,255,.94);
+    border-color:rgba(37,70,102,.12);
+    box-shadow:0 14px 34px rgba(31,65,96,.10);
+  }
+
+  [data-theme="light"] #page-home > .section:nth-of-type(4),
+  [data-theme="light"] #page-home > .section:nth-of-type(6),
+  [data-theme="light"] #page-home > .section:nth-of-type(8),
+  [data-theme="light"] #page-home > .section:nth-of-type(10){
+    background:linear-gradient(180deg,rgba(8,145,178,.045),rgba(255,255,255,.96));
+  }
+
+  /* Hero becomes one calm app-like entry card. */
+  #page-home > .hero{
+    width:calc(100% - 24px);
+    max-width:1180px;
+    margin:0 auto 12px;
+    padding:24px 16px 16px !important;
+    gap:14px !important;
+    border:1px solid var(--gc-v4-border);
+    border-radius:28px;
+    background:
+      radial-gradient(circle at 12% 0%,rgba(34,211,238,.11),transparent 42%),
+      linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));
+    box-shadow:var(--gc-v4-shadow);
+  }
+
+  #page-home > .hero .eyebrow{
+    margin-bottom:9px;
+    font-size:10px;
+    letter-spacing:1.4px;
+  }
+
+  #page-home > .hero h1{
+    font-size:clamp(30px,8.6vw,41px) !important;
+    line-height:1.16 !important;
+    letter-spacing:-.7px !important;
+    margin-bottom:12px;
+  }
+
+  #page-home > .hero .sub{
+    font-size:13.5px;
+    line-height:1.9;
+    margin-bottom:16px;
+  }
+
+  #page-home > .hero-ctas,
+  #page-home .hero-ctas{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:8px !important;
+  }
+
+  #page-home .hero-ctas .btn{
+    width:100%;
+    min-height:48px;
+    border-radius:15px;
+    padding-inline:10px;
+    font-size:12px;
+  }
+
+  #page-home .route-map{
+    min-height:292px !important;
+    aspect-ratio:unset !important;
+    border-radius:22px !important;
+    padding:10px !important;
+  }
+
+  #page-home .route-map > img,
+  #page-home .route-map svg{
+    border-radius:18px;
+  }
+
+  /* Trust metrics: compact chips instead of four oversized islands. */
+  #page-home > .trust-bar{
+    width:calc(100% - 24px);
+    max-width:1180px;
+    margin:0 auto 12px;
+    padding:0;
+    gap:8px;
+  }
+
+  #page-home > .trust-bar .trust-item{
+    min-height:76px;
+    padding:12px 8px;
+    border-radius:16px;
+    border:1px solid var(--gc-v4-border);
+    background:rgba(255,255,255,.035);
+  }
+
+  #page-home > .trust-bar .trust-item b{font-size:19px;}
+  #page-home > .trust-bar .trust-item span{font-size:9.5px;line-height:1.45;}
+
+  [data-theme="light"] #page-home > .trust-bar .trust-item{
+    background:rgba(255,255,255,.92);
+    border-color:rgba(37,70,102,.12);
+  }
+
+  /* Each section heading aligns like a native mobile app screen. */
+  #page-home > .section .section-head{
+    margin:0 0 16px;
+    text-align:start !important;
+  }
+
+  #page-home > .section .section-head .eyebrow{
+    margin-bottom:7px;
+    font-size:9.5px;
+    letter-spacing:1.2px;
+  }
+
+  #page-home > .section .section-head h2{
+    font-size:22px !important;
+    line-height:1.3;
+    margin-bottom:7px;
+  }
+
+  #page-home > .section .section-head p{
+    font-size:12px !important;
+    line-height:1.75;
+  }
+
+  /* Dense grids become horizontally scannable or tidy two-column cards. */
+  #page-home #businessHubGrid{
+    gap:8px !important;
+  }
+
+  #page-home #businessHubGrid .hub-card{
+    min-height:138px;
+    padding:15px 13px;
+    border-radius:17px;
+  }
+
+  #page-home #homeServicesGrid{
+    grid-template-columns:1fr 1fr !important;
+    gap:8px !important;
+  }
+
+  #page-home #homeServicesGrid .service-card{
+    min-width:0;
+    padding:0 !important;
+    border-radius:17px;
+  }
+
+  #page-home #homeServicesGrid .service-card-body{
+    padding:13px;
+  }
+
+  #page-home #homeServicesGrid .service-card-media{
+    aspect-ratio:16/8;
+  }
+
+  #page-home #homeServicesGrid .service-card h4{
+    font-size:12.5px;
+    line-height:1.45;
+  }
+
+  #page-home #homeServicesGrid .service-card p{
+    font-size:10.8px;
+    line-height:1.65;
+  }
+
+  #page-home #homeServicesGrid .service-card .learn{
+    font-size:10px;
+    padding-top:9px;
+  }
+
+  /* Long lists: turn the corridor into a deliberate swipe row. */
+  #page-home #corridorList,
+  #page-home .corridor-list{
+    display:flex !important;
+    overflow-x:auto !important;
+    gap:8px !important;
+    padding-bottom:2px;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  #page-home #corridorList .corridor-item,
+  #page-home .corridor-list .corridor-item{
+    flex:0 0 86%;
+    min-width:86% !important;
+    scroll-snap-align:start;
+  }
+
+  /* Operations / warehouses / testimonials stay visually separated. */
+  #page-home .warehouse-card,
+  #page-home .ops-card,
+  #page-home .testimonial-card,
+  #page-home .step-card,
+  #page-home .feature-card{
+    border-radius:17px;
+  }
+
+  #page-home .warehouse-list,
+  #page-home .ops-layout,
+  #page-home .grid-4,
+  #page-home .grid-3{
+    gap:8px !important;
+  }
+
+  #page-home .ops-metrics{
+    gap:8px !important;
+  }
+
+  #page-home .ops-metric{
+    border-radius:15px;
+    padding:13px;
+  }
+
+  #page-home > .live-track{
+    margin:0 0 12px;
+    border-top:0;
+    border-bottom:0;
+    border:1px solid var(--gc-v4-border);
+    border-radius:24px;
+    overflow:hidden;
+  }
+
+  #page-home > .live-track .live-track-inner{
+    padding:28px 14px 30px;
+  }
+
+  /* CTA closes the homepage as one deliberate final action. */
+  #page-home #ctaBand,
+  #page-home .cta-band{
+    border-radius:22px !important;
+    margin-top:2px;
+    box-shadow:0 16px 34px rgba(0,0,0,.18);
+  }
+
+  /* ---------- single bottom navigation ---------- */
+  /* The public portal navigation already owns these five actions:
+     Home / Services / New Quote / Track / Account. */
+  .portal-bottom-nav{
+    left:10px !important;
+    right:10px !important;
+    bottom:max(10px,env(safe-area-inset-bottom)) !important;
+    width:auto !important;
+    z-index:500 !important;
+    padding:0 !important;
+    pointer-events:none;
+  }
+
+  .portal-bottom-nav.active{
+    display:block !important;
+  }
+
+  .portal-bottom-nav-inner{
+    width:100%;
+    max-width:680px;
+    margin:0 auto;
+    display:grid !important;
+    grid-template-columns:1fr 1fr 68px 1fr 1fr;
+    align-items:end;
+    gap:5px;
+    padding:6px !important;
+    border:1px solid var(--gc-v4-border-strong);
+    border-radius:22px !important;
+    background:
+      linear-gradient(180deg,rgba(12,28,48,.96),rgba(6,17,31,.94));
+    box-shadow:
+      0 26px 65px rgba(0,0,0,.42),
+      0 1px 0 rgba(255,255,255,.07) inset;
+    backdrop-filter:blur(24px) saturate(165%);
+    -webkit-backdrop-filter:blur(24px) saturate(165%);
+    pointer-events:auto;
+  }
+
+  [data-theme="light"] .portal-bottom-nav-inner{
+    background:rgba(255,255,255,.96);
+    border-color:rgba(37,70,102,.14);
+    box-shadow:0 24px 56px rgba(31,65,96,.18),0 1px 0 rgba(255,255,255,.96) inset;
+  }
+
+  .pbn-item{
+    position:relative;
+    min-width:0 !important;
+    min-height:56px !important;
+    padding:7px 3px 8px !important;
+    border:0 !important;
+    border-radius:16px !important;
+    color:var(--muted-2);
+    background:transparent;
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:4px !important;
+    font-size:9.5px !important;
+    font-weight:800 !important;
+    line-height:1.2;
+  }
+
+  .pbn-item svg{
+    width:21px !important;
+    height:21px !important;
+    stroke-width:2.1 !important;
+    transition:transform .18s ease,filter .18s ease;
+  }
+
+  .pbn-item.active{
+    color:var(--teal-l) !important;
+    background:rgba(34,211,238,.10) !important;
+    box-shadow:0 0 0 1px rgba(34,211,238,.10) inset;
+  }
+
+  .pbn-item.active::after{
+    content:"";
+    position:absolute;
+    inset-inline:19px;
+    bottom:5px;
+    height:3px;
+    border-radius:99px;
+    background:var(--teal-l);
+    box-shadow:0 0 12px rgba(34,211,238,.55);
+  }
+
+  .pbn-item:active{
+    transform:scale(.97);
+  }
+
+  .pbn-icon-wrap{
+    display:inline-flex;
+    position:relative;
+  }
+
+  .pbn-badge{
+    min-width:17px !important;
+    height:17px !important;
+    top:-6px !important;
+    inset-inline-end:-10px !important;
+    box-shadow:0 0 0 2px #0a1b30 !important;
+  }
+
+  .pbn-fab{
+    width:60px !important;
+    height:60px !important;
+    margin-top:-22px !important;
+    justify-self:center;
+    align-self:start;
+    border-radius:50% !important;
+    background:linear-gradient(135deg,#9af7ff,#36d9e7 52%,#11acc2) !important;
+    color:#041317 !important;
+    border:4px solid var(--ink) !important;
+    box-shadow:0 13px 30px rgba(0,194,217,.35),0 1px 0 rgba(255,255,255,.45) inset !important;
+  }
+
+  .pbn-fab svg{
+    width:25px !important;
+    height:25px !important;
+    stroke-width:2.3;
+  }
+
+  /* Keep the floating WhatsApp button from fighting the nav. */
+  .whatsapp-float{
+    width:46px !important;
+    height:46px !important;
+    bottom:calc(92px + env(safe-area-inset-bottom)) !important;
+    inset-inline-start:12px !important;
+    z-index:450 !important;
+  }
+
+  /* Keep content above the floating navigation. */
+  body:has(.portal-bottom-nav.active){
+    padding-bottom:calc(102px + env(safe-area-inset-bottom)) !important;
+  }
+
+  /* Pages other than home use the same clean mobile spacing language. */
+  .page > .page-head{
+    margin-inline:12px;
+    border:1px solid var(--gc-v4-border);
+    border-radius:22px;
+    background:rgba(7,18,32,.68);
+    padding:24px 16px 12px !important;
+    box-shadow:0 14px 34px rgba(1,8,18,.14);
+  }
+
+  [data-theme="light"] .page > .page-head{
+    background:rgba(255,255,255,.94);
+    border-color:rgba(37,70,102,.12);
+  }
+
+  .page > .page-head h1{
+    font-size:25px !important;
+  }
+
+  /* Forms / cards: one clear column on phones. */
+  .page .card,
+  .page .panel,
+  .page .request-panel,
+  .page .auth-card,
+  .page .track-hero-card{
+    border-radius:19px !important;
+  }
+
+  .page input,
+  .page select,
+  .page textarea{
+    min-height:50px;
+    border-radius:14px;
+  }
+}
+
+/* ---------- small iPhones ---------- */
+@media (max-width: 430px){
+  #page-home > .hero,
+  #page-home > .trust-bar,
+  #page-home > .section{
+    width:calc(100% - 20px);
+  }
+
+  #page-home > .hero{
+    padding-inline:14px !important;
+  }
+
+  #page-home .hero-ctas{
+    grid-template-columns:1fr !important;
+  }
+
+  #page-home .route-map{
+    min-height:270px !important;
+  }
+
+  #page-home #homeServicesGrid{
+    grid-template-columns:1fr !important;
+  }
+
+  #page-home #businessHubGrid{
+    grid-template-columns:1fr 1fr !important;
+  }
+
+  #page-home #businessHubGrid .hub-card{
+    min-height:126px;
+  }
+
+  .portal-bottom-nav{
+    left:7px !important;
+    right:7px !important;
+  }
+
+  .portal-bottom-nav-inner{
+    grid-template-columns:1fr 1fr 60px 1fr 1fr;
+    gap:3px;
+    padding:5px !important;
+    border-radius:20px !important;
+  }
+
+  .pbn-item{
+    min-height:54px !important;
+    font-size:9px !important;
+  }
+
+  .pbn-item svg{
+    width:20px !important;
+    height:20px !important;
+  }
+
+  .pbn-fab{
+    width:55px !important;
+    height:55px !important;
+    margin-top:-20px !important;
+    border-width:3px !important;
+  }
+
+  .pbn-fab svg{
+    width:23px !important;
+    height:23px !important;
+  }
+
+  .pbn-item.active::after{
+    inset-inline:15px;
+  }
+}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce){
+  .portal-bottom-nav-inner,
+  .pbn-item,
+  .pbn-item svg{
+    transition:none !important;
+  }
+}
