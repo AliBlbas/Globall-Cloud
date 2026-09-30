@@ -43,9 +43,10 @@
 
     const links = [
       { id: 'home', label: 'سەرەکی', onClick: () => route('', '/') },
-      { id: 'calculator', label: 'نرخی بار', onClick: () => route('', '/request') },
-      { id: 'services', label: 'خزمەتگوزاری', onClick: () => route('#services', '/') },
+      { id: 'services', label: 'خزمەت', onClick: () => route('#services', '/') },
+      { id: 'calculator', label: 'نرخ', onClick: () => route('', '/request') },
       { id: 'contact', label: 'پەیوەندی', onClick: () => route('#contact', '/') },
+      { id: 'settings', label: 'ڕێکخستن', onClick: () => route('#profile', '/dashboard') },
     ];
 
     links.forEach(({ id, label, onClick }) => {
@@ -67,6 +68,7 @@
         : hash === '#request' || path === '/quote' || path === '/request' ? 'calculator'
         : hash === '#services' ? 'services'
         : hash === '#contact' ? 'contact'
+        : path === '/dashboard' && hash === '#profile' ? 'settings'
         : '';
       nav.querySelectorAll('[data-mobile-action]').forEach((el) => {
         const selected = el.dataset.mobileAction === active;
