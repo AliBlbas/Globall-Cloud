@@ -5,7 +5,7 @@
 (() => {
   'use strict';
 
-  const href = '/gc-product-visual-v6.css?v=20260930-2';
+  const href = '/gc-product-visual-v6.css?v=20260930-3';
   let link = null;
 
   const ensure = () => {
