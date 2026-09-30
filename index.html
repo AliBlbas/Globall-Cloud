@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="/gc-visual-v2.css?v=20260928-1" data-gc-visual-v2="1">
 <link rel="stylesheet" href="/gc-visual-v3.css?v=20260929-1" data-gc-visual-v3="1">
 <link rel="stylesheet" href="/gc-mobile-app-v4.css?v=20260929-1" data-gc-mobile-app-v4="1">
+<link rel="stylesheet" href="/site-system.css?v=20260930-1" data-gc-system-css="1">
 <style id="gc-production-polish-v3">
 /* Globall Cloud production polish v3 — interaction, hierarchy and mobile app ergonomics */
 :root{
@@ -988,6 +989,7 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
       <li><a data-route="track" data-gc-onclick="route('track')" data-i18n="nav.track"></a></li>
       <li><a data-route="contact" data-gc-onclick="route('contact')" data-i18n="nav.contact"></a></li>
       <li><a href="./staff-os.html" class="staff-nav-link"><span aria-hidden="true">◈</span> ستاف</a></li>
+      <li><a href="./careers.html" class="staff-nav-link"><span aria-hidden="true">✦</span> کار</a></li>
     </ul>
     <div class="nav-right">
       <div class="lang-toggle">
@@ -1008,6 +1010,7 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
     <a data-route="contact" data-gc-onclick="route('contact')" data-i18n="nav.contact"></a>
     <a data-route="portal" data-gc-onclick="route('portal')" id="mobileAuthLabel"></a>
     <a href="./staff-os.html" class="staff-mobile-link">◈ بەشی ستاف</a>
+    <a href="./careers.html" class="staff-mobile-link">✦ کار لەگەڵمان</a>
     <div style="display:flex; gap:10px; margin-top:14px;">
       <div class="lang-toggle" style="flex-shrink:0;">
         <button data-gc-onclick="setLang('ku')">KU</button>
@@ -1152,6 +1155,17 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
       </div>
     </div>
   </div>
+  <section class="gc-workspace-band" aria-label="Globall Cloud workspaces">
+    <div class="gc-workspace-band__head">
+      <div><div class="gc-workspace-band__eyebrow">ONE CONNECTED LOGISTICS SYSTEM</div><h2>یەک سایت، هەموو ڕێگاکان</h2><p>کڕیار، ستاف، ئۆپەریشن و تیم لە هەمان سیستەمەوە بە یەک دەبەسترێنەوە.</p></div>
+    </div>
+    <div class="gc-workspace-grid">
+      <a class="gc-workspace-card" href="./dashboard"><div class="gc-workspace-card__icon">◎</div><strong>هەژماری کڕیار</strong><span>بارەکان، بەڵگەکان، invoice و پارەدان لە یەک شوێن.</span><em>CUSTOMER PORTAL</em></a>
+      <a class="gc-workspace-card" href="./staff-os.html"><div class="gc-workspace-card__icon">◈</div><strong>کۆنسۆڵی ستاف</strong><span>کڕیار، warehouse، staff access و activity logs.</span><em>STAFF OS</em></a>
+      <a class="gc-workspace-card" href="./operations-command-center.html"><div class="gc-workspace-card__icon">▦</div><strong>کۆنترۆڵی ئۆپەریشن</strong><span>Shipment، exception، document و delivery لە یەک cockpit.</span><em>CONTROL PLANE</em></a>
+      <a class="gc-workspace-card" href="./careers.html"><div class="gc-workspace-card__icon">✦</div><strong>تیمەکەمان</strong><span>لەگەڵمان کار بکە و بەشداری دروستکردنی داهاتووی لۆجستیک بکە.</span><em>CAREERS</em></a>
+    </div>
+  </section>
 
   <div class="section container">
     <div class="section-head reveal">
@@ -1762,6 +1776,8 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
         <li><a data-gc-onclick="route('services')" data-i18n="nav.services"></a></li>
         <li><a data-gc-onclick="route('track')" data-i18n="nav.track"></a></li>
         <li><a data-gc-onclick="route('request')" data-i18n="nav.quote"></a></li>
+        <li><a href="./careers.html">کار لەگەڵمان</a></li>
+        <li><a href="./staff-os.html">کۆنسۆڵی ستاف</a></li>
       </ul>
     </div>
     <div class="footer-col">
