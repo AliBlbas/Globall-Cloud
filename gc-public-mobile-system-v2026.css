@@ -296,3 +296,17 @@ button,input,select,textarea,a{touch-action:manipulation;-webkit-tap-highlight-c
   #gcPublicMobileActions a span{font-size:8px!important}
 }
 @media (prefers-reduced-motion:reduce){#gcPublicMobileActions a,body:has(#gcApp) .gc-app-quick-grid>a{transition:none!important}}
+
+/* 2026-09-30: canonical premium five-item mobile dock. */
+@media(max-width:760px){
+  #gcPublicMobileActions{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px!important;padding:6px!important;border-radius:22px!important;background:linear-gradient(145deg,rgba(8,31,53,.97),rgba(3,14,27,.98))!important;border-color:rgba(112,222,239,.34)!important;box-shadow:0 24px 80px rgba(0,8,18,.55),inset 0 1px 0 rgba(255,255,255,.08)!important}
+  #gcPublicMobileActions a{position:relative;min-height:55px!important;border:1px solid transparent!important;color:#8faabd!important;font-weight:800!important}
+  #gcPublicMobileActions a:after{content:"";position:absolute;top:5px;left:50%;width:3px;height:3px;border-radius:50%;background:rgba(118,228,236,.4);transform:translateX(-50%)}
+  #gcPublicMobileActions a.active{background:linear-gradient(180deg,rgba(41,216,236,.22),rgba(41,216,236,.07))!important;border-color:rgba(104,237,241,.46)!important;color:#f5ffff!important;box-shadow:0 8px 22px rgba(41,216,236,.14),inset 0 1px 0 rgba(255,255,255,.1)!important}
+  #gcPublicMobileActions a.active:after{background:#ffe29a;box-shadow:0 0 10px rgba(255,226,154,.8)}
+  #gcPublicMobileActions .gc-mobile-nav-icon{display:grid;place-items:center;width:28px;height:28px;border-radius:10px;color:currentColor}
+  #gcPublicMobileActions .gc-mobile-nav-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  #gcPublicMobileActions a.active .gc-mobile-nav-icon{color:#8ff5f4;background:rgba(105,235,239,.1)}
+  #gcPublicMobileActions .gc-mobile-nav-label{font-size:9px!important;line-height:1.15!important;white-space:nowrap}
+}
+@media(max-width:390px){#gcPublicMobileActions{left:5px!important;right:5px!important;bottom:max(6px,env(safe-area-inset-bottom))!important;border-radius:19px!important}#gcPublicMobileActions a{min-height:52px!important}#gcPublicMobileActions .gc-mobile-nav-label{font-size:8px!important}#gcPublicMobileActions .gc-mobile-nav-icon{width:26px;height:26px}}
