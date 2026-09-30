@@ -30,7 +30,8 @@
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-7 9 7"></path><path d="M5 10v10h14V10"></path></svg>',
     calculator: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2m2 0h2m2 0h0M8 15h2m2 0h2m2 0h0M8 18h8"/></svg>',
     services: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4-8 4-8-4 8-4Z"/><path d="M4 7v9l8 4 8-4V7M12 11v9"/></svg>',
-    contact: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v11H8l-3 3z"/><path d="M8 9h8M8 12h5"/></svg>'
+    contact: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v11H8l-3 3z"/><path d="M8 9h8M8 12h5"/></svg>',
+    settings: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 13.5v-3l-2-.5a5.7 5.7 0 0 0-.8-1.4l.8-1.9-2.1-2.1-1.9.8a5.7 5.7 0 0 0-1.6-.6L11 3H8l-.5 1.8a5.7 5.7 0 0 0-1.5.9l-1.9-.7L2 7.1 2.8 9a5.7 5.7 0 0 0-.5 1.5L.5 11v3l1.8.5c.1.5.3 1 .6 1.5l-.8 1.9 2.1 2.1 1.9-.8c.5.4 1 .6 1.5.8L8 22h3l.5-1.8c.6-.1 1.1-.4 1.6-.7l1.9.8 2.1-2.1-.8-1.9c.4-.5.6-1 .8-1.6L19 13.5Z"/></svg>'
   };
 
   function boot() {
