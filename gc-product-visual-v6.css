@@ -600,3 +600,120 @@ body:has(#gcApp) .gc-rate-mode.active{
     scroll-behavior:auto!important;
   }
 }
+
+
+/* Mobile app bottom tab bar — Facebook-style full-width navigation */
+@media (max-width:760px){
+  body:has(#gcApp){
+    padding-bottom:calc(74px + env(safe-area-inset-bottom)) !important;
+  }
+  body:has(#gcApp) .gc-mobile-dock-v3{
+    position:fixed !important;
+    left:0 !important;
+    right:0 !important;
+    bottom:0 !important;
+    width:100% !important;
+    min-height:calc(62px + env(safe-area-inset-bottom)) !important;
+    height:auto !important;
+    display:grid !important;
+    grid-template-columns:repeat(5,minmax(0,1fr)) !important;
+    align-items:stretch !important;
+    gap:0 !important;
+    padding:4px 2px env(safe-area-inset-bottom) !important;
+    margin:0 !important;
+    border:0 !important;
+    border-top:1px solid rgba(120,160,180,.18) !important;
+    border-radius:0 !important;
+    background:rgba(3,16,28,.97) !important;
+    box-shadow:0 -8px 30px rgba(0,0,0,.22) !important;
+    backdrop-filter:blur(18px) saturate(145%) !important;
+    -webkit-backdrop-filter:blur(18px) saturate(145%) !important;
+    z-index:9999 !important;
+  }
+  body:has(#gcApp) .gc-mobile-dock-v3 a{
+    position:relative !important;
+    min-width:0 !important;
+    min-height:58px !important;
+    width:100% !important;
+    margin:0 !important;
+    padding:7px 3px 5px !important;
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:4px !important;
+    border:0 !important;
+    border-radius:8px !important;
+    background:transparent !important;
+    color:#8aa0b0 !important;
+    font-size:8px !important;
+    font-weight:800 !important;
+    line-height:1.15 !important;
+    text-decoration:none !important;
+  }
+  body:has(#gcApp) .gc-mobile-dock-v3 a:active{background:rgba(255,255,255,.05) !important}
+  body:has(#gcApp) .gc-mobile-dock-v3 a.active{
+    color:#6ce7ed !important;
+    background:transparent !important;
+  }
+  body:has(#gcApp) .gc-mobile-dock-v3 a.active::after{
+    content:"" !important;
+    position:absolute !important;
+    left:23px !important;
+    right:23px !important;
+    bottom:1px !important;
+    height:2px !important;
+    border-radius:999px !important;
+    background:#63e5eb !important;
+    box-shadow:0 0 8px rgba(99,229,235,.38) !important;
+  }
+  body:has(#gcApp) .gc-mobile-dock-v3 a .gc-icon{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    width:28px !important;
+    height:24px !important;
+  }
+  body:has(#gcApp) .gc-mobile-dock-v3 a svg{
+    display:block !important;
+    width:23px !important;
+    height:23px !important;
+    fill:none !important;
+    stroke:currentColor !important;
+    stroke-width:2 !important;
+    stroke-linecap:round !important;
+    stroke-linejoin:round !important;
+  }
+  body:has(#gcApp) .gc-mobile-dock-v3 a .gc-dock-label{
+    display:block !important;
+    max-width:100% !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+  }
+  body:has(#gcApp) .gc-mobile-dock-v3 a.primary{
+    width:100% !important;
+    height:auto !important;
+    min-height:58px !important;
+    margin:0 !important;
+    justify-self:stretch !important;
+    align-self:stretch !important;
+    border:0 !important;
+    border-radius:8px !important;
+    background:transparent !important;
+    color:#6ce7ed !important;
+    box-shadow:none !important;
+    font-size:8px !important;
+  }
+  body:has(#gcApp) .gc-mobile-dock-v3 a.primary svg{
+    width:24px !important;
+    height:24px !important;
+  }
+}
+@media (max-width:430px){
+  body:has(#gcApp){padding-bottom:calc(70px + env(safe-area-inset-bottom)) !important}
+  body:has(#gcApp) .gc-mobile-dock-v3{min-height:calc(58px + env(safe-area-inset-bottom)) !important}
+  body:has(#gcApp) .gc-mobile-dock-v3 a{min-height:54px !important;font-size:7.5px !important}
+  body:has(#gcApp) .gc-mobile-dock-v3 a svg{width:22px !important;height:22px !important}
+  body:has(#gcApp) .gc-mobile-dock-v3 a.active::after{left:18px !important;right:18px !important}
+}
