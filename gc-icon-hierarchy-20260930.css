@@ -1,0 +1,20 @@
+/* Globall Cloud — clean icon hierarchy: one section, one visual identity. */
+.gc-icon-separated{position:relative;overflow:hidden;isolation:isolate}
+.gc-icon-separated::after{content:"";position:absolute;inset:auto -24px -38px auto;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(212,175,55,.14),transparent 68%);pointer-events:none;z-index:-1}
+.gc-clean-icon{width:52px!important;height:52px!important;display:grid!important;place-items:center!important;flex:0 0 52px!important;border-radius:16px!important;border:1px solid rgba(212,175,55,.38)!important;background:linear-gradient(145deg,rgba(243,210,122,.18),rgba(212,175,55,.05))!important;color:#f3d27a!important;box-shadow:0 12px 26px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.12)!important;font-size:0!important}
+.gc-clean-icon svg{width:27px!important;height:27px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.65!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+.gc-icon-separated h3,.gc-icon-separated h4{display:flex;align-items:center;gap:10px}
+.service-card,.hub-card,.feature-card{position:relative}
+.gc-app .gc-platform-card .gc-icon-box{display:grid;place-items:center}
+.gc-app .gc-platform-card .gc-icon-box svg{width:25px;height:25px}
+.gc-app .gc-platform-grid,.gc-app .gc-service-grid,.gc-app .gc-ops-grid{align-items:stretch}
+.gc-app .gc-platform-card,.gc-app .gc-service,.gc-app .gc-ops-grid>div{min-height:164px}
+.gc-app .gc-platform-card:hover,.gc-app .gc-service:hover,.gc-app .gc-ops-grid>div:hover{transform:translateY(-3px)}
+/* The homepage has one deliberate floating action; the bottom rail and command bubble duplicate it. */
+.gc-app .gc-public-mobile-actions,.gc-app .gc-vx-cmd{display:none!important}
+@media(max-width:760px){
+  .gc-clean-icon{width:46px!important;height:46px!important;flex-basis:46px!important;border-radius:14px!important}
+  .gc-clean-icon svg{width:23px!important;height:23px!important}
+  .gc-app .gc-platform-card,.gc-app .gc-service,.gc-app .gc-ops-grid>div{min-height:145px}
+}
+@media(prefers-reduced-motion:no-preference){.gc-icon-separated{transition:transform .18s cubic-bezier(.23,1,.32,1),box-shadow .18s ease}}
