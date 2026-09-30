@@ -21,7 +21,61 @@
   }
   async function loadProfile(){try{const d=await api('GET');profile=d.profile||null;window.__customerProfile=profile;window.__customerNotificationPreferences=d.notification_preferences||{};render();}catch(e){console.error(e)}}
   async function previewAvatar(){const file=$('#gcAvatarFile')?.files?.[0];if(!file)return; if(file.size>5*1024*1024){$('#gcProfileMsg').textContent='وێنەکە دەبێت کەمتر لە 5MB بێت.';return}const c=client();const s=await session();const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';const path=s.user.id+'/avatar.'+ext;const {error}=await c.storage.from('avatars').upload(path,file,{upsert:true,contentType:file.type||'image/jpeg',cacheControl:'3600'});if(error){$('#gcProfileMsg').textContent=error.message;return}const {data}=c.storage.from('avatars').getPublicUrl(path);const url=data.publicUrl+'?v='+Date.now();const img=$('#gcAvatar');if(img)img.src=url;$('#gcAvatarFile').dataset.url=url}
-  async function saveProfile(){const msg=$('#gcProfileMsg');const b=$('#gcSaveProfile');b.disabled=true;msg.textContent='…';try{const avatar=$('#gcAvatarFile').dataset.url||profile?.avatar_url||'';const d=await api('POST',{action:'update_profile',data:{full_name:$('#gcFullName').value.trim(),email:$('#gcEmail').value.trim(),phone:$('#gcPhone').value.trim(),avatar_url:avatar,language:$('#gcLanguage')?.value||profile?.preferred_language||'ckb'}});profile={...profile,...d.profile,full_name:d.profile?.full_name||d.profile?.name||$('#gcFullName').value.trim(),avatar_url:avatar};msg.textContent=d.email_confirmation_required?'پڕۆفایل پاشەکەوت کرا؛ بۆ گۆڕینی ئیمەیل confirmation ـت داوا دەکرێت.':'پڕۆفایل پاشەکەوت کرا.';render();}catch(e){msg.textContent=e.message||'هەڵەیەک ڕوویدا.'}finally{b.disabled=false}}
+  async function saveProfile() {
+    const message = $('#gcProfileMsg');
+    const button = $('#gcSaveProfile');
+    if (!message || !button) return;
+    const originalLabel = button.textContent;
+    const loadingLabel = 'پاشەکەوت دەکرێت…';
+    button.disabled = true;
+    button.setAttribute('aria-busy', 'true');
+    button.textContent = loadingLabel;
+    message.textContent = '…';
+    message.setAttribute('role', 'status');
+    message.setAttribute('aria-live', 'polite');
+    try {
+      const avatar = $('#gcAvatarFile')?.dataset.url || profile?.avatar_url || '';
+      const fullName = $('#gcFullName')?.value.trim() || '';
+      const email = $('#gcEmail')?.value.trim() || '';
+      const phone = $('#gcPhone')?.value.trim() || '';
+      const d = await api('POST', {
+        action: 'update_profile',
+        data: {
+          full_name: fullName,
+          email,
+          phone,
+          avatar_url: avatar,
+          language: $('#gcLanguage')?.value || profile?.preferred_language || 'ckb',
+        },
+      });
+      profile = {
+        ...profile,
+        ...d.profile,
+        full_name: d.profile?.full_name || d.profile?.name || fullName,
+        avatar_url: avatar,
+      };
+      const successMessage = d.email_confirmation_required
+        ? 'پڕۆفایل پاشەکەوت کرا؛ بۆ گۆڕینی ئیمەیل confirmation ـت داوا دەکرێت.'
+        : 'پڕۆفایل پاشەکەوت کرا.';
+      render();
+      const savedStatus = $('#gcProfileMsg');
+      if (savedStatus) {
+        savedStatus.textContent = successMessage;
+        savedStatus.setAttribute('role', 'status');
+        savedStatus.setAttribute('aria-live', 'polite');
+      }
+    } catch (error) {
+      const errorStatus = $('#gcProfileMsg') || message;
+      errorStatus.textContent = error.message || 'هەڵەیەک ڕوویدا.';
+      errorStatus.setAttribute('role', 'alert');
+      errorStatus.setAttribute('aria-live', 'assertive');
+    } finally {
+      const currentButton = $('#gcSaveProfile') || button;
+      currentButton.disabled = false;
+      currentButton.removeAttribute('aria-busy');
+      if (currentButton === button && currentButton.textContent === loadingLabel) currentButton.textContent = originalLabel;
+    }
+  }
   async function changePassword(){const msg=$('#gcPasswordMsg'),b=$('#gcChangePassword'),p=$('#gcNewPassword').value,c=$('#gcConfirmPassword').value;if(p.length<12||p!==c){msg.textContent=p!==c?'وشە نهێنییەکان یەکسان نین.':'وشەی نهێنی دەبێت لانیکەم 12 پیت بێت.';return}b.disabled=true;msg.textContent='…';try{const s=await session();const r=await fetch(PASSWORD_FN,{method:'POST',headers:{Authorization:'Bearer '+s.access_token,apikey:SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({password:p})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'گۆڕینی وشەی نهێنی سەرکەوتوو نەبوو.');msg.textContent='وشەی نهێنی بە سەرکەوتوویی گۆڕدرا.';$('#gcNewPassword').value='';$('#gcConfirmPassword').value='';}catch(e){msg.textContent=e.message||'هەڵەیەک ڕوویدا.'}finally{b.disabled=false}}
   async function savePreferences(){const msg=$('#gcPreferenceMsg');const lang=$('#gcLanguage').value;const theme=$('#gcTheme').value;applyLocale(lang);applyTheme(theme);try{await api('POST',{action:'update_profile',data:{full_name:profile?.full_name||'Customer',email:profile?.email||'',phone:profile?.phone||'',language:lang,avatar_url:profile?.avatar_url||''}});msg.textContent='زمان و دۆخی نمایش پاشەکەوت کران.'}catch(e){msg.textContent=e.message||'پاشەکەوت نەکرا.'}}
   async function saveNotifications(){const msg=$('#gcNotificationMsg'),b=$('#gcSaveNotifications');b.disabled=true;msg.textContent='…';try{await api('POST',{action:'update_notification_preferences',data:{email_enabled:$('#gcEmailNotify').checked,whatsapp_enabled:$('#gcWhatsappNotify').checked,sms_enabled:false,in_app_enabled:$('#gcInApp').checked}});msg.textContent='ڕێکخستنەکانی ئاگادارکردنەوە پاشەکەوت کران.'}catch(e){msg.textContent=e.message||'پاشەکەوت نەکرا.'}finally{b.disabled=false}}

@@ -5,6 +5,9 @@ type Staff = { id:string; full_name:string|null; role:string; branch:string|null
 const ORIGINS = new Set(['https://globall-cloud.pages.dev','https://globall-cloud.netlify.app'])
 const READ_ROLES = new Set(['super_admin','admin','accountant','finance','warehouse','warehouse_china','warehouse_uae','warehouse_erbil','operations','driver','delivery'])
 const GLOBAL_ROLES = new Set(['super_admin','admin','accountant','finance','operations'])
+const FINANCE_ROLES=new Set(['super_admin','admin','accountant','finance'])
+const riskRank=(level:unknown)=>{switch(String(level)){case'critical':return 0;case'high':return 1;case'medium':return 2;default:return 99}}
+const exceptionRank=(level:unknown)=>{switch(String(level)){case'critical':return 0;case'high':return 1;case'warning':case'medium':return 2;default:return 99}}
 const cors=(req:Request)=>({
   'Access-Control-Allow-Origin':ORIGINS.has(req.headers.get('origin')||'')?req.headers.get('origin')!:'https://globall-cloud.pages.dev',
   'Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info, x-supabase-auth-token',
@@ -36,12 +39,12 @@ function scopeShipments(q:any, staff:Staff){
   return q.or(`branch.eq.${staff.branch},branch.is.null`)
 }
 
-const riskFor=(s:any)=>{
+const riskFor=(s:any,financeVisible=false)=>{
   const now=Date.now()
   const eta=s.eta?new Date(s.eta).getTime():null
   const outstanding=Math.max(num(s.total_amount)-num(s.paid_amount),0)
   if(eta && eta<now && num(s.current_step_index)<5) return {code:'ETA_OVERDUE',level:'critical',reason:'ETA تێپەڕیوە و بارەکە هێشتا نەگەیشتووە.'}
-  if(outstanding>0 && eta && eta<now+24*60*60*1000) return {code:'PAYMENT_RISK',level:'high',reason:'بڕی ماوەی پارەدان هەیە و ETA لە ٢٤ کاتژمێردایە.'}
+  if(financeVisible && outstanding>0 && eta && eta<now+24*60*60*1000) return {code:'PAYMENT_RISK',level:'high',reason:'بڕی ماوەی پارەدان هەیە و ETA لە ٢٤ کاتژمێردایە.'}
   if(num(s.current_step_index)===3 && eta && eta<now+72*60*60*1000) return {code:'CUSTOMS_RISK',level:'high',reason:'بارەکە لە گومرکە و ETA نزیکە.'}
   if(s.tracking_updated_at && new Date(s.tracking_updated_at).getTime()<now-6*60*60*1000 && num(s.current_step_index)>=1 && num(s.current_step_index)<=4) return {code:'STALE_TRACKING',level:'medium',reason:'زیاتر لە ٦ کاتژمێرە هیچ نوێکارییەکی tracking نییە.'}
   return {code:'WATCH',level:'low',reason:'بارەکە لە چاودێرییە.'}
@@ -49,13 +52,14 @@ const riskFor=(s:any)=>{
 
 async function dashboard(a:{admin:any,staff:Staff}){
   const {admin,staff}=a
+  const financeVisible=FINANCE_ROLES.has(staff.role)
   let q=admin.from('shipments').select('id,tracking_number,tracking_id,customer_name,origin_key,dest_key,status,operational_status,current_step_index,eta,total_amount,paid_amount,transport_mode,current_location_label,tracking_updated_at,branch,created_at').is('archived_at',null).order('created_at',{ascending:false}).limit(3000)
   q=scopeShipments(q,staff)
   const {data:shipments,error:shipmentError}=await q
   if(shipmentError) throw shipmentError
 
   const active=(shipments||[]).filter((s:any)=>!['delivered','cancelled','closed'].includes(String(s.operational_status||s.status||''))&&num(s.current_step_index)<5)
-  const risks=active.map((s:any)=>({...s,_risk:riskFor(s),_outstanding:Math.max(num(s.total_amount)-num(s.paid_amount),0)})).filter((s:any)=>s._risk.level!=='low').sort((a:any,b:any)=>({critical:0,high:1,medium:2}[a._risk.level]-({critical:0,high:1,medium:2}[b._risk.level]) || (a.eta?new Date(a.eta).getTime():Infinity)-(b.eta?new Date(b.eta).getTime():Infinity))).slice(0,40)
+  const risks=active.map((s:any)=>({...s,_risk:riskFor(s,financeVisible),_outstanding:financeVisible?Math.max(num(s.total_amount)-num(s.paid_amount),0):null})).filter((s:any)=>s._risk.level!=='low').sort((a:any,b:any)=>(riskRank(a._risk.level)-riskRank(b._risk.level) || (a.eta?new Date(a.eta).getTime():Infinity)-(b.eta?new Date(b.eta).getTime():Infinity))).slice(0,40)
 
   const [exceptionsResult,unverifiedResult,queueResult]=await Promise.all([
     admin.from('logistics_exceptions').select('id,shipment_id,severity,title,note,status,due_at,created_at').in('status',['open','acknowledged']).order('created_at',{ascending:false}).limit(100),
@@ -68,10 +72,10 @@ async function dashboard(a:{admin:any,staff:Staff}){
 
   const scopedIds=new Set(active.map((s:any)=>String(s.id)))
   const scopedExceptions=(exceptionsResult.data||[]).filter((e:any)=>!e.shipment_id || scopedIds.has(String(e.shipment_id)))
-  const shipmentMap=new Map((shipments||[]).map((s:any)=>[String(s.id),s]))
-  const exceptionRows=scopedExceptions.map((e:any)=>{const s=e.shipment_id?shipmentMap.get(String(e.shipment_id)):null;return {...e,customer_name:s?.customer_name||null,tracking_number:s?.tracking_number||s?.tracking_id||null,location:s?.current_location_label||null,origin_key:s?.origin_key||null,dest_key:s?.dest_key||null}}).sort((a:any,b:any)=>({critical:0,high:1,warning:2,medium:2}[String(a.severity||'medium')]-({critical:0,high:1,warning:2,medium:2}[String(b.severity||'medium')]))).slice(0,40)
+  const shipmentMap=new Map<string,any>((shipments||[]).map((s:any)=>[String(s.id),s] as [string,any]))
+  const exceptionRows=scopedExceptions.map((e:any)=>{const s=e.shipment_id?shipmentMap.get(String(e.shipment_id)):null;return {...e,customer_name:s?.customer_name||null,tracking_number:s?.tracking_number||s?.tracking_id||null,location:s?.current_location_label||null,origin_key:s?.origin_key||null,dest_key:s?.dest_key||null}}).sort((a:any,b:any)=>(exceptionRank(a.severity)-exceptionRank(b.severity))).slice(0,40)
 
-  return {ok:true,generated_at:new Date().toISOString(),staff:{id:staff.id,full_name:staff.full_name,role:staff.role,branch:staff.branch||'all'},kpis:{active:active.length,in_transit:active.filter((s:any)=>num(s.current_step_index)>=1&&num(s.current_step_index)<=4).length,overdue:active.filter((s:any)=>s._risk.code==='ETA_OVERDUE').length,payment_risk:active.filter((s:any)=>s._risk.code==='PAYMENT_RISK').length,customs_risk:active.filter((s:any)=>s._risk.code==='CUSTOMS_RISK').length,stale_tracking:active.filter((s:any)=>s._risk.code==='STALE_TRACKING').length,open_exceptions:scopedExceptions.length,unverified_documents:unverifiedResult.count||0,notification_queue:queueResult.count||0},risk_shipments:risks.map((s:any)=>({id:s.id,tracking_number:s.tracking_number||s.tracking_id||null,customer_name:s.customer_name,origin_key:s.origin_key,dest_key:s.dest_key,status:s.operational_status||s.status,current_step_index:s.current_step_index,eta:s.eta,transport_mode:s.transport_mode,current_location_label:s.current_location_label,tracking_updated_at:s.tracking_updated_at,outstanding:s._outstanding,risk_code:s._risk.code,risk_level:s._risk.level,risk_reason:s._risk.reason})),exceptions:exceptionRows}
+  return {ok:true,generated_at:new Date().toISOString(),staff:{id:staff.id,full_name:staff.full_name,role:staff.role,branch:staff.branch||'all'},kpis:{active:active.length,in_transit:active.filter((s:any)=>num(s.current_step_index)>=1&&num(s.current_step_index)<=4).length,overdue:active.filter((s:any)=>s._risk.code==='ETA_OVERDUE').length,payment_risk:financeVisible?active.filter((s:any)=>s._risk.code==='PAYMENT_RISK').length:null,customs_risk:active.filter((s:any)=>s._risk.code==='CUSTOMS_RISK').length,stale_tracking:active.filter((s:any)=>s._risk.code==='STALE_TRACKING').length,open_exceptions:scopedExceptions.length,unverified_documents:unverifiedResult.count||0,notification_queue:queueResult.count||0},risk_shipments:risks.map((s:any)=>({id:s.id,tracking_number:s.tracking_number||s.tracking_id||null,customer_name:s.customer_name,origin_key:s.origin_key,dest_key:s.dest_key,status:s.operational_status||s.status,current_step_index:s.current_step_index,eta:s.eta,transport_mode:s.transport_mode,current_location_label:s.current_location_label,tracking_updated_at:s.tracking_updated_at,...(financeVisible?{outstanding:s._outstanding}:{}),risk_code:s._risk.code,risk_level:s._risk.level,risk_reason:s._risk.reason})),exceptions:exceptionRows}
 }
 
 async function updateException(a:{admin:any,staff:Staff},data:any){

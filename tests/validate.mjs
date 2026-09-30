@@ -121,6 +121,80 @@ const customerSelfBodyParses = [...customerSelf.matchAll(/await req\.json\(\)/g)
 if (customerSelfBodyParses !== 1) fail(`customer-self must parse the request body once; found ${customerSelfBodyParses} parses`)
 else ok('customer-self parses the request body once')
 
+console.log('Customer profile edit flow')
+const customerAccount = read('gc-customer-account-20260923.js')
+const profileSave = customerAccount.match(/async function saveProfile\(\)\s*\{([\s\S]*?)\n\s*async function changePassword\(/)?.[1] || ''
+const profileRenderAt = profileSave.indexOf('render()')
+const statusAfterRenderAt = profileSave.indexOf("const savedStatus = $('#gcProfileMsg')", profileRenderAt)
+const profileEditChecks = [
+  ['customer portal loads the account editor', read('customer-portal.html').includes('/gc-customer-account-20260923.js?v=')],
+  ['profile save calls the supported update_profile action', profileSave.includes("action: 'update_profile'") && customerSelf.includes("action === 'update_profile'")],
+  ['profile success status is restored after render', profileRenderAt >= 0 && statusAfterRenderAt > profileRenderAt],
+  ['profile save clears busy state on the current button', profileSave.includes("const currentButton = $('#gcSaveProfile') || button;") && profileSave.includes("currentButton.removeAttribute('aria-busy')")],
+]
+for (const [label, passed] of profileEditChecks) if (!passed) fail(label)
+if (profileEditChecks.every(([, passed]) => passed)) ok('Customer profile edit UI/backend feedback contract OK')
+
+console.log('Staff customer management edit permissions')
+const staffUi = read('staff-os-v5.js')
+const staffCustomerEdit = staffUi.match(/function editCustomer\(id\) \{([\s\S]*?)\n  async function customerCode/)?.[1] || ''
+const accountAdmin = read('supabase/functions/account-admin/index.ts')
+const updateCustomer = accountAdmin.match(/async function updateCustomer\([\s\S]*?\n}\n\nasync function archiveCustomer/)?.[0] || ''
+const staffCustomerEditChecks = [
+  ['customer editor calls the account-admin update action', staffCustomerEdit.includes("account('customer', 'update', d)")],
+  ['email and masked password controls are Super Admin-only', staffCustomerEdit.includes("state.staff?.role === 'super_admin'") && staffCustomerEdit.includes('name="password" type="password"') && staffCustomerEdit.includes('Email changes require Super Admin')],
+  ['backend permits unchanged email while protecting identity changes', updateCustomer.includes('const emailChanged =') && updateCustomer.includes("!actor.isSuperAdmin && (emailChanged || txt(payload.password) !== null || codeChanged)") && updateCustomer.includes("select('id,auth_user_id,code,gc_code,email')")],
+]
+for (const [label, passed] of staffCustomerEditChecks) if (!passed) fail(label)
+if (staffCustomerEditChecks.every(([, passed]) => passed)) ok('Staff customer edit permissions and identity controls OK')
+
+console.log('Staff quote inbox, rate calculation, and approval flow')
+const staffQuoteFlow = staffUi.match(/async function renderRequests\(\) \{[\s\S]*?\n  async function renderActivity\(\)/)?.[0] || ''
+const quoteActionNormalizer = accountAdmin.match(/function normalizeAction\(value: unknown\): Action \{[\s\S]*?\n}/)?.[0] || ''
+const quoteCalculator = accountAdmin.match(/async function calculateQuote\([\s\S]*?\n}\nasync function listQuoteRequests/)?.[0] || ''
+const logisticsControl = read('supabase/functions/logistics-control-plane/index.ts')
+const quoteFlowChecks = [
+  ['staff quote calculator calls the quote endpoint and action', staffUi.includes("account('quote', 'calculate'") && quoteActionNormalizer.includes("action === 'calculate'")],
+  ['quote calculator supports stored CBM for customer requests', accountAdmin.includes('directVolumeProvided') && accountAdmin.includes("unit === 'cbm' ? volumeCbm : billableWeight")],
+  ['finance role can calculate a suggestion without broad operations access', accountAdmin.includes('!canReadOperations && !canReadFinance')],
+  ['quote inbox returns email and supports account prefill', accountAdmin.includes('customer_phone,customer_email,origin_key') && staffQuoteFlow.includes("['name', q.customer_name], ['phone', q.customer_phone], ['email', q.customer_email]")],
+  ['staff quote review uses the existing secured approval endpoint', staffQuoteFlow.includes('data-quote-review') && staffQuoteFlow.includes("action: 'approve_quote'") && staffQuoteFlow.includes('FN.logisticsControl') && logisticsControl.includes("service.rpc('approve_quote_request'")],
+  ['quote approval is limited by status and validity checks', staffQuoteFlow.includes("['pending', 'reviewing', 'quoted'].includes(status)") && staffQuoteFlow.includes('validUntil.getTime() <= Date.now()')],
+  ['only Super Admin sees customer-account creation from the inbox', staffQuoteFlow.includes("const canCreateAccount = state.staff?.role === 'super_admin'")],
+]
+for (const [label, passed] of quoteFlowChecks) if (!passed) fail(label)
+if (quoteFlowChecks.every(([, passed]) => passed)) ok('Staff quote inbox, pricing suggestion, and approval contracts OK')
+
+console.log('Finance role separation and customer 360 data')
+const operationsV4 = read('supabase/functions/operations-v4/index.ts')
+const logisticsTower = read('supabase/functions/logistics-control-tower/index.ts')
+const operationsAdmin = read('supabase/functions/operations-admin/index.ts')
+const financeAccessChecks = [
+  ['finance ledger is restricted to the finance role group on both APIs', operationsV4.includes("const FINANCE_ROLES = new Set(['super_admin','admin','accountant','finance'])") && operationsV4.includes('Finance permission required') && accountAdmin.includes('canReadFinance') && accountAdmin.includes("if (kind === 'finance' && canReadFinance)")],
+  ['non-finance shipment list and detail omit amounts and ledger rows', operationsV4.includes('delete row.total_amount;delete row.paid_amount') && operationsV4.includes('delete safeShipment.total_amount;delete safeShipment.paid_amount') && operationsV4.includes('includeFinance?(ledger.data||[]):[]')],
+  ['logistics risk tower hides outstanding amounts and payment risk from non-finance roles', logisticsTower.includes('const FINANCE_ROLES=') && logisticsTower.includes('payment_risk:financeVisible?') && logisticsTower.includes('...(financeVisible?{outstanding:s._outstanding}:{})')],
+  ['logistics control-plane grants invoice/payment reads to finance and redacts shipment amounts otherwise', logisticsControl.includes("requireRole(staff, ['admin', 'super_admin', 'accountant', 'finance'])") && logisticsControl.includes('kind === \'shipments\' && !FINANCE_ROLES.has(staff.role)') && logisticsControl.includes("message.startsWith('Role required:') ? 403")],
+  ['control-plane reads enforce roles and branch/driver scope', logisticsControl.includes('READ_ROLES.has(staff.role)') && logisticsControl.includes("query.eq('assigned_staff_id', staff.id)") && logisticsControl.includes('query.in(\'shipment_id\', ids)')],
+  ['legacy operations-admin restricts shipment amount writes and read projections', operationsAdmin.includes('canManageFinance(a.role)') && operationsAdmin.includes('Finance permission required') && operationsAdmin.includes('shipmentProjection(r.data,a)') && operationsAdmin.includes('Finance permission required|Role cannot change shipments|Forbidden/i.test(message)?403')],
+  ['customer summary view restores shipment counts and hides balances for non-finance staff', operationsV4.includes("from('customer_directory_accounts')") && operationsV4.includes('const {total_amount,outstanding_amount,...safe}=row')],
+  ['staff finance navigation, overview metrics, and API requests are role-gated', staffUi.includes("const FINANCE_ROLES = ['super_admin','admin','accountant','finance']") && staffUi.includes('financeTabVisible') && staffUi.includes('financeRequest = canViewFinance ? ops(\'finance\')') && staffUi.includes('const financeKpis = canViewFinance ?')],
+  ['customer and shipment details do not render financial balances for other roles', staffUi.includes("const financeRows = canViewFinance ?") && staffUi.includes("canViewFinance ? money(x.outstanding_amount||0) : '—'") && staffUi.includes("canViewFinance?`<strong class=\"mono\">")],
+  ['customer edit/create controls match the backend write-role policy', staffUi.includes("const canManageCustomers = ['admin','super_admin']") && staffUi.includes('canManageCustomers ? `<button class=\"btn\" data-customer-edit=')],
+]
+for (const [label, passed] of financeAccessChecks) if (!passed) fail(label)
+if (financeAccessChecks.every(([, passed]) => passed)) ok('Finance role separation and customer 360 data contracts OK')
+
+console.log('Warehouse receipt integrity and status messaging')
+const warehouseFn = read('supabase/functions/warehouse-receiving/index.ts')
+const warehouseChecks = [
+  ['receipt photos are validated before the first upload', warehouseFn.includes('for(const file of files){if(!file.type.startsWith') && warehouseFn.includes('const photoPaths:string[]=[];const receiptKey=')],
+  ['partial upload failures remove already-uploaded evidence', warehouseFn.includes('failed to clean partial uploads') && warehouseFn.includes('storage.from(BUCKET).remove(photoPaths)')],
+  ['warehouse UI surfaces shipment-chain failures', staffUi.includes("if(!r.chain?.linked)toast(")],
+  ['warehouse UI does not claim WhatsApp was queued or sent', !staffUi.includes('پەیامی WhatsApp بۆ queue دانرا') && staffUi.includes('بە شێوەی ئۆتۆماتیکی نەنێردرا')],
+]
+for (const [label, passed] of warehouseChecks) if (!passed) fail(label)
+if (warehouseChecks.every(([, passed]) => passed)) ok('Warehouse evidence and receipt status contracts OK')
+
 console.log('Customer mobile navigation')
 const customerDock = read('gc-customer-mobile-dock-20260922.js')
 if (!customerDock.includes("if (key === 'home') { window.scrollTo({top:0,behavior:'smooth'}); return; }")) fail('customer mobile Home must stay inside the portal')

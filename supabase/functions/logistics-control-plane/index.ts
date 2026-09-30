@@ -14,6 +14,9 @@ const ORIGINS = new Set([
   'https://globall-cloud.pages.dev',
   'https://globall-cloud.netlify.app',
 ])
+const READ_ROLES = new Set(['super_admin','admin','accountant','finance','operations','warehouse','warehouse_china','warehouse_uae','warehouse_erbil','driver','delivery'])
+const FINANCE_ROLES = new Set(['super_admin','admin','accountant','finance'])
+const GLOBAL_DATA_ROLES = new Set(['super_admin','admin','accountant','finance','operations'])
 
 const cors = (req: Request) => {
   const origin = req.headers.get('origin') || ''
@@ -461,9 +464,9 @@ const list = async (service: ReturnType<typeof serviceClient>, staff: Staff, req
   if (kind === 'events') {
     const shipmentId = text(requestUrl.searchParams.get('shipment_id'), 128)
     if (!shipmentId) throw new Error('shipment_id is required')
-    const shipment = await service.from('shipments').select('id,branch,archived_at').eq('id', shipmentId).maybeSingle()
+    const shipment = await service.from('shipments').select('id,branch,archived_at,assigned_staff_id').eq('id', shipmentId).maybeSingle()
     if (shipment.error) throw shipment.error
-    if (!shipment.data || shipment.data.archived_at || (staff.branch !== 'all' && shipment.data.branch && String(shipment.data.branch) !== String(staff.branch))) return { kind, items: [], offset: 0, limit: 0 }
+    if (!shipment.data || shipment.data.archived_at || (staff.role === 'driver' && String(shipment.data.assigned_staff_id || '') !== staff.id) || (!GLOBAL_DATA_ROLES.has(staff.role) && staff.branch !== 'all' && String(shipment.data.branch || '') !== String(staff.branch || ''))) return { kind, items: [], offset: 0, limit: 0 }
     const limit = Math.min(200, Math.max(1, Number(requestUrl.searchParams.get('limit') || 100)))
     const offset = Math.max(0, Number(requestUrl.searchParams.get('offset') || 0))
     const result = await service.from('shipment_events').select('id,shipment_id,event_type,status,location,note,occurred_at,created_by,created_by_name,metadata').eq('shipment_id', shipmentId).order('occurred_at', { ascending: false }).range(offset, offset + limit - 1)
@@ -477,30 +480,34 @@ const list = async (service: ReturnType<typeof serviceClient>, staff: Staff, req
   const scopedKinds = new Set(['packages', 'customs', 'invoices', 'payments', 'exceptions', 'status_history', 'documents', 'movements', 'route_legs', 'manifests'])
   const shipmentId = text(requestUrl.searchParams.get('shipment_id'), 128)
   if (shipmentId && scopedKinds.has(kind)) {
-    const shipment = await service.from('shipments').select('id,branch,archived_at').eq('id', shipmentId).maybeSingle()
+    const shipment = await service.from('shipments').select('id,branch,archived_at,assigned_staff_id').eq('id', shipmentId).maybeSingle()
     if (shipment.error) throw shipment.error
-    if (!shipment.data || shipment.data.archived_at || (staff.branch !== 'all' && shipment.data.branch && String(shipment.data.branch) !== String(staff.branch))) return { kind, items: [], offset: 0, limit: 0 }
+    if (!shipment.data || shipment.data.archived_at || (staff.role === 'driver' && String(shipment.data.assigned_staff_id || '') !== staff.id) || (!GLOBAL_DATA_ROLES.has(staff.role) && staff.branch !== 'all' && String(shipment.data.branch || '') !== String(staff.branch || ''))) return { kind, items: [], offset: 0, limit: 0 }
   }
   const from = offset
   const to = offset + limit - 1
   let query: any
   if (kind === 'shipments') {
     query = service.from('shipments').select('id,customer_name,origin_key,dest_key,type,weight_kg,volume_cbm,total_amount,paid_amount,current_step_index,operational_status,priority,eta,current_location_label,tracking_updated_at,service_level,incoterm,origin_hub,transit_hub,destination_hub,state_version,updated_at').order('created_at', { ascending: false })
+    if (staff.role === 'driver') query = query.eq('assigned_staff_id', staff.id)
+    else if (!GLOBAL_DATA_ROLES.has(staff.role) && staff.branch && staff.branch !== 'all') query = query.eq('branch', staff.branch)
   } else if (kind === 'packages') {
     query = service.from('shipment_packages').select('*').order('created_at', { ascending: false })
   } else if (kind === 'customs') {
     query = service.from('shipment_customs_cases').select('*').order('updated_at', { ascending: false })
   } else if (kind === 'consolidations') {
+    requireRole(staff, ['admin', 'super_admin', 'accountant', 'finance', 'operations'])
     query = service.from('consolidation_batches').select('*').order('created_at', { ascending: false })
   } else if (kind === 'invoices') {
-    requireRole(staff, ['admin', 'super_admin', 'accountant'])
+    requireRole(staff, ['admin', 'super_admin', 'accountant', 'finance'])
     query = service.from('shipment_invoices').select('*').order('created_at', { ascending: false })
   } else if (kind === 'payments') {
-    requireRole(staff, ['admin', 'super_admin', 'accountant'])
+    requireRole(staff, ['admin', 'super_admin', 'accountant', 'finance'])
     query = service.from('payment_transactions').select('*').order('created_at', { ascending: false })
   } else if (kind === 'exceptions') {
     query = service.from('logistics_exceptions').select('*').order('created_at', { ascending: false })
   } else if (kind === 'quotes') {
+    requireRole(staff, ['admin', 'super_admin', 'accountant', 'finance', 'operations'])
     query = service.from('quote_requests').select('id,customer_user_id,customer_name,customer_phone,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,dimensional_weight_kg,billable_weight_kg,status,quoted_amount,currency,valid_until,quoted_by,quoted_at,accepted_at,decision_note,created_at,updated_at').order('created_at', { ascending: false })
   } else if (kind === 'documents') {
     query = service.from('shipment_documents').select('id,shipment_id,customer_user_id,document_type,title,file_url,file_path,mime_type,file_size_bytes,sha256,is_public,document_status,version,verified_at,verified_by,created_by,created_at').order('created_at', { ascending: false })
@@ -509,6 +516,7 @@ const list = async (service: ReturnType<typeof serviceClient>, staff: Staff, req
   } else if (kind === 'route_legs') {
     query = service.from('shipment_route_legs').select('*').order('planned_departure', { ascending: true, nullsFirst: false })
   } else if (kind === 'manifests') {
+    requireRole(staff, ['admin', 'super_admin', 'accountant', 'finance', 'operations'])
     query = service.from('shipment_manifests').select('*').order('created_at', { ascending: false })
   } else if (kind === 'outbox') {
     requireRole(staff, ['admin', 'super_admin'])
@@ -517,9 +525,20 @@ const list = async (service: ReturnType<typeof serviceClient>, staff: Staff, req
     query = service.from('shipment_status_history').select('*').order('occurred_at', { ascending: false })
   }
   if (shipmentId && scopedKinds.has(kind)) query = query.eq('shipment_id', shipmentId)
+  else if (!GLOBAL_DATA_ROLES.has(staff.role) && staff.branch && staff.branch !== 'all' && ['packages','customs','exceptions','status_history','documents','movements','route_legs'].includes(kind)) {
+    const scoped = await service.from('shipments').select('id').eq('branch', staff.branch).limit(5000)
+    if (scoped.error) throw scoped.error
+    const ids = (scoped.data || []).map((row: {id:string}) => row.id)
+    if (!ids.length) return { kind, items: [], offset, limit }
+    query = query.in('shipment_id', ids)
+  }
   const result = await query.range(from, to)
   if (result.error) throw result.error
-  return { kind, items: result.data || [], offset, limit }
+  const items = result.data || []
+  const visibleItems = kind === 'shipments' && !FINANCE_ROLES.has(staff.role)
+    ? items.map((row: Record<string, unknown>) => { const { total_amount, paid_amount, ...safe } = row; return safe })
+    : items
+  return { kind, items: visibleItems, offset, limit }
 }
 
 const processOutbox = async (service: ReturnType<typeof serviceClient>, staff: Staff, limit: number) => {
@@ -561,7 +580,13 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors(req) })
   try {
     const { service, staff } = await authenticateStaff(req)
-    if (req.method === 'GET') return json(req, await list(service, staff, new URL(req.url)))
+    if (req.method === 'GET') {
+      if (!READ_ROLES.has(staff.role)) return json(req, { error: 'Forbidden' }, 403)
+      const requestUrl = new URL(req.url)
+      const kind = requestUrl.searchParams.get('kind') || 'shipments'
+      if (['driver','delivery'].includes(staff.role) && !['shipments','events'].includes(kind)) return json(req, { error: 'Forbidden' }, 403)
+      return json(req, await list(service, staff, requestUrl))
+    }
     if (req.method !== 'POST') return json(req, { error: 'Method not allowed' }, 405)
     if ((req.headers.get('content-type') || '').toLowerCase().includes('multipart/form-data')) {
       return json(req, { item: await documentUpload(service, staff, req) })
@@ -587,6 +612,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     if (error instanceof Response) return error
     console.error('logistics-control-plane error', error)
-    return json(req, { error: error instanceof Error ? error.message : 'Internal server error' }, 500)
+    const message = error instanceof Error ? error.message : 'Internal server error'
+    return json(req, { error: message }, message.startsWith('Role required:') ? 403 : 500)
   }
 })

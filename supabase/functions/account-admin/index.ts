@@ -1,7 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 type Kind = 'customer' | 'customer_match' | 'staff' | 'receipt' | 'log' | 'shipment' | 'task' | 'finance' | 'pricing' | 'quote' | 'quote_requests' | 'notification' | 'notification_delivery' | 'chat'
-type Action = 'list' | 'create' | 'update' | 'archive' | 'delete' | 'claim' | 'complete' | 'send' | 'mark_read'
+type Action = 'list' | 'create' | 'update' | 'archive' | 'delete' | 'claim' | 'complete' | 'send' | 'mark_read' | 'calculate'
 type JsonRecord = Record<string, unknown>
 
 const ALLOWED_ORIGINS = new Set([
@@ -113,7 +113,7 @@ function normalizeKind(value: unknown): Kind {
 
 function normalizeAction(value: unknown): Action {
   const action = String(value || 'list').toLowerCase()
-  if (action === 'create' || action === 'update' || action === 'archive' || action === 'delete' || action === 'claim' || action === 'complete' || action === 'send' || action === 'mark_read') return action
+  if (action === 'create' || action === 'update' || action === 'archive' || action === 'delete' || action === 'claim' || action === 'complete' || action === 'send' || action === 'mark_read' || action === 'calculate') return action
   return 'list'
 }
 
@@ -153,11 +153,12 @@ async function getActor(req: Request) {
   const role = String(staffRow.role || '')
   const isSuperAdmin = role === 'super_admin'
   const canRead = ['admin', 'super_admin', 'accountant'].includes(role)
+  const canReadFinance = ['admin', 'super_admin', 'accountant', 'finance'].includes(role)
   const canReadOperations = ['admin', 'super_admin', 'accountant', 'warehouse', 'warehouse_china', 'warehouse_uae', 'warehouse_erbil', 'operations', 'delivery'].includes(role)
   const canWrite = ['admin', 'super_admin'].includes(role)
   const canChat = ['admin', 'super_admin', 'accountant', 'finance', 'warehouse', 'warehouse_china', 'warehouse_uae', 'warehouse_erbil', 'operations', 'driver', 'delivery'].includes(role)
 
-  return { serviceClient, staffRow, role, isSuperAdmin, canRead, canReadOperations, canWrite, canChat }
+  return { serviceClient, staffRow, role, isSuperAdmin, canRead, canReadFinance, canReadOperations, canWrite, canChat }
 }
 
 async function logActivity(client: ReturnType<typeof createClient>, staffId: string, staffName: string | null, action: string, targetId: string | null, details: JsonRecord | null = null) {
@@ -245,8 +246,39 @@ async function listTasks(client: ReturnType<typeof createClient>, actor: { id: s
 }
 
 function addAmount(target: Record<string, number>, currency: unknown, amount: unknown) { const key = String(currency || 'USD').toUpperCase(); target[key] = Math.round(((target[key] || 0) + Number(amount || 0)) * 100) / 100 }
-async function calculateQuote(client: ReturnType<typeof createClient>, data: JsonRecord) { const transport = txt(data.transport_mode || data.type).toLowerCase(); const origin = txt(data.origin_key || data.origin); const destination = txt(data.destination_key || data.destination); const product = txt(data.product_type || 'General goods / no battery / no screen'); const actual = Number(data.actual_weight ?? data.weight_kg ?? 0); const length = Number(data.length_cm || 0); const width = Number(data.width_cm || 0); const height = Number(data.height_cm || 0); if (!['air','sea','land'].includes(transport) || !origin || !destination || !Number.isFinite(actual) || actual < 0) throw responseError('Invalid quote inputs', 400); const volumeCbm = length > 0 && width > 0 && height > 0 ? (length * width * height) / 1000000 : 0; const volumetricWeight = transport === 'air' || transport === 'sea' ? (length > 0 && width > 0 && height > 0 ? (length * width * height) / 6000 : 0) : 0; const billableWeight = Math.max(actual, volumetricWeight); const unit = transport === 'sea' ? 'cbm' : 'kg'; const { data: rates, error } = await client.from('pricing_rates').select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from').eq('is_active', true).eq('origin_key', origin).eq('destination_key', destination).eq('transport_mode', transport).eq('unit', unit).order('effective_from', { ascending: false }).limit(100); if (error) throw error; const exact = (rates ?? []).find((r: any) => r.product_type === product) || (rates ?? []).find((r: any) => r.product_type === 'General goods / no battery / no screen') || (rates ?? [])[0]; if (!exact) throw responseError('No active rate found for this route and product', 404); const billableUnits = unit === 'cbm' ? volumeCbm : billableWeight; const amount = Math.round(billableUnits * Number(exact.amount) * 100) / 100; return { rate_snapshot: exact, actual_weight_kg: actual, volume_cbm: Math.round(volumeCbm * 10000) / 10000, volumetric_weight_kg: Math.round(volumetricWeight * 100) / 100, billable_weight_kg: Math.round(billableWeight * 100) / 100, billable_units: Math.round(billableUnits * 10000) / 10000, total: amount, currency: exact.currency, transit_min_days: exact.transit_min_days, transit_max_days: exact.transit_max_days, formula: 'Volumetric weight = L × W × H ÷ 6000; billable weight = max(actual, volumetric)' } }
-async function listQuoteRequests(client: ReturnType<typeof createClient>) { const { data, error } = await client.from('quote_requests').select('id,customer_user_id,customer_name,customer_phone,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,dimensional_weight_kg,billable_weight_kg,status,quoted_amount,currency,valid_until,decision_note,created_at,updated_at').order('created_at', { ascending: false }).limit(300); if (error) throw error; return { kind: 'quote_requests', items: data ?? [] } }
+async function calculateQuote(client: ReturnType<typeof createClient>, data: JsonRecord) {
+  const transport = (txt(data.transport_mode || data.type) || '').toLowerCase()
+  const origin = txt(data.origin_key || data.origin)
+  const destination = txt(data.destination_key || data.destination)
+  const product = txt(data.product_type || 'General goods / no battery / no screen') || 'General goods / no battery / no screen'
+  const actual = Number(data.actual_weight ?? data.weight_kg ?? 0)
+  const length = Number(data.length_cm || 0)
+  const width = Number(data.width_cm || 0)
+  const height = Number(data.height_cm || 0)
+  const dimensionsProvided = [data.length_cm, data.width_cm, data.height_cm].some(value => value !== undefined && value !== null && value !== '')
+  const directVolumeProvided = data.volume_cbm !== undefined && data.volume_cbm !== null && data.volume_cbm !== ''
+  const directVolume = directVolumeProvided ? Number(data.volume_cbm) : 0
+  if (!['air','sea','land'].includes(transport) || !origin || !destination || !Number.isFinite(actual) || actual < 0) throw responseError('Invalid quote inputs', 400)
+  if (directVolumeProvided && (!Number.isFinite(directVolume) || directVolume < 0)) throw responseError('Invalid volume', 400)
+  if (![length, width, height].every(Number.isFinite) || [length, width, height].some(value => value < 0)) throw responseError('Invalid dimensions', 400)
+  if (dimensionsProvided && !(length > 0 && width > 0 && height > 0)) throw responseError('Provide all three positive dimensions', 400)
+  const dimensionVolume = length > 0 && width > 0 && height > 0 ? (length * width * height) / 1000000 : 0
+  const volumeCbm = directVolume > 0 ? directVolume : dimensionVolume
+  const volumetricWeight = transport === 'air' || transport === 'sea'
+    ? (dimensionVolume > 0 ? (length * width * height) / 6000 : volumeCbm * 1000000 / 6000)
+    : 0
+  const billableWeight = Math.max(actual, volumetricWeight)
+  const unit = transport === 'sea' ? 'cbm' : 'kg'
+  const { data: rates, error } = await client.from('pricing_rates').select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from').eq('is_active', true).eq('origin_key', origin).eq('destination_key', destination).eq('transport_mode', transport).eq('unit', unit).order('effective_from', { ascending: false }).limit(100)
+  if (error) throw error
+  const exact = (rates ?? []).find((r: any) => r.product_type === product) || (rates ?? []).find((r: any) => r.product_type === 'General goods / no battery / no screen') || (rates ?? [])[0]
+  if (!exact) throw responseError('No active rate found for this route and product', 404)
+  const billableUnits = unit === 'cbm' ? volumeCbm : billableWeight
+  const amount = Math.round(billableUnits * Number(exact.amount) * 100) / 100
+  return { rate_snapshot: exact, actual_weight_kg: actual, volume_cbm: Math.round(volumeCbm * 10000) / 10000, volumetric_weight_kg: Math.round(volumetricWeight * 100) / 100, billable_weight_kg: Math.round(billableWeight * 100) / 100, billable_units: Math.round(billableUnits * 10000) / 10000, total: amount, currency: exact.currency, transit_min_days: exact.transit_min_days, transit_max_days: exact.transit_max_days, formula: 'Volumetric weight = L × W × H ÷ 6000 (or CBM × 166.67); billable weight = max(actual, volumetric)' }
+}
+
+async function listQuoteRequests(client: ReturnType<typeof createClient>) { const { data, error } = await client.from('quote_requests').select('id,customer_user_id,customer_name,customer_phone,customer_email,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,dimensional_weight_kg,billable_weight_kg,status,quoted_amount,currency,valid_until,decision_note,created_at,updated_at').order('created_at', { ascending: false }).limit(300); if (error) throw error; return { kind: 'quote_requests', items: data ?? [] } }
 async function listStaffNotifications(client: ReturnType<typeof createClient>, staffId: string) { const { data, error } = await client.from('staff_notifications').select('id,kind,title,body,action_url,entity_type,entity_id,read_at,created_at').eq('staff_id', staffId).order('created_at', { ascending: false }).limit(50); if (error) throw error; return { kind: 'notification', items: data ?? [], unread_count: (data ?? []).filter((row: any) => !row.read_at).length } }
 async function listNotificationDelivery(client: ReturnType<typeof createClient>) { const { data, error } = await client.from('notification_delivery_events').select('id,provider,provider_message_id,provider_event_id,status,recipient,occurred_at,received_at').order('occurred_at', { ascending: false }).limit(40); if (error) throw error; return { kind: 'notification_delivery', items: data ?? [] } }
 async function listChat(client: ReturnType<typeof createClient>, staffId: string) {
@@ -464,9 +496,6 @@ async function upsertCustomer(client: ReturnType<typeof createClient>, payload: 
 async function updateCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, isSuperAdmin: boolean }) {
   const id = txt(payload.id)
   if (!id) throw responseError('Missing customer id', 400)
-  if (!actor.isSuperAdmin && (txt(payload.email) !== null || txt(payload.password) !== null || payload.gc_code !== undefined || payload.code !== undefined)) {
-    throw responseError('Email, password, and GC code are managed by Super Admin only', 403)
-  }
   const updates: JsonRecord = {}
   for (const key of ['name', 'email', 'phone', 'phone2', 'city', 'delivery_location', 'note', 'manager_staff_id'] as const) {
     if (!actor.isSuperAdmin && key === 'email') continue
@@ -480,9 +509,17 @@ async function updateCustomer(client: ReturnType<typeof createClient>, payload: 
     if (!requestedCode) throw responseError('GC code must match GC-### or GC-* format', 400)
   }
 
-  const { data: current, error: currentErr } = await client.from('customer_directory').select('id,auth_user_id,code,gc_code').eq('id', id).maybeSingle()
+  const { data: currentRow, error: currentErr } = await client.from('customer_directory').select('id,auth_user_id,code,gc_code,email').eq('id', id).maybeSingle()
+  const current = currentRow as Record<string, any> | null
   if (currentErr) throw currentErr
   if (!current) throw responseError('Customer not found', 404)
+  const emailWasProvided = Object.prototype.hasOwnProperty.call(payload, 'email')
+  const emailChanged = emailWasProvided && (txt(payload.email) || '').toLowerCase() !== (txt(current.email) || '').toLowerCase()
+  const codeWasProvided = payload.gc_code !== undefined || payload.code !== undefined
+  const codeChanged = codeWasProvided && normalizeGcCode(payload.gc_code ?? payload.code) !== normalizeGcCode(current.code ?? current.gc_code)
+  if (!actor.isSuperAdmin && (emailChanged || txt(payload.password) !== null || codeChanged)) {
+    throw responseError('Email, password, and GC code are managed by Super Admin only', 403)
+  }
   if (requestedCode) {
     const currentCode = normalizeGcCode(current.code ?? current.gc_code)
     if (currentCode && currentCode !== requestedCode) throw responseError('GC code is immutable after customer creation', 409)
@@ -673,14 +710,14 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(req) })
   try {
     const actor = await getActor(req)
-    const { serviceClient, staffRow, canRead, canReadOperations, canWrite, canChat, isSuperAdmin } = actor
+    const { serviceClient, staffRow, canRead, canReadFinance, canReadOperations, canWrite, canChat, isSuperAdmin } = actor
     const url = new URL(req.url)
     if (req.method === 'GET') {
       const kind = normalizeKind(url.searchParams.get('kind'))
       if (kind === 'receipt' && canReadOperations) return json(await listReceipts(serviceClient), {}, req)
       if (kind === 'customer_match' && canReadOperations) { const code = normalizeGcCode(url.searchParams.get('code')); if (!code) return json({ customer: null, error: 'Invalid GC code' }, { status: 400 }, req); return json({ customer: await lookupCustomer(serviceClient, { customer_code: code }), normalized_code: code }, {}, req) }
       if (kind === 'task' && canReadOperations) return json(await listTasks(serviceClient, { id: staffRow.id, role: String(staffRow.role || ''), branch: staffRow.branch }), {}, req)
-      if (kind === 'finance' && canRead) return json(await listFinance(serviceClient), {}, req)
+      if (kind === 'finance' && canReadFinance) return json(await listFinance(serviceClient), {}, req)
       if (kind === 'pricing' && canRead) return json(await listPricing(serviceClient), {}, req)
       if (kind === 'quote_requests' && canReadOperations) return json(await listQuoteRequests(serviceClient), {}, req)
       if (kind === 'notification' && canReadOperations) return json(await listStaffNotifications(serviceClient, staffRow.id), {}, req)
@@ -715,7 +752,7 @@ Deno.serve(async (req) => {
       if (!canReadOperations) return json({ error: 'Forbidden' }, { status: 403 }, req)
       return json(await createReceipt(serviceClient, data, files, { id: staffRow.id, name: staffRow.full_name }), {}, req)
     }
-    if (kind === 'quote' && action === 'calculate') { if (!canReadOperations) return json({ error: 'Operations access required' }, { status: 403 }, req); return json(await calculateQuote(serviceClient, data), {}, req) }
+    if (kind === 'quote' && action === 'calculate') { if (!canReadOperations && !canReadFinance) return json({ error: 'Operations access required' }, { status: 403 }, req); return json(await calculateQuote(serviceClient, data), {}, req) }
     if (kind === 'pricing') { const financeRole = ['admin','super_admin','accountant'].includes(String(staffRow.role || '')); if (!financeRole) return json({ error: 'Finance role required' }, { status: 403 }, req); const pricingActor = { id: staffRow.id, name: staffRow.full_name }; if (action === 'update') return json(data.rate_type === 'exchange' ? await updateExchangeRate(serviceClient, data, pricingActor) : await updatePricing(serviceClient, data, pricingActor), {}, req); return json({ error: 'Unsupported pricing action' }, { status: 400 }, req) }
     if (kind === 'notification' && action === 'update' && canReadOperations) return json(await markStaffNotificationRead(serviceClient, staffRow.id, data), {}, req)
     if (kind === 'chat' && canChat) {

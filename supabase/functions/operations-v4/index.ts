@@ -3,6 +3,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 const ORIGINS = new Set(['https://globall-cloud.pages.dev','https://globall-cloud.netlify.app'])
 const STAFF_ROLES = new Set(['super_admin','admin','accountant','warehouse','warehouse_china','warehouse_uae','warehouse_erbil','operations','delivery','finance'])
 const WRITE_ROLES = new Set(['super_admin','admin'])
+const FINANCE_ROLES = new Set(['super_admin','admin','accountant','finance'])
 const cors=(req:Request)=>({
  'Access-Control-Allow-Origin':ORIGINS.has(req.headers.get('origin')||'')?req.headers.get('origin')!:'https://globall-cloud.pages.dev',
  'Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info, x-supabase-auth-token',
@@ -21,51 +22,42 @@ async function actor(req:Request){
  return {admin,user:data.user,staff}
 }
 async function requireStaff(req:Request,write=false){const a=await actor(req);if(!a.staff?.is_active||!STAFF_ROLES.has(String(a.staff.role)))throw new Error('Staff permission required');if(write&&!WRITE_ROLES.has(String(a.staff.role)))throw new Error('Admin permission required');return a}
-async function listShipments(admin:any, gcCode?:string){
+async function listShipments(admin:any, gcCode?:string, includeFinance=false){
  let q=admin.from('shipments').select('id,tracking_id,route,type,status,created_at,customer_name,customer_phone,customer_user_id,directory_customer_id,customer_gc_code,origin_key,dest_key,branch,total_amount,paid_amount,current_step_index,step_dates,eta,items_count,weight_kg,volume_cbm,transport_mode,origin_warehouse,destination_warehouse,cargo_description,carton_count,actual_weight_kg,length_cm,width_cm,height_cm,volumetric_weight_kg,chargeable_weight_kg,updated_at').order('created_at',{ascending:false}).limit(500)
  if(gcCode) q=q.or(`customer_gc_code.eq.${gcCode},tracking_id.eq.${gcCode}`)
- const {data,error}=await q;if(error)throw error;
- const rows=data||[];
- if(!rows.length)return rows;
-
- let packages:any[]=[];
- try{
-   const ids=rows.map((x:any)=>x.id).filter(Boolean);
-   const r=await admin.from('shipment_packages').select('shipment_id,package_code,package_type,description,weight_kg,metadata').in('shipment_id',ids);
-   if(!r.error)packages=r.data||[];
- }catch(_){}
-
- const byShipment=new Map<string,any[]>();
- for(const p of packages){
-   const key=String(p.shipment_id);
-   if(!byShipment.has(key))byShipment.set(key,[]);
-   byShipment.get(key)!.push(p);
- }
+ const {data,error}=await q;if(error)throw error
+ const rows=data||[];if(!rows.length)return rows
+ let packages:any[]=[]
+ try{const ids=rows.map((x:any)=>x.id).filter(Boolean);const r=await admin.from('shipment_packages').select('shipment_id,package_code,package_type,description,weight_kg,metadata').in('shipment_id',ids);if(!r.error)packages=r.data||[]}catch(_){}
+ const byShipment=new Map<string,any[]>()
+ for(const p of packages){const key=String(p.shipment_id);if(!byShipment.has(key))byShipment.set(key,[]);byShipment.get(key)!.push(p)}
  return rows.map((s:any)=>{
-   const ps=byShipment.get(String(s.id))||[];
-   const customers=new Set<string>();
-   const contents:string[]=[];
-   for(const p of ps){
-     const meta=p.metadata&&typeof p.metadata==='object'?p.metadata:{};
-     const gc=meta.customer_gc_code||meta.gc_code||meta.customer_code;
-     if(gc)customers.add(String(gc).toUpperCase());
-     const desc=p.description||meta.contents||meta.description;
-     if(desc)contents.push(String(desc));
-   }
-   return {...s,package_count:ps.length,customer_goods_count:customers.size||((s.customer_gc_code)?1:0),cargo_contents:[...new Set(contents)].slice(0,12)};
- });
+   const ps=byShipment.get(String(s.id))||[];const customers=new Set<string>();const contents:string[]=[]
+   for(const p of ps){const meta=p.metadata&&typeof p.metadata==='object'?p.metadata:{};const gc=meta.customer_gc_code||meta.gc_code||meta.customer_code;if(gc)customers.add(String(gc).toUpperCase());const desc=p.description||meta.contents||meta.description;if(desc)contents.push(String(desc))}
+   const row={...s,package_count:ps.length,customer_goods_count:customers.size||((s.customer_gc_code)?1:0),cargo_contents:[...new Set(contents)].slice(0,12)}
+   if(!includeFinance){delete row.total_amount;delete row.paid_amount}
+   return row
+ })
 }
-async function shipmentDetail(admin:any,id:string){
+async function shipmentDetail(admin:any,id:string,includeFinance=false){
  const {data:shipment,error}=await admin.from('shipments').select('*').eq('id',id).maybeSingle();if(error)throw error;if(!shipment)throw new Error('Shipment not found')
+ const ledgerQuery=includeFinance?admin.from('shipment_financial_ledger').select('*').eq('shipment_id',id).order('created_at',{ascending:false}):Promise.resolve({data:[],error:null})
  const [packages,events,receipts,insurance,ledger]=await Promise.all([
   admin.from('shipment_packages').select('*').eq('shipment_id',id).order('created_at',{ascending:false}),
   admin.from('shipment_tracking_events').select('*').eq('shipment_id',id).order('created_at',{ascending:false}),
   admin.from('warehouse_receipts').select('*').eq('shipment_id',id).order('received_at',{ascending:false}),
   admin.from('shipment_insurance').select('*').eq('shipment_id',id).order('purchased_at',{ascending:false}),
-  admin.from('shipment_financial_ledger').select('*').eq('shipment_id',id).order('created_at',{ascending:false})
- ]);return {shipment,packages:packages.data||[],events:events.data||[],receipts:receipts.data||[],insurance:insurance.data||[],ledger:ledger.data||[]}
+  ledgerQuery
+ ])
+ const safeShipment={...shipment}
+ if(!includeFinance){delete safeShipment.total_amount;delete safeShipment.paid_amount}
+ return {shipment:safeShipment,packages:packages.data||[],events:events.data||[],receipts:receipts.data||[],insurance:insurance.data||[],ledger:includeFinance?(ledger.data||[]):[]}
 }
-async function customers(admin:any){const {data,error}=await admin.from('customer_directory').select('*').order('created_at',{ascending:false}).limit(2000);if(error)throw error;return data||[]}
+async function customers(admin:any,includeFinance=false){
+ const {data,error}=await admin.from('customer_directory_accounts').select('*').order('created_at',{ascending:false}).limit(2000)
+ if(error)throw error
+ return (data||[]).map((row:any)=>{if(includeFinance)return row;const {total_amount,outstanding_amount,...safe}=row;return safe})
+}
 async function alerts(admin:any,staffId:string){const {data,error}=await admin.from('staff_alerts').select('*').order('created_at',{ascending:false}).limit(200);if(error)throw error;const staffRow=await admin.from('staff').select('role').eq('id',staffId).maybeSingle();const role=String(staffRow.data?.role||'');return (data||[]).filter((x:any)=>!x.audience_role||x.audience_role===role)}
 async function pricing(admin:any){const [rates,fx,rules]=await Promise.all([admin.from('pricing_rates').select('*').order('origin_key').order('transport_mode').order('product_type'),admin.from('exchange_rates').select('*').order('created_at',{ascending:false}).limit(20),admin.from('pricing_rules').select('*').order('created_at',{ascending:false})]);if(rates.error)throw rates.error;if(fx.error)throw fx.error;if(rules.error)throw rules.error;return {rates:rates.data||[],exchange_rates:fx.data||[],rules:rules.data||[]}}
 async function finance(admin:any){
@@ -103,4 +95,4 @@ async function post(req:Request,a:any){
  }
  throw new Error('Unsupported action')
 }
-Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors(req)});try{const a=await actor(req);if(req.method==='POST')return json(req,await post(req,a));const u=new URL(req.url);const kind=text(u.searchParams.get('kind'))||'overview';const staffOnly=['shipments','shipment','customers','alerts','pricing','finance','chat'];if(staffOnly.includes(kind)&&(!a.staff?.is_active||!STAFF_ROLES.has(String(a.staff.role))))throw new Error('Staff permission required');if(kind==='shipments')return json(req,{items:await listShipments(a.admin,gc(u.searchParams.get('gc'))||undefined)});if(kind==='shipment')return json(req,await shipmentDetail(a.admin,text(u.searchParams.get('id'))));if(kind==='customers')return json(req,{items:await customers(a.admin)});if(kind==='alerts')return json(req,{items:await alerts(a.admin,a.staff.id)});if(kind==='pricing')return json(req,await pricing(a.admin));if(kind==='finance')return json(req,await finance(a.admin));if(kind==='chat')return json(req,await chat(req,a));return json(req,{ok:true,service:'operations-v4',time:new Date().toISOString()})}catch(e){const m=e instanceof Error?e.message:String(e);const s=/Unauthorized/i.test(m)?401:/permission|Forbidden/i.test(m)?403:/not found|required|Invalid/i.test(m)?400:500;return json(req,{error:m},s)}})
+Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors(req)});try{const a=await actor(req);if(req.method==='POST')return json(req,await post(req,a));const u=new URL(req.url);const kind=text(u.searchParams.get('kind'))||'overview';const staffOnly=['shipments','shipment','customers','alerts','pricing','finance','chat'];if(staffOnly.includes(kind)&&(!a.staff?.is_active||!STAFF_ROLES.has(String(a.staff.role))))throw new Error('Staff permission required');if(kind==='shipments')return json(req,{items:await listShipments(a.admin,gc(u.searchParams.get('gc'))||undefined,FINANCE_ROLES.has(String(a.staff?.role||'')))});if(kind==='shipment')return json(req,await shipmentDetail(a.admin,text(u.searchParams.get('id')),FINANCE_ROLES.has(String(a.staff?.role||''))));if(kind==='customers')return json(req,{items:await customers(a.admin,FINANCE_ROLES.has(String(a.staff?.role||'')))});if(kind==='alerts')return json(req,{items:await alerts(a.admin,a.staff!.id)});if(kind==='pricing')return json(req,await pricing(a.admin));if(kind==='finance'){if(!FINANCE_ROLES.has(String(a.staff?.role||'')))throw new Error('Finance permission required');return json(req,await finance(a.admin))}if(kind==='chat')return json(req,await chat(req,a));return json(req,{ok:true,service:'operations-v4',time:new Date().toISOString()})}catch(e){const m=e instanceof Error?e.message:String(e);const s=/Unauthorized/i.test(m)?401:/permission|Forbidden/i.test(m)?403:/not found|required|Invalid/i.test(m)?400:500;return json(req,{error:m},s)}})
