@@ -1,0 +1,65 @@
+/* Globall Cloud — Customer Dashboard + Accounts Console final visual polish. */
+:root{--gc-gold:#d4af37;--gc-gold-hi:#f3d27a;--gc-gold-soft:#ffe7ad;--gc-navy:#061428;--gc-panel:#0c2139;--gc-panel-hi:#123253;--gc-line:rgba(212,175,55,.24);--gc-muted:#9bb0c5;--gc-ease:cubic-bezier(.23,1,.32,1)}
+/* Customer workspace */
+body:has(.customer-welcome){background:radial-gradient(900px 480px at 76% -10%,rgba(212,175,55,.16),transparent 64%),radial-gradient(680px 420px at 5% 36%,rgba(20,66,104,.20),transparent 65%),#061428!important}
+body:has(.customer-welcome) .top{background:rgba(4,14,29,.88)!important;border-bottom:1px solid rgba(212,175,55,.22)!important;box-shadow:0 14px 40px rgba(0,0,0,.22)}
+body:has(.customer-welcome) .hero{margin:24px 0 14px!important}
+body:has(.customer-welcome) .hero .card{position:relative;overflow:hidden;border:1px solid rgba(212,175,55,.28)!important;background:radial-gradient(400px 180px at 12% 0,rgba(212,175,55,.14),transparent 70%),linear-gradient(145deg,#153553,#081b30)!important;box-shadow:0 24px 70px rgba(0,0,0,.25)!important}
+body:has(.customer-welcome) .hero .card:after{content:"CUSTOMER WORKSPACE";position:absolute;inset-inline-end:24px;top:22px;color:rgba(243,210,122,.62);font:700 9px/1 'JetBrains Mono',monospace;letter-spacing:2px}
+body:has(.customer-welcome) .hero h1{max-width:760px!important;color:#fff!important;letter-spacing:-.04em}
+body:has(.customer-welcome) .gc-route-chip{border-color:rgba(212,175,55,.25)!important;background:rgba(4,17,31,.38)!important;transition:transform .18s var(--gc-ease),border-color .18s ease,background .18s ease}
+body:has(.customer-welcome) .gc-route-chip:hover{transform:translateY(-3px);border-color:rgba(243,210,122,.65)!important;background:rgba(212,175,55,.10)!important}
+body:has(.customer-welcome) .gc-route-chip i{color:var(--gc-gold-hi)!important;border-color:rgba(212,175,55,.44)!important;background:rgba(212,175,55,.11)!important}
+body:has(.customer-welcome) .portal-section-heading{margin-top:36px!important;border-inline-start:2px solid var(--gc-gold);padding-inline-start:14px!important}
+body:has(.customer-welcome) .portal-section-heading:before{display:none!important}
+body:has(.customer-welcome) .portal-section-heading span{color:var(--gc-gold-hi)!important}
+body:has(.customer-welcome) .card{border-color:rgba(212,175,55,.18)!important;background:linear-gradient(155deg,rgba(18,51,80,.92),rgba(7,24,42,.96))!important;box-shadow:0 18px 48px rgba(0,0,0,.18)!important}
+body:has(.customer-welcome) .card:hover{border-color:rgba(243,210,122,.42)!important}
+body:has(.customer-welcome) .kpi{min-height:126px!important}
+body:has(.customer-welcome) .kpi b,body:has(.customer-welcome) .detail-value{color:var(--gc-gold-hi)!important}
+body:has(.customer-welcome) .portal-status{border-color:rgba(212,175,55,.32)!important;background:linear-gradient(100deg,rgba(212,175,55,.11),rgba(16,43,72,.76))!important}
+body:has(.customer-welcome) .portal-status strong{color:var(--gc-gold-soft)!important}
+body:has(.customer-welcome) .btn.primary{background:linear-gradient(135deg,var(--gc-gold-hi),var(--gc-gold))!important;color:#17150d!important;box-shadow:0 12px 28px rgba(212,175,55,.18)!important}
+body:has(.customer-welcome) .shipment-card{background:linear-gradient(145deg,rgba(22,55,84,.88),rgba(8,27,47,.96))!important}
+body:has(.customer-welcome) .gc-account-card{background:linear-gradient(145deg,rgba(19,55,84,.96),rgba(7,25,43,.98))!important;border-color:rgba(212,175,55,.24)!important}
+body:has(.customer-welcome) .gc-account-card:before{background:radial-gradient(circle,rgba(212,175,55,.13),transparent 68%)!important}
+body:has(.customer-welcome) .gc-settings-tabs{border-color:rgba(212,175,55,.20)!important;background:rgba(3,14,27,.80)!important}
+body:has(.customer-welcome) .gc-settings-tabs button.active{background:linear-gradient(135deg,rgba(243,210,122,.22),rgba(212,175,55,.07))!important;border-color:rgba(243,210,122,.48)!important;color:var(--gc-gold-soft)!important}
+/* Staff console */
+body:has(#consoleTabs){background:radial-gradient(900px 420px at 84% -8%,rgba(212,175,55,.13),transparent 62%),linear-gradient(180deg,#061428,#07111e 82%)!important}
+body:has(#consoleTabs) .shell{max-width:1380px!important;gap:14px!important}
+body:has(#consoleTabs) .mark{background:linear-gradient(135deg,var(--gc-gold-hi),var(--gc-gold))!important;color:#19150b!important;box-shadow:0 14px 30px rgba(212,175,55,.20)!important}
+body:has(#consoleTabs) .eyebrow{color:var(--gc-gold-hi)!important}
+body:has(#consoleTabs) .hero,body:has(#consoleTabs) .panel{border-color:rgba(212,175,55,.20)!important;background:linear-gradient(155deg,rgba(18,50,78,.96),rgba(7,24,42,.98))!important;box-shadow:0 22px 60px rgba(0,0,0,.25)!important}
+body:has(#consoleTabs) .hero{padding:16px!important}
+body:has(#consoleTabs) .section-title h2{color:#fff}
+body:has(#consoleTabs) .notice{border-color:rgba(212,175,55,.18)!important;background:rgba(212,175,55,.06)!important}
+body:has(#consoleTabs) .chip{border-color:rgba(212,175,55,.23)!important;background:rgba(212,175,55,.06)!important;color:var(--gc-gold-soft)!important}
+body:has(#consoleTabs) .tab{border-color:rgba(212,175,55,.20)!important;background:rgba(3,15,28,.48)!important;color:#adc0d0!important}
+body:has(#consoleTabs) .tab:hover{border-color:rgba(243,210,122,.62)!important;color:var(--gc-gold-soft)!important;transform:translateY(-2px)}
+body:has(#consoleTabs) .tab.active{background:linear-gradient(135deg,var(--gc-gold-hi),var(--gc-gold))!important;color:#17150d!important;border-color:transparent!important;box-shadow:0 10px 24px rgba(212,175,55,.18)}
+body:has(#consoleTabs) .stat{border-color:rgba(212,175,55,.16)!important;background:rgba(212,175,55,.055)!important}
+body:has(#consoleTabs) .stat b{color:var(--gc-gold-hi)!important}
+body:has(#consoleTabs) .btn-primary{background:linear-gradient(135deg,var(--gc-gold-hi),var(--gc-gold))!important;color:#17150d!important}
+body:has(#consoleTabs) .field:focus{border-color:var(--gc-gold)!important;box-shadow:0 0 0 3px rgba(212,175,55,.14)!important}
+body:has(#consoleTabs) .table-wrap{border-color:rgba(212,175,55,.18)!important;background:rgba(3,13,25,.58)!important}
+body:has(#consoleTabs) th{background:rgba(212,175,55,.08)!important;color:var(--gc-gold-soft)!important}
+body:has(#consoleTabs) tr:hover td{background:rgba(212,175,55,.045)!important}
+body:has(#consoleTabs) #gcWhatsAppFloat,body:has(#consoleTabs) .gc-vx-cmd{display:none!important}
+@media(max-width:760px){
+ body:has(.customer-welcome) .hero .card:after{inset-inline-end:16px;top:18px;font-size:7px}
+ body:has(.customer-welcome) .hero .card{padding:18px!important}
+ body:has(.customer-welcome) .portal-section-heading{margin-top:28px!important}
+ body:has(#consoleTabs) body{padding-bottom:14px!important}
+ body:has(#consoleTabs) .hero-grid{gap:10px!important}
+ body:has(#consoleTabs) .tabs{background:linear-gradient(180deg,#132e4c,#061428 72%)!important;border-inline-start-color:rgba(212,175,55,.28)!important}
+ body:has(#consoleTabs) .drawer-close{border-color:rgba(212,175,55,.28)!important}
+}
+@media(prefers-reduced-motion:reduce){body:has(.customer-welcome) *,body:has(#consoleTabs) *{transition:none!important;animation:none!important}}
+
+/* Console navigation icons stay aligned with their own tab. */
+body:has(#consoleTabs) .tab{display:inline-flex!important;align-items:center!important;gap:8px!important;justify-content:center}
+.gc-console-tab-icon{width:20px;height:20px;display:grid;place-items:center;color:var(--gc-gold-hi);flex:0 0 20px}
+.gc-console-tab-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}
+body:has(#consoleTabs) .tab.active .gc-console-tab-icon{color:#17150d}
+@media(max-width:760px){body:has(#consoleTabs) .tabs .tab{justify-content:flex-start}.gc-console-tab-icon{width:22px;height:22px;flex-basis:22px}}
