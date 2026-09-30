@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const params = new URLSearchParams(window.location.search);
-  const code = String(params.get('gc') || params.get('id') || params.get('track') || '').trim();
+  const code = String(params.get('gc') || params.get('id') || params.get('track') || params.get('tracking_id') || '').trim();
   if (!code) return;
   const start = () => {
     const input = document.getElementById('trackingId') || document.getElementById('trackInput');
