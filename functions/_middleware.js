@@ -8,6 +8,98 @@ const THEME_JS = `<script src="/gc-theme-sync.js?v=${VERSION}" defer data-gc-the
 const SETTINGS_CSS = `<link rel="stylesheet" href="/gc-settings-hub.css?v=${VERSION}" data-gc-settings-css="1">`;
 const SETTINGS_JS = `<script src="/gc-settings-hub.js?v=${VERSION}" defer data-gc-settings-hub="1"></script>`;
 const ACCOUNT_ENTRY_JS = `<script src="/gc-account-entry.js?v=${VERSION}" defer data-gc-account-entry="1"></script>`;
+const MOBILE_PRIMARY_NAV = `<style data-gc-mobile-primary-nav="1">
+@media (max-width: 760px){
+  body{padding-bottom:62px!important}
+  #gcPrimaryMobileNav{
+    position:fixed!important;
+    left:0!important;
+    right:0!important;
+    bottom:0!important;
+    width:100%!important;
+    height:calc(58px + env(safe-area-inset-bottom))!important;
+    min-height:58px!important;
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    align-items:stretch!important;
+    gap:0!important;
+    padding:3px 0 env(safe-area-inset-bottom)!important;
+    margin:0!important;
+    border:0!important;
+    border-top:1px solid rgba(140,170,186,.18)!important;
+    border-radius:0!important;
+    background:rgba(4,16,28,.985)!important;
+    box-shadow:0 -8px 24px rgba(0,0,0,.22)!important;
+    backdrop-filter:blur(18px)!important;
+    -webkit-backdrop-filter:blur(18px)!important;
+    z-index:2147483647!important;
+  }
+  #gcPrimaryMobileNav a{
+    position:relative!important;
+    width:100%!important;
+    min-width:0!important;
+    height:55px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    padding:0!important;
+    margin:0!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    color:#8ea5b1!important;
+    text-decoration:none!important;
+  }
+  #gcPrimaryMobileNav a svg{
+    display:block!important;
+    width:23px!important;
+    height:23px!important;
+    fill:none!important;
+    stroke:currentColor!important;
+    stroke-width:1.9!important;
+    stroke-linecap:round!important;
+    stroke-linejoin:round!important;
+    opacity:1!important;
+  }
+  #gcPrimaryMobileNav a span{display:none!important}
+  #gcPrimaryMobileNav a.primary{color:#f0cf79!important}
+  #gcPrimaryMobileNav a:focus-visible{
+    outline:2px solid #64e5ec!important;
+    outline-offset:-2px!important;
+  }
+  #gcPrimaryMobileNav a[aria-current="page"]{
+    color:#64e5ec!important;
+  }
+  #gcPrimaryMobileNav a[aria-current="page"]::before,
+  #gcPrimaryMobileNav a.primary[aria-current="page"]::before{
+    content:""!important;
+    position:absolute!important;
+    top:0!important;
+    left:24px!important;
+    right:24px!important;
+    height:2px!important;
+    border-radius:999px!important;
+    background:currentColor!important;
+  }
+}
+@media (min-width:761px){
+  #gcPrimaryMobileNav{display:none!important}
+}
+@media (max-width:430px){
+  body{padding-bottom:58px!important}
+  #gcPrimaryMobileNav{height:calc(54px + env(safe-area-inset-bottom))!important}
+  #gcPrimaryMobileNav a{height:51px!important}
+  #gcPrimaryMobileNav a svg{width:22px!important;height:22px!important}
+  #gcPrimaryMobileNav a[aria-current="page"]::before{left:18px!important;right:18px!important}
+}
+</style>
+<nav id="gcPrimaryMobileNav" aria-label="ناڤیگەیشنی سەرەکیی مۆبایل">
+<a href="/" aria-label="سەرەکی" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 10 8-7 8 7v10H4z"></path><path d="M9 20v-6h6v6"></path></svg><span>سەرەکی</span></a>
+<a href="/dashboard#shipments" aria-label="بارەکان"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v12H4z"></path><path d="M7 7V5h10v2M4 11h16M9 15h6"></path></svg><span>بارەکان</span></a>
+<a href="/#request" class="primary" aria-label="داواکردنی نرخ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg><span>نرخ</span></a>
+<a href="/track" aria-label="شوێنکەوتن"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"></circle><path d="m16 16 4 4"></path><path d="M8.5 11h5"></path></svg><span>شوێنکەوتن</span></a>
+<a href="/dashboard#profile" aria-label="هەژمار"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"></circle><path d="M5 20c.8-3.3 3.2-5 7-5s6.2 1.7 7 5"></path></svg><span>هەژمار</span></a>
+</nav>`;
 const LEGACY_SUPABASE_NOTICE = 'Supabase هێشتا پەیوەست نەکراوە — URL و publishable key لە کۆدەکەدا زیادبکە (سەرەتای script tag).';
 const CSP = "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rum-static.pingdom.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.supabase.co https://rum-ingest.pingdom.net https://*.sentry.io https://sentry.io; frame-src 'self' https://www.google.com; worker-src 'self' blob:";
 const STAFF_V5 = /^\/(?:staff|staff-os)(?:\.html)?\/?$/i;
@@ -65,12 +157,14 @@ export async function onRequest(context) {
     return new Response(html,{status:response.status,statusText:response.statusText,headers});
   }
   if (OPERATIONAL_PAGE.test(path)) html=addHeadAsset(html,'src="/runtime-guard.js',`<script src="/runtime-guard.js?v=${VERSION}" defer data-gc-runtime-guard="1"></script>`);
+  if (/^\/(?:tracking|track|tracking-integration)(?:\.html)?\/?$/i.test(path)) html=addHeadAsset(html,'src="/gc-tracking-deeplink.js',`<script src="/gc-tracking-deeplink.js?v=${VERSION}" defer data-gc-tracking-deeplink="1"></script>`);
   if (!OPERATIONAL_PAGE.test(path) || /^\/(?:customer-portal|tracking|tracking-integration)(?:\.html)?\/?$/i.test(path)) html=addHeadAsset(html,'href="/globall-realistic-design-20260919.css',`<link rel="stylesheet" href="/globall-realistic-design-20260919.css?v=${VERSION}" data-gc-realistic-design="1">`);
   if (path === '/' || path === '/index.html') {
     html=addHeadAsset(html,'src="/staff-auth-runtime-fix.js',`<script src="/staff-auth-runtime-fix.js?v=${VERSION}" defer data-gc-staff-auth-runtime="1"></script>`);
     html=addBodyAsset(html,'src="/gc-csp-scripts/logistics-pricing-ui.js',`<script src="/gc-csp-scripts/logistics-pricing-ui.js?v=${VERSION}" defer data-gc-logistics-pricing-ui="1"></script>`);
     html=addBodyAsset(html,'src="/site-navigation-20260909.js',`<script src="/site-navigation-20260909.js?v=${VERSION}" defer data-gc-site-navigation="1"></script>`);
     html=addBodyAsset(html,'src="/public-core-recovery.js',`<script src="/public-core-recovery.js?v=${VERSION}" defer data-gc-public-core-recovery="1"></script>`);
+    html=addBodyAsset(html,'id="gcPrimaryMobileNav"',MOBILE_PRIMARY_NAV);
   }
   if (STAFF_V5.test(path)) {
     html=addHeadAsset(html,'src="/staff-os-compat.js',`<script src="/staff-os-compat.js?v=${VERSION}" defer data-gc-staff-compat="1"></script>`);

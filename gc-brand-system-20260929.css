@@ -1,0 +1,57 @@
+/* Globall Cloud — unified premium gold / dark navy system */
+:root{
+  --gc-gold:#d4af37;
+  --gc-gold-bright:#f3d27a;
+  --gc-gold-soft:#ffe6a3;
+  --gc-navy:#061428;
+  --gc-navy-2:#0b1d34;
+  --gc-ink:#f7fbff;
+  --gc-muted:#9eb2c8;
+  --gc-line:rgba(212,175,55,.24);
+  --gc-glow:rgba(212,175,55,.18);
+  --gc-ease:cubic-bezier(.23,1,.32,1);
+}
+
+/* Public homepage */
+.gc-app .gc-eyebrow,.gc-app .gc-studio-mode-label,.gc-app .gc-app-kicker{color:var(--gc-gold-bright)!important}
+.gc-app .gc-btn-primary,.gc-app .gc-nav .gc-btn-primary{background:linear-gradient(135deg,var(--gc-gold-bright),var(--gc-gold))!important;color:#151a27!important;box-shadow:0 12px 28px rgba(212,175,55,.22)}
+.gc-app .gc-btn-primary:hover{box-shadow:0 16px 34px rgba(212,175,55,.34)}
+.gc-app .gc-btn-soft,.gc-app .gc-btn-ghost{border-color:rgba(212,175,55,.4)!important}
+.gc-app .gc-live-pill,.gc-app .gc-studio-signal,.gc-app .gc-app-live-badge{color:var(--gc-gold-bright)!important}
+.gc-app .gc-live-pill i,.gc-app .gc-studio-signal i,.gc-app .gc-app-live-badge i{background:var(--gc-gold)!important;box-shadow:0 0 0 5px rgba(212,175,55,.12)!important}
+.gc-app .gc-nav-settings svg,.gc-app .gc-nav .gc-socials a{color:var(--gc-gold-bright)!important}
+.gc-app .gc-platform-card:hover,.gc-app .gc-trust-card:hover,.gc-app .gc-app-quick-grid a:hover{border-color:rgba(212,175,55,.55)!important;box-shadow:0 18px 44px rgba(0,0,0,.26),0 0 0 1px rgba(212,175,55,.12)}
+.gc-app .gc-icon-box,.gc-app .gc-studio-tab.active .gc-studio-tab-icon,.gc-app .gc-app-action-icon{color:var(--gc-gold-bright)!important;border-color:rgba(212,175,55,.35)!important;background:rgba(212,175,55,.09)!important}
+.gc-app .gc-studio-tab.active{border-color:rgba(212,175,55,.56)!important;box-shadow:0 12px 28px rgba(212,175,55,.1)}
+.gc-app .gc-mini-chip{border-color:rgba(212,175,55,.28)!important;color:var(--gc-gold-soft)!important}
+.gc-app .gc-track-cta{border-color:rgba(212,175,55,.3)!important;background:linear-gradient(135deg,rgba(212,175,55,.12),rgba(7,20,38,.8))!important}
+
+/* Customer portal */
+body:has(.customer-welcome){--accent:var(--gc-gold);--accent-strong:var(--gc-gold-bright);--line:rgba(212,175,55,.27);--panel-glow:rgba(212,175,55,.14)}
+body:has(.customer-welcome) .top{background:rgba(6,20,40,.9);border-bottom-color:rgba(212,175,55,.22)}
+body:has(.customer-welcome) .btn.primary{background:linear-gradient(135deg,var(--gc-gold-bright),var(--gc-gold));color:#151a27;box-shadow:0 10px 24px rgba(212,175,55,.2)}
+body:has(.customer-welcome) .card{border-color:rgba(212,175,55,.18)}
+body:has(.customer-welcome) .card:hover{border-color:rgba(212,175,55,.42)}
+body:has(.customer-welcome) .portal-section-heading span,body:has(.customer-welcome) .detail-value,body:has(.customer-welcome) .eyebrow{color:var(--gc-gold-bright)}
+body:has(.customer-welcome) .gc-route-chip i{color:var(--gc-gold-bright);border-color:rgba(212,175,55,.35);background:rgba(212,175,55,.1)}
+
+/* Staff accounts console */
+body:has(#consoleTabs){--accent:var(--gc-gold);--accent2:var(--gc-gold-bright);--line:rgba(212,175,55,.25);--shadow:0 22px 60px rgba(0,0,0,.34)}
+body:has(#consoleTabs) .mark{background:linear-gradient(135deg,var(--gc-gold-bright),var(--gc-gold));box-shadow:0 14px 30px rgba(212,175,55,.2)}
+body:has(#consoleTabs) .eyebrow{color:var(--gc-gold-bright)}
+body:has(#consoleTabs) .btn-primary,.tabs .tab.active{background:linear-gradient(135deg,var(--gc-gold-bright),var(--gc-gold));color:#151a27;border-color:transparent}
+body:has(#consoleTabs) .panel,body:has(#consoleTabs) .hero{border-color:rgba(212,175,55,.18)}
+body:has(#consoleTabs) .tab:hover,body:has(#consoleTabs) .btn-outline:hover{border-color:rgba(212,175,55,.48);color:var(--gc-gold-soft)}
+body:has(#consoleTabs) .stat b{color:var(--gc-gold-bright)}
+body:has(#consoleTabs) .chip{border-color:rgba(212,175,55,.22);color:var(--gc-gold-soft)}
+
+/* Tracking page */
+.track-shell .track-card{border-color:rgba(212,175,55,.28);background:linear-gradient(145deg,#142a45,#04111f)}
+.track-shell .track-status,.track-shell .hub{background:rgba(212,175,55,.12);color:var(--gc-gold-soft);border-color:rgba(212,175,55,.22)}
+.track-shell button{border:1px solid transparent;border-radius:12px;padding:11px 15px;background:linear-gradient(135deg,var(--gc-gold-bright),var(--gc-gold));color:#151a27;font:inherit;font-weight:900;cursor:pointer}
+.track-shell input{border:1px solid rgba(212,175,55,.25);border-radius:12px;background:#08182b;color:#fff;padding:11px 12px;width:100%;font:inherit}
+
+/* Unified focus, active, and reduced motion behavior */
+.gc-app a:focus-visible,body:has(.customer-welcome) a:focus-visible,body:has(#consoleTabs) button:focus-visible,body:has(#consoleTabs) a:focus-visible,.track-shell button:focus-visible,.track-shell input:focus-visible{outline:3px solid var(--gc-gold-bright);outline-offset:3px}
+@media(prefers-reduced-motion:no-preference){.gc-app .gc-btn,.gc-app .gc-platform-card,body:has(.customer-welcome) .btn,body:has(#consoleTabs) .btn{transition:transform .18s var(--gc-ease),box-shadow .18s var(--gc-ease),border-color .18s var(--gc-ease)} }
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
