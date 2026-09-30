@@ -34,6 +34,115 @@
 <script src="/gc-whatsapp-float-20260929.js?v=1" defer></script>
 <link rel="stylesheet" href="/gc-product-visual-v5.css?v=20260930-1">
 <link rel="stylesheet" href="/gc-product-visual-v6.css?v=20260930-1">
+<style id="gc-mobile-facebook-nav">
+@media (max-width:760px){
+  html,body{overflow-x:hidden!important}
+  body:has(#gcApp){padding-bottom:64px!important}
+  #gcPrimaryMobileNav.gc-mobile-dock-v3{
+    position:fixed!important;
+    inset-inline:0!important;
+    inset-block-end:0!important;
+    width:100vw!important;
+    height:calc(58px + env(safe-area-inset-bottom))!important;
+    min-height:58px!important;
+    margin:0!important;
+    padding:3px 0 env(safe-area-inset-bottom)!important;
+    display:grid!important;
+    grid-template-columns:repeat(5,1fr)!important;
+    align-items:stretch!important;
+    justify-items:stretch!important;
+    gap:0!important;
+    border:0!important;
+    border-top:1px solid rgba(139,171,190,.16)!important;
+    border-radius:0!important;
+    background:rgba(4,16,28,.98)!important;
+    box-shadow:0 -5px 24px rgba(0,0,0,.22)!important;
+    backdrop-filter:blur(18px)!important;
+    -webkit-backdrop-filter:blur(18px)!important;
+    z-index:2147483000!important;
+  }
+  #gcPrimaryMobileNav.gc-mobile-dock-v3>a{
+    position:relative!important;
+    width:100%!important;
+    height:55px!important;
+    min-width:0!important;
+    min-height:55px!important;
+    margin:0!important;
+    padding:5px 1px 4px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:2px!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    color:#91a5b2!important;
+    text-decoration:none!important;
+    font-size:0!important;
+  }
+  #gcPrimaryMobileNav.gc-mobile-dock-v3>a svg{
+    width:24px!important;
+    height:24px!important;
+    display:block!important;
+    flex:0 0 24px!important;
+    overflow:visible!important;
+    fill:none!important;
+    stroke:currentColor!important;
+    stroke-width:1.9!important;
+    stroke-linecap:round!important;
+    stroke-linejoin:round!important;
+    opacity:1!important;
+  }
+  #gcPrimaryMobileNav.gc-mobile-dock-v3>a span{
+    display:none!important;
+  }
+  #gcPrimaryMobileNav.gc-mobile-dock-v3>a.active{
+    color:#65e5ec!important;
+    background:rgba(101,229,236,.06)!important;
+  }
+  #gcPrimaryMobileNav.gc-mobile-dock-v3>a.active::before{
+    content:""!important;
+    position:absolute!important;
+    inset-inline:22px!important;
+    inset-block-start:0!important;
+    height:2px!important;
+    border-radius:999px!important;
+    background:#65e5ec!important;
+  }
+  #gcPrimaryMobileNav.gc-mobile-dock-v3>a.primary,
+  #gcPrimaryMobileNav.gc-mobile-dock-v3>a.primary.active{
+    width:100%!important;
+    height:55px!important;
+    min-height:55px!important;
+    margin:0!important;
+    border:0!important;
+    border-radius:0!important;
+    background:rgba(255,255,255,.02)!important;
+    color:#f0cf7b!important;
+    box-shadow:none!important;
+  }
+  #gcPrimaryMobileNav.gc-mobile-dock-v3>a.primary svg{
+    width:26px!important;
+    height:26px!important;
+    stroke-width:2.1!important;
+  }
+  #gcPrimaryMobileNav.gc-mobile-dock-v3>a.primary.active{
+    background:rgba(240,207,123,.07)!important;
+  }
+  #gcPrimaryMobileNav.gc-mobile-dock-v3>a.primary.active::before{
+    background:#f0cf7b!important;
+  }
+}
+@media (max-width:430px){
+  body:has(#gcApp){padding-bottom:60px!important}
+  #gcPrimaryMobileNav.gc-mobile-dock-v3{height:calc(54px + env(safe-area-inset-bottom))!important}
+  #gcPrimaryMobileNav.gc-mobile-dock-v3>a{height:51px!important;min-height:51px!important}
+  #gcPrimaryMobileNav.gc-mobile-dock-v3>a svg{width:23px!important;height:23px!important;flex-basis:23px!important}
+  #gcPrimaryMobileNav.gc-mobile-dock-v3>a.primary svg{width:25px!important;height:25px!important}
+}
+</style>
 </head>
 <body>
 <div class="gc-app" id="gcApp">
@@ -51,13 +160,13 @@
     </div>
   </header>
 
-  <nav class="gc-mobile-dock-v3" aria-label="ناڤیگەیشنی سەرەکیی مۆبایل">
-    <a href="/" data-dock="home" aria-label="سەرەکی"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 10 8-7 8 7v10H4z"></path><path d="M9 20v-6h6v6"></path></svg><span>سەرەکی</span></a>
-    <a href="/dashboard#shipments" data-dock="shipments" aria-label="بارەکان"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v12H4z"></path><path d="M7 7V5h10v2M4 11h16M9 15h6"></path></svg><span>بارەکان</span></a>
-    <a href="/#request" class="primary" data-dock="quote" aria-label="داواکردنی نرخ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg><span>داواکردنی نرخ</span></a>
-    <a href="/track" data-dock="track" aria-label="شوێنکەوتن"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"></circle><path d="m16 16 4 4M8.5 11h5"></path></svg><span>شوێنکەوتن</span></a>
-    <a href="/dashboard#profile" data-dock="account" aria-label="هەژمار"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"></circle><path d="M5 20c.8-3.3 3.2-5 7-5s6.2 1.7 7 5"></path></svg><span>هەژمار</span></a>
-  </nav>
+  <nav class="gc-mobile-dock-v3" id="gcPrimaryMobileNav" aria-label="ناڤیگەیشنی سەرەکیی مۆبایل">
+  <a href="/" data-dock="home" aria-label="سەرەکی"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 10 8-7 8 7v10H4z"></path><path d="M9 20v-6h6v6"></path></svg><span>سەرەکی</span></a>
+  <a href="/dashboard#shipments" data-dock="shipments" aria-label="بارەکان"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v12H4z"></path><path d="M7 7V5h10v2M4 11h16M9 15h6"></path></svg><span>بارەکان</span></a>
+  <a href="/#request" class="primary" data-dock="quote" aria-label="داواکردنی نرخ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg><span>نرخ</span></a>
+  <a href="/track" data-dock="track" aria-label="شوێنکەوتن"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"></circle><path d="m16 16 4 4"></path><path d="M8.5 11h5"></path></svg><span>شوێنکەوتن</span></a>
+  <a href="/dashboard#profile" data-dock="account" aria-label="هەژمار"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"></circle><path d="M5 20c.8-3.3 3.2-5 7-5s6.2 1.7 7 5"></path></svg><span>هەژمار</span></a>
+</nav>
 
   <main id="gcMain" class="gc-home">
     <section class="gc-hero-rebuild">
