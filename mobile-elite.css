@@ -10,7 +10,7 @@
   button,a,input,select,textarea{touch-action:manipulation!important}
 
   /* ---------- Brand / broken-image guard ---------- */
-  .brand-logo,.logo-icon,.brand img,.nav img[src*="logo-icon"],img[src*="logo-icon.png"]{
+  .brand-logo,.logo-icon,.brand img,.nav img[src*="logo-icon"],img[src*="logo-icon.webp"]{
     content:url('/logo-icon-original.png')!important;object-fit:contain!important;object-position:center!important;display:block!important;
     background:linear-gradient(145deg,rgba(0,194,217,.16),rgba(255,255,255,.02))!important;
     border:1px solid rgba(79,227,240,.22)!important;box-shadow:0 8px 24px rgba(0,0,0,.20),0 0 0 1px rgba(255,255,255,.03) inset!important
@@ -23,7 +23,7 @@
   .nav{height:64px!important;min-height:64px!important;background:rgba(5,14,28,.94)!important;backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important}
   .nav-inner{width:100%!important;max-width:none!important;height:64px!important;min-height:64px!important;padding:8px 10px!important;gap:8px!important}
   .brand{min-width:0!important;max-width:56%!important;gap:8px!important}
-  .brand-logo,.brand img,img[src*="logo-icon.png"]{width:38px!important;height:38px!important;min-width:38px!important;flex:0 0 38px!important;border-radius:12px!important;padding:3px!important}
+  .brand-logo,.brand img,img[src*="logo-icon.webp"]{width:38px!important;height:38px!important;min-width:38px!important;flex:0 0 38px!important;border-radius:12px!important;padding:3px!important}
   .brand b{font-size:15px!important;line-height:1.05!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
   .brand small{font-size:8px!important;line-height:1!important}
   .nav-right{gap:6px!important;margin-inline-start:auto!important}
@@ -78,6 +78,6 @@
 }
 @media(max-width:390px){
   .nav,.nav-inner{height:60px!important;min-height:60px!important}.nav-inner{padding-inline:8px!important}.brand{max-width:53%!important}
-  .brand-logo,.brand img,img[src*="logo-icon.png"]{width:35px!important;height:35px!important;min-width:35px!important;flex-basis:35px!important;border-radius:11px!important}
+  .brand-logo,.brand img,img[src*="logo-icon.webp"]{width:35px!important;height:35px!important;min-width:35px!important;flex-basis:35px!important;border-radius:11px!important}
   .brand b{font-size:13.5px!important}.brand small{font-size:7px!important}.hero{padding:24px 12px 22px!important}.hero h1{font-size:28px!important;max-width:12ch!important}.hero .sub{font-size:13.5px!important}.hero-ctas{grid-template-columns:1fr!important}.route-map{aspect-ratio:1.06/1!important;border-radius:22px!important}body:has(.portal-bottom-nav.active) .hero{padding-bottom:98px!important}
 }

@@ -3,7 +3,7 @@
  */
 .brand-logo,
 .logo-icon,
-img[src*="logo-icon.png"],
+img[src*="logo-icon.webp"],
 img[src*="logo-icon-original.png"],
 img[src*="logo-icon.svg"]{
   width:40px;
@@ -30,7 +30,7 @@ img[src*="logo-icon.svg"]{
 }
 
 /* Keep broken-image fallback visually stable in WebKit. */
-img[src*="logo-icon.png"],
+img[src*="logo-icon.webp"],
 img[src*="logo-icon-original.png"],
 img[src*="logo-icon.svg"]{
   color:transparent;
@@ -40,7 +40,7 @@ img[src*="logo-icon.svg"]{
 @media (max-width:760px){
   .brand-logo,
   .logo-icon,
-  img[src*="logo-icon.png"],
+  img[src*="logo-icon.webp"],
   img[src*="logo-icon-original.png"],
   img[src*="logo-icon.svg"]{
     width:38px!important;
@@ -58,7 +58,7 @@ img[src*="logo-icon.svg"]{
 @media (max-width:390px){
   .brand-logo,
   .logo-icon,
-  img[src*="logo-icon.png"],
+  img[src*="logo-icon.webp"],
   img[src*="logo-icon-original.png"],
   img[src*="logo-icon.svg"]{
     width:36px!important;

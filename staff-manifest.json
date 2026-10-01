@@ -10,7 +10,7 @@
   "lang":"ckb",
   "dir":"rtl",
   "icons":[
-    {"src":"/logo-icon.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"/logo-icon.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+    {"src":"/logo-icon.webp","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"/logo-icon.webp","sizes":"512x512","type":"image/png","purpose":"any maskable"}
   ]
 }

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#061428">
 <title>Globall Cloud — Operations Command Center</title>
-<link rel="icon" href="logo-icon.png">
+<link rel="icon" href="logo-icon.webp">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#061428;--bg2:#081b33;--card:#0d2039;--card2:#112b49;--line:#214363;--text:#f5f9fd;--muted:#92aac7;--cyan:#00c2d9;--cyan2:#58e5ef;--green:#2ed27f;--amber:#f0a83a;--red:#e5533d;--shadow:0 22px 70px rgba(0,0,0,.34);--r:20px;--font:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
@@ -17,7 +17,7 @@
 <script src="/gc-csp-bridge.js?v=20260816-1" defer data-gc-csp-bridge="1"></script>  <link rel="stylesheet" href="/gc-operations-visual-system-20260922.css?v=20260922-1">
 </head>
 <body>
-<header class="top"><div class="wrap topin"><a class="brand" href="/"><img src="logo-icon.png" alt="Globall Cloud"><span><b>Globall Cloud</b><small>OPERATIONS COMMAND CENTER</small></span></a><div class="tools"><span id="rolePill" class="pill">Guest</span><button id="refresh" class="btn ghost">↻ نوێکردنەوە</button><button id="authOpen" class="btn primary">چوونەژوورەوە</button></div></div></header>
+<header class="top"><div class="wrap topin"><a class="brand" href="/"><img src="logo-icon.webp" alt="Globall Cloud"><span><b>Globall Cloud</b><small>OPERATIONS COMMAND CENTER</small></span></a><div class="tools"><span id="rolePill" class="pill">Guest</span><button id="refresh" class="btn ghost">↻ نوێکردنەوە</button><button id="authOpen" class="btn primary">چوونەژوورەوە</button></div></div></header>
 <main class="wrap shell">
 <section class="hero"><div class="hero-card"><span class="eyebrow">LIVE LOGISTICS CONTROL PLANE</span><h1>کۆنترۆڵی یەکگرتووی Global Cloud</h1><p class="lead">کۆنترۆڵی shipment، ETA، exception، document، proof-of-delivery و customer communication لە یەک cockpit ـی production.</p><div class="section" style="margin-top:16px"><div class="toolbar"><button class="btn primary" data-open="quote">+ داواکاری نرخ</button><button class="btn ghost" data-open="track">شوێنکەوتنی بار</button><button class="btn ghost" data-open="alert">دروستکردنی Exception</button></div></div></div><div class="identity"><span class="eyebrow">SESSION</span><div id="who" class="big">Guest</div><div id="sessionText" class="muted">بۆ داتای تایبەتی چوونەژوورەوە بکە.</div><div class="sep"></div><span id="dataState" class="pill warn">Waiting</span></div></section>
 <section class="section"><div class="grid4"><div class="card kpi"><span class="muted">کۆی shipment</span><b id="kShip">—</b><span class="muted">accessible records</span></div><div class="card kpi"><span class="muted">لە گواستنەوە</span><b id="kMoving">—</b><span class="muted">active flow</span></div><div class="card kpi"><span class="muted">پارەی ماوە</span><b id="kDue">—</b><span class="muted">USD</span></div><div class="card kpi"><span class="muted">Exception</span><b id="kExc">—</b><span class="muted">requires attention</span></div></div></section>

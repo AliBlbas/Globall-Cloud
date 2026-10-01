@@ -56,7 +56,7 @@ live-logistics-map.js
 logistics-os.html
 logo-fix.css
 logo-icon-original.png
-logo-icon.png
+logo-icon.webp
 logo-icon.svg
 management.html
 manifest.json

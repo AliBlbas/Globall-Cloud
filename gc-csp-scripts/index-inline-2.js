@@ -1129,7 +1129,7 @@ function invoiceDocumentHTML(s){
   return `<div style="width:780px; background:#ffffff; color:#101820; font-family:'Vazirmatn','Noto Sans Arabic',sans-serif; padding:48px; direction:${currentLang==='ku'?'rtl':'ltr'};" dir="${currentLang==='ku'?'rtl':'ltr'}">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #00A8BD; padding-bottom:20px; margin-bottom:28px;">
       <div style="display:flex; align-items:center; gap:12px;">
-        <img src="logo-icon.png" alt="Globall Cloud" style="width:46px; height:46px;" crossorigin="anonymous">
+        <img src="logo-icon.webp" alt="Globall Cloud" style="width:46px; height:46px;" crossorigin="anonymous">
         <div><div style="font-size:22px; font-weight:800;">Globall Cloud</div><div style="font-size:11.5px; color:#647FA3; letter-spacing:1px;">CHINA · UAE · IRAQ LOGISTICS</div></div>
       </div>
       <div style="text-align:end;">
@@ -1175,7 +1175,7 @@ function commercialInvoiceDocumentHTML(s, goodsDesc){
   return `<div style="width:780px; background:#ffffff; color:#101820; font-family:'Vazirmatn','Noto Sans Arabic',sans-serif; padding:48px; direction:${currentLang==='ku'?'rtl':'ltr'};" dir="${currentLang==='ku'?'rtl':'ltr'}">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #00A8BD; padding-bottom:20px; margin-bottom:28px;">
       <div style="display:flex; align-items:center; gap:12px;">
-        <img src="logo-icon.png" alt="Globall Cloud" style="width:46px; height:46px;" crossorigin="anonymous">
+        <img src="logo-icon.webp" alt="Globall Cloud" style="width:46px; height:46px;" crossorigin="anonymous">
         <div><div style="font-size:22px; font-weight:800;">Globall Cloud</div><div style="font-size:11.5px; color:#647FA3; letter-spacing:1px;">CHINA · UAE · IRAQ LOGISTICS</div></div>
       </div>
       <div style="text-align:end;">
@@ -2792,7 +2792,7 @@ function printShipmentLabel(shipmentId){
   area.innerHTML = `
     <div style="border:2px solid #111; border-radius:10px; padding:22px; max-width:420px; font-family:sans-serif; color:#111;">
       <div style="display:flex; align-items:center; gap:10px; border-bottom:2px solid #111; padding-bottom:12px; margin-bottom:14px;">
-        <img src="logo-icon.png" alt="Globall Cloud" style="width:42px; height:42px;">
+        <img src="logo-icon.webp" alt="Globall Cloud" style="width:42px; height:42px;">
         <div><b style="font-size:18px;">Globall Cloud</b><br><span style="font-size:12px;">China · UAE · Iraq Logistics</span></div>
       </div>
       <div style="text-align:center; margin-bottom:14px;">
