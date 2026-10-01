@@ -8,10 +8,6 @@
 /quote/ /#request 302
 /request /#request 302
 /request/ /#request 302
-/customer-portal /customer-portal.html 200
-/customer-portal/ /customer-portal.html 200
-/portal /customer-portal.html 200
-/portal/ /customer-portal.html 200
 /staff /staff-os-v5.html 200
 /staff/ /staff-os-v5.html 200
 /staff-os /staff-os-v5.html 200
