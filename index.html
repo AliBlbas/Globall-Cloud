@@ -32,6 +32,7 @@
 	  <script src="/live-logistics-map.js?v=20260927-2" defer></script>
 <script src="/gc-whatsapp-float-20260929.js?v=1" defer></script>
 <link rel="stylesheet" href="/gc-icon-hierarchy-20260930.css?v=1">
+<link rel="stylesheet" href="/gc-homepage-intelligence-20261001.css?v=1">
 </head>
 <body>
 <div class="gc-app" id="gcApp">
@@ -107,6 +108,21 @@
       </div>
     </section>
 
+    <section class="gc-container gc-intelligence" data-gc-intelligence aria-labelledby="gcIntelligenceTitle">
+      <div class="gc-intelligence-head">
+        <div><span class="gc-eyebrow">LIVE CORRIDOR INTELLIGENCE</span><h2 id="gcIntelligenceTitle">هەموو ڕێگاکە لە یەک سەیرکردندا.</h2><p>لە هەڵبژاردنی Air، Sea یان Land تا گەیاندن، دۆخی ڕێگا و توانای سیستەمەکە بە شێوەیەکی ڕوون و زیندوو ببینە.</p></div>
+        <span class="gc-intelligence-online"><i></i> ROUTE ENGINE ONLINE</span>
+      </div>
+      <div class="gc-intelligence-grid">
+        <div class="gc-corridor-panel">
+          <div class="gc-corridor-tabs" role="tablist" aria-label="هەڵبژاردنی کۆریدۆر"><button class="gc-corridor-tab active" type="button" data-corridor-tab="air" role="tab" aria-selected="true">✈ Air lane</button><button class="gc-corridor-tab" type="button" data-corridor-tab="sea" role="tab" aria-selected="false">◒ Sea lane</button><button class="gc-corridor-tab" type="button" data-corridor-tab="land" role="tab" aria-selected="false">▣ Land lane</button></div>
+          <div class="gc-corridor-route" aria-live="polite"><div class="gc-corridor-node" data-corridor-node><i>◎</i><b>Guangzhou</b><small>Origin hub</small></div><div class="gc-corridor-waypoint"><i></i><span>Dubai Hub</span></div><div class="gc-corridor-node" data-corridor-node><i>◈</i><b>Dubai Hub</b><small>Transit</small></div><div class="gc-corridor-waypoint"><i></i><span>Erbil</span></div><div class="gc-corridor-node" data-corridor-node><i>⌂</i><b>Erbil</b><small>Delivery hub</small></div></div>
+          <div class="gc-corridor-status"><span data-corridor-status>Air lane · priority handling</span><b data-corridor-eta>2–5 days</b></div><div class="gc-corridor-progress" aria-label="route readiness"><i data-corridor-progress></i></div>
+        </div>
+        <div class="gc-intelligence-metrics" aria-label="ئامارەکانی سیستەم"><div class="gc-intelligence-metric"><span class="metric-icon">↗</span><div><strong data-intelligence-counter="98" data-suffix="%">0%</strong><span>route visibility</span><small>هەموو هەنگاوەکان ڕوونن</small></div></div><div class="gc-intelligence-metric"><span class="metric-icon">◷</span><div><strong data-intelligence-counter="24" data-suffix="/7">0/7</strong><span>support coverage</span><small>پشتیوانی بەردەوام</small></div></div><div class="gc-intelligence-metric"><span class="metric-icon">⌁</span><div><strong data-intelligence-counter="3" data-suffix="">0</strong><span>core corridors</span><small>Air · Sea · Land</small></div></div><div class="gc-intelligence-metric"><span class="metric-icon">✓</span><div><strong data-intelligence-counter="1" data-suffix=" hub">0 hub</strong><span>customer workspace</span><small>quote تا payment</small></div></div></div>
+      </div>
+      <div class="gc-intelligence-actions"><a class="gc-btn gc-btn-soft" href="/track">شوێنکەوتنی بار <span>←</span></a><a class="gc-btn gc-btn-primary" href="/#request">هەژمارکردنی نرخی بار <span>←</span></a></div>
+    </section>
     <section class="gc-container">
       <div class="gc-track-cta">
         <div><span class="gc-eyebrow" style="color:#74e2eb">SHIPMENT CONTROL</span><h2>شوێنکەوتن لە پەڕەی تایبەتدا</h2><p>بۆ ئەزموونی پاکتر، ژمارەی بارەکەت لە Tracking Center بنووسە و timeline ـی shipment ـەکەت ببینە.</p></div>
@@ -226,5 +242,6 @@
 <script src="/gc-quick-quote-advanced-20260929.js?v=1"></script>
 <script src="/gc-landing-service-polish-20260929.js?v=1"></script>
 <script src="/gc-icon-hierarchy-20260930.js?v=1" defer></script>
+<script src="/gc-homepage-intelligence-20261001.js?v=1" defer></script>
 </body>
 </html>
