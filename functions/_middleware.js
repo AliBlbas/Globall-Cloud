@@ -129,30 +129,15 @@ export async function onRequest(context) {
   if (!contentType.toLowerCase().includes(HTML_ACCEPT)) return response;
   let html = await response.text();
   if (path === '/' || path === '/index.html') html = rewriteRootHtml(html); else html = html.split(LEGACY_SUPABASE_NOTICE).join('');
-  // The production pages own their asset graph. Keep the compatibility layer
-  // on the homepage only; injecting it into dashboards/tracking reintroduces
-  // duplicate CSS and legacy scripts on every request.
+  // The production pages own their asset graph. The homepage only needs the
+  // small settings/theme compatibility controls; legacy visual and bridge
+  // assets are loaded by their owning routes or on explicit user intent.
   const headAssets = [
     ['href="/gc-theme-sync.css',THEME_CSS],
     ['src="/gc-theme-sync.js',THEME_JS],
     ['href="/gc-settings-hub.css',SETTINGS_CSS],
     ['src="/gc-settings-hub.js',SETTINGS_JS],
-    ['name="color-scheme"','<meta name="color-scheme" content="dark light">'],
-    ['href="/globall-visual-refresh-20260921.css',VISUAL_REFRESH],
-    ['href="/enterprise-shell-v2026.css',ENTERPRISE_SHELL],
-    ['href="/browser-compat.css',`<link rel="stylesheet" href="/browser-compat.css?v=${VERSION}" data-gc-browser-compat="1">`],
-    ['href="/safari-compat-elite.css',`<link rel="stylesheet" href="/safari-compat-elite.css?v=${VERSION}" data-gc-safari-elite="1">`],
-    ['href="/logo-fix.css',`<link rel="stylesheet" href="/logo-fix.css?v=${VERSION}" data-gc-logo-fix="1">`],
-    ['href="/site-polish.css',`<link rel="stylesheet" href="/site-polish.css?v=${VERSION}" data-gc-premium-polish="1">`],
-    ['href="/production-mobile-hotfix.css',`<link rel="stylesheet" href="/production-mobile-hotfix.css?v=${VERSION}" data-gc-production-mobile-hotfix="1">`],
-    ['href="/production-mobile-ux-v2026.css',`<link rel="stylesheet" href="/production-mobile-ux-v2026.css?v=${VERSION}" data-gc-production-mobile-ux="1">`],
-    ['href="/gc-public-premium-ux-2026.css',`<link rel="stylesheet" href="/gc-public-premium-ux-2026.css?v=${VERSION}" data-gc-public-premium-ux="1">`],
-    ['href="/gc-home-final-2026.css',`<link rel="stylesheet" href="/gc-home-final-2026.css?v=${VERSION}" data-gc-home-final="1">`],
-    ['src="/production-bridge.js',`<script src="/production-bridge.js?v=${VERSION}" defer data-gc-production-bridge="1"></script>`],
-    ['src="/public-customer-auth-fix.js',`<script src="/public-customer-auth-fix.js?v=${VERSION}" defer data-gc-customer-auth-fix="1"></script>`],
-    ['src="/production-brand-repair.js',`<script src="/production-brand-repair.js?v=${VERSION}" defer data-gc-production-brand-repair="1"></script>`],
-    ['src="/gc-final-experience-2026.js',`<script src="/gc-final-experience-2026.js?v=${VERSION}" defer data-gc-final-experience="1"></script>`],
-    ['href="/gc-final-ui-20260927.css',`<link rel="stylesheet" href="/gc-final-ui-20260927.css?v=4" data-gc-final-ui="3">`]
+    ['name="color-scheme"','<meta name="color-scheme" content="dark light">']
   ];
   if (path === '/' || path === '/index.html') {
     for (const [needle,fragment] of headAssets) html = addHeadAsset(html,needle,fragment);
