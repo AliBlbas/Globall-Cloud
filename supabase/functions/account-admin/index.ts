@@ -1,7 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 type Kind = 'customer' | 'customer_match' | 'staff' | 'receipt' | 'log' | 'shipment' | 'task' | 'finance' | 'pricing' | 'quote' | 'quote_requests' | 'notification' | 'notification_delivery' | 'chat'
-type Action = 'list' | 'create' | 'update' | 'archive' | 'delete' | 'claim' | 'complete' | 'send' | 'mark_read'
+type Action = 'list' | 'create' | 'update' | 'archive' | 'delete' | 'bind' | 'claim' | 'complete' | 'send' | 'mark_read'
 type JsonRecord = Record<string, unknown>
 
 const ALLOWED_ORIGINS = new Set([
@@ -113,7 +113,7 @@ function normalizeKind(value: unknown): Kind {
 
 function normalizeAction(value: unknown): Action {
   const action = String(value || 'list').toLowerCase()
-  if (action === 'create' || action === 'update' || action === 'archive' || action === 'delete' || action === 'claim' || action === 'complete' || action === 'send' || action === 'mark_read') return action
+  if (action === 'create' || action === 'update' || action === 'archive' || action === 'delete' || action === 'bind' || action === 'claim' || action === 'complete' || action === 'send' || action === 'mark_read') return action
   return 'list'
 }
 
@@ -479,6 +479,38 @@ async function upsertCustomer(client: ReturnType<typeof createClient>, payload: 
   return { customer: canonicalCustomerIdentity(saved), auth_user_id: authResult.userId, warning: authResult.warning, status: authResult.userId ? 'linked' : 'saved_without_auth' }
 }
 
+async function bindCustomerAuth(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, isSuperAdmin: boolean }) {
+  if (!actor.isSuperAdmin) throw responseError('Only Super Admin can bind customer accounts', 403)
+  const id = txt(payload.id)
+  if (!id) throw responseError('Missing customer id', 400)
+  const { data: customer, error: customerError } = await client.from('customer_directory').select('id,code,gc_code,name,email,phone,auth_user_id,is_active').eq('id', id).maybeSingle()
+  if (customerError) throw customerError
+  if (!customer) throw responseError('Customer not found', 404)
+  if (customer.is_active !== true) throw responseError('Inactive customers cannot be bound', 400)
+  const code = normalizeGcCode(customer.gc_code ?? customer.code)
+  if (!code) throw responseError('Customer has no valid GC code', 400)
+  const password = txt(payload.password) || randomPassword(16)
+  if (password.length < 12) throw responseError('Password must be at least 12 characters', 400)
+  const email = txt(customer.email) || `${code.toLowerCase()}@customers.globall-cloud.internal`
+  let userId = txt(customer.auth_user_id)
+  if (userId) {
+    const { error } = await client.auth.admin.updateUserById(userId, { password, email_confirm: true, user_metadata: { full_name: customer.name || 'Customer', phone: customer.phone || '', account_kind: 'customer' } } as never)
+    if (error) throw error
+  } else {
+    const { data, error } = await client.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { full_name: customer.name || 'Customer', phone: customer.phone || '', account_kind: 'customer' } } as never)
+    if (error) throw error
+    userId = data.user?.id ?? null
+    if (!userId) throw new Error('Customer Auth account was not created')
+    const { error: linkError } = await client.from('customer_directory').update({ auth_user_id: userId }).eq('id', id)
+    if (linkError) {
+      await client.auth.admin.deleteUser(userId).catch(() => undefined)
+      throw linkError
+    }
+  }
+  await logActivity(client, actor.id, actor.name, 'bind_customer_auth_account', id, { gc_code: code, auth_user_id: userId, synthetic_email: email.endsWith('@customers.globall-cloud.internal') })
+  return { ok: true, status: 'linked', customer_id: id, gc_code: code, auth_user_id: userId, login_email: email, temporary_password: password, note: 'Deliver this password securely; it is not shown again.' }
+}
+
 async function updateCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, isSuperAdmin: boolean }) {
   const id = txt(payload.id)
   if (!id) throw responseError('Missing customer id', 400)
@@ -754,6 +786,7 @@ Deno.serve(async (req) => {
     if (kind === 'customer') {
       if (action === 'create') return json(await upsertCustomer(serviceClient, data, { id: staffRow.id, name: staffRow.full_name, isSuperAdmin }), {}, req)
       if (action === 'update') return json(await updateCustomer(serviceClient, data, { id: staffRow.id, name: staffRow.full_name, isSuperAdmin }), {}, req)
+      if (action === 'bind') return json(await bindCustomerAuth(serviceClient, data, { id: staffRow.id, name: staffRow.full_name, isSuperAdmin }), {}, req)
       if (action === 'archive' || action === 'delete') return json(await archiveCustomer(serviceClient, data, staffRow.id, staffRow.full_name), {}, req)
     }
     if (kind === 'staff') {

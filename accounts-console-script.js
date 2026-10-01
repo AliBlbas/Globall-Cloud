@@ -93,7 +93,7 @@ function renderList() {
         <td>${esc(manager?.full_name || '—')}<div class="muted">${esc(manager?.role || '')}</div></td>
         <td><b>${r.shipment_count || 0}</b><div class="muted">${money(r.outstanding_amount || 0)} due</div></td>
         <td>${badge(r.is_active)}</td>
-        <td><div class="toolbar"><button class="btn btn-outline" data-gc-onclick='editCustomer(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button><button class="btn btn-danger" data-gc-onclick="archiveCustomerAccount('${esc(r.id)}')">Archive</button></div></td>
+        <td><div class="toolbar"><button class="btn btn-outline" data-gc-onclick='editCustomer(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button>${r.auth_user_id ? '<span class="ok">Linked</span>' : `<button class="btn btn-primary" data-gc-onclick="bindCustomerAccount('${esc(r.id)}')">Bind login</button>`}<button class="btn btn-danger" data-gc-onclick="archiveCustomerAccount('${esc(r.id)}')">Archive</button></div></td>
       </tr>`;
     }).join('') || '<tr><td colspan="8">No customers found.</td></tr>';
   } else if (state.tab === 'staff') {
@@ -305,6 +305,14 @@ window.editCustomer = (row) => {
 window.editStaff = (row) => {
   window.formValidator.resetForm('staffForm');
   $('staffId').value = row.id || ''; $('staffFullName').value = row.full_name || ''; $('staffEmail').value = row.email || ''; $('staffRole').value = row.role || 'admin'; $('staffBranch').value = row.branch || 'all'; $('staffInvite').value = row.auth_user_id ? 'false' : 'true'; $('staffPassword').value = ''; setActiveTab('staff'); $('staffForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+window.bindCustomerAccount = async (id) => {
+  const password = prompt('Optional password (minimum 12 characters). Leave empty to generate a temporary password:') || '';
+  try {
+    const row = state.customers.find((item) => String(item.id) === String(id)) || {}; const res = await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'customer', action: 'create', data: { id, gc_code: row.gc_code || row.code, name: row.name, email: row.email || undefined, phone: row.phone || undefined, phone2: row.phone2 || undefined, city: row.city || undefined, delivery_location: row.delivery_location || undefined, manager_staff_id: row.manager_staff_id || null, is_active: true, send_invite: false, password: password || undefined } }) });
+    alert(`GC: ${res.gc_code}\nLogin password: ${res.temporary_password}\n\nئەم وشەی نهێنییە تەنها ئێستا پیشان دەدرێت؛ بە شێوەی پارێزراو بۆ کڕیار بنێرە.`);
+    await refreshAll();
+  } catch (err) { alert(err.message || 'Unable to bind customer login'); }
 };
 window.archiveCustomerAccount = async (id) => {
   if (!confirm('Archive this customer account?')) return;
