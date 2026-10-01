@@ -133,6 +133,7 @@
             <div id="roleBadge" class="badge badge-admin hidden" style="margin-top:10px">—</div>
           </div>
           <div class="chips">
+            <span class="chip">Automatic GC codes</span>
             <span class="chip">Customer accounts</span>
             <span class="chip">Staff access</span>
             <span class="chip">Warehouse receipts</span>
@@ -141,7 +142,8 @@
           </div>
           <div class="drawer-backdrop" id="drawerBackdrop"></div><div class="tabs" id="consoleTabs"><button class="drawer-close" id="drawerClose" type="button" aria-label="Close navigation">×</button>
             <button class="tab active" data-tab="dashboard">Dashboard</button>
-            <button class="tab" data-tab="customers">Customers</button>
+            <button class="tab" data-tab="customers">Customers & GC Codes</button>
+            <button class="tab" data-tab="shipments">Shipments</button>
             <button class="tab" data-tab="staff">Staff</button>
             <button class="tab" data-tab="receipts">Warehouse Receipts</button>
             <button class="tab" data-tab="logs">Activity Logs</button>
@@ -201,6 +203,7 @@
             <div class="grid">
               <div class="form-row"><label class="label">Customer name</label><input class="field" id="customerName" data-validate="required"></div>
               <div class="form-row"><label class="label">Email</label><input class="field" type="email" id="customerEmail" data-validate="email"></div>
+              <div class="form-row"><label class="label">GC code <span class="muted">(auto if empty)</span></label><input class="field mono" id="customerGcCode" placeholder="GC-709 (leave empty for next code)" pattern="GC-[A-Za-z0-9-]+"><small class="muted">کۆدەکە لە کاتی Save ـدا بە شێوەی ئۆتۆماتیکی دروست دەبێت.</small></div>
             </div>
             <div class="grid">
               <div class="form-row"><label class="label">Phone</label><input class="field" id="customerPhone" data-validate="required,phone"></div>
@@ -245,6 +248,37 @@
               <button class="btn btn-outline" type="button" id="staffClearBtn">Clear</button>
             </div>
             <p id="staffMsg" class="small"></p>
+          </form>
+
+          <form id="shipmentForm" class="tab-pane hidden" novalidate>
+            <input type="hidden" id="shipmentId">
+            <div class="grid">
+              <div class="form-row"><label class="label">Customer / GC code</label><input class="field" id="shipmentCustomerCode" placeholder="GC-709 or customer name" required></div>
+              <div class="form-row"><label class="label">Batch / tracking ID</label><input class="field" id="shipmentBatch" placeholder="Optional batch code"></div>
+            </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">Origin</label><select class="field" id="shipmentOrigin"><option value="china">China</option><option value="dubai">Dubai / UAE</option><option value="usa">USA</option></select></div>
+              <div class="form-row"><label class="label">Destination</label><select class="field" id="shipmentDestination"><option value="erbil">Erbil</option><option value="baghdad">Baghdad</option><option value="basra">Basra</option></select></div>
+              <div class="form-row"><label class="label">Transport</label><select class="field" id="shipmentType"><option value="air">Air</option><option value="sea">Sea</option><option value="land">Land</option></select></div>
+            </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">Weight (kg)</label><input class="field" type="number" min="0" step="0.01" id="shipmentWeight"></div>
+              <div class="form-row"><label class="label">Volume (CBM)</label><input class="field" type="number" min="0" step="0.001" id="shipmentVolume"></div>
+              <div class="form-row"><label class="label">Items / cartons</label><input class="field" type="number" min="0" step="1" id="shipmentItems"></div>
+            </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">Total cost (USD)</label><input class="field" type="number" min="0" step="0.01" id="shipmentTotal"></div>
+              <div class="form-row"><label class="label">Paid (USD)</label><input class="field" type="number" min="0" step="0.01" id="shipmentPaid"></div>
+              <div class="form-row"><label class="label">Status</label><select class="field" id="shipmentStatus"><option value="pending">Pending</option><option value="warehouse">At warehouse</option><option value="in_transit">In transit</option><option value="erbil_arrived">Arrived Erbil</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div>
+            </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">ETA</label><input class="field" type="date" id="shipmentEta"></div>
+              <div class="form-row"><label class="label">Priority</label><select class="field" id="shipmentPriority"><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
+              <div class="form-row"><label class="label">Branch</label><select class="field" id="shipmentBranch"><option value="all">All</option><option value="china">China</option><option value="dubai">Dubai</option><option value="erbil">Erbil</option></select></div>
+            </div>
+            <div class="form-row"><label class="label">Notes</label><textarea class="field" id="shipmentNotes" placeholder="Cargo description, customer notes, or operational instructions"></textarea></div>
+            <div class="toolbar"><button class="btn btn-primary" type="submit">Save shipment</button><button class="btn btn-outline" type="button" id="shipmentClearBtn">New / Clear</button></div>
+            <p id="shipmentMsg" class="small"></p>
           </form>
 
           <form id="receiptForm" class="tab-pane hidden" enctype="multipart/form-data" novalidate>
@@ -326,7 +360,7 @@
     </section>
   </div>
 
-<script src="/gc-csp-scripts/accounts-console-inline-1.js?v=20260816-1" defer data-gc-externalized="1"></script>
+<script src="/gc-csp-scripts/accounts-console-inline-1.js?v=20261001-3" defer data-gc-externalized="1"></script>
 <script src="/gc-whatsapp-float-20260929.js?v=1" defer></script>
 <script src="/gc-icon-hierarchy-20260930.js?v=1" defer></script>
 <script src="/gc-dashboard-console-polish-20260930.js?v=1" defer></script>
