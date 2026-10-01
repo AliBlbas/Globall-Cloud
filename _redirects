@@ -8,8 +8,8 @@
 /quote/ /#request 302
 /request /#request 302
 /request/ /#request 302
-/dashboard /customer-portal.html 200
-/dashboard/ /customer-portal.html 200
+/customer-portal /customer-portal.html 200
+/customer-portal/ /customer-portal.html 200
 /portal /customer-portal.html 200
 /portal/ /customer-portal.html 200
 /staff /staff-os-v5.html 200
@@ -27,4 +27,7 @@
 /shop/* /services 302
 
 /login /login.html 200
-/dashboard /dashboard.html 200/customer-access /customer-access.html 200
+/register /register.html 200
+/dashboard /dashboard.html 200
+/dashboard/ /dashboard.html 200
+/customer-access /customer-access.html 200
