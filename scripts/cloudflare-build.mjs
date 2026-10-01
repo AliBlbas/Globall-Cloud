@@ -17,6 +17,7 @@ const keepFiles = new Set(['package.json']);
 function shouldSkipFile(name){
   if (name === 'package-lock.json' || name === 'pnpm-lock.yaml' || name === 'yarn.lock' || name === 'bun.lockb') return true;
   if (name === '.env' || name.startsWith('.env.')) return true;
+  if (name === 'robots.txt') return false;
   return !keepFiles.has(name) && skippedSuffixes.some(s => name.endsWith(s));
 }
 
