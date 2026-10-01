@@ -1,0 +1,54 @@
+/* Globall Cloud account + tracking design system — 2026-10-01 */
+:root{
+  --gc-ds-primary:#0f172a;
+  --gc-ds-accent:#3b82f6;
+  --gc-ds-success:#10b981;
+  --gc-ds-bg:#07111f;
+  --gc-ds-surface:#111d31;
+  --gc-ds-surface-2:#16243b;
+  --gc-ds-line:rgba(148,163,184,.18);
+  --gc-ds-text:#f8fafc;
+  --gc-ds-muted:#94a3b8;
+  --gc-ds-gradient:linear-gradient(135deg,#0f172a 0%,#172554 55%,#1d4ed8 140%);
+}
+body:has(#auth),body:has(#gcAccountSettings){
+  background:radial-gradient(900px 520px at 80% -10%,rgba(59,130,246,.20),transparent 68%),linear-gradient(160deg,var(--gc-ds-bg),var(--gc-ds-primary) 54%,#0b2341)!important;
+  color:var(--gc-ds-text);
+}
+body:has(#auth) .top,body:has(#gcAccountSettings) .top{background:rgba(15,23,42,.88)!important;border-bottom:1px solid var(--gc-ds-line)!important}
+body:has(#auth) .hero .card,body:has(#gcAccountSettings) .hero .card,
+body:has(#auth) .card,body:has(#gcAccountSettings) .card,
+body:has(#auth) .gc-account-card,body:has(#gcAccountSettings) .gc-account-card{
+  background:linear-gradient(145deg,rgba(22,36,59,.96),rgba(15,23,42,.97))!important;
+  border-color:var(--gc-ds-line)!important;
+  box-shadow:0 22px 60px rgba(2,8,23,.28)!important;
+}
+body:has(#auth) h1,body:has(#auth) h2,body:has(#auth) h3,
+body:has(#gcAccountSettings) h1,body:has(#gcAccountSettings) h2,body:has(#gcAccountSettings) h3{color:var(--gc-ds-text)!important}
+body:has(#auth) .muted,body:has(#gcAccountSettings) .muted,
+body:has(#auth) .detail-label,body:has(#gcAccountSettings) .detail-label{color:var(--gc-ds-muted)!important}
+body:has(#auth) .btn.primary,body:has(#gcAccountSettings) .btn.primary{background:linear-gradient(135deg,#3b82f6,#2563eb)!important;color:#fff!important;box-shadow:0 12px 28px rgba(59,130,246,.24)!important}
+body:has(#auth) .field,body:has(#gcAccountSettings) .field,
+body:has(#auth) .gc-setting-row input,body:has(#gcAccountSettings) .gc-setting-row input,
+body:has(#auth) .gc-setting-row select,body:has(#gcAccountSettings) .gc-setting-row select{background:#0f172a!important;color:#f8fafc!important;border-color:var(--gc-ds-line)!important}
+body:has(#auth) .field:focus,body:has(#gcAccountSettings) .field:focus{border-color:#3b82f6!important;box-shadow:0 0 0 4px rgba(59,130,246,.18)!important}
+body:has(#auth) .kpi b,body:has(#gcAccountSettings) .kpi b{color:#60a5fa!important}
+body:has(#auth) .gc-status-done,body:has(#gcAccountSettings) .gc-status-done{color:#34d399!important;border-color:rgba(16,185,129,.42)!important;background:rgba(16,185,129,.10)!important}
+body:has(#auth) .timeline-dot,body:has(#gcAccountSettings) .timeline-dot{background:#10b981!important;box-shadow:0 0 0 4px rgba(16,185,129,.16),0 0 18px rgba(16,185,129,.28)!important}
+body:has(#auth) .timeline-item,body:has(#gcAccountSettings) .timeline-item{border-bottom-color:rgba(148,163,184,.16)!important}
+body:has(#auth) .gc-copy-btn,body:has(#gcAccountSettings) .gc-copy-btn{border-color:rgba(59,130,246,.44)!important;color:#93c5fd!important;background:rgba(59,130,246,.10)!important}
+.gc-copy-btn.is-copied{animation:gcCopyPulse .42s ease;background:rgba(16,185,129,.16)!important;border-color:rgba(16,185,129,.62)!important;color:#6ee7b7!important}
+@keyframes gcCopyPulse{0%{transform:scale(1)}45%{transform:scale(1.06)}100%{transform:scale(1)}}
+.gc-upload-preview{display:none;align-items:center;gap:10px;margin-top:9px;padding:9px;border:1px dashed rgba(59,130,246,.42);border-radius:14px;background:rgba(59,130,246,.08);color:#bfdbfe;font-size:11px}
+.gc-upload-preview.is-visible{display:flex;animation:gcPreviewIn .25s ease}
+.gc-upload-preview img{width:54px;height:54px;border-radius:12px;object-fit:cover;border:1px solid rgba(147,197,253,.4)}
+@keyframes gcPreviewIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.gc-whatsapp-notify-link{display:inline-flex;align-items:center;gap:5px;margin-inline-start:6px;color:#6ee7b7!important;font-size:11px;text-decoration:none}
+.gc-whatsapp-notify-link:hover{text-decoration:underline}
+html[data-gc-theme="light"] body:has(#auth),html[data-gc-theme="light"] body:has(#gcAccountSettings){background:linear-gradient(145deg,#eff6ff,#f8fafc 54%,#dbeafe)!important;color:#0f172a!important}
+html[data-gc-theme="light"] body:has(#auth) .top,html[data-gc-theme="light"] body:has(#gcAccountSettings) .top{background:rgba(255,255,255,.90)!important;border-bottom-color:#cbd5e1!important}
+html[data-gc-theme="light"] body:has(#auth) .card,html[data-gc-theme="light"] body:has(#gcAccountSettings) .card,html[data-gc-theme="light"] body:has(#gcAccountSettings) .gc-account-card{background:linear-gradient(145deg,#fff,#eff6ff)!important;border-color:#cbd5e1!important;color:#0f172a!important;box-shadow:0 18px 45px rgba(15,23,42,.10)!important}
+html[data-gc-theme="light"] body:has(#auth) h1,html[data-gc-theme="light"] body:has(#auth) h2,html[data-gc-theme="light"] body:has(#auth) h3,html[data-gc-theme="light"] body:has(#gcAccountSettings) h1,html[data-gc-theme="light"] body:has(#gcAccountSettings) h2,html[data-gc-theme="light"] body:has(#gcAccountSettings) h3{color:#0f172a!important}
+html[data-gc-theme="light"] body:has(#auth) .muted,html[data-gc-theme="light"] body:has(#gcAccountSettings) .muted{color:#475569!important}
+@media(max-width:620px){body:has(#auth) .topin,body:has(#gcAccountSettings) .topin{gap:8px}.gc-upload-preview{font-size:10px}.gc-whatsapp-notify-link{display:flex;margin:5px 0 0}}
+@media(prefers-reduced-motion:reduce){.gc-copy-btn.is-copied,.gc-upload-preview.is-visible{animation:none}}
