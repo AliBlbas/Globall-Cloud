@@ -717,3 +717,24 @@ body:has(#gcApp) .gc-rate-mode.active{
   body:has(#gcApp) .gc-mobile-dock-v3 a svg{width:22px !important;height:22px !important}
   body:has(#gcApp) .gc-mobile-dock-v3 a.active::after{left:18px !important;right:18px !important}
 }
+
+/* Responsive audit patch — keep tablet hero copy and transport cards readable. */
+@media (min-width:761px) and (max-width:900px){
+  body:has(#gcApp) .gc-hero-grid{
+    grid-template-columns:1fr!important;
+    gap:24px!important;
+  }
+  body:has(#gcApp) .gc-hero-copy{
+    order:1!important;
+    max-width:760px!important;
+    margin-inline:auto!important;
+    text-align:center!important;
+  }
+  body:has(#gcApp) .gc-hero-copy>p{max-width:680px!important;margin-inline:auto!important}
+  body:has(#gcApp) .gc-hero-visual{order:2!important;min-height:430px!important}
+  body:has(#gcApp) .gc-hero-card{min-height:410px!important}
+  body:has(#gcApp) .gc-trust-row{max-width:760px!important;margin-inline:auto!important}
+}
+
+/* Keep the floating WhatsApp CTA clear of the five-item dock on short phones. */
+@media (max-width:390px){body:has(#gcApp){padding-bottom:112px!important}}
