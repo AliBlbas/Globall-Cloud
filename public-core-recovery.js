@@ -122,9 +122,13 @@
 
   const boot = () => {
     recover();
-    window.setTimeout(() => { addCoreScript(); recover(); }, 900);
-    window.setTimeout(() => recover(), 1800);
-    window.setTimeout(() => recover(), 3200);
+    // Do not add index-inline-2.js during the critical path. If the canonical
+    // router really is absent, a user interaction is the explicit recovery
+    // signal and the fallback can be loaded without hurting LCP/CLS.
+    const requestRecovery = () => { addCoreScript(); recover(); };
+    document.addEventListener('click', (event) => {
+      if (event.target.closest?.('[data-gc-route], [data-gc-onclick], .gc-menu')) requestRecovery();
+    }, { capture: true, once: true });
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });

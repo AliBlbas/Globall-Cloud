@@ -129,6 +129,9 @@ export async function onRequest(context) {
   if (!contentType.toLowerCase().includes(HTML_ACCEPT)) return response;
   let html = await response.text();
   if (path === '/' || path === '/index.html') html = rewriteRootHtml(html); else html = html.split(LEGACY_SUPABASE_NOTICE).join('');
+  // The production pages own their asset graph. Keep the compatibility layer
+  // on the homepage only; injecting it into dashboards/tracking reintroduces
+  // duplicate CSS and legacy scripts on every request.
   const headAssets = [
     ['href="/gc-theme-sync.css',THEME_CSS],
     ['src="/gc-theme-sync.js',THEME_JS],
@@ -151,7 +154,9 @@ export async function onRequest(context) {
     ['src="/gc-final-experience-2026.js',`<script src="/gc-final-experience-2026.js?v=${VERSION}" defer data-gc-final-experience="1"></script>`],
     ['href="/gc-final-ui-20260927.css',`<link rel="stylesheet" href="/gc-final-ui-20260927.css?v=4" data-gc-final-ui="3">`]
   ];
-  for (const [needle,fragment] of headAssets) html = addHeadAsset(html,needle,fragment);
+  if (path === '/' || path === '/index.html') {
+    for (const [needle,fragment] of headAssets) html = addHeadAsset(html,needle,fragment);
+  }
   if (STAFF_V5.test(path)) {
     const headers=applySecurityHeaders(new Headers(response.headers)); headers.delete('content-encoding'); headers.delete('content-length'); headers.delete('etag'); headers.set('cache-control','no-store, max-age=0, must-revalidate'); headers.set('content-type','text/html; charset=UTF-8');
     return new Response(html,{status:response.status,statusText:response.statusText,headers});
