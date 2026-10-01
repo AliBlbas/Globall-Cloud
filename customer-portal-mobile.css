@@ -1,0 +1,32 @@
+/* Globall Cloud mobile polish — customer portal + tracking safeguards */
+.portal-empty{display:grid;gap:4px;place-items:start;padding:14px 0;color:var(--muted);min-height:0}
+.portal-empty-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:rgba(88,229,239,.09);border:1px solid rgba(88,229,239,.18);color:var(--accent);font-size:16px}
+.portal-empty strong{color:var(--text);font-size:13px}
+.portal-empty p{margin:0;font-size:12px;line-height:1.65}
+.portal-data-grid,.portal-lower-grid,.portal-actions-grid{align-items:stretch}
+.portal-data-grid>.card,.portal-lower-grid>.card,.portal-actions-grid>.card{min-width:0;min-height:0}
+.portal-data-grid h2,.portal-lower-grid h2,.portal-actions-grid h2{line-height:1.35}
+@media(max-width:760px){
+  .portal-data-grid,.portal-lower-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+  .portal-data-grid>.card:first-child{grid-column:1/-1}
+  .portal-data-grid>.card,.portal-lower-grid>.card{padding:14px!important;border-radius:17px!important}
+  .portal-data-grid h2,.portal-lower-grid h2{font-size:16px!important;margin:0 0 4px!important}
+  .portal-actions-grid{grid-template-columns:1fr!important}
+  .portal-actions-grid>.card{padding:16px!important}
+}
+@media(max-width:420px){
+  .portal-data-grid,.portal-lower-grid{grid-template-columns:1fr 1fr!important}
+  .portal-data-grid>.card,.portal-lower-grid>.card{padding:12px!important}
+  .portal-empty{padding:4px 0}
+  .portal-empty-icon{width:30px;height:30px;font-size:14px}
+  .portal-empty strong{font-size:12px}
+  .portal-empty p{font-size:11px}
+}
+/* The public tracking form must never shrink to its content width. */
+#page-track .container.narrow{width:100%;max-width:640px;min-width:0}
+#page-track .track-search{width:100%;max-width:none;min-width:0;display:flex;align-items:stretch}
+#page-track .track-search .field{width:auto;min-width:0;flex:1 1 auto}
+@media(max-width:480px){
+  #page-track .track-search{display:grid;grid-template-columns:1fr;gap:9px}
+  #page-track .track-search .field,#page-track .track-search .btn{width:100%;min-width:0}
+}
