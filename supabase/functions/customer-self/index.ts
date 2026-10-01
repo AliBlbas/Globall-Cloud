@@ -179,6 +179,38 @@ Deno.serve(async (req) => {
         return json(req, {ok: true})
       }
 
+      if (action === 'chat_send') {
+        const bodyText = text(data.body, 4000)
+        if (!bodyText) return json(req, {error: 'Message body is required.'}, 400)
+        let threadId = text(data.thread_id, 100)
+        if (threadId) {
+          const {data: thread, error: threadError} = await service.from('customer_chat_threads').select('id,customer_user_id,status').eq('id', threadId).maybeSingle()
+          if (threadError) throw threadError
+          if (!thread || String(thread.customer_user_id) !== String(user.id)) return json(req, {error: 'Chat thread not found.'}, 404)
+          if (thread.status === 'closed') return json(req, {error: 'This chat is closed.'}, 409)
+        } else {
+          const {data: thread, error: createError} = await service.from('customer_chat_threads').insert({customer_user_id:user.id, subject:text(data.subject, 160) || 'Customer Support', status:'open', priority:'normal'}).select('id').single()
+          if (createError) throw createError
+          threadId = thread.id
+        }
+        const {data: message, error: messageError} = await service.from('customer_chat_messages').insert({thread_id:threadId, sender_user_id:user.id, sender_type:'customer', body:bodyText, attachments:Array.isArray(data.attachments) ? data.attachments : []}).select('id,thread_id,sender_user_id,sender_type,body,created_at,read_at').single()
+        if (messageError) throw messageError
+        const now = new Date().toISOString()
+        await service.from('customer_chat_threads').update({last_message_at:now, updated_at:now}).eq('id',threadId).eq('customer_user_id',user.id)
+        return json(req, {ok:true, message, thread_id:threadId})
+      }
+
+      if (action === 'chat_mark_read') {
+        const threadId = text(data.thread_id, 100)
+        if (!threadId) return json(req, {error:'Thread id is required.'}, 400)
+        const {data: thread, error: threadError} = await service.from('customer_chat_threads').select('id').eq('id',threadId).eq('customer_user_id',user.id).maybeSingle()
+        if (threadError) throw threadError
+        if (!thread) return json(req, {error:'Chat thread not found.'}, 404)
+        const {error} = await service.from('customer_chat_messages').update({read_at:new Date().toISOString()}).eq('thread_id',threadId).eq('sender_type','staff').is('read_at',null)
+        if (error) throw error
+        return json(req, {ok:true})
+      }
+
       if (action === 'request_quote') {
         const originKey = text(data.origin_key, 100)
         const destKey = text(data.dest_key, 100)
@@ -222,7 +254,7 @@ Deno.serve(async (req) => {
     const shipments = shipmentRows || []
     const shipmentIds = shipments.map((item) => item.id).filter(Boolean)
 
-    const [notifications, preferences, quotes, documents, pods, invoices, payments, events, ledger, receipts, packages] = await Promise.all([
+    const [notifications, preferences, quotes, documents, pods, invoices, payments, events, ledger, receipts, packages, chatThreads] = await Promise.all([
       service.from('customer_notifications').select('id,title,body,read_at,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(12),
       service.from('customer_notification_preferences').select('email_enabled,whatsapp_enabled,sms_enabled,in_app_enabled,quiet_hours_start,quiet_hours_end,updated_at').eq('customer_user_id', user.id).maybeSingle(),
       service.from('quote_requests').select('id,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,status,quoted_amount,currency,valid_until,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(12),
@@ -234,8 +266,9 @@ Deno.serve(async (req) => {
       shipmentIds.length ? service.from('shipment_financial_ledger').select('shipment_id,entry_type,amount,currency,reference,note,created_at').in('shipment_id', shipmentIds).order('created_at', {ascending: false}).limit(100) : Promise.resolve({data: [], error: null}),
       service.from('warehouse_receipts').select('id,batch_code,location,stage,photo_taken_at,gc_code_detected,verification_status,photos,shipment_id,received_at,created_at').eq('directory_customer_id', customer.id).order('received_at', {ascending: false}).limit(30),
       shipmentIds.length ? service.from('shipment_packages').select('id,shipment_id,package_code,barcode,package_type,description,weight_kg,length_cm,width_cm,height_cm,declared_value,declared_currency,current_hub,status,created_at,updated_at').in('shipment_id', shipmentIds).order('created_at', {ascending: false}).limit(100) : Promise.resolve({data: [], error: null}),
+      service.from('customer_chat_threads').select('id,subject,status,priority,last_message_at,created_at').eq('customer_user_id', user.id).neq('status','closed').order('last_message_at', {ascending:false}).limit(20),
     ])
-    const results = [notifications, preferences, quotes, documents, pods, invoices, payments, events, ledger, receipts, packages]
+    const results = [notifications, preferences, quotes, documents, pods, invoices, payments, events, ledger, receipts, packages, chatThreads]
     const failed = results.find((result) => result?.error)
     if (failed?.error) throw failed.error
 
@@ -265,6 +298,7 @@ Deno.serve(async (req) => {
       ledger: ledger.data || [],
       receipts: receipts.data || [],
       packages: packages.data || [],
+      chat_threads: chatThreads.data || [],
       notification_preferences: preferences.data || {email_enabled:false,whatsapp_enabled:false,sms_enabled:false,in_app_enabled:true},
     })
   } catch (error) {
