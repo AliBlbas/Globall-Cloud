@@ -78,7 +78,7 @@ const headers = read('_headers')
 const redirects = read('_redirects')
 if (!headers.includes('Content-Security-Policy:') || /script-src[^\n;]*unsafe-inline/.test(headers) || !headers.includes('Strict-Transport-Security:') || !headers.includes('X-Content-Type-Options: nosniff')) fail('security header contract is incomplete')
 else ok('Security headers are present')
-for (const route of ['/track /track.html 200','/staff /staff-os-v5.html 200','/staff/ /staff-os-v5.html 200','/staff-os /staff-os-v5.html 200']) if (!redirects.includes(route)) fail(`route contract missing: ${route}`)
+for (const route of ['/tracking-integration.html /track 301','/staff /staff-os-v5.html 200','/staff/ /staff-os-v5.html 200','/staff-os /staff-os-v5.html 200']) if (!redirects.includes(route)) fail(`route contract missing: ${route}`)
 if (!failures) ok('Core public/staff routes are wired')
 
 const bridge = read('production-bridge.js')

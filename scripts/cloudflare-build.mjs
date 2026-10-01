@@ -44,8 +44,9 @@ for(const entry of fs.readdirSync(root)){
   if(!skippedDirectories.has(entry)) copyEntry(entry);
 }
 
-// Keep /track as a first-class public route instead of relying on extension
-// normalization from the legacy tracking-integration.html filename.
+// Publish the professional tracking experience at the pretty /track route.
+// The source track.html is retained for compatibility, but the tracking page
+// remains authored once in tracking-integration.html.
 fs.copyFileSync(path.join(root,'tracking-integration.html'),path.join(out,'track.html'));
 
 // Cloudflare Pages Functions must remain at the deploy root.
@@ -65,7 +66,7 @@ const legacyOut = path.join(root,'Build');
 fs.rmSync(legacyOut,{recursive:true,force:true});
 fs.cpSync(out,legacyOut,{recursive:true});
 
-for(const required of ['index.html','track.html','_headers','_redirects','functions/_middleware.js','functions/api/health.js','functions/api/ready.js']){
+for(const required of ['index.html','_headers','_redirects','functions/_middleware.js','functions/api/health.js','functions/api/ready.js']){
   if(!fs.existsSync(path.join(out,required))) throw new Error(`Cloudflare build error: missing ${required}`);
 }
 
