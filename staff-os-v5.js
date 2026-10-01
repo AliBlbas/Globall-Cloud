@@ -37,6 +37,16 @@
   const shortDate = (v) => v ? new Date(v).toLocaleDateString('ku-IQ') : '—';
   const text = (v) => String(v ?? '').trim();
   const safeJson = (v) => { try { return JSON.parse(v); } catch { return v; } };
+  const errorText = (value, fallback = 'Data service error') => {
+    if (value instanceof Error) return value.message || fallback;
+    if (typeof value === 'string') return value || fallback;
+    if (value && typeof value === 'object') {
+      const message = value.message || value.error_description || value.error || value.details || value.hint;
+      if (message && message !== value) return errorText(message, fallback);
+      try { return JSON.stringify(value); } catch { return fallback; }
+    }
+    return value == null ? fallback : String(value);
+  };
   const statusLabel = (v) => ({received_origin:'لە بنکە وەرگیراوە',in_transit:'لە ڕێگایە',at_transit_hub:'لە هەڵگرتنی ناوەندییە',customs:'گومرک',out_for_delivery:'بۆ گەیاندن',delivered:'گەیشتووە',on_hold:'وەستێنراوە',cancelled:'هەڵوەشێنراوە'})[v] || v || '—';
   const modeLabel = (v) => ({air:'ئاسمانی',land:'وشکانی',sea:'دەریایی'})[v] || v || '—';
   const roleLabel = (v) => ({super_admin:'Super Admin',admin:'Admin',accountant:'Accountant',finance:'Finance',warehouse:'Warehouse',warehouse_china:'China Warehouse',warehouse_uae:'Dubai Warehouse',warehouse_erbil:'Erbil Warehouse',operations:'Operations',driver:'Driver',delivery:'Delivery'})[v] || v || '—';
@@ -75,11 +85,11 @@
       const raw = await response.text();
       let payload = {};
       try { payload = raw ? JSON.parse(raw) : {}; } catch { payload = { error: raw }; }
-      if (!response.ok) throw new Error(payload.error || payload.message || `HTTP ${response.status}`);
+      if (!response.ok) throw new Error(errorText(payload.error || payload.message || payload, `HTTP ${response.status}`));
       return payload;
     } catch (err) {
       if (err?.name === 'AbortError') throw new Error('سێرڤەر لە ماوەی کاتی دیاریکراودا وەڵامی نەدا. تکایە دووبارە هەوڵ بدە.');
-      throw err;
+      throw new Error(errorText(err, 'Data service error'));
     } finally {
       clearTimeout(timer);
     }
@@ -243,7 +253,8 @@
       else if (tab==='settings') await renderSettings();
       void refreshRuntimeHealth();
     } catch (err) {
-      view.innerHTML = `<div class="empty"><strong style="color:var(--red)">هەڵەی module</strong><div style="margin-top:5px">${esc(err.message)}</div><button class="btn" data-retry style="margin-top:10px">↻ دووبارە هەوڵدان</button></div>`;
+      const message = errorText(err, 'Data service error');
+      view.innerHTML = `<div class="empty"><strong style="color:var(--red)">هەڵەی module</strong><div style="margin-top:5px">${esc(message)}</div><button class="btn" data-retry style="margin-top:10px">↻ دووبارە هەوڵدان</button></div>`;
       view.querySelector('[data-retry]')?.addEventListener('click', () => loadTab(tab, true));
       void refreshRuntimeHealth();
     }
