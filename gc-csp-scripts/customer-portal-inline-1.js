@@ -1,5 +1,6 @@
 const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
+const GC_LOGIN_FN = `${SUPABASE_URL}/functions/v1/customer-gc-login`;
 const sb = window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
 const $ = (id) => document.getElementById(id);
 const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
@@ -8,7 +9,11 @@ const money = (amount, currency = 'USD') => `${Number(amount || 0).toLocaleStrin
 const date = (value) => value ? new Date(value).toLocaleString() : '—';
 const showMessage = (message, kind = 'muted') => { $('quoteMessage').textContent = message; $('quoteMessage').className = kind; };
 
-const renderShipments = (items) => setHtml('shipments', items.map((item) => `<div class="item"><div class="row"><strong>${esc(item.id)}</strong><span class="pill">${esc(item.operational_status || item.current_step_index || 0)}</span></div><div class="muted">${esc(item.origin_key)} → ${esc(item.dest_key)}</div><small>${esc(item.current_location_label || '—')} · ETA ${esc(date(item.eta))}</small></div>`).join('') || '<div class="muted">هیچ shipment نییە.</div>');
+const renderShipments = (items) => setHtml('shipments', items.map((item) => {
+  const photos = item.step_photos && typeof item.step_photos === 'object' ? Object.values(item.step_photos).flat().filter(Boolean) : [];
+  return `<div class="item"><div class="row"><strong>${esc(item.batch_code || item.id)}</strong><span class="pill">${esc(item.operational_status || item.current_step_index || 'pending')}</span></div><div class="muted">${esc(item.origin_key)} → ${esc(item.dest_key)} · ${esc(item.warehouse_location || '—')}</div><small>کێش: ${esc(item.weight_kg || 0)} kg · جۆر: ${esc(item.cargo_type || item.type || '—')} · تێچوو: ${money(item.cargo_cost || item.total_amount || 0, item.cargo_currency || 'USD')}</small><div class="muted">${esc(item.current_location_label || '—')} · ETA ${esc(date(item.eta))}</div>${photos.length ? `<div class="gc-shipment-photos">${photos.slice(0,8).map((url) => `<a href="${esc(url)}" target="_blank" rel="noreferrer"><img src="${esc(url)}" alt="Shipment photo"></a>`).join('')}</div>` : ''}</div>`;
+}).join('') || '<div class="muted">هیچ shipment نییە.</div>');
+const renderWarehouses = (items) => setHtml('warehouseDirectory', items.map((item) => `<div class="item"><strong>${esc(item.label)}</strong><div class="muted">${esc(item.city)}, ${esc(item.country)}</div><p>${esc(item.address)}</p>${item.contact ? `<small>${esc(item.contact)}</small>` : ''}${item.pickup_hours ? `<small>کاتی وەرگرتن: ${esc(item.pickup_hours)}</small>` : ''}</div>`).join('') || '<div class="muted">ناونیشان بەردەست نییە.</div>');
 const renderNotifications = (items) => setHtml('notifications', items.map((item) => `<div class="item"><strong>${esc(item.title)}</strong><div class="muted">${esc(item.body)}</div><small>${esc(date(item.created_at))}</small></div>`).join('') || '<div class="muted">هیچ notification نییە.</div>');
 const renderQuotes = (items) => setHtml('quotes', items.map((item) => {
   const canAccept = item.status === 'quoted' && item.valid_until && new Date(item.valid_until) > new Date();
@@ -33,9 +38,11 @@ const load = async () => {
   $('loginBtn').classList.add('hidden');
   $('logoutBtn').classList.remove('hidden');
   const uid = session.user.id;
+  const warehouses = await sb.from('gc_warehouse_addresses').select('id,country,city,label,address,contact,pickup_hours').eq('is_active', true).order('sort_order');
+  renderWarehouses(warehouses.data || []);
   $('hello').textContent = `بەخێربێیت — ${session.user.email || 'Customer'}`;
   const [shipments, notifications, quotes, documents, pods, invoices, payments] = await Promise.all([
-    sb.from('shipments').select('id,origin_key,dest_key,current_step_index,operational_status,current_location_label,total_amount,paid_amount,eta').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(30),
+    sb.from('shipments').select('id,batch_code,origin_key,dest_key,current_step_index,operational_status,current_location_label,total_amount,paid_amount,cargo_cost,cargo_currency,cargo_type,warehouse_location,weight_kg,step_photos,eta').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(30),
     sb.from('customer_notifications').select('title,body,read_at,created_at').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(12),
     sb.from('quote_requests').select('id,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,status,quoted_amount,currency,valid_until,created_at').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(12),
     sb.from('shipment_documents').select('id,shipment_id,document_type,title,file_url,is_public,document_status,created_at').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(12),
@@ -102,7 +109,15 @@ const acceptQuote = async (quoteId) => {
 
 $('loginBtn').addEventListener('click', () => $('auth').classList.remove('hidden'));
 $('close').addEventListener('click', () => $('auth').classList.add('hidden'));
-$('signIn').addEventListener('click', async () => { $('msg').textContent = '…'; const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('password').value }); $('msg').textContent = error ? error.message : 'سەرکەوتوو'; if (!error) { $('auth').classList.add('hidden'); await load(); } });
+$('signIn').addEventListener('click', async () => {
+  $('msg').textContent = '…';
+  const response = await fetch(GC_LOGIN_FN, { method: 'POST', headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ code: $('email').value.trim(), password: $('password').value }) });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok || !body.session) { $('msg').textContent = body.error || 'کۆدی GC یان وشەی نهێنی هەڵەیە'; return; }
+  const { error } = await sb.auth.setSession({ access_token: body.session.access_token, refresh_token: body.session.refresh_token });
+  $('msg').textContent = error ? error.message : 'سەرکەوتوو';
+  if (!error) { $('auth').classList.add('hidden'); await load(); }
+});
 $('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
 $('trackBtn').addEventListener('click', () => { location.href = './index.html#track'; });
 $('quoteBtn').addEventListener('click', () => { $('quoteForm').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('quoteOrigin').focus(); });

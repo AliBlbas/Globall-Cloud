@@ -1,7 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 type Kind = 'customer' | 'staff' | 'receipt' | 'log' | 'shipment'
-type Action = 'list' | 'create' | 'update' | 'archive' | 'delete'
+type Action = 'list' | 'create' | 'update' | 'archive' | 'delete' | 'allocate'
 type JsonRecord = Record<string, unknown>
 
 const ALLOWED_ORIGINS = new Set([
@@ -91,7 +91,7 @@ function normalizeKind(value: unknown): Kind {
 
 function normalizeAction(value: unknown): Action {
   const action = String(value || 'list').toLowerCase()
-  if (action === 'create' || action === 'update' || action === 'archive' || action === 'delete') return action
+  if (action === 'create' || action === 'update' || action === 'archive' || action === 'delete' || action === 'allocate') return action
   return 'list'
 }
 
@@ -151,7 +151,7 @@ async function logActivity(client: ReturnType<typeof createClient>, staffId: str
 async function listCustomers(client: ReturnType<typeof createClient>) {
   const { data: customers, error } = await client
     .from('customer_directory')
-    .select('id,code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at')
+    .select('id,code,gc_code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at')
     .order('created_at', { ascending: false })
   if (error) throw error
   const { data: stats, error: statsErr } = await client.from('customer_directory_stats').select('directory_customer_id,shipment_count,total_amount,outstanding,last_shipment_at')
@@ -252,9 +252,15 @@ async function upsertCustomer(client: ReturnType<typeof createClient>, payload: 
   const managerStaffId = txt(payload.manager_staff_id)
   const existing = await findCustomerRow(client, payload)
   const authResult = await createCustomerAuth(client, payload, existing?.auth_user_id ?? null)
+  let gcCode = txt(payload.gc_code) || txt(payload.code) || txt(existing?.gc_code) || txt(existing?.code)
+  if (!gcCode && !existing?.id) {
+    const { data, error } = await client.rpc('generate_gc_customer_code')
+    if (error) throw error
+    gcCode = String(data)
+  }
   const base = { name, email, phone, phone2, city, delivery_location: deliveryLocation, note, manager_staff_id: managerStaffId, is_active: typeof payload.is_active === 'boolean' ? payload.is_active : true }
-  const write = existing?.id ? client.from('customer_directory').update({ ...base, auth_user_id: authResult.userId ?? null }).eq('id', existing.id) : client.from('customer_directory').insert({ ...base, auth_user_id: authResult.userId ?? null })
-  const { data: saved, error } = await write.select('id,code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
+  const write = existing?.id ? client.from('customer_directory').update({ ...base, auth_user_id: authResult.userId ?? null }).eq('id', existing.id) : client.from('customer_directory').insert({ ...base, code: gcCode, gc_code: gcCode, auth_user_id: authResult.userId ?? null })
+  const { data: saved, error } = await write.select('id,code,gc_code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
   if (error) throw error
   await logActivity(client, actor.id, actor.name, existing?.id ? 'update_customer_account' : 'create_customer_account', String(saved.id), { email, phone, manager_staff_id: managerStaffId, auth_user_created: Boolean(authResult.userId && !existing?.auth_user_id) })
   return { customer: saved, auth_user_id: authResult.userId, warning: authResult.warning, status: authResult.userId ? 'linked' : 'saved_without_auth' }
@@ -273,8 +279,6 @@ async function updateCustomer(client: ReturnType<typeof createClient>, payload: 
     if (value !== null) updates[key] = value
   }
   if (typeof payload.is_active === 'boolean') updates.is_active = payload.is_active
-  if (actor.isSuperAdmin && payload.gc_code !== undefined) updates.gc_code = txt(payload.gc_code)
-  if (actor.isSuperAdmin && payload.code !== undefined) updates.code = txt(payload.code)
 
   const { data: current, error: currentErr } = await client.from('customer_directory').select('id,auth_user_id').eq('id', id).maybeSingle()
   if (currentErr) throw currentErr
@@ -297,7 +301,7 @@ async function updateCustomer(client: ReturnType<typeof createClient>, payload: 
     }
   }
 
-  const { data: updated, error } = await client.from('customer_directory').update(updates).eq('id', id).select('id,code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
+  const { data: updated, error } = await client.from('customer_directory').update(updates).eq('id', id).select('id,code,gc_code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
   if (error) throw error
   await logActivity(client, actor.id, actor.name, 'update_customer_account', id, updates)
   return updated
@@ -314,7 +318,7 @@ async function archiveCustomer(client: ReturnType<typeof createClient>, payload:
   if (hardDeleteAuth && current.auth_user_id) {
     try { const { error } = await client.auth.admin.deleteUser(String(current.auth_user_id)); if (error) throw error } catch (err) { authWarning = `Linked Auth user deletion failed: ${toErrorMessage(err)}` }
   }
-  const { data: updated, error } = await client.from('customer_directory').update({ is_active: false, auth_user_id: hardDeleteAuth ? null : current.auth_user_id ?? null }).eq('id', id).select('id,code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
+  const { data: updated, error } = await client.from('customer_directory').update({ is_active: false, auth_user_id: hardDeleteAuth ? null : current.auth_user_id ?? null }).eq('id', id).select('id,code,gc_code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
   if (error) throw error
   await logActivity(client, staffId, staffName, 'archive_customer_account', id, { hard_delete_auth: hardDeleteAuth })
   return { ...updated, warning: authWarning }
@@ -428,7 +432,21 @@ async function createReceipt(client: ReturnType<typeof createClient>, payload: J
   }
   const { data: row, error } = await client.from('warehouse_receipts').insert({ batch_code: batchCode, location, notes, directory_customer_id: customer?.id ?? null, directory_phone: customer?.phone ?? txt(payload.customer_phone) ?? null, created_by: actor.id, created_by_name: actor.name, photos: uploadedUrls, consolidated: false }).select('id,batch_code,location,notes,received_at,created_by_name,directory_customer_id,directory_phone,consolidated,photos,created_at').single()
   if (error) throw error
-  await logActivity(client, actor.id, actor.name, 'create_warehouse_receipt', String(row.id), { batch_code: batchCode, location, photo_count: uploadedUrls.length })
+  const shipmentUpdates: Record<string, unknown> = {}
+  const cargoType = txt(payload.cargo_type)
+  const warehouseLocation = location
+  const weight = Number(payload.weight_kg)
+  const cargoCost = Number(payload.cargo_cost)
+  if (cargoType) shipmentUpdates.cargo_type = cargoType
+  if (Number.isFinite(weight) && weight >= 0) shipmentUpdates.weight_kg = weight
+  if (Number.isFinite(cargoCost) && cargoCost >= 0) shipmentUpdates.cargo_cost = cargoCost
+  if (txt(payload.operational_status)) shipmentUpdates.operational_status = txt(payload.operational_status)
+  shipmentUpdates.warehouse_location = warehouseLocation
+  if (uploadedUrls.length) shipmentUpdates.step_photos = { [location.toLowerCase()]: uploadedUrls }
+  if (Object.keys(shipmentUpdates).length) {
+    await client.from('shipments').update(shipmentUpdates).eq('batch_code', batchCode)
+  }
+  await logActivity(client, actor.id, actor.name, 'create_warehouse_receipt', String(row.id), { batch_code: batchCode, photo_count: uploadedUrls.length, cargo_type: cargoType, weight_kg: weight, cargo_cost: cargoCost })
   return { receipt: row, customer, uploaded_urls: uploadedUrls }
 }
 
@@ -469,6 +487,13 @@ Deno.serve(async (req) => {
     const data = body.data && typeof body.data === 'object' ? (body.data as JsonRecord) : body
     if ((kind === 'customer' || kind === 'staff') && action === 'create' && !isSuperAdmin) return json({ error: 'Only Super Admin can create accounts' }, { status: 403 }, req)
     if (kind === 'customer') {
+      if (action === 'allocate') {
+        if (!canWrite) return json({ error: 'Write access required' }, { status: 403 }, req)
+        const { data: code, error } = await serviceClient.rpc('generate_gc_customer_code')
+        if (error) throw error
+        await logActivity(serviceClient, staffRow.id, staffRow.full_name, 'allocate_gc_customer_code', String(code), null)
+        return json({ code: String(code), kind: 'customer' }, {}, req)
+      }
       if (action === 'create') return json(await upsertCustomer(serviceClient, data, { id: staffRow.id, name: staffRow.full_name, isSuperAdmin }), {}, req)
       if (action === 'update') return json(await updateCustomer(serviceClient, data, { id: staffRow.id, name: staffRow.full_name, isSuperAdmin }), {}, req)
       if (action === 'archive' || action === 'delete') return json(await archiveCustomer(serviceClient, data, staffRow.id, staffRow.full_name), {}, req)

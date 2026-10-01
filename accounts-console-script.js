@@ -46,9 +46,9 @@ function setActiveTab(tab) {
 function loadManagerOptions() {
   $('customerManager').innerHTML = '<option value="">Unassigned</option>' + state.staff.map((s) => `<option value="${esc(s.id)}">${esc(s.full_name)} (${esc(s.role)})</option>`).join('');
 }
-function resetCustomerForm() { window.formValidator.resetForm('customerForm'); $('customerId').value=''; $('customerName').value=''; $('customerEmail').value=''; $('customerPhone').value=''; $('customerPhone2').value=''; $('customerCity').value=''; $('customerDelivery').value=''; $('customerManager').value=''; $('customerStatus').value='true'; $('customerNote').value=''; $('customerInvite').value='true'; $('customerPassword').value=''; setMsg($('customerMsg'), ''); }
+function resetCustomerForm() { window.formValidator.resetForm('customerForm'); $('customerId').value=''; $('customerName').value=''; $('customerEmail').value=''; $('customerGcCode').value=''; $('customerPhone').value=''; $('customerPhone2').value=''; $('customerCity').value=''; $('customerDelivery').value=''; $('customerManager').value=''; $('customerStatus').value='true'; $('customerNote').value=''; $('customerInvite').value='true'; $('customerPassword').value=''; setMsg($('customerMsg'), ''); }
 function resetStaffForm() { window.formValidator.resetForm('staffForm'); $('staffId').value=''; $('staffFullName').value=''; $('staffEmail').value=''; $('staffRole').value='admin'; $('staffBranch').value='all'; $('staffInvite').value='true'; $('staffPassword').value=''; setMsg($('staffMsg'), ''); }
-function resetReceiptForm() { window.formValidator.resetForm('receiptForm'); $('receiptBatch').value=''; $('receiptLocation').value='Dubai'; $('receiptCustomerCode').value=''; $('receiptCustomerPhone').value=''; $('receiptNotes').value=''; $('receiptPhotos').value=''; $('receiptPreview').innerHTML=''; setMsg($('receiptMsg'), ''); }
+function resetReceiptForm() { window.formValidator.resetForm('receiptForm'); $('receiptBatch').value=''; $('receiptLocation').value='Dubai'; $('receiptCustomerCode').value=''; $('receiptCargoType').value='standard'; $('receiptWeight').value=''; $('receiptCargoCost').value=''; $('receiptStatus').value='received_origin'; $('receiptCustomerPhone').value=''; $('receiptNotes').value=''; $('receiptPhotos').value=''; $('receiptPreview').innerHTML=''; setMsg($('receiptMsg'), ''); }
 function renderList() {
   const q = $('searchBox').value.trim().toLowerCase();
   if (state.tab === 'customers') {
@@ -210,6 +210,7 @@ $('refreshBtn').addEventListener('click', refreshAll);
 $('searchBox').addEventListener('input', renderList);
 document.querySelectorAll('.tab').forEach((btn) => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
 $('customerClearBtn').addEventListener('click', resetCustomerForm);
+$('allocateGcBtn').addEventListener('click', async () => { try { $('allocateGcBtn').disabled = true; const { data: code, error } = await window.sb.rpc('generate_gc_customer_code'); if (error) throw error; $('customerGcCode').value = code || ''; setMsg($('customerMsg'), `Allocated ${code}`, true); } catch (err) { setMsg($('customerMsg'), err.message || 'Unable to allocate GC code'); } finally { $('allocateGcBtn').disabled = false; } });
 $('staffClearBtn').addEventListener('click', resetStaffForm);
 $('receiptClearBtn').addEventListener('click', resetReceiptForm);
 ['customerForm', 'staffForm', 'receiptForm'].forEach((id) => window.formValidator.initializeForm(id, { manageSubmit: false }));
@@ -218,7 +219,7 @@ $('customerForm').addEventListener('submit', async (e) => {
   if (!window.formValidator.validateForm('customerForm')) { setMsg($('customerMsg'), 'Please fix the highlighted fields'); return; }
   setMsg($('customerMsg'), 'Saving customer...');
   try {
-    const payload = { id: $('customerId').value || undefined, name: $('customerName').value.trim(), email: $('customerEmail').value.trim(), phone: $('customerPhone').value.trim(), phone2: $('customerPhone2').value.trim(), city: $('customerCity').value.trim(), delivery_location: $('customerDelivery').value.trim(), note: $('customerNote').value.trim(), manager_staff_id: $('customerManager').value || null, is_active: $('customerStatus').value === 'true', send_invite: $('customerInvite').value === 'true', password: $('customerPassword').value.trim() || undefined };
+    const payload = { id: $('customerId').value || undefined, gc_code: $('customerGcCode').value.trim() || undefined, code: $('customerGcCode').value.trim() || undefined, name: $('customerName').value.trim(), email: $('customerEmail').value.trim(), phone: $('customerPhone').value.trim(), phone2: $('customerPhone2').value.trim(), city: $('customerCity').value.trim(), delivery_location: $('customerDelivery').value.trim(), note: $('customerNote').value.trim(), manager_staff_id: $('customerManager').value || null, is_active: $('customerStatus').value === 'true', send_invite: $('customerInvite').value === 'true', password: $('customerPassword').value.trim() || undefined };
     const action = $('customerId').value ? 'update' : 'create';
     const res = await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'customer', action, data: payload }) });
     setMsg($('customerMsg'), action === 'create' ? `Customer saved${res.warning ? ' · ' + res.warning : ''}` : 'Customer updated', true);
@@ -248,7 +249,7 @@ $('receiptForm').addEventListener('submit', async (e) => {
   try {
     const formData = new FormData();
     formData.append('kind', 'receipt'); formData.append('action', 'create');
-    formData.append('batch_code', $('receiptBatch').value.trim()); formData.append('location', $('receiptLocation').value); formData.append('customer_code', $('receiptCustomerCode').value.trim()); formData.append('customer_phone', $('receiptCustomerPhone').value.trim()); formData.append('notes', $('receiptNotes').value.trim());
+    formData.append('batch_code', $('receiptBatch').value.trim()); formData.append('location', $('receiptLocation').value); formData.append('customer_code', $('receiptCustomerCode').value.trim()); formData.append('cargo_type', $('receiptCargoType').value); formData.append('weight_kg', $('receiptWeight').value); formData.append('cargo_cost', $('receiptCargoCost').value); formData.append('operational_status', $('receiptStatus').value); formData.append('customer_phone', $('receiptCustomerPhone').value.trim()); formData.append('notes', $('receiptNotes').value.trim());
     for (const file of Array.from($('receiptPhotos').files || [])) formData.append('photos', file);
     const res = await authFetch('/', { method: 'POST', body: formData });
     setMsg($('receiptMsg'), `Receipt saved: ${res.receipt.batch_code}${res.customer ? ' · linked to customer' : ''}`, true);
@@ -257,7 +258,7 @@ $('receiptForm').addEventListener('submit', async (e) => {
 });
 window.editCustomer = (row) => {
   window.formValidator.resetForm('customerForm');
-  $('customerId').value = row.id || ''; $('customerName').value = row.name || ''; $('customerEmail').value = row.email || ''; $('customerPhone').value = row.phone || ''; $('customerPhone2').value = row.phone2 || ''; $('customerCity').value = row.city || ''; $('customerDelivery').value = row.delivery_location || ''; $('customerManager').value = row.manager_staff_id || ''; $('customerStatus').value = String(Boolean(row.is_active)); $('customerNote').value = row.note || ''; $('customerInvite').value = row.auth_user_id ? 'false' : 'true'; $('customerPassword').value = ''; setActiveTab('customers'); $('customerForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('customerId').value = row.id || ''; $('customerName').value = row.name || ''; $('customerEmail').value = row.email || ''; $('customerGcCode').value = row.gc_code || row.code || '';  $('customerPhone').value = row.phone || ''; $('customerPhone2').value = row.phone2 || ''; $('customerCity').value = row.city || ''; $('customerDelivery').value = row.delivery_location || ''; $('customerManager').value = row.manager_staff_id || ''; $('customerStatus').value = String(Boolean(row.is_active)); $('customerNote').value = row.note || ''; $('customerInvite').value = row.auth_user_id ? 'false' : 'true'; $('customerPassword').value = ''; setActiveTab('customers'); $('customerForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 window.editStaff = (row) => {
   window.formValidator.resetForm('staffForm');

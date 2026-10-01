@@ -29,12 +29,14 @@ class PriceCalculator {
 
   setupBaseRates() {
     return {
-      air: { perKg: 8.5, range: { min: 5.0, max: 15.0 }, minCharge: 150, description: 'Air Freight - Fastest delivery' },
-      sea: { perCbm: 450, range: { min: 300, max: 600 }, minCharge: 300, description: 'Sea Freight - Most economical' },
-      land: { perKg: 3.5, perKm: 0.25, range: { min: 2.0, max: 5.5 }, minCharge: 100, description: 'Land Transport - Regional delivery' },
+      chinaAir: { standard: 9, screen: 12, battery: 14, unit: 'kg' },
+      chinaSea: { perCbm: 300, unit: 'cbm' },
+      usaAir: { perKg: 13, unit: 'kg' },
+      dubaiAir: { min: 8.25, max: 22, unit: 'kg' },
+      dubaiLand: { perKg: 1.50, sheinOver100: 1.25, unit: 'kg' },
+      minimumIQD: 5000,
     };
   }
-
   setupDistanceMatrix() {
     return {
       'China-UAE': 4800,
@@ -77,53 +79,33 @@ class PriceCalculator {
    * @param {boolean} useSeasonal - apply the seasonal multiplier (opt-in,
    *   since the quote form may want a flat, predictable price instead)
    */
-  calculateShippingCost(shipmentType, weight, origin, destination, { useSeasonal = false } = {}) {
-    const rate = this.baseRates[shipmentType];
-    if (!rate) return null;
-
+  calculateShippingCost(shipmentType, weight, origin, destination, { useSeasonal = false, cargoType = 'standard', volumeCbm = null, merchant = '' } = {}) {
+    const kg = Math.max(0, Number(weight || 0));
+    const place = String(origin || '').toLowerCase();
     let baseCost = 0;
-    const breakdown = {};
-
-    if (shipmentType === 'air') {
-      baseCost = Math.max(weight * rate.perKg, rate.minCharge);
-      breakdown.weight = weight * rate.perKg;
-      breakdown.minCharge = rate.minCharge;
-    } else if (shipmentType === 'sea') {
-      const cbm = weight / 200; // rough density estimate
-      baseCost = Math.max(cbm * rate.perCbm, rate.minCharge);
-      breakdown.cbm = cbm;
-      breakdown.rate = rate.perCbm;
-    } else if (shipmentType === 'land') {
-      const distance = this.getDistance(origin, destination) || 500;
-      baseCost = Math.max(weight * rate.perKg + distance * rate.perKm, rate.minCharge);
-      breakdown.weight = weight * rate.perKg;
-      breakdown.distance = distance * rate.perKm;
+    let unit = 'kg';
+    let rate = 0;
+    if (place.includes('china') && shipmentType === 'air') {
+      rate = this.baseRates.chinaAir[cargoType] || this.baseRates.chinaAir.standard;
+      baseCost = kg * rate;
+    } else if (place.includes('china') && shipmentType === 'sea') {
+      unit = 'cbm'; rate = this.baseRates.chinaSea.perCbm;
+      baseCost = Math.max(0, Number(volumeCbm ?? kg / 200)) * rate;
+    } else if ((place.includes('usa') || place.includes('united')) && shipmentType === 'air') {
+      rate = this.baseRates.usaAir.perKg; baseCost = kg * rate;
+    } else if ((place.includes('dubai') || place.includes('uae')) && shipmentType === 'air') {
+      rate = this.baseRates.dubaiAir.min + Math.min(1, kg / 100) * (this.baseRates.dubaiAir.max - this.baseRates.dubaiAir.min);
+      baseCost = kg * rate;
+    } else if ((place.includes('dubai') || place.includes('uae')) && shipmentType === 'land') {
+      rate = String(merchant).toLowerCase() === 'shein' && kg > 100 ? this.baseRates.dubaiLand.sheinOver100 : this.baseRates.dubaiLand.perKg;
+      baseCost = kg * rate;
+    } else {
+      return null;
     }
-
-    let totalCost = baseCost * this.getWeightMultiplier(weight, shipmentType);
-    if (useSeasonal) totalCost *= this.getSeasonalMultiplier();
-
-    // keep price inside the sane published range
-    totalCost = Math.max(rate.range.min * weight, Math.min(totalCost, rate.range.max * weight * 1.5));
-
-    const appliedModifiers = {};
-    for (const [name, modifier] of this.modifiers) {
-      const modifiedCost = modifier.calculator(totalCost, { weight, origin, destination });
-      appliedModifiers[name] = modifiedCost - totalCost;
-      totalCost = modifiedCost;
-    }
-
-    return {
-      type: shipmentType,
-      baseCost: Math.round(baseCost * 100) / 100,
-      totalCost: Math.round(totalCost * 100) / 100,
-      currency: 'USD',
-      breakdown,
-      modifiers: appliedModifiers,
-      generatedAt: new Date().toISOString(),
-    };
+    if (useSeasonal) baseCost *= this.getSeasonalMultiplier();
+    const totalCost = Math.round(baseCost * 100) / 100;
+    return { type: shipmentType, origin, destination, baseCost: totalCost, totalCost, currency: 'USD', unit, rate, minimumChargeIQD: this.baseRates.minimumIQD, breakdown: { weight: kg, volumeCbm: volumeCbm ?? null }, modifiers: {}, generatedAt: new Date().toISOString() };
   }
-
   calculateDeliveryTime(shipmentType) {
     const times = {
       air: { min: 2, max: 5, unit: 'days' },
@@ -146,7 +128,7 @@ class PriceCalculator {
   }
 }
 
-window.priceCalculator = new PriceCalculator();
+if (typeof window !== 'undefined') window.priceCalculator = new PriceCalculator();
 
 // A modifier registered here would apply to every single call to
 // calculateShippingCost() from that point on — including this project's

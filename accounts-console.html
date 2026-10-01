@@ -252,6 +252,12 @@
               <div class="form-row"><label class="label">Customer code</label><input class="field" id="receiptCustomerCode" placeholder="GC... or directory code"></div>
               <div class="form-row"><label class="label">Customer phone</label><input class="field" id="receiptCustomerPhone" data-validate="phone"></div>
             </div>
+            <div class="grid">
+              <div class="form-row"><label class="label">Cargo type</label><select class="field" id="receiptCargoType"><option value="standard">Standard</option><option value="screen">Screen</option><option value="battery">Battery</option><option value="shein_100_plus">Shein over 100kg</option></select></div>
+              <div class="form-row"><label class="label">Weight (kg)</label><input class="field" id="receiptWeight" type="number" min="0" step="0.01"></div>
+              <div class="form-row"><label class="label">Cargo cost (USD)</label><input class="field" id="receiptCargoCost" type="number" min="0" step="0.01"></div>
+              <div class="form-row"><label class="label">Shipment status</label><select class="field" id="receiptStatus"><option value="received_origin">لە کۆگایە</option><option value="in_transit">لە ڕێگادایە</option><option value="delivered">گەیشتووە</option></select></div>
+            </div>
             <div class="form-row"><label class="label">Notes</label><textarea class="field" id="receiptNotes" placeholder="Received goods from Dubai / Erbil..."></textarea></div>
             <div class="form-row"><label class="label">Receipt photos</label><input class="field" type="file" id="receiptPhotos" multiple accept="image/*"></div>
             <div class="receipt-files" id="receiptPreview"></div>
