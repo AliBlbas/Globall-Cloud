@@ -26,6 +26,39 @@
     if (progress) progress.style.width = state.progress;
   };
   root.querySelectorAll('[data-corridor-tab]').forEach((tab) => tab.addEventListener('click', () => update(tab.dataset.corridorTab)));
+
+  const healthBadge = root.querySelector('[data-intelligence-health]');
+  const healthLabel = root.querySelector('[data-intelligence-health-label]');
+  const syncLabel = root.querySelector('[data-intelligence-sync]');
+  const formatTime = (value) => {
+    try { return new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Baghdad' }).format(new Date(value)); }
+    catch (_) { return '—'; }
+  };
+  const setHealth = (state, label, detail) => {
+    if (!healthBadge) return;
+    healthBadge.dataset.state = state;
+    if (healthLabel) healthLabel.textContent = label;
+    if (syncLabel) syncLabel.textContent = detail;
+  };
+  const refreshHealth = async () => {
+    if (!healthBadge) return;
+    setHealth('checking', 'CHECKING SYSTEM', 'checking…');
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 7000);
+    try {
+      const response = await fetch('/api/ready', { headers: { accept: 'application/json' }, cache: 'no-store', signal: controller.signal });
+      const body = await response.json();
+      if (!response.ok || body?.ok !== true || body?.status !== 'ready' || body?.supabase?.ok !== true) throw new Error('readiness degraded');
+      setHealth('ready', 'SYSTEM READY', `last sync · ${formatTime(body.timestamp)} · ${body.supabase.latency_ms}ms`);
+      healthBadge.title = `Backend ready · request ${body.request_id || '—'}`;
+    } catch (_) {
+      setHealth('degraded', 'SYSTEM DEGRADED', 'backend status unavailable');
+      healthBadge.title = 'The backend readiness check did not complete successfully.';
+    } finally { window.clearTimeout(timeout); }
+  };
+  refreshHealth();
+  window.setInterval(refreshHealth, 60000);
+
   const counters = root.querySelectorAll('[data-intelligence-counter]');
   const animate = (el) => {
     if (el.dataset.counted) return;
