@@ -32,6 +32,9 @@ verify_jwt = true
 [functions.customer-gc-login]
 verify_jwt = false
 
+[functions.customer-register]
+verify_jwt = false
+
 [functions.operations-admin]
 verify_jwt = true
 

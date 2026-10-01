@@ -4,6 +4,8 @@
     {"path": "/track", "title": "شوێنکەوتنی بار"},
     {"path": "/customer-portal", "title": "Customer Portal"},
     {"path": "/customer-portal.html", "title": "Customer Portal"},
+    {"path": "/login.html", "title": "Customer Login"},
+    {"path": "/register.html", "title": "Customer Registration"},
     {"path": "/careers.html", "title": "Careers"}
   ]
 }
