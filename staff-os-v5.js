@@ -100,6 +100,7 @@
     return request(FN.account, `/?kind=${encodeURIComponent(kind)}`);
   };
   const ops = (kind, qs='') => request(FN.operations, `/?kind=${encodeURIComponent(kind)}${qs ? `&${qs}` : ''}`);
+  const dataRead = (kind) => request(FN.data, `/?kind=${encodeURIComponent(kind)}`);
   const opsPost = (action, data) => request(FN.operations, '/', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action,data:data||{}}) });
   const hubPost = (action, data) => request(FN.hub, '/', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action,data:data||{}}) });
 
