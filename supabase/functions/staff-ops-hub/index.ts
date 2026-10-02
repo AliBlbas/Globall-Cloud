@@ -3,6 +3,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 type Json = Record<string, unknown>
 const ORIGINS = new Set(['https://globall-cloud.pages.dev','https://globall-cloud.netlify.app'])
 const FINANCE_ROLES = new Set(['super_admin','admin','accountant','finance'])
+const FINANCE_TYPES = new Set(['income','expense','customer_payment','customer_charge','refund','adjustment'])
 const PRICING_ROLES = new Set(['super_admin','admin','accountant'])
 const PROFILE_ROLES = new Set(['super_admin','admin','accountant','finance','warehouse','warehouse_china','warehouse_uae','warehouse_erbil','operations','delivery','driver'])
 const cors=(req:Request)=>({
@@ -58,6 +59,7 @@ async function pricingCreate(a:any,data:Json){
 async function financeCreate(a:any,data:Json){
   if(!FINANCE_ROLES.has(a.role))throw new Error('Finance permission required')
   const type=txt(data.type)||'income',amount=num(data.amount_usd)
+  if(!FINANCE_TYPES.has(type))throw new Error('Invalid finance type')
   if(amount===null||amount<0)throw new Error('Invalid finance amount')
   const row={type,gc_code:gc(data.gc_code),amount_usd:amount,reference:txt(data.reference),note:txt(data.note),created_at:txt(data.created_at)||new Date().toISOString()}
   const {data:created,error}=await a.admin.from('finance_transactions').insert(row).select('*').single();if(error)throw error
@@ -67,8 +69,11 @@ async function financeCreate(a:any,data:Json){
 async function financeUpdate(a:any,data:Json){
   if(!FINANCE_ROLES.has(a.role))throw new Error('Finance permission required')
   const id=txt(data.id),type=txt(data.type)||'income',amount=num(data.amount_usd)
+  if(!FINANCE_TYPES.has(type))throw new Error('Invalid finance type')
   if(!id||amount===null||amount<0)throw new Error('Invalid finance data')
-  const {data:updated,error}=await a.admin.from('finance_transactions').update({type,gc_code:gc(data.gc_code),amount_usd:amount,reference:txt(data.reference),note:txt(data.note)}).eq('id',id).select('*').single();if(error)throw error
+  const existing=await a.admin.from('finance_transactions').select('reference,note').eq('id',id).maybeSingle();if(existing.error)throw existing.error;if(!existing.data)throw new Error('Finance transaction not found')
+  const patch={type,gc_code:gc(data.gc_code),amount_usd:amount,reference:Object.prototype.hasOwnProperty.call(data,'reference')?txt(data.reference):existing.data.reference,note:Object.prototype.hasOwnProperty.call(data,'note')?txt(data.note):existing.data.note}
+  const {data:updated,error}=await a.admin.from('finance_transactions').update(patch).eq('id',id).select('*').single();if(error)throw error
   await audit(a.admin,a.staff,'finance.update',id,{type,amount_usd:amount,reference:txt(data.reference),note:txt(data.note)})
   return {transaction:updated}
 }
