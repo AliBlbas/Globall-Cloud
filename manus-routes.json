@@ -10,6 +10,10 @@
     {"path": "/login.html", "title": "Customer Login"},
     {"path": "/register.html", "title": "Customer Registration"},
     {"path": "/dashboard.html", "title": "Customer Dashboard"},
-    {"path": "/careers.html", "title": "Careers"}
+    {"path": "/careers.html", "title": "Careers"},
+    {"path": "/shop", "title": "Globall Cloud Shop"},
+    {"path": "/shop.html", "title": "Globall Cloud Shop"},
+    {"path": "/shop-operations", "title": "Shop Operations"},
+    {"path": "/shop-operations.html", "title": "Shop Operations"}
   ]
 }
