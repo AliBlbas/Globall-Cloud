@@ -67,9 +67,26 @@ async function shipmentDetail(admin:any,id:string){
 }
 async function customers(admin:any){const {data,error}=await admin.from('customer_directory').select('*').order('created_at',{ascending:false}).limit(2000);if(error)throw error;return data||[]}
 async function alerts(admin:any,staffId:string){const {data,error}=await admin.from('staff_alerts').select('*').order('created_at',{ascending:false}).limit(200);if(error)throw error;const staffRow=await admin.from('staff').select('role').eq('id',staffId).maybeSingle();const role=String(staffRow.data?.role||'');return (data||[]).filter((x:any)=>!x.audience_role||x.audience_role===role)}
-async function pricing(admin:any){const [rates,fx,rules]=await Promise.all([admin.from('pricing_rates').select('*').order('origin_key').order('transport_mode').order('product_type'),admin.from('exchange_rates').select('*').order('created_at',{ascending:false}).limit(20),admin.from('pricing_rules').select('*').order('created_at',{ascending:false})]);if(rates.error)throw rates.error;if(fx.error)throw fx.error;if(rules.error)throw rules.error;return {rates:rates.data||[],exchange_rates:fx.data||[],rules:rules.data||[]}}
+async function pricing(admin:any){
+ const [rates,fx,rules]=await Promise.all([
+  admin.from('pricing_rates').select('*').order('origin_key').order('transport_mode').order('product_type'),
+  admin.from('exchange_rates').select('*').order('created_at',{ascending:false}).limit(20),
+  admin.from('pricing_rules').select('*').order('created_at',{ascending:false})
+ ]);
+ // Rates are the source of truth. FX history and legacy rules are optional display metadata;
+ // a stale/missing legacy object must never blank the whole Staff pricing module.
+ if(rates.error)throw rates.error;
+ return {rates:rates.data||[],exchange_rates:fx.error?[]:(fx.data||[]),rules:rules.error?[]:(rules.data||[]),degraded:{exchange_rates:Boolean(fx.error),pricing_rules:Boolean(rules.error)}}
+}
 async function finance(admin:any){
- const [tx,summary]=await Promise.all([admin.from('finance_transactions').select('*').order('created_at',{ascending:false}).limit(1000),admin.from('v_financial_summary').select('*').limit(1000)]);if(tx.error)throw tx.error;return {transactions:tx.data||[],summary:summary.data||[]}
+ const [tx,summary]=await Promise.all([
+  admin.from('finance_transactions').select('*').order('created_at',{ascending:false}).limit(1000),
+  admin.from('v_financial_summary').select('*').limit(1000)
+ ]);
+ // The transaction ledger is authoritative for the Staff view. The summary view is
+ // an optimization and can be unavailable during schema hardening without blocking the ledger.
+ if(tx.error)throw tx.error;
+ return {transactions:tx.data||[],summary:summary.error?[]:(summary.data||[]),degraded:{summary:Boolean(summary.error)}}
 }
 async function chat(req:Request, a:any){
  const isStaff=!!a.staff?.is_active&&STAFF_ROLES.has(String(a.staff.role));
