@@ -3,6 +3,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 const ORIGINS = new Set(['https://globall-cloud.pages.dev','https://globall-cloud.netlify.app'])
 const STAFF_ROLES = new Set(['super_admin','admin','accountant','warehouse','warehouse_china','warehouse_uae','warehouse_erbil','operations','delivery','finance'])
 const WRITE_ROLES = new Set(['super_admin','admin'])
+const PRICING_WRITE_ROLES = new Set(['super_admin','admin','accountant','finance'])
 const cors=(req:Request)=>({
  'Access-Control-Allow-Origin':ORIGINS.has(req.headers.get('origin')||'')?req.headers.get('origin')!:'https://globall-cloud.pages.dev',
  'Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info, x-supabase-auth-token',
@@ -100,7 +101,9 @@ async function chat(req:Request, a:any){
 }
 async function post(req:Request,a:any){
  const body=await req.json();const action=text(body.action);const data=body.data||{};const isStaff=!!a.staff?.is_active&&STAFF_ROLES.has(String(a.staff.role));
- if(['customer_create','customer_update','customer_delete','pricing_update','fx_update','alert_create','shipment_update'].includes(action)&&(!isStaff||!WRITE_ROLES.has(String(a.staff.role))))throw new Error('Admin permission required')
+ const role=String(a.staff?.role||'');
+ if(['customer_create','customer_update','customer_delete','alert_create','shipment_update'].includes(action)&&(!isStaff||!WRITE_ROLES.has(role)))throw new Error('Admin permission required')
+ if(['pricing_update','fx_update'].includes(action)&&(!isStaff||!PRICING_WRITE_ROLES.has(role)))throw new Error('Pricing permission required')
  if(action==='customer_create'){
   const code=gc(data.gc_code||data.code)||`GC-${String(Math.floor(1000+Math.random()*9000))}`;const password=text(data.password)||crypto.randomUUID().slice(0,12)+'Aa!';
   const email=text(data.email)||`${code.toLowerCase()}@globall-cloud.local`;const {data:u,error:ue}=await a.admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{full_name:text(data.name),gc_code:code,phone:text(data.phone)}});if(ue)throw ue
