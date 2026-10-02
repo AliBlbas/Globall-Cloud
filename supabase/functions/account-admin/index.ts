@@ -452,8 +452,8 @@ async function createCustomerAuth(client: ReturnType<typeof createClient>, paylo
   }
 }
 
-async function upsertCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, isSuperAdmin: boolean }) {
-  if (!actor.isSuperAdmin) throw responseError('Only Super Admin can create customer accounts', 403)
+async function upsertCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, role: string, isSuperAdmin: boolean }) {
+  if (!actor.isSuperAdmin && actor.role !== 'admin') throw responseError('Admin permission required to create customer accounts', 403)
   const name = txt(payload.name) || txt(payload.phone) || txt(payload.email) || 'Customer'
   const email = txt(payload.email)
   const phone = txt(payload.phone)
@@ -479,8 +479,8 @@ async function upsertCustomer(client: ReturnType<typeof createClient>, payload: 
   return { customer: canonicalCustomerIdentity(saved), auth_user_id: authResult.userId, warning: authResult.warning, status: authResult.userId ? 'linked' : 'saved_without_auth' }
 }
 
-async function bindCustomerAuth(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, isSuperAdmin: boolean }) {
-  if (!actor.isSuperAdmin) throw responseError('Only Super Admin can bind customer accounts', 403)
+async function bindCustomerAuth(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, role: string, isSuperAdmin: boolean }) {
+  if (!actor.isSuperAdmin && actor.role !== 'admin') throw responseError('Admin permission required to bind customer accounts', 403)
   const id = txt(payload.id)
   if (!id) throw responseError('Missing customer id', 400)
   const { data: customer, error: customerError } = await client.from('customer_directory').select('id,code,gc_code,name,email,phone,auth_user_id,is_active').eq('id', id).maybeSingle()
@@ -511,21 +511,21 @@ async function bindCustomerAuth(client: ReturnType<typeof createClient>, payload
   return { ok: true, status: 'linked', customer_id: id, gc_code: code, auth_user_id: userId, login_email: email, temporary_password: password, note: 'Deliver this password securely; it is not shown again.' }
 }
 
-async function updateCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, isSuperAdmin: boolean }) {
+async function updateCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, role: string, isSuperAdmin: boolean }) {
   const id = txt(payload.id)
   if (!id) throw responseError('Missing customer id', 400)
-  if (!actor.isSuperAdmin && (txt(payload.email) !== null || txt(payload.password) !== null || payload.gc_code !== undefined || payload.code !== undefined)) {
-    throw responseError('Email, password, and GC code are managed by Super Admin only', 403)
+  if (!actor.isSuperAdmin && actor.role !== 'admin' && (txt(payload.email) !== null || txt(payload.password) !== null || payload.gc_code !== undefined || payload.code !== undefined)) {
+    throw responseError('Email, password, and GC code are managed by Admin only', 403)
   }
   const updates: JsonRecord = {}
   for (const key of ['name', 'email', 'phone', 'phone2', 'city', 'delivery_location', 'note', 'manager_staff_id'] as const) {
-    if (!actor.isSuperAdmin && key === 'email') continue
+    if (!actor.isSuperAdmin && actor.role !== 'admin' && key === 'email') continue
     const value = txt(payload[key])
     if (value !== null) updates[key] = value
   }
   if (typeof payload.is_active === 'boolean') updates.is_active = payload.is_active
   let requestedCode: string | null = null
-  if (actor.isSuperAdmin && (payload.gc_code !== undefined || payload.code !== undefined)) {
+  if ((actor.isSuperAdmin || actor.role === 'admin') && (payload.gc_code !== undefined || payload.code !== undefined)) {
     requestedCode = normalizeGcCode(payload.gc_code ?? payload.code)
     if (!requestedCode) throw responseError('GC code must match GC-### or GC-* format', 400)
   }
@@ -538,7 +538,7 @@ async function updateCustomer(client: ReturnType<typeof createClient>, payload: 
     if (currentCode && currentCode !== requestedCode) throw responseError('GC code is immutable after customer creation', 409)
   }
 
-  if (current.auth_user_id && actor.isSuperAdmin) {
+  if (current.auth_user_id && (actor.isSuperAdmin || actor.role === 'admin')) {
     const authUpdate: Record<string, unknown> = {}
     const name = txt(payload.name)
     const email = txt(payload.email)
@@ -782,11 +782,12 @@ Deno.serve(async (req) => {
       return json({ error: 'Unsupported task action' }, { status: 400 }, req)
     }
     if (!canWrite) return json({ error: 'Forbidden' }, { status: 403 }, req)
-    if ((kind === 'customer' || kind === 'staff') && action === 'create' && !isSuperAdmin) return json({ error: 'Only Super Admin can create accounts' }, { status: 403 }, req)
+    if (kind === 'staff' && action === 'create' && !isSuperAdmin) return json({ error: 'Only Super Admin can create staff accounts' }, { status: 403 }, req)
+    const customerActor = { id: staffRow.id, name: staffRow.full_name, role: String(staffRow.role || ''), isSuperAdmin }
     if (kind === 'customer') {
-      if (action === 'create') return json(await upsertCustomer(serviceClient, data, { id: staffRow.id, name: staffRow.full_name, isSuperAdmin }), {}, req)
-      if (action === 'update') return json(await updateCustomer(serviceClient, data, { id: staffRow.id, name: staffRow.full_name, isSuperAdmin }), {}, req)
-      if (action === 'bind') return json(await bindCustomerAuth(serviceClient, data, { id: staffRow.id, name: staffRow.full_name, isSuperAdmin }), {}, req)
+      if (action === 'create') return json(await upsertCustomer(serviceClient, data, customerActor), {}, req)
+      if (action === 'update') return json(await updateCustomer(serviceClient, data, customerActor), {}, req)
+      if (action === 'bind') return json(await bindCustomerAuth(serviceClient, data, customerActor), {}, req)
       if (action === 'archive' || action === 'delete') return json(await archiveCustomer(serviceClient, data, staffRow.id, staffRow.full_name), {}, req)
     }
     if (kind === 'staff') {

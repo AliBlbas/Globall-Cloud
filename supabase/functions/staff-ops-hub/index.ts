@@ -87,6 +87,15 @@ Deno.serve(async(req:Request)=>{
         const {data:profile}=await a.admin.from('staff_profiles').select('staff_id,job_title,phone,avatar_key,locale,timezone,notification_preferences,updated_at').eq('staff_id',a.staff.id).maybeSingle()
         return json(req,{profile:{...a.staff,settings:profile||null}})
       }
+      if(kind==='finance'){
+        if(!FINANCE_ROLES.has(a.role)) return json(req,{error:'Finance permission required'},403)
+        const {data:transactions,error}=await a.admin.from('finance_transactions').select('id,type,gc_code,amount_usd,reference,note,created_at,updated_at').order('created_at',{ascending:false}).limit(1000)
+        if(error) throw error
+        const rows=transactions||[]
+        const income=rows.filter((x:any)=>['income','customer_payment','payment'].includes(String(x.type))).reduce((sum:number,x:any)=>sum+Number(x.amount_usd||0),0)
+        const expense=rows.filter((x:any)=>['expense','cost'].includes(String(x.type))).reduce((sum:number,x:any)=>sum+Number(x.amount_usd||0),0)
+        return json(req,{kind:'finance',transactions:rows,summary:{income,expense,profit:income-expense},period:'all_available_records'})
+      }
       return json(req,{ok:true})
     }
     const body=await req.json().catch(()=>({})) as Json
