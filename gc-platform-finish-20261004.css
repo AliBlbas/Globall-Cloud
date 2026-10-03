@@ -1,0 +1,93 @@
+/* Globall Cloud — platform finish layer, 2026-10-04
+ * Shared visual contract: calm dark navy, signal cyan, warm route amber.
+ * Scoped to existing components so live operations and feature modules remain intact.
+ */
+:root {
+  --gc-finish-cyan: #55e5f1;
+  --gc-finish-cyan-strong: #14c7df;
+  --gc-finish-navy: #061525;
+  --gc-finish-ink: #04101d;
+  --gc-finish-line: rgba(133, 211, 235, .2);
+  --gc-finish-glow: 0 22px 70px rgba(0, 0, 0, .22);
+}
+
+/* Shared interaction language */
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid rgba(85, 229, 241, .68);
+  outline-offset: 3px;
+}
+:where(button, .gc-btn, .btn) { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease; }
+:where(button, .gc-btn, .btn):hover { transform: translateY(-1px); }
+:where(button, .gc-btn, .btn):active { transform: translateY(0) scale(.985); }
+
+/* Public homepage */
+.gc-app .gc-nav,
+.gc-app .gc-announcement { position: relative; z-index: 40; }
+.gc-app .gc-nav { box-shadow: 0 12px 32px rgba(1, 12, 24, .18); }
+.gc-app .gc-hero-rebuild { isolation: isolate; }
+.gc-app .gc-hero-copy h1 { text-wrap: balance; }
+.gc-app .gc-hero-track { box-shadow: 0 18px 48px rgba(3, 18, 32, .22); }
+.gc-app .gc-hero-track input { min-height: 48px; }
+.gc-app .gc-hero-track button { min-height: 48px; font-weight: 900; }
+.gc-app .gc-transport-card { overflow: hidden; }
+.gc-app .gc-transport-card img { transition: transform .45s ease, filter .45s ease; }
+.gc-app .gc-transport-card:hover img { transform: scale(1.07); filter: saturate(1.12) contrast(1.04); }
+.gc-app .gc-service,
+.gc-app .gc-platform-card,
+.gc-app .gc-rate-panel,
+.gc-app .gc-rate-result { box-shadow: var(--gc-finish-glow); }
+.gc-app .gc-studio-tab[aria-selected="true"],
+.gc-app .gc-corridor-tab.active { box-shadow: inset 0 -2px 0 var(--gc-finish-cyan); }
+.gc-app .gc-intelligence-metric { min-height: 104px; }
+
+/* Tracking center */
+.gc-track-shell { position: relative; }
+.gc-track-panel,
+#liveMapContainer,
+#trackingDetailsContainer { border-radius: 22px; box-shadow: var(--gc-finish-glow); }
+.gc-track-form input,
+.gc-track-form button { border-radius: 13px; }
+.gc-track-form button { min-width: 130px; box-shadow: 0 10px 28px rgba(20, 199, 223, .18); }
+.gc-track-section { min-width: 0; }
+.gc-notification-button { border-radius: 12px; box-shadow: 0 10px 26px rgba(20, 199, 223, .16); }
+.gc-toast { border-radius: 14px; box-shadow: var(--gc-finish-glow); transition: opacity .2s ease, transform .2s ease; }
+
+/* Customer workspace */
+body:has(.topin) { background: radial-gradient(900px 500px at 85% -10%, rgba(39, 135, 170, .26), transparent 62%), #061428; }
+.top { box-shadow: 0 12px 35px rgba(0, 0, 0, .16); }
+.topin { max-width: 1240px; margin-inline: auto; }
+.top .brand img { filter: drop-shadow(0 6px 14px rgba(88, 229, 239, .2)); }
+.top .btn { box-shadow: 0 8px 22px rgba(0, 0, 0, .14); }
+.card { box-shadow: 0 16px 42px rgba(0, 0, 0, .15); }
+.hero .card { overflow: hidden; position: relative; }
+.hero .card::after { content: ''; position: absolute; width: 220px; height: 220px; inset-inline-end: -110px; top: -120px; border-radius: 50%; background: radial-gradient(circle, rgba(88, 229, 239, .16), transparent 68%); pointer-events: none; }
+.shipment-card, .warehouse-address, .portal-status { box-shadow: 0 12px 30px rgba(0, 0, 0, .12); }
+.field:focus { box-shadow: 0 0 0 4px rgba(88, 229, 239, .12); }
+
+/* Staff operations */
+#app > .gc-shell { position: relative; }
+.gc-side { box-shadow: 0 24px 70px rgba(0, 0, 0, .28); }
+.gc-side .brand-logo { box-shadow: 0 0 0 1px rgba(139, 234, 246, .28), 0 12px 34px rgba(24, 201, 232, .2); }
+.gc-main .topbar { box-shadow: 0 18px 55px rgba(0, 0, 0, .25); }
+.gc-main .view { box-shadow: 0 24px 80px rgba(0, 0, 0, .22); }
+.gc-main .card,
+.gc-main .kpi,
+.gc-main .shipment-card { box-shadow: 0 14px 38px rgba(0, 0, 0, .14); }
+.gc-main .kpi { position: relative; overflow: hidden; }
+.gc-main .kpi::before { content: ''; position: absolute; inset-inline-end: -30px; top: -34px; width: 96px; height: 96px; border-radius: 50%; background: radial-gradient(circle, rgba(85, 229, 241, .13), transparent 68%); pointer-events: none; }
+.gc-main .table tr { transition: background .18s ease; }
+.gc-main .modal { box-shadow: 0 35px 110px rgba(0, 0, 0, .6); }
+.login-card { position: relative; overflow: hidden; }
+.login-card::before { content: ''; position: absolute; width: 190px; height: 190px; inset-inline-end: -90px; top: -110px; border-radius: 50%; background: radial-gradient(circle, rgba(85, 229, 241, .16), transparent 70%); pointer-events: none; }
+
+@media (max-width: 760px) {
+  .gc-track-shell { width: min(100% - 24px, 680px); }
+  .gc-track-panel { padding: 20px; }
+  .gc-app .gc-hero-track { border-radius: 18px; }
+  .gc-app .gc-intelligence-metric { min-height: 88px; }
+  .topin { padding-inline: 2px; }
+  .gc-main .view { min-height: calc(100dvh - 90px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
