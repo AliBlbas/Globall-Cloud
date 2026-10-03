@@ -163,6 +163,7 @@ export async function onRequest(context) {
     html=addBodyAsset(html,'id="gcPrimaryMobileNav"',MOBILE_PRIMARY_NAV);
   }
   if (STAFF_V5.test(path)) {
+    html=addHeadAsset(html,'src="/staff-blank-screen-recovery-20261003.js',`<script src="/staff-blank-screen-recovery-20261003.js?v=${VERSION}" defer data-gc-staff-blank-recovery="1"></script>`);
     html=addHeadAsset(html,'src="/staff-os-compat.js',`<script src="/staff-os-compat.js?v=${VERSION}" defer data-gc-staff-compat="1"></script>`);
     html=addHeadAsset(html,'href="/staff-login-polish.css',`<link rel="stylesheet" href="/staff-login-polish.css?v=${VERSION}" data-gc-staff-login-polish="1">`);
     html=addHeadAsset(html,'href="/staff-command-center-pro.css',`<link rel="stylesheet" href="/staff-command-center-pro.css?v=${VERSION}" data-gc-staff-command-center-css="1">`);
