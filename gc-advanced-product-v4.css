@@ -1,0 +1,45 @@
+/* Globall Cloud — Advanced Product UI V4 */
+body:has(#gcApp){--gc-cyan:#29d8ec;--gc-blue:#178cf4;--gc-gold:#f4c96b;--gc-panel:#0a1b2b}
+body:has(#gcApp) .gc-nav-inner,
+body:has(#gcApp) .gc-hero-grid,
+body:has(#gcApp) .gc-section .gc-container{position:relative}
+body:has(#gcApp) .gc-nav{overflow:visible}
+body:has(#gcApp) .gc-brand:after{content:"ERBIL OPS";display:inline-flex;align-items:center;height:18px;padding:0 7px;margin-inline-start:6px;border:1px solid rgba(41,216,236,.18);border-radius:999px;color:#74dee8;background:rgba(41,216,236,.045);font:800 7px/1 ui-monospace,monospace;letter-spacing:1px}
+body:has(#gcApp) .gc-hero-copy{position:relative}
+body:has(#gcApp) .gc-hero-copy:after{content:"AIR  ·  SEA  ·  LAND  →  IRAQ";display:block;margin-top:18px;color:#5c7f93;font:800 8px/1.4 ui-monospace,monospace;letter-spacing:1.6px}
+body:has(#gcApp) .gc-actions .gc-btn{position:relative;overflow:hidden}
+body:has(#gcApp) .gc-actions .gc-btn:before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.13) 50%,transparent 80%);transform:translateX(-120%);transition:transform .7s ease}
+body:has(#gcApp) .gc-actions .gc-btn:hover:before{transform:translateX(120%)}
+body:has(#gcApp) .gc-trust-card{position:relative;overflow:hidden}
+body:has(#gcApp) .gc-trust-card:after{content:"";position:absolute;inset:auto -18px -30px auto;width:64px;height:64px;border-radius:50%;background:radial-gradient(circle,rgba(41,216,236,.11),transparent 68%)}
+body:has(#gcApp) .gc-hero-visual:before{content:"NETWORK MAP";position:absolute;inset-inline-start:18px;bottom:14px;padding:6px 8px;border:1px solid rgba(130,209,229,.14);border-radius:8px;background:rgba(3,14,24,.72);color:#6d96a8;font:800 7px/1 ui-monospace,monospace;letter-spacing:1.3px;z-index:4}
+body:has(#gcApp) .gc-map-shell{position:relative}
+body:has(#gcApp) .gc-map-topbar{display:flex;justify-content:space-between;align-items:center;gap:8px}
+body:has(#gcApp) .gc-map-topbar:after{content:"SECURE ROUTE VIEW";color:#648597;font:800 7px/1 ui-monospace,monospace;letter-spacing:1.2px}
+body:has(#gcApp) .gc-map-fleet>div{position:relative;overflow:hidden}
+body:has(#gcApp) .gc-map-fleet>div:after{content:"";position:absolute;inset-inline-end:9px;top:10px;width:5px;height:5px;border-radius:50%;background:#38e39a;box-shadow:0 0 0 4px rgba(56,227,154,.08)}
+body:has(#gcApp) .gc-app-dashboard-preview{position:relative}
+body:has(#gcApp) .gc-app-dashboard-preview:before{content:"CUSTOMER WORKSPACE";display:block;margin-bottom:10px;color:#5f8295;font:800 7px/1 ui-monospace,monospace;letter-spacing:1.5px}
+body:has(#gcApp) .gc-app-quick-grid>a{position:relative}
+body:has(#gcApp) .gc-app-quick-grid>a:after{content:"↗";position:absolute;inset-inline-end:9px;top:8px;color:#4f7184;font-size:9px}
+body:has(#gcApp) .gc-entry-grid .gc-entry-card{position:relative;overflow:hidden}
+body:has(#gcApp) .gc-entry-grid .gc-entry-card:after{content:"";position:absolute;inset-inline-end:-25px;top:-25px;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(41,216,236,.13),transparent 70%);pointer-events:none}
+body:has(#gcApp) .gc-section-head h2{display:flex;align-items:center;gap:10px}
+body:has(#gcApp) .gc-section-head h2:before{content:"";width:5px;height:24px;border-radius:4px;background:linear-gradient(180deg,#29d8ec,#178cf4);display:inline-block;flex:none}
+body:has(#gcApp) .gc-service,.gc-platform-card,.gc-info-grid>div{position:relative;overflow:hidden}
+body:has(#gcApp) .gc-service:before,.gc-platform-card:before{content:"";position:absolute;inset-inline-start:0;top:0;width:2px;height:0;background:linear-gradient(180deg,#29d8ec,#178cf4);transition:height .25s ease}
+body:has(#gcApp) .gc-service:hover:before,.gc-platform-card:hover:before{height:100%}
+body:has(#gcApp) .gc-track-panel{position:relative}
+body:has(#gcApp) .gc-track-panel:after{content:"TRACKING ENGINE";position:absolute;inset-inline-end:16px;top:16px;color:#5d7d90;font:800 7px/1 ui-monospace,monospace;letter-spacing:1.4px}
+body:has(#gcApp) .gc-footer{position:relative}
+body:has(#gcApp) .gc-footer:before{content:"GLOBALL CLOUD / IRAQ LOGISTICS CONTROL PLANE";display:block;max-width:1160px;margin:0 auto 20px;padding:0 16px;color:#3f6478;font:800 7px/1.5 ui-monospace,monospace;letter-spacing:1.5px}
+@media(max-width:680px){
+ body:has(#gcApp) .gc-brand:after{display:none}
+ body:has(#gcApp) .gc-hero-copy:after{margin-top:13px;font-size:7px;letter-spacing:1.15px}
+ body:has(#gcApp) .gc-hero-visual:before{inset-inline-start:12px;bottom:12px}
+ body:has(#gcApp) .gc-map-topbar:after{display:none}
+ body:has(#gcApp) .gc-section-head h2:before{height:19px;width:4px}
+ body:has(#gcApp) .gc-track-panel:after{display:none}
+ body:has(#gcApp) .gc-footer:before{padding-inline:12px;font-size:6.5px}
+}
+@media(prefers-reduced-motion:reduce){body:has(#gcApp) .gc-actions .gc-btn:before{display:none}}

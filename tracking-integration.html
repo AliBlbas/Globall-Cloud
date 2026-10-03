@@ -5,12 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>شوێنکەوتنی بار | Globall Cloud</title>
   <meta name="description" content="شوێنکەوتنی بارەکەت لە چین، دوبەی و ئەمریکا بۆ هەولێر بە کۆدی GC و ژمارەی شوێنکەوتن.">
-  <link rel="canonical" href="https://globall-cloud.pages.dev/tracking-integration.html">
-  <link rel="icon" type="image/png" href="/logo-icon.png">
+  <link rel="canonical" href="https://globall-cloud.pages.dev/track">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Globall Cloud">
+  <meta property="og:title" content="شوێنکەوتنی بار | Globall Cloud">
+  <meta property="og:description" content="نوێترین دۆخی shipment، هەنگاوەکان و بەڵگەی شوێنکەوتن لە یەک شوێن ببینە.">
+  <meta property="og:url" content="https://globall-cloud.pages.dev/track">
+  <meta property="og:image" content="https://globall-cloud.pages.dev/og-image.jpg">
+  <link rel="icon" type="image/png" href="/logo-icon.webp">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/tracking-styles.css">
   <link rel="stylesheet" href="/premium-brand-overrides.css">
   <link rel="stylesheet" href="/browser-compat.css">
+  <link rel="stylesheet" href="/gc-brand-system-20260929.css?v=1">
   <link rel="stylesheet" href="/tracking-intelligence.css?v=20260908-1">
   <link rel="stylesheet" href="/mobile-final.css" media="screen and (max-width: 760px)">
   <style>
@@ -53,6 +60,7 @@
     .gc-toast[data-kind="success"] { border-color: rgba(49,220,135,.65); }
     @media (max-width: 780px) { .gc-track-shell { width: min(100% - 22px, 680px); padding-top: 16px; } .gc-track-hero, .gc-track-sections { grid-template-columns: 1fr; gap: 26px; padding-top: 44px; } .gc-track-hero h1 { font-size: clamp(34px, 11vw, 48px); } .gc-track-form { flex-direction: column; } .gc-track-form button { width: 100%; } .gc-track-nav { padding-bottom: 18px; } }
   </style>
+<link rel="stylesheet" href="/gc-tracking-summary-timeline-20260930.css?v=1">
 </head>
 <body>
   <main class="gc-track-shell">
@@ -97,10 +105,13 @@
     </section>
   </main>
   <div class="gc-toast" id="gcToast" role="status" aria-live="polite"></div>
+  <script src="/gc-tracking-deeplink.js?v=1" defer data-gc-tracking-deeplink="1"></script>
   <script src="/production-bridge.js?v=20260824-1" defer></script>
   <script src="/tracking-enhanced.js?v=20260826-2" defer></script>
   <script src="/gc-csp-scripts/tracking-integration-inline-1.js?v=20260826-2" defer data-gc-externalized="1"></script>
   <script src="/tracking-route-controller.js?v=20260826-2" defer></script>
   <script src="/tracking-intelligence.js?v=20260908-1" defer></script>
+  <script src="/gc-whatsapp-float-20260929.js?v=1" defer></script>
+<script src="/gc-tracking-summary-timeline-20260930.js?v=1" defer></script>
 </body>
 </html>

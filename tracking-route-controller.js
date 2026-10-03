@@ -21,7 +21,9 @@
 
   const normalizeSearchValue = (value) => String(value || '').trim().replace(/\s+/g, '').toUpperCase();
   const query = new URLSearchParams(window.location.search);
-  const deepLinkId = normalizeSearchValue(query.get('id') || query.get('track'));
+  // WhatsApp/share links use ?gc=..., while older links use ?id=, ?track=, or ?tracking_id=.
+  // Accept all aliases so each customer-facing tracking URL starts the same lookup flow.
+  const deepLinkId = normalizeSearchValue(query.get('gc') || query.get('id') || query.get('track') || query.get('tracking_id'));
 
   const setHealth = (state, message) => {
     if (!health || !healthText) return;

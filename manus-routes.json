@@ -1,0 +1,22 @@
+{
+  "routes": [
+    {"path": "/", "title": "Globall Cloud"},
+    {"path": "/track", "title": "شوێنکەوتنی بار"},
+    {"path": "/customer-portal", "title": "Customer Portal"},
+    {"path": "/customer-portal.html", "title": "Customer Portal"},
+    {"path": "/login", "title": "Customer Login"},
+    {"path": "/register", "title": "Customer Registration"},
+    {"path": "/dashboard", "title": "Customer Dashboard"},
+    {"path": "/login.html", "title": "Customer Login"},
+    {"path": "/register.html", "title": "Customer Registration"},
+    {"path": "/dashboard.html", "title": "Customer Dashboard"},
+    {"path": "/careers.html", "title": "Careers"},
+    {"path": "/staff", "title": "Globall Cloud Staff OS"},
+    {"path": "/staff-os", "title": "Globall Cloud Staff OS"},
+    {"path": "/staff-os-v5", "title": "Globall Cloud Staff OS"},
+    {"path": "/shop", "title": "Globall Cloud Shop"},
+    {"path": "/shop.html", "title": "Globall Cloud Shop"},
+    {"path": "/shop-operations", "title": "Shop Operations"},
+    {"path": "/shop-operations.html", "title": "Shop Operations"}
+  ]
+}

@@ -17,6 +17,7 @@ const keepFiles = new Set(['package.json']);
 function shouldSkipFile(name){
   if (name === 'package-lock.json' || name === 'pnpm-lock.yaml' || name === 'yarn.lock' || name === 'bun.lockb') return true;
   if (name === '.env' || name.startsWith('.env.')) return true;
+  if (name === 'robots.txt') return false;
   return !keepFiles.has(name) && skippedSuffixes.some(s => name.endsWith(s));
 }
 
@@ -42,6 +43,11 @@ for(const entry of fs.readdirSync(root)){
   if(entry==='functions') continue;
   if(!skippedDirectories.has(entry)) copyEntry(entry);
 }
+
+// Publish the professional tracking experience at the pretty /track route.
+// The source track.html is retained for compatibility, but the tracking page
+// remains authored once in tracking-integration.html.
+fs.copyFileSync(path.join(root,'tracking-integration.html'),path.join(out,'track.html'));
 
 // Cloudflare Pages Functions must remain at the deploy root.
 const functionsDir=path.join(root,'functions');

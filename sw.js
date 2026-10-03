@@ -4,7 +4,7 @@
  * This worker intentionally keeps navigation and application assets network-first so
  * a broken/old UI release cannot remain pinned on a customer's device.
  */
-const CACHE_NAME = 'globall-cloud-v8-20260926';
+const CACHE_NAME = 'globall-cloud-v10-20261001';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(self.skipWaiting());
@@ -32,7 +32,7 @@ self.addEventListener('fetch', (event) => {
 
   if (['script', 'style', 'image', 'font', 'manifest', 'worker'].includes(request.destination)) {
     event.respondWith(
-      fetch(request, { cache: 'no-store' })
+      fetch(request)
         .then((response) => {
           if (response.ok) {
             const copy = response.clone();

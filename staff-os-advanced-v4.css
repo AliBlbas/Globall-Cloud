@@ -1,0 +1,16 @@
+/* Globall Cloud — Advanced Staff OS V4 */
+body:has(#staffApp),body:has(#staff-shell),body:has(.staff-os-app){--gc-cyan:#50e3ef}
+body:has(.staff-os-v5),body:has(#staffApp){background:
+ radial-gradient(900px 420px at 100% -10%,rgba(30,139,244,.14),transparent 66%),
+ linear-gradient(180deg,#061422,#04101b 70%,#020a12)!important}
+body:has(.staff-os-v5) .topbar,body:has(#staffApp) .topbar{backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+body:has(.staff-os-v5) .metric,body:has(#staffApp) .metric{position:relative;overflow:hidden}
+body:has(.staff-os-v5) .metric:before,body:has(#staffApp) .metric:before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:linear-gradient(90deg,transparent,#50e3ef,transparent);opacity:.65}
+body:has(.staff-os-v5) .quick-action,body:has(#staffApp) .quick-action{position:relative;overflow:hidden}
+body:has(.staff-os-v5) .quick-action:after,body:has(#staffApp) .quick-action:after{content:"↗";position:absolute;inset-inline-end:11px;top:9px;color:#4c7185;font-size:9px}
+body:has(.staff-os-v5) .section-title,body:has(#staffApp) .section-title{display:flex;align-items:center;gap:9px}
+body:has(.staff-os-v5) .section-title:before,body:has(#staffApp) .section-title:before{content:"";display:block;width:4px;height:22px;border-radius:4px;background:linear-gradient(#50e3ef,#178cf4)}
+body:has(.staff-os-v5) .staff-card,body:has(#staffApp) .staff-card{box-shadow:0 18px 40px rgba(0,0,0,.18)!important}
+@media(max-width:760px){
+ body:has(.staff-os-v5),body:has(#staffApp){padding-bottom:88px!important}
+}

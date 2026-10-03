@@ -1,0 +1,695 @@
+/* Globall Cloud Product — Visual Direction V5
+   Premium logistics app direction. CSS-only presentation layer.
+   Does not change auth, Supabase, payments, shipment logic or routes.
+*/
+
+/* ---------- core art direction ---------- */
+body:has(#gcApp){
+  --g5-bg:#03111e;
+  --g5-bg-2:#061b2b;
+  --g5-panel:#09243a;
+  --g5-panel-soft:rgba(9,36,58,.66);
+  --g5-line:rgba(141,213,225,.13);
+  --g5-cyan:#65e7ee;
+  --g5-cyan-2:#1bbdcf;
+  --g5-gold:#e8be64;
+  --g5-white:#f4fbff;
+  --g5-muted:#88a5b7;
+  --g5-radius:26px;
+  background:
+    radial-gradient(800px 420px at 10% -5%,rgba(27,189,207,.13),transparent 68%),
+    radial-gradient(700px 420px at 92% 14%,rgba(232,190,100,.06),transparent 72%),
+    linear-gradient(180deg,var(--g5-bg-2),var(--g5-bg) 44%,#020b14 100%) !important;
+  color:var(--g5-white);
+}
+
+body:has(#gcApp)::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-1;
+  opacity:.20;
+  background-image:
+    linear-gradient(rgba(150,215,230,.028) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(150,215,230,.022) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:linear-gradient(to bottom,black,transparent 70%);
+}
+
+body:has(#gcApp) .gc-main,
+body:has(#gcApp) main{
+  position:relative;
+}
+
+/* ---------- header ---------- */
+body:has(#gcApp) .gc-nav{
+  background:rgba(3,17,30,.78)!important;
+  border-bottom:1px solid rgba(141,213,225,.10)!important;
+  box-shadow:0 12px 38px rgba(0,0,0,.18)!important;
+  backdrop-filter:blur(24px) saturate(145%)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(145%)!important;
+}
+
+body:has(#gcApp) .gc-nav-inner{
+  max-width:1240px!important;
+}
+
+body:has(#gcApp) .gc-brand{
+  letter-spacing:-.02em;
+}
+
+body:has(#gcApp) .gc-brand img{
+  filter:drop-shadow(0 8px 18px rgba(27,189,207,.14));
+}
+
+body:has(#gcApp) .gc-desktop-nav a{
+  border-radius:12px!important;
+  transition:background .18s ease,color .18s ease,transform .18s ease!important;
+}
+body:has(#gcApp) .gc-desktop-nav a:hover{transform:translateY(-1px)}
+body:has(#gcApp) .gc-nav-actions .gc-btn-primary{
+  background:linear-gradient(135deg,#f1cf82,#dba94d)!important;
+  color:#151c23!important;
+  border-color:transparent!important;
+  box-shadow:0 10px 24px rgba(219,169,77,.15)!important;
+}
+
+/* ---------- homepage width / rhythm ---------- */
+body:has(#gcApp) .gc-home{
+  width:min(1240px,100%)!important;
+  margin-inline:auto!important;
+}
+
+body:has(#gcApp) .gc-home > section{
+  scroll-margin-top:88px;
+}
+
+/* ---------- HERO ---------- */
+body:has(#gcApp) .gc-home > .gc-hero-rebuild{
+  padding:52px 20px 28px!important;
+  background:transparent!important;
+}
+
+body:has(#gcApp) .gc-hero-grid{
+  max-width:1200px!important;
+  margin:0 auto!important;
+  grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)!important;
+  align-items:center!important;
+  gap:42px!important;
+}
+
+body:has(#gcApp) .gc-hero-copy{
+  max-width:650px!important;
+}
+
+body:has(#gcApp) .gc-eyebrow{
+  width:max-content!important;
+  padding:7px 11px!important;
+  border:1px solid rgba(232,190,100,.18)!important;
+  border-radius:999px!important;
+  background:rgba(232,190,100,.055)!important;
+  color:#f1d181!important;
+  font-size:9px!important;
+  font-weight:900!important;
+  letter-spacing:1.35px!important;
+}
+
+body:has(#gcApp) .gc-hero-copy h1{
+  max-width:700px!important;
+  margin:16px 0 16px!important;
+  font-size:clamp(42px,5.1vw,72px)!important;
+  line-height:1.03!important;
+  letter-spacing:-.065em!important;
+  font-weight:950!important;
+  text-wrap:balance;
+}
+
+body:has(#gcApp) .gc-hero-copy h1 em{
+  font-style:normal!important;
+  color:var(--g5-cyan)!important;
+  text-shadow:0 0 34px rgba(101,231,238,.13);
+}
+
+body:has(#gcApp) .gc-hero-copy>p{
+  max-width:590px!important;
+  margin:0!important;
+  font-size:14px!important;
+  line-height:1.95!important;
+  color:#9ab5c5!important;
+}
+
+body:has(#gcApp) .gc-actions{
+  margin-top:23px!important;
+  gap:9px!important;
+}
+
+body:has(#gcApp) .gc-actions .gc-btn{
+  min-height:50px!important;
+  padding-inline:17px!important;
+  border-radius:14px!important;
+  font-weight:900!important;
+}
+
+body:has(#gcApp) .gc-actions .gc-btn-primary{
+  background:linear-gradient(135deg,#6cedf3,#20bdcf)!important;
+  color:#02171d!important;
+  border-color:transparent!important;
+  box-shadow:0 13px 32px rgba(32,189,207,.18)!important;
+}
+
+body:has(#gcApp) .gc-actions .gc-btn-soft,
+body:has(#gcApp) .gc-actions .gc-btn-ghost{
+  background:rgba(255,255,255,.035)!important;
+  border:1px solid rgba(141,213,225,.16)!important;
+  color:#c6edf1!important;
+}
+
+/* trust row = data ribbon, not cards floating randomly */
+body:has(#gcApp) .gc-trust{
+  margin-top:22px!important;
+  padding-top:16px!important;
+  border-top:1px solid var(--g5-line)!important;
+  grid-template-columns:repeat(4,1fr)!important;
+  gap:0!important;
+}
+
+body:has(#gcApp) .gc-trust-card{
+  min-height:72px!important;
+  padding:0 15px!important;
+  border:0!important;
+  border-inline-end:1px solid var(--g5-line)!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+body:has(#gcApp) .gc-trust-card:last-child{border-inline-end:0}
+body:has(#gcApp) .gc-trust-card strong{font-size:18px!important}
+body:has(#gcApp) .gc-trust-card span{font-size:9px!important;letter-spacing:.02em}
+
+/* map = route intelligence panel */
+body:has(#gcApp) .gc-hero-visual{
+  min-height:490px!important;
+  border:1px solid rgba(101,231,238,.16)!important;
+  border-radius:32px!important;
+  background:
+    radial-gradient(circle at 22% 12%,rgba(101,231,238,.09),transparent 38%),
+    linear-gradient(145deg,rgba(9,39,61,.82),rgba(2,16,28,.92))!important;
+  box-shadow:0 30px 80px rgba(0,0,0,.30),0 1px 0 rgba(255,255,255,.04) inset!important;
+  overflow:hidden!important;
+}
+
+body:has(#gcApp) .gc-hero-visual::after{
+  content:"LIVE ROUTE • CHINA → DUBAI → ERBIL";
+  position:absolute;
+  top:14px;
+  inset-inline-start:14px;
+  z-index:5;
+  padding:7px 10px;
+  border:1px solid rgba(101,231,238,.14);
+  border-radius:999px;
+  background:rgba(3,17,28,.78);
+  color:#96dbe2;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:1.2px;
+  backdrop-filter:blur(12px);
+}
+
+/* ---------- section architecture ---------- */
+body:has(#gcApp) .gc-home > section.gc-transport-studio,
+body:has(#gcApp) .gc-home > section.gc-app-dashboard-preview,
+body:has(#gcApp) .gc-home > section.gc-container.gc-section,
+body:has(#gcApp) .gc-home > section.gc-container.gc-rate-section{
+  width:calc(100% - 40px)!important;
+  margin:0 auto 18px!important;
+  padding:34px 34px 36px!important;
+  border:1px solid var(--g5-line)!important;
+  border-radius:var(--g5-radius)!important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.008)),
+    rgba(4,20,33,.60)!important;
+  box-shadow:0 18px 46px rgba(0,0,0,.12)!important;
+  overflow:hidden!important;
+}
+
+body:has(#gcApp) .gc-transport-studio::before,
+body:has(#gcApp) .gc-app-dashboard-preview::before,
+body:has(#gcApp) .gc-container.gc-section::before,
+body:has(#gcApp) .gc-container.gc-rate-section::before{
+  content:"";
+  display:block;
+  width:40px;
+  height:2px;
+  margin-bottom:18px;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--g5-gold),transparent);
+  opacity:.8;
+}
+
+body:has(#gcApp) .gc-studio-head h2,
+body:has(#gcApp) .gc-section-head h2,
+body:has(#gcApp) .gc-rate-head h2{
+  font-size:31px!important;
+  line-height:1.15!important;
+  letter-spacing:-.045em!important;
+}
+
+body:has(#gcApp) .gc-studio-head p,
+body:has(#gcApp) .gc-section-head p,
+body:has(#gcApp) .gc-rate-head p{
+  max-width:620px!important;
+  color:#87a4b6!important;
+  line-height:1.9!important;
+}
+
+/* ---------- transport studio becomes command surface ---------- */
+body:has(#gcApp) .gc-studio-tabs{
+  display:grid!important;
+  grid-template-columns:repeat(3,1fr)!important;
+  gap:7px!important;
+  margin:23px 0 11px!important;
+  padding:6px!important;
+  border:1px solid var(--g5-line)!important;
+  border-radius:17px!important;
+  background:rgba(2,12,21,.58)!important;
+}
+
+body:has(#gcApp) .gc-studio-tab{
+  min-height:67px!important;
+  border:1px solid transparent!important;
+  border-radius:13px!important;
+  background:transparent!important;
+  transition:.18s ease!important;
+}
+
+body:has(#gcApp) .gc-studio-tab.active{
+  background:linear-gradient(145deg,rgba(101,231,238,.12),rgba(101,231,238,.035))!important;
+  border-color:rgba(101,231,238,.18)!important;
+  box-shadow:0 7px 24px rgba(0,0,0,.12)!important;
+}
+
+body:has(#gcApp) .gc-studio-tab-icon{filter:drop-shadow(0 5px 12px rgba(101,231,238,.13))}
+body:has(#gcApp) .gc-studio-stage{
+  border:1px solid var(--g5-line)!important;
+  border-radius:22px!important;
+  background:linear-gradient(145deg,rgba(9,35,54,.72),rgba(3,17,29,.86))!important;
+  overflow:hidden!important;
+}
+
+body:has(#gcApp) .gc-studio-content{
+  padding:24px!important;
+}
+
+body:has(#gcApp) .gc-studio-content h3{
+  font-size:27px!important;
+  letter-spacing:-.035em!important;
+}
+
+body:has(#gcApp) .gc-studio-stats>div{
+  border-radius:14px!important;
+  background:rgba(255,255,255,.025)!important;
+  border:1px solid var(--g5-line)!important;
+}
+
+body:has(#gcApp) .gc-studio-visual{
+  border-inline-start:1px solid var(--g5-line)!important;
+  background:
+    radial-gradient(circle at 50% 48%,rgba(101,231,238,.12),transparent 48%),
+    rgba(2,13,23,.46)!important;
+}
+
+/* ---------- app quick actions ---------- */
+body:has(#gcApp) .gc-app-dashboard-preview{
+  background:
+    radial-gradient(500px 300px at 88% 10%,rgba(101,231,238,.07),transparent 70%),
+    linear-gradient(180deg,rgba(255,255,255,.022),rgba(255,255,255,.008)),
+    rgba(4,20,33,.60)!important;
+}
+
+body:has(#gcApp) .gc-app-greeting h2{
+  font-size:28px!important;
+  letter-spacing:-.045em!important;
+}
+
+body:has(#gcApp) .gc-app-quick-grid{
+  gap:9px!important;
+}
+
+body:has(#gcApp) .gc-app-quick-grid>a{
+  min-height:128px!important;
+  border:1px solid var(--g5-line)!important;
+  border-radius:18px!important;
+  background:
+    linear-gradient(145deg,rgba(18,52,77,.52),rgba(5,23,38,.58))!important;
+  box-shadow:none!important;
+  transition:transform .18s ease,border-color .18s ease,background .18s ease!important;
+}
+
+body:has(#gcApp) .gc-app-quick-grid>a:hover{
+  transform:translateY(-2px)!important;
+  border-color:rgba(101,231,238,.22)!important;
+  background:rgba(11,40,61,.72)!important;
+}
+
+body:has(#gcApp) .gc-app-action-icon{
+  width:37px!important;height:37px!important;
+  border-radius:12px!important;
+}
+
+/* ---------- platforms/services: editorial cards ---------- */
+body:has(#gcApp) .gc-platform-grid,
+body:has(#gcApp) .gc-service-grid{
+  gap:9px!important;
+}
+
+body:has(#gcApp) .gc-platform-card,
+body:has(#gcApp) .gc-service{
+  position:relative!important;
+  min-height:205px!important;
+  border:1px solid var(--g5-line)!important;
+  border-radius:19px!important;
+  background:linear-gradient(150deg,rgba(11,40,63,.62),rgba(4,20,33,.72))!important;
+  overflow:hidden!important;
+}
+
+body:has(#gcApp) .gc-platform-card::after,
+body:has(#gcApp) .gc-service::after{
+  content:"";
+  position:absolute;
+  top:0;
+  inset-inline-end:0;
+  width:80px;
+  height:80px;
+  background:radial-gradient(circle,rgba(101,231,238,.10),transparent 68%);
+  pointer-events:none;
+}
+
+body:has(#gcApp) .gc-platform-card:hover,
+body:has(#gcApp) .gc-service:hover{
+  border-color:rgba(101,231,238,.22)!important;
+}
+
+/* ---------- rate explorer: fewer visual distractions ---------- */
+body:has(#gcApp) .gc-rate-layout{
+  gap:10px!important;
+}
+
+body:has(#gcApp) .gc-rate-panel,
+body:has(#gcApp) .gc-rate-result{
+  border:1px solid var(--g5-line)!important;
+  border-radius:20px!important;
+  background:linear-gradient(145deg,rgba(9,37,58,.72),rgba(3,18,30,.82))!important;
+  box-shadow:none!important;
+}
+
+body:has(#gcApp) .gc-rate-mode{
+  border-radius:13px!important;
+  border-color:transparent!important;
+}
+
+body:has(#gcApp) .gc-rate-mode.active{
+  background:rgba(101,231,238,.10)!important;
+  border-color:rgba(101,231,238,.18)!important;
+}
+
+body:has(#gcApp) input,
+body:has(#gcApp) select,
+body:has(#gcApp) textarea{
+  border-color:rgba(141,213,225,.12)!important;
+  background:rgba(2,15,25,.66)!important;
+  border-radius:13px!important;
+}
+
+/* ---------- CTA ---------- */
+body:has(#gcApp) .gc-track-cta{
+  position:relative!important;
+  border:1px solid rgba(232,190,100,.15)!important;
+  border-radius:22px!important;
+  background:
+    radial-gradient(circle at 90% 15%,rgba(232,190,100,.11),transparent 35%),
+    linear-gradient(145deg,rgba(19,47,65,.78),rgba(5,22,35,.88))!important;
+  overflow:hidden!important;
+}
+
+body:has(#gcApp) .gc-track-cta::after{
+  content:"GC";
+  position:absolute;
+  inset-inline-end:-20px;
+  bottom:-58px;
+  font-size:180px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-.12em;
+  color:rgba(255,255,255,.018);
+  pointer-events:none;
+}
+
+/* ---------- footer ---------- */
+body:has(#gcApp) .gc-footer{
+  border-top:1px solid rgba(141,213,225,.09)!important;
+  background:rgba(2,12,20,.60)!important;
+}
+
+/* ---------- mobile art direction ---------- */
+@media(max-width:760px){
+  body:has(#gcApp){
+    padding-bottom:calc(104px + env(safe-area-inset-bottom))!important;
+  }
+
+  body:has(#gcApp)::before{background-size:38px 38px;opacity:.11}
+
+  body:has(#gcApp) .gc-home > .gc-hero-rebuild{
+    padding:25px 10px 12px!important;
+  }
+
+  body:has(#gcApp) .gc-hero-grid{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:13px!important;
+  }
+
+  body:has(#gcApp) .gc-hero-copy{
+    width:100%!important;
+    padding-inline:5px!important;
+  }
+
+  body:has(#gcApp) .gc-hero-copy h1{
+    font-size:clamp(35px,10.4vw,47px)!important;
+    line-height:1.06!important;
+    margin:13px 0 12px!important;
+  }
+
+  body:has(#gcApp) .gc-hero-copy>p{
+    font-size:12px!important;
+    line-height:1.85!important;
+  }
+
+  body:has(#gcApp) .gc-actions{
+    grid-template-columns:1fr 1fr!important;
+    gap:7px!important;
+  }
+
+  body:has(#gcApp) .gc-actions .gc-btn{
+    min-height:48px!important;
+    padding-inline:8px!important;
+    font-size:10px!important;
+  }
+
+  body:has(#gcApp) .gc-trust{
+    grid-template-columns:repeat(2,1fr)!important;
+    border-top:0!important;
+    gap:0!important;
+    margin-top:13px!important;
+    padding-top:0!important;
+  }
+
+  body:has(#gcApp) .gc-trust-card{
+    min-height:62px!important;
+    padding:8px 10px!important;
+    border-inline-end:1px solid var(--g5-line)!important;
+    border-bottom:1px solid var(--g5-line)!important;
+  }
+
+  body:has(#gcApp) .gc-trust-card:nth-child(2n){border-inline-end:0}
+  body:has(#gcApp) .gc-trust-card:nth-last-child(-n+2){border-bottom:0}
+
+  body:has(#gcApp) .gc-hero-visual{
+    width:100%!important;
+    min-height:300px!important;
+    border-radius:24px!important;
+  }
+
+  body:has(#gcApp) .gc-hero-visual::after{
+    top:9px;inset-inline-start:9px;font-size:7px;padding:6px 8px;
+  }
+
+  body:has(#gcApp) .gc-home > section.gc-transport-studio,
+  body:has(#gcApp) .gc-home > section.gc-app-dashboard-preview,
+  body:has(#gcApp) .gc-home > section.gc-container.gc-section,
+  body:has(#gcApp) .gc-home > section.gc-container.gc-rate-section{
+    width:calc(100% - 14px)!important;
+    margin:0 auto 10px!important;
+    padding:21px 13px 22px!important;
+    border-radius:22px!important;
+  }
+
+  body:has(#gcApp) .gc-studio-head h2,
+  body:has(#gcApp) .gc-section-head h2,
+  body:has(#gcApp) .gc-rate-head h2{
+    font-size:23px!important;
+  }
+
+  body:has(#gcApp) .gc-studio-tabs{
+    grid-template-columns:repeat(3,1fr)!important;
+    gap:4px!important;
+    padding:4px!important;
+    margin-top:15px!important;
+    border-radius:15px!important;
+  }
+
+  body:has(#gcApp) .gc-studio-tab{
+    min-height:60px!important;
+    padding:7px 4px!important;
+    border-radius:12px!important;
+  }
+
+  body:has(#gcApp) .gc-studio-content{
+    padding:15px!important;
+  }
+
+  body:has(#gcApp) .gc-studio-content h3{
+    font-size:20px!important;
+  }
+
+  body:has(#gcApp) .gc-studio-stage{
+    border-radius:18px!important;
+  }
+
+  body:has(#gcApp) .gc-studio-visual{
+    min-height:225px!important;
+    border-inline-start:0!important;
+    border-top:1px solid var(--g5-line)!important;
+  }
+
+  body:has(#gcApp) .gc-app-dashboard-preview{
+    padding:18px 13px 19px!important;
+  }
+
+  body:has(#gcApp) .gc-app-greeting h2{
+    font-size:21px!important;
+  }
+
+  body:has(#gcApp) .gc-app-quick-grid{
+    grid-template-columns:repeat(3,1fr)!important;
+    gap:5px!important;
+  }
+
+  body:has(#gcApp) .gc-app-quick-grid>a{
+    min-height:91px!important;
+    padding:9px 5px!important;
+    border-radius:14px!important;
+  }
+
+  body:has(#gcApp) .gc-platform-grid,
+  body:has(#gcApp) .gc-service-grid{
+    grid-template-columns:1fr 1fr!important;
+    gap:6px!important;
+  }
+
+  body:has(#gcApp) .gc-platform-card,
+  body:has(#gcApp) .gc-service{
+    min-height:160px!important;
+    padding:12px!important;
+    border-radius:15px!important;
+  }
+
+  body:has(#gcApp) .gc-platform-card h3,
+  body:has(#gcApp) .gc-service h3{
+    font-size:11px!important;
+  }
+
+  body:has(#gcApp) .gc-platform-card p,
+  body:has(#gcApp) .gc-service p{
+    font-size:9px!important;
+    line-height:1.6!important;
+  }
+
+  body:has(#gcApp) .gc-rate-layout{
+    grid-template-columns:1fr!important;
+  }
+
+  body:has(#gcApp) .gc-rate-panel,
+  body:has(#gcApp) .gc-rate-result{
+    padding:13px!important;
+    border-radius:17px!important;
+  }
+
+  /* final five-item dock */
+  body:has(#gcApp) .gc-mobile-dock-v3{
+    left:6px!important;
+    right:6px!important;
+    bottom:calc(6px + env(safe-area-inset-bottom))!important;
+    min-height:68px!important;
+    padding:5px!important;
+    gap:3px!important;
+    border:1px solid rgba(101,231,238,.22)!important;
+    border-radius:20px!important;
+    background:rgba(3,18,30,.94)!important;
+    box-shadow:0 24px 55px rgba(0,0,0,.44),0 1px 0 rgba(255,255,255,.06) inset!important;
+    backdrop-filter:blur(25px) saturate(155%)!important;
+    -webkit-backdrop-filter:blur(25px) saturate(155%)!important;
+  }
+
+  body:has(#gcApp) .gc-mobile-dock-v3 a{
+    min-height:55px!important;
+    border-radius:14px!important;
+    gap:4px!important;
+    color:#7f99aa!important;
+  }
+
+  body:has(#gcApp) .gc-mobile-dock-v3 a.active{
+    color:#70e9ef!important;
+    background:rgba(101,231,238,.085)!important;
+  }
+
+  body:has(#gcApp) .gc-mobile-dock-v3 a.active::after{
+    left:16px!important;right:16px!important;bottom:4px!important;
+    background:#68e6ec!important;
+  }
+
+  body:has(#gcApp) .gc-mobile-dock-v3 a.primary{
+    width:56px!important;height:56px!important;
+    min-height:56px!important;
+    margin-top:-16px!important;
+    border:4px solid #061625!important;
+    background:linear-gradient(145deg,#f4d482,#d9a947)!important;
+    box-shadow:0 13px 30px rgba(217,169,71,.22),0 1px 0 rgba(255,255,255,.45) inset!important;
+  }
+
+  body:has(#gcApp) .gc-mobile-dock-v3 a svg{
+    width:20px!important;height:20px!important;
+  }
+}
+
+@media(max-width:430px){
+  body:has(#gcApp) .gc-hero-copy h1{font-size:35px!important}
+  body:has(#gcApp) .gc-actions{grid-template-columns:1fr!important}
+  body:has(#gcApp) .gc-hero-visual{min-height:275px!important}
+  body:has(#gcApp) .gc-platform-grid,
+  body:has(#gcApp) .gc-service-grid{grid-template-columns:1fr!important}
+  body:has(#gcApp) .gc-app-quick-grid{grid-template-columns:repeat(3,1fr)!important}
+  body:has(#gcApp) .gc-mobile-dock-v3{left:5px!important;right:5px!important;border-radius:18px!important}
+  body:has(#gcApp) .gc-mobile-dock-v3 a{font-size:8px!important}
+  body:has(#gcApp) .gc-mobile-dock-v3 a.primary{width:53px!important;height:53px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  body:has(#gcApp) *,
+  body:has(#gcApp) *::before,
+  body:has(#gcApp) *::after{
+    transition:none!important;
+    scroll-behavior:auto!important;
+  }
+}

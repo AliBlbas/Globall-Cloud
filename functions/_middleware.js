@@ -1,12 +1,109 @@
 /* Globall Cloud — production HTML middleware. */
 const HTML_ACCEPT = 'text/html';
-const VERSION = '20260923-2';
+const VERSION = '20261001-1';
 const VISUAL_REFRESH = `<link rel="stylesheet" href="/globall-visual-refresh-20260921.css?v=20260921-1" data-gc-visual-refresh="20260921-1">`;
 const ENTERPRISE_SHELL = `<link rel="stylesheet" href="/enterprise-shell-v2026.css?v=${VERSION}" data-gc-enterprise-shell="1">`;
+const THEME_CSS = `<link rel="stylesheet" href="/gc-theme-sync.css?v=${VERSION}" data-gc-theme-css="1">`;
+const THEME_JS = `<script src="/gc-theme-sync.js?v=${VERSION}" defer data-gc-theme-sync="1"></script>`;
+const SETTINGS_CSS = `<link rel="stylesheet" href="/gc-settings-hub.css?v=${VERSION}" data-gc-settings-css="1">`;
+const SETTINGS_JS = `<script src="/gc-settings-hub.js?v=${VERSION}" defer data-gc-settings-hub="1"></script>`;
+const ACCOUNT_ENTRY_JS = `<script src="/gc-account-entry.js?v=${VERSION}" defer data-gc-account-entry="1"></script>`;
+const MOBILE_PRIMARY_NAV = `<style data-gc-mobile-primary-nav="1">
+@media (max-width: 760px){
+  body{padding-bottom:62px!important}
+  #gcPrimaryMobileNav{
+    position:fixed!important;
+    left:0!important;
+    right:0!important;
+    bottom:0!important;
+    width:100%!important;
+    height:calc(58px + env(safe-area-inset-bottom))!important;
+    min-height:58px!important;
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    align-items:stretch!important;
+    gap:0!important;
+    padding:3px 0 env(safe-area-inset-bottom)!important;
+    margin:0!important;
+    border:0!important;
+    border-top:1px solid rgba(140,170,186,.18)!important;
+    border-radius:0!important;
+    background:rgba(4,16,28,.985)!important;
+    box-shadow:0 -8px 24px rgba(0,0,0,.22)!important;
+    backdrop-filter:blur(18px)!important;
+    -webkit-backdrop-filter:blur(18px)!important;
+    z-index:2147483647!important;
+  }
+  #gcPrimaryMobileNav a{
+    position:relative!important;
+    width:100%!important;
+    min-width:0!important;
+    height:55px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    padding:0!important;
+    margin:0!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    color:#8ea5b1!important;
+    text-decoration:none!important;
+  }
+  #gcPrimaryMobileNav a svg{
+    display:block!important;
+    width:23px!important;
+    height:23px!important;
+    fill:none!important;
+    stroke:currentColor!important;
+    stroke-width:1.9!important;
+    stroke-linecap:round!important;
+    stroke-linejoin:round!important;
+    opacity:1!important;
+  }
+  #gcPrimaryMobileNav a span{display:none!important}
+  #gcPrimaryMobileNav a.primary{color:#f0cf79!important}
+  #gcPrimaryMobileNav a:focus-visible{
+    outline:2px solid #64e5ec!important;
+    outline-offset:-2px!important;
+  }
+  #gcPrimaryMobileNav a[aria-current="page"]{
+    color:#64e5ec!important;
+  }
+  #gcPrimaryMobileNav a[aria-current="page"]::before,
+  #gcPrimaryMobileNav a.primary[aria-current="page"]::before{
+    content:""!important;
+    position:absolute!important;
+    top:0!important;
+    left:24px!important;
+    right:24px!important;
+    height:2px!important;
+    border-radius:999px!important;
+    background:currentColor!important;
+  }
+}
+@media (min-width:761px){
+  #gcPrimaryMobileNav{display:none!important}
+}
+@media (max-width:430px){
+  body{padding-bottom:58px!important}
+  #gcPrimaryMobileNav{height:calc(54px + env(safe-area-inset-bottom))!important}
+  #gcPrimaryMobileNav a{height:51px!important}
+  #gcPrimaryMobileNav a svg{width:22px!important;height:22px!important}
+  #gcPrimaryMobileNav a[aria-current="page"]::before{left:18px!important;right:18px!important}
+}
+</style>
+<nav id="gcPrimaryMobileNav" aria-label="ناڤیگەیشنی سەرەکیی مۆبایل">
+<a href="/" aria-label="سەرەکی" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 10 8-7 8 7v10H4z"></path><path d="M9 20v-6h6v6"></path></svg><span>سەرەکی</span></a>
+<a href="/dashboard#shipments" aria-label="بارەکان"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v12H4z"></path><path d="M7 7V5h10v2M4 11h16M9 15h6"></path></svg><span>بارەکان</span></a>
+<a href="/#request" class="primary" aria-label="داواکردنی نرخ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg><span>نرخ</span></a>
+<a href="/track" aria-label="شوێنکەوتن"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"></circle><path d="m16 16 4 4"></path><path d="M8.5 11h5"></path></svg><span>شوێنکەوتن</span></a>
+<a href="/dashboard#profile" aria-label="هەژمار"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"></circle><path d="M5 20c.8-3.3 3.2-5 7-5s6.2 1.7 7 5"></path></svg><span>هەژمار</span></a>
+</nav>`;
 const LEGACY_SUPABASE_NOTICE = 'Supabase هێشتا پەیوەست نەکراوە — URL و publishable key لە کۆدەکەدا زیادبکە (سەرەتای script tag).';
 const CSP = "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rum-static.pingdom.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.supabase.co https://rum-ingest.pingdom.net https://*.sentry.io https://sentry.io; frame-src 'self' https://www.google.com; worker-src 'self' blob:";
 const STAFF_V5 = /^\/(?:staff|staff-os)(?:\.html)?\/?$/i;
-const OPERATIONAL_PAGE = /^\/(?:staff(?:-os)?|warehouse(?:-os)?|customer-portal|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\.html)?\/?$/i;
+const OPERATIONAL_PAGE = /^\/(?:staff(?:-os)?|warehouse(?:-os)?|customer-portal|shop-operations|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\.html)?\/?$/i;
 const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`);
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`);
 const applySecurityHeaders = (headers) => {
@@ -32,36 +129,30 @@ export async function onRequest(context) {
   if (!contentType.toLowerCase().includes(HTML_ACCEPT)) return response;
   let html = await response.text();
   if (path === '/' || path === '/index.html') html = rewriteRootHtml(html); else html = html.split(LEGACY_SUPABASE_NOTICE).join('');
+  // The production pages own their asset graph. The homepage only needs the
+  // small settings/theme compatibility controls; legacy visual and bridge
+  // assets are loaded by their owning routes or on explicit user intent.
   const headAssets = [
-    ['name="color-scheme"','<meta name="color-scheme" content="dark light">'],
-    ['href="/globall-visual-refresh-20260921.css',VISUAL_REFRESH],
-    ['href="/enterprise-shell-v2026.css',ENTERPRISE_SHELL],
-    ['href="/browser-compat.css',`<link rel="stylesheet" href="/browser-compat.css?v=${VERSION}" data-gc-browser-compat="1">`],
-    ['href="/safari-compat-elite.css',`<link rel="stylesheet" href="/safari-compat-elite.css?v=${VERSION}" data-gc-safari-elite="1">`],
-    ['href="/logo-fix.css',`<link rel="stylesheet" href="/logo-fix.css?v=${VERSION}" data-gc-logo-fix="1">`],
-    ['href="/site-polish.css',`<link rel="stylesheet" href="/site-polish.css?v=${VERSION}" data-gc-premium-polish="1">`],
-    ['href="/production-mobile-hotfix.css',`<link rel="stylesheet" href="/production-mobile-hotfix.css?v=${VERSION}" data-gc-production-mobile-hotfix="1">`],
-    ['href="/production-mobile-ux-v2026.css',`<link rel="stylesheet" href="/production-mobile-ux-v2026.css?v=${VERSION}" data-gc-production-mobile-ux="1">`],
-    ['href="/gc-public-premium-ux-2026.css',`<link rel="stylesheet" href="/gc-public-premium-ux-2026.css?v=${VERSION}" data-gc-public-premium-ux="1">`],
-    ['href="/gc-home-final-2026.css',`<link rel="stylesheet" href="/gc-home-final-2026.css?v=${VERSION}" data-gc-home-final="1">`],
-    ['src="/production-bridge.js',`<script src="/production-bridge.js?v=${VERSION}" defer data-gc-production-bridge="1"></script>`],
-    ['src="/public-customer-auth-fix.js',`<script src="/public-customer-auth-fix.js?v=${VERSION}" defer data-gc-customer-auth-fix="1"></script>`],
-    ['src="/production-brand-repair.js',`<script src="/production-brand-repair.js?v=${VERSION}" defer data-gc-production-brand-repair="1"></script>`],
-    ['src="/gc-final-experience-2026.js',`<script src="/gc-final-experience-2026.js?v=${VERSION}" defer data-gc-final-experience="1"></script>`],
-    ['href="/gc-final-ui-20260927.css',`<link rel="stylesheet" href="/gc-final-ui-20260927.css?v=4" data-gc-final-ui="3">`]
+    ['href="/gc-theme-sync.css',THEME_CSS],
+    ['src="/gc-theme-sync.js',THEME_JS],
+    ['href="/gc-settings-hub.css',SETTINGS_CSS],
+    ['src="/gc-settings-hub.js',SETTINGS_JS],
+    ['name="color-scheme"','<meta name="color-scheme" content="dark light">']
   ];
-  for (const [needle,fragment] of headAssets) html = addHeadAsset(html,needle,fragment);
+  if (path === '/' || path === '/index.html') {
+    for (const [needle,fragment] of headAssets) html = addHeadAsset(html,needle,fragment);
+  }
   if (STAFF_V5.test(path)) {
     const headers=applySecurityHeaders(new Headers(response.headers)); headers.delete('content-encoding'); headers.delete('content-length'); headers.delete('etag'); headers.set('cache-control','no-store, max-age=0, must-revalidate'); headers.set('content-type','text/html; charset=UTF-8');
     return new Response(html,{status:response.status,statusText:response.statusText,headers});
   }
   if (OPERATIONAL_PAGE.test(path)) html=addHeadAsset(html,'src="/runtime-guard.js',`<script src="/runtime-guard.js?v=${VERSION}" defer data-gc-runtime-guard="1"></script>`);
-  if (!OPERATIONAL_PAGE.test(path) || /^\/(?:customer-portal|tracking|tracking-integration)(?:\.html)?\/?$/i.test(path)) html=addHeadAsset(html,'href="/globall-realistic-design-20260919.css',`<link rel="stylesheet" href="/globall-realistic-design-20260919.css?v=${VERSION}" data-gc-realistic-design="1">`);
+  if (/^\/(?:tracking|track|tracking-integration)(?:\.html)?\/?$/i.test(path)) html=addHeadAsset(html,'src="/gc-tracking-deeplink.js',`<script src="/gc-tracking-deeplink.js?v=${VERSION}" defer data-gc-tracking-deeplink="1"></script>`);
+  if (path !== '/' && path !== '/index.html' && (!OPERATIONAL_PAGE.test(path) || /^\/(?:customer-portal|tracking|tracking-integration)(?:\.html)?\/?$/i.test(path))) html=addHeadAsset(html,'href="/globall-realistic-design-20260919.css',`<link rel="stylesheet" href="/globall-realistic-design-20260919.css?v=${VERSION}" data-gc-realistic-design="1">`);
   if (path === '/' || path === '/index.html') {
     html=addHeadAsset(html,'src="/staff-auth-runtime-fix.js',`<script src="/staff-auth-runtime-fix.js?v=${VERSION}" defer data-gc-staff-auth-runtime="1"></script>`);
-    html=addBodyAsset(html,'src="/gc-csp-scripts/logistics-pricing-ui.js',`<script src="/gc-csp-scripts/logistics-pricing-ui.js?v=${VERSION}" defer data-gc-logistics-pricing-ui="1"></script>`);
     html=addBodyAsset(html,'src="/site-navigation-20260909.js',`<script src="/site-navigation-20260909.js?v=${VERSION}" defer data-gc-site-navigation="1"></script>`);
-    html=addBodyAsset(html,'src="/public-core-recovery.js',`<script src="/public-core-recovery.js?v=${VERSION}" defer data-gc-public-core-recovery="1"></script>`);
+    html=addBodyAsset(html,'id="gcPrimaryMobileNav"',MOBILE_PRIMARY_NAV);
   }
   if (STAFF_V5.test(path)) {
     html=addHeadAsset(html,'src="/staff-os-compat.js',`<script src="/staff-os-compat.js?v=${VERSION}" defer data-gc-staff-compat="1"></script>`);
@@ -84,6 +175,7 @@ export async function onRequest(context) {
     html=addBodyAsset(html,'src="/gc-csp-scripts/warehouse-receiving-chain-bridge.js',`<script src="/gc-csp-scripts/warehouse-receiving-chain-bridge.js?v=${VERSION}" defer data-gc-warehouse-receiving-chain="1"></script>`);
   }
   if (/^\/customer-portal(?:\.html)?\/?$/i.test(path)) {
+    html=addHeadAsset(html,'src="/gc-account-entry.js',ACCOUNT_ENTRY_JS);
     html=addHeadAsset(html,'href="/customer-receipt-evidence.css',`<link rel="stylesheet" href="/customer-receipt-evidence.css?v=${VERSION}" data-gc-customer-receipt-evidence="1">`);
     html=addBodyAsset(html,'src="/gc-csp-scripts/customer-receipt-evidence-enhancement.js',`<script src="/gc-csp-scripts/customer-receipt-evidence-enhancement.js?v=${VERSION}" defer data-gc-customer-receipt-evidence="1"></script>`);
     html=addBodyAsset(html,'src="/customer-debt-chat.js',`<script src="/customer-debt-chat.js?v=${VERSION}" defer data-gc-customer-debt-chat="1"></script>`);

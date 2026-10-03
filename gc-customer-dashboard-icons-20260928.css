@@ -1,0 +1,54 @@
+/* Globall Cloud customer dashboard — distinct gold navigation system */
+:root{--gc-icon-gold:#f4c968;--gc-icon-gold-bright:#ffe7a7;--gc-icon-line:rgba(244,201,104,.24);--gc-icon-panel:rgba(244,201,104,.07)}
+
+/* The customer dock is mobile navigation only. Older layers used body:has(#auth)
+   and accidentally made it visible on desktop; this layer is intentionally last. */
+body:has(#auth) .gc-customer-mobile-dock,.gc-customer-mobile-dock{display:none!important}
+@media (max-width:760px){
+  body:has(#auth){padding-bottom:96px!important}
+  .gc-customer-mobile-dock{
+    display:grid!important;position:fixed!important;left:10px!important;right:10px!important;
+    bottom:max(9px,env(safe-area-inset-bottom))!important;z-index:9999!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:5px!important;
+    height:76px!important;padding:7px!important;border:1px solid rgba(244,201,104,.34)!important;
+    border-radius:24px!important;background:linear-gradient(145deg,rgba(10,31,51,.98),rgba(3,12,24,.98))!important;
+    box-shadow:0 24px 70px rgba(0,0,0,.62),0 0 0 1px rgba(255,255,255,.035) inset!important;
+    backdrop-filter:blur(22px)!important;-webkit-backdrop-filter:blur(22px)!important;
+  }
+  .gc-customer-mobile-dock button{
+    --dock-accent:#e1b94f;--dock-wash:rgba(225,185,79,.075);
+    min-width:0!important;min-height:60px!important;height:60px!important;padding:5px 2px!important;
+    display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+    gap:4px!important;border:1px solid rgba(225,185,79,.16)!important;border-radius:17px!important;
+    background:linear-gradient(180deg,var(--dock-wash),rgba(255,255,255,.015))!important;
+    color:#d9bd70!important;font:800 8px/1.2 Vazirmatn,system-ui,sans-serif!important;
+    transition:transform .16s cubic-bezier(.23,1,.32,1),background .16s ease,border-color .16s ease,color .16s ease!important;
+  }
+  .gc-customer-mobile-dock button:nth-child(1){--dock-accent:#f5d477;--dock-wash:rgba(245,212,119,.11)}
+  .gc-customer-mobile-dock button:nth-child(2){--dock-accent:#e9bb56;--dock-wash:rgba(233,187,86,.085)}
+  .gc-customer-mobile-dock button:nth-child(3){--dock-accent:#ffd98a;--dock-wash:rgba(255,217,138,.085)}
+  .gc-customer-mobile-dock button:nth-child(4){--dock-accent:#dcae45;--dock-wash:rgba(220,174,69,.085)}
+  .gc-customer-mobile-dock button:nth-child(5){--dock-accent:#f0c86a;--dock-wash:rgba(240,200,106,.085)}
+  .gc-customer-mobile-dock button:hover,.gc-customer-mobile-dock button:focus-visible{transform:translateY(-2px);border-color:color-mix(in srgb,var(--dock-accent) 70%,transparent)!important;color:var(--dock-accent)!important;outline:none!important}
+  .gc-customer-mobile-dock button:active{transform:scale(.96)!important}
+  .gc-customer-mobile-dock button.active{
+    color:var(--dock-accent)!important;border-color:color-mix(in srgb,var(--dock-accent) 74%,transparent)!important;
+    background:linear-gradient(145deg,color-mix(in srgb,var(--dock-accent) 24%,transparent),color-mix(in srgb,var(--dock-accent) 6%,transparent))!important;
+    box-shadow:inset 0 1px rgba(255,255,255,.12),0 5px 18px color-mix(in srgb,var(--dock-accent) 12%,transparent)!important;
+  }
+  .gc-customer-mobile-dock .dock-icon{width:25px!important;height:25px!important;display:grid!important;place-items:center!important;flex:0 0 25px!important;color:var(--dock-accent)!important}
+  .gc-customer-mobile-dock .dock-icon svg{width:21px!important;height:21px!important;display:block!important;fill:none!important;stroke:currentColor!important;stroke-width:1.75!important;stroke-linecap:round!important;stroke-linejoin:round!important;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--dock-accent) 34%,transparent))!important}
+  .gc-customer-mobile-dock .dock-label{display:block!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;color:inherit!important;letter-spacing:.01em!important}
+
+  /* Match the specificity of legacy body:has(#auth) rules loaded by the app shell. */
+  body:has(#auth) .gc-customer-mobile-dock{display:grid!important}
+  body:has(#auth) .gc-customer-mobile-dock button{color:var(--dock-accent)!important;background:linear-gradient(180deg,var(--dock-wash),rgba(255,255,255,.015))!important;border-color:rgba(225,185,79,.16)!important}
+  body:has(#auth) .gc-customer-mobile-dock button.active{color:var(--dock-accent)!important;border-color:color-mix(in srgb,var(--dock-accent) 74%,transparent)!important;background:linear-gradient(145deg,color-mix(in srgb,var(--dock-accent) 24%,transparent),color-mix(in srgb,var(--dock-accent) 6%,transparent))!important}
+  body:has(#auth) .gc-customer-mobile-dock .dock-icon{color:var(--dock-accent)!important}
+  body:has(#auth) .gc-customer-mobile-dock .dock-icon svg{stroke:currentColor!important;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--dock-accent) 34%,transparent))!important}
+}
+
+/* Keep the support action separate from the five navigation destinations. */
+@media (max-width:760px){#gcSupportLive{bottom:92px!important}#gcSupportLive .gcs-toggle{border-color:rgba(244,201,104,.82)!important}}
+@media (min-width:761px){#gcSupportLive{bottom:24px!important}}
+@media (prefers-reduced-motion:reduce){.gc-customer-mobile-dock button{transition:none!important}}

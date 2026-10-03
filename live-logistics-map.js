@@ -89,38 +89,23 @@
   function setInfo(root, shipment, origin, dest, current){
     const info=root.querySelector('.gc-map-info b'); const sub=root.querySelector('.gc-map-info small');
     if(info) info.textContent=`${origin.label} → ${dest.label}`;
-    if(sub){
-      const eta=shipment?.eta?new Date(shipment.eta):null;
-      if(eta&&!Number.isNaN(eta.valueOf())) sub.textContent=`ETA · ${eta.toLocaleDateString('ckb-IQ')}`;
-      else if(current) sub.textContent=`شوێنی ئێستا · ${current.label}`;
-      else if(shipment?.id) sub.textContent='داتای شوێنی ئێستا بۆ ئەم بارە بەردەست نییە';
-      else sub.textContent='نەخشەی گشتیی ڕێگا؛ داتای شوێنی بار نییە';
-    }
+    if(sub){ const eta=shipment?.eta?new Date(shipment.eta):null; sub.textContent=eta&&!Number.isNaN(eta.valueOf())?`ETA · ${eta.toLocaleDateString('ckb-IQ')}`:`شوێنی ئێستا · ${current?.label||'لە ڕێگادایە'}`; }
   }
   async function initRouteMap(root,payload){
     const L=await loadLeaflet(); if(!root||root.dataset.mapReady==='1') return;
     root.dataset.mapReady='1';
     const shipment=payload?.shipment||payload||null;
-    const {origin,dest,current}=coordsFromShipment(shipment);
-    const hasLiveLocation=Boolean(shipment?.id&&current);
-    const mapLabel=hasLiveLocation?'نەخشەی شوێنی بار':'نەخشەی ڕێگای گشتیی گواستنەوە';
-    const mapStatus=hasLiveLocation?'LIVE TRACKING':shipment?.id?'SHIPMENT ROUTE':'ROUTE OVERVIEW';
-    const currentLegend=current?'<span><i class="gc-leg-dot gc-leg-current"></i> شوێنی ئێستا</span>':'';
-    root.innerHTML=`<div class="gc-map" aria-label="${mapLabel}"></div><div class="gc-map-overlay"><div class="gc-map-live">${hasLiveLocation?'<span class="gc-live-dot"></span>':''}<span>${mapStatus}</span></div><div class="gc-map-info"><b>China → Dubai → Erbil</b><small>نەخشەی گشتیی ڕێگا</small></div></div><div class="gc-map-legend">${currentLegend}<span><i class="gc-leg-line"></i> ڕێگا</span><span><i class="gc-leg-hub"></i> هاب</span></div>`;
+    const hasShipment=Boolean(shipment?.id);
+    root.innerHTML='<div class="gc-map" aria-label="نەخشەی ڕاستەقینەی گەیاندنی بار"></div><div class="gc-map-overlay"><div class="gc-map-live"><span class="gc-live-dot"></span><span>'+(hasShipment?'LIVE TRACKING':'ROUTE OVERVIEW')+'</span></div><div class="gc-map-info"><b>China → Dubai → Erbil</b><small>'+(hasShipment?'چاوەڕێی داتای شوێنی بار':'نەخشەی گشتیی مسیر؛ بۆ شوێنی زیندوو ژمارەی بار هەڵبژێرە')+'</small></div></div><div class="gc-map-legend"><span><i class="gc-leg-dot gc-leg-current"></i> شوێنی ئێستا</span><span><i class="gc-leg-line"></i> ڕێگا</span><span><i class="gc-leg-hub"></i> هاب</span></div>';
     const map=L.map(root.querySelector('.gc-map'),{zoomControl:false,attributionControl:true,scrollWheelZoom:false,dragging:true,tap:true,minZoom:2,maxZoom:16});
     L.control.zoom({position:'bottomright'}).addTo(map);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors',detectRetina:true}).addTo(map);
 
-    const addMarker=(point,mode)=>{const m=L.marker([point.lat,point.lng],{icon:markerIcon(L,mode),keyboard:false}).addTo(map);m.bindTooltip(esc(point.label),{direction:'top',offset:[0,-14],className:'gc-map-tooltip',opacity:.96});return m;};
+    const {origin,dest,current}=coordsFromShipment(shipment); const addMarker=(point,mode)=>{const m=L.marker([point.lat,point.lng],{icon:markerIcon(L,mode),keyboard:false}).addTo(map);m.bindTooltip(esc(point.label),{direction:'top',offset:[0,-14],className:'gc-map-tooltip',opacity:.96});return m;};
     addMarker(origin,'node'); addMarker(ROUTE.dubai,'hub'); addMarker(dest,'node');
     const leg1=greatCircle(origin,ROUTE.dubai,90); const leg2=await roadRoute(ROUTE.dubai,dest);
     L.polyline(leg1,{color:'#39e4f1',weight:3,opacity:.82,dashArray:'7 8'}).addTo(map);
     L.polyline(leg2,{color:'#ffc15c',weight:4,opacity:.88,lineCap:'round',lineJoin:'round'}).addTo(map);
-    const midpoint=(points,f)=>points[Math.max(0,Math.min(points.length-1,Math.floor(points.length*f)))];
-    const addVehicle=(point,mode,label)=>{if(!point)return;const m=addMarker({lat:point[0],lng:point[1],label},mode);m.bindTooltip(label,{direction:'top',offset:[0,-15],className:'gc-map-tooltip',opacity:.96});};
-    addVehicle(midpoint(leg1,.48),'air','باری فڕۆکە · Air cargo');
-    addVehicle(midpoint(leg1,.92),'sea','باری کەشتی · Sea cargo');
-    addVehicle(midpoint(leg2,.52),'land','ترێلەی دوبەی → هەولێر · Land cargo');
 
     let currentMarker;
     if(current) currentMarker=addMarker(current,'current');
@@ -135,6 +120,9 @@
     }
 
     map.fitBounds([origin,ROUTE.dubai,dest].map(p=>[p.lat,p.lng]),{padding:[22,22]}); setTimeout(()=>map.invalidateSize(),250); setInfo(root,shipment,origin,dest,current);
+    const liveLabel=root.querySelector('.gc-map-live span:last-child'); const mapSub=root.querySelector('.gc-map-info small');
+    if(liveLabel) liveLabel.textContent=current?'LIVE TRACKING':(hasShipment?'TRACKING READY':'ROUTE OVERVIEW');
+    if(mapSub && hasShipment && !current) mapSub.textContent='شوێنی ئێستا هێشتا نەنێردراوە؛ داتا بە Realtime نوێ دەکرێتەوە.';
 
     const sb=window.sb||window.supabase;
     if(sb&&shipment?.id){
@@ -148,8 +136,34 @@
   async function boot(){
     const roots=Array.from(document.querySelectorAll('.route-map')); if(!roots.length)return;
     const id=new URLSearchParams(location.search).get('tracking')||localStorage.getItem('gc-last-tracking-id')||'';
-    const payload=id?await fetchShipment(id):null;
-    for(const root of roots){try{await initRouteMap(root,payload);}catch(error){root.classList.add('gc-map-fallback');root.innerHTML='<div class="gc-map-error"><b>نەخشەکە بەردەست نەبوو</b><small>دواتر هەوڵبدەوە؛ داتا و شوێنی بار پارێزراون.</small></div>';console.error('Globall Cloud live map:',error);}}
+    let started=false;
+    let observer=null;
+    const cleanup=()=>{
+      observer?.disconnect();
+      roots.forEach(root=>['pointerdown','focusin','click','touchstart'].forEach(event=>root.removeEventListener(event,start)));
+    };
+    const start=async()=>{
+      if(started)return; started=true;
+      cleanup();
+      roots.forEach(root=>{root.dataset.mapState='loading';});
+      const payload=id?await fetchShipment(id):null;
+      for(const root of roots){try{await initRouteMap(root,payload);root.dataset.mapState='ready';}catch(error){root.dataset.mapState='error';root.classList.add('gc-map-fallback');root.innerHTML='<div class="gc-map-error"><b>نەخشەکە بەردەست نەبوو</b><small>دواتر هەوڵبدەوە؛ داتا و شوێنی بار پارێزراون.</small></div>';console.error('Globall Cloud live map:',error);}}
+    };
+    roots.forEach(root=>{
+      root.dataset.mapState='waiting';
+      ['pointerdown','focusin','click','touchstart'].forEach(event=>root.addEventListener(event,start,{once:true,passive:true}));
+    });
+    // Tracking links still initialize immediately. The public overview map waits
+    // until it is near the viewport or the user explicitly interacts with it.
+    if(id){start();return;}
+    if('IntersectionObserver' in window){
+      observer=new IntersectionObserver(entries=>{
+        if(entries.some(entry=>entry.isIntersecting))start();
+      },{rootMargin:'200px 0px',threshold:0.01});
+      roots.forEach(root=>observer.observe(root));
+    }else{
+      window.addEventListener('scroll',start,{once:true,passive:true});
+    }
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

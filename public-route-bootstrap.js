@@ -38,25 +38,24 @@
     document.head.appendChild(link);
   };
 
-  // Unified visual layer: public pages, tracking, quote and routed workspaces.
-  addStylesheet(`/gc-unified-design-v2-20260922.css?v=${RELEASE}`);
-  addStylesheet(`/site-polish.css?v=${RELEASE}`);
-  addStylesheet(`/production-mobile-hotfix.css?v=${RELEASE}`);
-  addStylesheet(`/production-mobile-ux-v2026.css?v=${RELEASE}`);
-  addStylesheet(`/public-live-repair-20260914.css?v=${RELEASE}`);
-  addStylesheet(`/site-navigation-20260909.css?v=${RELEASE}`);
-  addStylesheet(`/gc-production-ui-20260927.css?v=${RELEASE}`);
-  addStylesheet(`/gc-final-ui-20260927.css?v=4`);
-
-  // Critical interaction repair runs independently of the main renderer.
-  addScript(`/public-live-repair-20260914.js?v=${RELEASE}`, 'data-gc-public-live-repair');
-
-  // Primary public runtime.
-  addScript(`/public-core-entry.js?v=${RELEASE}`, 'data-gc-public-core-entry-loader');
-  addScript(`/public-staff-guard-20260909.js?v=${RELEASE}`, 'data-gc-public-staff-guard');
-  addScript(`/public-production-safety.js?v=${RELEASE}`, 'data-gc-public-production-safety');
-  addScript(`/site-navigation-20260909.js?v=${RELEASE}`, 'data-gc-public-navigation');
-  addScript(`/public-runtime-guarantee.js?v=${RELEASE}`, 'data-gc-public-runtime-guarantee');
+  // Healthy homepage requests already contain the canonical bundles. The old
+  // compatibility stack is loaded only after a real interaction and only if
+  // the canonical router is missing, preventing duplicate CSS/JS on LCP.
+  const loadRecoveryStack = () => {
+    if (typeof window.route === 'function') return;
+    addStylesheet(`/public-live-repair-20260914.css?v=${RELEASE}`);
+    addStylesheet(`/site-navigation-20260909.css?v=${RELEASE}`);
+    addScript(`/public-live-repair-20260914.js?v=${RELEASE}`, 'data-gc-public-live-repair');
+    addScript(`/public-core-entry.js?v=${RELEASE}`, 'data-gc-public-core-entry-loader');
+    addScript(`/public-staff-guard-20260909.js?v=${RELEASE}`, 'data-gc-public-staff-guard');
+    addScript(`/public-production-safety.js?v=${RELEASE}`, 'data-gc-public-production-safety');
+    addScript(`/site-navigation-20260909.js?v=${RELEASE}`, 'data-gc-public-navigation');
+    addScript(`/public-runtime-guarantee.js?v=${RELEASE}`, 'data-gc-public-runtime-guarantee');
+  };
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest?.('[data-gc-route], [data-gc-onclick], .gc-menu')) return;
+    loadRecoveryStack();
+  }, { capture: true, once: true });
 
   const registerStableWorker = () => {
     if (!('serviceWorker' in navigator)) return;

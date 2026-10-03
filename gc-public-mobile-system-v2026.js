@@ -28,10 +28,10 @@
 
   const icon = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-7 9 7"></path><path d="M5 10v10h14V10"></path></svg>',
-    shipments: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v13H3zM7 7V4h10v3"/></svg>',
-    track: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="2"></circle><path d="m12 4 2 6 6 2-6 2-2 6-2-6-6-2 6-2z"></path></svg>',
     calculator: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2m2 0h2m2 0h0M8 15h2m2 0h2m2 0h0M8 18h8"/></svg>',
-    account: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c.8-4 3-6 7-6s6.2 2 7 6"/></svg>'
+    services: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4-8 4-8-4 8-4Z"/><path d="M4 7v9l8 4 8-4V7M12 11v9"/></svg>',
+    contact: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v11H8l-3 3z"/><path d="M8 9h8M8 12h5"/></svg>',
+    settings: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 13.5v-3l-2-.5a5.7 5.7 0 0 0-.8-1.4l.8-1.9-2.1-2.1-1.9.8a5.7 5.7 0 0 0-1.6-.6L11 3H8l-.5 1.8a5.7 5.7 0 0 0-1.5.9l-1.9-.7L2 7.1 2.8 9a5.7 5.7 0 0 0-.5 1.5L.5 11v3l1.8.5c.1.5.3 1 .6 1.5l-.8 1.9 2.1 2.1 1.9-.8c.5.4 1 .6 1.5.8L8 22h3l.5-1.8c.6-.1 1.1-.4 1.6-.7l1.9.8 2.1-2.1-.8-1.9c.4-.5.6-1 .8-1.6L19 13.5Z"/></svg>'
   };
 
   function boot() {
@@ -44,15 +44,15 @@
 
     const links = [
       { id: 'home', label: 'سەرەکی', onClick: () => route('', '/') },
-      { id: 'shipments', label: 'بارەکان', onClick: () => route('', '/dashboard') },
-      { id: 'track', label: 'Tracking', onClick: () => route('', '/track') },
-      { id: 'calculator', label: 'حاسیبە', onClick: () => route('', '/request') },
-      { id: 'account', label: 'هەژمار', onClick: () => { const target = resolveAccount(); if (target) target.click(); else route('', '/dashboard'); } },
+      { id: 'services', label: 'خزمەت', onClick: () => route('#services', '/') },
+      { id: 'calculator', label: 'نرخ', onClick: () => route('', '/request') },
+      { id: 'contact', label: 'پەیوەندی', onClick: () => route('#contact', '/') },
+      { id: 'settings', label: 'ڕێکخستن', onClick: () => route('#profile', '/dashboard') },
     ];
 
     links.forEach(({ id, label, onClick }) => {
       const button = document.createElement('a');
-      button.href = id === 'home' ? '/' : id === 'shipments' ? '/dashboard' : id === 'track' ? '/track' : id === 'calculator' ? '/request' : '/dashboard';
+      button.href = id === 'home' ? '/' : id === 'calculator' ? '/request' : '/';
       button.dataset.mobileAction = id;
       button.setAttribute('aria-label', label);
       button.innerHTML = `<span class="gc-mobile-nav-icon">${icon[id]}</span><span class="gc-mobile-nav-label">${label}</span>`;
@@ -65,10 +65,11 @@
     const sync = () => {
       const path = window.location.pathname.replace(/\/$/, '') || '/';
       const hash = window.location.hash;
-      const active = path === '/' ? 'home'
-        : hash === '#track' || path === '/track' || path === '/tracking-integration.html' ? 'track'
+      const active = path === '/' && !hash ? 'home'
         : hash === '#request' || path === '/quote' || path === '/request' ? 'calculator'
-        : hash === '#portal' || path === '/dashboard' || path === '/portal' || path === '/login' ? 'account'
+        : hash === '#services' ? 'services'
+        : hash === '#contact' ? 'contact'
+        : path === '/dashboard' && hash === '#profile' ? 'settings'
         : '';
       nav.querySelectorAll('[data-mobile-action]').forEach((el) => {
         const selected = el.dataset.mobileAction === active;

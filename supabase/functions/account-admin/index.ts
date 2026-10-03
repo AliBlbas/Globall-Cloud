@@ -1,7 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 type Kind = 'customer' | 'customer_match' | 'staff' | 'receipt' | 'log' | 'shipment' | 'task' | 'finance' | 'pricing' | 'quote' | 'quote_requests' | 'notification' | 'notification_delivery' | 'chat'
-type Action = 'list' | 'create' | 'update' | 'archive' | 'delete' | 'claim' | 'complete' | 'send' | 'mark_read' | 'calculate'
+type Action = 'list' | 'create' | 'update' | 'archive' | 'delete' | 'bind' | 'claim' | 'complete' | 'send' | 'mark_read'
 type JsonRecord = Record<string, unknown>
 
 const ALLOWED_ORIGINS = new Set([
@@ -113,7 +113,7 @@ function normalizeKind(value: unknown): Kind {
 
 function normalizeAction(value: unknown): Action {
   const action = String(value || 'list').toLowerCase()
-  if (action === 'create' || action === 'update' || action === 'archive' || action === 'delete' || action === 'claim' || action === 'complete' || action === 'send' || action === 'mark_read' || action === 'calculate') return action
+  if (action === 'create' || action === 'update' || action === 'archive' || action === 'delete' || action === 'bind' || action === 'claim' || action === 'complete' || action === 'send' || action === 'mark_read') return action
   return 'list'
 }
 
@@ -153,12 +153,11 @@ async function getActor(req: Request) {
   const role = String(staffRow.role || '')
   const isSuperAdmin = role === 'super_admin'
   const canRead = ['admin', 'super_admin', 'accountant'].includes(role)
-  const canReadFinance = ['admin', 'super_admin', 'accountant', 'finance'].includes(role)
   const canReadOperations = ['admin', 'super_admin', 'accountant', 'warehouse', 'warehouse_china', 'warehouse_uae', 'warehouse_erbil', 'operations', 'delivery'].includes(role)
   const canWrite = ['admin', 'super_admin'].includes(role)
   const canChat = ['admin', 'super_admin', 'accountant', 'finance', 'warehouse', 'warehouse_china', 'warehouse_uae', 'warehouse_erbil', 'operations', 'driver', 'delivery'].includes(role)
 
-  return { serviceClient, staffRow, role, isSuperAdmin, canRead, canReadFinance, canReadOperations, canWrite, canChat }
+  return { serviceClient, staffRow, role, isSuperAdmin, canRead, canReadOperations, canWrite, canChat }
 }
 
 async function logActivity(client: ReturnType<typeof createClient>, staffId: string, staffName: string | null, action: string, targetId: string | null, details: JsonRecord | null = null) {
@@ -246,39 +245,26 @@ async function listTasks(client: ReturnType<typeof createClient>, actor: { id: s
 }
 
 function addAmount(target: Record<string, number>, currency: unknown, amount: unknown) { const key = String(currency || 'USD').toUpperCase(); target[key] = Math.round(((target[key] || 0) + Number(amount || 0)) * 100) / 100 }
-async function calculateQuote(client: ReturnType<typeof createClient>, data: JsonRecord) {
-  const transport = (txt(data.transport_mode || data.type) || '').toLowerCase()
-  const origin = txt(data.origin_key || data.origin)
-  const destination = txt(data.destination_key || data.destination)
-  const product = txt(data.product_type || 'General goods / no battery / no screen') || 'General goods / no battery / no screen'
-  const actual = Number(data.actual_weight ?? data.weight_kg ?? 0)
-  const length = Number(data.length_cm || 0)
-  const width = Number(data.width_cm || 0)
-  const height = Number(data.height_cm || 0)
-  const dimensionsProvided = [data.length_cm, data.width_cm, data.height_cm].some(value => value !== undefined && value !== null && value !== '')
-  const directVolumeProvided = data.volume_cbm !== undefined && data.volume_cbm !== null && data.volume_cbm !== ''
-  const directVolume = directVolumeProvided ? Number(data.volume_cbm) : 0
-  if (!['air','sea','land'].includes(transport) || !origin || !destination || !Number.isFinite(actual) || actual < 0) throw responseError('Invalid quote inputs', 400)
-  if (directVolumeProvided && (!Number.isFinite(directVolume) || directVolume < 0)) throw responseError('Invalid volume', 400)
-  if (![length, width, height].every(Number.isFinite) || [length, width, height].some(value => value < 0)) throw responseError('Invalid dimensions', 400)
-  if (dimensionsProvided && !(length > 0 && width > 0 && height > 0)) throw responseError('Provide all three positive dimensions', 400)
-  const dimensionVolume = length > 0 && width > 0 && height > 0 ? (length * width * height) / 1000000 : 0
-  const volumeCbm = directVolume > 0 ? directVolume : dimensionVolume
-  const volumetricWeight = transport === 'air' || transport === 'sea'
-    ? (dimensionVolume > 0 ? (length * width * height) / 6000 : volumeCbm * 1000000 / 6000)
-    : 0
-  const billableWeight = Math.max(actual, volumetricWeight)
-  const unit = transport === 'sea' ? 'cbm' : 'kg'
-  const { data: rates, error } = await client.from('pricing_rates').select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from').eq('is_active', true).eq('origin_key', origin).eq('destination_key', destination).eq('transport_mode', transport).eq('unit', unit).order('effective_from', { ascending: false }).limit(100)
-  if (error) throw error
-  const exact = (rates ?? []).find((r: any) => r.product_type === product) || (rates ?? []).find((r: any) => r.product_type === 'General goods / no battery / no screen') || (rates ?? [])[0]
-  if (!exact) throw responseError('No active rate found for this route and product', 404)
-  const billableUnits = unit === 'cbm' ? volumeCbm : billableWeight
-  const amount = Math.round(billableUnits * Number(exact.amount) * 100) / 100
-  return { rate_snapshot: exact, actual_weight_kg: actual, volume_cbm: Math.round(volumeCbm * 10000) / 10000, volumetric_weight_kg: Math.round(volumetricWeight * 100) / 100, billable_weight_kg: Math.round(billableWeight * 100) / 100, billable_units: Math.round(billableUnits * 10000) / 10000, total: amount, currency: exact.currency, transit_min_days: exact.transit_min_days, transit_max_days: exact.transit_max_days, formula: 'Volumetric weight = L × W × H ÷ 6000 (or CBM × 166.67); billable weight = max(actual, volumetric)' }
+async function calculateQuote(client: ReturnType<typeof createClient>, data: JsonRecord) { const transport = txt(data.transport_mode || data.type).toLowerCase(); const origin = txt(data.origin_key || data.origin); const destination = txt(data.destination_key || data.destination); const product = txt(data.product_type || 'General goods / no battery / no screen'); const actual = Number(data.actual_weight ?? data.weight_kg ?? 0); const length = Number(data.length_cm || 0); const width = Number(data.width_cm || 0); const height = Number(data.height_cm || 0); if (!['air','sea','land'].includes(transport) || !origin || !destination || !Number.isFinite(actual) || actual < 0) throw responseError('Invalid quote inputs', 400); const volumeCbm = length > 0 && width > 0 && height > 0 ? (length * width * height) / 1000000 : 0; const volumetricWeight = transport === 'air' || transport === 'sea' ? (length > 0 && width > 0 && height > 0 ? (length * width * height) / 6000 : 0) : 0; const billableWeight = Math.max(actual, volumetricWeight); const unit = transport === 'sea' ? 'cbm' : 'kg'; const { data: rates, error } = await client.from('pricing_rates').select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from').eq('is_active', true).eq('origin_key', origin).eq('destination_key', destination).eq('transport_mode', transport).eq('unit', unit).order('effective_from', { ascending: false }).limit(100); if (error) throw error; const exact = (rates ?? []).find((r: any) => r.product_type === product) || (rates ?? []).find((r: any) => r.product_type === 'General goods / no battery / no screen') || (rates ?? [])[0]; if (!exact) throw responseError('No active rate found for this route and product', 404); const billableUnits = unit === 'cbm' ? volumeCbm : billableWeight; const amount = Math.round(billableUnits * Number(exact.amount) * 100) / 100; return { rate_snapshot: exact, actual_weight_kg: actual, volume_cbm: Math.round(volumeCbm * 10000) / 10000, volumetric_weight_kg: Math.round(volumetricWeight * 100) / 100, billable_weight_kg: Math.round(billableWeight * 100) / 100, billable_units: Math.round(billableUnits * 10000) / 10000, total: amount, currency: exact.currency, transit_min_days: exact.transit_min_days, transit_max_days: exact.transit_max_days, formula: 'Volumetric weight = L × W × H ÷ 6000; billable weight = max(actual, volumetric)' } }
+async function listQuoteRequests(client: ReturnType<typeof createClient>) { const { data, error } = await client.from('quote_requests').select('id,customer_user_id,customer_name,customer_phone,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,dimensional_weight_kg,billable_weight_kg,status,quoted_amount,currency,valid_until,decision_note,created_at,updated_at').order('created_at', { ascending: false }).limit(300); if (error) throw error; return { kind: 'quote_requests', items: data ?? [] }
 }
-
-async function listQuoteRequests(client: ReturnType<typeof createClient>) { const { data, error } = await client.from('quote_requests').select('id,customer_user_id,customer_name,customer_phone,customer_email,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,dimensional_weight_kg,billable_weight_kg,status,quoted_amount,currency,valid_until,decision_note,created_at,updated_at').order('created_at', { ascending: false }).limit(300); if (error) throw error; return { kind: 'quote_requests', items: data ?? [] } }
+async function decideQuote(client: ReturnType<typeof createClient>, data: JsonRecord, actor: {id:string, name:string|null, role:string}, decision: 'approve'|'reject') {
+  const id=txt(data.id); if(!id) throw responseError('Quote id is required',400);
+  const allowed=['admin','super_admin','accountant','finance','operations','staff']; if(!allowed.includes(actor.role)) throw responseError('Quote decision permission required',403);
+  if(decision==='approve'){
+    const amount=Number(data.quoted_amount); if(!Number.isFinite(amount)||amount<=0) throw responseError('A positive quoted amount is required',400);
+    const currency=(txt(data.currency)||'USD').toUpperCase(); if(!['USD','IQD','AED','CNY'].includes(currency)) throw responseError('Unsupported quote currency',400);
+    const validUntil=txt(data.valid_until)||new Date(Date.now()+7*86400000).toISOString();
+    const {data:current,error:readError}=await client.from('quote_requests').select('id,status,customer_user_id,weight_kg,volume_cbm,transport_mode').eq('id',id).maybeSingle(); if(readError) throw readError; if(!current) throw responseError('Quote request not found',404); if(!['pending','reviewing','quoted'].includes(String(current.status))) throw responseError('Quote is not open for decision',409);
+    const dimensional=current.transport_mode==='sea'?Number(current.volume_cbm||0):0; const {data:row,error}=await client.from('quote_requests').update({status:'quoted',quoted_amount:Math.round(amount*100)/100,currency,valid_until:validUntil,decision_note:txt(data.decision_note)||null,quoted_by:actor.id,quoted_at:new Date().toISOString(),dimensional_weight_kg:dimensional,billable_weight_kg:Math.max(Number(current.weight_kg||0),dimensional),updated_at:new Date().toISOString()}).eq('id',id).in('status',['pending','reviewing','quoted']).select('*').single();
+    if(error) throw error; await logActivity(client,actor.id,actor.name,'approve_quote_request',id,{amount:row.quoted_amount,currency:row.currency,valid_until:row.valid_until}); if(row.customer_user_id) await client.from('customer_notifications').insert({customer_user_id:row.customer_user_id,kind:'quote_ready',title:'Quote ready for review',body:`Your quote is ready: ${row.quoted_amount} ${row.currency}.`,action_url:'/customer-portal.html#quotes',event_key:`quote:${row.id}:quoted`}); return {quote:row};
+  }
+  const note=txt(data.decision_note)||'Quote request was rejected.';
+  const {data:row,error}=await client.from('quote_requests').update({status:'rejected',decision_note:note,quoted_by:actor.id,quoted_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',id).in('status',['pending','reviewing','quoted']).select('*').single();
+  if(error) throw error; await logActivity(client,actor.id,actor.name,'reject_quote_request',id,{decision_note:note});
+  if(row.customer_user_id) await client.from('customer_notifications').insert({customer_user_id:row.customer_user_id,kind:'quote_rejected',title:'Quote request update',body:note,action_url:'/customer-portal.html#quotes',event_key:`quote:${row.id}:rejected`});
+  return {quote:row};
+}
 async function listStaffNotifications(client: ReturnType<typeof createClient>, staffId: string) { const { data, error } = await client.from('staff_notifications').select('id,kind,title,body,action_url,entity_type,entity_id,read_at,created_at').eq('staff_id', staffId).order('created_at', { ascending: false }).limit(50); if (error) throw error; return { kind: 'notification', items: data ?? [], unread_count: (data ?? []).filter((row: any) => !row.read_at).length } }
 async function listNotificationDelivery(client: ReturnType<typeof createClient>) { const { data, error } = await client.from('notification_delivery_events').select('id,provider,provider_message_id,provider_event_id,status,recipient,occurred_at,received_at').order('occurred_at', { ascending: false }).limit(40); if (error) throw error; return { kind: 'notification_delivery', items: data ?? [] } }
 async function listChat(client: ReturnType<typeof createClient>, staffId: string) {
@@ -466,8 +452,8 @@ async function createCustomerAuth(client: ReturnType<typeof createClient>, paylo
   }
 }
 
-async function upsertCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, isSuperAdmin: boolean }) {
-  if (!actor.isSuperAdmin) throw responseError('Only Super Admin can create customer accounts', 403)
+async function upsertCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, role: string, isSuperAdmin: boolean }) {
+  if (!actor.isSuperAdmin && actor.role !== 'admin') throw responseError('Admin permission required to create customer accounts', 403)
   const name = txt(payload.name) || txt(payload.phone) || txt(payload.email) || 'Customer'
   const email = txt(payload.email)
   const phone = txt(payload.phone)
@@ -493,39 +479,66 @@ async function upsertCustomer(client: ReturnType<typeof createClient>, payload: 
   return { customer: canonicalCustomerIdentity(saved), auth_user_id: authResult.userId, warning: authResult.warning, status: authResult.userId ? 'linked' : 'saved_without_auth' }
 }
 
-async function updateCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, isSuperAdmin: boolean }) {
+async function bindCustomerAuth(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, role: string, isSuperAdmin: boolean }) {
+  if (!actor.isSuperAdmin && actor.role !== 'admin') throw responseError('Admin permission required to bind customer accounts', 403)
   const id = txt(payload.id)
   if (!id) throw responseError('Missing customer id', 400)
+  const { data: customer, error: customerError } = await client.from('customer_directory').select('id,code,gc_code,name,email,phone,auth_user_id,is_active').eq('id', id).maybeSingle()
+  if (customerError) throw customerError
+  if (!customer) throw responseError('Customer not found', 404)
+  if (customer.is_active !== true) throw responseError('Inactive customers cannot be bound', 400)
+  const code = normalizeGcCode(customer.gc_code ?? customer.code)
+  if (!code) throw responseError('Customer has no valid GC code', 400)
+  const password = txt(payload.password) || randomPassword(16)
+  if (password.length < 12) throw responseError('Password must be at least 12 characters', 400)
+  const email = txt(customer.email) || `${code.toLowerCase()}@customers.globall-cloud.internal`
+  let userId = txt(customer.auth_user_id)
+  if (userId) {
+    const { error } = await client.auth.admin.updateUserById(userId, { password, email_confirm: true, user_metadata: { full_name: customer.name || 'Customer', phone: customer.phone || '', account_kind: 'customer' } } as never)
+    if (error) throw error
+  } else {
+    const { data, error } = await client.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { full_name: customer.name || 'Customer', phone: customer.phone || '', account_kind: 'customer' } } as never)
+    if (error) throw error
+    userId = data.user?.id ?? null
+    if (!userId) throw new Error('Customer Auth account was not created')
+    const { error: linkError } = await client.from('customer_directory').update({ auth_user_id: userId }).eq('id', id)
+    if (linkError) {
+      await client.auth.admin.deleteUser(userId).catch(() => undefined)
+      throw linkError
+    }
+  }
+  await logActivity(client, actor.id, actor.name, 'bind_customer_auth_account', id, { gc_code: code, auth_user_id: userId, synthetic_email: email.endsWith('@customers.globall-cloud.internal') })
+  return { ok: true, status: 'linked', customer_id: id, gc_code: code, auth_user_id: userId, login_email: email, temporary_password: password, note: 'Deliver this password securely; it is not shown again.' }
+}
+
+async function updateCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, role: string, isSuperAdmin: boolean }) {
+  const id = txt(payload.id)
+  if (!id) throw responseError('Missing customer id', 400)
+  if (!actor.isSuperAdmin && actor.role !== 'admin' && (txt(payload.email) !== null || txt(payload.password) !== null || payload.gc_code !== undefined || payload.code !== undefined)) {
+    throw responseError('Email, password, and GC code are managed by Admin only', 403)
+  }
   const updates: JsonRecord = {}
   for (const key of ['name', 'email', 'phone', 'phone2', 'city', 'delivery_location', 'note', 'manager_staff_id'] as const) {
-    if (!actor.isSuperAdmin && key === 'email') continue
+    if (!actor.isSuperAdmin && actor.role !== 'admin' && key === 'email') continue
     const value = txt(payload[key])
     if (value !== null) updates[key] = value
   }
   if (typeof payload.is_active === 'boolean') updates.is_active = payload.is_active
   let requestedCode: string | null = null
-  if (actor.isSuperAdmin && (payload.gc_code !== undefined || payload.code !== undefined)) {
+  if ((actor.isSuperAdmin || actor.role === 'admin') && (payload.gc_code !== undefined || payload.code !== undefined)) {
     requestedCode = normalizeGcCode(payload.gc_code ?? payload.code)
     if (!requestedCode) throw responseError('GC code must match GC-### or GC-* format', 400)
   }
 
-  const { data: currentRow, error: currentErr } = await client.from('customer_directory').select('id,auth_user_id,code,gc_code,email').eq('id', id).maybeSingle()
-  const current = currentRow as Record<string, any> | null
+  const { data: current, error: currentErr } = await client.from('customer_directory').select('id,auth_user_id,code,gc_code').eq('id', id).maybeSingle()
   if (currentErr) throw currentErr
   if (!current) throw responseError('Customer not found', 404)
-  const emailWasProvided = Object.prototype.hasOwnProperty.call(payload, 'email')
-  const emailChanged = emailWasProvided && (txt(payload.email) || '').toLowerCase() !== (txt(current.email) || '').toLowerCase()
-  const codeWasProvided = payload.gc_code !== undefined || payload.code !== undefined
-  const codeChanged = codeWasProvided && normalizeGcCode(payload.gc_code ?? payload.code) !== normalizeGcCode(current.code ?? current.gc_code)
-  if (!actor.isSuperAdmin && (emailChanged || txt(payload.password) !== null || codeChanged)) {
-    throw responseError('Email, password, and GC code are managed by Super Admin only', 403)
-  }
   if (requestedCode) {
     const currentCode = normalizeGcCode(current.code ?? current.gc_code)
     if (currentCode && currentCode !== requestedCode) throw responseError('GC code is immutable after customer creation', 409)
   }
 
-  if (current.auth_user_id && actor.isSuperAdmin) {
+  if (current.auth_user_id && (actor.isSuperAdmin || actor.role === 'admin')) {
     const authUpdate: Record<string, unknown> = {}
     const name = txt(payload.name)
     const email = txt(payload.email)
@@ -710,14 +723,14 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(req) })
   try {
     const actor = await getActor(req)
-    const { serviceClient, staffRow, canRead, canReadFinance, canReadOperations, canWrite, canChat, isSuperAdmin } = actor
+    const { serviceClient, staffRow, canRead, canReadOperations, canWrite, canChat, isSuperAdmin } = actor
     const url = new URL(req.url)
     if (req.method === 'GET') {
       const kind = normalizeKind(url.searchParams.get('kind'))
       if (kind === 'receipt' && canReadOperations) return json(await listReceipts(serviceClient), {}, req)
       if (kind === 'customer_match' && canReadOperations) { const code = normalizeGcCode(url.searchParams.get('code')); if (!code) return json({ customer: null, error: 'Invalid GC code' }, { status: 400 }, req); return json({ customer: await lookupCustomer(serviceClient, { customer_code: code }), normalized_code: code }, {}, req) }
       if (kind === 'task' && canReadOperations) return json(await listTasks(serviceClient, { id: staffRow.id, role: String(staffRow.role || ''), branch: staffRow.branch }), {}, req)
-      if (kind === 'finance' && canReadFinance) return json(await listFinance(serviceClient), {}, req)
+      if (kind === 'finance' && canRead) return json(await listFinance(serviceClient), {}, req)
       if (kind === 'pricing' && canRead) return json(await listPricing(serviceClient), {}, req)
       if (kind === 'quote_requests' && canReadOperations) return json(await listQuoteRequests(serviceClient), {}, req)
       if (kind === 'notification' && canReadOperations) return json(await listStaffNotifications(serviceClient, staffRow.id), {}, req)
@@ -752,7 +765,8 @@ Deno.serve(async (req) => {
       if (!canReadOperations) return json({ error: 'Forbidden' }, { status: 403 }, req)
       return json(await createReceipt(serviceClient, data, files, { id: staffRow.id, name: staffRow.full_name }), {}, req)
     }
-    if (kind === 'quote' && action === 'calculate') { if (!canReadOperations && !canReadFinance) return json({ error: 'Operations access required' }, { status: 403 }, req); return json(await calculateQuote(serviceClient, data), {}, req) }
+    if (kind === 'quote' && action === 'calculate') { if (!canReadOperations) return json({ error: 'Operations access required' }, { status: 403 }, req); return json(await calculateQuote(serviceClient, data), {}, req) }
+    if (kind === 'quote_requests' && (action === 'approve' || action === 'reject')) return json(await decideQuote(serviceClient, data, {id:staffRow.id, name:staffRow.full_name, role:String(staffRow.role||'')}, action === 'approve' ? 'approve' : 'reject'), {}, req)
     if (kind === 'pricing') { const financeRole = ['admin','super_admin','accountant'].includes(String(staffRow.role || '')); if (!financeRole) return json({ error: 'Finance role required' }, { status: 403 }, req); const pricingActor = { id: staffRow.id, name: staffRow.full_name }; if (action === 'update') return json(data.rate_type === 'exchange' ? await updateExchangeRate(serviceClient, data, pricingActor) : await updatePricing(serviceClient, data, pricingActor), {}, req); return json({ error: 'Unsupported pricing action' }, { status: 400 }, req) }
     if (kind === 'notification' && action === 'update' && canReadOperations) return json(await markStaffNotificationRead(serviceClient, staffRow.id, data), {}, req)
     if (kind === 'chat' && canChat) {
@@ -768,10 +782,12 @@ Deno.serve(async (req) => {
       return json({ error: 'Unsupported task action' }, { status: 400 }, req)
     }
     if (!canWrite) return json({ error: 'Forbidden' }, { status: 403 }, req)
-    if ((kind === 'customer' || kind === 'staff') && action === 'create' && !isSuperAdmin) return json({ error: 'Only Super Admin can create accounts' }, { status: 403 }, req)
+    if (kind === 'staff' && action === 'create' && !isSuperAdmin) return json({ error: 'Only Super Admin can create staff accounts' }, { status: 403 }, req)
+    const customerActor = { id: staffRow.id, name: staffRow.full_name, role: String(staffRow.role || ''), isSuperAdmin }
     if (kind === 'customer') {
-      if (action === 'create') return json(await upsertCustomer(serviceClient, data, { id: staffRow.id, name: staffRow.full_name, isSuperAdmin }), {}, req)
-      if (action === 'update') return json(await updateCustomer(serviceClient, data, { id: staffRow.id, name: staffRow.full_name, isSuperAdmin }), {}, req)
+      if (action === 'create') return json(await upsertCustomer(serviceClient, data, customerActor), {}, req)
+      if (action === 'update') return json(await updateCustomer(serviceClient, data, customerActor), {}, req)
+      if (action === 'bind') return json(await bindCustomerAuth(serviceClient, data, customerActor), {}, req)
       if (action === 'archive' || action === 'delete') return json(await archiveCustomer(serviceClient, data, staffRow.id, staffRow.full_name), {}, req)
     }
     if (kind === 'staff') {

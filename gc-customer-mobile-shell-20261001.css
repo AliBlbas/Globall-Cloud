@@ -1,0 +1,17 @@
+/* Globall Cloud — customer mobile shell: one dock, one purpose per icon. */
+:root{--gc-gold:#d8b15a;--gc-gold-hi:#f5d889;--gc-navy:#071522;--gc-panel:#0d2233;--gc-line:rgba(216,177,90,.2)}
+.gc-customer-mobile-dock{display:none}
+@media (max-width:760px){
+  body{padding-bottom:calc(84px + env(safe-area-inset-bottom))!important;background:linear-gradient(180deg,#06121e 0%,#071522 100%)!important}
+  .gc-customer-mobile-dock{position:fixed!important;z-index:2147483000!important;left:12px!important;right:12px!important;bottom:max(10px,env(safe-area-inset-bottom))!important;height:68px!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:5px!important;padding:5px!important;border:1px solid var(--gc-line)!important;border-radius:22px!important;background:rgba(7,21,34,.96)!important;box-shadow:0 18px 50px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.04)!important;backdrop-filter:blur(18px)!important}
+  .gc-customer-mobile-dock button{display:flex!important;min-width:0!important;min-height:58px!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;border:0!important;border-radius:16px!important;background:transparent!important;color:#91a5b5!important;font:700 10px/1.1 Vazirmatn,system-ui,sans-serif!important;cursor:pointer!important}
+  .gc-customer-mobile-dock button:hover{transform:none!important;background:rgba(216,177,90,.08)!important}
+  .gc-customer-mobile-dock button.active{color:var(--gc-gold-hi)!important;background:linear-gradient(180deg,rgba(216,177,90,.18),rgba(216,177,90,.06))!important;box-shadow:inset 0 0 0 1px rgba(216,177,90,.22)!important}
+  .gc-customer-mobile-dock .dock-icon{display:grid!important;place-items:center!important;width:28px!important;height:28px!important;border-radius:10px!important;color:currentColor!important}
+  .gc-customer-mobile-dock svg{display:block!important;width:21px!important;height:21px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+  .gc-customer-mobile-dock .dock-label{display:block!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%!important}
+  .hero,.card{border-radius:20px!important}
+  .grid,.grid3,.detail-related{grid-template-columns:1fr!important}
+  .hero h1{font-size:clamp(27px,8vw,37px)!important;line-height:1.35!important}
+  .portal-section-heading{margin-top:26px!important}
+}

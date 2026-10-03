@@ -1,0 +1,26 @@
+/* Globall Cloud — Advanced Customer Workspace V4 */
+body:has(#customerWelcome){--gc-cyan:#58e5ef}
+body:has(#customerWelcome) .top{box-shadow:0 10px 30px rgba(0,0,0,.18)}
+body:has(#customerWelcome) .topin:after{content:"SECURE CUSTOMER WORKSPACE";color:#55758a;font:800 7px/1 ui-monospace,monospace;letter-spacing:1.4px;position:absolute;left:18px;bottom:3px}
+body:has(#customerWelcome) .topin{position:relative}
+body:has(#customerWelcome) .hero .card{position:relative;overflow:hidden;background:
+ radial-gradient(280px 140px at 88% 8%,rgba(88,229,239,.11),transparent 68%),
+ linear-gradient(155deg,#112e4a,#0a1b2f)!important}
+body:has(#customerWelcome) .hero .card:after{content:"CUSTOMER  ·  TRACKING  ·  FINANCE";position:absolute;inset-inline-end:18px;bottom:18px;color:#5e8296;font:800 7px/1 ui-monospace,monospace;letter-spacing:1.25px}
+body:has(#customerWelcome) .grid>.kpi{position:relative;overflow:hidden}
+body:has(#customerWelcome) .grid>.kpi:before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:linear-gradient(90deg,transparent,#58e5ef,transparent);opacity:.7}
+body:has(#customerWelcome) .portal-status{box-shadow:0 16px 36px rgba(0,0,0,.14)!important}
+body:has(#customerWelcome) .portal-section-heading{position:relative;padding-inline-start:12px}
+body:has(#customerWelcome) .portal-section-heading:before{content:"";position:absolute;inset-inline-start:0;top:3px;width:3px;height:36px;border-radius:3px;background:linear-gradient(#58e5ef,#178cf4)}
+body:has(#customerWelcome) .card h2{letter-spacing:-.3px}
+body:has(#customerWelcome) .shipment-card{background:linear-gradient(145deg,rgba(17,48,76,.72),rgba(8,22,39,.98))}
+body:has(#customerWelcome) .shipment-card:before{content:"TRACKING";display:block;margin-bottom:8px;color:#5d8192;font:800 7px/1 ui-monospace,monospace;letter-spacing:1.3px}
+body:has(#customerWelcome) .finance-summary .kpi b{font-size:24px}
+body:has(#customerWelcome) .actions .btn,.field{min-height:48px}
+@media(max-width:620px){
+ body:has(#customerWelcome){padding-bottom:84px}
+ body:has(#customerWelcome) .topin:after{display:none}
+ body:has(#customerWelcome) .hero .card:after{font-size:6.5px;bottom:14px}
+ body:has(#customerWelcome) .portal-section-heading{margin-top:25px}
+ body:has(#customerWelcome) .card{border-radius:18px}
+}
