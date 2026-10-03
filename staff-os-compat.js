@@ -6,6 +6,10 @@
   const STAFF_VERIFY = `${SUPABASE_URL}/functions/v1/staff-auth-verify`;
   const STAFF_TABLE = `${SUPABASE_URL}/rest/v1/staff`;
   const STAFF_OS_PATH = /^\/staff(?:-os(?:-v5)?|)(?:\.html)?\/?$/;
+  // Staff V5 owns its complete auth and render lifecycle. The legacy bridge
+  // installs a capture-phase submit handler, which otherwise signs in twice
+  // and races V5 while it is rendering the authenticated console.
+  if (/^\/staff-os-v5(?:\.html)?\/?$/i.test(window.location.pathname)) return;
   const nativeFetch = window.fetch.bind(window);
 
   const getClient = async () => {
