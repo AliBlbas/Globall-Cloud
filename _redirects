@@ -8,6 +8,10 @@
 /quote/ /#request 302
 /request /#request 302
 /request/ /#request 302
+/customer-portal /dashboard 301
+/customer-portal/ /dashboard 301
+/portal /dashboard 301
+/portal/ /dashboard 301
 /staff /staff-os-v5.html 200
 /staff/ /staff-os-v5.html 200
 /staff-os /staff-os-v5.html 200
