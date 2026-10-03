@@ -23,6 +23,11 @@
   const currentLang = () => validLang(localStorage.getItem(LANG_KEY) || document.documentElement.lang || 'ckb');
   const currentTheme = () => localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark';
   const syncAppTheme = (theme) => {
+    if (document.body?.classList.contains('gc-customer-app')) {
+      document.body.style.setProperty('background-image', theme === 'light' ? 'radial-gradient(900px 500px at 78% -12%,rgba(88,229,239,.18),transparent 64%)' : 'radial-gradient(900px 500px at 78% -12%,rgba(38,126,151,.22),transparent 64%),radial-gradient(700px 500px at -8% 45%,rgba(47,80,157,.14),transparent 60%)', 'important');
+      document.body.style.setProperty('background-color', theme === 'light' ? '#f3f8fa' : '#071421', 'important');
+      document.body.style.setProperty('color', theme === 'light' ? '#102b43' : '#f2fbfd', 'important');
+    }
     let style = document.getElementById('gcCustomerAppThemeStyle');
     if (!style) { style = document.createElement('style'); style.id = 'gcCustomerAppThemeStyle'; document.head.appendChild(style); }
     style.textContent = theme === 'light'
