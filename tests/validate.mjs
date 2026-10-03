@@ -155,15 +155,46 @@ const quoteCalculator = accountAdmin.match(/async function calculateQuote\([\s\S
 const logisticsControl = read('supabase/functions/logistics-control-plane/index.ts')
 const quoteFlowChecks = [
   ['staff quote calculator calls the quote endpoint and action', staffUi.includes("account('quote', 'calculate'") && quoteActionNormalizer.includes("action === 'calculate'")],
-  ['quote calculator supports stored CBM for customer requests', accountAdmin.includes('directVolumeProvided') && accountAdmin.includes("unit === 'cbm' ? volumeCbm : billableWeight")],
+  ['quote calculator uses the canonical server RPC with CBM and per-item quantities', /rpc\(['\"]calculate_logistics_price['\"]/.test(quoteCalculator) && /p_volume_cbm\s*:\s*volumeCbm/.test(quoteCalculator) && /p_items_count\s*:\s*items/.test(quoteCalculator) && read('supabase/migrations/20261002210000_unified_item_based_pricing.sql').includes('v_units:=p_items_count')],
   ['finance role can calculate a suggestion without broad operations access', accountAdmin.includes('!canReadOperations && !canReadFinance')],
-  ['quote inbox returns email and supports account prefill', accountAdmin.includes('customer_phone,customer_email,origin_key') && staffQuoteFlow.includes("['name', q.customer_name], ['phone', q.customer_phone], ['email', q.customer_email]")],
+  ['quote inbox returns email and supports admin-only customer prefill', accountAdmin.includes('customer_email') && staffQuoteFlow.includes('q.customer_email') && staffQuoteFlow.includes('data-request-account') && staffQuoteFlow.includes('canCreateAccount=canManageAccounts')],
   ['staff quote review uses the existing secured approval endpoint', staffQuoteFlow.includes('data-quote-review') && staffQuoteFlow.includes("action: 'approve_quote'") && staffQuoteFlow.includes('FN.logisticsControl') && logisticsControl.includes("service.rpc('approve_quote_request'")],
   ['quote approval is limited by status and validity checks', staffQuoteFlow.includes("['pending', 'reviewing', 'quoted'].includes(status)") && staffQuoteFlow.includes('validUntil.getTime() <= Date.now()')],
-  ['only Super Admin sees customer-account creation from the inbox', staffQuoteFlow.includes("const canCreateAccount = state.staff?.role === 'super_admin'")],
+  ['only Admin or Super Admin sees customer-account request actions', staffQuoteFlow.includes("const canManageAccounts=['admin','super_admin'].includes(role)") && staffQuoteFlow.includes('canManageAccounts?`<section class="card"')],
 ]
 for (const [label, passed] of quoteFlowChecks) if (!passed) fail(label)
 if (quoteFlowChecks.every(([, passed]) => passed)) ok('Staff quote inbox, pricing suggestion, and approval contracts OK')
+
+
+console.log('Staff-only GC issuance and customer login activation')
+const registrationFn = read('supabase/functions/customer-gc-register/index.ts')
+const gcLoginFn = read('supabase/functions/customer-gc-login/index.ts')
+const accountRequestMigration = read('supabase/migrations/20261002180000_customer_account_requests_staff_gc_assignment.sql')
+const accountCreate = accountAdmin.match(/async function upsertCustomer\([\s\S]*?\n}\nasync function bindCustomerAuth/)?.[0] || ''
+const gcAccountChecks = [
+  ['public registration creates only a private access request, not Auth users or GC codes', registrationFn.includes("from('customer_account_requests')") && !registrationFn.includes('register_customer_with_gc') && !registrationFn.includes('auth.admin.createUser')],
+  ['account requests are RLS-protected and legacy self-registration RPC is revoked', accountRequestMigration.includes('enable row level security') && accountRequestMigration.includes('from public, anon, authenticated') && accountRequestMigration.includes('register_customer_with_gc(uuid,text,text,text)')],
+  ['new customer GC codes are database-sequenced; manually selected codes are rejected', accountCreate.includes('assigned sequentially by the system') && accountCreate.includes("insert({...base,auth_user_id:null})")],
+  ['staff activation exposes a one-time password and is admin-gated', staffUi.includes('activateCustomerLogin') && staffUi.includes("account('customer','bind',{id:c.id})") && accountAdmin.includes('Admin permission required to bind customer accounts') && accountAdmin.includes('temporary_password: password')],
+  ['customer GC login has hashed IP/code attempt limits and generic authentication failures', gcLoginFn.includes('consume_public_message_rate_limit') && gcLoginFn.includes("allowAttempt('ip'") && gcLoginFn.includes("allowAttempt('code'") && gcLoginFn.includes('Invalid GC code or password')],
+]
+for (const [label, passed] of gcAccountChecks) if (!passed) fail(label)
+if (gcAccountChecks.every(([, passed]) => passed)) ok('Staff-controlled GC issuance, review and login security contracts OK')
+
+console.log('Unified live pricing and route-unit contracts')
+const rateMigration = read('supabase/migrations/20261002210000_unified_item_based_pricing.sql')
+const customerPricingUi = read('gc-customer-calculator-20260927.js')
+const publicQuote = read('supabase/functions/public-quote/index.ts')
+const pricingChecks = [
+  ['customer portal loads an active server price catalog instead of hardcoded rates', customerPricingUi.includes('public-quote?catalog=1') && customerPricingUi.includes('rates:[]') && !customerPricingUi.includes('const fallbackRates')],
+  ['Dubai Air uses item quantities and active rate keys end-to-end', customerPricingUi.includes('rate_key||rate.product_type') && read('gc-csp-scripts/customer-portal-inline-1.js').includes('items_count: items>0?items:null') && publicQuote.includes('items_count') && read('supabase/functions/public-pricing/index.ts').includes('p_items_count: items && items > 0 ? Math.floor(items) : null') && rateMigration.includes('v_units:=p_items_count') && rateMigration.includes('v_usd:=v_rate.amount*v_units')],
+  ['shipping floor and FX are server-side and sea uses CBM', rateMigration.includes('minimum_charge_iqd') && rateMigration.includes('usd_iqd_rate') && rateMigration.includes('p_volume_cbm') && rateMigration.includes('round(v_min_iqd,0)')],
+  ['pickup-only office hours/timezone and active transit metadata are shown on the customer portal', customerPricingUi.includes('وەرگرتن لە نووسینگەی هەولێر تەنها') && customerPricingUi.includes('policy.timezone') && customerPricingUi.includes('rate.transit_min_days') && customerPricingUi.includes('rate.transit_max_days') && rateMigration.includes("id='office'")],
+  ['Shein >100kg discount is blocked server-side at or below 100kg, even by explicit rate key', rateMigration.includes("v_rate.rate_key='dubai_erbil_land_shein_over_100kg'") && rateMigration.includes('p_weight_kg<=100')],
+  ['FX writers use numeric app_settings values and quote RPC maps absent rate keys to SQL NULL', accountAdmin.includes('value: rate') && !accountAdmin.includes('value: String(rate)') && read('supabase/functions/operations-v4/index.ts').includes('value:value,updated_by:a.staff.id') && accountAdmin.includes('p_rate_key:txt(data.rate_key)||null')],
+]
+for (const [label, passed] of pricingChecks) if (!passed) fail(label)
+if (pricingChecks.every(([, passed]) => passed)) ok('Unified live rates, item-based Dubai Air, minimum fee and pickup policy OK')
 
 console.log('Finance role separation and customer 360 data')
 const operationsV4 = read('supabase/functions/operations-v4/index.ts')
@@ -176,9 +207,9 @@ const financeAccessChecks = [
   ['logistics control-plane grants invoice/payment reads to finance and redacts shipment amounts otherwise', logisticsControl.includes("requireRole(staff, ['admin', 'super_admin', 'accountant', 'finance'])") && logisticsControl.includes('kind === \'shipments\' && !FINANCE_ROLES.has(staff.role)') && logisticsControl.includes("message.startsWith('Role required:') ? 403")],
   ['control-plane reads enforce roles and branch/driver scope', logisticsControl.includes('READ_ROLES.has(staff.role)') && logisticsControl.includes("query.eq('assigned_staff_id', staff.id)") && logisticsControl.includes('query.in(\'shipment_id\', ids)')],
   ['legacy operations-admin restricts shipment amount writes and read projections', operationsAdmin.includes('canManageFinance(a.role)') && operationsAdmin.includes('Finance permission required') && operationsAdmin.includes('shipmentProjection(r.data,a)') && operationsAdmin.includes('Finance permission required|Role cannot change shipments|Forbidden/i.test(message)?403')],
-  ['customer summary view restores shipment counts and hides balances for non-finance staff', operationsV4.includes("from('customer_directory_accounts')") && operationsV4.includes('const {total_amount,outstanding_amount,...safe}=row')],
+  ['customer summary removes Auth IDs for all staff and finance balances for non-finance roles', operationsV4.includes("from('customer_directory_accounts')") && operationsV4.includes('const {auth_user_id,...withoutAuthId}=row') && operationsV4.includes('const {total_amount,outstanding_amount,paid_amount,...safe}=withoutAuthId') && operationsV4.includes('has_login:hasLogin')],
   ['staff finance navigation, overview metrics, and API requests are role-gated', staffUi.includes("const FINANCE_ROLES = ['super_admin','admin','accountant','finance']") && staffUi.includes('financeTabVisible') && staffUi.includes('financeRequest = canViewFinance ? ops(\'finance\')') && staffUi.includes('const financeKpis = canViewFinance ?')],
-  ['customer and shipment details do not render financial balances for other roles', staffUi.includes("const financeRows = canViewFinance ?") && staffUi.includes("canViewFinance ? money(x.outstanding_amount||0) : '—'") && staffUi.includes("canViewFinance?`<strong class=\"mono\">")],
+  ['customer and shipment detail amounts are rendered only inside finance-role-gated blocks', /async function shipDetail\(id\) \{[\s\S]*?const financeRows = canViewFinance \?[\s\S]*?money\(s\.total_amount/.test(staffUi) && /async function customerDetail\(id\) \{[\s\S]*?const financeRows = canViewFinance \?[\s\S]*?money\(c\.outstanding_amount/.test(staffUi) && staffUi.includes('canViewFinance?`<strong class=\"mono\">')],
   ['customer edit/create controls match the backend write-role policy', staffUi.includes("const canManageCustomers = ['admin','super_admin']") && staffUi.includes('canManageCustomers ? `<button class=\"btn\" data-customer-edit=')],
 ]
 for (const [label, passed] of financeAccessChecks) if (!passed) fail(label)
@@ -199,6 +230,21 @@ console.log('Customer mobile navigation')
 const customerDock = read('gc-customer-mobile-dock-20260922.js')
 if (!customerDock.includes("if (key === 'home') { window.scrollTo({top:0,behavior:'smooth'}); return; }")) fail('customer mobile Home must stay inside the portal')
 else ok('customer mobile Home stays inside the portal')
+
+console.log('Staff Console mobile responsiveness')
+const staffMobileCss = read('gc-staff-mobile-responsive-20261003.css')
+const staffV5Page = read('staff-os-v5.html')
+const staffLegacyPage = read('staff-os.html')
+const staffMobileChecks = [
+  ['both Staff Console entrypoints load the final responsive layer', staffV5Page.includes('gc-staff-mobile-responsive-20261003.css') && staffLegacyPage.includes('gc-staff-mobile-responsive-20261003.css')],
+  ['KPI cards stay compact in a two-column mobile grid', /grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/.test(staffMobileCss) && staffMobileCss.includes('min-height: 76px !important') && staffMobileCss.includes('min-height: 70px !important')],
+  ['numbers, codes, dates and contact fields are isolated LTR and can wrap', staffMobileCss.includes('unicode-bidi: isolate') && staffMobileCss.includes('overflow-wrap: anywhere') && staffMobileCss.includes('input[type="number"]')],
+  ['action buttons wrap into full-width touch targets instead of cramped inline rows', staffMobileCss.includes('.actions,') && staffMobileCss.includes('min-height: 44px') && staffMobileCss.includes('grid-template-columns: minmax(0, 1fr) !important')],
+  ['tables retain a contained horizontal scroll region on phones', staffMobileCss.includes('overflow-x: auto !important') && staffMobileCss.includes('min-width: 700px !important')],
+  ['customer phone/email values receive explicit LTR isolation', staffUi.includes('class="gc-ltr" dir="ltr"') && staffUi.includes('x.email||')],
+]
+for (const [label, passed] of staffMobileChecks) if (!passed) fail(label)
+if (staffMobileChecks.every(([, passed]) => passed)) ok('Staff Console mobile direction, KPI, actions, and overflow checks OK')
 
 console.log('Homepage trust, transport cards, and tracking separation')
 const liveMap = read('live-logistics-map.js')

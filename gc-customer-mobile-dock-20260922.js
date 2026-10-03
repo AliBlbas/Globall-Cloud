@@ -3,6 +3,7 @@
   let dock = null;
 
   const go = (key) => {
+    if (key === 'home') { window.scrollTo({top:0,behavior:'smooth'}); return; }
     const routes = {home:'#home',shipments:'#shipments',quotes:'#quotes',account:'#account'};
     if (key === 'track') { location.href = '/track'; return; }
     if (routes[key]) history.pushState({tab:key},'',`/customer-portal${routes[key]}`);

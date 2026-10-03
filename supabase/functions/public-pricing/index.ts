@@ -79,6 +79,8 @@ Deno.serve(async (req) => {
     const mode = text(body.transport_mode, 30).toLowerCase() || 'air'
     const weight = num(body.weight_kg)
     const volume = num(body.volume_cbm)
+    const items = num(body.items_count)
+    const isDubaiAir = mode === 'air' && ['dubai','uae','united arab emirates','unitedarabemirates'].includes(originKey)
 
     if (!originKey) return reply(req, { error: 'Origin is required.', code: 'ORIGIN_REQUIRED' }, 400)
     if (!['air', 'land', 'sea'].includes(mode)) return reply(req, { error: 'Unsupported transport mode.', code: 'MODE_UNSUPPORTED' }, 400)
@@ -96,8 +98,8 @@ Deno.serve(async (req) => {
     if (compliance.error) throw compliance.error
     if (!compliance.data?.allowed) return reply(req, { allowed: false, message_ku: compliance.data?.message_ku || 'کاڵاکە وەرناگیرێت.' }, 200)
 
-    if ((mode === 'sea' && !(volume && volume > 0)) || (mode !== 'sea' && !(weight && weight > 0))) {
-      return reply(req, { error: 'Weight or volume is required.' }, 400)
+    if ((mode === 'sea' && !(volume && volume > 0)) || (isDubaiAir && !(items && items > 0)) || (mode !== 'sea' && !isDubaiAir && !(weight && weight > 0))) {
+      return reply(req, { error: isDubaiAir ? 'A positive item count is required for Dubai Air.' : 'Weight or volume is required.' }, 400)
     }
 
     const result = await db.rpc('calculate_logistics_price', {
@@ -105,9 +107,10 @@ Deno.serve(async (req) => {
       p_destination_key: destKey,
       p_transport_mode: mode,
       p_product_type: product,
-      p_weight_kg: weight,
+      p_weight_kg: weight && weight > 0 ? weight : null,
       p_volume_cbm: volume,
-      p_rate_key: null,
+      p_rate_key: text(body.rate_key, 120) || null,
+      p_items_count: items && items > 0 ? Math.floor(items) : null,
     })
     if (result.error) {
       const detail = String(result.error.message || result.error).toLowerCase()

@@ -55,11 +55,30 @@ async function applyRateLimit(db: ReturnType<typeof serviceClient>, req: Request
   return result.data === true
 }
 
+
+async function listPublicPricingMeta(db: ReturnType<typeof serviceClient>) {
+  const today=new Date().toISOString().slice(0,10)
+  const [minimum, fallbackFx, activeFx]=await Promise.all([
+    db.from('app_settings').select('value').eq('key','minimum_charge_iqd').maybeSingle(),
+    db.from('app_settings').select('value').eq('key','usd_iqd_rate').maybeSingle(),
+    db.from('exchange_rates').select('usd_to_iqd,effective_from,updated_at').eq('is_active',true).eq('base_currency','USD').eq('quote_currency','IQD').lte('effective_from',today).or(`effective_to.is.null,effective_to.gte.${today}`).order('effective_from',{ascending:false}).order('updated_at',{ascending:false}).limit(1).maybeSingle(),
+  ])
+  if(minimum.error)throw minimum.error
+  if(fallbackFx.error)throw fallbackFx.error
+  const activeError=activeFx.error
+  const exchangeRate=Number(activeFx.data?.usd_to_iqd||fallbackFx.data?.value||0)
+  if(!Number.isFinite(exchangeRate)||exchangeRate<=0)throw activeError||new Error('USD/IQD rate unavailable')
+  return {minimum_charge_iqd:Number(minimum.data?.value||5000),usd_iqd_rate:exchangeRate}
+}
+
 async function listPublicRates(db: ReturnType<typeof serviceClient>) {
+  const today=new Date().toISOString().slice(0,10)
   const result = await db.from('pricing_rates')
-    .select('rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from')
+    .select('rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from,effective_to')
     .ilike('destination_key', 'erbil')
     .eq('is_active', true)
+    .lte('effective_from',today)
+    .or(`effective_to.is.null,effective_to.gte.${today}`)
     .order('origin_key', { ascending: true })
     .order('transport_mode', { ascending: true })
     .order('product_type', { ascending: true })
@@ -81,7 +100,8 @@ Deno.serve(async (req) => {
 
     if (req.method === 'GET') {
       if (new URL(req.url).searchParams.get('catalog') !== '1') return reply(req, { error: 'Catalog flag required' }, 400)
-      return reply(req, { rates: await listPublicRates(db) })
+      const [rates, pricing] = await Promise.all([listPublicRates(db), listPublicPricingMeta(db)])
+      return reply(req, { rates, ...pricing, delivery: { mode: 'office_pickup_only', location: 'Erbil office', hours: '09:00–17:00', timezone: 'Asia/Baghdad' } })
     }
 
     const body = await req.json().catch(() => ({})) as Json
@@ -99,7 +119,9 @@ Deno.serve(async (req) => {
     const weight = numberOrNull(body.weight_kg, 100000)
     const volume = numberOrNull(body.volume_cbm, 100000)
     const items = numberOrNull(body.items_count, 1000000)
-    const quantityValid = mode === 'sea' ? volume !== null && volume > 0 : weight !== null && weight > 0
+    const productType = text(body.product_type, 120)
+    const isDubaiAir = mode === 'air' && ['dubai','uae','united arab emirates','unitedarabemirates'].includes(originKey)
+    const quantityValid = mode === 'sea' ? volume !== null && volume > 0 : isDubaiAir ? items !== null && items > 0 : weight !== null && weight > 0
 
     if (
       name.length < 2 ||
@@ -127,7 +149,8 @@ Deno.serve(async (req) => {
         origin_key: originKey,
         dest_key: destKey,
         transport_mode: mode,
-        weight_kg: weight,
+        product_type: productType || null,
+        weight_kg: weight && weight > 0 ? weight : null,
         volume_cbm: volume,
         items_count: items,
         service_level: level,

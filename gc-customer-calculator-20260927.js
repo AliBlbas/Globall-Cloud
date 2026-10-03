@@ -1,58 +1,24 @@
 (() => {
   'use strict';
-  const URL = 'https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/public-pricing';
-  const KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
-  const $ = (id) => document.getElementById(id);
-  const money = (value, currency = 'USD') => `${Number(value || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })} ${currency}`;
-  const fallback = ({ mode, origin, weight, volume }) => {
-    const o = String(origin || '').toLowerCase();
-    const w = Number(weight || 0);
-    const v = Number(volume || 0);
-    if (mode === 'sea') return { total: Math.max(v * 300, 300), days: '45–60 ڕۆژ', note: 'حاسیبەی مەتر کۆنتینەر / Sea' };
-    if (mode === 'land') return { total: Math.max(w * (o.includes('dubai') || o.includes('uae') ? 1.5 : 3.5), 100), days: '7–15 ڕۆژ', note: 'نرخی نزیکەیی گواستنەوەی وشکانی' };
-    return { total: Math.max(w * (o.includes('dubai') || o.includes('uae') ? 8.25 : 9), 75), days: '7–15 ڕۆژ', note: 'نرخی نزیکەیی گواستنەوەی ئاسمانی' };
-  };
-  const boot = () => {
-    const form = $('quoteForm');
-    if (!form || $('gcQuotePreview')) return;
-    const box = document.createElement('div');
-    box.id = 'gcQuotePreview';
-    box.className = 'gc-quote-preview';
-    box.setAttribute('aria-live', 'polite');
-    box.innerHTML = '<span class="gc-quote-preview-label">LIVE ESTIMATE</span><strong>زانیاری بارەکەت بنووسە</strong><small>نرخی کۆتایی دوای پشکنینی کاڵا و مەبەست پشتڕاست دەکرێتەوە.</small>';
-    form.appendChild(box);
-    const update = async () => {
-      const mode = $('quoteMode')?.value || 'air';
-      const origin = $('quoteOrigin')?.value.trim() || '';
-      const destination = $('quoteDestination')?.value.trim() || 'Erbil';
-      const weight = Number($('quoteWeight')?.value || 0);
-      const volume = Number($('quoteVolume')?.value || 0);
-      if ((mode === 'sea' && volume <= 0) || (mode !== 'sea' && weight <= 0)) {
-        box.innerHTML = '<span class="gc-quote-preview-label">LIVE ESTIMATE</span><strong>بڕی بار و مەتر بنووسە</strong><small>بۆ Sea مەتر کۆنتینەر، بۆ Air/Land کیلۆ بنووسە.</small>';
-        return;
-      }
-      box.innerHTML = '<span class="gc-quote-preview-label">LIVE ESTIMATE</span><strong>لە حاڵی حیسابکردندا…</strong><small>نرخەکە لە کۆنتراکتی production وەرگیراوە.</small>';
-      const payload = { product_type: 'general', origin_key: origin, destination_key: destination, transport_mode: mode, weight_kg: mode === 'sea' ? null : weight, volume_cbm: mode === 'sea' ? volume : (volume || null), has_battery: false, has_liquid: false, msds_provided: false, medical_device: false };
-      try {
-        const response = await fetch(URL, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok || data.allowed === false) throw new Error(data.message_ku || data.error || 'fallback');
-        const quote = data.quote || data;
-        const total = quote.total ?? quote.total_cost ?? quote.amount ?? quote.price ?? quote.usd;
-        if (!Number.isFinite(Number(total))) throw new Error('fallback');
-        const primary = quote.usd !== undefined ? money(quote.usd, 'USD') : money(total, quote.currency || 'USD');
-        const iqD = quote.iqd !== undefined ? ` · ${money(quote.iqd, 'IQD')}` : '';
-        const days = quote.delivery_days || quote.estimated_days || quote.transit_time || 'بەپێی route';
-        box.innerHTML = `<span class="gc-quote-preview-label">LIVE ESTIMATE · ${mode.toUpperCase()}</span><strong>${primary}${iqD}</strong><small>${String(origin || 'Origin')} → ${String(destination)} · گەیشتن: ${String(days)} · نرخی production</small>`;
-      } catch {
-        const result = fallback({ mode, origin, weight, volume });
-        box.innerHTML = `<span class="gc-quote-preview-label">ESTIMATE · ${mode.toUpperCase()}</span><strong>${money(result.total)}</strong><small>${result.note} · ${result.days} · نرخەکە پێش ناردنی invoice پشتڕاست دەکرێتەوە.</small>`;
-      }
-    };
-    let timer;
-    form.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(update, 420); });
-    form.addEventListener('change', update);
-    update();
-  };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true }); else boot();
+  const SUPABASE_URL='https://ahslifnthiwfkmaswjno.supabase.co';
+  const SUPABASE_KEY='sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
+  const CATALOG_URL=`${SUPABASE_URL}/functions/v1/public-quote?catalog=1`;
+  const $=(id)=>document.getElementById(id);
+  const esc=(value)=>String(value??'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const money=(value,currency='USD')=>`${Number(value||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})} ${currency}`;
+  const state={rates:[],minimumIqd:5000,usdIqd:0,delivery:null,error:null};
+  const routeLabels={china:'China',usa:'USA',dubai:'Dubai / UAE'};
+  const norm=(value)=>String(value||'').trim().toLowerCase();
+  function originKey(value){const v=norm(value);if(v.includes('dubai')||v==='uae'||v.includes('united arab'))return 'dubai';if(v==='us'||v.includes('usa')||v.includes('america'))return 'usa';if(v.includes('china')||v==='cn'||v.includes('foshan')||v.includes('guangzhou'))return 'china';return v;}
+  function matchingRates(origin,mode){const key=originKey(origin);return state.rates.filter((rate)=>{const r=norm(rate.origin_key);const same=key==='dubai'?['dubai','uae'].includes(r):key==='usa'?['usa','us'].includes(r):key==='china'?['china','cn'].includes(r):r===key;const bulkShein=rate.rate_key==='dubai_erbil_land_shein_over_100kg';const weight=Number($('quoteWeight')?.value||0);return same&&norm(rate.transport_mode)===norm(mode)&&norm(rate.destination_key)==='erbil'&&(!bulkShein||weight>100);});}
+  function unitLabel(unit){const u=norm(unit);return ['item','items','piece','pieces','unit','units'].includes(u)?'item':u==='cbm'||u==='per cbm'?'CBM':'kg';}
+  function installStyles(){if($('gcLivePricingStyle'))return;const style=document.createElement('style');style.id='gcLivePricingStyle';style.textContent='.gc-public-rate-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}.gc-public-rate-card{padding:14px;border:1px solid var(--line,#214363);border-radius:14px;background:rgba(255,255,255,.025)}.gc-public-rate-card h3{margin:0 0 8px;font-size:16px}.gc-public-rate-card ul{margin:0;padding-inline-start:20px}.gc-public-rate-card li{padding:3px 0}.gc-live-delivery{margin-top:12px;padding:13px;border:1px solid var(--line,#214363);border-radius:14px}.gc-live-error{color:#ff9d9d}.gc-quote-preview small{display:block}.gc-quote-unit-hint{font-size:12px;color:var(--muted,#92aac7)}';document.head.appendChild(style);}
+  function renderCatalog(){const root=$('gcPublicRateGrid');if(!root)return;if(state.error){root.innerHTML=`<p class="gc-live-error">${esc(state.error)} نرخەکان کاتییانە بەردەست نین؛ تکایە داواکاری نرخ بنێرە یان دواتر دووبارە هەوڵ بدەوە.</p>`;return;}const groups=new Map();for(const rate of state.rates){const origin=originKey(rate.origin_key);const key=`${origin}|${norm(rate.transport_mode)}`;if(!groups.has(key))groups.set(key,{origin,mode:norm(rate.transport_mode),rows:[]});groups.get(key).rows.push(rate);}root.innerHTML=[...groups.values()].map((group)=>{const title=`${routeLabels[group.origin]||group.origin} ${group.mode.charAt(0).toUpperCase()+group.mode.slice(1)}`;const rows=group.rows.map((rate)=>`<li><b>${esc(rate.product_type)}</b> — ${money(rate.amount,rate.currency||'USD')}/${esc(unitLabel(rate.unit))}${rate.transit_min_days!=null?` · ${esc(rate.transit_min_days)}–${esc(rate.transit_max_days??rate.transit_min_days)} ڕۆژ`:''}</li>`).join('');return `<article class="gc-public-rate-card"><h3>${esc(title)}</h3><ul>${rows}</ul></article>`;}).join('')||'<p class="muted">نرخی چالاک نییە.</p>';const delivery=$('gcDeliveryPolicy');if(delivery){const policy=state.delivery||{};delivery.innerHTML=`<b>وەرگرتن لە نووسینگەی هەولێر تەنها</b><div class="muted">${esc(policy.location||'Erbil office')} · ${esc(policy.hours||'09:00–17:00')} · ${esc(policy.timezone||'Asia/Baghdad')}</div>`;}}
+  function updateProductOptions(){const select=$('quoteProduct');if(!select)return;const previous=select.value;const rows=matchingRates($('quoteOrigin')?.value,$('quoteMode')?.value||'air');select.innerHTML=rows.length?'<option value="">جۆری کاڵا هەڵبژێرە</option>'+rows.map((rate)=>`<option value="${esc(rate.rate_key||rate.product_type)}" data-product="${esc(rate.product_type)}" data-unit="${esc(unitLabel(rate.unit))}">${esc(rate.product_type)} — ${money(rate.amount,rate.currency||'USD')}/${esc(unitLabel(rate.unit))}</option>`).join(''):'<option value="">نرخی چالاک بۆ ئەم ڕێگایە نییە</option>';if([...select.options].some((option)=>option.value===previous))select.value=previous;}
+  function updateQuoteRequirements(){const mode=$('quoteMode')?.value||'air';const origin=originKey($('quoteOrigin')?.value);const itemRoute=mode==='air'&&origin==='dubai';const weight=$('quoteWeight'),volume=$('quoteVolume'),items=$('quoteItems'),hint=$('quoteWeightHint');if(weight)weight.required=mode!=='sea'&&!itemRoute;if(volume)volume.required=mode==='sea';if(items)items.required=itemRoute;if(hint)hint.textContent=itemRoute?'بۆ Dubai Air، ژمارەی دانە پێویستە؛ کێش دەتوانێت ئاختیاری بێت.':mode==='sea'?'بۆ Sea، CBM پێویستە.':'بۆ ئەم ڕێگایە کێشی KG پێویستە.';updateProductOptions();}
+  function previewMarkup(title,details='',error=false){const box=$('gcQuotePreview');if(!box)return;box.innerHTML=`<span class="gc-quote-preview-label">${error?'RATE ESTIMATE':'LIVE RATE ESTIMATE'}</span><strong${error?' class="gc-live-error"':''}>${esc(title)}</strong><small>${esc(details)}</small>`;}
+  function updateEstimate(){const mode=$('quoteMode')?.value||'air';const origin=$('quoteOrigin')?.value||'';const dest=$('quoteDestination')?.value.trim()||'Erbil';const route=originKey(origin);const option=$('quoteProduct')?.selectedOptions?.[0];const rate=state.rates.find((row)=>String(row.rate_key||row.product_type)===String(option?.value||''));const weight=Number($('quoteWeight')?.value||0);const volume=Number($('quoteVolume')?.value||0);const items=Number($('quoteItems')?.value||0);if(state.error||!state.rates.length){previewMarkup('نرخەکان بەردەست نین','داواکاری نرخ بنێرە؛ نرخێکی کۆن یان خەمڵێنراو پیشان نادرێت.',true);return;}if(!rate){previewMarkup('جۆری کاڵا هەڵبژێرە','نرخ لە کاتالۆگی چالاکی داتابەیس هەڵبژێرە.');return;}const unit=unitLabel(rate.unit);let quantity=0,label='';if(unit==='CBM'){quantity=volume;label=`${volume} CBM`;}else if(unit==='item'){quantity=items;label=`${items} item`;}else{quantity=weight;label=`${weight} kg`;}if(!Number.isFinite(quantity)||quantity<=0){previewMarkup(unit==='item'?'ژمارەی دانە بنووسە':unit==='CBM'?'CBM بنووسە':'کێشی بار بنووسە',`${esc(routeLabels[route]||origin)} → ${esc(dest)} · ${esc(rate.product_type)}`);return;}const fx=Number(state.usdIqd||0);const minimumUsd=fx>0?Number(state.minimumIqd||5000)/fx:0;const raw=quantity*Number(rate.amount||0);const total=Math.max(raw,minimumUsd);const iqd=fx?Math.round(total*fx):null;const floorApplied=minimumUsd>0&&raw<minimumUsd;const basis=`${label} × ${money(rate.amount,rate.currency||'USD')}/${unit}`;const notes=[basis,rate.transit_min_days!=null?`Transit ${rate.transit_min_days}–${rate.transit_max_days??rate.transit_min_days} days`:'',floorApplied?`Minimum ${Number(state.minimumIqd||5000).toLocaleString('en-US')} IQD applied`:'' ].filter(Boolean).join(' · ');previewMarkup(`${money(total,rate.currency||'USD')}${iqd!==null?` · ${money(iqd,'IQD')}`:''}`,`${routeLabels[route]||origin} → ${dest} · ${rate.product_type} · ${notes}`);}
+  async function loadCatalog(){try{const response=await fetch(CATALOG_URL,{headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json'},cache:'no-store'});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||'Rate catalog request failed');state.rates=Array.isArray(data.rates)?data.rates:[];state.minimumIqd=Number(data.minimum_charge_iqd||5000);state.usdIqd=Number(data.usd_iqd_rate||0);state.delivery=data.delivery||null;if(!state.rates.length)throw new Error('No active rates');}catch(error){state.error='ئێستا ناتوانین کاتالۆگی نرخ بخوێنینەوە.';console.error('[Globall pricing catalog]',error);}renderCatalog();updateQuoteRequirements();updateEstimate();}
+  function boot(){installStyles();const form=$('quoteForm');if(form&&!$('gcQuotePreview')){const box=document.createElement('div');box.id='gcQuotePreview';box.className='gc-quote-preview';box.setAttribute('aria-live','polite');box.innerHTML='<span class="gc-quote-preview-label">LIVE RATE ESTIMATE</span><strong>کاتالۆگی نرخ بار دەکرێت…</strong><small>نرخە چالاکەکان لە داتابەیسی سەرەکی وەردەگیرێن.</small>';form.appendChild(box);}['quoteOrigin','quoteMode'].forEach((id)=>$(id)?.addEventListener('input',()=>{updateQuoteRequirements();updateEstimate();}));['quoteOrigin','quoteMode'].forEach((id)=>$(id)?.addEventListener('change',()=>{updateQuoteRequirements();updateEstimate();}));['quoteProduct','quoteVolume','quoteItems','quoteDestination'].forEach((id)=>$(id)?.addEventListener('input',updateEstimate));$('quoteWeight')?.addEventListener('input',()=>{updateProductOptions();updateEstimate();});['quoteProduct','quoteMode'].forEach((id)=>$(id)?.addEventListener('change',updateEstimate));loadCatalog();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

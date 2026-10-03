@@ -1,7 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
-type Kind = 'customer' | 'customer_match' | 'staff' | 'receipt' | 'log' | 'shipment' | 'task' | 'finance' | 'pricing' | 'quote' | 'quote_requests' | 'notification' | 'notification_delivery' | 'chat'
-type Action = 'list' | 'create' | 'update' | 'archive' | 'delete' | 'bind' | 'claim' | 'complete' | 'send' | 'mark_read'
+type Kind = 'customer' | 'customer_match' | 'customer_account_requests' | 'staff' | 'receipt' | 'log' | 'shipment' | 'task' | 'finance' | 'pricing' | 'quote' | 'quote_requests' | 'notification' | 'notification_delivery' | 'chat'
+type Action = 'list' | 'create' | 'update' | 'archive' | 'delete' | 'bind' | 'claim' | 'complete' | 'send' | 'mark_read' | 'approve' | 'reject' | 'calculate'
 type JsonRecord = Record<string, unknown>
 
 const ALLOWED_ORIGINS = new Set([
@@ -107,13 +107,13 @@ function decimal(value: unknown): number | null {
 
 function normalizeKind(value: unknown): Kind {
   const kind = String(value || 'customer').toLowerCase()
-  if (kind === 'customer_match' || kind === 'staff' || kind === 'receipt' || kind === 'log' || kind === 'shipment' || kind === 'task' || kind === 'finance' || kind === 'pricing' || kind === 'quote' || kind === 'quote_requests' || kind === 'notification' || kind === 'notification_delivery' || kind === 'chat') return kind
+  if (kind === 'customer_match' || kind === 'customer_account_requests' || kind === 'staff' || kind === 'receipt' || kind === 'log' || kind === 'shipment' || kind === 'task' || kind === 'finance' || kind === 'pricing' || kind === 'quote' || kind === 'quote_requests' || kind === 'notification' || kind === 'notification_delivery' || kind === 'chat') return kind
   return 'customer'
 }
 
 function normalizeAction(value: unknown): Action {
   const action = String(value || 'list').toLowerCase()
-  if (action === 'create' || action === 'update' || action === 'archive' || action === 'delete' || action === 'bind' || action === 'claim' || action === 'complete' || action === 'send' || action === 'mark_read') return action
+  if (action === 'create' || action === 'update' || action === 'archive' || action === 'delete' || action === 'bind' || action === 'claim' || action === 'complete' || action === 'send' || action === 'mark_read' || action === 'approve' || action === 'reject' || action === 'calculate') return action
   return 'list'
 }
 
@@ -152,12 +152,13 @@ async function getActor(req: Request) {
 
   const role = String(staffRow.role || '')
   const isSuperAdmin = role === 'super_admin'
-  const canRead = ['admin', 'super_admin', 'accountant'].includes(role)
+  const canRead = ['admin', 'super_admin', 'accountant', 'finance'].includes(role)
+  const canReadFinance = ['admin', 'super_admin', 'accountant', 'finance'].includes(role)
   const canReadOperations = ['admin', 'super_admin', 'accountant', 'warehouse', 'warehouse_china', 'warehouse_uae', 'warehouse_erbil', 'operations', 'delivery'].includes(role)
   const canWrite = ['admin', 'super_admin'].includes(role)
   const canChat = ['admin', 'super_admin', 'accountant', 'finance', 'warehouse', 'warehouse_china', 'warehouse_uae', 'warehouse_erbil', 'operations', 'driver', 'delivery'].includes(role)
 
-  return { serviceClient, staffRow, role, isSuperAdmin, canRead, canReadOperations, canWrite, canChat }
+  return { serviceClient, staffRow, role, isSuperAdmin, canRead, canReadFinance, canReadOperations, canWrite, canChat }
 }
 
 async function logActivity(client: ReturnType<typeof createClient>, staffId: string, staffName: string | null, action: string, targetId: string | null, details: JsonRecord | null = null) {
@@ -245,9 +246,69 @@ async function listTasks(client: ReturnType<typeof createClient>, actor: { id: s
 }
 
 function addAmount(target: Record<string, number>, currency: unknown, amount: unknown) { const key = String(currency || 'USD').toUpperCase(); target[key] = Math.round(((target[key] || 0) + Number(amount || 0)) * 100) / 100 }
-async function calculateQuote(client: ReturnType<typeof createClient>, data: JsonRecord) { const transport = txt(data.transport_mode || data.type).toLowerCase(); const origin = txt(data.origin_key || data.origin); const destination = txt(data.destination_key || data.destination); const product = txt(data.product_type || 'General goods / no battery / no screen'); const actual = Number(data.actual_weight ?? data.weight_kg ?? 0); const length = Number(data.length_cm || 0); const width = Number(data.width_cm || 0); const height = Number(data.height_cm || 0); if (!['air','sea','land'].includes(transport) || !origin || !destination || !Number.isFinite(actual) || actual < 0) throw responseError('Invalid quote inputs', 400); const volumeCbm = length > 0 && width > 0 && height > 0 ? (length * width * height) / 1000000 : 0; const volumetricWeight = transport === 'air' || transport === 'sea' ? (length > 0 && width > 0 && height > 0 ? (length * width * height) / 6000 : 0) : 0; const billableWeight = Math.max(actual, volumetricWeight); const unit = transport === 'sea' ? 'cbm' : 'kg'; const { data: rates, error } = await client.from('pricing_rates').select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from').eq('is_active', true).eq('origin_key', origin).eq('destination_key', destination).eq('transport_mode', transport).eq('unit', unit).order('effective_from', { ascending: false }).limit(100); if (error) throw error; const exact = (rates ?? []).find((r: any) => r.product_type === product) || (rates ?? []).find((r: any) => r.product_type === 'General goods / no battery / no screen') || (rates ?? [])[0]; if (!exact) throw responseError('No active rate found for this route and product', 404); const billableUnits = unit === 'cbm' ? volumeCbm : billableWeight; const amount = Math.round(billableUnits * Number(exact.amount) * 100) / 100; return { rate_snapshot: exact, actual_weight_kg: actual, volume_cbm: Math.round(volumeCbm * 10000) / 10000, volumetric_weight_kg: Math.round(volumetricWeight * 100) / 100, billable_weight_kg: Math.round(billableWeight * 100) / 100, billable_units: Math.round(billableUnits * 10000) / 10000, total: amount, currency: exact.currency, transit_min_days: exact.transit_min_days, transit_max_days: exact.transit_max_days, formula: 'Volumetric weight = L × W × H ÷ 6000; billable weight = max(actual, volumetric)' } }
-async function listQuoteRequests(client: ReturnType<typeof createClient>) { const { data, error } = await client.from('quote_requests').select('id,customer_user_id,customer_name,customer_phone,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,dimensional_weight_kg,billable_weight_kg,status,quoted_amount,currency,valid_until,decision_note,created_at,updated_at').order('created_at', { ascending: false }).limit(300); if (error) throw error; return { kind: 'quote_requests', items: data ?? [] }
+async function calculateQuote(client: ReturnType<typeof createClient>, data: JsonRecord) {
+  const transport=txt(data.transport_mode||data.type).toLowerCase();
+  const origin=txt(data.origin_key||data.origin);
+  const destination=txt(data.destination_key||data.destination||'erbil');
+  const product=txt(data.product_type||'General goods / no battery / no screen');
+  const actual=Number(data.actual_weight??data.weight_kg??0);
+  const items=Number(data.items_count||0);
+  const length=Number(data.length_cm||0),width=Number(data.width_cm||0),height=Number(data.height_cm||0);
+  if(!['air','sea','land'].includes(transport)||!origin||!destination||!Number.isFinite(actual)||actual<0||!Number.isFinite(items)||items<0)throw responseError('Invalid quote inputs',400);
+  const isDubaiAir=transport==='air'&&['dubai','uae'].includes(origin.toLowerCase());
+  const volumeCbm=Number(data.volume_cbm||0)||(length>0&&width>0&&height>0?(length*width*height)/1000000:0);
+  const volumetricWeight=(transport==='air'||transport==='sea')&&length>0&&width>0&&height>0?(length*width*height)/6000:0;
+  const billableWeight=Math.max(actual,volumetricWeight);
+  if(transport==='sea'&&volumeCbm<=0)throw responseError('Positive CBM volume is required for sea cargo',400);
+  if(isDubaiAir&&items<=0)throw responseError('Dubai Air requires a positive item count',400);
+  if(!(transport==='sea'||isDubaiAir)&&billableWeight<=0)throw responseError('Positive weight is required for this route',400);
+  const {data:quote,error}=await client.rpc('calculate_logistics_price',{
+    p_origin_key:origin,p_destination_key:destination,p_transport_mode:transport,p_product_type:product,
+    p_weight_kg:billableWeight>0?billableWeight:null,p_volume_cbm:volumeCbm>0?volumeCbm:null,
+    p_rate_key:txt(data.rate_key)||null,p_items_count:items>0?Math.floor(items):null,
+  });
+  if(error)throw responseError(error.message||'No active rate found for this route and product',400);
+  const result=quote||{};
+  const rateSnapshot={rate_key:result.rate_key,product_type:result.product_type,unit:result.unit,amount:result.rate_usd,currency:'USD',transit_min_days:result.transit_min_days,transit_max_days:result.transit_max_days};
+  return {rate_snapshot:rateSnapshot,actual_weight_kg:actual,volume_cbm:volumeCbm,volumetric_weight_kg:volumetricWeight,billable_weight_kg:billableWeight,billable_units:result.billable_units,total:Number(result.usd||0),total_iqd:Number(result.iqd||0),minimum_applied:Boolean(result.minimum_applied),exchange_rate:Number(result.exchange_rate||0),currency:'USD',transit_min_days:result.transit_min_days,transit_max_days:result.transit_max_days,formula:result.unit==='item'?'Price = active item rate × item count (minimum charge and FX applied by server)':'Price = active rate × billable kg/CBM (minimum charge and FX applied by server)'};
 }
+async function listQuoteRequests(client: ReturnType<typeof createClient>) { const { data, error } = await client.from('quote_requests').select('id,customer_user_id,customer_name,customer_email,customer_phone,request_type,product_type,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,items_count,dimensional_weight_kg,billable_weight_kg,status,quoted_amount,currency,valid_until,decision_note,created_at,updated_at').order('created_at', { ascending: false }).limit(300); if (error) throw error; return { kind: 'quote_requests', items: data ?? [] }
+}
+async function listCustomerAccountRequests(client: ReturnType<typeof createClient>) {
+  const { data, error } = await client.from('customer_account_requests')
+    .select('id,name,email,phone,status,staff_note,customer_id,reviewed_by,reviewed_at,created_at,updated_at')
+    .order('created_at', { ascending: false }).limit(300)
+  if (error) throw error
+  return { kind: 'customer_account_requests', items: data ?? [] }
+}
+
+async function reviewCustomerAccountRequest(client: ReturnType<typeof createClient>, data: JsonRecord, actor: { id: string, name: string | null, role: string, isSuperAdmin: boolean }, action: 'approve' | 'reject') {
+  if (!actor.isSuperAdmin && actor.role !== 'admin') throw responseError('Only Admin or Super Admin can review account requests', 403)
+  const id = txt(data.id)
+  if (!id) throw responseError('Account request id is required', 400)
+  const { data: request, error: readError } = await client.from('customer_account_requests')
+    .select('id,name,email,phone,status,customer_id').eq('id', id).maybeSingle()
+  if (readError) throw readError
+  if (!request) throw responseError('Account request not found', 404)
+  if (request.status === 'approved' && request.customer_id) return { status: 'approved', customer_id: request.customer_id, already_processed: true }
+  if (request.status !== 'pending') throw responseError('Account request is no longer pending', 409)
+  const reviewedAt = new Date().toISOString()
+  if (action === 'reject') {
+    const { data: saved, error } = await client.from('customer_account_requests').update({ status: 'rejected', staff_note: txt(data.staff_note), reviewed_by: actor.id, reviewed_at: reviewedAt, updated_at: reviewedAt }).eq('id', id).eq('status', 'pending').select('id,status,reviewed_at').single()
+    if (error) throw error
+    await logActivity(client, actor.id, actor.name, 'reject_customer_account_request', id, {})
+    return { status: saved.status, request: saved }
+  }
+  const { data: existing, error: duplicateError } = await client.from('customer_directory').select('id').ilike('email', String(request.email)).limit(1).maybeSingle()
+  if (duplicateError) throw duplicateError
+  if (existing) throw responseError('A customer already uses this email. Review or merge the existing customer instead of creating a duplicate.', 409)
+  const created = await upsertCustomer(client, { name: request.name, email: request.email, phone: request.phone, is_active: true, send_invite: true }, actor)
+  const { data: saved, error } = await client.from('customer_account_requests').update({ status: 'approved', customer_id: created.customer.id, staff_note: txt(data.staff_note), reviewed_by: actor.id, reviewed_at: reviewedAt, updated_at: reviewedAt }).eq('id', id).eq('status', 'pending').select('id,status,customer_id,reviewed_at').single()
+  if (error) throw error
+  await logActivity(client, actor.id, actor.name, 'approve_customer_account_request', id, { customer_id: created.customer.id, gc_code: created.customer.gc_code || created.customer.code })
+  return { status: 'approved', request: saved, customer: created.customer, warning: created.warning, auth_status: created.status }
+}
+
 async function decideQuote(client: ReturnType<typeof createClient>, data: JsonRecord, actor: {id:string, name:string|null, role:string}, decision: 'approve'|'reject') {
   const id=txt(data.id); if(!id) throw responseError('Quote id is required',400);
   const allowed=['admin','super_admin','accountant','finance','operations','staff']; if(!allowed.includes(actor.role)) throw responseError('Quote decision permission required',403);
@@ -313,9 +374,10 @@ async function markChatRead(client: ReturnType<typeof createClient>, staffId: st
   return { kind: 'chat', membership: row }
 }
 async function markStaffNotificationRead(client: ReturnType<typeof createClient>, staffId: string, data: JsonRecord) { const id = txt(data.id); if (!id) throw responseError('Notification id is required', 400); const { data: row, error } = await client.from('staff_notifications').update({ read_at: new Date().toISOString() }).eq('id', id).eq('staff_id', staffId).select('id,read_at').single(); if (error) throw error; return { notification: row } }
-async function listPricing(client: ReturnType<typeof createClient>) { const [rates, fx] = await Promise.all([client.from('pricing_rates').select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from,effective_to,is_active,notes,updated_at').eq('is_active', true).order('origin_key').order('transport_mode').order('product_type'), client.from('exchange_rates').select('id,base_currency,quote_currency,rate,effective_from,effective_to,is_active,source_note,updated_at').eq('is_active', true).order('base_currency').order('quote_currency')]); if (rates.error) throw rates.error; if (fx.error) throw fx.error; return { kind: 'pricing', rates: rates.data ?? [], exchange_rates: fx.data ?? [] } }
-async function updatePricing(client: ReturnType<typeof createClient>, data: JsonRecord, actor: { id: string, name: string | null }) { const id = txt(data.id); if (!id) throw responseError('Pricing rate id is required', 400); const amount = Number(data.amount); if (!Number.isFinite(amount) || amount < 0) throw responseError('Valid non-negative amount is required', 400); const transitMin = data.transit_min_days === '' || data.transit_min_days == null ? null : Number(data.transit_min_days); const transitMax = data.transit_max_days === '' || data.transit_max_days == null ? null : Number(data.transit_max_days); if ((transitMin != null && (!Number.isInteger(transitMin) || transitMin < 0)) || (transitMax != null && (!Number.isInteger(transitMax) || transitMax < (transitMin ?? 0)))) throw responseError('Invalid transit days', 400); const { data: row, error } = await client.from('pricing_rates').update({ amount, transit_min_days: transitMin, transit_max_days: transitMax, notes: txt(data.notes), updated_by: actor.id, updated_at: new Date().toISOString() }).eq('id', id).select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from,effective_to,is_active,notes,updated_at').single(); if (error) throw error; await logActivity(client, actor.id, actor.name, 'update_pricing_rate', id, { amount, transit_min_days: transitMin, transit_max_days: transitMax }); return { rate: row } }
-async function updateExchangeRate(client: ReturnType<typeof createClient>, data: JsonRecord, actor: { id: string, name: string | null }) { const id = txt(data.id); if (!id) throw responseError('Exchange rate id is required', 400); const rate = Number(data.rate); if (!Number.isFinite(rate) || rate <= 0) throw responseError('Valid positive exchange rate is required', 400); const { data: row, error } = await client.from('exchange_rates').update({ rate, source_note: txt(data.source_note), updated_by: actor.id, updated_at: new Date().toISOString() }).eq('id', id).select('id,base_currency,quote_currency,rate,effective_from,effective_to,is_active,source_note,updated_at').single(); if (error) throw error; await logActivity(client, actor.id, actor.name, 'update_exchange_rate', id, { rate }); return { exchange_rate: row } }
+async function listPricing(client: ReturnType<typeof createClient>) { const [rates, fx] = await Promise.all([client.from('pricing_rates').select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from,effective_to,is_active,notes,updated_at').eq('is_active', true).order('origin_key').order('transport_mode').order('product_type'), client.from('exchange_rates').select('id,base_currency,quote_currency,rate,usd_to_iqd,effective_from,effective_to,is_active,source,source_note,updated_at').eq('is_active', true).order('base_currency').order('quote_currency')]); if (rates.error) throw rates.error; if (fx.error) throw fx.error; return { kind: 'pricing', rates: rates.data ?? [], exchange_rates: fx.data ?? [] } }
+async function updatePricing(client: ReturnType<typeof createClient>, data: JsonRecord, actor: { id: string, name: string | null }) { const id = txt(data.id); if (!id) throw responseError('Pricing rate id is required', 400); const amount = Number(data.amount); if (!Number.isFinite(amount) || amount < 0) throw responseError('Valid non-negative amount is required', 400); const transitMin = data.transit_min_days === '' || data.transit_min_days == null ? null : Number(data.transit_min_days); const transitMax = data.transit_max_days === '' || data.transit_max_days == null ? null : Number(data.transit_max_days); if ((transitMin != null && (!Number.isInteger(transitMin) || transitMin < 0)) || (transitMax != null && (!Number.isInteger(transitMax) || transitMax < (transitMin ?? 0)))) throw responseError('Invalid transit days', 400); const { data: row, error } = await client.from('pricing_rates').update({ amount, price_usd: amount, transit_min_days: transitMin, transit_max_days: transitMax, notes: txt(data.notes), updated_by: actor.id, updated_at: new Date().toISOString() }).eq('id', id).select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from,effective_to,is_active,notes,updated_at').single(); if (error) throw error; await logActivity(client, actor.id, actor.name, 'update_pricing_rate', id, { amount, transit_min_days: transitMin, transit_max_days: transitMax }); return { rate: row } }
+async function updateExchangeRate(client: ReturnType<typeof createClient>, data: JsonRecord, actor: { id: string, name: string | null }) { const id = txt(data.id); if (!id) throw responseError('Exchange rate id is required', 400); const rate = Number(data.rate ?? data.usd_to_iqd); if (!Number.isFinite(rate) || rate <= 0) throw responseError('Valid positive exchange rate is required', 400); const note = txt(data.source_note ?? data.source); const patch = { rate, usd_to_iqd: rate, source: note || 'manual', source_note: note || 'manual', updated_by: actor.id, updated_at: new Date().toISOString() }; const { data: row, error } = await client.from('exchange_rates').update(patch).eq('id', id).select('id,base_currency,quote_currency,rate,usd_to_iqd,effective_from,effective_to,is_active,source,source_note,updated_at').single(); if (error) throw error; const setting=await client.from('app_settings').upsert({ key: 'usd_iqd_rate', value: rate, updated_by: actor.id }); if(setting.error)throw setting.error; await logActivity(client, actor.id, actor.name, 'update_exchange_rate', id, { rate }); return { exchange_rate: row } }
+async function createExchangeRate(client: ReturnType<typeof createClient>, data: JsonRecord, actor: { id: string, name: string | null }) { const rate = Number(data.rate ?? data.usd_to_iqd); if (!Number.isFinite(rate) || rate <= 0) throw responseError('Valid positive exchange rate is required', 400); const note = txt(data.source_note ?? data.source) || 'manual'; const { data: row, error } = await client.from('exchange_rates').insert({ base_currency: 'USD', quote_currency: 'IQD', rate, usd_to_iqd: rate, source: note, source_note: note, effective_from: new Date().toISOString().slice(0, 10), is_active: true, updated_by: actor.id }).select('id,base_currency,quote_currency,rate,usd_to_iqd,effective_from,effective_to,is_active,source,source_note,updated_at').single(); if (error) throw error; const setting=await client.from('app_settings').upsert({ key: 'usd_iqd_rate', value: rate, updated_by: actor.id }); if(setting.error)throw setting.error; await logActivity(client, actor.id, actor.name, 'create_exchange_rate', String(row.id), { rate }); return { exchange_rate: row } }
 
 async function listFinance(client: ReturnType<typeof createClient>) {
   const [invoiceResult, costResult] = await Promise.all([
@@ -427,31 +489,31 @@ async function findCustomerRow(client: ReturnType<typeof createClient>, payload:
 }
 
 async function createCustomerAuth(client: ReturnType<typeof createClient>, payload: JsonRecord, existingAuthUserId: string | null) {
-  if (existingAuthUserId) return { userId: existingAuthUserId, warning: null }
+  if (existingAuthUserId) return { userId: existingAuthUserId, warning: null as string | null, temporaryPassword: null as string | null }
   const name = txt(payload.name) || 'Customer'
   const email = txt(payload.email)
   const phone = txt(payload.phone)
   const phone2 = txt(payload.phone2)
   const invite = bool(payload.send_invite, Boolean(email))
-  const password = txt(payload.password) || randomPassword()
-  if (!email && !phone) return { userId: null as string | null, warning: 'No email or phone provided; customer saved without Supabase Auth account.' }
+  if (!email) return { userId: null as string | null, warning: 'No email provided; customer saved without a login. Add an email, then use the Staff Console activation action.', temporaryPassword: null as string | null }
   try {
-    if (invite && email) {
+    if (invite) {
       const { data, error } = await client.auth.admin.inviteUserByEmail(email, { data: { full_name: name, phone: phone ?? '', phone2: phone2 ?? '', account_kind: 'customer' } })
       if (error) throw error
-      return { userId: data.user?.id ?? null, warning: null }
+      return { userId: data.user?.id ?? null, warning: data.user?.id ? null : 'Invitation was requested but Auth returned no user ID; retry activation from the Staff Console.', temporaryPassword: null as string | null }
     }
-    const attrs: Record<string, unknown> = { user_metadata: { full_name: name, phone: phone ?? '', phone2: phone2 ?? '', account_kind: 'customer' }, password }
-    if (email) { attrs.email = email; attrs.email_confirm = true }
+    const suppliedPassword=txt(payload.password)
+    const password = suppliedPassword || randomPassword(16)
+    if(password.length<12)throw responseError('Password must be at least 12 characters',400)
+    const attrs: Record<string, unknown> = { user_metadata: { full_name: name, phone: phone ?? '', phone2: phone2 ?? '', account_kind: 'customer' }, password, email, email_confirm: true }
     if (phone) { attrs.phone = phone; attrs.phone_confirm = true }
     const { data, error } = await client.auth.admin.createUser(attrs as never)
     if (error) throw error
-    return { userId: data.user?.id ?? null, warning: null }
+    return { userId: data.user?.id ?? null, warning: null as string | null, temporaryPassword: data.user?.id ? password : null }
   } catch (err) {
-    return { userId: null as string | null, warning: `Customer Auth account was not created: ${toErrorMessage(err)}` }
+    return { userId: null as string | null, warning: `Customer Auth account was not created: ${toErrorMessage(err)}`, temporaryPassword: null as string | null }
   }
 }
-
 async function upsertCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, role: string, isSuperAdmin: boolean }) {
   if (!actor.isSuperAdmin && actor.role !== 'admin') throw responseError('Admin permission required to create customer accounts', 403)
   const name = txt(payload.name) || txt(payload.phone) || txt(payload.email) || 'Customer'
@@ -463,22 +525,35 @@ async function upsertCustomer(client: ReturnType<typeof createClient>, payload: 
   const note = txt(payload.note)
   const managerStaffId = txt(payload.manager_staff_id)
   const existing = await findCustomerRow(client, payload)
-  const requestedCode = payload.gc_code !== undefined || payload.code !== undefined ? normalizeGcCode(payload.gc_code ?? payload.code) : null
-  if ((payload.gc_code !== undefined || payload.code !== undefined) && !requestedCode) throw responseError('GC code must match GC-### or GC-* format', 400)
+  const codeWasProvided = payload.gc_code !== undefined || payload.code !== undefined
+  const requestedCode = codeWasProvided ? normalizeGcCode(payload.gc_code ?? payload.code) : null
+  if (codeWasProvided && !requestedCode) throw responseError('GC code must match GC-### or GC-* format', 400)
+  if (codeWasProvided && !existing?.id) throw responseError('New GC codes are assigned sequentially by the system and cannot be chosen manually', 403)
   if (existing?.id && requestedCode) {
     const currentCode = normalizeGcCode(existing.code ?? existing.gc_code)
     if (currentCode && currentCode !== requestedCode) throw responseError('GC code is immutable after customer creation', 409)
   }
-  const authResult = await createCustomerAuth(client, payload, existing?.auth_user_id ?? null)
-  const identity = requestedCode && !existing?.id ? { code: requestedCode, gc_code: requestedCode } : {}
-  const base = { name, email, phone, phone2, city, delivery_location: deliveryLocation, note, manager_staff_id: managerStaffId, is_active: typeof payload.is_active === 'boolean' ? payload.is_active : true, ...identity }
-  const write = existing?.id ? client.from('customer_directory').update({ ...base, auth_user_id: authResult.userId ?? null }).eq('id', existing.id) : client.from('customer_directory').insert({ ...base, auth_user_id: authResult.userId ?? null })
-  const { data: saved, error } = await write.select('id,code,gc_code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
-  if (error) throw error
+  const base = { name, email, phone, phone2, city, delivery_location: deliveryLocation, note, manager_staff_id: managerStaffId, is_active: typeof payload.is_active === 'boolean' ? payload.is_active : true }
+  let saved:any
+  let authResult:{userId:string|null,warning:string|null,temporaryPassword:string|null}
+  if(existing?.id){
+    authResult=await createCustomerAuth(client,payload,existing.auth_user_id??null)
+    const {data,error}=await client.from('customer_directory').update({...base,auth_user_id:authResult.userId??null}).eq('id',existing.id).select('id,code,gc_code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
+    if(error)throw error
+    saved=data
+  }else{
+    const {data,error}=await client.from('customer_directory').insert({...base,auth_user_id:null}).select('id,code,gc_code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
+    if(error)throw error
+    saved=data
+    authResult=await createCustomerAuth(client,payload,null)
+    if(authResult.userId){
+      const linked=await client.from('customer_directory').update({auth_user_id:authResult.userId,updated_at:new Date().toISOString()}).eq('id',saved.id).select('id,code,gc_code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
+      if(linked.error){await client.auth.admin.deleteUser(authResult.userId).catch(()=>({}));authResult.warning=`Customer row was saved, but account linking failed: ${toErrorMessage(linked.error)}`;authResult.userId=null;authResult.temporaryPassword=null}else saved=linked.data
+    }
+  }
   await logActivity(client, actor.id, actor.name, existing?.id ? 'update_customer_account' : 'create_customer_account', String(saved.id), { email, phone, gc_code: saved.gc_code || saved.code || null, manager_staff_id: managerStaffId, auth_user_created: Boolean(authResult.userId && !existing?.auth_user_id) })
-  return { customer: canonicalCustomerIdentity(saved), auth_user_id: authResult.userId, warning: authResult.warning, status: authResult.userId ? 'linked' : 'saved_without_auth' }
+  return { customer: canonicalCustomerIdentity(saved), auth_user_id: authResult.userId, temporary_password: authResult.temporaryPassword, warning: authResult.warning, status: authResult.userId ? 'linked' : 'saved_without_auth' }
 }
-
 async function bindCustomerAuth(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, role: string, isSuperAdmin: boolean }) {
   if (!actor.isSuperAdmin && actor.role !== 'admin') throw responseError('Admin permission required to bind customer accounts', 403)
   const id = txt(payload.id)
@@ -511,34 +586,39 @@ async function bindCustomerAuth(client: ReturnType<typeof createClient>, payload
   return { ok: true, status: 'linked', customer_id: id, gc_code: code, auth_user_id: userId, login_email: email, temporary_password: password, note: 'Deliver this password securely; it is not shown again.' }
 }
 
-async function updateCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, role: string, isSuperAdmin: boolean }) {
+async function updateCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, isSuperAdmin: boolean }) {
   const id = txt(payload.id)
   if (!id) throw responseError('Missing customer id', 400)
-  if (!actor.isSuperAdmin && actor.role !== 'admin' && (txt(payload.email) !== null || txt(payload.password) !== null || payload.gc_code !== undefined || payload.code !== undefined)) {
-    throw responseError('Email, password, and GC code are managed by Admin only', 403)
-  }
   const updates: JsonRecord = {}
   for (const key of ['name', 'email', 'phone', 'phone2', 'city', 'delivery_location', 'note', 'manager_staff_id'] as const) {
-    if (!actor.isSuperAdmin && actor.role !== 'admin' && key === 'email') continue
+    if (!actor.isSuperAdmin && key === 'email') continue
     const value = txt(payload[key])
     if (value !== null) updates[key] = value
   }
   if (typeof payload.is_active === 'boolean') updates.is_active = payload.is_active
   let requestedCode: string | null = null
-  if ((actor.isSuperAdmin || actor.role === 'admin') && (payload.gc_code !== undefined || payload.code !== undefined)) {
+  if (actor.isSuperAdmin && (payload.gc_code !== undefined || payload.code !== undefined)) {
     requestedCode = normalizeGcCode(payload.gc_code ?? payload.code)
     if (!requestedCode) throw responseError('GC code must match GC-### or GC-* format', 400)
   }
 
-  const { data: current, error: currentErr } = await client.from('customer_directory').select('id,auth_user_id,code,gc_code').eq('id', id).maybeSingle()
+  const { data: currentRow, error: currentErr } = await client.from('customer_directory').select('id,auth_user_id,code,gc_code,email').eq('id', id).maybeSingle()
+  const current = currentRow as Record<string, any> | null
   if (currentErr) throw currentErr
   if (!current) throw responseError('Customer not found', 404)
+  const emailWasProvided = Object.prototype.hasOwnProperty.call(payload, 'email')
+  const emailChanged = emailWasProvided && (txt(payload.email) || '').toLowerCase() !== (txt(current.email) || '').toLowerCase()
+  const codeWasProvided = payload.gc_code !== undefined || payload.code !== undefined
+  const codeChanged = codeWasProvided && normalizeGcCode(payload.gc_code ?? payload.code) !== normalizeGcCode(current.code ?? current.gc_code)
+  if (!actor.isSuperAdmin && (emailChanged || txt(payload.password) !== null || codeChanged)) {
+    throw responseError('Email, password, and GC code are managed by Super Admin only', 403)
+  }
   if (requestedCode) {
     const currentCode = normalizeGcCode(current.code ?? current.gc_code)
     if (currentCode && currentCode !== requestedCode) throw responseError('GC code is immutable after customer creation', 409)
   }
 
-  if (current.auth_user_id && (actor.isSuperAdmin || actor.role === 'admin')) {
+  if (current.auth_user_id && actor.isSuperAdmin) {
     const authUpdate: Record<string, unknown> = {}
     const name = txt(payload.name)
     const email = txt(payload.email)
@@ -548,6 +628,7 @@ async function updateCustomer(client: ReturnType<typeof createClient>, payload: 
     if (email) authUpdate.email = email
     if (phone) authUpdate.phone = phone
     const password = txt(payload.password)
+    if (password && password.length < 12) throw responseError('Password must be at least 12 characters', 400)
     if (password) authUpdate.password = password
     if (Object.keys(authUpdate).length) {
       const { error } = await client.auth.admin.updateUserById(String(current.auth_user_id), authUpdate as never)
@@ -723,16 +804,17 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(req) })
   try {
     const actor = await getActor(req)
-    const { serviceClient, staffRow, canRead, canReadOperations, canWrite, canChat, isSuperAdmin } = actor
+    const { serviceClient, staffRow, canRead, canReadFinance, canReadOperations, canWrite, canChat, isSuperAdmin } = actor
     const url = new URL(req.url)
     if (req.method === 'GET') {
       const kind = normalizeKind(url.searchParams.get('kind'))
       if (kind === 'receipt' && canReadOperations) return json(await listReceipts(serviceClient), {}, req)
       if (kind === 'customer_match' && canReadOperations) { const code = normalizeGcCode(url.searchParams.get('code')); if (!code) return json({ customer: null, error: 'Invalid GC code' }, { status: 400 }, req); return json({ customer: await lookupCustomer(serviceClient, { customer_code: code }), normalized_code: code }, {}, req) }
       if (kind === 'task' && canReadOperations) return json(await listTasks(serviceClient, { id: staffRow.id, role: String(staffRow.role || ''), branch: staffRow.branch }), {}, req)
-      if (kind === 'finance' && canRead) return json(await listFinance(serviceClient), {}, req)
+      if (kind === 'finance' && canReadFinance) return json(await listFinance(serviceClient), {}, req)
       if (kind === 'pricing' && canRead) return json(await listPricing(serviceClient), {}, req)
-      if (kind === 'quote_requests' && canReadOperations) return json(await listQuoteRequests(serviceClient), {}, req)
+      if (kind === 'quote_requests' && (canReadOperations || canReadFinance)) return json(await listQuoteRequests(serviceClient), {}, req)
+      if (kind === 'customer_account_requests' && canWrite) return json(await listCustomerAccountRequests(serviceClient), {}, req)
       if (kind === 'notification' && canReadOperations) return json(await listStaffNotifications(serviceClient, staffRow.id), {}, req)
       if (kind === 'notification_delivery' && canReadOperations) return json(await listNotificationDelivery(serviceClient), {}, req)
       if (kind === 'chat' && canChat) return json(await listChat(serviceClient, staffRow.id), {}, req)
@@ -765,9 +847,9 @@ Deno.serve(async (req) => {
       if (!canReadOperations) return json({ error: 'Forbidden' }, { status: 403 }, req)
       return json(await createReceipt(serviceClient, data, files, { id: staffRow.id, name: staffRow.full_name }), {}, req)
     }
-    if (kind === 'quote' && action === 'calculate') { if (!canReadOperations) return json({ error: 'Operations access required' }, { status: 403 }, req); return json(await calculateQuote(serviceClient, data), {}, req) }
+    if (kind === 'quote' && action === 'calculate') { if (!canReadOperations && !canReadFinance) return json({ error: 'Operations or finance access required' }, { status: 403 }, req); return json(await calculateQuote(serviceClient, data), {}, req) }
     if (kind === 'quote_requests' && (action === 'approve' || action === 'reject')) return json(await decideQuote(serviceClient, data, {id:staffRow.id, name:staffRow.full_name, role:String(staffRow.role||'')}, action === 'approve' ? 'approve' : 'reject'), {}, req)
-    if (kind === 'pricing') { const financeRole = ['admin','super_admin','accountant'].includes(String(staffRow.role || '')); if (!financeRole) return json({ error: 'Finance role required' }, { status: 403 }, req); const pricingActor = { id: staffRow.id, name: staffRow.full_name }; if (action === 'update') return json(data.rate_type === 'exchange' ? await updateExchangeRate(serviceClient, data, pricingActor) : await updatePricing(serviceClient, data, pricingActor), {}, req); return json({ error: 'Unsupported pricing action' }, { status: 400 }, req) }
+    if (kind === 'pricing') { const financeRole = ['admin','super_admin','accountant','finance'].includes(String(staffRow.role || '')); if (!financeRole) return json({ error: 'Finance role required' }, { status: 403 }, req); const pricingActor = { id: staffRow.id, name: staffRow.full_name }; if (action === 'create' && data.rate_type === 'exchange') return json(await createExchangeRate(serviceClient, data, pricingActor), {}, req); if (action === 'update') return json(data.rate_type === 'exchange' ? await updateExchangeRate(serviceClient, data, pricingActor) : await updatePricing(serviceClient, data, pricingActor), {}, req); return json({ error: 'Unsupported pricing action' }, { status: 400 }, req) }
     if (kind === 'notification' && action === 'update' && canReadOperations) return json(await markStaffNotificationRead(serviceClient, staffRow.id, data), {}, req)
     if (kind === 'chat' && canChat) {
       if (action === 'send') return json(await sendChatMessage(serviceClient, staffRow.id, staffRow.full_name, data, req), {}, req)
@@ -784,6 +866,7 @@ Deno.serve(async (req) => {
     if (!canWrite) return json({ error: 'Forbidden' }, { status: 403 }, req)
     if (kind === 'staff' && action === 'create' && !isSuperAdmin) return json({ error: 'Only Super Admin can create staff accounts' }, { status: 403 }, req)
     const customerActor = { id: staffRow.id, name: staffRow.full_name, role: String(staffRow.role || ''), isSuperAdmin }
+    if (kind === 'customer_account_requests' && (action === 'approve' || action === 'reject')) return json(await reviewCustomerAccountRequest(serviceClient, data, customerActor, action), {}, req)
     if (kind === 'customer') {
       if (action === 'create') return json(await upsertCustomer(serviceClient, data, customerActor), {}, req)
       if (action === 'update') return json(await updateCustomer(serviceClient, data, customerActor), {}, req)

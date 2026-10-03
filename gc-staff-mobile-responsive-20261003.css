@@ -1,0 +1,359 @@
+/* Globall Cloud Staff Console — mobile stability layer (2026-10-03)
+   Loaded after the legacy visual layers so phone rules have a predictable final say. */
+
+body:has(#app) {
+  direction: rtl;
+  max-width: 100%;
+  overflow-x: clip;
+}
+body:has(#app) *,
+body:has(#app) *::before,
+body:has(#app) *::after {
+  box-sizing: border-box;
+}
+body:has(#app) #app,
+body:has(#app) .gc-shell,
+body:has(#app) .gc-main,
+body:has(#app) main,
+body:has(#app) .view,
+body:has(#app) #view {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Keep Arabic layout RTL while isolating identifiers and numeric data as LTR. */
+body:has(#app) :is(.mono, .gc-ltr, time, code, input[type="number"], input[type="email"], input[type="tel"], input[type="url"], input[type="date"], input[type="datetime-local"], [dir="ltr"]) {
+  direction: ltr !important;
+  unicode-bidi: isolate;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+body:has(#app) :is(.eyebrow, .kicker, .status, .pill, .btn) {
+  unicode-bidi: isolate;
+}
+body:has(#app) .mono,
+body:has(#app) .gc-ltr,
+body:has(#app) code {
+  max-width: 100%;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+body:has(#app) .field {
+  min-width: 0;
+  max-width: 100%;
+  unicode-bidi: plaintext;
+}
+body:has(#app) input[type="number"],
+body:has(#app) input[type="email"],
+body:has(#app) input[type="tel"],
+body:has(#app) input[type="url"] {
+  text-align: left !important;
+}
+
+@media (max-width: 760px) {
+  body:has(#app) {
+    padding-inline: 8px !important;
+  }
+  body:has(#app) .gc-main,
+  body:has(#app) main {
+    width: 100%;
+  }
+  body:has(#app) .view,
+  body:has(#app) #view {
+    width: 100%;
+    padding: 10px !important;
+    border-radius: 16px !important;
+  }
+  body:has(#app) .section-head {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: stretch !important;
+    gap: 9px !important;
+    margin-bottom: 14px !important;
+  }
+  body:has(#app) .section-head > *,
+  body:has(#app) .card-head > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+  body:has(#app) .section-head h1,
+  body:has(#app) .section-head h2 {
+    font-size: clamp(19px, 5.5vw, 24px) !important;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+  body:has(#app) .section-head p {
+    font-size: 12px !important;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+  }
+
+  /* Compact KPI cards; preserve two readable columns even on narrow phones. */
+  body:has(#app) .grid-kpi {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin-bottom: 12px;
+  }
+  body:has(#app) .grid-kpi > .kpi {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    min-width: 0 !important;
+    min-height: 76px !important;
+    height: auto !important;
+    padding: 9px 10px !important;
+    overflow: hidden;
+  }
+  body:has(#app) .grid-kpi > .kpi::before {
+    width: 24px !important;
+    height: 2px !important;
+    margin: 0 0 3px !important;
+  }
+  body:has(#app) .grid-kpi .kpi span {
+    max-width: 100%;
+    font-size: 10px !important;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+  body:has(#app) .grid-kpi .kpi strong {
+    display: block;
+    max-width: 100%;
+    margin: 1px 0 0 !important;
+    font-size: clamp(13px, 3.8vw, 17px) !important;
+    line-height: 1.25;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+  body:has(#app) .grid-kpi .kpi small {
+    max-width: 100%;
+    font-size: 9px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  /* Actions wrap into comfortable targets instead of compressing in one row. */
+  body:has(#app) .actions,
+  body:has(#app) .head-actions,
+  body:has(#app) .modal-foot,
+  body:has(#app) .modal-actions,
+  body:has(#app) .gc-admin-shortcut-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-items: stretch;
+    gap: 8px !important;
+    width: 100%;
+    min-width: 0;
+  }
+  body:has(#app) .actions > :is(.btn, button, a),
+  body:has(#app) .head-actions > :is(.btn, button, a),
+  body:has(#app) .modal-foot > :is(.btn, button, a),
+  body:has(#app) .modal-actions > :is(.btn, button, a),
+  body:has(#app) .gc-admin-shortcut-actions > :is(.btn, button, a),
+  body:has(#app) .section-head > .btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding-inline: 8px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+    line-height: 1.35;
+  }
+  body:has(#app) .top-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+    width: 100%;
+  }
+  body:has(#app) .top-actions .status {
+    grid-column: 1 / -1;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+  body:has(#app) .toolbar {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+    width: 100%;
+  }
+  body:has(#app) .toolbar > *,
+  body:has(#app) .toolbar .field {
+    width: 100%;
+    min-width: 0 !important;
+    max-width: 100%;
+  }
+
+  /* Keep dense records accessible through a deliberate horizontal scroll region. */
+  body:has(#app) .table-wrap,
+  body:has(#app) .table-responsive,
+  body:has(#app) .data-table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto !important;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  body:has(#app) .table-wrap .table,
+  body:has(#app) .table-responsive .table,
+  body:has(#app) .data-table-wrap .table {
+    min-width: 700px !important;
+  }
+  body:has(#app) .table td,
+  body:has(#app) .table th {
+    overflow-wrap: anywhere;
+  }
+
+  body:has(#app) .modal-backdrop {
+    padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
+    align-items: center;
+  }
+  body:has(#app) .modal {
+    width: min(640px, 100%);
+    max-height: calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  body:has(#app) .form-grid,
+  body:has(#app) .two-col,
+  body:has(#app) .three-col,
+  body:has(#app) .shipment-command-kpis,
+  body:has(#app) .shipment-milestones {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+  body:has(#app) .form-grid > *,
+  body:has(#app) .two-col > *,
+  body:has(#app) .three-col > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+  body:has(#app) .gc-mobile-staff-dock,
+  body:has(#app) .gc-staff-mobile-dock {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  body:has(#app) :is(.card, .panelv, .shipment-card, .notice, .mini-row) {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  body:has(#app) .gc-ltr {
+    display: inline-block;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 390px) {
+  body:has(#app) .grid-kpi { gap: 7px !important; }
+  body:has(#app) .grid-kpi > .kpi {
+    min-height: 70px !important;
+    padding: 8px !important;
+  }
+  body:has(#app) .grid-kpi .kpi span { font-size: 9px !important; }
+  body:has(#app) .grid-kpi .kpi strong { font-size: clamp(12px, 4vw, 15px) !important; }
+  body:has(#app) .actions,
+  body:has(#app) .head-actions,
+  body:has(#app) .modal-foot,
+  body:has(#app) .modal-actions,
+  body:has(#app) .gc-admin-shortcut-actions {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  body:has(#app) .form-grid,
+  body:has(#app) .two-col,
+  body:has(#app) .three-col,
+  body:has(#app) .shipment-command-kpis,
+  body:has(#app) .shipment-milestones {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body:has(#app) *,
+  body:has(#app) *::before,
+  body:has(#app) *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+
+/* Backward-compatible Staff OS shell (staff-os.html). */
+@media (max-width: 760px) {
+  body:has(#app) .shell {
+    width: 100% !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+  body:has(#app) .sidebar {
+    position: static !important;
+    height: auto !important;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    padding: 9px !important;
+  }
+  body:has(#app) .sidebar .nav {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  body:has(#app) .sidebar .nav-item {
+    flex: 0 0 auto;
+    min-height: 44px;
+    width: auto;
+    white-space: nowrap;
+  }
+  body:has(#app) .metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+  body:has(#app) .metrics-grid > .metric {
+    min-width: 0;
+    min-height: 76px;
+    padding: 10px !important;
+  }
+  body:has(#app) .metrics-grid .metric strong {
+    max-width: 100%;
+    margin: 4px 0 !important;
+    font-size: clamp(14px, 4vw, 18px) !important;
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+  body:has(#app) .quick-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  body:has(#app) .head-actions {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+  body:has(#app) .head-actions > .btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+@media (max-width: 390px) {
+  body:has(#app) .quick-grid,
+  body:has(#app) .head-actions {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}

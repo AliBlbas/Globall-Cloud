@@ -4,7 +4,7 @@ type Json = Record<string, unknown>
 const ORIGINS = new Set(['https://globall-cloud.pages.dev','https://globall-cloud.netlify.app'])
 const FINANCE_ROLES = new Set(['super_admin','admin','accountant','finance'])
 const FINANCE_TYPES = new Set(['income','expense','customer_payment','customer_charge','refund','adjustment'])
-const PRICING_ROLES = new Set(['super_admin','admin','accountant'])
+const PRICING_ROLES = new Set(['super_admin','admin','accountant','finance'])
 const PROFILE_ROLES = new Set(['super_admin','admin','accountant','finance','warehouse','warehouse_china','warehouse_uae','warehouse_erbil','operations','delivery','driver'])
 const cors=(req:Request)=>({
   'Access-Control-Allow-Origin':ORIGINS.has(req.headers.get('origin')||'')?req.headers.get('origin')!:'https://globall-cloud.pages.dev',
@@ -46,15 +46,24 @@ async function profileUpdate(a:any,data:Json){
   return {staff}
 }
 async function pricingCreate(a:any,data:Json){
-  if(!PRICING_ROLES.has(a.role))throw new Error('Admin permission required')
-  const origin=txt(data.origin_key),destination=txt(data.destination_key),mode=txt(data.transport_mode),product=txt(data.product_type),unit=txt(data.unit)||'kg'
-  const amount=num(data.amount)
-  if(!origin||!destination||!mode||!product||amount===null||amount<0)throw new Error('Invalid pricing data')
+  if(!PRICING_ROLES.has(a.role))throw new Error('Pricing permission required')
+  const origin=txt(data.origin_key),destination=txt(data.destination_key),mode=txt(data.transport_mode),product=txt(data.product_type)
+  const amount=num(data.amount);const rawUnit=txt(data.unit)||'kg';const unit=rawUnit.toLowerCase()
+  if(!origin||!destination||!mode||!product||amount===null||amount<=0)throw new Error('Invalid pricing data')
+  if(!['air','sea','land'].includes(mode.toLowerCase())||!['kg','cbm','item'].includes(unit))throw new Error('Unsupported pricing unit or mode')
+  const originKey=origin.toLowerCase();const expectedUnit=mode.toLowerCase()==='sea'?'cbm':mode.toLowerCase()==='air'&&['dubai','uae'].includes(originKey)?'item':'kg'
+  if(unit!==expectedUnit)throw new Error(`This route must use ${expectedUnit} pricing`)
   const rateKey=txt(data.rate_key)||`${mode}_${origin}_${destination}_${product}`.toLowerCase().replace(/[^a-z0-9]+/g,'_')
-  const payload={rate_key:rateKey,origin_key:origin,destination_key:destination,transport_mode:mode,product_type:product,unit,currency:txt(data.currency)||'USD',amount,transit_min_days:num(data.transit_min_days),transit_max_days:num(data.transit_max_days),effective_from:txt(data.effective_from)||new Date().toISOString().slice(0,10),is_active:data.is_active!==false,notes:txt(data.notes),markup_percent:num(data.markup_percent)||0,created_by:a.staff.id,updated_by:a.staff.id}
-  const {data:row,error}=await a.admin.from('pricing_rates').insert(payload).select('*').single();if(error)throw error
-  await audit(a.admin,a.staff,'pricing.create',row.id,{rate_key:rateKey,amount})
-  return {rate:row}
+  const transitMin=num(data.transit_min_days),transitMax=num(data.transit_max_days)
+  if((transitMin!==null&&(!Number.isInteger(transitMin)||transitMin<0))||(transitMax!==null&&(!Number.isInteger(transitMax)||transitMax<(transitMin??0))))throw new Error('Invalid transit days')
+  const originLabel=originKey==='dubai'||originKey==='uae'?'Dubai':originKey==='china'?'China':originKey==='usa'?'USA':origin
+  const modeLabel=mode.toLowerCase()==='air'?'Air':mode.toLowerCase()==='sea'?'Sea':'Land'
+  const payload={origin:originLabel,destination,transport_type:modeLabel,item_category:product,price_usd:amount,estimated_days:transitMax,rate_key:rateKey,origin_key:originKey==='uae'?'dubai':originKey,destination_key:destination.toLowerCase(),transport_mode:mode.toLowerCase(),product_type:product,unit,currency:txt(data.currency)||'USD',amount,transit_min_days:transitMin,transit_max_days:transitMax,effective_from:txt(data.effective_from)||new Date().toISOString().slice(0,10),is_active:data.is_active!==false,notes:txt(data.notes),created_by:a.staff.id,updated_by:a.staff.id}
+  const existing=await a.admin.from('pricing_rates').select('id').eq('rate_key',rateKey).limit(1).maybeSingle();if(existing.error)throw existing.error
+  const {data:row,error}=existing.data?await a.admin.from('pricing_rates').update({...payload,updated_at:new Date().toISOString()}).eq('id',existing.data.id).select('*').single():await a.admin.from('pricing_rates').insert(payload).select('*').single()
+  if(error)throw error
+  await audit(a.admin,a.staff,existing.data?'pricing.update':'pricing.create',row.id,{rate_key:rateKey,amount,unit})
+  return {rate:row,updated:Boolean(existing.data)}
 }
 async function financeCreate(a:any,data:Json){
   if(!FINANCE_ROLES.has(a.role))throw new Error('Finance permission required')

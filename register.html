@@ -13,28 +13,42 @@
   <main class="box">
     <a class="brand" href="/"><img src="logo-icon.webp" alt="Globall Cloud"><span><b>Globall Cloud</b><small>CUSTOMER PORTAL</small></span></a>
     <h1>تۆمارکردنی کڕیار</h1>
-    <p class="muted">هەژماری خۆت دروست بکە؛ سیستەم بە شێوەی ئۆتۆماتیکی نوێترین کۆدی GC ـت پێدەدات. کۆدی داهاتوو لە داتابەیسەوە دیاری دەکرێت، نەک بە ژمارەی hardcode.</p>
-    <div class="notice">وشەی نهێنییەکەت لە شوێنێکی پارێزراو هەڵبگرە. بۆ پاراستنی هەژمار، لانیکەم 12 پیت بەکاربهێنە.</div>
+    <p class="muted">داواکاری هەژمار بنێرە؛ ستافی Globall Cloud زانیارییەکانت پێداچوونەوە دەکات، پاشان کۆدی GC و ڕێنمایی چالاککردنت بۆ ئیمەیڵەکەت دەنێرێت.</p>
+    <div class="notice">کۆدی GC بە زنجیرە و تەنها لەلایەن ستافەوە دیاری دەکرێت. بۆ پاراستنی زانیاری، ئەم داواکارییە ژمارەی GC دروست ناکات.</div>
     <form id="registerForm" novalidate>
+      <input name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px">
       <div class="field-wrap"><label for="name">ناوی تەواو</label><input id="name" class="field" autocomplete="name" required maxlength="160"></div>
       <div class="field-wrap"><label for="email">ئیمەیڵ</label><input id="email" class="field" type="email" autocomplete="email" required maxlength="180"></div>
       <div class="field-wrap"><label for="phone">ژمارەی مۆبایل</label><input id="phone" class="field" type="tel" autocomplete="tel" maxlength="40"></div>
-      <div class="field-wrap"><label for="password">وشەی نهێنی</label><input id="password" class="field" type="password" autocomplete="new-password" minlength="12" required></div>
-      <div class="field-wrap"><label for="confirm">دووبارەکردنەوەی وشەی نهێنی</label><input id="confirm" class="field" type="password" autocomplete="new-password" minlength="12" required></div>
       <div id="message" class="message muted" aria-live="polite"></div>
       <div id="result" class="result" hidden></div>
-      <button id="submit" class="btn" type="submit">دروستکردنی هەژمار و وەرگرتنی کۆدی GC</button>
+      <button id="submit" class="btn" type="submit">ناردنی داواکاری بۆ کۆدی GC</button>
     </form>
     <div class="links"><a href="/customer-access">هەژمارت هەیە؟ Login</a><a href="/">گەڕانەوە بۆ سەرەکی</a></div>
   </main>
   <script>
     const API='https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/customer-gc-register';
     const form=document.getElementById('registerForm'), msg=document.getElementById('message'), result=document.getElementById('result'), button=document.getElementById('submit');
-    form.addEventListener('submit', async (event)=>{event.preventDefault(); msg.className='message muted'; msg.textContent='چاوەڕوان بە…'; result.hidden=true; button.disabled=true;
-      const name=document.getElementById('name').value.trim(), email=document.getElementById('email').value.trim(), phone=document.getElementById('phone').value.trim(), password=document.getElementById('password').value, confirm=document.getElementById('confirm').value;
-      if(password!==confirm){msg.className='message error';msg.textContent='وشەی نهێنییەکان یەکسان نین.';button.disabled=false;return}
-      try{const response=await fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name,email,phone,password})});const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(body.error||'تۆمارکردن سەرکەوتوو نەبوو.');msg.className='message success';msg.textContent='هەژمارەکەت بە سەرکەوتوویی دروست کرا.';result.innerHTML='<strong>'+body.customer.gc_code+'</strong><span>ئەمە کۆدی چوونەژوورەوەتە؛ بیپارێزە.</span>';result.hidden=false;button.textContent='هەژمار دروست کرا';}
-      catch(error){msg.className='message error';msg.textContent=error.message||'تۆمارکردن سەرکەوتوو نەبوو.';button.disabled=false;}
+    form.addEventListener('submit', async (event)=>{
+      event.preventDefault();
+      msg.className='message muted'; msg.textContent='چاوەڕوان بە…'; result.hidden=true; button.disabled=true;
+      const name=document.getElementById('name').value.trim();
+      const email=document.getElementById('email').value.trim();
+      const phone=document.getElementById('phone').value.trim();
+      if(name.length<2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+        msg.className='message error'; msg.textContent='تکایە ناو و ئیمەیڵێکی دروست بنووسە.'; button.disabled=false; return;
+      }
+      try{
+        const response=await fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name,email,phone,company_website:form.elements.company_website.value})});
+        const body=await response.json().catch(()=>({}));
+        if(!response.ok) throw new Error(body.error||'ناردنی داواکاری سەرکەوتوو نەبوو.');
+        msg.className='message success';
+        msg.textContent=body.message||'داواکارییەکەت وەرگیرا؛ ستاف پێداچوونەوەی دەکات.';
+        result.innerHTML='<span>کۆدی GC دوای پەسەندکردنی ستاف بۆ ئیمەیڵەکەت دەنێردرێت. ئەم فۆڕمە هێشتا هەژماری چوونەژوورەوە دروست ناکات.</span>';
+        result.hidden=false; button.textContent='داواکاری نێردرا';
+      }catch(error){
+        msg.className='message error'; msg.textContent=error.message||'ناردنی داواکاری سەرکەوتوو نەبوو.'; button.disabled=false;
+      }
     });
   </script>
 </body>
