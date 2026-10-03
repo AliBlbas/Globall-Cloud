@@ -5,7 +5,7 @@
   const SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
   const STAFF_VERIFY = `${SUPABASE_URL}/functions/v1/staff-auth-verify`;
   const STAFF_TABLE = `${SUPABASE_URL}/rest/v1/staff`;
-  const STAFF_OS_PATH = /^\/staff-os(?:\.html)?\/?$/;
+  const STAFF_OS_PATH = /^\/staff(?:-os(?:-v5)?|)(?:\.html)?\/?$/;
   const nativeFetch = window.fetch.bind(window);
 
   const getClient = async () => {
@@ -237,8 +237,8 @@
       setBusy(true);
       setError('');
       try {
-        const email = String(document.getElementById('email')?.value || '').trim().toLowerCase();
-        const password = String(document.getElementById('password')?.value || '');
+        const email = String((document.getElementById('email') || document.getElementById('loginEmail'))?.value || '').trim().toLowerCase();
+        const password = String((document.getElementById('password') || document.getElementById('loginPassword'))?.value || '');
         if (!email || !password) throw new Error('ئیمەڵ و وشەی نهێنی پڕبکەرەوە.');
 
         const { data, error } = await client.auth.signInWithPassword({ email, password });
