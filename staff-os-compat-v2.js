@@ -3,6 +3,9 @@
   const SUPABASE_KEY='sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
   const STAFF_VERIFY=`${SUPABASE_URL}/functions/v1/staff-auth-verify`;
   const STAFF_TABLE=`${SUPABASE_URL}/rest/v1/staff`;
+  // V5 owns auth, session verification, and rendering. Never install the
+  // legacy capture-phase login handler on the V5 route.
+  if (/^\/staff-os-v5(?:\.html)?\/?$/i.test(window.location.pathname)) return;
   const STAFF_OS_PATH=/^\/staff-os(?:\.html)?\/?$/;
   const nativeFetch=window.fetch.bind(window);
   const getClient=async()=>{if(typeof window.gcEnsureSupabase==='function'){try{const c=await window.gcEnsureSupabase();if(c?.auth)return c;}catch(_){}}if(window.gcSupabase?.auth)return window.gcSupabase;if(window.supabase?.createClient){window.gcSupabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false},global:{headers:{'x-gc-client':'staff-os'}}});window.sb=window.gcSupabase;return window.gcSupabase;}return null;};
