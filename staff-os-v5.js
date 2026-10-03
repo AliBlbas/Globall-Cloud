@@ -185,7 +185,13 @@
 
   function renderSurface(html) {
     const root = document.getElementById('app');
-    if (root) root.innerHTML = html;
+    if (root) {
+      // Legacy auth bridges may leave the shared container hidden while V5
+      // is booting. V5 owns this container, so reset that state on render.
+      root.classList.remove('hidden');
+      root.removeAttribute('aria-hidden');
+      root.innerHTML = html;
+    }
     else document.body.innerHTML = html;
   }
 
