@@ -40,3 +40,10 @@ USA warehouse remains an explicit owner-confirmation placeholder as requested.
 - **Brand voice examples:** “بارەکەت لە کوێیە؟” and “هەنگاوی دواترت لێرەیە.”
 - **Wordmark/mark:** retain the GC mark, but pair it with a simple route-line underline rather than multiple boxed logos.
 - **Signature brand color:** `#58E5EF` cyan, used sparingly for active state, primary CTA, and live connection status.
+
+## Mobile excellence system
+- **Responsive movement:** calm, safe-area-aware mobile operations UI designed for one-handed use on 320–430px devices.
+- **Core principles:** one clear next action, 46–52px touch targets, no horizontal page overflow, readable Kurdish line lengths, and progressive disclosure for dense logistics data.
+- **Mobile layout:** sticky compact header → focused hero or account summary → one primary action → stacked cards → fixed bottom navigation where the route benefits from repeated navigation.
+- **Shared mobile surface:** `gc-mobile-excellence-20261003.css` is loaded last on the homepage, dashboard, tracking, customer auth, and staff OS routes so responsive rules are consistent rather than split across historical layers.
+- **Signature mobile elements:** the dashboard five-item dock, full-width tracking field, compact two-column KPI cards, safe-area-aware toast/dock spacing, and reduced-motion support.
