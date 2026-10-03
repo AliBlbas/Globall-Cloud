@@ -169,6 +169,7 @@ export async function onRequest(context) {
     html=addHeadAsset(html,'href="/staff-command-center-pro.css',`<link rel="stylesheet" href="/staff-command-center-pro.css?v=${VERSION}" data-gc-staff-command-center-css="1">`);
     html=addHeadAsset(html,'href="/staff-directory-360.css',`<link rel="stylesheet" href="/staff-directory-360.css?v=${VERSION}" data-gc-staff-directory-360-css="1">`);
     html=addHeadAsset(html,'href="/gc-staff-customer-control-20261003.css',`<link rel="stylesheet" href="/gc-staff-customer-control-20261003.css?v=${VERSION}" data-gc-staff-customer-control="1">`);
+    html=addHeadAsset(html,'href="/gc-staff-dashboard-mobile-fix-20261003.css',`<link rel="stylesheet" href="/gc-staff-dashboard-mobile-fix-20261003.css?v=${VERSION}" data-gc-staff-dashboard-mobile-fix="1">`);
     html=addBodyAsset(html,'src="/staff-command-center-pro.js',`<script src="/staff-command-center-pro.js?v=${VERSION}" defer data-gc-staff-command-center="1"></script>`);
     html=addBodyAsset(html,'src="/staff-directory-360.js',`<script src="/staff-directory-360.js?v=${VERSION}" defer data-gc-staff-directory-360="1"></script>`);
     html=addBodyAsset(html,'src="/staff-profit-analytics.js',`<script src="/staff-profit-analytics.js?v=${VERSION}" defer data-gc-staff-profit-analytics="1"></script>`);
