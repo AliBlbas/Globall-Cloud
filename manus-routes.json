@@ -5,6 +5,7 @@
     {"path": "/customer-portal", "title": "Customer Portal"},
     {"path": "/customer-portal.html", "title": "Customer Portal"},
     {"path": "/login", "title": "Customer Login"},
+    {"path": "/customer-login", "title": "Customer Login"},
     {"path": "/register", "title": "Customer Registration"},
     {"path": "/dashboard", "title": "Customer Dashboard"},
     {"path": "/login.html", "title": "Customer Login"},

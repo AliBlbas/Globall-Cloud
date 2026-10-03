@@ -27,3 +27,4 @@
 /shop/* /services 302
 
 /customer-access /customer-access.html 200
+/customer-login /customer-login.html 200
