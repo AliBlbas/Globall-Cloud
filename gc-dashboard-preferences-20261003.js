@@ -22,6 +22,13 @@
   const validLang = (lang) => copy[lang] ? lang : 'ckb';
   const currentLang = () => validLang(localStorage.getItem(LANG_KEY) || document.documentElement.lang || 'ckb');
   const currentTheme = () => localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark';
+  const syncAppTheme = (theme) => {
+    let style = document.getElementById('gcCustomerAppThemeStyle');
+    if (!style) { style = document.createElement('style'); style.id = 'gcCustomerAppThemeStyle'; document.head.appendChild(style); }
+    style.textContent = theme === 'light'
+      ? 'html[data-gc-theme="light"] body.gc-customer-app{background-image:radial-gradient(900px 500px at 78% -12%,rgba(88,229,239,.18),transparent 64%)!important;background-color:#f3f8fa!important;color:#102b43!important}html[data-gc-theme="light"] body.gc-customer-app .metric-card,html[data-gc-theme="light"] body.gc-customer-app .metric-card strong,html[data-gc-theme="light"] body.gc-customer-app .surface-card,html[data-gc-theme="light"] body.gc-customer-app .surface-card h2,html[data-gc-theme="light"] body.gc-customer-app .surface-card h3,html[data-gc-theme="light"] body.gc-customer-app .surface-card strong{color:#102b43!important}html[data-gc-theme="light"] body.gc-customer-app .metric-card>div>span,html[data-gc-theme="light"] body.gc-customer-app .muted{color:#668092!important}'
+      : 'html[data-gc-theme="dark"] body.gc-customer-app{background-color:#071421!important;color:#f2fbfd!important}html[data-gc-theme="dark"] body.gc-customer-app .metric-card,html[data-gc-theme="dark"] body.gc-customer-app .surface-card{color:#f2fbfd!important}';
+  };
   const applyTheme = (theme) => {
     const next = theme === 'light' ? 'light' : 'dark';
     localStorage.setItem(THEME_KEY, next);
@@ -31,6 +38,7 @@
       document.documentElement.dataset.theme = next === 'light' ? 'light' : '';
       document.documentElement.style.colorScheme = next;
     }
+    syncAppTheme(next);
     const button = document.querySelector('[data-dashboard-theme]');
     if (button) {
       button.innerHTML = icons[next === 'dark' ? 'sun' : 'moon'] + `<span>${copy[currentLang()].labels[next === 'dark' ? 'light' : 'dark']}</span>`;
