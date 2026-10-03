@@ -16,6 +16,7 @@
   const BRANCHES = ['all','china','dubai','erbil','usa'];
   const MODES = ['air','land','sea'];
   const STATUS = ['received_origin','in_transit','at_transit_hub','customs','out_for_delivery','delivered','on_hold','cancelled'];
+  const app = document.getElementById('app');
   const state = {
     client: null,
     session: null,
@@ -183,13 +184,16 @@
   }
 
   function renderApp() {
-    document.body.innerHTML = shellHTML();
+    if (!app) throw new Error('Staff app root نەدۆزرایەوە');
+    app.innerHTML = shellHTML();
+    app.dataset.gcStaffSurface = 'app';
     bindShell();
     void refreshRuntimeHealth();
   }
 
   function renderLogin(mfa=false, message='') {
-    document.body.innerHTML = `<main class="login"><section class="login-card"><div class="login-title"><div class="brand-logo">GC</div><div><b>Globall Cloud</b><div class="eyebrow">SECURE STAFF ACCESS</div></div></div><h1>${mfa?'پشتڕاستکردنەوەی 2FA':'Staff Command Center'}</h1><p>${mfa?'کۆدی ٦ ژمارەیی Google Authenticator بنووسە.':'چوونەژوورەوە بۆ سیستەمی کارگێڕی و عملیات.'}</p><form id="loginForm" style="margin-top:16px"><div id="loginFields" class="${mfa?'hidden':''}"><div class="form-field"><label>ئیمەیل</label><input class="field" id="loginEmail" type="email" autocomplete="username" required placeholder="staff@example.com"></div><div class="form-field" style="margin-top:9px"><label>وشەی نهێنی</label><input class="field" id="loginPassword" type="password" autocomplete="current-password" required placeholder="••••••••"></div></div>${mfa?'<div class="form-field"><label>کۆدی 2FA</label><input class="field" id="mfaCode" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000" style="text-align:center;letter-spacing:6px;font:900 20px var(--mono)"></div>':' '}<div class="login-msg" id="loginMsg">${esc(message)}</div><button class="btn primary" id="loginBtn" type="submit">${mfa?'پشتڕاستکردنەوەی 2FA':'چوونەژوورەوە'}</button></form><div style="margin-top:12px;color:#6f8da8;font-size:9px">GLOBALL CLOUD · AUTH + RLS + EDGE FUNCTIONS</div></section></main>`;
+    if (!app) throw new Error('Staff app root نەدۆزرایەوە');
+    app.innerHTML = `<main class="login"><section class="login-card"><div class="login-title"><div class="brand-logo">GC</div><div><b>Globall Cloud</b><div class="eyebrow">SECURE STAFF ACCESS</div></div></div><h1>${mfa?'پشتڕاستکردنەوەی 2FA':'Staff Command Center'}</h1><p>${mfa?'کۆدی ٦ ژمارەیی Google Authenticator بنووسە.':'چوونەژوورەوە بۆ سیستەمی کارگێڕی و عملیات.'}</p><form id="loginForm" style="margin-top:16px"><div id="loginFields" class="${mfa?'hidden':''}"><div class="form-field"><label>ئیمەیل</label><input class="field" id="loginEmail" type="email" autocomplete="username" required placeholder="staff@example.com"></div><div class="form-field" style="margin-top:9px"><label>وشەی نهێنی</label><input class="field" id="loginPassword" type="password" autocomplete="current-password" required placeholder="••••••••"></div></div>${mfa?'<div class="form-field"><label>کۆدی 2FA</label><input class="field" id="mfaCode" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000" style="text-align:center;letter-spacing:6px;font:900 20px var(--mono)"></div>':' '}<div class="login-msg" id="loginMsg">${esc(message)}</div><button class="btn primary" id="loginBtn" type="submit">${mfa?'پشتڕاستکردنەوەی 2FA':'چوونەژوورەوە'}</button></form><div style="margin-top:12px;color:#6f8da8;font-size:9px">GLOBALL CLOUD · AUTH + RLS + EDGE FUNCTIONS</div></section></main>`;
     const form = document.getElementById('loginForm');
     if (!form) return;
     form.onsubmit = async (e) => {
