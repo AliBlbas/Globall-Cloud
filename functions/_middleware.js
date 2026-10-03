@@ -152,10 +152,6 @@ export async function onRequest(context) {
     ['href="/gc-final-ui-20260927.css',`<link rel="stylesheet" href="/gc-final-ui-20260927.css?v=4" data-gc-final-ui="3">`]
   ];
   for (const [needle,fragment] of headAssets) html = addHeadAsset(html,needle,fragment);
-  if (STAFF_V5.test(path)) {
-    const headers=applySecurityHeaders(new Headers(response.headers)); headers.delete('content-encoding'); headers.delete('content-length'); headers.delete('etag'); headers.set('cache-control','no-store, max-age=0, must-revalidate'); headers.set('content-type','text/html; charset=UTF-8');
-    return new Response(html,{status:response.status,statusText:response.statusText,headers});
-  }
   if (OPERATIONAL_PAGE.test(path)) html=addHeadAsset(html,'src="/runtime-guard.js',`<script src="/runtime-guard.js?v=${VERSION}" defer data-gc-runtime-guard="1"></script>`);
   if (/^\/(?:tracking|track|tracking-integration)(?:\.html)?\/?$/i.test(path)) html=addHeadAsset(html,'src="/gc-tracking-deeplink.js',`<script src="/gc-tracking-deeplink.js?v=${VERSION}" defer data-gc-tracking-deeplink="1"></script>`);
   if (!OPERATIONAL_PAGE.test(path) || /^\/(?:customer-portal|tracking|tracking-integration)(?:\.html)?\/?$/i.test(path)) html=addHeadAsset(html,'href="/globall-realistic-design-20260919.css',`<link rel="stylesheet" href="/globall-realistic-design-20260919.css?v=${VERSION}" data-gc-realistic-design="1">`);
@@ -171,6 +167,7 @@ export async function onRequest(context) {
     html=addHeadAsset(html,'href="/staff-login-polish.css',`<link rel="stylesheet" href="/staff-login-polish.css?v=${VERSION}" data-gc-staff-login-polish="1">`);
     html=addHeadAsset(html,'href="/staff-command-center-pro.css',`<link rel="stylesheet" href="/staff-command-center-pro.css?v=${VERSION}" data-gc-staff-command-center-css="1">`);
     html=addHeadAsset(html,'href="/staff-directory-360.css',`<link rel="stylesheet" href="/staff-directory-360.css?v=${VERSION}" data-gc-staff-directory-360-css="1">`);
+    html=addHeadAsset(html,'href="/gc-staff-customer-control-20261003.css',`<link rel="stylesheet" href="/gc-staff-customer-control-20261003.css?v=${VERSION}" data-gc-staff-customer-control="1">`);
     html=addBodyAsset(html,'src="/staff-command-center-pro.js',`<script src="/staff-command-center-pro.js?v=${VERSION}" defer data-gc-staff-command-center="1"></script>`);
     html=addBodyAsset(html,'src="/staff-directory-360.js',`<script src="/staff-directory-360.js?v=${VERSION}" defer data-gc-staff-directory-360="1"></script>`);
     html=addBodyAsset(html,'src="/staff-profit-analytics.js',`<script src="/staff-profit-analytics.js?v=${VERSION}" defer data-gc-staff-profit-analytics="1"></script>`);
@@ -200,6 +197,6 @@ export async function onRequest(context) {
   }
   if (path === '/operations-control-v2.html') html=addBodyAsset(html,'src="/operations-events.js',`<script src="/operations-events.js?v=${VERSION}" defer data-gc-operations-events="1"></script>`);
   if (path === '/operations-command-center.html') html=addBodyAsset(html,'src="/operations-exception-engine.js',`<script src="/operations-exception-engine.js?v=${VERSION}" defer data-gc-exception-engine="1"></script>`);
-  const headers=applySecurityHeaders(new Headers(response.headers)); headers.delete('content-encoding'); headers.delete('content-length'); headers.delete('etag'); headers.set('content-type','text/html; charset=UTF-8');
+  const headers=applySecurityHeaders(new Headers(response.headers)); headers.delete('content-encoding'); headers.delete('content-length'); headers.delete('etag'); headers.set('content-type','text/html; charset=UTF-8'); if(STAFF_V5.test(path)) headers.set('cache-control','no-store, max-age=0, must-revalidate');
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
