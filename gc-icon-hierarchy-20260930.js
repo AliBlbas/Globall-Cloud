@@ -41,7 +41,6 @@
       document.querySelectorAll('a[href^="https://wa.me"]').forEach((node) => {
         if (node.id !== 'gcWhatsAppFloat' && !node.closest('.gc-whatsapp-float')) node.remove();
       });
-      document.querySelectorAll('[data-dock="settings"]').forEach((node) => node.remove());
     }
     const whatsapp = [...document.querySelectorAll('#gcWhatsAppFloat')];
     whatsapp.slice(1).forEach((node) => node.remove());
