@@ -194,3 +194,11 @@ body.gc-customer-app .mobile-dock a{color:#9bb2c5!important;border-radius:15px!i
   body:has(.gc-home) .gc-trust{grid-template-columns:1fr!important}
   body:has(.gc-home) .gc-hero-copy h1{font-size:clamp(29px,9.2vw,38px)!important}
 }
+
+/* Mobile dashboard status rhythm correction */
+@media (max-width:760px){
+  body.gc-customer-app .portal-status{min-height:0!important;margin:8px 0!important;padding:12px 14px!important;border-radius:16px!important;line-height:1.75!important}
+  body.gc-customer-app .portal-status:empty{display:none!important}
+  body.gc-customer-app .portal-status h1,body.gc-customer-app .portal-status h2,body.gc-customer-app .portal-status h3{margin:0 0 4px!important;font-size:16px!important}
+  body.gc-customer-app .portal-status p{margin:0!important;font-size:11px!important}
+}
