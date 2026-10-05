@@ -213,11 +213,14 @@ Deno.serve(async (req) => {
         const weight = numberOrNull(data.weight_kg, 50000)
         const volume = numberOrNull(data.volume_cbm, 100000)
         const items = numberOrNull(data.items_count, 1000000)
+        const productType = text(data.product_type, 120)
+        const rateKey = text(data.rate_key, 120)
+        const isDubaiAir = transportMode === 'air' && /\b(dubai|uae|united arab)\b/i.test(originKey)
         const serviceLevel = text(data.service_level, 30) || 'standard'
         const incoterm = text(data.incoterm, 12) || 'EXW'
         const notes = text(data.notes, 2000)
-        const quantityValid = transportMode === 'sea' ? volume !== null && volume > 0 : weight !== null && weight > 0
-        if (originKey.length < 2 || destKey.length < 2 || !['air', 'sea', 'land', 'multimodal'].includes(transportMode) || !['standard', 'express', 'priority'].includes(serviceLevel) || !['EXW', 'FOB', 'CIF', 'DDP'].includes(incoterm) || !quantityValid) return json(req, {error: 'Please check the required quote fields.'}, 400)
+        const quantityValid = transportMode === 'sea' ? volume !== null && volume > 0 : isDubaiAir ? items !== null && items > 0 && Number.isInteger(items) : weight !== null && weight > 0
+        if (originKey.length < 2 || destKey.length < 2 || !['air', 'sea', 'land'].includes(transportMode) || serviceLevel !== 'standard' || !['EXW', 'FOB', 'CIF', 'DDP'].includes(incoterm) || !quantityValid || (isDubaiAir && !productType)) return json(req, {error: 'Please check the required quote fields.'}, 400)
         const {data: rows, error} = await service.from('quote_requests').insert({
           customer_user_id: user.id,
           customer_name: customer.name || user.user_metadata?.full_name || user.email || 'Customer',
@@ -225,6 +228,8 @@ Deno.serve(async (req) => {
           origin_key: originKey,
           dest_key: destKey,
           transport_mode: transportMode,
+          product_type: productType || null,
+          rate_key: rateKey || null,
           weight_kg: weight,
           volume_cbm: volume,
           items_count: items,
@@ -252,7 +257,7 @@ Deno.serve(async (req) => {
     const [notifications, preferences, quotes, documents, pods, invoices, payments, events, ledger, receipts, packages, chatThreads] = await Promise.all([
       service.from('customer_notifications').select('id,title,body,read_at,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(12),
       service.from('customer_notification_preferences').select('email_enabled,whatsapp_enabled,sms_enabled,in_app_enabled,quiet_hours_start,quiet_hours_end,updated_at').eq('customer_user_id', user.id).maybeSingle(),
-      service.from('quote_requests').select('id,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,status,quoted_amount,currency,valid_until,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(12),
+      service.from('quote_requests').select('id,origin_key,dest_key,transport_mode,product_type,rate_key,items_count,weight_kg,volume_cbm,status,quoted_amount,currency,valid_until,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(12),
       service.from('shipment_documents').select('id,shipment_id,document_type,title,file_url,is_public,document_status,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(12),
       shipmentIds.length ? service.from('delivery_proofs').select('shipment_id,delivered_at,receiver_name,note,photo_urls,latitude,longitude,created_at').in('shipment_id', shipmentIds).order('created_at', {ascending: false}).limit(12) : Promise.resolve({data: [], error: null}),
       service.from('shipment_invoices').select('id,invoice_number,shipment_id,total,paid_total,currency,status,due_at,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(20),

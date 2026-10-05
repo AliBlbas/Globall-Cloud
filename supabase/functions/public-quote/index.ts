@@ -120,6 +120,7 @@ Deno.serve(async (req) => {
     const volume = numberOrNull(body.volume_cbm, 100000)
     const items = numberOrNull(body.items_count, 1000000)
     const productType = text(body.product_type, 120)
+    const rateKey = text(body.rate_key, 120)
     const isDubaiAir = mode === 'air' && ['dubai','uae','united arab emirates','unitedarabemirates'].includes(originKey)
     const quantityValid = mode === 'sea' ? volume !== null && volume > 0 : isDubaiAir ? items !== null && items > 0 : weight !== null && weight > 0
 
@@ -129,10 +130,45 @@ Deno.serve(async (req) => {
       !ALLOWED_ROUTE_ORIGINS.has(originKey) ||
       !ALLOWED_ROUTE_DESTINATIONS.has(destKey) ||
       !['air', 'sea', 'land', 'multimodal'].includes(mode) ||
-      !['standard', 'express', 'priority'].includes(level) ||
+      level !== 'standard' ||
       !['EXW', 'FOB', 'CIF', 'DDP'].includes(incoterm) ||
-      !quantityValid
+      !quantityValid ||
+      (items !== null && !Number.isInteger(items)) ||
+      (isDubaiAir && !productType)
     ) return reply(req, { error: 'Please check the required quote fields.' }, 400)
+
+    if (rateKey) {
+      const today = new Date().toISOString().slice(0, 10)
+      const selected = await db.from('pricing_rates')
+        .select('rate_key,origin_key,destination_key,transport_mode,product_type,unit,effective_from,effective_to,is_active')
+        .eq('rate_key', rateKey)
+        .eq('is_active', true)
+        .lte('effective_from', today)
+        .or(`effective_to.is.null,effective_to.gte.${today}`)
+        .maybeSingle()
+      if (selected.error) throw selected.error
+      const rate = selected.data
+      const originGroup = (value: unknown) => {
+        const key = text(value, 100).toLowerCase()
+        if (['dubai', 'uae', 'sharjah'].includes(key)) return 'dubai'
+        if (['usa', 'us'].includes(key)) return 'usa'
+        if (['china', 'cn', 'guangzhou', 'shenzhen'].includes(key)) return 'china'
+        return key
+      }
+      const unit = String(rate?.unit || '').toLowerCase()
+      const itemUnit = ['item', 'items', 'piece', 'pieces', 'unit', 'units'].includes(unit)
+      const cbmUnit = ['cbm', 'meter', 'per cbm'].includes(unit)
+      if (!rate ||
+          originGroup(rate.origin_key) !== originGroup(originKey) ||
+          String(rate.destination_key).toLowerCase() !== destKey && !(['hawler', 'hwr'].includes(destKey) && String(rate.destination_key).toLowerCase() === 'erbil') ||
+          String(rate.transport_mode).toLowerCase() !== mode ||
+          String(rate.product_type).trim().toLowerCase() !== productType.trim().toLowerCase() ||
+          (itemUnit && (items === null || items <= 0)) ||
+          (cbmUnit && (volume === null || volume <= 0)) ||
+          (!itemUnit && !cbmUnit && (weight === null || weight <= 0))) {
+        return reply(req, { error: 'The selected active rate does not match this quote request.' }, 400)
+      }
+    }
 
     const response = await fetch(`${env('SUPABASE_URL')}/rest/v1/quote_requests`, {
       method: 'POST',
@@ -150,6 +186,7 @@ Deno.serve(async (req) => {
         dest_key: destKey,
         transport_mode: mode,
         product_type: productType || null,
+        rate_key: rateKey || null,
         weight_kg: weight && weight > 0 ? weight : null,
         volume_cbm: volume,
         items_count: items,

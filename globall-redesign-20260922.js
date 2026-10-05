@@ -45,10 +45,6 @@
     });
   };
 
-  const menu = document.querySelector('[data-gc-menu]');
-  const mobile = document.querySelector('[data-gc-mobile-menu]');
-  menu?.addEventListener('click', () => { if (mobile) mobile.hidden = !mobile.hidden; });
-  document.querySelectorAll('[data-gc-mobile-menu] a').forEach(a => a.addEventListener('click', () => { if (mobile) mobile.hidden = true; }));
 
   const rateData = {
     air: { label: 'AIR · EXPRESS', eta: '٢–٥ ڕۆژ', base: 22, perKg: 4.8, service: 'Air Freight · خێرایی بۆ بارە پەلەکان', text: 'باشترین هەڵبژاردەیە بۆ بارە کەم‌قەبارە و پەلەدارەکان، بە ڕێگای ڕوون لە source تا Erbil.' },
@@ -111,6 +107,11 @@
     const hash = String(location.hash || '').replace(/^#/, '');
     const allowed = ['home','about','services','track','request','portal','contact'];
     const id = allowed.includes(hash) ? hash : (location.pathname === '/services' ? 'services' : location.pathname === '/track' ? 'track' : location.pathname === '/request' || location.pathname === '/quote' ? 'request' : location.pathname === '/dashboard' || location.pathname === '/portal' ? 'portal' : location.pathname === '/contact' ? 'contact' : 'home');
+    if (id === 'services' && (location.pathname === '/' || location.pathname === '/index.html') && document.getElementById('services')) {
+      try { if (typeof window.route === 'function') window.route('home'); } catch (_) {}
+      window.setTimeout(() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+      return;
+    }
     if (typeof window.route === 'function') {
       try { window.route(id); return; } catch (_) {}
     }

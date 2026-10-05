@@ -1,6 +1,6 @@
 /* Globall Cloud — production HTML middleware. */
 const HTML_ACCEPT = 'text/html';
-const VERSION = '20261001-1';
+const VERSION = '20260930-2';
 const VISUAL_REFRESH = `<link rel="stylesheet" href="/globall-visual-refresh-20260921.css?v=20260921-1" data-gc-visual-refresh="20260921-1">`;
 const ENTERPRISE_SHELL = `<link rel="stylesheet" href="/enterprise-shell-v2026.css?v=${VERSION}" data-gc-enterprise-shell="1">`;
 const THEME_CSS = `<link rel="stylesheet" href="/gc-theme-sync.css?v=${VERSION}" data-gc-theme-css="1">`;
@@ -102,8 +102,8 @@ const MOBILE_PRIMARY_NAV = `<style data-gc-mobile-primary-nav="1">
 </nav>`;
 const LEGACY_SUPABASE_NOTICE = 'Supabase هێشتا پەیوەست نەکراوە — URL و publishable key لە کۆدەکەدا زیادبکە (سەرەتای script tag).';
 const CSP = "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://rum-static.pingdom.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.supabase.co https://rum-ingest.pingdom.net https://*.sentry.io https://sentry.io; frame-src 'self' https://www.google.com; worker-src 'self' blob:";
-const STAFF_V5 = /^\/(?:staff|staff-os)(?:\.html)?\/?$/i;
-const OPERATIONAL_PAGE = /^\/(?:staff(?:-os)?|warehouse(?:-os)?|customer-portal|shop-operations|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\.html)?\/?$/i;
+const STAFF_V5 = /^\/(?:staff|staff-os|staff-os-v5)(?:\.html)?\/?$/i;
+const OPERATIONAL_PAGE = /^\/(?:staff(?:-os)?|staff-os-v5|warehouse(?:-os)?|customer-portal|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\.html)?\/?$/i;
 const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`);
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`);
 const applySecurityHeaders = (headers) => {
@@ -129,36 +129,47 @@ export async function onRequest(context) {
   if (!contentType.toLowerCase().includes(HTML_ACCEPT)) return response;
   let html = await response.text();
   if (path === '/' || path === '/index.html') html = rewriteRootHtml(html); else html = html.split(LEGACY_SUPABASE_NOTICE).join('');
-  // The production pages own their asset graph. The homepage only needs the
-  // small settings/theme compatibility controls; legacy visual and bridge
-  // assets are loaded by their owning routes or on explicit user intent.
   const headAssets = [
     ['href="/gc-theme-sync.css',THEME_CSS],
     ['src="/gc-theme-sync.js',THEME_JS],
     ['href="/gc-settings-hub.css',SETTINGS_CSS],
     ['src="/gc-settings-hub.js',SETTINGS_JS],
-    ['name="color-scheme"','<meta name="color-scheme" content="dark light">']
+    ['name="color-scheme"','<meta name="color-scheme" content="dark light">'],
+    ['href="/globall-visual-refresh-20260921.css',VISUAL_REFRESH],
+    ['href="/enterprise-shell-v2026.css',ENTERPRISE_SHELL],
+    ['href="/browser-compat.css',`<link rel="stylesheet" href="/browser-compat.css?v=${VERSION}" data-gc-browser-compat="1">`],
+    ['href="/safari-compat-elite.css',`<link rel="stylesheet" href="/safari-compat-elite.css?v=${VERSION}" data-gc-safari-elite="1">`],
+    ['href="/logo-fix.css',`<link rel="stylesheet" href="/logo-fix.css?v=${VERSION}" data-gc-logo-fix="1">`],
+    ['href="/site-polish.css',`<link rel="stylesheet" href="/site-polish.css?v=${VERSION}" data-gc-premium-polish="1">`],
+    ['href="/production-mobile-hotfix.css',`<link rel="stylesheet" href="/production-mobile-hotfix.css?v=${VERSION}" data-gc-production-mobile-hotfix="1">`],
+    ['href="/production-mobile-ux-v2026.css',`<link rel="stylesheet" href="/production-mobile-ux-v2026.css?v=${VERSION}" data-gc-production-mobile-ux="1">`],
+    ['href="/gc-public-premium-ux-2026.css',`<link rel="stylesheet" href="/gc-public-premium-ux-2026.css?v=${VERSION}" data-gc-public-premium-ux="1">`],
+    ['href="/gc-home-final-2026.css',`<link rel="stylesheet" href="/gc-home-final-2026.css?v=${VERSION}" data-gc-home-final="1">`],
+    ['src="/production-bridge.js',`<script src="/production-bridge.js?v=${VERSION}" defer data-gc-production-bridge="1"></script>`],
+    ['src="/public-customer-auth-fix.js',`<script src="/public-customer-auth-fix.js?v=${VERSION}" defer data-gc-customer-auth-fix="1"></script>`],
+    ['src="/production-brand-repair.js',`<script src="/production-brand-repair.js?v=${VERSION}" defer data-gc-production-brand-repair="1"></script>`],
+    ['src="/gc-final-experience-2026.js',`<script src="/gc-final-experience-2026.js?v=${VERSION}" defer data-gc-final-experience="1"></script>`],
+    ['href="/gc-final-ui-20260927.css',`<link rel="stylesheet" href="/gc-final-ui-20260927.css?v=4" data-gc-final-ui="3">`]
   ];
-  if (path === '/' || path === '/index.html') {
-    for (const [needle,fragment] of headAssets) html = addHeadAsset(html,needle,fragment);
-  }
-  if (STAFF_V5.test(path)) {
-    const headers=applySecurityHeaders(new Headers(response.headers)); headers.delete('content-encoding'); headers.delete('content-length'); headers.delete('etag'); headers.set('cache-control','no-store, max-age=0, must-revalidate'); headers.set('content-type','text/html; charset=UTF-8');
-    return new Response(html,{status:response.status,statusText:response.statusText,headers});
-  }
+  for (const [needle,fragment] of headAssets) html = addHeadAsset(html,needle,fragment);
   if (OPERATIONAL_PAGE.test(path)) html=addHeadAsset(html,'src="/runtime-guard.js',`<script src="/runtime-guard.js?v=${VERSION}" defer data-gc-runtime-guard="1"></script>`);
   if (/^\/(?:tracking|track|tracking-integration)(?:\.html)?\/?$/i.test(path)) html=addHeadAsset(html,'src="/gc-tracking-deeplink.js',`<script src="/gc-tracking-deeplink.js?v=${VERSION}" defer data-gc-tracking-deeplink="1"></script>`);
-  if (path !== '/' && path !== '/index.html' && (!OPERATIONAL_PAGE.test(path) || /^\/(?:customer-portal|tracking|tracking-integration)(?:\.html)?\/?$/i.test(path))) html=addHeadAsset(html,'href="/globall-realistic-design-20260919.css',`<link rel="stylesheet" href="/globall-realistic-design-20260919.css?v=${VERSION}" data-gc-realistic-design="1">`);
+  if (!OPERATIONAL_PAGE.test(path) || /^\/(?:customer-portal|tracking|tracking-integration)(?:\.html)?\/?$/i.test(path)) html=addHeadAsset(html,'href="/globall-realistic-design-20260919.css',`<link rel="stylesheet" href="/globall-realistic-design-20260919.css?v=${VERSION}" data-gc-realistic-design="1">`);
   if (path === '/' || path === '/index.html') {
     html=addHeadAsset(html,'src="/staff-auth-runtime-fix.js',`<script src="/staff-auth-runtime-fix.js?v=${VERSION}" defer data-gc-staff-auth-runtime="1"></script>`);
+    html=addBodyAsset(html,'src="/gc-csp-scripts/logistics-pricing-ui.js',`<script src="/gc-csp-scripts/logistics-pricing-ui.js?v=${VERSION}" defer data-gc-logistics-pricing-ui="1"></script>`);
     html=addBodyAsset(html,'src="/site-navigation-20260909.js',`<script src="/site-navigation-20260909.js?v=${VERSION}" defer data-gc-site-navigation="1"></script>`);
+    html=addBodyAsset(html,'src="/public-core-recovery.js',`<script src="/public-core-recovery.js?v=${VERSION}" defer data-gc-public-core-recovery="1"></script>`);
     html=addBodyAsset(html,'id="gcPrimaryMobileNav"',MOBILE_PRIMARY_NAV);
   }
   if (STAFF_V5.test(path)) {
+    html=addHeadAsset(html,'src="/staff-blank-screen-recovery-20261003.js',`<script src="/staff-blank-screen-recovery-20261003.js?v=${VERSION}" defer data-gc-staff-blank-recovery="1"></script>`);
     html=addHeadAsset(html,'src="/staff-os-compat.js',`<script src="/staff-os-compat.js?v=${VERSION}" defer data-gc-staff-compat="1"></script>`);
     html=addHeadAsset(html,'href="/staff-login-polish.css',`<link rel="stylesheet" href="/staff-login-polish.css?v=${VERSION}" data-gc-staff-login-polish="1">`);
     html=addHeadAsset(html,'href="/staff-command-center-pro.css',`<link rel="stylesheet" href="/staff-command-center-pro.css?v=${VERSION}" data-gc-staff-command-center-css="1">`);
     html=addHeadAsset(html,'href="/staff-directory-360.css',`<link rel="stylesheet" href="/staff-directory-360.css?v=${VERSION}" data-gc-staff-directory-360-css="1">`);
+    html=addHeadAsset(html,'href="/gc-staff-customer-control-20261003.css',`<link rel="stylesheet" href="/gc-staff-customer-control-20261003.css?v=${VERSION}" data-gc-staff-customer-control="1">`);
+    html=addHeadAsset(html,'href="/gc-staff-dashboard-mobile-fix-20261003.css',`<link rel="stylesheet" href="/gc-staff-dashboard-mobile-fix-20261003.css?v=${VERSION}" data-gc-staff-dashboard-mobile-fix="1">`);
     html=addBodyAsset(html,'src="/staff-command-center-pro.js',`<script src="/staff-command-center-pro.js?v=${VERSION}" defer data-gc-staff-command-center="1"></script>`);
     html=addBodyAsset(html,'src="/staff-directory-360.js',`<script src="/staff-directory-360.js?v=${VERSION}" defer data-gc-staff-directory-360="1"></script>`);
     html=addBodyAsset(html,'src="/staff-profit-analytics.js',`<script src="/staff-profit-analytics.js?v=${VERSION}" defer data-gc-staff-profit-analytics="1"></script>`);
@@ -188,6 +199,6 @@ export async function onRequest(context) {
   }
   if (path === '/operations-control-v2.html') html=addBodyAsset(html,'src="/operations-events.js',`<script src="/operations-events.js?v=${VERSION}" defer data-gc-operations-events="1"></script>`);
   if (path === '/operations-command-center.html') html=addBodyAsset(html,'src="/operations-exception-engine.js',`<script src="/operations-exception-engine.js?v=${VERSION}" defer data-gc-exception-engine="1"></script>`);
-  const headers=applySecurityHeaders(new Headers(response.headers)); headers.delete('content-encoding'); headers.delete('content-length'); headers.delete('etag'); headers.set('content-type','text/html; charset=UTF-8');
+  const headers=applySecurityHeaders(new Headers(response.headers)); headers.delete('content-encoding'); headers.delete('content-length'); headers.delete('etag'); headers.set('content-type','text/html; charset=UTF-8'); if(STAFF_V5.test(path)) headers.set('cache-control','no-store, max-age=0, must-revalidate');
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }

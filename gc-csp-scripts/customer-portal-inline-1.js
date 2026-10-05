@@ -1,79 +1,387 @@
 const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
+const CUSTOMER_SELF = `${SUPABASE_URL}/functions/v1/customer-self`;
 const GC_LOGIN_FN = `${SUPABASE_URL}/functions/v1/customer-gc-login`;
-const sb = window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+// Classic-script const bindings are not window properties; expose the same
+// session-aware client to independently loaded account modules.
+window.sb = sb;
+window.gcSupabase = sb;
+
+const customerApi = async ({ method = 'GET', body } = {}) => {
+  const { data: sessionResult } = await sb.auth.getSession();
+  const token = sessionResult.session?.access_token;
+  if (!token) throw new Error('تکایە سەرەتا login بکە');
+  const response = await fetch(CUSTOMER_SELF, {
+    method,
+    headers: { Authorization: `Bearer ${token}`, apikey: SUPABASE_KEY, 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+    cache: 'no-store',
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(payload.error || `Customer API ${response.status}`);
+    error.status = response.status;
+    error.payload = payload;
+    throw error;
+  }
+  return payload;
+};
 const $ = (id) => document.getElementById(id);
 const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const setHtml = (id, html) => { const element = $(id); if (element) element.innerHTML = html; };
-const money = (amount, currency = 'USD') => `${Number(amount || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })} ${esc(currency)}`;
-const date = (value) => value ? new Date(value).toLocaleString('ckb-IQ', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
-const statusLabel = (item) => {
-  const raw = String(item.operational_status || '').toLowerCase();
-  if (['delivered', 'completed', 'arrived'].includes(raw) || Number(item.current_step_index) >= 5) return 'گەیشتووە هەولێر';
-  if (['in_transit', 'moving', 'out_for_delivery', 'picked_up'].includes(raw) || Number(item.current_step_index) > 0) return 'لە ڕێگەیە';
-  return 'لە کۆگا';
+const money = (amount, currency = 'USD') => `${Number(amount || 0).toLocaleString('en-US')} ${esc(currency)}`;
+const date = (value) => value ? new Date(value).toLocaleString() : '—';
+const showMessage = (message, kind = 'muted') => { $('quoteMessage').textContent = message; $('quoteMessage').className = kind; };
+
+const renderClaimPrompt = () => {
+  const status = $('portalStatus');
+  if (!status) return;
+  status.className = 'portal-status';
+  status.innerHTML = `
+    <div>
+      <strong>هەژماری کڕیاری خۆت پەیوەست بکە</strong>
+      <span>ئەم هەژمارەی login ـە هێشتا بە customer profile ـەکەت نەبەستراوە. GC Code و ژمارەی مۆبایلەکەت بنووسە بۆ پەیوەستکردنی هەژمارەکەت بە زانیارییەکانی کۆمپانیا.</span>
+      <div style="display:grid;gap:10px;margin-top:14px;max-width:520px">
+        <input id="gcClaimCode" class="field" inputmode="text" autocomplete="off" placeholder="GC-1008" aria-label="GC Code">
+        <input id="gcClaimPhone" class="field" inputmode="tel" autocomplete="tel" placeholder="+964 750 000 0000" aria-label="ژمارەی مۆبایل">
+        <button id="gcClaimBtn" class="btn primary" type="button">پەیوەستکردنی هەژمار</button>
+        <div id="gcClaimMsg" class="muted" role="status" aria-live="polite"></div>
+      </div>
+    </div>`;
+  $('gcClaimBtn')?.addEventListener('click', claimExistingCustomer);
 };
-const paymentLabel = (item) => Number(item.paid_amount || 0) >= Number(item.total_amount || item.cargo_cost || 0) && Number(item.total_amount || item.cargo_cost || 0) > 0 ? 'پارەکە دراوە' : 'پارەی ماوە';
-const message = (id, text, kind = 'muted') => { const el = $(id); if (el) { el.textContent = text; el.className = kind; } };
-const emptyState = (icon, title, body) => `<div class="portal-empty"><span class="portal-empty-icon">${icon}</span><strong>${title}</strong><p>${body}</p></div>`;
 
-const renderShipments = (items) => setHtml('shipments', items.map((item) => {
-  const photos = item.step_photos && typeof item.step_photos === 'object' ? Object.values(item.step_photos).flat().filter(Boolean) : [];
-  const status = statusLabel(item);
-  const total = Number(item.total_amount || item.cargo_cost || 0);
-  const paid = Number(item.paid_amount || 0);
-  return `<div class="item shipment-card"><div class="row"><strong>${esc(item.batch_code || item.tracking_id || item.id)}</strong><span class="pill gc-status-${status === 'لە ڕێگەیە' ? 'moving' : status === 'گەیشتووە هەولێر' ? 'done' : 'warehouse'}">${esc(status)}</span></div><div class="gc-status-track"><span class="active"></span><span class="${Number(item.current_step_index || 0) > 0 ? 'active' : ''}"></span><span class="${Number(item.current_step_index || 0) >= 5 ? 'active' : ''}"></span></div><div class="muted">${esc(item.origin_key || item.origin_warehouse || '—')} → ${esc(item.dest_key || 'Erbil')} · ${esc(item.current_location_label || item.warehouse_location || '—')}</div><div class="gc-shipment-meta"><span>کێش: <b>${esc(item.weight_kg ?? item.actual_weight_kg ?? 0)} kg</b></span><span>جۆر: <b>${esc(item.cargo_type || item.type || item.transport_mode || '—')}</b></span><span>پارە: <b>${esc(paymentLabel(item))}</b></span></div><div class="muted">تێچوو: ${money(total, item.currency || item.cargo_currency || 'USD')} · دراوە: ${money(paid, item.currency || item.cargo_currency || 'USD')} · ماوە: ${money(Math.max(0, total - paid), item.currency || item.cargo_currency || 'USD')}</div><small class="muted">نوێکراوەتەوە: ${esc(date(item.tracking_updated_at || item.updated_at || item.created_at))}${item.eta ? ` · گەیشتن: ${esc(date(item.eta))}` : ''}</small>${photos.length ? `<div class="gc-shipment-photos">${photos.slice(0, 8).map((url) => `<a href="${esc(url)}" target="_blank" rel="noreferrer"><img src="${esc(url)}" alt="وێنەی بار"></a>`).join('')}</div>` : ''}</div>`;
-}).join('') || emptyState('📦', 'هێشتا بارێکت نییە', 'کاتێک shipment ـێکت تۆمار کرا، لێرە بە وردی دەیبینیت.'));
+const claimExistingCustomer = async () => {
+  const code = $('gcClaimCode')?.value.trim() || '';
+  const phone = $('gcClaimPhone')?.value.trim() || '';
+  const button = $('gcClaimBtn');
+  const msg = $('gcClaimMsg');
+  if (!code || !phone) {
+    if (msg) msg.textContent = 'GC Code و ژمارەی مۆبایل پڕبکەرەوە.';
+    return;
+  }
+  if (button) { button.disabled = true; button.textContent = 'پشکنین دەکرێت…'; }
+  if (msg) msg.textContent = '';
+  try {
+    await customerApi({ method: 'POST', body: { action: 'claim_account', data: { gc_code: code, phone } } });
+    if (msg) msg.textContent = 'هەژمارەکەت بە سەرکەوتوویی پەیوەست کرا. داتا بارکراوە.';
+    await load();
+  } catch (error) {
+    if (msg) msg.textContent = error.message || 'پەیوەستکردنی هەژمار سەرکەوتوو نەبوو.';
+    if (button) { button.disabled = false; button.textContent = 'پەیوەستکردنی هەژمار'; }
+  }
+};
 
-const renderWarehouses = (items) => setHtml('warehouseDirectory', items.map((item) => `<div class="item"><strong>${esc(item.label)}</strong><div class="muted">${esc(item.city)}, ${esc(item.country)}</div><p class="gc-address">${esc(item.address)}</p>${item.contact ? `<small>${esc(item.contact)}</small>` : ''}${item.pickup_hours ? `<small>کاتی وەرگرتن: ${esc(item.pickup_hours)}</small>` : ''}<button class="btn gc-copy-btn" type="button" data-copy="${esc(item.address)}">کۆپیکردنی ناونیشان</button></div>`).join('') || '<div class="muted">ناونیشان بەردەست نییە.</div>');
-const renderNotifications = (items) => setHtml('notifications', items.map((item) => `<div class="item"><strong>${esc(item.title)}</strong><div class="muted">${esc(item.body)}</div><small>${esc(date(item.created_at))}</small></div>`).join('') || emptyState('🔔', 'هیچ ئاگادارکردنەوەیەک نییە', 'نوێکارییە گرنگەکان و دۆخی بارەکانت لێرە دەردەکەون.'));
-const renderQuotes = (items) => setHtml('quotes', items.map((item) => `<div class="item"><div class="row"><strong>${esc(item.origin_key)} → ${esc(item.dest_key)}</strong><span class="pill">${esc(item.status)}</span></div><div class="muted">${esc(item.transport_mode)} · ${esc(item.product_type||'')} · ${item.items_count?`${esc(item.items_count)} item · `:''}${esc(item.weight_kg??'—')} kg · ${esc(item.volume_cbm || 0)} CBM</div><div>${item.quoted_amount == null ? 'لەژێر پێداچوونەوە' : money(item.quoted_amount, item.currency)}</div><small>${item.valid_until ? `کاریگەر تا ${esc(date(item.valid_until))}` : ''}</small></div>`).join('') || emptyState('◈', 'هیچ داواکارییەکی نرخ نییە', 'داواکاری نرخەکانت لێرە بە ئاسانی بەدواداچوون بۆ دەکرێت.'));
-const renderRequests = (items) => setHtml('requestHistory', items.map((item) => `<div class="item"><div class="row"><strong>${esc(item.cargo_country || item.origin_key)} · ${esc(item.transport_mode)}</strong><span class="pill">${esc(item.status === 'pending' ? 'چاوەڕوانی پێداچوونەوە' : item.status)}</span></div><div class="muted">کێش: ${esc(item.weight_kg || 0)} kg · ${esc(item.cargo_description || item.notes || '—')}</div><small>${esc(date(item.created_at))}${item.quoted_amount != null ? ` · نرخ: ${money(item.quoted_amount, item.currency)}` : ''}</small></div>`).join('') || '<div class="muted">هێشتا هیچ داواکارییەکت نییە.</div>');
-const renderDocuments = (items) => setHtml('docs', items.map((item) => `<div class="item"><div class="row"><strong>${esc(item.title || item.document_type)}</strong><span class="pill">${item.is_public ? 'Public' : 'Private'}</span></div><div class="muted">${esc(item.shipment_id)} · ${esc(item.document_status || 'uploaded')}</div><small>${esc(date(item.created_at))}</small>${item.file_url ? ` <a class="download" href="${esc(item.file_url)}" data-document-id="${esc(item.id)}" target="_blank" rel="noopener noreferrer">داگرتن</a>` : ''}</div>`).join('') || emptyState('▤', 'بەڵگەنامەیەک نییە', 'Invoice و بەڵگەکانی shipment ـەکانت لێرە کۆدەکرێنەوە.'));
-const renderPods = (items) => setHtml('pods', items.map((item) => `<div class="item"><strong>${esc(item.shipment_id)}</strong><div class="muted">${item.delivered_at ? `گەیەنراو ${esc(date(item.delivered_at))}` : 'Pending'} · ${esc(item.receiver_name || '—')}</div><small>${esc(item.note || '')}</small></div>`).join('') || emptyState('✓', 'هێشتا بەڵگەی گەیاندن نییە', 'دوای گەیاندنی بار، زانیارییەکانی وەرگرتن لێرە دەردەکەون.'));
-const renderPayments = (invoices, payments) => setHtml('payments', [...invoices.map((item) => `<div class="item"><div class="row"><strong>${esc(item.invoice_number)}</strong><span class="pill">${esc(item.status)}</span></div><div class="muted">${esc(item.shipment_id)} · ${money(item.total, item.currency)}</div><small>دراوە: ${money(item.paid_total, item.currency)} · ماوە: ${money(Math.max(0, Number(item.total || 0) - Number(item.paid_total || 0)), item.currency)}</small></div>`), ...payments.map((item) => `<div class="item"><div class="row"><strong>${money(item.amount, item.currency)}</strong><span class="pill">${esc(item.status)}</span></div><div class="muted">${esc(item.provider || '—')} · ${esc(item.method || '—')}</div><small>${esc(date(item.paid_at || item.created_at))}</small></div>`)].join('') || emptyState('$', 'مێژووی پارەدان بەتاڵە', 'پارەدان و invoice ـەکانت بە شێوەی ڕێکخراو لێرە دەبینیت.'));
+const emptyState = (icon, title, text) => `<div class="gc-data-empty"><span class="gc-empty-icon">${icon}</span><div><strong>${title}</strong><span>${text}</span></div></div>`;
+const EMPTY = {
+  box: '<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M7 7V4h10v3"></path></svg>',
+  bell: '<svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg>',
+  quote: '<svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 7h8M8 11h2m2 0h2m2 0h0M8 15h2m2 0h2"></path></svg>',
+  file: '<svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v5h5"></path></svg>',
+  money: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18M7 15h5"></path></svg>'
+};
+
+const renderCustomerIdentity = (profile) => {
+  if (!profile) return;
+  const code = profile.gc_code || profile.code || 'GC-—';
+  if ($('customerGcCode')) $('customerGcCode').textContent = code;
+  if ($('customerProfileName')) $('customerProfileName').textContent = profile.name || 'Customer';
+  if ($('customerProfileContact')) $('customerProfileContact').textContent = [profile.email, profile.phone].filter(Boolean).join(' · ') || 'پەیوەندی تۆمار نەکراوە';
+};
+const renderWarehouseAddresses = (items) => {
+  const rows = (items || []).map((item) => {
+    const warehouse = item.warehouse || {};
+    const descriptor = `${item.label || ''} ${warehouse.name || ''} ${warehouse.city || ''} ${warehouse.country_code || ''} ${warehouse.code || ''}`.toLowerCase();
+    const isDubai = /\b(dubai|uae|ae-dxb)\b/.test(descriptor);
+    const mapLink = isDubai ? '<a class="download" href="https://maps.app.goo.gl/VVw58LFzbn36jP1G7?g_st=iwb" target="_blank" rel="noopener noreferrer" aria-label="Open the Dubai warehouse location in Google Maps">بینینی شوێنی کۆگای دوبەی لە Google Maps</a>' : '';
+    return `<div class="warehouse-address"><strong>${esc(item.label || warehouse.name || warehouse.code || 'Warehouse')}</strong><div dir="auto">${esc(warehouse.address_line || warehouse.city || '—')}</div><small class="muted">${esc(warehouse.country_code || '')} · ${esc(item.recipient_name || '')}${item.recipient_phone ? ` · ${esc(item.recipient_phone)}` : ''}</small>${item.instructions ? `<div class="muted">${esc(item.instructions)}</div>` : ''}${item.is_default ? '<span class="pill">Default</span>' : ''}${mapLink}</div>`;
+  }).join('');
+  setHtml('warehouseAddresses', rows || '<div class="muted">هێشتا ناونیشانی warehouse بۆ هەژمارەکەت دانەنراوە.</div>');
+};
+const renderShipments = (items) => setHtml('shipments',
+  items.length
+    ? items.map((item) => `<button class="item shipment-card" type="button" data-shipment-id="${esc(item.id)}"><div class="row"><strong>${esc(item.id)}</strong><span class="pill">${esc(item.operational_status || 'in_progress')}</span></div><div class="muted">${esc(item.origin_key)} → ${esc(item.dest_key)}</div><small>${esc(item.current_location_label || 'دۆخی شوێن بەردەست نییە')} · ETA ${esc(date(item.eta))}</small><span class="shipment-open">کردنەوەی وردەکاری ←</span></button>`).join('')
+    : emptyState(EMPTY.box,'هیچ بارێک نییە','کاتێک shipment ـێک بۆ هەژمارەکەت تۆمار بکرێت، لێرە دەردەکەوێت.')
+);
+const renderCustomerChat = (threads) => { const list=$('customerChatThreads'); if(!list)return; const rows=threads||[]; list.innerHTML=rows.map((thread)=>`<article class="item"><div class="row"><strong>${esc(thread.subject||'Customer Support')}</strong><span class="pill">${esc(thread.status||'open')}</span></div><small class="muted">${esc(date(thread.last_message_at||thread.created_at))}</small><div class="chat-messages">${(thread.messages||[]).map((message)=>`<div class="message ${message.sender_type==='customer'?'me':''}"><b>${message.sender_type==='customer'?'تۆ':'Staff'}</b><p>${esc(message.body)}</p><small>${esc(date(message.created_at))}</small></div>`).join('')||'<span class="muted">هێشتا پەیام نییە.</span>'}</div><button class="btn tiny" type="button" data-chat-thread="${esc(thread.id)}">وەڵامدانەوە</button></article>`).join('') || '<div class="muted">هیچ chat ـێک نییە؛ پەیامێک بنووسە بۆ دەستپێکردن.</div>'; document.querySelectorAll('[data-chat-thread]').forEach((button)=>button.addEventListener('click',()=>{ const input=$('customerChatInput'); if(input){ input.dataset.threadId=button.dataset.chatThread; input.focus(); } })); };
+const sendCustomerChat = async (event) => { event.preventDefault(); const input=$('customerChatInput'); const status=$('customerChatStatus'); const body=input?.value.trim()||''; if(!body)return; const button=event.currentTarget.querySelector('button'); if(button)button.disabled=true; if(status)status.textContent='پەیامەکە دەنێردرێت…'; try{ await customerApi({method:'POST',body:{action:'chat_send',data:{thread_id:input.dataset.threadId||undefined,body}}}); input.value=''; delete input.dataset.threadId; if(status)status.textContent='پەیام بە سەرکەوتوویی نێردرا.'; await load(); }catch(error){if(status)status.textContent=error.message||'ناردنی پەیام سەرکەوتوو نەبوو.';}finally{if(button)button.disabled=false;} };
+const renderNotifications = (items) => setHtml('notifications',
+  items.length
+    ? items.map((item) => `<div class="item"><div class="row"><strong>${esc(item.title)}</strong>${item.read_at ? '<span class="pill">خوێندراوە</span>' : `<button class="btn notification-action" type="button" data-read-notification="${esc(item.id)}">خوێندراوە بکە</button>`}</div><div class="muted">${esc(item.body)}</div><small>${esc(date(item.created_at))}</small></div>`).join('')
+    : emptyState(EMPTY.bell,'هیچ ئاگادارییەکی نوێ نییە','کاتێک update ـێکی shipment یان پەیامێک هەبێت، لێرە پیشان دەدرێت.')
+);
+
+const renderQuotes = (items) => {
+  const html = items.map((item) => {
+    const canAccept = item.status === 'quoted' && item.valid_until && new Date(item.valid_until) > new Date();
+    return `<div class="item">
+      <div class="row"><strong>${esc(item.origin_key)} → ${esc(item.dest_key)}</strong><span class="pill">${esc(item.status)}</span></div>
+      <div class="muted">${esc(item.transport_mode)} · ${esc(item.product_type || "Cargo details pending")} · ${esc(item.items_count || 0)} item · ${esc(item.weight_kg || 0)} kg · ${esc(item.volume_cbm || 0)} CBM</div>
+      <div>${item.quoted_amount == null ? 'لەژێر پێداچوونەوە' : money(item.quoted_amount, item.currency)}</div>
+      <small>${item.valid_until ? `کاریگەر تا ${esc(date(item.valid_until))}` : 'هێشتا نرخ دیاری نەکراوە'}</small>
+      ${canAccept ? `<div class="actions"><button class="btn primary" type="button" data-accept-quote="${esc(item.id)}">پەسەندکردنی quote</button></div>` : ''}
+    </div>`;
+  }).join('');
+  setHtml('quotes', html || emptyState(EMPTY.quote, 'هیچ داواکاریی نرخ نییە', 'لە بەشی “داواکاری نرخ” ـەوە دەتوانیت داواکارییەکی نوێ بنێریت.'));
+};
+
+const renderDocuments = (items) => {
+  const html = items.map((item) => `<div class="item">
+    <div class="row"><strong>${esc(item.title || item.document_type)}</strong><span class="pill">${item.is_public ? 'Public' : 'Private'}</span></div>
+    <div class="muted">${esc(item.shipment_id)} · ${esc(item.document_status || 'uploaded')}</div>
+    <small>${esc(date(item.created_at))}</small>
+    ${item.file_url ? ` <a class="download" href="${esc(item.file_url)}" data-document-id="${esc(item.id)}" target="_blank" rel="noopener noreferrer" download>داگرتن</a>` : ''}
+  </div>`).join('');
+  setHtml('docs', html || emptyState(EMPTY.file, 'هیچ بەڵگەیەک نییە', 'کاتێک document ـێک بۆ shipment ـەکەت بڵاوکرایەوە، لێرە دەبینرێت.'));
+};
+
+const renderPods = (items) => {
+  const html = items.map((item) => `<div class="item">
+    <div class="row"><strong>${esc(item.shipment_id)}</strong><span class="pill">${item.delivered_at ? 'Delivered' : 'Pending'}</span></div>
+    <div class="muted">${item.delivered_at ? `گەیەنراو ${esc(date(item.delivered_at))}` : 'لە چاوەڕوانیدایە'} · ${esc(item.receiver_name || '—')}</div>
+    <small>${esc(item.note || '')}${Array.isArray(item.photo_urls) && item.photo_urls.length ? ` · ${item.photo_urls.length} وێنە` : ''}</small>
+  </div>`).join('');
+  setHtml('pods', html || emptyState(EMPTY.file, 'هیچ Proof of Delivery نییە', 'دوای گەیاندنی بار، بەڵگەی وەرگرتن لێرە دەردەکەوێت.'));
+};
+
+const renderReceipts = (items) => {
+  const html = items.map((item) => {
+    const photos = Array.isArray(item.photos) ? item.photos.filter((url) => typeof url === 'string' && url.startsWith('http')) : [];
+    return `<div class="item">
+      <div class="row"><strong>${esc(item.batch_code || 'Receipt')}</strong><span class="pill">${esc(item.verification_status || 'pending')}</span></div>
+      <div class="muted">${esc(item.location || '—')} · ${esc(item.stage || 'received')} · ${esc(date(item.received_at))}</div>
+      <small>${item.gc_code_detected ? `GC: ${esc(item.gc_code_detected)} · ` : ''}${photos.length} وێنە</small>
+      ${photos.length ? `<div class="photo-grid">${photos.map((url) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img class="receipt-photo" src="${esc(url)}" alt="Receipt ${esc(item.batch_code || '')}" loading="lazy"></a>`).join('')}</div>` : ''}
+    </div>`;
+  }).join('');
+  setHtml('receipts', html || emptyState(EMPTY.file, 'هێشتا warehouse evidence نییە', 'کاتێک بار لە کۆگا وەردەگیرێت، بەڵگە و وێنەکان لێرە دەردەکەون.'));
+};
+
+const renderPayments = (invoices, payments) => {
+  const invoiceRows = invoices.map((item) => {
+    const due = Math.max(0, Number(item.total || 0) - Number(item.paid_total || 0));
+    const paymentAction = due > 0 && item.status !== 'paid'
+      ? `<a class="btn primary payment-action" href="./payment-checkout.html?invoice_id=${encodeURIComponent(item.id)}">پارەدان</a>`
+      : '';
+    return `<div class="item">
+      <div class="row"><strong>${esc(item.invoice_number)}</strong><span class="pill">${esc(item.status)}</span></div>
+      <div class="muted">${esc(item.shipment_id)} · ${money(item.total, item.currency)}</div>
+      <small>Paid: ${money(item.paid_total, item.currency)} · Due: ${money(due, item.currency)}</small>
+      ${paymentAction ? `<div class="actions">${paymentAction}</div>` : ''}
+    </div>`;
+  });
+  const paymentRows = payments.map((item) => `<div class="item">
+    <div class="row"><strong>${money(item.amount, item.currency)}</strong><span class="pill">${esc(item.status)}</span></div>
+    <div class="muted">${esc(item.provider)} · ${esc(item.method || '—')}</div>
+    <small>${esc(date(item.paid_at || item.created_at))}</small>
+  </div>`);
+  setHtml('payments', invoiceRows.concat(paymentRows).join('') || emptyState(EMPTY.money, 'هیچ مامەڵەیەکی دارایی نییە', 'لە کاتی دروستبوونی invoice یان payment، مێژووی مامەڵەکان لێرە دەردەکەوێت.'));
+};
+
+const totalsByCurrency = (items, amountKey) => items.reduce((out, item) => {
+  const currency = String(item.currency || 'USD').toUpperCase();
+  out[currency] = (out[currency] || 0) + Number(item[amountKey] || 0);
+  return out;
+}, {});
+
+const formatBuckets = (buckets) => Object.entries(buckets).map(([currency, amount]) => money(amount, currency)).join(' · ') || '0';
+
+const renderFinance = (invoices, payments, ledger) => {
+  const billed = totalsByCurrency(invoices, 'total');
+  const paid = totalsByCurrency(invoices, 'paid_total');
+  const balance = Object.fromEntries(Object.keys({...billed, ...paid}).map((currency) => [
+    currency,
+    Math.max(0, Number(billed[currency] || 0) - Number(paid[currency] || 0))
+  ]));
+  const expenseRows = ledger.filter((item) => ['charge', 'adjustment'].includes(item.entry_type));
+  const expenseTotals = totalsByCurrency(expenseRows, 'amount');
+
+  $('billedKpi').textContent = formatBuckets(billed);
+  $('paidKpi').textContent = formatBuckets(paid);
+  $('balanceKpi').textContent = formatBuckets(balance);
+  $('expenseKpi').textContent = formatBuckets(expenseTotals);
+
+  const invoiceHtml = invoices.map((item) => {
+    const due = Math.max(0, Number(item.total || 0) - Number(item.paid_total || 0));
+    const action = due > 0 && item.status !== 'paid'
+      ? `<a class="btn primary payment-action" href="./payment-checkout.html?invoice_id=${encodeURIComponent(item.id)}">پارەدان</a>`
+      : '';
+    return `<div class="item">
+      <div class="row"><strong>${esc(item.invoice_number)}</strong><span class="pill">${esc(item.status)}</span></div>
+      <div class="muted">${esc(item.shipment_id)} · ${money(item.total, item.currency)}</div>
+      <small>دراو: ${money(item.paid_total, item.currency)} · ماوە: ${money(due, item.currency)}</small>
+      ${action ? `<div class="actions">${action}</div>` : ''}
+    </div>`;
+  }).join('');
+  const expenseHtml = expenseRows.map((item) => `<div class="item">
+    <div class="row"><strong>${money(item.amount, item.currency)}</strong><span class="pill">${esc(item.entry_type)}</span></div>
+    <div class="muted">${esc(item.shipment_id)}</div>
+    <small>${esc(item.note || item.reference || 'خەرجیی تۆمارکراو')} · ${esc(date(item.created_at))}</small>
+  </div>`).join('');
+
+  setHtml('invoices', invoiceHtml || emptyState(EMPTY.file, 'هیچ invoice ـێک نییە', 'کاتێک invoice ـێک بۆ هەژمارەکەت دروست بکرێت، لێرە دەبینرێت.'));
+  setHtml('expenses', expenseHtml || emptyState(EMPTY.money, 'هیچ خەرجییەکی تۆمارکراو نییە', 'خەرجییەکان کاتێک لە ledger تۆمار بکرێن لێرە دەردەکەون.'));
+};
+
+const renderShipmentDetail = (shipment, events, pods) => { const detail = $('shipmentDetail'); if (!detail || !shipment) return; $('detailTitle').textContent = shipment.id || 'Shipment'; $('detailRoute').textContent = `${shipment.origin_key || '—'} → ${shipment.dest_key || '—'}`; $('detailLocation').textContent = shipment.current_location_label || 'شوێنی ئێستا بەردەست نییە'; $('detailStatus').textContent = shipment.operational_status || 'لە پڕۆسەدایە'; $('detailUpdated').textContent = shipment.tracking_updated_at ? `نوێکراوەتەوە: ${date(shipment.tracking_updated_at)}` : `ETA: ${date(shipment.eta)}`; const lat = Number(shipment.current_lat), lng = Number(shipment.current_lng); const map = $('detailMap'); if (map && Number.isFinite(lat) && Number.isFinite(lng)) { map.href = `https://www.google.com/maps?q=${encodeURIComponent(`${lat},${lng}`)}`; map.classList.remove('hidden'); } else if (map) { map.classList.add('hidden'); } const shipmentEvents = events.filter((event) => event.shipment_id === shipment.id); const proof = pods.find((item) => item.shipment_id === shipment.id); const media = [...shipmentEvents.flatMap((event) => Array.isArray(event.photos) ? event.photos : []), ...(proof && Array.isArray(proof.photo_urls) ? proof.photo_urls : [])].filter((url) => typeof url === 'string' && /^https?:\/\//i.test(url)); setHtml('detailPhotos', media.map((url) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img src="${esc(url)}" alt="وێنەی بار ${esc(shipment.id)}" loading="lazy"></a>`).join('') || '<div class="muted">هێشتا وێنەیەک بۆ ئەم بارە نییە.</div>'); setHtml('detailTimeline', shipmentEvents.map((event) => `<div class="timeline-item"><span class="timeline-dot"></span><div><strong>${esc(event.title || event.status_key || 'Shipment update')}</strong><div class="muted">${esc(event.location_label || '—')} · ${esc(date(event.occurred_at))}</div>${event.note ? `<small>${esc(event.note)}</small>` : ''}</div></div>`).join('') || '<div class="muted">مێژووی هەنگاوەکان بەردەست نییە.</div>'); detail.classList.remove('hidden'); detail.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+
+const renderShipmentRelated = (shipment, related = {}) => {
+  if (!shipment) return;
+  const byShipment = (key) => (Array.isArray(related[key]) ? related[key] : []).filter((item) => item.shipment_id === shipment.id);
+  const packages = byShipment('packages');
+  const documents = byShipment('documents');
+  const invoices = byShipment('invoices');
+  const payments = byShipment('payments');
+  const receipts = byShipment('receipts');
+  const pods = byShipment('pods');
+  setHtml('detailPackages', packages.map((item) => `<div class="item"><div class="row"><strong>${esc(item.package_code || 'Package')}</strong><span class="pill">${esc(item.status || 'created')}</span></div><div class="muted">${esc(item.current_hub || '—')} · ${esc(item.package_type || 'carton')}</div><small>${item.weight_kg == null ? 'وزن بەردەست نییە' : `${esc(item.weight_kg)} kg`}${item.barcode ? ` · ${esc(item.barcode)}` : ''}</small></div>`).join('') || '<div class="muted">هیچ package ـێک بۆ ئەم shipment ـە نییە.</div>');
+  setHtml('detailDocuments', documents.map((item) => `<div class="item"><div class="row"><strong>${esc(item.title || item.document_type || 'Document')}</strong><span class="pill">${esc(item.document_status || 'uploaded')}</span></div><small>${esc(date(item.created_at))}</small>${item.file_url ? ` <a class="download" href="${esc(item.file_url)}" data-document-id="${esc(item.id)}" target="_blank" rel="noopener noreferrer" download>داگرتن</a>` : ''}</div>`).join('') || '<div class="muted">هیچ document ـێکی ئەم shipment ـە نییە.</div>');
+  const invoiceRows = invoices.map((item) => { const due = Math.max(0, Number(item.total || 0) - Number(item.paid_total || 0)); return `<div class="item"><div class="row"><strong>${esc(item.invoice_number || 'Invoice')}</strong><span class="pill">${esc(item.status || 'pending')}</span></div><div class="muted">${money(item.total, item.currency)} · ماوە ${money(due, item.currency)}</div><small>${esc(date(item.due_at))}</small></div>`; });
+  const paymentRows = payments.map((item) => `<div class="item"><div class="row"><strong>${money(item.amount, item.currency)}</strong><span class="pill">${esc(item.status || 'pending')}</span></div><small>${esc(item.provider || 'Payment')} · ${esc(date(item.paid_at || item.created_at))}</small></div>`);
+  setHtml('detailFinance', [...invoiceRows, ...paymentRows].join('') || '<div class="muted">هیچ invoice یان payment ـێکی ئەم shipment ـە نییە.</div>');
+  const receiptRows = receipts.map((item) => `<div class="item"><div class="row"><strong>${esc(item.batch_code || 'Warehouse receipt')}</strong><span class="pill">${esc(item.verification_status || item.stage || 'received')}</span></div><small>${esc(item.location || '—')} · ${esc(date(item.received_at))}</small></div>`);
+  const podRows = pods.map((item) => `<div class="item"><div class="row"><strong>Proof of delivery</strong><span class="pill">${item.delivered_at ? 'Delivered' : 'Pending'}</span></div><small>${esc(item.receiver_name || '—')} · ${esc(date(item.delivered_at || item.created_at))}</small></div>`);
+  setHtml('detailEvidence', [...receiptRows, ...podRows].join('') || '<div class="muted">هێشتا warehouse receipt یان POD نییە.</div>');
+};
 
 const load = async () => {
   const { data: sessionResult } = await sb.auth.getSession();
   const session = sessionResult.session;
-  if (!session) { $('loginBtn').classList.remove('hidden'); $('logoutBtn').classList.add('hidden'); return; }
-  $('loginBtn').classList.add('hidden'); $('logoutBtn').classList.remove('hidden');
-  const uid = session.user.id;
-  const profileResult = await sb.from('customer_directory').select('id,code,gc_code,name,email,phone,auth_user_id').eq('auth_user_id', uid).maybeSingle();
-  const profile = profileResult.data || {};
-  window.__customerProfile = profile;
-  const directoryId = profile.id;
-  const shipmentFilter = directoryId ? `customer_user_id.eq.${uid},directory_customer_id.eq.${directoryId}` : `customer_user_id.eq.${uid}`;
-  const warehouses = await sb.from('gc_warehouse_addresses').select('id,country,city,label,address,contact,pickup_hours').eq('is_active', true).order('sort_order');
-  renderWarehouses(warehouses.data || []);
-  $('hello').textContent = `بەخێربێیت — ${profile.name || profile.email || session.user.email || 'کڕیار'}`;
-  const [shipments, notifications, quotes, requests, documents, pods, invoices, payments] = await Promise.all([
-    sb.from('shipments').select('id,tracking_id,batch_code,origin_key,dest_key,current_step_index,operational_status,current_location_label,total_amount,paid_amount,cargo_cost,cargo_currency,cargo_type,warehouse_location,weight_kg,actual_weight_kg,step_photos,eta,tracking_updated_at,updated_at,created_at,type,transport_mode,currency').or(shipmentFilter).order('created_at', { ascending: false }).limit(50),
-    sb.from('customer_notifications').select('title,body,read_at,created_at').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(12),
-    sb.from('quote_requests').select('id,origin_key,dest_key,transport_mode,product_type,weight_kg,volume_cbm,items_count,status,quoted_amount,currency,valid_until,created_at').eq('customer_user_id', uid).eq('request_type', 'quote').order('created_at', { ascending: false }).limit(12),
-    sb.from('quote_requests').select('id,origin_key,transport_mode,weight_kg,status,quoted_amount,currency,cargo_country,cargo_description,notes,created_at').eq('customer_user_id', uid).eq('request_type', 'shipment').order('created_at', { ascending: false }).limit(20),
-    sb.from('shipment_documents').select('id,shipment_id,document_type,title,file_url,is_public,document_status,created_at').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(12),
-    sb.from('delivery_proofs').select('shipment_id,delivered_at,receiver_name,note,created_at').order('created_at', { ascending: false }).limit(12),
-    sb.from('shipment_invoices').select('id,invoice_number,shipment_id,total,paid_total,currency,status,due_at,created_at').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(20),
-    sb.from('payment_transactions').select('id,invoice_id,shipment_id,provider,status,amount,currency,method,paid_at,created_at').eq('customer_user_id', uid).order('created_at', { ascending: false }).limit(20),
-  ]);
-  if (shipments.error) throw shipments.error;
-  const rows = shipments.data || [];
-  $('shipKpi').textContent = rows.length; $('movingKpi').textContent = rows.filter((item) => statusLabel(item) === 'لە ڕێگەیە').length;
-  $('dueKpi').textContent = `${rows.reduce((sum, item) => sum + Math.max(0, Number(item.total_amount || item.cargo_cost || 0) - Number(item.paid_amount || 0)), 0).toLocaleString('en-US')} USD`;
-  $('notifKpi').textContent = (notifications.data || []).filter((item) => !item.read_at).length;
-  renderShipments(rows); renderNotifications(notifications.data || []); renderQuotes(quotes.data || []); renderRequests(requests.data || []); renderDocuments(documents.data || []); renderPods(pods.data || []); renderPayments(invoices.data || [], payments.data || []);
+  if (!session) {
+    $('loginBtn').classList.remove('hidden');
+    $('logoutBtn').classList.add('hidden');
+    $('portalStatus')?.classList.remove('hidden');
+    return;
+  }
+  $('loginBtn').classList.add('hidden');
+  $('logoutBtn').classList.remove('hidden');
+  $('portalStatus')?.classList.add('hidden');
+  $('hello').textContent = 'بەخێربێیت بۆ ناوەندی کڕیار';
+  const welcome = $('customerWelcome');
+  if (welcome) {
+    const displayName = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
+    welcome.textContent = displayName || session.user.email || 'Customer';
+    welcome.title = session.user.email || '';
+  }
+  const dashboard = await customerApi();
+  const rows = dashboard.shipments || [];
+  const invoicesRows = dashboard.invoices || [];
+  $('shipKpi').textContent = String(rows.length);
+  $('movingKpi').textContent = String(rows.filter((item) => Number(item.current_step_index || 0) > 0 && Number(item.current_step_index || 0) < 5).length);
+  const dueByCurrency = invoicesRows.reduce((out,item) => {
+    const cur = String(item.currency || 'USD').toUpperCase();
+    out[cur] = (out[cur] || 0) + Math.max(0, Number(item.total || 0) - Number(item.paid_total || 0));
+    return out;
+  }, {});
+  $('dueKpi').textContent = Object.entries(dueByCurrency).map(([cur,v]) => `${Number(v).toLocaleString('en-US',{maximumFractionDigits:2})} ${cur}`).join(' · ') || '0 USD';
+  $('notifKpi').textContent = (dashboard.notifications || []).filter((item) => !item.read_at).length;
+  renderCustomerIdentity(dashboard.profile); renderWarehouseAddresses(dashboard.warehouse_addresses || []); renderShipments(rows); renderNotifications(dashboard.notifications || []); renderCustomerChat(dashboard.chat_threads || []); renderQuotes(dashboard.quotes || []); renderDocuments(dashboard.documents || []); renderPods(dashboard.pods || []); renderReceipts(dashboard.receipts || []); renderPayments(invoicesRows, dashboard.payments || []); renderFinance(invoicesRows, dashboard.payments || [], dashboard.ledger || []);
+  window.__customerShipments = rows; window.__customerQuotes = dashboard.quotes || []; window.__customerEvents = dashboard.events || []; window.__customerPods = dashboard.pods || []; window.__customerRelated = { packages: dashboard.packages || [], documents: dashboard.documents || [], invoices: dashboard.invoices || [], payments: dashboard.payments || [], receipts: dashboard.receipts || [], pods: dashboard.pods || [] }; window.dispatchEvent(new CustomEvent('gc:customer-loaded', { detail: dashboard }));
+  window.gcCustomerReload = () => load().catch((error) => console.warn('[gc-realtime] customer reload', error));
 };
 
-const submitQuote = async (event) => { event.preventDefault(); const { data: userResult } = await sb.auth.getUser(); if (!userResult.user) { message('quoteMessage', 'تکایە سەرەتا login بکە', 'error'); return; } const mode=$('quoteMode').value,origin=$('quoteOrigin').value.trim(),isDubaiAir=mode==='air'&&/(dubai|uae|united arab)/i.test(origin),weight=Number($('quoteWeight').value||0),volume=Number($('quoteVolume').value||0),items=Number($('quoteItems').value||0),productOption=$('quoteProduct')?.selectedOptions?.[0]; if(mode==='sea'&&volume<=0){message('quoteMessage','بۆ Sea، CBM ـێکی دروست بنووسە.','error');return} if(isDubaiAir&&items<=0){message('quoteMessage','بۆ Dubai Air ژمارەی دانە پێویستە.','error');return} if(mode!=='sea'&&!isDubaiAir&&weight<=0){message('quoteMessage','بۆ ئەم ڕێگایە کێشی دروست پێویستە.','error');return} if(!productOption?.dataset.product){message('quoteMessage','جۆری کاڵا لە کاتالۆگی نرخ هەڵبژێرە.','error');return} message('quoteMessage', 'داواکاری نێردراوە…'); const payload = { customer_user_id: userResult.user.id, customer_name: userResult.user.user_metadata?.full_name || userResult.user.email || 'Customer', customer_phone: userResult.user.phone || null, origin_key: origin, dest_key: $('quoteDestination').value.trim(), transport_mode: mode, product_type: productOption.dataset.product, weight_kg: weight>0?weight:null, volume_cbm: volume>0?volume:null, items_count: items>0?items:null, service_level: $('quoteService').value, incoterm: $('quoteIncoterm').value, notes: $('quoteNotes').value.trim() || null, status: 'pending', request_type: 'quote' }; const { data, error } = await sb.from('quote_requests').insert(payload).select('id').single(); if (error) { message('quoteMessage', error.message, 'error'); return; } message('quoteMessage', `سەرکەوتوو بوو؛ ژمارەی داواکاری ${String(data.id).slice(0, 8).toUpperCase()} ـە.`, 'success'); event.target.reset(); $('quoteProduct').innerHTML='<option value=>کاتالۆگ بار دەکرێت…</option>'; await load(); };
-const submitRequest = async (event) => { event.preventDefault(); const { data: userResult } = await sb.auth.getUser(); const user = userResult.user; if (!user) { message('requestMessage', 'تکایە سەرەتا بە کۆدی GC بچۆ ژوورەوە.', 'error'); $('auth').classList.remove('hidden'); return; } const file = $('requestImage').files?.[0]; if (file && (!file.type.startsWith('image/') || file.size > 10 * 1024 * 1024)) { message('requestMessage', 'تەنها وێنەی کەمتر لە 10MB ڕێگەپێدراوە.', 'error'); return; } message('requestMessage', 'داواکاری وێنەکە upload و نێردراوە…'); let imagePath = null; if (file) { const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'; imagePath = `${user.id}/${crypto.randomUUID()}.${ext}`; const upload = await sb.storage.from('customer-request-photos').upload(imagePath, file, { contentType: file.type, upsert: false }); if (upload.error) { message('requestMessage', upload.error.message, 'error'); return; } } const country = $('requestCountry').value; const payload = { customer_user_id: user.id, customer_name: user.user_metadata?.full_name || user.email || 'Customer', customer_phone: user.phone || null, origin_key: country, dest_key: 'erbil', transport_mode: $('requestMode').value, weight_kg: Number($('requestWeight').value), items_count: Number($('requestItems').value || 0) || null, cargo_country: country, cargo_description: $('requestDescription').value.trim(), cargo_image_path: imagePath, notes: $('requestDescription').value.trim(), request_type: 'shipment', status: 'pending' }; const { error } = await sb.from('quote_requests').insert(payload); if (error) { if (imagePath) await sb.storage.from('customer-request-photos').remove([imagePath]); message('requestMessage', error.message, 'error'); return; } message('requestMessage', 'داواکارییەکەت بە سەرکەوتوویی نێردرا؛ ستاف پاش پێداچوونەوە وەڵامت دەداتەوە.', 'success'); event.target.reset(); await load(); };
-const downloadDocument = async (link) => { const { data } = await sb.auth.getSession(); const token = data.session?.access_token; if (!token) return; const response = await fetch(`${SUPABASE_URL}/functions/v1/document-access?document_id=${encodeURIComponent(link.dataset.documentId)}`, { headers: { Authorization: `Bearer ${token}` } }); const body = await response.json().catch(() => ({})); if (response.ok && body.url) { link.href = body.url; window.open(body.url, '_blank', 'noopener,noreferrer'); } else throw new Error(body.error || 'Document access failed'); };
-$('loginBtn').addEventListener('click', () => $('auth').classList.remove('hidden')); $('close').addEventListener('click', () => $('auth').classList.add('hidden'));
-$('signIn').addEventListener('click', async () => { $('msg').textContent = '…'; const response = await fetch(GC_LOGIN_FN, { method: 'POST', headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ code: $('email').value.trim(), password: $('password').value }) }); const body = await response.json().catch(() => ({})); if (!response.ok || !body.session) { $('msg').textContent = body.error || 'کۆدی GC یان وشەی نهێنی هەڵەیە'; return; } const { error } = await sb.auth.setSession({ access_token: body.session.access_token, refresh_token: body.session.refresh_token }); $('msg').textContent = error ? error.message : 'سەرکەوتوو'; if (!error) { $('auth').classList.add('hidden'); await load(); } });
-$('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); }); $('trackBtn').addEventListener('click', () => { location.href = './index.html#track'; }); $('quoteBtn').addEventListener('click', () => { $('quoteForm').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('quoteOrigin').focus(); });
-$('quoteForm').addEventListener('submit', (event) => submitQuote(event).catch((error) => message('quoteMessage', error.message, 'error'))); $('requestForm').addEventListener('submit', (event) => submitRequest(event).catch((error) => message('requestMessage', error.message, 'error')));
-document.addEventListener('click', (event) => { const copy = event.target.closest('[data-copy]'); if (copy) { const old = copy.textContent; const done = () => { copy.textContent = 'کۆپی کرا'; copy.classList.add('is-copied'); window.setTimeout(() => { copy.textContent = old; copy.classList.remove('is-copied'); }, 1500); }; if (navigator.clipboard?.writeText) navigator.clipboard.writeText(copy.dataset.copy).then(done).catch(done); else done(); return; } const documentLink = event.target.closest('[data-document-id]'); if (documentLink) { event.preventDefault(); downloadDocument(documentLink).catch((error) => message('quoteMessage', error.message, 'error')); } });
-const installRequestPhotoPreview = () => { const input = $('requestImage'); if (!input || input.dataset.previewReady) return; input.dataset.previewReady = '1'; const preview = document.createElement('div'); preview.className = 'gc-upload-preview'; preview.setAttribute('aria-live','polite'); preview.innerHTML = '<img alt="پێشبینینی وێنەی کاڵا"><span>پێشبینینی وێنە ئامادەیە</span>'; input.insertAdjacentElement('afterend', preview); input.addEventListener('change', () => { const file = input.files?.[0]; if (!file || !file.type.startsWith('image/')) { preview.classList.remove('is-visible'); return; } const img = preview.querySelector('img'); img.src = URL.createObjectURL(file); preview.classList.add('is-visible'); }); }; installRequestPhotoPreview();
-const renderLoadError = (error) => { console.error('Globall Cloud customer portal data load failed:', error); setHtml('shipments', emptyState('⚠', 'داتا بەردەست نەبوو', 'پەیوەندی بە سیستەمەکە کاتییە؛ تکایە دووبارە هەوڵبدەوە یان بە پشتیوانی پەیوەندی بکە.')); };
-sb.auth.onAuthStateChange(() => window.setTimeout(() => load().catch(renderLoadError), 100));
-load().catch(renderLoadError);
+const submitQuote = async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const submitButton = form.querySelector('button[type="submit"]');
+  if (submitButton?.disabled) return;
+  const { data: userResult } = await sb.auth.getUser();
+  const user = userResult.user;
+  if (!user) { showMessage('تکایە سەرەتا login بکە', 'error'); return; }
+  if (!form.reportValidity()) return;
+  if (submitButton) { submitButton.disabled = true; submitButton.setAttribute('aria-busy', 'true'); submitButton.dataset.originalLabel = submitButton.textContent; submitButton.textContent = 'لە ناردندایە…'; }
+  showMessage('داواکاری نێردراوە…');
+  const items = Number($('quoteItems').value || 0);
+  const weight = Number($('quoteWeight').value || 0);
+  const volume = Number($('quoteVolume').value || 0);
+  const selectedProduct = $('quoteProduct')?.selectedOptions?.[0];
+  const payload = {
+    customer_user_id: user.id,
+    customer_name: user.user_metadata?.full_name || user.email || 'Customer',
+    customer_phone: user.phone || null,
+    origin_key: $('quoteOrigin').value.trim(),
+    dest_key: $('quoteDestination').value.trim(),
+    transport_mode: $('quoteMode').value,
+    product_type: selectedProduct?.dataset.product || null,
+    weight_kg: weight > 0 ? weight : null,
+    volume_cbm: volume > 0 ? volume : null,
+    items_count: items>0?items:null,
+    rate_key: selectedProduct?.dataset.rateKey || null,
+    service_level: $('quoteService').value,
+    incoterm: $('quoteIncoterm').value,
+    notes: $('quoteNotes').value.trim() || null,
+    status: 'pending',
+  };
+  try {
+    const result = await customerApi({ method: 'POST', body: { action: 'request_quote', data: payload } });
+    showMessage(`سەرکەوتوو بوو؛ ژمارەی داواکاری ${String(result.request?.id || '').slice(0, 8).toUpperCase()} ـە.`, 'success');
+  } catch (error) {
+    showMessage(error.message, 'error');
+    if (submitButton) { submitButton.disabled = false; submitButton.removeAttribute('aria-busy'); submitButton.textContent = submitButton.dataset.originalLabel || 'ناردنی داواکاری نرخ'; }
+    return;
+  }
+  form.reset();
+  if (submitButton) { submitButton.disabled = false; submitButton.removeAttribute('aria-busy'); submitButton.textContent = submitButton.dataset.originalLabel || 'ناردنی داواکاری نرخ'; }
+  await load();
+};
+
+const downloadDocument = async (link) => {
+  const documentId = link.dataset.documentId;
+  if (!documentId) return;
+  const { data: sessionResult } = await sb.auth.getSession();
+  const token = sessionResult.session?.access_token;
+  if (!token) return;
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/document-access?document_id=${encodeURIComponent(documentId)}`, { headers: { Authorization: `Bearer ${token}` } });
+  const body = await response.json().catch(() => ({}));
+  if (response.ok && body.url) { link.href = body.url; return; }
+  throw new Error(body.error || 'Document access failed');
+};
+
+const markNotificationRead = async (notificationId) => {
+  const { data: userResult } = await sb.auth.getUser();
+  if (!userResult.user || !notificationId) return;
+  try { await customerApi({ method: 'POST', body: { action: 'mark_notification_read', data: { id: notificationId } } }); }
+  catch (error) { showMessage(error.message, 'error'); return; }
+  await load();
+};
+
+const acceptQuote = async (quoteId) => {
+  const { data: userResult } = await sb.auth.getUser();
+  if (!userResult.user) return;
+  try { await customerApi({ method: 'POST', body: { action: 'accept_quote', data: { id: quoteId } } }); }
+  catch (error) { showMessage(error.message, 'error'); return; }
+  showMessage('Quote پەسەندکرا.', 'success'); await load();
+};
+
+$('authForm')?.addEventListener('submit', (event) => { event.preventDefault(); $('signIn').click(); });
+$('loginBtn').addEventListener('click', () => { $('auth').classList.remove('hidden'); $('email')?.focus(); });
+$('loginPromptBtn')?.addEventListener('click', () => { $('auth').classList.remove('hidden'); $('email')?.focus(); });
+$('close').addEventListener('click', () => { $('auth').classList.add('hidden'); $('loginBtn')?.focus(); });
+$('auth').addEventListener('click', (event) => { if (event.target === $('auth')) $('close').click(); });
+$('password').addEventListener('keydown', (event) => { if (event.key === 'Enter') $('signIn').click(); });
+$('signIn').addEventListener('click', async () => { const identity = $('email').value.trim(); const password = $('password').value; const button = $('signIn'); if (!identity || !password) { $('msg').textContent = 'کۆدی GC/ئیمەیل و وشەی نهێنی پڕبکەرەوە.'; return; } button.disabled = true; button.setAttribute('aria-busy', 'true'); $('msg').textContent = '…'; try { if (/^GC-[A-Z0-9-]+$/i.test(identity)) { const response = await fetch(GC_LOGIN_FN, { method: 'POST', headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ code: identity, password }), cache: 'no-store' }); const payload = await response.json().catch(() => ({})); if (!response.ok || !payload.session?.access_token || !payload.session?.refresh_token) throw new Error(payload.error || 'کۆدی GC یان وشەی نهێنی نادروستە.'); const { error } = await sb.auth.setSession({ access_token: payload.session.access_token, refresh_token: payload.session.refresh_token }); if (error) throw error; } else { const { error } = await sb.auth.signInWithPassword({ email: identity, password }); if (error) throw error; } $('msg').textContent = 'سەرکەوتوو'; $('auth').classList.add('hidden'); $('loginBtn')?.focus(); await load(); } catch (error) { $('msg').textContent = error.message || 'کۆد/ئیمەیل یان وشەی نهێنی نادروستە.'; } finally { button.disabled = false; button.removeAttribute('aria-busy'); } });
+document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !$('auth').classList.contains('hidden')) $('close').click(); });
+$('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
+$('trackBtn').addEventListener('click', () => { location.href = './index.html#track'; });
+$('quoteBtn').addEventListener('click', () => { $('quoteForm').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('quoteOrigin').focus(); });
+$('quoteForm').addEventListener('submit', (event) => submitQuote(event).catch((error) => showMessage(error.message, 'error')));
+$('customerChatForm')?.addEventListener('submit', sendCustomerChat);
+$('closeShipmentDetail')?.addEventListener('click', () => $('shipmentDetail')?.classList.add('hidden'));
+document.addEventListener('click', (event) => { const shipmentCard = event.target.closest('[data-shipment-id]'); if (shipmentCard) { const shipment = (window.__customerShipments || []).find((item) => item.id === shipmentCard.dataset.shipmentId); renderShipmentDetail(shipment, window.__customerEvents || [], window.__customerPods || []); renderShipmentRelated(shipment, window.__customerRelated || {}); } });
+document.addEventListener('click', (event) => { const notificationButton = event.target.closest('[data-read-notification]'); if (notificationButton) { notificationButton.disabled = true; markNotificationRead(notificationButton.dataset.readNotification).catch((error) => { notificationButton.disabled = false; showMessage(error.message, 'error'); }); return; } const documentLink = event.target.closest('[data-document-id]'); if (documentLink) { event.preventDefault(); downloadDocument(documentLink).then(() => window.open(documentLink.href, '_blank', 'noopener,noreferrer')).catch((error) => showMessage(error.message, 'error')); return; } const button = event.target.closest('[data-accept-quote]'); if (button) acceptQuote(button.dataset.acceptQuote).catch((error) => showMessage(error.message, 'error')); });
+sb.auth.onAuthStateChange(() => window.setTimeout(() => load().catch((error) => showMessage(error.message, 'error')), 100));
+load().catch((error) => {
+  console.error(error);
+  if (Number(error?.status) === 403) {
+    $('portalStatus')?.classList.remove('hidden');
+    renderClaimPrompt();
+    $('shipKpi').textContent = '—';
+    $('movingKpi').textContent = '—';
+    $('dueKpi').textContent = '—';
+    $('notifKpi').textContent = '—';
+    return;
+  }
+  $('portalStatus')?.classList.remove('hidden');
+  setHtml('notifications', '<div class="alert">هەڵە لە هێنانی داتا؛ تکایە دواتر هەوڵ بدەرەوە.</div>');
+});

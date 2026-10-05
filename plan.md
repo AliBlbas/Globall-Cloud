@@ -26,3 +26,24 @@ Extend the existing Globall Cloud customer portal without duplicating the produc
 The attached request names `customers`, `shipments`, and `requests`. The deployed system already has equivalent production tables with stronger relationships: `customer_directory`, `shipments`, and `quote_requests`. New duplicate tables would split ownership and break staff workflows, so the implementation maps the requested concepts to those existing tables and adds only missing configuration/registration structures.
 
 USA warehouse remains an explicit owner-confirmation placeholder as requested.
+
+## Professional visual refinement direction
+- **Design movement:** premium editorial logistics dashboard — less “neon control room,” more calm enterprise product with one strong cyan signature accent.
+- **Core principles:** one primary action per screen, progressive disclosure instead of showing every module at once, strong spacing rhythm, and Kurdish-first copy with consistent terminology.
+- **Color philosophy:** navy remains the trust/background color; off-white text is reserved for hierarchy; cyan is only for live/primary actions; amber is reserved for warnings and payment exceptions; avoid using gradients on every card.
+- **Layout paradigm:** use a guided operational flow rather than a wall of equal cards. Homepage: promise → proof → route choice → tracking/quote CTA. Dashboard: account summary → active shipments → next action → history/details.
+- **Signature elements:** a single route-line motif, compact status chips with icons, and a consistent “next action” card. Remove duplicate decorative cards and repeated section labels.
+- **Interaction philosophy:** every card should answer “what is this?” and “what can I do next?”; clicking a shipment opens a focused detail drawer/page rather than expanding multiple dense blocks.
+- **Animation:** subtle 160–220ms fades/slides only for route changes, status updates, and modal/drawer entry; no perpetual glow or large motion on mobile.
+- **Typography system:** Vazirmatn for all Kurdish UI; JetBrains Mono only for GC codes, tracking IDs, dates, and numeric metrics. Use three heading sizes and avoid mixing English labels beside every Kurdish label.
+- **Brand essence:** “The clearest way to move cargo into Iraq.” Personality: dependable, precise, welcoming.
+- **Brand voice examples:** “بارەکەت لە کوێیە؟” and “هەنگاوی دواترت لێرەیە.”
+- **Wordmark/mark:** retain the GC mark, but pair it with a simple route-line underline rather than multiple boxed logos.
+- **Signature brand color:** `#58E5EF` cyan, used sparingly for active state, primary CTA, and live connection status.
+
+## Mobile excellence system
+- **Responsive movement:** calm, safe-area-aware mobile operations UI designed for one-handed use on 320–430px devices.
+- **Core principles:** one clear next action, 46–52px touch targets, no horizontal page overflow, readable Kurdish line lengths, and progressive disclosure for dense logistics data.
+- **Mobile layout:** sticky compact header → focused hero or account summary → one primary action → stacked cards → fixed bottom navigation where the route benefits from repeated navigation.
+- **Shared mobile surface:** `gc-mobile-excellence-20261003.css` is loaded last on the homepage, dashboard, tracking, customer auth, and staff OS routes so responsive rules are consistent rather than split across historical layers.
+- **Signature mobile elements:** the dashboard five-item dock, full-width tracking field, compact two-column KPI cards, safe-area-aware toast/dock spacing, and reduced-motion support.

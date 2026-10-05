@@ -1334,26 +1334,41 @@ function selectRouteCard(wrapId, hiddenInputId, key){
   document.querySelectorAll('#'+wrapId+' .route-card').forEach(el=>el.classList.toggle('active', el.dataset.key===key));
 }
 function requestRatesForForm(){
-  const origin = String(document.getElementById('reqOrigin')?.value || 'china').toLowerCase();
+  const aliases = quoteOriginAliases(document.getElementById('reqOrigin')?.value || 'china');
   const mode = document.getElementById('reqType')?.value || 'air';
   const destination = String(document.getElementById('reqDestination')?.value || 'hawler').toLowerCase();
-  return quoteCatalogState.rates.filter(rate => String(rate.origin_key||'').toLowerCase() === quoteOriginKey(origin).toLowerCase() && String(rate.transport_mode||'').toLowerCase() === mode && String(rate.destination_key||'').toLowerCase() === (destination === 'hawler' ? 'erbil' : destination));
+  const destKey = ['hawler','hwr'].includes(destination) ? 'erbil' : destination;
+  const weight = Number(document.getElementById('reqWeight')?.value || 0);
+  return quoteCatalogState.rates.filter(rate => aliases.includes(String(rate.origin_key || '').toLowerCase()) && String(rate.transport_mode || '').toLowerCase() === mode && String(rate.destination_key || '').toLowerCase() === destKey && (rate.rate_key !== 'dubai_erbil_land_shein_over_100kg' || weight > 100));
 }
 function syncRequestQuoteFields(){
+  const origin = quoteOriginKey(document.getElementById('reqOrigin')?.value || 'china');
   const type = document.getElementById('reqType')?.value || 'air';
   const productEl = document.getElementById('reqProduct');
+  const productList = document.getElementById('reqProductOptions');
   const weightEl = document.getElementById('reqWeight');
   const volumeEl = document.getElementById('reqVolume');
-  const volumeRow = document.getElementById('reqVolumeRow');
-  if(!productEl) return;
+  const itemsEl = document.getElementById('reqItems');
   const rows = requestRatesForForm();
-  const previous = productEl.value;
-  productEl.innerHTML = rows.length ? rows.map(rate => `<option value="${escapeHtml(rate.product_type)}">${escapeHtml(rate.product_type)}</option>`).join('') : `<option value="">${currentLang === 'ku' ? 'جۆری کاڵا هەڵبژێرە' : 'Select a product type'}</option>`;
-  if(rows.some(row => row.product_type === previous)) productEl.value = previous;
-  const sea = type === 'sea';
+  const previous = productEl?.value || '';
+  if(productList) productList.innerHTML = rows.map(rate => `<option value="${escapeHtml(rate.product_type)}"></option>`).join('');
+  if(productEl) productEl.value = previous;
+  const selectedRate = rows.find(rate => String(rate.product_type || '').toLowerCase() === String(previous).toLowerCase());
+  const kind = selectedRate ? quoteUnitKind(selectedRate.unit) : type === 'sea' ? 'cbm' : origin === 'dubai' && type === 'air' ? 'item' : 'kg';
+  const sea = kind === 'cbm';
+  const itemRoute = kind === 'item' || (!selectedRate && origin === 'dubai' && type === 'air');
+  const weightRow = document.getElementById('reqWeightRow') || weightEl?.closest('label');
+  const volumeRow = document.getElementById('reqVolumeRow');
+  const itemsRow = document.getElementById('reqItemsRow');
+  if(weightRow) weightRow.style.display = !sea && !itemRoute ? '' : 'none';
   if(volumeRow) volumeRow.style.display = sea ? '' : 'none';
+  if(itemsRow) itemsRow.style.display = itemRoute ? '' : 'none';
+  if(weightEl) weightEl.required = !sea && !itemRoute;
   if(volumeEl) volumeEl.required = sea;
-  if(weightEl) weightEl.required = !sea;
+  if(itemsEl) { itemsEl.required = itemRoute; itemsEl.min = '1'; itemsEl.step = '1'; }
+  if(productEl) productEl.required = itemRoute;
+  const hint = document.getElementById('reqQuoteHint');
+  if(hint) hint.textContent = itemRoute ? 'Dubai Air: جۆری کاڵا و ژمارەی دانە پێویستن؛ کێش ئاختیارییە.' : sea ? 'Sea: حەجم بە CBM پێویستە؛ ستاف quote ـی کۆتایی پشتڕاست دەکاتەوە.' : 'کێش بە KG پێویستە؛ نرخ لە کاتالۆگی چالاک وەردەگیرێت.';
 }
 function populateRequestSelects(){
   renderRoutePicker('reqOriginPicker', 'reqOrigin', ORIGIN_KEYS);
@@ -1364,6 +1379,33 @@ function populateRequestSelects(){
     type.dataset.gcRequestWired = '1';
     type.addEventListener('change', syncRequestQuoteFields);
   }
+  const requestForm = document.getElementById('requestForm');
+  if(requestForm && requestForm.dataset.gcRequestSubmitWired !== '1'){
+    requestForm.dataset.gcRequestSubmitWired = '1';
+    requestForm.addEventListener('submit', (event) => handleRequestSubmit(event).catch((error) => {
+      console.error('[Globall public quote]', error);
+      const button = document.getElementById('reqSubmitBtn');
+      if(button){ button.disabled = false; button.textContent = 'ناردنی داواکاری'; }
+      showToast('هەڵەیەک ڕوویدا، داواکارییەکە نەنێردرا. تکایە دووبارە هەوڵبدەرەوە.', 'error');
+    }));
+  }
+  const origin = document.getElementById('reqOriginPicker');
+  if(origin && origin.dataset.gcRateWired !== '1'){
+    origin.dataset.gcRateWired = '1';
+    origin.addEventListener('click', () => setTimeout(syncRequestQuoteFields, 0));
+  }
+  const weight = document.getElementById('reqWeight');
+  if(weight && weight.dataset.gcRateWired !== '1'){
+    weight.dataset.gcRateWired = '1';
+    weight.addEventListener('input', syncRequestQuoteFields);
+  }
+  ['reqProduct','reqVolume','reqItems'].forEach((id) => {
+    const field = document.getElementById(id);
+    if(field && field.dataset.gcRateWired !== '1'){
+      field.dataset.gcRateWired = '1';
+      field.addEventListener('input', syncRequestQuoteFields);
+    }
+  });
 }
 
 async function handleRequestSubmit(e){
@@ -1378,11 +1420,14 @@ async function handleRequestSubmit(e){
   const originKey = document.getElementById('reqOrigin').value;
   const destKey = document.getElementById('reqDestination').value;
   const type = document.getElementById('reqType').value;
-  const product = document.getElementById('reqProduct')?.value || '';
-  const weightRaw = Number(document.getElementById('reqWeight').value);
-  const volumeRaw = Number(document.getElementById('reqVolume')?.value);
+  const product = document.getElementById('reqProduct')?.value.trim() || '';
+  const weightRaw = Number(document.getElementById('reqWeight')?.value || 0);
+  const volumeRaw = Number(document.getElementById('reqVolume')?.value || 0);
+  const itemsRaw = Number(document.getElementById('reqItems')?.value || 0);
+  const isDubaiAir = type === 'air' && quoteOriginKey(originKey) === 'dubai';
   const weightKg = Number.isFinite(weightRaw) && weightRaw > 0 ? weightRaw : null;
-  const volumeCbm = Number.isFinite(volumeRaw) && volumeRaw > 0 ? volumeRaw : null;
+  const volumeCbm = type === 'sea' && Number.isFinite(volumeRaw) && volumeRaw > 0 ? volumeRaw : null;
+  const itemsCount = Number.isInteger(itemsRaw) && itemsRaw > 0 ? itemsRaw : null;
   const notes = document.getElementById('reqNotes').value.trim();
   if(type === 'sea' && !volumeCbm){
     btn.disabled = false; btn.textContent = originalLabel;
@@ -1390,17 +1435,24 @@ async function handleRequestSubmit(e){
     document.getElementById('reqVolume')?.focus();
     return;
   }
-  if(type !== 'sea' && !weightKg){
+  if(isDubaiAir && (!itemsCount || !product)){
+    btn.disabled = false; btn.textContent = originalLabel;
+    showToast('بۆ Dubai Air جۆری کاڵا و ژمارەی دانە پێویستە.', 'error');
+    (!product ? document.getElementById('reqProduct') : document.getElementById('reqItems'))?.focus();
+    return;
+  }
+  if(type !== 'sea' && !isDubaiAir && !weightKg){
     btn.disabled = false; btn.textContent = originalLabel;
     showToast(t('services.quote.needWeight'), 'error');
     document.getElementById('reqWeight')?.focus();
     return;
   }
+  const selectedRate = requestRatesForForm().find(rate => String(rate.product_type || '').toLowerCase() === product.toLowerCase());
   const payload = {
     name, phone, email, origin_key: originKey, dest_key: destKey,
-    transport_mode: type, product_type: product, weight_kg: weightKg,
-    volume_cbm: type === 'sea' ? volumeCbm : (weightKg ? Math.round((weightKg / 500) * 10) / 10 : null),
-    items_count: null, service_level: 'standard', incoterm: 'EXW', notes
+    transport_mode: type, product_type: product || null, rate_key: selectedRate?.rate_key || null,
+    weight_kg: weightKg, volume_cbm: volumeCbm, items_count: itemsCount,
+    service_level: 'standard', incoterm: 'EXW', notes
   };
 
   let requestId = '';
@@ -1412,7 +1464,7 @@ async function handleRequestSubmit(e){
     });
     const body = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(body.error || 'Unable to submit quote request right now.');
-    requestId = String(body.request?.id || '').trim();
+    requestId = String(body.request?.id || body.request?.request_number || '').trim();
     if (!requestId) throw new Error('Quote request was accepted without a request number.');
   } catch (error) {
     btn.disabled = false; btn.textContent = originalLabel;
@@ -1426,12 +1478,13 @@ async function handleRequestSubmit(e){
   notifyOwner('داواکاریی نوێی نرخ — '+requestId, {
     'ژمارەی داواکاری':requestId, 'ناو':name, 'مۆبایل':phone, 'ئیمەیل':(email||'—'),
     'لە':placeLabel(originKey), 'بۆ':placeLabel(destKey),
-    'جۆر':t('track.type.'+type), 'جۆری کاڵا':(product||'—'), 'کێش (kg)':(weightKg||'—'), 'حەجم (CBM)':(volumeCbm||'—'), 'تێبینی':(notes||'—')
+    'جۆر':t('track.type.'+type), 'جۆری کاڵا':(product||'—'), 'کێش (kg)':(weightKg||'—'), 'ژمارەی دانە':(itemsCount||'—'), 'حەجم (CBM)':(volumeCbm||'—'), 'تێبینی':(notes||'—')
   });
 
   const safeRequestId = requestId.replace(/'/g, "\\'");
   const successWrap = document.getElementById('requestSuccessWrap');
   document.getElementById('requestFormWrap').style.display = 'none';
+  successWrap.hidden = false;
   successWrap.style.display = 'block';
   successWrap.innerHTML = `<div class="success-panel">
     <svg class="icon-lg"><use href="#i-check"></use></svg>
@@ -1450,6 +1503,7 @@ async function handleRequestSubmit(e){
 }
 function resetRequestForm(){
   document.getElementById('requestFormWrap').style.display = 'block';
+  document.getElementById('requestSuccessWrap').hidden = true;
   document.getElementById('requestSuccessWrap').style.display = 'none';
   document.getElementById('requestSuccessWrap').innerHTML = '';
 }
@@ -2817,11 +2871,22 @@ function printShipmentLabel(shipmentId){
    The public calculator reads the active, staff-managed pricing catalog from
    public-quote?catalog=1. It never invents a number for an unconfigured route
    or product; customers are directed to the request/WhatsApp path instead. */
-let quoteCatalogState = { rates: [], loaded: false, loading: null };
-const quoteOriginKey = (value) => ({ china:'China', uae:'UAE', usa:'USA' }[value] || value);
-const quoteOriginLabels = { china:'چین', uae:'دوبەی / ئیمارات', usa:'ئەمریکا' };
-const quoteDestLabels = { hawler:'هەولێر', slimani:'سلێمانی', duhok:'دهۆک', bakhdad:'بەغدا', kerkuk:'کەرکووک', mosul:'موسڵ', basra:'بەسرە' };
+let quoteCatalogState = { rates: [], loaded: false, loading: null, minimumIqd: 5000, usdIqd: 0 };
+const quoteOriginKey = (value) => {
+  const key = String(value || '').trim().toLowerCase();
+  if (['uae','dubai','sharjah','united arab emirates','unitedarabemirates'].includes(key)) return 'dubai';
+  if (['usa','us','america','miami'].includes(key)) return 'usa';
+  if (['china','cn','guangzhou','shenzhen'].includes(key)) return 'china';
+  return key;
+};
+const quoteOriginAliases = (value) => {
+  const key = quoteOriginKey(value);
+  return key === 'dubai' ? ['dubai','uae','sharjah'] : key === 'usa' ? ['usa','us'] : key === 'china' ? ['china','cn','guangzhou','shenzhen'] : [key];
+};
+const quoteOriginLabels = { china:'چین', dubai:'دوبەی / ئیمارات', uae:'دوبەی / ئیمارات', usa:'ئەمریکا' };
+const quoteDestLabels = { hawler:'هەولێر', erbil:'هەولێر', slimani:'سلێمانی', duhok:'دهۆک', bakhdad:'بەغدا', kerkuk:'کەرکووک', mosul:'موسڵ', basra:'بەسرە' };
 const quoteModeLabels = { air:'ئاسمانی', sea:'دەریایی', land:'وشکانی / زمینی' };
+const quoteUnitKind = (unit) => ['item','items','piece','pieces','unit','units'].includes(String(unit || '').trim().toLowerCase()) ? 'item' : ['cbm','meter','per cbm'].includes(String(unit || '').trim().toLowerCase()) ? 'cbm' : 'kg';
 
 async function loadQuoteCatalog(){
   if(quoteCatalogState.loaded) return quoteCatalogState.rates;
@@ -2831,39 +2896,54 @@ async function loadQuoteCatalog(){
     const body = await response.json().catch(()=>({}));
     if(!response.ok || !Array.isArray(body.rates)) throw new Error(body.error || 'Verified pricing is unavailable');
     quoteCatalogState.rates = body.rates.filter(row => row && row.is_active !== false);
+    quoteCatalogState.minimumIqd = Number(body.minimum_charge_iqd || 5000);
+    quoteCatalogState.usdIqd = Number(body.usd_iqd_rate || 0);
     quoteCatalogState.loaded = true;
     syncQuoteForm();
+    populateRequestSelects();
     return quoteCatalogState.rates;
   })().finally(()=>{ quoteCatalogState.loading = null; });
   return quoteCatalogState.loading;
 }
 
 function quoteRatesForForm(){
-  const origin = quoteOriginKey(document.getElementById('quoteOrigin')?.value || 'china');
+  const aliases = quoteOriginAliases(document.getElementById('quoteOrigin')?.value || 'china');
   const mode = document.getElementById('quoteType')?.value || 'air';
   const destination = String(document.getElementById('quoteDest')?.value || 'hawler').toLowerCase();
-  return quoteCatalogState.rates.filter(rate => String(rate.origin_key||'').toLowerCase() === origin.toLowerCase() && String(rate.transport_mode||'').toLowerCase() === mode && String(rate.destination_key||'').toLowerCase() === (destination === 'hawler' ? 'erbil' : destination));
+  const destKey = ['hawler','hwr'].includes(destination) ? 'erbil' : destination;
+  const weight = Number(document.getElementById('quoteWeight')?.value || 0);
+  return quoteCatalogState.rates.filter(rate => aliases.includes(String(rate.origin_key || '').toLowerCase()) && String(rate.transport_mode || '').toLowerCase() === mode && String(rate.destination_key || '').toLowerCase() === destKey && (rate.rate_key !== 'dubai_erbil_land_shein_over_100kg' || weight > 100));
 }
 
 function syncQuoteForm(){
+  const origin = quoteOriginKey(document.getElementById('quoteOrigin')?.value || 'china');
   const mode = document.getElementById('quoteType')?.value || 'air';
   const productEl = document.getElementById('quoteProduct');
-  const weightLabel = document.getElementById('quoteWeightLabel');
-  const weightHint = document.getElementById('quoteWeightHint');
-  const volumeRow = document.getElementById('quoteVolumeRow');
-  const weightEl = document.getElementById('quoteWeight');
   if(!productEl) return;
   const rows = quoteRatesForForm();
   const previous = productEl.value;
-  productEl.innerHTML = rows.length ? rows.map(rate => `<option value="${escapeHtml(rate.product_type)}">${escapeHtml(rate.product_type)} · $${Number(rate.amount).toLocaleString('en-US',{maximumFractionDigits:2})}/${escapeHtml(rate.unit)}</option>`).join('') : `<option value="">${currentLang === 'ku' ? 'نرخی پشتڕاستکراو بۆ ئەم ڕێگایە نییە' : 'No verified rate for this route'}</option>`;
-  if(rows.some(row => row.product_type === previous)) productEl.value = previous;
-  const sea = mode === 'sea';
-  if(volumeRow) volumeRow.style.display = sea ? '' : 'none';
-  if(weightEl) weightEl.required = !sea;
-  if(weightLabel) weightLabel.textContent = sea ? 'کێشی کاڵا (kg)' : 'کێش (kg)';
-  if(weightHint) weightHint.textContent = sea ? 'بۆ زانیاری؛ بڕی نرخ بە CBM ـە.' : '0.1–50,000 kg';
+  productEl.innerHTML = rows.length ? `<option value="">${currentLang === 'ku' ? 'جۆری کاڵا هەڵبژێرە' : 'Select product type'}</option>${rows.map(rate => `<option value="${escapeHtml(rate.rate_key || rate.product_type)}" data-product="${escapeHtml(rate.product_type)}" data-unit="${escapeHtml(rate.unit)}">${escapeHtml(rate.product_type)} · ${Number(rate.amount).toLocaleString('en-US',{maximumFractionDigits:2})} ${escapeHtml(rate.currency || 'USD')}/${escapeHtml(rate.unit)}</option>`).join('')}` : `<option value="">${currentLang === 'ku' ? 'نرخی پشتڕاستکراو بۆ ئەم ڕێگایە نییە' : 'No verified rate for this route'}</option>`;
+  if([...productEl.options].some(option => option.value === previous)) productEl.value = previous;
+  const rate = rows.find(item => String(item.rate_key || item.product_type) === String(productEl.value || ''));
+  const kind = rate ? quoteUnitKind(rate.unit) : mode === 'sea' ? 'cbm' : origin === 'dubai' && mode === 'air' ? 'item' : 'kg';
+  const weightRow = document.getElementById('quoteWeightRow') || document.getElementById('quoteWeight')?.closest('.field-wrap');
+  const volumeRow = document.getElementById('quoteVolumeRow') || document.getElementById('quoteVolume')?.closest('.field-wrap');
+  const itemsRow = document.getElementById('quoteItemsRow') || document.getElementById('quoteItems')?.closest('.field-wrap');
+  const weightEl = document.getElementById('quoteWeight');
+  const volumeEl = document.getElementById('quoteVolume');
+  const itemsEl = document.getElementById('quoteItems');
+  if(weightRow) weightRow.style.display = kind === 'kg' ? '' : 'none';
+  if(volumeRow) volumeRow.style.display = kind === 'cbm' ? '' : 'none';
+  if(itemsRow) itemsRow.style.display = kind === 'item' ? '' : 'none';
+  if(weightEl) weightEl.required = kind === 'kg';
+  if(volumeEl) volumeEl.required = kind === 'cbm';
+  if(itemsEl) { itemsEl.required = kind === 'item'; itemsEl.min = '1'; itemsEl.step = '1'; }
+  const weightLabel = document.getElementById('quoteWeightLabel') || document.querySelector('label[for="quoteWeight"]');
+  const weightHint = document.getElementById('quoteWeightHint');
+  if(weightLabel) weightLabel.textContent = kind === 'kg' ? 'کێش (kg)' : 'کێش (kg) · ئاختیاری';
+  if(weightHint) weightHint.textContent = kind === 'item' ? 'بۆ Dubai Air، ژمارەی دانە پێویستە.' : kind === 'cbm' ? 'بۆ Sea، نرخ بە CBM حیساب دەکرێت.' : 'کێش بە کیلۆگرام';
   const hint = document.getElementById('quoteProductHint');
-  if(hint) hint.textContent = rows.length ? (currentLang === 'ku' ? 'نرخەکان لە catalog ـی چالاکی سیستەمەوە دێن.' : 'Rates are loaded from the active system catalog.') : (currentLang === 'ku' ? 'بۆ نرخی ئەم ڕێگا/جۆرە تکایە داواکاری بنێرە.' : 'Request a quote for this route or product.');
+  if(hint) hint.textContent = rows.length ? (currentLang === 'ku' ? 'نرخ و یەکە لە catalog ـی چالاکی سیستەمەوە دێن؛ کۆتایی quote لەلایەن ستاف پشتڕاست دەکرێتەوە.' : 'Active catalog rate and unit; staff confirms the final quote.') : (currentLang === 'ku' ? 'بۆ نرخی ئەم route/product ـە تکایە داواکاری بنێرە.' : 'Request a quote for this route or product.');
 }
 
 function quoteUnavailableHTML(origin, dest, mode){
@@ -2877,8 +2957,7 @@ async function calcQuote(){
   const dest = document.getElementById('quoteDest')?.value || 'hawler';
   const weightEl = document.getElementById('quoteWeight');
   const volumeEl = document.getElementById('quoteVolume');
-  const weight = Number(weightEl?.value);
-  const volume = Number(volumeEl?.value);
+  const itemsEl = document.getElementById('quoteItems');
   const resultEl = document.getElementById('quoteResult');
   const calcBtn = document.getElementById('quoteCalcBtn');
   if(calcBtn){ calcBtn.disabled = true; calcBtn.classList.add('is-loading'); calcBtn.setAttribute('aria-busy','true'); }
@@ -2887,20 +2966,30 @@ async function calcQuote(){
     await loadQuoteCatalog();
     syncQuoteForm();
     const rows = quoteRatesForForm();
-    const rate = rows.find(row => row.product_type === product) || rows[0];
+    const rate = rows.find(row => String(row.rate_key || row.product_type) === String(product));
     if(!rate){ if(resultEl) resultEl.innerHTML = quoteUnavailableHTML(origin,dest,type); return; }
-    const units = type === 'sea' ? volume : weight;
-    const max = type === 'sea' ? 100000 : 50000;
-    if(!Number.isFinite(units) || units <= 0 || units > max){
-      const field = type === 'sea' ? volumeEl : weightEl;
+    const kind = quoteUnitKind(rate.unit);
+    const units = kind === 'item' ? Number(itemsEl?.value) : kind === 'cbm' ? Number(volumeEl?.value) : Number(weightEl?.value);
+    const max = kind === 'item' ? 1000000 : kind === 'cbm' ? 100000 : 50000;
+    if(!Number.isFinite(units) || units <= 0 || units > max || (kind === 'item' && !Number.isInteger(units))){
+      const field = kind === 'item' ? itemsEl : kind === 'cbm' ? volumeEl : weightEl;
       if(field) field.focus();
-      if(resultEl) resultEl.innerHTML = `<p class="admin-error" style="display:block; margin-top:12px;" role="alert">${type === 'sea' ? (currentLang === 'ku' ? 'تکایە حەجمی CBM ـی دروست بنووسە.' : 'Enter a valid CBM volume.') : t('services.quote.needWeight')}</p>`;
+      if(resultEl) resultEl.innerHTML = `<p class="admin-error" style="display:block; margin-top:12px;" role="alert">${kind === 'item' ? 'تکایە ژمارەی دانەی دروست بنووسە.' : kind === 'cbm' ? 'تکایە حەجمی CBM ـی دروست بنووسە.' : t('services.quote.needWeight')}</p>`;
       return;
     }
-    const total = Math.round(units * Number(rate.amount) * 100) / 100;
-    const iqd = Math.round(total * getExchangeRate());
-    const transit = rate.transit_min_days != null ? `${rate.transit_min_days}${rate.transit_max_days != null && rate.transit_max_days !== rate.transit_min_days ? `–${rate.transit_max_days}` : ''} ${currentLang === 'ku' ? 'ڕۆژ' : 'days'}` : '';
-    if(resultEl) resultEl.innerHTML = `<div class="quote-result-card"><div class="quote-route">${escapeHtml(quoteOriginLabels[origin] || origin)} → ${escapeHtml(quoteDestLabels[dest] || dest)} · ${escapeHtml(rate.product_type)}</div><div class="quote-price">$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div class="hint">≈ ${iqd.toLocaleString()} د.ع · ${units.toLocaleString('en-US',{maximumFractionDigits:4})} ${escapeHtml(rate.unit)} × $${Number(rate.amount).toLocaleString('en-US',{maximumFractionDigits:2})}</div>${transit ? `<div class="hint">${currentLang === 'ku' ? 'ماوەی خەملێنراو' : 'Estimated transit'}: ${escapeHtml(transit)}</div>` : ''}<div class="quote-result-actions"><button class="btn btn-primary" data-gc-onclick="route('request')">${t('services.quote.cta')}</button><button class="btn btn-outline" data-gc-onclick="route('track')">${currentLang === 'ku' ? 'شوێنکەوتنی بار' : 'Track shipment'}</button></div></div>`;
+    const currency = String(rate.currency || 'USD').toUpperCase();
+    const raw = units * Number(rate.amount);
+    const fx = Number(quoteCatalogState.usdIqd || 0);
+    const minimumIqd = Number(quoteCatalogState.minimumIqd || 5000);
+    const minimumUsd = currency === 'USD' && fx > 0 ? minimumIqd / fx : 0;
+    const total = Math.max(raw, minimumUsd);
+    const iqd = currency === 'USD' && fx > 0 ? Math.round(total * fx) : null;
+    const formatted = `${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})} ${escapeHtml(currency)}`;
+    const quantityLabel = kind === 'item' ? 'item(s)' : kind === 'cbm' ? 'CBM' : 'kg';
+    const basis = `${units.toLocaleString('en-US',{maximumFractionDigits:4})} ${quantityLabel} × ${Number(rate.amount).toLocaleString('en-US',{maximumFractionDigits:2})} ${currency}/${escapeHtml(rate.unit)}`;
+    const floorNote = minimumUsd > 0 && raw < minimumUsd ? `<div class="hint">${minimumIqd.toLocaleString('en-US')} IQD minimum applied</div>` : '';
+    const iqdNote = iqd === null ? '' : ` · ${iqd.toLocaleString('en-US')} IQD`;
+    if(resultEl) resultEl.innerHTML = `<div class="quote-result-card"><div class="quote-route">${escapeHtml(quoteOriginLabels[quoteOriginKey(origin)] || origin)} → ${escapeHtml(quoteDestLabels[String(dest).toLowerCase()] || dest)} · ${escapeHtml(rate.product_type)}</div><div class="quote-price">${formatted}</div><div class="hint">${basis}${iqdNote}</div>${floorNote}<div class="hint">خەمڵاندنە؛ ستاف نرخی کۆتایی پشتڕاست دەکاتەوە.</div><div class="quote-result-actions"><button class="btn btn-primary" data-gc-onclick="route('request')">${t('services.quote.cta')}</button><button class="btn btn-outline" data-gc-onclick="route('track')">${currentLang === 'ku' ? 'شوێنکەوتنی بار' : 'Track shipment'}</button></div></div>`;
   }catch(error){
     if(resultEl) resultEl.innerHTML = `<div class="quote-result-card quote-result-card--notice"><div class="quote-price">${currentLang === 'ku' ? 'نرخی کاتیی بەردەست نییە' : 'Verified rate unavailable'}</div><div class="hint">${currentLang === 'ku' ? 'سیستەمی نرخەکان ئێستا وەڵام ناداتەوە؛ داواکاری نرخ بنێرە بۆ پێداچوونەوەی ستاف.' : 'The rate catalog is temporarily unavailable; send a quote request for staff review.'}</div><div class="quote-result-actions"><button class="btn btn-primary" data-gc-onclick="route('request')">${t('services.quote.cta')}</button></div></div>`;
   }finally{
@@ -2912,11 +3001,12 @@ function initQuotePricingUI(){
   const origin = document.getElementById('quoteOrigin');
   const type = document.getElementById('quoteType');
   const dest = document.getElementById('quoteDest');
-  if(!origin || !type || !dest || origin.dataset.gcQuoteWired === '1') return;
-  origin.dataset.gcQuoteWired = '1';
-  [origin,type,dest].forEach(el => el.addEventListener('change', ()=>{ syncQuoteForm(); const result=document.getElementById('quoteResult'); if(result) result.innerHTML=''; }));
-  syncQuoteForm();
-  loadQuoteCatalog().catch(()=>syncQuoteForm());
+  if(origin && type && dest && origin.dataset.gcQuoteWired !== '1'){
+    origin.dataset.gcQuoteWired = '1';
+    [origin,type,dest].forEach(el => el.addEventListener('change', ()=>{ syncQuoteForm(); const result=document.getElementById('quoteResult'); if(result) result.innerHTML=''; }));
+    syncQuoteForm();
+  }
+  loadQuoteCatalog().catch(()=>{ syncQuoteForm(); populateRequestSelects(); });
 }
 
 let batchLookupTimer = null;

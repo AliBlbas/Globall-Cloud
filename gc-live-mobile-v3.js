@@ -6,10 +6,11 @@
     const menu = document.querySelector('[data-gc-mobile-menu]');
     const dock = document.querySelector('.gc-mobile-dock-v3');
     if (menuButton && menu) {
+      menuButton.setAttribute('aria-controls', menu.id || 'gcMobileMenu');
       const setOpen = (open) => {
         menu.hidden = !open;
         menuButton.setAttribute('aria-expanded', String(open));
-        menuButton.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+        menuButton.setAttribute('aria-label', open ? 'مێنیوی مۆبایل دابخە' : 'مێنیوی مۆبایل بکەرەوە');
       };
       setOpen(false);
       menuButton.addEventListener('click', (event) => {

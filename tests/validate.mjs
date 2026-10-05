@@ -185,12 +185,16 @@ console.log('Unified live pricing and route-unit contracts')
 const rateMigration = read('supabase/migrations/20261002210000_unified_item_based_pricing.sql')
 const customerPricingUi = read('gc-customer-calculator-20260927.js')
 const publicQuote = read('supabase/functions/public-quote/index.ts')
+const homepageLiveQuote = read('gc-homepage-live-quote-20261005.js')
+const customerQuoteUi = read('gc-csp-scripts/customer-portal-inline-1.js')
 const pricingChecks = [
   ['customer portal loads an active server price catalog instead of hardcoded rates', customerPricingUi.includes('public-quote?catalog=1') && customerPricingUi.includes('rates:[]') && !customerPricingUi.includes('const fallbackRates')],
   ['Dubai Air uses item quantities and active rate keys end-to-end', customerPricingUi.includes('rate_key||rate.product_type') && read('gc-csp-scripts/customer-portal-inline-1.js').includes('items_count: items>0?items:null') && publicQuote.includes('items_count') && read('supabase/functions/public-pricing/index.ts').includes('p_items_count: items && items > 0 ? Math.floor(items) : null') && rateMigration.includes('v_units:=p_items_count') && rateMigration.includes('v_usd:=v_rate.amount*v_units')],
   ['shipping floor and FX are server-side and sea uses CBM', rateMigration.includes('minimum_charge_iqd') && rateMigration.includes('usd_iqd_rate') && rateMigration.includes('p_volume_cbm') && rateMigration.includes('round(v_min_iqd,0)')],
   ['pickup-only office hours/timezone and active transit metadata are shown on the customer portal', customerPricingUi.includes('وەرگرتن لە نووسینگەی هەولێر تەنها') && customerPricingUi.includes('policy.timezone') && customerPricingUi.includes('rate.transit_min_days') && customerPricingUi.includes('rate.transit_max_days') && rateMigration.includes("id='office'")],
   ['Shein >100kg discount is blocked server-side at or below 100kg, even by explicit rate key', rateMigration.includes("v_rate.rate_key='dubai_erbil_land_shein_over_100kg'") && rateMigration.includes('p_weight_kg<=100')],
+  ['anonymous homepage quote requests use live catalog units, exact rate keys and whole item counts', homepageLiveQuote.includes('public-quote?catalog=1') && homepageLiveQuote.includes('items_count: items') && homepageLiveQuote.includes('rate_key: selected?.rate_key || null') && homepageLiveQuote.includes('Number.isInteger(itemCount)') && publicQuote.includes('Number.isInteger(items)')],
+  ['authenticated requests send exact rate_key values and persist them through a forward migration', customerQuoteUi.includes('selectedProduct?.dataset.rateKey') && read('supabase/functions/customer-self/index.ts').includes('rate_key: rateKey || null') && read('supabase/migrations/20261005121500_quote_requests_rate_key.sql').includes('add column if not exists rate_key')],
   ['FX writers use numeric app_settings values and quote RPC maps absent rate keys to SQL NULL', accountAdmin.includes('value: rate') && !accountAdmin.includes('value: String(rate)') && read('supabase/functions/operations-v4/index.ts').includes('value:value,updated_by:a.staff.id') && accountAdmin.includes('p_rate_key:txt(data.rate_key)||null')],
 ]
 for (const [label, passed] of pricingChecks) if (!passed) fail(label)
@@ -249,13 +253,13 @@ if (staffMobileChecks.every(([, passed]) => passed)) ok('Staff Console mobile di
 console.log('Homepage trust, transport cards, and tracking separation')
 const liveMap = read('live-logistics-map.js')
 const homepageBeforeTrackingPage = publicShell.split('<section class="gc-container gc-page" id="page-track"')[0]
-const modeSection = homepageBeforeTrackingPage.match(/<section class="gc-container gc-section gc-modes-section"[\s\S]*?<\/section>/)?.[0] || ''
+const modeSection = homepageBeforeTrackingPage.match(/<section class="gc-public-modes gc-container"[\s\S]*?<\/section>/)?.[0] || ''
 const publicPolish = read('gc-public-app-polish-20260928.css')
 const homepageChecks = [
   ['homepage has no embedded tracking panel or tracking prompt', !/gc-track-panel|gc-track-prompt|data-gc-track-form/.test(homepageBeforeTrackingPage)],
   ['dedicated tracking page and site navigation remain available', publicShell.includes('href="/track"') && (publicShell.match(/data-gc-track-form/g) || []).length === 1],
   ['Air, Sea, and Land photo cards use optimized images', ['air-cargo','sea-cargo','land-cargo'].every(mode => modeSection.includes(`/assets/homepage/${mode}.webp`) && existsSync(join(ROOT, 'assets', 'homepage', `${mode}.webp`)))],
-  ['transport cards use native accessible disclosure controls', (modeSection.match(/<details class="gc-mode-card">/g) || []).length === 3 && (modeSection.match(/<summary class="gc-mode-summary">/g) || []).length === 3],
+  ['transport cards use native accessible disclosure controls', (modeSection.match(/<details class="gc-public-mode">/g) || []).length === 3 && (modeSection.match(/<summary>/g) || []).length === 3],
   ['public headings retain contrast on the light content canvas', publicPolish.includes('body:has(#gcApp) #gcMain .gc-section-head h2') && publicPolish.includes('body:has(#gcApp) #gcMain .gc-page h1')],
   ['no fabricated active-shipment preview remains', !/ACTIVE SHIPMENT|GLC — LIVE CARGO|ETA: 5 days/.test(publicShell)],
   ['no generic social profile placeholders remain', !/https:\/\/www\.(facebook|instagram)\.com\/?["']/i.test(publicShell)],
