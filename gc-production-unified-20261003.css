@@ -142,3 +142,55 @@ body.gc-customer-app .field{background:rgba(2,12,23,.72)!important;border-color:
 body.gc-customer-app .mobile-dock{background:rgba(3,15,27,.97)!important;border:1px solid rgba(226,173,75,.34)!important;border-radius:22px!important;box-shadow:0 22px 70px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.06)!important;backdrop-filter:blur(20px)!important}
 body.gc-customer-app .mobile-dock a{color:#9bb2c5!important;border-radius:15px!important}body.gc-customer-app .mobile-dock a.active{background:rgba(226,173,75,.13)!important;color:#ffe19a!important;border-color:rgba(226,173,75,.35)!important}body.gc-customer-app .mobile-dock a.dock-primary{background:transparent!important;color:#ffe19a!important;box-shadow:none!important}body.gc-customer-app .mobile-dock svg{stroke:currentColor!important;fill:none!important;stroke-width:2!important;stroke-linecap:round!important;stroke-linejoin:round!important}
 @media(max-width:760px){body.gc-customer-app .app-main{padding-top:12px!important}body.gc-customer-app .app-header-inner{min-height:66px!important}body.gc-customer-app .command-card{border-radius:24px!important}body.gc-customer-app .mobile-dock{left:10px!important;right:10px!important;bottom:calc(8px + env(safe-area-inset-bottom))!important;padding:6px!important}body.gc-customer-app .mobile-dock a{min-height:54px!important;font-size:9px!important}body.gc-customer-app .mobile-dock svg{width:23px!important;height:23px!important}}
+
+/* Mobile excellence pass · 2026-10-05 */
+@media (max-width:760px){
+  html,body{max-width:100%;overflow-x:hidden!important}
+  body.gc-customer-app .app-layout{padding:10px 8px calc(88px + env(safe-area-inset-bottom))!important}
+  body.gc-customer-app .app-header-inner{padding-inline:10px!important;gap:8px!important}
+  body.gc-customer-app .app-brand{min-width:0!important;gap:8px!important}
+  body.gc-customer-app .app-brand strong{font-size:15px!important;white-space:nowrap!important}
+  body.gc-customer-app .app-brand small{display:none!important}
+  body.gc-customer-app .app-header-actions{gap:5px!important}
+  body.gc-customer-app .app-header-actions>a,body.gc-customer-app .app-header-actions>button{min-width:40px!important;width:40px!important;height:40px!important;padding:0!important;justify-content:center!important}
+  body.gc-customer-app .app-header-actions>a>span:last-child,body.gc-customer-app .app-header-actions>button>span:last-child{display:none!important}
+  body.gc-customer-app .workspace-toolbar{padding-inline:3px!important}
+  body.gc-customer-app .workspace-toolbar h1{font-size:clamp(24px,7vw,30px)!important;line-height:1.25!important}
+  body.gc-customer-app .workspace-toolbar p{font-size:12px!important;line-height:1.75!important}
+  body.gc-customer-app .workspace-controls{gap:6px!important}
+  body.gc-customer-app .command-card{padding:16px!important;gap:16px!important;overflow:hidden!important}
+  body.gc-customer-app .command-copy h2{font-size:21px!important;line-height:1.45!important}
+  body.gc-customer-app .command-copy p{font-size:12px!important;line-height:1.8!important}
+  body.gc-customer-app .command-actions{display:grid!important;grid-template-columns:1fr!important;gap:7px!important}
+  body.gc-customer-app .command-actions>*{width:100%!important;min-height:44px!important;justify-content:center!important}
+  body.gc-customer-app .command-visual{padding:12px!important;border-radius:18px!important}
+  body.gc-customer-app .metric-card{min-height:82px!important;padding:10px!important;gap:8px!important}
+  body.gc-customer-app .metric-card strong{font-size:19px!important}
+  body.gc-customer-app .section-heading{gap:8px!important;align-items:flex-start!important}
+  body.gc-customer-app .section-heading h2{font-size:20px!important}
+  body.gc-customer-app .section-heading p{font-size:11px!important;line-height:1.7!important}
+  body.gc-customer-app .text-action{white-space:nowrap!important;font-size:10px!important}
+  body.gc-customer-app .surface-card,body.gc-customer-app .request-form{padding:13px!important;border-radius:18px!important}
+  body.gc-customer-app .field-wrap label{font-size:11px!important}
+  body.gc-customer-app .field{min-height:46px!important;font-size:14px!important}
+  body.gc-customer-app .mobile-dock{z-index:3000!important}
+  body:has(.gc-home) .gc-container{width:100%!important;max-width:100%!important}
+  body:has(.gc-home) .gc-nav-inner{padding-inline:10px!important;gap:8px!important}
+  body:has(.gc-home) .gc-brand span small{display:none!important}
+  body:has(.gc-home) .gc-brand b{font-size:15px!important}
+  body:has(.gc-home) .gc-nav-actions{gap:5px!important}
+  body:has(.gc-home) .gc-nav-actions .gc-staff,body:has(.gc-home) .gc-nav-actions .gc-btn{display:none!important}
+  body:has(.gc-home) .gc-menu{display:grid!important;place-items:center!important;width:42px!important;height:42px!important}
+  body:has(.gc-home) .gc-hero-rebuild{padding-inline:10px!important}
+  body:has(.gc-home) .gc-hero-copy{padding-inline:2px!important}
+  body:has(.gc-home) .gc-hero-track{grid-template-columns:1fr!important;gap:8px!important}
+  body:has(.gc-home) .gc-trust{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+  body:has(.gc-home) .gc-trust-card{min-width:0!important;padding:8px!important}
+}
+@media (max-width:390px){
+  body.gc-customer-app .metric-grid{gap:6px!important}
+  body.gc-customer-app .metric-card{padding:8px!important;min-height:76px!important}
+  body.gc-customer-app .metric-card small{font-size:8px!important}
+  body:has(.gc-home) .gc-trust{grid-template-columns:1fr!important}
+  body:has(.gc-home) .gc-hero-copy h1{font-size:clamp(29px,9.2vw,38px)!important}
+}
