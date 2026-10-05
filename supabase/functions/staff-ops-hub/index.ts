@@ -61,6 +61,7 @@ async function financeCreate(a:any,data:Json){
   const type=txt(data.type)||'income',amount=num(data.amount_usd)
   if(!FINANCE_TYPES.has(type))throw new Error('Invalid finance type')
   if(amount===null||amount<0)throw new Error('Invalid finance amount')
+  if(data.gc_code!==undefined&&txt(data.gc_code)!==null&&!gc(data.gc_code))throw new Error('Invalid GC code')
   const row={type,gc_code:gc(data.gc_code),amount_usd:amount,reference:txt(data.reference),note:txt(data.note),created_at:txt(data.created_at)||new Date().toISOString()}
   const {data:created,error}=await a.admin.from('finance_transactions').insert(row).select('*').single();if(error)throw error
   await audit(a.admin,a.staff,'finance.create',created.id,{type,amount_usd:amount,gc_code:row.gc_code,reference:row.reference,note:row.note})

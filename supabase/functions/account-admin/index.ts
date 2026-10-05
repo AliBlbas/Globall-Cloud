@@ -470,11 +470,19 @@ async function upsertCustomer(client: ReturnType<typeof createClient>, payload: 
     if (currentCode && currentCode !== requestedCode) throw responseError('GC code is immutable after customer creation', 409)
   }
   const authResult = await createCustomerAuth(client, payload, existing?.auth_user_id ?? null)
+  const newlyCreatedAuthUserId = authResult.userId && !existing?.auth_user_id ? authResult.userId : null
   const identity = requestedCode && !existing?.id ? { code: requestedCode, gc_code: requestedCode } : {}
   const base = { name, email, phone, phone2, city, delivery_location: deliveryLocation, note, manager_staff_id: managerStaffId, is_active: typeof payload.is_active === 'boolean' ? payload.is_active : true, ...identity }
-  const write = existing?.id ? client.from('customer_directory').update({ ...base, auth_user_id: authResult.userId ?? null }).eq('id', existing.id) : client.from('customer_directory').insert({ ...base, auth_user_id: authResult.userId ?? null })
-  const { data: saved, error } = await write.select('id,code,gc_code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
-  if (error) throw error
+  let saved: any
+  try {
+    const write = existing?.id ? client.from('customer_directory').update({ ...base, auth_user_id: authResult.userId ?? null }).eq('id', existing.id) : client.from('customer_directory').insert({ ...base, auth_user_id: authResult.userId ?? null })
+    const result = await write.select('id,code,gc_code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
+    if (result.error) throw result.error
+    saved = result.data
+  } catch (error) {
+    if (newlyCreatedAuthUserId) await client.auth.admin.deleteUser(newlyCreatedAuthUserId).catch(() => undefined)
+    throw error
+  }
   await logActivity(client, actor.id, actor.name, existing?.id ? 'update_customer_account' : 'create_customer_account', String(saved.id), { email, phone, gc_code: saved.gc_code || saved.code || null, manager_staff_id: managerStaffId, auth_user_created: Boolean(authResult.userId && !existing?.auth_user_id) })
   return { customer: canonicalCustomerIdentity(saved), auth_user_id: authResult.userId, warning: authResult.warning, status: authResult.userId ? 'linked' : 'saved_without_auth' }
 }
