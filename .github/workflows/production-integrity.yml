@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   integrity:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Checkout
@@ -98,6 +98,8 @@ jobs:
           grep -q "document_status" gc-csp-scripts/operations-command-center-inline-1.js
           grep -q "RESEND_API_KEY" supabase/functions/notification-dispatch/index.ts
           grep -q "PAYMENT_WORKER_SECRET" supabase/functions/payment-reconcile/index.ts
+          grep -q "harden_server_only_function_execute" supabase/migrations/20261008190000_harden_server_only_function_execute.sql
+          grep -q "release_id" release.json
 
       - name: Validate Supabase migration filenames
         shell: bash
@@ -137,7 +139,9 @@ jobs:
             supabase/migrations/20260817090000_logistics_advanced_workflows.sql \
             supabase/migrations/20260818090000_notification_dispatch_hardening.sql \
             supabase/migrations/20260818130000_logistics_notifications_contract_hardening.sql \
-            supabase/migrations/20260816120000_qicard_fib_payment_sessions.sql
+            supabase/migrations/20260816120000_qicard_fib_payment_sessions.sql \
+            supabase/migrations/20261008190000_harden_server_only_function_execute.sql \
+            release.json
           do
             test -f "$file"
           done
@@ -158,12 +162,18 @@ jobs:
           import json, re, urllib.request
 
           site = "https://globall-cloud.pages.dev/"
+          release = "https://globall-cloud.pages.dev/release.json"
           config = "https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/public-config?key=usd_iqd_rate"
 
           with urllib.request.urlopen(site, timeout=20) as response:
               html = response.read().decode("utf-8", "replace")
               assert response.status == 200, response.status
               assert "Globall Cloud" in html
+
+          with urllib.request.urlopen(release, timeout=20) as response:
+              marker = json.loads(response.read().decode("utf-8", "replace"))
+              assert response.status == 200, response.status
+              assert marker.get("release_id") == "gc-2026-10-08-security-hardening-01", marker
 
           bridge = open("production-bridge.js", encoding="utf-8").read()
           match = re.search(r"SUPABASE_PUBLISHABLE_KEY\s*=\s*['\"]([^'\"]+)['\"]", bridge)
