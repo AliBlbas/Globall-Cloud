@@ -9,9 +9,31 @@
 <body>
   <main class="auth-shell"><section class="auth-card">
     <a class="brand" href="/"><img src="/logo-icon.png" alt="Globall Cloud"><span><b>Globall Cloud</b><small>NEW CUSTOMER</small></span></a>
-    <div class="eyebrow">CREATE ACCOUNT</div><h1>هەژماری کڕیار دروست بکە</h1><p class="muted">کۆدی GC بە خۆکارانە لە داتابەیسەوە دروست دەکرێت؛ ژمارەی دواتر لە دوایین کۆدی تۆمارکراوەوە وەردەگیرێت.</p>
-    <form id="authForm" class="auth-form"><label for="name">ناوی تەواو</label><input id="name" required maxlength="160" autocomplete="name" placeholder="ناوی تۆ"><label for="phone">ژمارەی مۆبایل</label><input id="phone" required maxlength="40" inputmode="tel" autocomplete="tel" placeholder="07xx xxx xxxx"><label for="password">وشەی نهێنی</label><input id="password" type="password" required minlength="12" autocomplete="new-password" placeholder="لانیکەم 12 پیت"><label for="confirmPassword">دووبارەکردنەوەی وشەی نهێنی</label><input id="confirmPassword" type="password" required minlength="12" autocomplete="new-password"><div id="message" class="auth-message" aria-live="polite"></div><button class="primary" type="submit">دروستکردنی هەژمار</button></form>
-    <p class="switch">پێشتر هەژمارت هەیە؟ <a href="/login.html">چوونەژوورەوە</a></p><a class="back" href="/">← گەڕانەوە بۆ سەرەکی</a>
-  </section></main><script src="/customer-auth.js" defer></script>
+    <div class="eyebrow">CREATE CUSTOMER ACCOUNT</div>
+    <h1>هەژماری کڕیار دروست بکە</h1>
+    <p class="muted">ئیمەیڵ، مۆبایل و وشەی نهێنی بنووسە؛ سیستەم بە خۆکارانە کۆدی GC ـی تایبەتت دروست دەکات.</p>
+    <form id="authForm" class="auth-form">
+      <label for="name">ناوی تەواو</label>
+      <input id="name" required maxlength="160" autocomplete="name" placeholder="ناوی تۆ">
+
+      <label for="email">ئیمەیڵ</label>
+      <input id="email" type="email" required maxlength="180" autocomplete="email" placeholder="you@example.com">
+
+      <label for="phone">ژمارەی مۆبایل</label>
+      <input id="phone" required maxlength="40" inputmode="tel" autocomplete="tel" placeholder="07xx xxx xxxx">
+
+      <label for="password">وشەی نهێنی</label>
+      <input id="password" type="password" required minlength="12" autocomplete="new-password" placeholder="لانیکەم 12 پیت">
+
+      <label for="confirmPassword">دووبارەکردنەوەی وشەی نهێنی</label>
+      <input id="confirmPassword" type="password" required minlength="12" autocomplete="new-password">
+
+      <div id="message" class="auth-message" aria-live="polite"></div>
+      <button class="primary" type="submit">دروستکردنی هەژمار</button>
+    </form>
+    <p class="switch">پێشتر هەژمارت هەیە؟ <a href="/login.html">چوونەژوورەوە</a></p>
+    <a class="back" href="/">← گەڕانەوە بۆ سەرەکی</a>
+  </section></main>
+  <script src="/customer-auth.js" defer></script>
 </body>
 </html>
