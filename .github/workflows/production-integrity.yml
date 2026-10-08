@@ -138,6 +138,7 @@ jobs:
             supabase/functions/payment-webhook/index.ts \
             supabase/functions/payment-reconcile/index.ts \
             supabase/functions/system-health/index.ts \
+            supabase/functions/customer-gc-register/index.ts \
             supabase/functions/_shared/payment-providers.ts \
             payment-checkout.html payment-checkout.css payment-checkout.js payment-gateway.js \
             supabase/migrations/20260816090000_production_logistics_control_plane.sql \
