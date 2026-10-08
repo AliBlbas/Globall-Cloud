@@ -1,0 +1,11 @@
+{
+  "release_id": "gc-2026-10-08-security-hardening-01",
+  "source_base_commit": "0cf297b1a6da6fa87815a91e2c1b399de9179064",
+  "created_at": "2026-10-08T19:30:00+03:00",
+  "purpose": "deployment-marker",
+  "notes": [
+    "Supabase server-only function EXECUTE hardening is recorded in migration 20261008190000_harden_server_only_function_execute.sql",
+    "Production Integrity runner is being moved to ubuntu-latest",
+    "This file is intentionally no-store and exists only to verify which frontend release reached Cloudflare Pages"
+  ]
+}
