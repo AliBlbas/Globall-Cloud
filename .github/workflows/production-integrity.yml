@@ -100,6 +100,11 @@ jobs:
           grep -q "PAYMENT_WORKER_SECRET" supabase/functions/payment-reconcile/index.ts
           grep -q "harden_server_only_function_execute" supabase/migrations/20261008190000_harden_server_only_function_execute.sql
           grep -q "release_id" release.json
+          grep -q "customer-gc-login" customer-auth.js
+          grep -q "customer-gc-register" customer-auth.js
+          grep -q "\[functions.customer-gc-register\]" supabase/config.toml
+          ! grep -q "functions/v1/customer-register" customer-auth.js
+          ! grep -q "\[functions.customer-register\]" supabase/config.toml
 
       - name: Validate Supabase migration filenames
         shell: bash
