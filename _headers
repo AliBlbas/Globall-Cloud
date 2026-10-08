@@ -70,6 +70,10 @@
 /sw.js
   Cache-Control: no-cache, no-store, must-revalidate
 
+/release.json
+  Cache-Control: no-store, max-age=0, must-revalidate
+  X-Robots-Tag: noindex, nofollow, noarchive
+
 /browser-compat.css
   Cache-Control: public, max-age=300, must-revalidate
 
