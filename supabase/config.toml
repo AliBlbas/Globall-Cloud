@@ -32,7 +32,7 @@ verify_jwt = true
 [functions.customer-gc-login]
 verify_jwt = false
 
-[functions.customer-register]
+[functions.customer-gc-register]
 verify_jwt = false
 
 [functions.operations-admin]
