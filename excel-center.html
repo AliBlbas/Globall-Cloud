@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Excel Center | Globall Cloud</title>
+<link rel="stylesheet" href="/gc-theme-sync.css?v=20260929-1">
+<style>
+:root{--bg:#081526;--panel:#10243d;--line:#28445f;--text:#f4f8fc;--muted:#9db2c8;--teal:#28d5e6;--gold:#f0b34d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 85% 0,rgba(40,213,230,.12),transparent 42%),var(--bg);color:var(--text);font-family:Vazirmatn,"Noto Sans Arabic",Arial,sans-serif;line-height:1.7}.wrap{max-width:1180px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin:8px 0 28px}.brand{font-size:19px;font-weight:900}.brand span{color:var(--teal)}a{color:inherit}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border-radius:12px;padding:10px 16px;border:1px solid var(--line);background:#183451;color:var(--text);font:inherit;font-weight:800;text-decoration:none;cursor:pointer}.btn.primary{background:linear-gradient(120deg,#64e7ef,#12b7cc);color:#05202a;border:0}.hero{padding:clamp(24px,5vw,46px);border:1px solid var(--line);border-radius:26px;background:linear-gradient(135deg,rgba(16,36,61,.96),rgba(11,30,50,.9));box-shadow:0 22px 60px #0003}.eyebrow{color:var(--teal);font-weight:900;font-size:12px;letter-spacing:1px}.hero h1{font-size:clamp(27px,5vw,43px);line-height:1.25;margin:10px 0}.hero p{color:var(--muted);max-width:760px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:18px 0}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px}.card h2{font-size:17px;margin:0 0 8px}.muted{color:var(--muted);font-size:13px}.upload{margin-top:18px;border:1px dashed #42849b;border-radius:18px;padding:22px;background:#0b2036}.upload input{display:block;width:100%;margin:14px 0;padding:12px;background:#071626;border:1px solid var(--line);border-radius:10px;color:var(--text)}.status{margin:12px 0;color:var(--teal);font-weight:800}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px;margin-top:16px}table{border-collapse:collapse;min-width:700px;width:100%;font-size:13px}th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:pre-wrap;max-width:320px}th{background:#183451;position:sticky;top:0}tr:nth-child(even) td{background:#ffffff06}.sheetbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.sheetbar button.active{border-color:var(--teal);color:var(--teal)}.notice{border-right:4px solid var(--gold);padding:12px 14px;background:#f0b34d12;border-radius:10px;margin-top:18px;color:#f8dca4;font-size:13px}.hidden{display:none!important}footer{padding:28px 0;color:var(--muted);font-size:12px}@media(max-width:760px){.wrap{padding:15px}.grid{grid-template-columns:1fr}.hero{border-radius:19px}.top .btn{width:100%}}
+</style>
+</head>
+<body><main class="wrap">
+<header class="top"><div class="brand">◈ <span>GLOBALL</span> CLOUD · Excel Center</div><a class="btn" href="/">گەڕانەوە بۆ سایت</a></header>
+<section class="hero"><div class="eyebrow">OPERATIONS · CASH · ORDERS · RECEIPTS</div><h1>ناوەندی کارکردن لەگەڵ Excel</h1><p>فایلی Excel ـی کارەکەت هەڵبژێرە بۆ بینینی شیتەکان، گەڕان لە داتا و پشکنینی خێرا. ئەم وەشانە فایلەکە لە ناو وێبگەڕدا دەخوێنێتەوە؛ فایلەکە بۆ سێرڤەر نانێرێت و داتای Supabase ناگۆڕێت.</p>
+<div class="upload"><h2>بارکردنی فایلی Excel بۆ بینین</h2><label for="excelFile" class="muted">فایلی .xlsx یان .xls هەڵبژێرە</label><input id="excelFile" type="file" accept=".xlsx,.xls,.xlsm"><div id="status" class="status" role="status">هیچ فایلێک هەڵنەبژێردراوە.</div><div class="muted">پاراستنی تایبەتمەندی: ناوەڕۆکی فایل لە وێبگەڕی خۆتدا دەمێنێتەوە؛ بە هیچ API ـەک نانێردرێت.</div></div>
+<div id="results" class="hidden"><div class="grid"><div class="card"><div class="muted">ژمارەی شیتەکان</div><h2 id="sheetCount">—</h2></div><div class="card"><div class="muted">شیتی ئێستا</div><h2 id="activeSheet">—</h2></div><div class="card"><div class="muted">ڕیزە پیشاندراوەکان</div><h2 id="rowCount">—</h2></div></div><div id="sheetbar" class="sheetbar"></div><div class="table-wrap"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div><p class="muted">تەنها ٢٠٠ ڕیزی یەکەم لە خشتەکەدا پیشان دەدرێت بۆ ئەوەی فایلە گەورەکانیش خێرا بمێننەوە.</p></div>
+<div class="notice"><b>تێبینی گرنگ:</b> ئەمە هێشتا هاوکاتکردنی ڕاستەقینەی ژمێریاری لەگەڵ سێرڤەر نییە. بۆ نووسین/دەستکاریکردنی داتای هاوبەش پێویستە API ـی پارێزراو، ڕۆڵی ستاف و مۆڵەتی داتابەیس بە شێوەی جیاواز جێبەجێ بکرێن.</div>
+<footer>Globall Cloud · Excel Center · بەکارهێنان بۆ کارمەندانی مۆڵەتپێدراو</footer>
+</section></main>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+(function(){
+const input=document.getElementById('excelFile'), status=document.getElementById('status'), results=document.getElementById('results');
+let book=null;
+function safe(v){return v==null?'':String(v).slice(0,2000)}
+function render(name){
+ const ws=book.Sheets[name], rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,defval:''});
+ document.getElementById('activeSheet').textContent=name;
+ document.getElementById('rowCount').textContent=rows.length.toLocaleString();
+ const head=document.getElementById('thead'), body=document.getElementById('tbody'); head.replaceChildren();body.replaceChildren();
+ const maxCols=Math.min(24,Math.max(0,...rows.slice(0,200).map(r=>r.length)));
+ const hr=document.createElement('tr');
+ for(let c=0;c<maxCols;c++){const th=document.createElement('th');th.textContent=safe((rows[0]||[])[c]||('ستوون '+(c+1)));hr.appendChild(th)}head.appendChild(hr);
+ rows.slice(1,200).forEach(row=>{const tr=document.createElement('tr');for(let c=0;c<maxCols;c++){const td=document.createElement('td');td.textContent=safe(row[c]);tr.appendChild(td)}body.appendChild(tr)});
+ document.querySelectorAll('#sheetbar button').forEach(b=>b.classList.toggle('active',b.dataset.sheet===name));
+}
+input.addEventListener('change',async()=>{
+ const f=input.files&&input.files[0]; if(!f)return;
+ if(f.size>25*1024*1024){status.textContent='فایل زۆر گەورەیە؛ سنووری ئەم پەڕەیە ٢٥MB ـە.';return}
+ status.textContent='فایل دەخوێندرێتەوە...';
+ try{const bytes=await f.arrayBuffer();book=XLSX.read(bytes,{type:'array',cellDates:true});if(!book.SheetNames.length)throw Error('هیچ شیتێک نەدۆزرایەوە');
+ document.getElementById('sheetCount').textContent=book.SheetNames.length;
+ const bar=document.getElementById('sheetbar');bar.replaceChildren();
+ book.SheetNames.forEach(name=>{const b=document.createElement('button');b.className='btn';b.textContent=name;b.dataset.sheet=name;b.addEventListener('click',()=>render(name));bar.appendChild(b)});
+ results.classList.remove('hidden');status.textContent='سەرکەوتوو بوو: '+f.name+' — '+(f.size/1024).toFixed(0)+' KB';render(book.SheetNames[0]);
+ }catch(e){status.textContent='نەتوانرا فایلەکە بخوێندرێتەوە. تکایە دڵنیابە فایلەکە تەندروستە و .xlsx/.xls ـە.';results.classList.add('hidden')}
+});
+})();
+</script></body></html>
