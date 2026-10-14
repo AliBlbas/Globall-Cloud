@@ -1,4 +1,4 @@
-/* Staff OS – premium operational dashboard polish */
+/* Staff OS – premium operations dashboard polish */
 :root {
   --bg:#061022;
   --bg-2:#0a1830;
@@ -14,7 +14,8 @@
   --accent-3:#8ef8ff;
   --warning:#ffc96b;
   --danger:#ff6b7a;
-  --shadow:0 20px 60px rgba(2,8,20,.52);
+  --shadow:0 22px 60px rgba(2,8,20,.52);
+  --shadow-soft:0 12px 28px rgba(0,8,18,.3);
   --radius:18px;
   --radius-sm:12px;
   --mono:"JetBrains Mono", monospace;
@@ -25,8 +26,8 @@ html, body {
   margin:0;
   min-height:100%;
   background:
-    radial-gradient(1000px 540px at 85% -10%, rgba(0,194,217,.12), transparent 60%),
-    radial-gradient(900px 480px at -8% 24%, rgba(88,127,255,.08), transparent 62%),
+    radial-gradient(1000px 540px at 85% -8%, rgba(0,194,217,.12), transparent 60%),
+    radial-gradient(900px 480px at -8% 28%, rgba(88,127,255,.08), transparent 62%),
     linear-gradient(180deg, #071421 0%, #061022 100%);
   color:var(--text);
   font-family:var(--ui);
@@ -34,6 +35,8 @@ html, body {
 }
 
 body * { box-sizing:border-box; }
+
+a { color:inherit; text-decoration:none; }
 
 .wrap{
   width:min(1200px, calc(100% - 28px));
@@ -50,7 +53,7 @@ body * { box-sizing:border-box; }
   position:sticky;
   top:8px;
   z-index:50;
-  background:rgba(7,19,31,.7);
+  background:rgba(7,19,31,.72);
   border:1px solid var(--line);
   border-radius:20px;
   backdrop-filter:blur(16px);
@@ -67,7 +70,7 @@ body * { box-sizing:border-box; }
   font-weight:900;
   box-shadow:0 12px 28px rgba(0,194,217,.18);
 }
-.brand > div{min-width:0}
+.brand > div{ min-width:0; }
 .brand b{display:block;font-size:17px;font-weight:800;letter-spacing:-.2px}
 .brand .muted{display:block;color:var(--muted);font-size:11px;white-space:nowrap}
 
@@ -141,10 +144,7 @@ body * { box-sizing:border-box; }
   letter-spacing:-.7px;
 }
 .gate-card p{ color:var(--muted); }
-
-.gate-card form {
-  margin-top:18px;
-}
+.gate-card form { margin-top:18px; }
 
 label.muted{
   display:block;
@@ -206,7 +206,7 @@ label.muted{
   background:linear-gradient(150deg, rgba(16,35,54,.96), rgba(7,17,30,.98));
   border:1px solid var(--line);
   border-radius:var(--radius);
-  box-shadow:var(--shadow);
+  box-shadow:var(--shadow-soft);
 }
 
 .hero-card{
@@ -228,8 +228,8 @@ label.muted{
   letter-spacing:1px;
 }
 .status i.dot{
-  width:8px;height:8px;border-radius:50%;background:var(--accent-2);box-shadow:0 0 0 4px rgba(88,230,176,.12);
-  display:inline-block;
+  width:8px;height:8px;border-radius:50%;background:var(--accent-2);
+  display:inline-block; box-shadow:0 0 0 4px rgba(88,230,176,.12);
 }
 
 .hero h1{
@@ -415,7 +415,6 @@ label.muted{
   .grid{grid-template-columns:1fr;}
   .metrics{grid-template-columns:1fr;}
   .hero h1{font-size:32px}
-  .gated-card{padding:22px 18px}
 }
 
 :focus-visible{
