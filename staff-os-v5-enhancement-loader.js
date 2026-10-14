@@ -50,6 +50,9 @@
     enhancementStyles.forEach(loadStyle);
     for (const src of enhancementScripts) await loadOne(src);
     loadStyle('/gc-final-ui-20260927.css?v=4');
+    // Keep the current console design layer last: later-loaded legacy bundles
+    // otherwise override responsive layout, cards, and mobile navigation.
+    loadStyle('/gc-staff-elite-20261014.css?v=2');
   };
 
   const waitForShell = () => {
