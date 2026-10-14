@@ -49,7 +49,7 @@ const required = [
   'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/invoice-ai/index.ts',
   'supabase/functions/customer-debt-assistant/index.ts','supabase/functions/fx-refresh/index.ts','supabase/functions/public-config/index.ts',
   'supabase/functions/public-message/index.ts','supabase/functions/public-quote/index.ts','supabase/functions/public-pricing/index.ts',
-  'supabase/functions/public-track/index.ts','supabase/functions/public-health/index.ts','supabase/functions/customer-self/index.ts','supabase/functions/payment-webhook/index.ts',
+  'supabase/functions/public-track/index.ts','supabase/functions/public-health/index.ts','supabase/functions/customer-self/index.ts','supabase/functions/customer-gc-login/index.ts','supabase/functions/payment-webhook/index.ts',
   'supabase/functions/_shared/payment-providers.ts','tests/validate.mjs','tests/e2e/run.mjs'
 ]
 const missing = required.filter((path) => !exists(path))
@@ -124,6 +124,9 @@ if (!customerAccountEntry.includes("email.setAttribute('type', 'text')")) fail('
 else ok('Customer login input accepts GC codes')
 if (!read('customer-portal.html').includes('/gc-csp-scripts/customer-portal-inline-1.js?v=20261014-1')) fail('Customer portal login cache-buster is stale')
 if (!read('functions/_middleware.js').includes('gc-account-entry.js?v=20261014-1')) fail('Customer GC login helper cache-buster is stale')
+const customerGcLogin = read('supabase/functions/customer-gc-login/index.ts')
+if (!customerGcLogin.includes('consume_public_message_rate_limit') || !customerGcLogin.includes('MAX_LOGIN_REQUESTS_PER_IP = 40') || !customerGcLogin.includes('MAX_LOGIN_REQUESTS_PER_IP_CODE = 8')) fail('GC-code login must apply network and account-scoped rate limits')
+else ok('GC-code login applies server-side attempt limits')
 
 
 console.log('')
