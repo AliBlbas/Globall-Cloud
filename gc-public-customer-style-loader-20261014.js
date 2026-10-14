@@ -11,7 +11,7 @@
     '/gc-homepage-elite-20261014.css?v=4'
   ];
   const customerStyles = [
-    '/gc-customer-workspace-elite-20261014.css?v=3'
+    '/gc-customer-workspace-elite-20261014.css?v=4'
   ];
 
   const desiredStyles = () => {
