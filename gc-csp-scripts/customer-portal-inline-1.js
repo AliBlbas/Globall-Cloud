@@ -350,7 +350,52 @@ $('loginPromptBtn')?.addEventListener('click', () => { $('auth').classList.remov
 $('close').addEventListener('click', () => { $('auth').classList.add('hidden'); $('loginBtn')?.focus(); });
 $('auth').addEventListener('click', (event) => { if (event.target === $('auth')) $('close').click(); });
 $('password').addEventListener('keydown', (event) => { if (event.key === 'Enter') $('signIn').click(); });
-$('signIn').addEventListener('click', async () => { if (!$('email').value.trim() || !$('password').value) { $('msg').textContent = 'ئیمەیل و وشەی نهێنی پڕبکەرەوە.'; return; } $('signIn').disabled = true; $('signIn').setAttribute('aria-busy', 'true'); $('msg').textContent = '…'; const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('password').value }); $('msg').textContent = error ? error.message : 'سەرکەوتوو'; $('signIn').disabled = false; $('signIn').removeAttribute('aria-busy'); if (!error) { $('auth').classList.add('hidden'); $('loginBtn')?.focus(); await load(); } });
+$('signIn').addEventListener('click', async () => {
+  const identifier = $('email').value.trim();
+  const password = $('password').value;
+  const button = $('signIn');
+  const msg = $('msg');
+  if (!identifier || !password) { msg.textContent = 'کۆدی GC یان ئیمەیل و وشەی نهێنی پڕبکەرەوە.'; return; }
+  button.disabled = true;
+  button.setAttribute('aria-busy', 'true');
+  msg.textContent = 'چوونەژوورەوە پشتڕاست دەکرێتەوە…';
+  try {
+    if (identifier.includes('@')) {
+      const result = await sb.auth.signInWithPassword({ email: identifier, password });
+      if (result.error) throw result.error;
+    } else {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/customer-gc-login`, {
+        method: 'POST',
+        headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: identifier, gc_code: identifier, password }),
+        cache: 'no-store',
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload.session?.access_token || !payload.session?.refresh_token) {
+        throw new Error(payload.error || 'چوونەژوورەوە سەرکەوتوو نەبوو.');
+      }
+      const sessionResult = await sb.auth.setSession({
+        access_token: payload.session.access_token,
+        refresh_token: payload.session.refresh_token,
+      });
+      if (sessionResult.error) throw sessionResult.error;
+    }
+    msg.textContent = 'چوونەژوورەوە سەرکەوتوو بوو.';
+    $('auth').classList.add('hidden');
+    $('loginBtn')?.focus();
+    await load();
+  } catch (error) {
+    const raw = String(error?.message || error || '');
+    msg.textContent = /invalid login credentials|invalid gc code or password/i.test(raw)
+      ? 'کۆدی GC یان ئیمەیل یان وشەی نهێنی هەڵەیە.'
+      : /account is not ready/i.test(raw)
+        ? 'هەژماری GC ـەکەت هێشتا بەستراو نییە؛ تکایە پەیوەندی بە ستاف بکە.'
+        : raw || 'چوونەژوورەوە سەرکەوتوو نەبوو.';
+  } finally {
+    button.disabled = false;
+    button.removeAttribute('aria-busy');
+  }
+});
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !$('auth').classList.contains('hidden')) $('close').click(); });
 $('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
 $('trackBtn').addEventListener('click', () => { location.href = './index.html#track'; });
