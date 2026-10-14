@@ -5,7 +5,7 @@
 (() => {
   'use strict';
 
-  const BRIDGE = '/production-bridge.js?v=20260815-3';
+  const BRIDGE = '/production-bridge.js?v=20260816-4';
   const LEGACY_MESSAGE = 'Supabase هێشتا پەیوەست نەکراوە';
   const READY_MESSAGE = 'پەیوەندیی پارێزراو بە Supabase چالاکە و سیستەمەکە ئامادەیە.';
   const FAIL_MESSAGE = 'پەیوەندیی خزمەتگوزاری بە شێوەی پارێزراو دەتاقیکرێتەوە.';
@@ -33,7 +33,7 @@
 
   function startLegacyTextGuard() {
     replaceLegacyLeafText(FAIL_MESSAGE);
-    const observer = new MutationObserver(() => replaceLegacyLeafText(FAIL_MESSAGE));
+    const observer = new MutationObserver(() => replaceLegacyText(FAIL_MESSAGE));
     observer.observe(document.documentElement, { subtree: true, childList: true, characterData: true });
     window.setTimeout(() => observer.disconnect(), 15000);
   }
