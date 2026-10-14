@@ -7,7 +7,7 @@ const THEME_CSS = `<link rel="stylesheet" href="/gc-theme-sync.css?v=${VERSION}"
 const THEME_JS = `<script src="/gc-theme-sync.js?v=${VERSION}" defer data-gc-theme-sync="1"></script>`;
 const SETTINGS_CSS = `<link rel="stylesheet" href="/gc-settings-hub.css?v=${VERSION}" data-gc-settings-css="1">`;
 const SETTINGS_JS = `<script src="/gc-settings-hub.js?v=${VERSION}" defer data-gc-settings-hub="1"></script>`;
-const ACCOUNT_ENTRY_JS = `<script src="/gc-account-entry.js?v=${VERSION}" defer data-gc-account-entry="1"></script>`;
+const ACCOUNT_ENTRY_JS = `<script src="/gc-account-entry.js?v=20261014-1" defer data-gc-account-entry="1"></script>`;
 const MOBILE_PRIMARY_NAV = `<style data-gc-mobile-primary-nav="1">
 @media (max-width: 760px){
   body{padding-bottom:62px!important}
