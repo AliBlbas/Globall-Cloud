@@ -13,6 +13,60 @@
 @media(max-width:1050px){.hero{grid-template-columns:1fr}.grid4{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:1fr 1fr}.rowitem{grid-template-columns:1fr 1fr}}@media(max-width:680px){.wrap{padding:0 12px}.topin{min-height:64px}.tools .ghost{display:none}.grid4,.grid3,.authgrid{grid-template-columns:1fr}.hero-card,.identity,.card{padding:16px}.rowitem{grid-template-columns:1fr}.mini{max-width:none}.field{font-size:16px!important}.modalbox{max-height:calc(100dvh - 24px)}}
 @supports not (height:100dvh){.modalbox{max-height:calc(100vh - 24px)}}
 @supports (-webkit-touch-callout:none){body{background-attachment:scroll}.top{position:-webkit-sticky;position:sticky}.modal{padding-bottom:max(16px,env(safe-area-inset-bottom))}}
+
+/* Mobile-first operations dashboard refinement — Oct 2026 */
+:root{--r:18px;--shadow:0 12px 34px rgba(0,0,0,.22)}
+body{background-color:var(--bg);background-image:radial-gradient(760px 360px at 100% 0%,rgba(0,194,217,.10),transparent 62%),radial-gradient(620px 340px at 0% 24%,rgba(88,229,239,.06),transparent 64%)}
+.top{background:rgba(6,20,40,.94);border-bottom-color:rgba(92,153,190,.18)}
+.topin{gap:10px}.brand{min-width:0}.brand b{letter-spacing:-.02em}.brand small{letter-spacing:.08em}
+.hero-card,.identity,.card{border-color:rgba(83,135,173,.22);box-shadow:0 12px 34px rgba(0,0,0,.18)}
+.hero-card{background:linear-gradient(145deg,rgba(16,43,70,.98),rgba(8,27,48,.98))}
+.card{background:linear-gradient(155deg,rgba(14,36,60,.96),rgba(8,27,47,.98))}
+h1{letter-spacing:-.035em;text-wrap:balance}h2,h3{letter-spacing:-.02em}
+.lead{line-height:1.85}.section-head{align-items:center}
+.kpi{min-height:116px;padding:17px}.kpi b{font-size:clamp(25px,3vw,34px);line-height:1.2;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+.kpi .muted{font-size:12px;line-height:1.55}
+.btn{transition:transform .16s ease,border-color .16s ease,filter .16s ease}
+.btn:active{transform:translateY(1px)}.btn:focus-visible,.field:focus-visible{outline:3px solid rgba(88,229,239,.45);outline-offset:2px}
+.pill{white-space:nowrap}.rowitem{border-color:rgba(83,135,173,.2);background:rgba(255,255,255,.025)}
+@media(max-width:680px){
+  .wrap{padding-inline:14px}
+  .topin{min-height:66px;align-items:center}
+  .brand img{width:34px;height:34px}.brand b{font-size:16px}.brand small{font-size:9px;letter-spacing:.04em}
+  .tools{gap:6px}.tools .pill{display:none}.tools .btn{padding:8px 11px;min-height:40px;font-size:12px}
+  .shell{padding:14px 0 34px}
+  .hero{gap:10px;margin-bottom:10px}
+  .hero-card{padding:20px 17px;border-radius:20px}
+  .identity{padding:15px;border-radius:18px}
+  .eyebrow{font-size:10px;letter-spacing:1.2px}
+  h1{font-size:clamp(27px,8vw,36px);line-height:1.22;margin:10px 0}
+  .lead{font-size:14px;line-height:1.85}
+  .section{margin-top:11px}
+  .section-head{align-items:flex-start;flex-wrap:wrap}
+  .section-head h2{font-size:18px}
+  .grid4{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .grid3{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .card{padding:13px;border-radius:16px}
+  .kpi{min-height:118px;padding:14px 12px;display:flex;flex-direction:column;justify-content:center;gap:3px}
+  .kpi b{font-size:clamp(22px,6vw,29px);margin:3px 0;overflow-wrap:anywhere}
+  .kpi .muted{font-size:11px}
+  .feature{min-height:0}.feature h3{font-size:15px}.feature p{font-size:12px;line-height:1.75}
+  .icon{width:36px;height:36px;border-radius:11px}
+  .toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+  .toolbar .btn{width:100%;padding:10px 9px;font-size:13px}
+  .toolbar .btn:first-child:last-child{grid-column:1/-1}
+  .rowitem{gap:7px;padding:13px;border-radius:13px}
+  .mini{max-width:none;width:100%}
+  .modal{padding:12px}
+  .modalbox{border-radius:20px;padding:17px;max-height:calc(100dvh - 24px)}
+}
+@media(max-width:380px){
+  .wrap{padding-inline:10px}.grid4,.grid3{grid-template-columns:1fr}
+  .kpi{min-height:94px}.kpi b{font-size:27px}
+  .brand small{max-width:145px;overflow:hidden;text-overflow:ellipsis}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
 </style>
 <script src="/gc-csp-bridge.js?v=20260816-1" defer data-gc-csp-bridge="1"></script></head>
 <body>
