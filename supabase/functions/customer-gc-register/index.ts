@@ -5,6 +5,21 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || ''
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') || Deno.env.get('SUPABASE_PUBLISHABLE_KEY') || ''
 const ALLOWED_ORIGINS = new Set(['https://globall-cloud.pages.dev', 'https://globall-cloud.netlify.app'])
+const RATE_WINDOW_SECONDS = 10 * 60
+const MAX_REGISTER_REQUESTS_PER_IP = 5
+const RATE_LIMIT_PREFIX = 'globall-cloud:customer-gc-register:v1:'
+const clientKey = (req: Request) => (req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown').split(',')[0].trim().slice(0, 80) || 'unknown'
+const sha256Hex = async (value: string) => {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('')
+}
+const rateAllowed = async (value: string) => {
+  const key = await sha256Hex(RATE_LIMIT_PREFIX + value)
+  const result = await service.rpc('consume_public_message_rate_limit', { p_key_hash: key, p_window_seconds: RATE_WINDOW_SECONDS, p_max_requests: MAX_REGISTER_REQUESTS_PER_IP })
+  if (result.error) throw result.error
+  return result.data === true
+}
+const originAllowed = (req: Request) => !req.headers.get('origin') || ALLOWED_ORIGINS.has(req.headers.get('origin') || '')
 const service = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { autoRefreshToken: false, persistSession: false } })
 
 const text = (value: unknown, max = 240) => String(value ?? '').trim().slice(0, max)
@@ -17,10 +32,12 @@ const headers = (req: Request) => ({
 const json = (req: Request, body: Record<string, unknown>, status = 200) => new Response(JSON.stringify(body), { status, headers: headers(req) })
 
 Deno.serve(async (req) => {
+  if (!originAllowed(req)) return json(req, { error: 'Origin not allowed' }, 403)
   if (req.method === 'OPTIONS') return new Response('ok', { headers: headers(req) })
   if (req.method !== 'POST') return json(req, { error: 'Method not allowed' }, 405)
   let createdUserId = ''
   try {
+    if (!(await rateAllowed('ip:' + clientKey(req)))) return json(req, { error: 'Too many registration attempts. Please try again in 10 minutes.' }, 429)
     const body = await req.json().catch(() => ({})) as Body
     const name = text(body.name, 160)
     const email = text(body.email, 180).toLowerCase()
