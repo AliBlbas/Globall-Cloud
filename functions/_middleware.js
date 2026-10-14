@@ -4,7 +4,7 @@
  * off public/customer/payment surfaces.
  */
 const HTML_ACCEPT = 'text/html'
-const VERSION = '20260929-1'
+const VERSION = '20260816-4'
 const THEME_CSS = `<link rel="stylesheet" href="/gc-theme-sync.css?v=${VERSION}" data-gc-theme-css="1">`
 const THEME_JS = `<script src="/gc-theme-sync.js?v=${VERSION}" defer data-gc-theme-sync="1"></script>`
 const SETTINGS_CSS = `<link rel="stylesheet" href="/gc-settings-hub.css?v=${VERSION}" data-gc-settings-css="1">`
@@ -45,8 +45,8 @@ export async function onRequest(context) {
     html = addBodyAsset(html, 'src="/gc-customer-account-20260923.js', `<script src="/gc-customer-account-20260923.js?v=${VERSION}" defer data-gc-customer-account="1"></script>`)
   }
 
-  const adminSurface = /^\/(management|accounts-console|operations-suite|operations-command-center|operations-control|operations-control-v2|staff-os|staff-portal|warehouse-os|superadmin|super-admin-command-center)\.html$/.test(path)
-  if (adminSurface) {
+  const adminSurface = /^\/(management|accounts-console|operations-suite|operations-command-center|operations-control|operations-control-v2|staff-os|staff-portal|warehouse-os|superadmin|super-admin-command-center|superadmin|management|login|register)$/
+  if (adminSurface.test(path)) {
     html = addHeadAsset(html, 'href="/admin-console-enhanced.css', `<link rel="stylesheet" href="/admin-console-enhanced.css?v=${VERSION}" data-gc-admin-polish="1">`)
     html = addHeadAsset(html, 'src="/admin-console-enhanced.js', `<script src="/admin-console-enhanced.js?v=${VERSION}" defer data-gc-admin-recovery="1"></script>`)
   }
