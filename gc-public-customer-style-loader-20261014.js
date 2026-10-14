@@ -7,11 +7,11 @@
   'use strict';
 
   const homeStyles = [
-    '/gc-live-mobile-v3.css?v=20261014-2',
-    '/gc-homepage-elite-20261014.css?v=2'
+    '/gc-live-mobile-v3.css?v=20261014-3',
+    '/gc-homepage-elite-20261014.css?v=3'
   ];
   const customerStyles = [
-    '/gc-customer-workspace-elite-20261014.css?v=2'
+    '/gc-customer-workspace-elite-20261014.css?v=3'
   ];
 
   const desiredStyles = () => {
