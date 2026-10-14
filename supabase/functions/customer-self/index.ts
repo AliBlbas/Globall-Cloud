@@ -49,16 +49,17 @@ Deno.serve(async (req) => {
 
     if (req.method === 'POST' && action === 'claim_account') {
       const normalizeGcCode = (value: unknown) => {
-        const raw = text(value, 50).toUpperCase().replace(/\\s+/g, '')
-        if (/^GC-\\d+$/.test(raw)) return raw
-        if (/^GC\\d+$/.test(raw)) return 'GC-' + raw.slice(2)
-        if (/^\\d+$/.test(raw)) return 'GC-' + raw
+        const raw = text(value, 50).toUpperCase().replace(/\s+/g, '')
+        if (/^GC-\d+$/.test(raw)) return raw
+        if (/^GC\d+$/.test(raw)) return 'GC-' + raw.slice(2)
+        if (/^\d+$/.test(raw)) return 'GC-' + raw
         return ''
       }
       const normalizePhone = (value: unknown) => {
-        let digits = text(value, 50).replace(/\\D/g, '')
-        if (digits.startsWith('00964')) digits = digits.slice(5)
+        let digits = text(value, 50).replace(/\D/g, '')
+        if (digits.startsWith('00964')) digits = digits.slice(2)
         if (digits.startsWith('964')) digits = '0' + digits.slice(3)
+        else if (/^7\d{9}$/.test(digits)) digits = '0' + digits
         return digits
       }
       const gcCode = normalizeGcCode(data.gc_code || data.code)
