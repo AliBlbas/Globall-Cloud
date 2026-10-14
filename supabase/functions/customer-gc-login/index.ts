@@ -27,8 +27,10 @@ function text(value: unknown, max = 240) { return String(value ?? '').trim().sli
 const RATE_WINDOW_SECONDS = 10 * 60
 const MAX_LOGIN_REQUESTS_PER_IP = 40
 const MAX_LOGIN_REQUESTS_PER_IP_CODE = 8
+const MAX_LOGIN_REQUESTS_PER_GC_CODE = 12
 const RATE_LIMIT_PREFIX = 'globall-cloud:customer-gc-login:v1:'
 const clientKey = (req: Request) => (req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown').split(',')[0].trim().slice(0, 80) || 'unknown'
+const originAllowed = (req: Request) => !req.headers.get('origin') || ALLOWED_ORIGINS.has(req.headers.get('origin') || '')
 const sha256Hex = async (value: string) => {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('')
@@ -53,6 +55,7 @@ const service = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { autoRefreshTok
 const auth = createClient(SUPABASE_URL, ANON_KEY, { auth: { autoRefreshToken: false, persistSession: false } })
 
 Deno.serve(async (req) => {
+  if (!originAllowed(req)) return json(req, { error: 'Origin not allowed' }, 403)
   if (req.method === 'OPTIONS') return new Response('ok', { headers: headers(req) })
   if (req.method !== 'POST') return json(req, { error: 'Method not allowed' }, 405)
   try {
@@ -64,6 +67,9 @@ Deno.serve(async (req) => {
     const code = normalizeCode(body.code ?? body.gc_code)
     const password = text(body.password, 200)
     if (!code || !password) return json(req, { error: 'GC code and password are required' }, 400)
+    if (!(await rateAllowed('code:' + code, MAX_LOGIN_REQUESTS_PER_GC_CODE))) {
+      return json(req, { error: 'Too many login attempts for this GC code. Please try again in 10 minutes.' }, 429)
+    }
     if (!(await rateAllowed('ip-code:' + ipKey + ':' + code, MAX_LOGIN_REQUESTS_PER_IP_CODE))) {
       return json(req, { error: 'Too many login attempts for this GC code. Please try again in 10 minutes.' }, 429)
     }
