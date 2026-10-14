@@ -115,6 +115,49 @@ const guards = [
 for (const [label, passed] of guards) if (!passed) fail(label)
 if (!failures) ok('Public and Staff integration guards OK')
 
+console.log('Customer identity claim normalization')
+const customerIdentitySource = read('supabase/functions/customer-self/index.ts')
+const identityPatterns = [
+  ['remove GC-code whitespace', String.raw`replace(/\s+/g, '')`, String.raw`replace(/\\s+/g, '')`],
+  ['GC-123 format', String.raw`/^GC-\d+$/.test(raw)`, String.raw`/^GC-\\d+$/.test(raw)`],
+  ['GC123 format', String.raw`/^GC\d+$/.test(raw)`, String.raw`/^GC\\d+$/.test(raw)`],
+  ['numeric GC input', String.raw`/^\d+$/.test(raw)`, String.raw`/^\\d+$/.test(raw)`],
+  ['phone digit normalization', String.raw`replace(/\D/g, '')`, String.raw`replace(/\\D/g, '')`],
+  ['mobile prefix normalization', String.raw`else if (/^7\d{9}$/.test(digits)) digits = '0' + digits`, String.raw`else if (/^7\\d{9}$/.test(digits)) digits = '0' + digits`],
+]
+let identityPatternsPassed = true
+for (const [label, expected, legacy] of identityPatterns) {
+  if (!customerIdentitySource.includes(expected) || customerIdentitySource.includes(legacy)) {
+    fail(`customer-self identity normalization: ${label}`)
+    identityPatternsPassed = false
+  }
+}
+const normalizeTestGcCode = (value) => {
+  const raw = String(value ?? '').trim().slice(0, 50).toUpperCase().replace(/\s+/g, '')
+  if (/^GC-\d+$/.test(raw)) return raw
+  if (/^GC\d+$/.test(raw)) return 'GC-' + raw.slice(2)
+  if (/^\d+$/.test(raw)) return 'GC-' + raw
+  return ''
+}
+const normalizeTestPhone = (value) => {
+  let digits = String(value ?? '').trim().slice(0, 50).replace(/\D/g, '')
+  if (digits.startsWith('00964')) digits = digits.slice(2)
+  if (digits.startsWith('964')) digits = '0' + digits.slice(3)
+  else if (/^7\d{9}$/.test(digits)) digits = '0' + digits
+  return digits
+}
+const identityCases = [
+  ['GC-123 stays canonical', normalizeTestGcCode('GC-123') === 'GC-123'],
+  ['GC123 gains the dash', normalizeTestGcCode('GC123') === 'GC-123'],
+  ['numeric code gains GC prefix', normalizeTestGcCode('123') === 'GC-123'],
+  ['spaced GC code normalizes', normalizeTestGcCode(' GC - 123 ') === 'GC-123'],
+  ['+964 mobile matches local format', normalizeTestPhone('+964 750 123 4567') === '07501234567'],
+  ['00964 mobile matches local format', normalizeTestPhone('00964 750 123 4567') === '07501234567'],
+  ['mobile without leading zero normalizes', normalizeTestPhone('750 123 4567') === '07501234567'],
+]
+for (const [label, passed] of identityCases) if (!passed) { fail(`identity regression: ${label}`); identityPatternsPassed = false }
+if (identityPatternsPassed) ok('Customer GC-code and Iraq-phone normalization contracts OK')
+
 console.log('Migration naming and presence')
 const migDir = join(ROOT, 'supabase', 'migrations')
 const migrations = existsSync(migDir) ? readdirSync(migDir).filter((x) => x.endsWith('.sql')) : []
