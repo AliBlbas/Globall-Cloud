@@ -38,12 +38,12 @@ body * { box-sizing:border-box; }
 
 a { color:inherit; text-decoration:none; }
 
-.wrap{
+.wrap {
   width:min(1200px, calc(100% - 28px));
   margin:0 auto;
 }
 
-.top{
+.top {
   display:flex;
   align-items:center;
   justify-content:space-between;
