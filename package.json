@@ -10,7 +10,7 @@
     "typescript": "^5.5.0"
   },
   "scripts": {
-    "test": "node tests/validate.mjs",
+    "test": "node --test tests/*.test.mjs",
     "test:syntax": "node tests/validate.mjs"
   }
 }
