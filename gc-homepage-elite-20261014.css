@@ -136,7 +136,7 @@
 #gcApp .gc-footer-grid a{display:block;margin:7px 0;color:#98b4c4;font-size:10px;text-decoration:none}
 #gcApp .gc-footer-grid a:hover{color:#69dfe9}
 #gcApp .gc-footer-bottom{display:flex;justify-content:space-between;gap:12px;margin-top:23px;padding-top:13px;border-top:1px solid rgba(143,198,218,.09);color:#728fa1;font-size:9px}
-#gcApp .gc-mobile-dock-v3{display:none!important}
+.gc-mobile-dock-v3{display:none!important}
 #gcApp .gc-whatsapp-float{z-index:620!important}
 @media(max-width:1060px){
   #gcApp .gc-desktop-nav{gap:10px}
@@ -213,7 +213,7 @@
   #gcApp .gc-footer{margin-top:30px;padding-bottom:calc(98px + env(safe-area-inset-bottom))!important}
   #gcApp .gc-footer-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
   #gcApp .gc-footer-bottom{font-size:8px}
-  #gcApp .gc-mobile-dock-v3{
+  .gc-mobile-dock-v3{
     position:fixed!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;align-items:stretch!important;
     left:8px!important;right:8px!important;bottom:calc(7px + env(safe-area-inset-bottom))!important;
     z-index:650!important;height:67px!important;padding:5px!important;gap:4px!important;
@@ -221,15 +221,15 @@
     background:rgba(4,17,29,.96)!important;box-shadow:0 16px 46px rgba(0,0,0,.38)!important;
     backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important
   }
-  #gcApp .gc-mobile-dock-v3 a{
+  .gc-mobile-dock-v3 a{
     display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;
     min-width:0!important;min-height:54px!important;padding:4px 2px!important;border:1px solid transparent!important;border-radius:13px!important;
     color:#91adbf!important;text-decoration:none!important;font:800 9px/1.2 Vazirmatn,system-ui,sans-serif!important
   }
-  #gcApp .gc-mobile-dock-v3 a svg{width:20px!important;height:20px!important;display:block;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important}
-  #gcApp .gc-mobile-dock-v3 a.active{color:#68e0e9!important;background:rgba(82,215,229,.10)!important;border-color:rgba(82,215,229,.17)!important}
-  #gcApp .gc-mobile-dock-v3 a.primary{background:linear-gradient(135deg,#73e4ec,#30c4d7)!important;color:#05242c!important;transform:translateY(-6px);box-shadow:0 9px 21px rgba(48,196,215,.18)}
-  #gcApp .gc-mobile-dock-v3 a span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .gc-mobile-dock-v3 a svg{width:20px!important;height:20px!important;display:block;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+  .gc-mobile-dock-v3 a.active{color:#68e0e9!important;background:rgba(82,215,229,.10)!important;border-color:rgba(82,215,229,.17)!important}
+  .gc-mobile-dock-v3 a.primary{background:linear-gradient(135deg,#73e4ec,#30c4d7)!important;color:#05242c!important;transform:translateY(-6px);box-shadow:0 9px 21px rgba(48,196,215,.18)}
+  .gc-mobile-dock-v3 a span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   #gcApp .gc-whatsapp-float{inset-inline-start:10px!important;bottom:calc(83px + env(safe-area-inset-bottom))!important;height:42px!important;width:42px!important;padding:0!important;justify-content:center;gap:0!important;font-size:0!important;border-radius:50%!important;box-shadow:0 8px 24px rgba(0,0,0,.26)!important}
   #gcApp .gc-whatsapp-float svg{width:23px;height:23px}
 }
@@ -238,18 +238,18 @@
   #gcApp .gc-nav-inner{width:calc(100% - 18px)}
   #gcApp .gc-hero-copy h1{font-size:31px!important}
   #gcApp .gc-hero-grid{width:calc(100% - 20px)!important}
-  #gcApp .gc-mobile-dock-v3{left:5px!important;right:5px!important}
-  #gcApp .gc-mobile-dock-v3 a{font-size:8px!important}
+  .gc-mobile-dock-v3{left:5px!important;right:5px!important}
+  .gc-mobile-dock-v3 a{font-size:8px!important}
   #gcApp .gc-footer-grid{gap:11px}
 }
-@media(min-width:761px){#gcApp .gc-mobile-dock-v3{display:none!important}}
+@media(min-width:761px){.gc-mobile-dock-v3{display:none!important}}
 @media(prefers-reduced-motion:reduce){#gcApp *,#gcApp *:before,#gcApp *:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 
 
 /* Responsive dock breakpoint alignment: the hero stacks below 820px, so navigation must also switch before that layout. */
 @media (max-width: 900px) {
   #gcApp { padding-bottom: calc(96px + env(safe-area-inset-bottom)) !important; }
-  #gcApp .gc-mobile-dock-v3 {
+  .gc-mobile-dock-v3 {
     position: fixed !important; display: grid !important;
     grid-template-columns: repeat(5, minmax(0,1fr)) !important; align-items: stretch !important;
     left: 8px !important; right: 8px !important; bottom: calc(7px + env(safe-area-inset-bottom)) !important;
@@ -258,21 +258,29 @@
     background: rgba(4,17,29,.96) !important; box-shadow: 0 16px 46px rgba(0,0,0,.38) !important;
     backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important;
   }
-  #gcApp .gc-mobile-dock-v3 a {
+  .gc-mobile-dock-v3 a {
     display: flex !important; flex-direction: column !important; align-items: center !important;
     justify-content: center !important; gap: 3px !important; min-width: 0 !important; min-height: 54px !important;
     padding: 4px 2px !important; border: 1px solid transparent !important; border-radius: 13px !important;
     color: #91adbf !important; text-decoration: none !important; font: 800 9px/1.2 Vazirmatn,system-ui,sans-serif !important;
   }
-  #gcApp .gc-mobile-dock-v3 a svg { display:block !important; width:20px !important; height:20px !important; fill:none!important; stroke:currentColor!important; stroke-width:1.8!important; stroke-linecap:round!important; stroke-linejoin:round!important; }
-  #gcApp .gc-mobile-dock-v3 a.active { color:#68e0e9!important; background:rgba(82,215,229,.10)!important; border-color:rgba(82,215,229,.17)!important; }
-  #gcApp .gc-mobile-dock-v3 a.primary { background:linear-gradient(135deg,#73e4ec,#30c4d7)!important; color:#05242c!important; transform:translateY(-6px); box-shadow:0 9px 21px rgba(48,196,215,.18)!important; }
-  #gcApp .gc-mobile-dock-v3 a span { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .gc-mobile-dock-v3 a svg { display:block !important; width:20px !important; height:20px !important; fill:none!important; stroke:currentColor!important; stroke-width:1.8!important; stroke-linecap:round!important; stroke-linejoin:round!important; }
+  .gc-mobile-dock-v3 a.active { color:#68e0e9!important; background:rgba(82,215,229,.10)!important; border-color:rgba(82,215,229,.17)!important; }
+  .gc-mobile-dock-v3 a.primary { background:linear-gradient(135deg,#73e4ec,#30c4d7)!important; color:#05242c!important; transform:translateY(-6px); box-shadow:0 9px 21px rgba(48,196,215,.18)!important; }
+  .gc-mobile-dock-v3 a span { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   #gcApp .gc-whatsapp-float { inset-inline-start:10px!important; bottom:calc(83px + env(safe-area-inset-bottom))!important; height:42px!important; width:42px!important; padding:0!important; justify-content:center!important; gap:0!important; font-size:0!important; border-radius:50%!important; }
   #gcApp .gc-whatsapp-float svg { width:23px!important; height:23px!important; }
 }
 @media (max-width: 390px) {
-  #gcApp .gc-mobile-dock-v3 { left:5px!important; right:5px!important; }
-  #gcApp .gc-mobile-dock-v3 a { font-size:8px!important; }
+  .gc-mobile-dock-v3 { left:5px!important; right:5px!important; }
+  .gc-mobile-dock-v3 a { font-size:8px!important; }
 }
-@media (min-width: 901px) { #gcApp .gc-mobile-dock-v3 { display:none!important; } }
+@media (min-width: 901px) { .gc-mobile-dock-v3 { display:none!important; } }
+
+
+/* Mobile navigation lives at the body root to avoid transformed app ancestors. */
+@media (max-width:760px){
+  .gc-mobile-dock-v3{position:fixed!important;display:grid!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;inset-inline:8px!important;bottom:calc(7px + env(safe-area-inset-bottom))!important;z-index:9999!important;width:auto!important;max-width:none!important;margin:0!important;transform:none!important;}
+  .gc-mobile-dock-v3 a{min-width:0!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;}
+}
+@media (min-width:761px){.gc-mobile-dock-v3{display:none!important}}
