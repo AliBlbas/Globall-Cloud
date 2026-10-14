@@ -10,6 +10,7 @@
     if (!auth || !signIn) return;
     const email = document.querySelector('#email');
     if (email) {
+      email.setAttribute('type', 'text');
       email.setAttribute('inputmode', 'text');
       email.setAttribute('autocomplete', 'username');
       email.setAttribute('placeholder', 'GC-833');
