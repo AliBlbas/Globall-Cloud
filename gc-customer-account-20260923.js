@@ -19,7 +19,49 @@
     $('#gcSaveProfile').onclick=saveProfile;$('#gcChangePassword').onclick=changePassword;$('#gcSavePreferences').onclick=savePreferences;$('#gcSaveNotifications').onclick=saveNotifications;$('#gcAvatarFile').onchange=previewAvatar;
     root.querySelectorAll('[data-gc-pay]').forEach(a=>a.onclick=e=>{e.preventDefault();const inv=(window.__customerInvoices||[]).find(x=>Math.max(0,Number(x.total||0)-Number(x.paid_total||0))>0);if(inv)location.href='./payment-checkout.html?invoice_id='+encodeURIComponent(inv.id);else $('#gcProfileMsg').textContent='هیچ invoice ـی بۆ پارەدان نییە.';});
   }
-  async function loadProfile(){try{const d=await api('GET');profile=d.profile||null;window.__customerProfile=profile;window.__customerNotificationPreferences=d.notification_preferences||{};render();}catch(e){console.error('[GC account]',e);const root=$('#gcAccountSettings');if(root){root.innerHTML='<div class="gc-account-error" role="status"><div class="gc-account-error-icon">!</div><div><strong>هەژمارەکەت ئامادەیە بۆ چوونەژوورەوە</strong><p>بۆ بینینی پڕۆفایل، shipment، پارەدان و ڕێکخستنەکانت، تکایە login بکە.</p><button class="btn primary" type="button" id="gcAccountLogin">چوونەژوورەوەی کڕیار</button><button class="btn" type="button" id="gcAccountRetry">دووبارە هەوڵدانەوە</button></div></div>';$('#gcAccountLogin')?.addEventListener('click',()=>$('#loginBtn')?.click());$('#gcAccountRetry')?.addEventListener('click',loadProfile);}}}
+  async function loadProfile(){
+    try {
+      const d=await api('GET');
+      profile=d.profile||null;
+      window.__customerProfile=profile;
+      window.__customerNotificationPreferences=d.notification_preferences||{};
+      render();
+    } catch(e) {
+      console.error('[GC account]',e);
+      const root=$('#gcAccountSettings');
+      if(!root)return;
+      let activeSession=null;
+      try { const c=client(); const r=await c?.auth?.getSession(); activeSession=r?.data?.session||null; } catch(_){}
+      if(activeSession) {
+        root.innerHTML='<div class="gc-account-error" role="status"><div class="gc-account-error-icon">GC</div><div><strong>بەستنەوەی هەژماری کڕیاری پێشوو</strong><p>ئەگەر پێشتر کڕیاری Globall Cloud بوویت، کۆدی GC و ژمارەی مۆبایلەکەت بنووسە. سیستەم تەنها ئەگەر هەردووکیان بە تۆمارێکی چالاک و یەکتا بگونجێن، هەژمارەکە دەبەستێتەوە؛ هیچ تۆمارێک ناگۆڕدرێت ئەگەر ناسنامەکە پشتڕاست نەکرێتەوە.</p><form id="gcClaimAccountForm"><div class="gc-setting-row"><label for="gcClaimCode">کۆدی کڕیاری GC</label><input id="gcClaimCode" name="gc_code" required maxlength="40" autocomplete="off" placeholder="GC-12345"></div><div class="gc-setting-row"><label for="gcClaimPhone">ژمارەی مۆبایل لە تۆماری کۆن</label><input id="gcClaimPhone" name="phone" type="tel" inputmode="tel" required maxlength="40" autocomplete="tel" placeholder="+964…"></div><div class="gc-setting-status" id="gcClaimStatus" role="status" aria-live="polite"></div><div class="gc-account-actions"><button class="btn primary" id="gcClaimSubmit" type="submit">پشتڕاستکردنەوە و بەستنەوە</button><button class="btn" id="gcClaimRetry" type="button">دووبارە پشکنینەوە</button><button class="btn" id="gcClaimSignOut" type="button">دەرچوون</button></div></form></div>';
+        const form=$('#gcClaimAccountForm',root);
+        form?.addEventListener('submit',async event=>{
+          event.preventDefault();
+          const code=$('#gcClaimCode',root)?.value.trim()||'';
+          const phone=$('#gcClaimPhone',root)?.value.trim()||'';
+          const button=$('#gcClaimSubmit',root);
+          const status=$('#gcClaimStatus',root);
+          if(!code||!phone){if(status)status.textContent='کۆدی GC و ژمارەی مۆبایل پێویستن.';return;}
+          if(button)button.disabled=true;
+          if(status)status.textContent='زانیارییەکان پشتڕاست دەکرێنەوە…';
+          try{
+            const result=await api('POST',{action:'claim_account',data:{gc_code:code,phone}});
+            if(!result?.ok)throw new Error('بەستنەوەی هەژمار پشتڕاست نەکرایەوە.');
+            if(status)status.textContent='هەژمارەکەت بە سەرکەوتوویی بەسترا؛ زانیارییەکان بار دەکرێنەوە…';
+            await loadProfile();
+          }catch(error){
+            if(status)status.textContent=error?.message||'پشتڕاستکردنەوە سەرکەوتوو نەبوو. کۆد و ژمارەکەت بپشکنەوە.';
+          }finally{if(button)button.disabled=false;}
+        });
+        $('#gcClaimRetry',root)?.addEventListener('click',loadProfile);
+        $('#gcClaimSignOut',root)?.addEventListener('click',async()=>{try{await client()?.auth?.signOut();}finally{window.location.reload();}});
+      } else {
+        root.innerHTML='<div class="gc-account-error" role="status"><div class="gc-account-error-icon">!</div><div><strong>چوونەژوورەوە پێویستە</strong><p>بچۆ ژوورەوە یان هەژمار دروست بکە. دوای چوونەژوورەوە، ئەگەر پێشتر GC code ـت هەبوو، دەتوانیت هەژماری کۆنەکەت بە کۆدی GC و ژمارەی مۆبایل بەستەوە.</p><button class="btn primary" type="button" id="gcAccountLogin">چوونەژوورەوە / دروستکردنی هەژمار</button><button class="btn" type="button" id="gcAccountRetry">دووبارە هەوڵدانەوە</button></div></div>';
+        $('#gcAccountLogin')?.addEventListener('click',()=>$('#loginBtn')?.click());
+        $('#gcAccountRetry')?.addEventListener('click',loadProfile);
+      }
+    }
+  }
   async function previewAvatar(){const file=$('#gcAvatarFile')?.files?.[0];if(!file)return; if(file.size>5*1024*1024){$('#gcProfileMsg').textContent='وێنەکە دەبێت کەمتر لە 5MB بێت.';return}const c=client();const s=await session();const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';const path=s.user.id+'/avatar.'+ext;const {error}=await c.storage.from('avatars').upload(path,file,{upsert:true,contentType:file.type||'image/jpeg',cacheControl:'3600'});if(error){$('#gcProfileMsg').textContent=error.message;return}const {data}=c.storage.from('avatars').getPublicUrl(path);const url=data.publicUrl+'?v='+Date.now();const img=$('#gcAvatar');if(img)img.src=url;$('#gcAvatarFile').dataset.url=url}
   async function saveProfile(){const msg=$('#gcProfileMsg');const b=$('#gcSaveProfile');b.disabled=true;msg.textContent='…';try{const avatar=$('#gcAvatarFile').dataset.url||profile?.avatar_url||'';const d=await api('POST',{action:'update_profile',data:{full_name:$('#gcFullName').value.trim(),email:$('#gcEmail').value.trim(),phone:$('#gcPhone').value.trim(),avatar_url:avatar,language:$('#gcLanguage')?.value||profile?.preferred_language||'ckb'}});profile={...profile,...d.profile,full_name:d.profile?.full_name||d.profile?.name||$('#gcFullName').value.trim(),avatar_url:avatar};msg.textContent=d.email_confirmation_required?'پڕۆفایل پاشەکەوت کرا؛ بۆ گۆڕینی ئیمەیل confirmation ـت داوا دەکرێت.':'پڕۆفایل پاشەکەوت کرا.';render();}catch(e){msg.textContent=e.message||'هەڵەیەک ڕوویدا.'}finally{b.disabled=false}}
   async function changePassword(){const msg=$('#gcPasswordMsg'),b=$('#gcChangePassword'),p=$('#gcNewPassword').value,c=$('#gcConfirmPassword').value;if(p.length<12||p!==c){msg.textContent=p!==c?'وشە نهێنییەکان یەکسان نین.':'وشەی نهێنی دەبێت لانیکەم 12 پیت بێت.';return}b.disabled=true;msg.textContent='…';try{const s=await session();const r=await fetch(PASSWORD_FN,{method:'POST',headers:{Authorization:'Bearer '+s.access_token,apikey:SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({password:p})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'گۆڕینی وشەی نهێنی سەرکەوتوو نەبوو.');msg.textContent='وشەی نهێنی بە سەرکەوتوویی گۆڕدرا.';$('#gcNewPassword').value='';$('#gcConfirmPassword').value='';}catch(e){msg.textContent=e.message||'هەڵەیەک ڕوویدا.'}finally{b.disabled=false}}
