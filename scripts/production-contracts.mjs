@@ -44,7 +44,7 @@ const required = [
   'staff-os-pro-20260909.css','staff-os-pro-20260909.js','staff-shell-polish-20260909.css','staff-shell-polish-20260909.js',
   'staff-premium-mobile-20260909.css','staff-premium-mobile-20260909.js','warehouse-offline-sync.js','production-mobile-ux-v2026.css','gc-platform-vnext.js',
   'gc-platform-vnext-plus.js','gc-runtime-safety-v2026.js','production-brand-repair.js','gc-csp-scripts/logistics-pricing-ui.js','supabase/config.toml',
-  'package.json','supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
+  'package.json','gc-account-entry.js','gc-csp-scripts/customer-portal-inline-1.js','supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
   'supabase/functions/notification-dispatch/index.ts','supabase/functions/warehouse-receiving/index.ts','supabase/functions/warehouse-notify/index.ts',
   'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/invoice-ai/index.ts',
   'supabase/functions/customer-debt-assistant/index.ts','supabase/functions/fx-refresh/index.ts','supabase/functions/public-config/index.ts',
@@ -116,6 +116,15 @@ for (const fn of publicFns) {
   else if (block[1] !== 'false') fail(`${fn} must be publicly callable`)
 }
 if (!failures) ok('Public function JWT posture is explicit')
+const customerPortalLogin = read('gc-csp-scripts/customer-portal-inline-1.js')
+const customerAccountEntry = read('gc-account-entry.js')
+if (!customerPortalLogin.includes('/functions/v1/customer-gc-login') || !customerPortalLogin.includes('sb.auth.setSession')) fail('Customer portal must authenticate GC codes via customer-gc-login and persist the returned session')
+else ok('GC-code sign-in uses the dedicated Edge Function and stores the Supabase session')
+if (!customerAccountEntry.includes("email.setAttribute('type', 'text')")) fail('Customer login identifier must accept GC codes without email-type validation')
+else ok('Customer login input accepts GC codes')
+if (!read('customer-portal.html').includes('/gc-csp-scripts/customer-portal-inline-1.js?v=20261014-1')) fail('Customer portal login cache-buster is stale')
+if (!read('functions/_middleware.js').includes('gc-account-entry.js?v=20261014-1')) fail('Customer GC login helper cache-buster is stale')
+
 
 console.log('')
 if (failures) { console.error(`${failures} production contract check(s) failed.`); process.exit(1) }
