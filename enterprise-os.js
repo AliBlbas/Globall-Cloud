@@ -4,7 +4,7 @@
   const SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
   const API_URL = SUPABASE_URL + '/functions/v1/fleet-hr-admin';
   const $ = (id) => document.getElementById(id);
-  const state = { client:null, session:null, me:null, view:'overview', data:{summary:null,vehicles:[],maintenance:[],fuel:[],attendance:[],leave_requests:[],payroll_periods:[],payroll_entries:[],vehicle_events:[]}, modalAction:null };
+  const state = { client:null, session:null, me:null, view:'overview', data:{summary:null,vehicles:[],maintenance:[],fuel:[],attendance:[],leave_requests:[],payroll_periods:[],payroll_entries:[],vehicle_events:[],staff:[]}, modalAction:null };
   const titles = {
     overview:['کورتەی سیستەم','دۆخی ماژوولەکان و کردارە پێویستەکان.'],
     fleet:['Fleet Management','تۆمار و چاودێری ئۆتۆمبێلەکانی branch ـە دەستپێگەیشتووەکان.'],
@@ -73,7 +73,7 @@
     return state.data[kind];
   };
   const loadViewData = async(name) => {
-    const mapping={fleet:['vehicles'],maintenance:['vehicles','maintenance'],fuel:['vehicles','fuel'],attendance:['attendance'],leave:['leave_requests'],payroll:['payroll_periods','payroll_entries']};
+    const mapping={fleet:['vehicles'],maintenance:['vehicles','maintenance'],fuel:['vehicles','fuel'],attendance:['attendance'],leave:['leave_requests',...(isAdmin()?['staff']:[])],payroll:['payroll_periods','payroll_entries','staff']};
     const kinds=mapping[name]||[];
     try { await Promise.all(kinds.map(loadKind)); renderView(name); }
     catch(e) { notice(e.message,'bad'); }
@@ -98,10 +98,10 @@
       $('checkInBtn').disabled=Boolean(open); $('checkOutBtn').disabled=!open;
       $('attendanceRows').innerHTML=rows.attendance.length?rows.attendance.map(v=>{let duration='—';if(v.check_in_at&&v.check_out_at) duration=((new Date(v.check_out_at)-new Date(v.check_in_at))/3600000).toFixed(2)+' h';return '<tr><td>'+escapeHtml(v.work_date)+'</td><td>'+escapeHtml(fmtDate(v.check_in_at,true))+'</td><td>'+escapeHtml(fmtDate(v.check_out_at,true))+'</td><td>'+escapeHtml(duration)+'</td><td>'+escapeHtml(v.check_in_source)+'</td></tr>'}).join(''):tableEmpty(5,'هێشتا تۆماری ئامادەبوون نییە.');
     } else if(name==='leave') {
-      $('leaveRows').innerHTML=rows.leave_requests.length?rows.leave_requests.map(v=>'<tr><td>'+escapeHtml(String(v.staff_id).slice(0,8))+'</td><td>'+escapeHtml(v.leave_type)+'</td><td>'+escapeHtml(v.starts_on)+'</td><td>'+escapeHtml(v.ends_on)+'</td><td>'+escapeHtml(v.reason||'—')+'</td><td><span class="status-badge '+statusClass(v.status)+'">'+escapeHtml(v.status)+'</span></td><td>'+(canReviewLeave()&&v.status==='pending'?'<button class="row-action primary" data-action="approve-leave" data-id="'+escapeHtml(v.id)+'">پەسەند</button><button class="row-action" data-action="reject-leave" data-id="'+escapeHtml(v.id)+'">ڕەتکردنەوە</button>':'—')+'</td></tr>').join(''):tableEmpty(7,'داواکاری مۆڵەت نییە.');
+      $('leaveRows').innerHTML=rows.leave_requests.length?rows.leave_requests.map(v=>'<tr><td>'+escapeHtml((state.data.staff.find(s=>s.id===v.staff_id)?.full_name)||String(v.staff_id).slice(0,8))+'</td><td>'+escapeHtml(v.leave_type)+'</td><td>'+escapeHtml(v.starts_on)+'</td><td>'+escapeHtml(v.ends_on)+'</td><td>'+escapeHtml(v.reason||'—')+'</td><td><span class="status-badge '+statusClass(v.status)+'">'+escapeHtml(v.status)+'</span></td><td>'+(canReviewLeave()&&v.status==='pending'?'<button class="row-action primary" data-action="approve-leave" data-id="'+escapeHtml(v.id)+'">پەسەند</button><button class="row-action" data-action="reject-leave" data-id="'+escapeHtml(v.id)+'">ڕەتکردنەوە</button>':'—')+'</td></tr>').join(''):tableEmpty(7,'داواکاری مۆڵەت نییە.');
     } else if(name==='payroll') {
       $('payrollRows').innerHTML=rows.payroll_periods.length?rows.payroll_periods.map(p=>'<tr><td>'+escapeHtml(p.period_start)+'</td><td>'+escapeHtml(p.period_end)+'</td><td><span class="status-badge '+statusClass(p.status)+'">'+escapeHtml(p.status)+'</span></td><td>'+escapeHtml(fmtDate(p.approved_at,true))+'</td><td>'+escapeHtml(fmtDate(p.paid_at,true))+'</td><td>'+(['draft','approved','paid'].includes(p.status)&&canPayrollWrite()?'<button class="row-action primary" data-action="payroll-advance" data-id="'+escapeHtml(p.id)+'" data-status="'+escapeHtml(p.status)+'">'+(p.status==='draft'?'پەسەندکردن':p.status==='approved'?'تۆمارکردنی پارەدان':'داخستن')+'</button>':'—')+'</td></tr>').join(''):tableEmpty(6,'خولی مووچە نییە.');
-      $('payrollEntryRows').innerHTML=rows.payroll_entries.length?rows.payroll_entries.map(p=>'<tr><td>'+escapeHtml(String(p.payroll_period_id).slice(0,8))+'</td><td class="mono">'+escapeHtml(String(p.staff_id).slice(0,8))+'</td><td>'+escapeHtml(fmtMoney(p.base_salary,p.currency))+'</td><td>'+escapeHtml(fmtMoney(p.allowances,p.currency))+'</td><td>'+escapeHtml(fmtMoney(p.deductions,p.currency))+'</td><td><b>'+escapeHtml(fmtMoney(p.net_pay,p.currency))+'</b></td><td>'+escapeHtml(p.currency)+'</td></tr>').join(''):tableEmpty(7,'تۆماری مووچە نییە.');
+      $('payrollEntryRows').innerHTML=rows.payroll_entries.length?rows.payroll_entries.map(p=>'<tr><td>'+escapeHtml(String(p.payroll_period_id).slice(0,8))+'</td><td class="mono">'+escapeHtml((state.data.staff.find(s=>s.id===p.staff_id)?.full_name)||String(p.staff_id).slice(0,8))+'</td><td>'+escapeHtml(fmtMoney(p.base_salary,p.currency))+'</td><td>'+escapeHtml(fmtMoney(p.allowances,p.currency))+'</td><td>'+escapeHtml(fmtMoney(p.deductions,p.currency))+'</td><td><b>'+escapeHtml(fmtMoney(p.net_pay,p.currency))+'</b></td><td>'+escapeHtml(p.currency)+'</td></tr>').join(''):tableEmpty(7,'تۆماری مووچە نییە.');
     }
   };
   const field = (name,label,type='text',opts={}) => {
@@ -162,7 +162,7 @@
     } else if(action==='payroll-entry') {
       title='تۆماری مووچە';
       fields=field('payroll_period_id','خولی مووچە','select',{options:state.data.payroll_periods.filter(x=>x.status==='draft').map(x=>[x.id,x.period_start+' → '+x.period_end])})+
-       field('staff_id','Staff UUID','text')+field('base_salary','مووچەی بنەڕەتی','number',{min:0,step:'0.01'})+field('allowances','زیادە','number',{min:0,step:'0.01',value:0})+
+       field('staff_id','کارمەند','select',{options:state.data.staff.filter(x=>x.is_active).map(x=>[x.id,(x.full_name||x.email||x.id)+' · '+x.role])})+field('base_salary','مووچەی بنەڕەتی','number',{min:0,step:'0.01'})+field('allowances','زیادە','number',{min:0,step:'0.01',value:0})+
        field('deductions','داشکاندن','number',{min:0,step:'0.01',value:0})+field('currency','دراو','select',{options:[['IQD','IQD'],['USD','USD'],['AED','AED'],['CNY','CNY']]})+
        field('payment_reference','ژمارەی پارەدان','text',{required:false})+field('note','تێبینی','textarea',{required:false,wide:true});
     }
