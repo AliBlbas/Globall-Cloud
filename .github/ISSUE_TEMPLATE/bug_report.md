@@ -1,38 +1,30 @@
 ---
-name: راپۆرتی هەڵە (Bug report)
-about: راپۆرتێک دروست بکە بۆ یارمەتیدان بۆ باشترکردنی پرۆژە
-title: ''
+name: Bug report
+about: Report a problem in the Globall Cloud repository
+title: ""
 labels: bug
-assignees: ''
-
+assignees: ""
 ---
 
-**پێناسەی هەڵە**
-وەسفێکی کورت و ڕوون لەسەر هەڵەکە.
+## Summary
+Describe the issue briefly.
 
-**چۆن دەتوانرێت هەڵەکە تکرار بکرێت**
-گامەکان بۆ تکرارکردن:
-1. بڕۆ بۆ '...'
-2. کرتە لە '...'
-3. '...' لەسڕە
-4. هەڵەیەک بینە
+## Steps to reproduce
+1. Go to ...
+2. Click on ...
+3. Observe ...
 
-**ووتارە هەڵبژاردە (Expected behavior)**
-وەسفێکی کورت لەوەی کە پێشبینی کراوە.
+## Expected behavior
+Describe the expected result.
 
-**وێنەکان (Screenshots)**
-ئەگەر دەتوانیت، وێنە زیاد بکە بۆ ڕوونکردنەوە.
+## Actual behavior
+Describe the actual result.
 
-**دسکتۆپ (زانیاری تەواو):**
- - پلاتفۆرم: [وەک: iOS, Android, Windows]
- - براوزەر: [وەک: Chrome, Safari]
- - وەشان: [وەک: 1.2.3]
+## Environment
+- Browser:
+- Device:
+- Version/branch:
+- Related module:
 
-**مۆبایل (زانیاری تەواو):**
- - ئامێر: [وەک: iPhone6]
- - سیستەم: [وەک: iOS 8.1]
- - براوزەر: [وەک: Safari]
- - وەشان: [وەک: 22]
-
-**زانیاری زیاتر**
-هەر ووردەکارییەکی تر لێرە زیاد بکە.
+## Additional context
+Add logs, screenshots, links, or notes here.

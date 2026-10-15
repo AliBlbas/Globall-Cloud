@@ -22,7 +22,7 @@ Globall Cloud is a production-oriented logistics platform for shipping from Chin
 - `operations-admin` — operations workflows
 - `public-config` — narrow public configuration/health bridge
 - `system-health` — lightweight backend health probe
-- `logistics-control-plane` — authenticated production API for shipment transitions, package traceability, customs cases, finance control, exception resolution, paginated operational reads, and notification outbox processing
+- `logistics-control-plane` — authenticated production API for shipment transitions, package traceability, customs cases, finance control, exception resolution, paginated operational reads, and the core control-plane flows.
 - `payment-checkout` — authenticated payment-session API for Qicard and FIB create/status/cancel flows; it never exposes provider credentials
 - `payment-webhook` — Qicard RSA-signed and FIB callback intake with provider status re-query, idempotent event storage, amount/currency matching, and settlement RPC
 - `payment-reconcile` — server-only status polling worker for pending sessions, provider mismatch detection, expiry handling, and reconciliation summary
@@ -30,10 +30,10 @@ Globall Cloud is a production-oriented logistics platform for shipping from Chin
 - `public-message` — public contact/quote form submission (rate-limited, honeypot-protected)
 - `account-self-password` — authenticated self-service password change
 - `account-self-profile` — authenticated self-service profile lookup (staff or customer)
-- `lg-track-shipment` — retired; returns 410 Gone. Superseded by `account-admin`/`public-track` after the legacy `lg_shipments`/`lg_tracking_events` tables were dropped. Kept only so old callers get an honest error.
+- `lg-track-shipment` — retired; returns 410 Gone. Superseded by `account-admin`/`public-track` after the legacy `lg_shipments`/`lg_tracking_events` tables were dropped. Kept only so old callers do not break unexpectedly.
 
 ## Customer workflow
-Customer quote/request → shipment creation → warehouse intake → transit/customs → driver assignment → live GPS → ETA/SLA monitoring → delivery proof → delivered → customer notification.
+Customer quote/request → shipment creation → warehouse intake → transit/customs → driver assignment → live GPS → ETA/SLA monitoring → delivery proof → delivered → customer notifications.
 
 ## Mobile-first experience
 Driver and customer surfaces use responsive/mobile-first layouts, safe-area handling, touch-sized controls, realtime tracking states, and Safari/WebKit compatibility layers.
@@ -46,32 +46,49 @@ Driver and customer surfaces use responsive/mobile-first layouts, safe-area hand
 - Cloudflare security headers enforce CSP and allow only the origins/capabilities required by the production app.
 
 ## CI / production integrity
-`.github/workflows/production-integrity.yml` validates JavaScript syntax, required files, migration naming, security invariants, Supabase configuration, service-role secret absence, Realtime/CSP requirements, and runtime/cache version consistency before a change is considered production-ready.
+`.github/workflows/production-integrity.yml` validates JavaScript syntax, required files, migration naming, security invariants, Supabase configuration, service-role secret absence, Realtime/CSP requirements, and security gate checks required for production readiness.
 
-## Production control plane
-The production control-plane migration adds `shipment_status_history`, `shipment_packages`, `shipment_customs_cases`, `integration_inbox`, and `notification_outbox`. State changes are performed through `record_shipment_transition`, which applies step monotonicity, delivery-proof gating, idempotency, timeline events, customer notifications, and staff audit logging. Package, customs, exception, and notification operations are exposed through the authenticated `logistics-control-plane` Edge Function and the `control-plane.html` staff console.
+## Roadmap and enterprise expansion
+This repository already covers the operational logistics core. The next milestone is to evolve it from a strong logistics website into a full enterprise logistics operating system.
 
-The notification pipeline uses `notification-dispatch`, a server-only worker protected by `NOTIFICATION_WORKER_SECRET`. It claims outbox rows with `FOR UPDATE SKIP LOCKED`, delivers `in_app` notifications through Supabase, email through Resend, WhatsApp through the Meta Cloud API, and SMS through Twilio, then completes each row through the retry-aware RPC. Missing provider credentials produce a retryable failure instead of a fake success. Provider event intake remains separated behind `integration-webhook`, which requires a server-side HMAC secret and stores each event once by `(provider, event_id)` before adapter-specific processing.
+### Current maturity
+- Tracking: strong
+- Warehouse: strong
+- Operations: strong
+- Customer Portal: strong
+- Driver Portal: strong
+- Payments: good foundation
+- Security: strong
+- Analytics: partial foundation
+- Finance ERP: incomplete
+- HR: incomplete
+- Fleet management: incomplete
+- AI operations layer: not yet implemented
+- Mobile apps: design-first, not yet native
 
-## v3 advanced logistics workflows
+### Priority roadmap
+1. Unified Enterprise OS
+   - Single shell for operations, warehouse, CRM, finance, HR, analytics, and AI center
+   - Shared RBAC and navigation model across customer, driver, staff, and admin roles
+2. Finance ERP foundation
+   - Chart of accounts, general ledger, journal posting, cash flow, P&L, branch comparison, and payroll linkage
+3. HR and fleet modules
+   - Attendance, leave management, payroll, staffing KPIs, vehicles, fuel, maintenance, service schedules, and cost tracking
+4. BI and analytics
+   - Exec reports, revenue forecast, branch comparison, KPI center, and operational dashboards
+5. AI layer
+   - ETA prediction, OCR/document handling, support agent, smart pricing, and demand forecasting
+6. Mobile delivery
+   - Android/iPhone app shell, push notifications, and offline sync strategy
 
-The v3 migration `20260817090000_logistics_advanced_workflows.sql` adds multi-leg routing (`shipment_route_legs`), a warehouse chain-of-custody ledger (`warehouse_movements`), physical consolidation manifests, quote approval and customer acceptance RPCs, standardized dimensional-weight calculation, document-vault metadata with SHA-256 integrity, private `shipment-documents` storage, and server-side reporting. Quote changes, warehouse scans, route-leg updates, and document registration are actor-bound to `auth.uid()` and audited through `staff_activity_log`.
-
-The staff control plane now exposes `quotes`, `documents`, `movements`, and `route_legs` list views, together with `approve_quote`, `record_warehouse_movement`, `upsert_route_leg`, `upload_document`, and `get_report` actions. The customer portal supports a richer quote submission form, quote acceptance, document download links, invoice balances, and payment history. The browser never receives a service-role key or provider credential.
-
-Document uploads are size-limited and hashed in the Edge Function before registration. The storage bucket is private, and the JWT-protected `document-access` endpoint verifies staff/customer ownership before issuing a fresh one-hour signed URL, so expired links do not become a permanent download failure.
-
-## Qicard and FIB payments
-Qicard and FIB payments use separate server-side provider adapters. The browser opens `payment-checkout.html?invoice_id=...`, while `payment-checkout` creates and reads payment sessions through Supabase Edge Functions. Qicard uses the documented merchant terminal/API credentials and RSA public key for signed webhook verification. FIB uses the documented OAuth2 client-credentials flow, IQD payment creation, QR/app links, status lookup, and callback URL.
-
-The payment schema adds `payment_sessions` and `payment_webhook_events`. Settlement is accepted only when the provider status is re-queried and the provider amount/currency match the invoice. `record_payment_transaction` applies the ledger update through an idempotent server-side RPC. A browser redirect alone never marks an invoice paid.
-
-Set these as Supabase Edge Function secrets, never in HTML or JavaScript: `NOTIFICATION_WORKER_SECRET`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`, `QICARD_API_BASE_URL` (sandbox default is used if omitted), `QICARD_USERNAME`, `QICARD_PASSWORD`, `QICARD_TERMINAL_ID`, `QICARD_WEBHOOK_PUBLIC_KEY`, `FIB_API_BASE_URL` (sandbox default is used if omitted), `FIB_CLIENT_ID`, `FIB_CLIENT_SECRET`, `FIB_CALLBACK_URL` if FIB requires a fixed public callback, `PAYMENT_FINISH_URL`, and `PAYMENT_WORKER_SECRET` for the server-only reconciliation worker. The public callback URL must be HTTPS and reachable from the provider.
-
-Provider documentation must be checked again before switching from sandbox to live. Qicard production access requires merchant-terminal credentials and its gateway public key; FIB production access requires credentials issued through its integration process. The system intentionally returns configuration errors rather than pretending that a payment was accepted.
+### Recommended delivery sequence
+- Phase 0: roadmap, governance, issue tracking, and enterprise scope alignment
+- Phase 1: enterprise dashboard, finance ledger, and role-based access foundation
+- Phase 2: HR and fleet workflows
+- Phase 3: BI, AI, and mobile delivery
 
 ## Deployment
 The intended release path is:
 **GitHub `main` → Cloudflare Pages production deployment → Supabase production backend.**
 
-Live deployment verification is a release gate; source code being present on GitHub alone is not treated as proof that the live site is updated. Production release order is: apply the migrations, deploy `logistics-control-plane`, `document-access`, `notification-dispatch`, `payment-checkout`, `payment-webhook`, `payment-reconcile` and `system-health`, set server-side provider secrets, configure the notification worker to run from a protected scheduler/heartbeat, configure public HTTPS callback URLs in Qicard/FIB, then deploy the Pages frontend and run a sandbox transaction and notification test for each enabled provider.
+Live deployment verification is a release gate; source code being present on GitHub alone is not treated as proof that the live site is updated. Production release order is: apply the migrations, validate the release artifact, confirm the production environment, and only then proceed to the live deployment.
