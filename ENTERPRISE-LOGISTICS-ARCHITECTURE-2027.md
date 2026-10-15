@@ -92,10 +92,10 @@ The feature branch now adds a dedicated double-entry ledger in `20261015194000_f
 - Verify branch/deployment parity and that production points to the expected commit.
 
 ### Gate B — Fleet / HR foundation
-- Apply the migration to an isolated staging database only after review.
-- Test RLS as anonymous, customer, driver, operations, finance, and admin roles.
-- Verify concurrent attendance check-ins, check-out rules, branch scoping, currency checks, immutable vehicle events, and no direct payroll write for finance-only users.
-- Add audited Edge Functions/UI for fleet maintenance/fuel and HR workflows before exposing these modules to staff.
+- Review the proposed `enterprise-os.html` workspace and the `fleet-hr-admin` Edge Function as part of this draft PR.
+- Apply the migration only to a staging database first; the currently linked staging project is not schema-aligned with production and cannot safely validate this migration.
+- Test RLS and server-side authorization as anonymous, customer, driver, operations, finance, and admin roles.
+- Verify concurrent attendance check-ins, check-out rules, branch scope, active driver/vehicle branch matching, currency checks, append-only vehicle events, and that finance-only roles cannot modify payroll periods or entries.
 
 ### Gate C — Operations UX
 - Connect Control Tower counts/charts to live, permission-scoped queries; never use fabricated demo KPIs in production.
@@ -114,4 +114,12 @@ The feature branch now adds a dedicated double-entry ledger in `20261015194000_f
 
 ## Current release status
 
-This branch contains a proposed additive SQL schema and this architecture document only. It does **not** claim that the Fleet/HR screens or workflows are complete, that the migration has been applied, or that the production website has changed. Production readiness requires CI, staging database/RLS tests, Edge Function and UI implementation, and explicit deployment verification.
+This draft branch now contains the Enterprise OS staff workspace (`enterprise-os.html/css/js`), the authenticated `fleet-hr-admin` and `finance-erp-admin` Edge Functions, additive Fleet/HR and Finance ERP migrations, and this architecture document. It is still a **draft implementation slice**, not a production release.
+
+- No migration has been applied to the production Supabase database, and no Cloudflare production deployment has been verified.
+- GitHub Actions validation jobs were not started because GitHub reports the account is locked due to a billing issue. This is an infrastructure/account blocker, not proof that the code passed or failed its tests.
+- The Cloudflare Pages preview check reports “Build failed”; its detailed logs require an authenticated Cloudflare session and have not yet been inspected.
+- Supabase Preview was skipped because automatic Supabase preview branches are disabled. The linked staging project also lacks the production `public.staff`, `public.delivery_assignments`, and `private.is_real_authenticated_session()` objects, so it is not a safe migration target until brought into schema alignment.
+- Finance reports include only journals posted into the new General Ledger. Existing QiCard/FIB settlements, shipment invoices/payments, operational costs, fuel/maintenance, and payroll are not automatically journaled yet.
+
+Production readiness therefore requires resolving the GitHub billing lock, inspecting and fixing the Cloudflare preview build, applying migrations to a production-aligned staging database, running SQL/RLS and end-to-end tests, verifying payment/notification/finance reconciliation, and explicitly verifying the final production commit.
