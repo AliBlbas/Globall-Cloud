@@ -2,7 +2,8 @@
 (() => {
   const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
-  const API_URL = SUPABASE_URL + '/functions/v1/fleet-hr-admin';
+  const FLEET_HR_API_URL = SUPABASE_URL + '/functions/v1/fleet-hr-admin';
+  const FINANCE_API_URL = SUPABASE_URL + '/functions/v1/finance-erp-admin';
   const $ = (id) => document.getElementById(id);
   const state = { client:null, session:null, me:null, view:'overview', data:{summary:null,vehicles:[],maintenance:[],fuel:[],attendance:[],leave_requests:[],payroll_periods:[],payroll_entries:[],vehicle_events:[],staff:[],assignments:[],accounts:[],periods:[],journals:[],finance_report:null}, modalAction:null };
   const titles = {
@@ -26,7 +27,12 @@
   const showApp = () => { $('boot').classList.add('hidden'); $('login').classList.add('hidden'); $('app').classList.remove('hidden'); };
   const api = async (method='GET',params={},body=null) => {
     if(!state.session?.access_token) throw new Error('چوونەژوورەوە پێویستە.');
-    const url = API_URL + (method==='GET' ? '?' + new URLSearchParams(params).toString() : '');
+    const financeKinds = ['accounts','periods','journals','report'];
+    const financeActions = ['create_account','create_period','close_period','create_journal','post_journal'];
+    const isFinanceRequest = (method==='GET' && financeKinds.includes(String(params.kind||''))) ||
+      (method!=='GET' && financeActions.includes(String(body?.action||'')));
+    const baseUrl = isFinanceRequest ? FINANCE_API_URL : FLEET_HR_API_URL;
+    const url = baseUrl + (method==='GET' ? '?' + new URLSearchParams(params).toString() : '');
     const response = await fetch(url,{method,headers:{Authorization:'Bearer '+state.session.access_token,apikey:SUPABASE_KEY,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined,cache:'no-store'});
     const payload = await response.json().catch(()=>({}));
     if(!response.ok) throw new Error(payload.error || 'داواکاری سەرکەوتوو نەبوو ('+response.status+').');
