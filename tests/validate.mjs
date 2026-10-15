@@ -82,6 +82,8 @@ const required = [
   'supabase/functions/_shared/payment-providers.ts',
   'enterprise-os.html', 'enterprise-os.css', 'enterprise-os.js',
   'supabase/functions/fleet-hr-admin/index.ts',
+  'supabase/functions/finance-erp-admin/index.ts',
+  'supabase/migrations/20261015194000_finance_erp_foundation.sql',
   'supabase/migrations/20261015190000_enterprise_fleet_hr_foundation.sql',
 ];
 const beforeReq = failures;
