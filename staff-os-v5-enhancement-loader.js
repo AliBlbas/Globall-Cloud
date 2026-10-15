@@ -53,6 +53,8 @@
     // Keep the current console design layer last: later-loaded legacy bundles
     // otherwise override responsive layout, cards, and mobile navigation.
     loadStyle('/gc-staff-elite-20261014.css?v=3');
+    // The mobile repair is the final layer, after every legacy/runtime stylesheet.
+    loadStyle('/staff-mobile-layout-repair-20261015.css?v=1');
   };
 
   const waitForShell = () => {
