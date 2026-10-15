@@ -185,7 +185,7 @@ as $$
 declare
   v_period public.finance_periods%rowtype;
 begin
-  perform public.gc_finance_assert_actor(p_actor_id, coalesce((select s.branch from public.staff s where s.id=p_actor_id),'erbil'), true);
+  perform public.gc_finance_assert_actor(p_actor_id, 'erbil', true);
   if p_period_name is null or length(trim(p_period_name)) < 3 or length(trim(p_period_name)) > 40 then
     raise exception 'Valid period name is required' using errcode = '22023';
   end if;
@@ -276,7 +276,7 @@ begin
   end if;
   select * into v_period
   from public.finance_periods p
-  where p.status='open' and p_starts_on is not null
+  where p.status='open'
     and p_entry_date between p.starts_on and p.ends_on
   order by p.starts_on desc limit 1 for update;
   if not found then raise exception 'No open finance period covers the entry date' using errcode = '23514'; end if;
@@ -374,6 +374,8 @@ set search_path = public, pg_temp
 as $$
 declare
   v_branch text := nullif(lower(trim(coalesce(p_branch,''))),'');
+  v_actor_role text;
+  v_actor_branch text;
   v_revenue numeric(18,2) := 0;
   v_expenses numeric(18,2) := 0;
   v_cashflow numeric(18,2) := 0;
@@ -388,12 +390,18 @@ begin
     raise exception 'Valid reporting date range is required' using errcode='22023';
   end if;
   if v_branch='uae' then v_branch:='dubai'; end if;
-  perform public.gc_finance_assert_actor(p_actor_id,coalesce(v_branch,(select case when lower(trim(coalesce(s.branch,'')))='uae' then 'dubai' when lower(trim(coalesce(s.branch,''))) in ('china','dubai','erbil') then lower(trim(s.branch)) else 'erbil' end from public.staff s where s.id=p_actor_id)),false);
-  if v_branch is not null and not exists (
-    select 1 from public.staff s where s.id=p_actor_id and s.role in ('admin','super_admin')
-      or s.id=p_actor_id and (lower(trim(coalesce(s.branch,'')))='all'
-      or (case when lower(trim(coalesce(s.branch,'')))='uae' then 'dubai' else lower(trim(coalesce(s.branch,''))) end)=v_branch)
-  ) then raise exception 'Finance branch access denied' using errcode='42501'; end if;
+  select s.role,lower(trim(coalesce(s.branch,''))) into v_actor_role,v_actor_branch
+    from public.staff s where s.id=p_actor_id and s.is_active=true;
+  if v_actor_role is null or v_actor_role not in ('admin','super_admin','accountant','finance') then
+    raise exception 'Active finance role is required' using errcode='42501';
+  end if;
+  if v_actor_branch='uae' then v_actor_branch:='dubai'; end if;
+  if v_branch is null and v_actor_role not in ('admin','super_admin') and v_actor_branch <> 'all' then
+    v_branch := v_actor_branch;
+  end if;
+  if v_branch is not null then
+    perform public.gc_finance_assert_actor(p_actor_id,v_branch,false);
+  end if;
 
   select
     coalesce(sum(case when a.account_type='revenue' then l.credit_iqd-l.debit_iqd else 0 end),0),
