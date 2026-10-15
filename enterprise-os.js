@@ -42,7 +42,7 @@
     $('superAdminLink').classList.toggle('hidden',!isAdmin());
     document.querySelectorAll('[data-action="create-vehicle"],[data-action="vehicle-event"],[data-action="create-maintenance"]').forEach(el=>el.classList.toggle('hidden',!canOperate()));
     document.querySelectorAll('[data-action="record-fuel"]').forEach(el=>el.classList.toggle('hidden',!(['admin','super_admin','operations','accountant','finance'].includes(state.me?.role))));
-    document.querySelectorAll('[data-action="payroll-entry"],[data-action="payroll-period"],[data-action="create-account"],[data-action="create-period"],.finance-admin-only'.replace(',','.finance-admin-only')).forEach(el=>el.classList.toggle('hidden',!canPayrollWrite()));
+    document.querySelectorAll('[data-action="payroll-entry"],[data-action="payroll-period"],[data-action="create-account"],[data-action="create-period"],.finance-admin-only').forEach(el=>el.classList.toggle('hidden',!canPayrollWrite()));
   };
   const setView = async (name) => {
     if(!titles[name]) return;
@@ -87,6 +87,31 @@
   };
   const vehicleLabel = (id) => { const v=state.data.vehicles.find(x=>x.id===id); return v ? v.vehicle_code+' · '+v.plate_number : String(id||'—').slice(0,10); };
   const tableEmpty = (cols,msg) => '<tr><td colspan="'+cols+'" class="empty">'+escapeHtml(msg)+'</td></tr>';
+  const renderFinance = () => {
+    const report=state.data.finance_report||{};
+    const n=(v)=>Number(v||0).toLocaleString('en-US',{maximumFractionDigits:0});
+    $('financeRevenue').textContent=n(report.revenue_iqd);
+    $('financeExpenses').textContent=n(report.expenses_iqd);
+    $('financeProfit').textContent=n(report.profit_iqd);
+    $('financeCashflow').textContent=n(report.net_cashflow_iqd);
+    $('financeReportScope').textContent=(report.branch||'All authorized branches')+' · IQD · '+(report.posted_entries||0)+' posted';
+    if(!$('financeFrom').value&&report.from_date)$('financeFrom').value=report.from_date;
+    if(!$('financeTo').value&&report.to_date)$('financeTo').value=report.to_date;
+    const scope=state.data.summary?.scope||[];
+    [...$('financeBranch').options].forEach(option=>{if(option.value)option.disabled=!scope.includes(option.value);});
+    if(scope.length===1&&$('financeBranch').value!==scope[0])$('financeBranch').value=scope[0];
+    $('financeMonthlyRows').innerHTML=(report.monthly_trend||[]).length?(report.monthly_trend||[]).map(r=>'<tr><td class="mono">'+escapeHtml(r.month)+'</td><td>'+escapeHtml(fmtMoney(r.revenue_iqd,'IQD'))+'</td><td>'+escapeHtml(fmtMoney(r.expenses_iqd,'IQD'))+'</td><td><b>'+escapeHtml(fmtMoney(r.profit_iqd,'IQD'))+'</b></td></tr>').join(''):tableEmpty(4,'لەو ماوەیەدا ژوورنالی پۆستکراو نییە.');
+    $('financeBranchRows').innerHTML=(report.branch_comparison||[]).length?(report.branch_comparison||[]).map(r=>'<tr><td>'+escapeHtml(r.branch)+'</td><td>'+escapeHtml(fmtMoney(r.revenue_iqd,'IQD'))+'</td><td>'+escapeHtml(fmtMoney(r.expenses_iqd,'IQD'))+'</td><td><b>'+escapeHtml(fmtMoney(r.profit_iqd,'IQD'))+'</b></td><td>'+escapeHtml(fmtMoney(r.cashflow_iqd,'IQD'))+'</td></tr>').join(''):tableEmpty(5,'بۆ ئەم ماوەیە داتای دارایی نییە.');
+    $('financeJournalRows').innerHTML=state.data.journals.length?state.data.journals.map(j=>{
+      const lines=j.finance_journal_lines||[];
+      const debit=lines.reduce((sum,l)=>sum+Number(l.debit_iqd||0),0);
+      const credit=lines.reduce((sum,l)=>sum+Number(l.credit_iqd||0),0);
+      const action=j.status==='draft'?'<button class="row-action primary" data-action="post-journal" data-id="'+escapeHtml(j.id)+'">Post</button>':'—';
+      return '<tr><td><b class="mono">'+escapeHtml(j.journal_number)+'</b><span class="cell-sub">'+escapeHtml(j.reference||j.source_type||'manual')+'</span></td><td>'+escapeHtml(j.entry_date)+'</td><td>'+escapeHtml(j.branch)+'</td><td>'+escapeHtml(j.description)+'<span class="cell-sub">'+lines.length+' line(s)</span></td><td>'+escapeHtml(fmtMoney(debit,'IQD'))+'</td><td>'+escapeHtml(fmtMoney(credit,'IQD'))+'</td><td><span class="status-badge '+statusClass(j.status)+'">'+escapeHtml(j.status)+'</span></td><td>'+action+'</td></tr>';
+    }).join(''):tableEmpty(8,'هێشتا ژوورنالی دارایی نییە.');
+    $('financeAccountsRows').innerHTML=state.data.accounts.length?state.data.accounts.map(a=>'<tr><td class="mono">'+escapeHtml(a.account_code)+'</td><td><b>'+escapeHtml(a.name_ckb)+'</b><span class="cell-sub">'+escapeHtml(a.name_en)+'</span></td><td>'+escapeHtml(a.account_type)+'</td><td>'+((a.is_cash_account)?'<span class="status-badge ok">Cash</span>':'—')+'</td><td><span class="status-badge '+statusClass(a.is_active?'active':'inactive')+'">'+(a.is_active?'Active':'Inactive')+'</span></td></tr>').join(''):tableEmpty(5,'Chart of Accounts بەردەست نییە.');
+    $('financePeriodRows').innerHTML=state.data.periods.length?state.data.periods.map(p=>'<tr><td><b>'+escapeHtml(p.period_name)+'</b></td><td>'+escapeHtml(p.starts_on)+'</td><td>'+escapeHtml(p.ends_on)+'</td><td><span class="status-badge '+statusClass(p.status)+'">'+escapeHtml(p.status)+'</span></td><td>'+escapeHtml(fmtDate(p.closed_at,true))+'</td><td>'+(p.status==='open'&&canPayrollWrite()?'<button class="row-action primary" data-action="close-finance-period" data-id="'+escapeHtml(p.id)+'">Close period</button>':'—')+'</td></tr>').join(''):tableEmpty(6,'Accounting Period دروست نەکراوە.');
+  };
   const renderView = (name) => {
     const rows=state.data;
     if(name==='fleet') {
