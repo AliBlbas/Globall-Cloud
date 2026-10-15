@@ -56,7 +56,7 @@
   const loadSummary = async () => {
     const result=await api('GET',{kind:'summary'});
     state.data.summary=result.item;
-    const s=result.item||{};
+    const s=result.item||{}; state.me=s;
     $('kpiVehicles').textContent=s.vehicles??'—';
     $('kpiMaintenance').textContent=s.maintenance_open??'—';
     $('kpiAttendance').textContent=s.attendance_today??'—';
