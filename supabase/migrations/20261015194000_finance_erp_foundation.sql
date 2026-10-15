@@ -115,7 +115,8 @@ create table if not exists public.finance_journal_lines (
     (transaction_currency = 'IQD' and (transaction_amount is null or transaction_amount >= 0))
     or
     (transaction_currency <> 'IQD' and transaction_amount is not null and transaction_amount >= 0
-      and exchange_rate_to_iqd is not null and exchange_rate_to_iqd > 0)
+      and exchange_rate_to_iqd is not null and exchange_rate_to_iqd > 0
+      and abs((transaction_amount * exchange_rate_to_iqd) - (debit_iqd + credit_iqd)) <= 1)
   )
 );
 create index if not exists finance_journal_lines_entry_idx
