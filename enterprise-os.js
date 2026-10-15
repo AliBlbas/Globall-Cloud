@@ -267,6 +267,24 @@
     } catch(e) { toast(e.message,'bad'); }
     finally {submit.disabled=false;}
   };
+  const postFinanceJournal=async(id)=>{
+    if(!window.confirm('دڵنیایت ژوورنالەکە Post بکرێت؟ دوای Post کردن لە P&L و General Ledger حساب دەکرێت.'))return;
+    try{await api('POST',{}, {action:'post_journal',data:{journal_id:id}});toast('ژوورنال بە سەرکەوتوویی پۆست کرا.');await loadViewData('finance');}
+    catch(e){toast(e.message,'bad');}
+  };
+  const closeFinancePeriod=async(id)=>{
+    if(!window.confirm('دڵنیایت ئەم Accounting Period ـە داخەیت؟ ئەگەر draft journal هەبێت داخستن ڕەت دەکرێتەوە.'))return;
+    try{await api('POST',{}, {action:'close_period',data:{period_id:id}});toast('Accounting Period داخرا.');await loadViewData('finance');}
+    catch(e){toast(e.message,'bad');}
+  };
+  const runFinanceReport=async()=>{
+    const params={kind:'report'};
+    if($('financeFrom').value)params.from=$('financeFrom').value;
+    if($('financeTo').value)params.to=$('financeTo').value;
+    if($('financeBranch').value)params.branch=$('financeBranch').value;
+    try{const result=await api('GET',params);state.data.finance_report=result.report||null;renderFinance();toast('ڕاپۆرتی دارایی نوێکرایەوە.');}
+    catch(e){toast(e.message,'bad');}
+  };
   const attendanceAction=async(action)=>{
     $('checkInBtn').disabled=true;$('checkOutBtn').disabled=true;
     try { await api('POST',{}, {action:'attendance',data:{action}});toast(action==='check_in'?'کاتی هاتن تۆمار کرا.':'کاتی چوون تۆمار کرا.');await loadViewData('attendance');await loadSummary(); }
@@ -295,6 +313,7 @@
   $('loginForm').addEventListener('submit',async(event)=>{event.preventDefault();$('loginError').classList.add('hidden');const b=event.submitter;b.disabled=true;try{const {data,error}=await state.client.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;state.session=data.session;showApp();await loadSummary();await setView('overview');}catch(e){$('loginError').textContent=e.message;$('loginError').classList.remove('hidden');showLogin()}finally{b.disabled=false}});
   $('signOut').addEventListener('click',async()=>{await state.client.auth.signOut();state.session=null;state.me=null;showLogin()});
   $('refreshBtn').addEventListener('click',()=>loadAll().catch(e=>notice(e.message,'bad')));
+  $('runFinanceReport').addEventListener('click',runFinanceReport);
   $('checkInBtn').addEventListener('click',()=>attendanceAction('check_in'));
   $('checkOutBtn').addEventListener('click',()=>attendanceAction('check_out'));
   $('closeModal').addEventListener('click',closeModal);$('cancelModal').addEventListener('click',closeModal);$('actionForm').addEventListener('submit',submitAction);
@@ -309,6 +328,8 @@
     else if(a==='approve-leave')leaveReview(id,'approved');
     else if(a==='reject-leave')leaveReview(id,'rejected');
     else if(a==='payroll-advance')payrollAdvance(id,action.dataset.status);
+    else if(a==='post-journal')postFinanceJournal(id);
+    else if(a==='close-finance-period')closeFinancePeriod(id);
   });
   document.addEventListener('DOMContentLoaded',()=>{const until=Date.now()+2500;const poll=()=>{if(window.supabase?.createClient){boot().catch(e=>{showLogin();$('loginError').textContent=e.message;$('loginError').classList.remove('hidden')});}else if(Date.now()<until)window.setTimeout(poll,40);else{showLogin();$('loginError').textContent='Supabase library did not load.';$('loginError').classList.remove('hidden')}};poll()});
 })();
