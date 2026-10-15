@@ -51,7 +51,7 @@ const assertBranch=(staff:Staff,requested:unknown)=>{
   return branch
 }
 const audit=async(service:ReturnType<typeof serviceClient>,staff:Staff,action:string,target:string,details:Json={})=>{
-  const result=await service.from('staff_activity_log').insert({staff_id:staff.id,staff_name:staff.full_name,action,target_id:target,details})
+  const result=await service.from('staff_activity_log').insert({staff_id:staff.id,staff_name:staff.full_name,action,target_id:target,details:JSON.stringify(details)})
   if(result.error)throw new Error('Finance change was saved, but the audit record could not be written. Contact an administrator before retrying.')
 }
 const page=(url:URL)=>{
