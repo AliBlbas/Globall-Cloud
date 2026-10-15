@@ -72,6 +72,18 @@ The proposed migration introduces:
 
 The migration applies Row Level Security and least-privilege role checks. Attendance has no direct self-service table-write policy; the server-time RPC is the intended employee clock-in/out boundary. Payroll is restricted to administrators for writes; finance/accounting can read it. The frontend, API/UI workflows, test coverage, and release path must be completed before this schema is used operationally.
 
+## Finance ERP foundation (additive, initial slice)
+
+The feature branch now adds a dedicated double-entry ledger in `20261015194000_finance_erp_foundation.sql` and the authenticated `finance-erp-admin` Edge Function:
+
+- `finance_accounts`: account codes and account types for assets, liabilities, equity, revenue, and expenses, with a seeded starter chart (cash, banks, receivables, payables, shipment/customs/service revenue, fuel, rent, salaries, maintenance, and operating costs).
+- `finance_periods`: administrator-managed, non-overlapping date periods. Posting is blocked when no open period covers the journal date; periods cannot close while they contain draft journals.
+- `finance_journal_entries` / `finance_journal_lines`: IQD functional-currency double entry; the database rejects unbalanced journals, and triggers prevent editing or deleting posted entries/lines. Corrections must be represented by a new compensating journal.
+- `gc_finance_report`: P&L by month/branch, net cash-account movement, current asset/liability/equity balances, and posted-entry counts. Reports exclude drafts.
+- New finance tables have RLS and are accessed for writes through the server-only Finance API. The page offers chart-of-accounts, period-control, journal, monthly P&L, cash-movement, and branch-comparison views.
+
+**Integration limitation:** this is the ledger foundation, not a completed accounting integration. QiCard/FIB payment settlement, shipment invoice settlement, company-cost entries, payroll payments, and fuel/maintenance records are not yet automatically posted into the General Ledger. Until those source adapters and reconciliation tests are implemented, reports are accurate for *posted ledger journals only*, not a complete consolidated statement of every existing business transaction. FX journal lines carry an original currency/amount and exchange-rate metadata; the initial UI creates functional-currency IQD lines only.
+
 ## Implementation and acceptance gates
 
 ### Gate A — Existing core remains healthy
