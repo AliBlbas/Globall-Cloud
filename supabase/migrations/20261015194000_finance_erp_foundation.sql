@@ -152,7 +152,7 @@ create or replace function public.gc_finance_guard_journal_entry()
 returns trigger
 language plpgsql
 set search_path = public, pg_temp
-as $
+as $$
 declare
   v_debit numeric(18,2);
   v_credit numeric(18,2);
@@ -193,13 +193,13 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 
 create or replace function public.gc_finance_guard_journal_line()
 returns trigger
 language plpgsql
 set search_path = public, pg_temp
-as $
+as $$
 declare
   v_entry_id uuid;
   v_status text;
@@ -215,7 +215,7 @@ begin
   if tg_op='DELETE' then return old; end if;
   return new;
 end;
-$;
+$$;
 
 drop trigger if exists finance_journal_entries_guard on public.finance_journal_entries;
 create trigger finance_journal_entries_guard before update or delete on public.finance_journal_entries
