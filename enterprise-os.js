@@ -4,7 +4,7 @@
   const SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
   const API_URL = SUPABASE_URL + '/functions/v1/fleet-hr-admin';
   const $ = (id) => document.getElementById(id);
-  const state = { client:null, session:null, me:null, view:'overview', data:{summary:null,vehicles:[],maintenance:[],fuel:[],attendance:[],leave_requests:[],payroll_periods:[],payroll_entries:[],vehicle_events:[],staff:[]}, modalAction:null };
+  const state = { client:null, session:null, me:null, view:'overview', data:{summary:null,vehicles:[],maintenance:[],fuel:[],attendance:[],leave_requests:[],payroll_periods:[],payroll_entries:[],vehicle_events:[],staff:[],assignments:[]}, modalAction:null };
   const titles = {
     overview:['کورتەی سیستەم','دۆخی ماژوولەکان و کردارە پێویستەکان.'],
     fleet:['Fleet Management','تۆمار و چاودێری ئۆتۆمبێلەکانی branch ـە دەستپێگەیشتووەکان.'],
@@ -73,7 +73,7 @@
     return state.data[kind];
   };
   const loadViewData = async(name) => {
-    const mapping={fleet:['vehicles'],maintenance:['vehicles','maintenance'],fuel:['vehicles','fuel'],attendance:['attendance'],leave:['leave_requests',...(isAdmin()?['staff']:[])],payroll:['payroll_periods','payroll_entries','staff']};
+    const mapping={fleet:['vehicles','assignments'],maintenance:['vehicles','maintenance'],fuel:['vehicles','fuel'],attendance:['attendance'],leave:['leave_requests',...(isAdmin()?['staff']:[])],payroll:['payroll_periods','payroll_entries','staff']};
     const kinds=mapping[name]||[];
     try { await Promise.all(kinds.map(loadKind)); renderView(name); }
     catch(e) { notice(e.message,'bad'); }
@@ -87,7 +87,7 @@
   const renderView = (name) => {
     const rows=state.data;
     if(name==='fleet') {
-      $('vehiclesRows').innerHTML=rows.vehicles.length?rows.vehicles.map(v=>'<tr><td><b>'+escapeHtml(v.vehicle_code)+'</b><span class="cell-sub">'+escapeHtml([v.make,v.model].filter(Boolean).join(' '))+'</span></td><td class="mono">'+escapeHtml(v.plate_number)+'</td><td>'+escapeHtml(v.vehicle_type)+'</td><td>'+escapeHtml(v.branch)+'</td><td>'+escapeHtml(v.capacity_kg??'—')+' kg</td><td>'+escapeHtml(v.odometer_km)+' km</td><td><span class="status-badge '+statusClass(v.status)+'">'+escapeHtml(v.status)+'</span></td><td>'+(canOperate()?'<button class="row-action primary" data-action="edit-vehicle" data-id="'+escapeHtml(v.id)+'">دەستکاری</button>':'—')+'</td></tr>').join(''):tableEmpty(8,'هیچ ئۆتۆمبێلێک لەم scope ـەدا نییە.');
+      $('vehiclesRows').innerHTML=rows.vehicles.length?rows.vehicles.map(v=>'<tr><td><b>'+escapeHtml(v.vehicle_code)+'</b><span class="cell-sub">'+escapeHtml([v.make,v.model].filter(Boolean).join(' '))+'</span></td><td class="mono">'+escapeHtml(v.plate_number)+'</td><td>'+escapeHtml(v.vehicle_type)+'</td><td>'+escapeHtml(v.branch)+'</td><td>'+escapeHtml(v.capacity_kg??'—')+' kg</td><td>'+escapeHtml(v.odometer_km)+' km</td><td><span class="status-badge '+statusClass(v.status)+'">'+escapeHtml(v.status)+'</span></td><td>'+(canOperate()?'<button class="row-action primary" data-action="edit-vehicle" data-id="'+escapeHtml(v.id)+'">دەستکاری</button><button class="row-action" data-action="assign-vehicle" data-id="'+escapeHtml(v.id)+'">بەستنەوە بە delivery</button>':'—')+'</td></tr>').join(''):tableEmpty(8,'هیچ ئۆتۆمبێلێک لەم scope ـەدا نییە.');
     } else if(name==='maintenance') {
       $('maintenanceRows').innerHTML=rows.maintenance.length?rows.maintenance.map(v=>'<tr><td>'+escapeHtml(vehicleLabel(v.vehicle_id))+'</td><td>'+escapeHtml(v.maintenance_type)+'</td><td>'+escapeHtml(v.description)+'</td><td>'+escapeHtml(fmtDate(v.scheduled_at))+'</td><td><span class="status-badge '+statusClass(v.status)+'">'+escapeHtml(v.status)+'</span></td><td>'+escapeHtml(fmtMoney(v.cost_amount,v.cost_currency))+'</td></tr>').join(''):tableEmpty(6,'تۆماری سێرڤیس نییە.');
     } else if(name==='fuel') {
@@ -135,6 +135,10 @@
       if(v.branch) fields=fields.replace('<option value="'+v.branch+'">','<option value="'+v.branch+'" selected>');
       if(v.fuel_type) fields=fields.replace('<option value="'+v.fuel_type+'">','<option value="'+v.fuel_type+'" selected>');
       if(v.status) fields=fields.replace('<option value="'+v.status+'">','<option value="'+v.status+'" selected>');
+    } else if(action==='assign-vehicle') {
+      title='بەستنەوەی ئۆتۆمبێل بە delivery';
+      fields=field('vehicle_id','ئۆتۆمبێل','select',{options:vehicles})+field('assignment_id','Delivery و شۆفێر','select',{options:state.data.assignments.map(x=>[x.id,String(x.shipment_id)+' · '+String(x.driver_name||x.assigned_staff_id)+' · '+String(x.status)])});
+      fields=fields.replace('<option value="'+id+'">','<option value="'+id+'" selected>');
     } else if(action==='create-maintenance') {
       title='تۆمارکردنی سێرڤیس';
       fields=field('vehicle_id','ئۆتۆمبێل','select',{options:vehicles})+field('maintenance_type','جۆری کار','select',{options:[['scheduled','Scheduled'],['repair','Repair'],['inspection','Inspection'],['tyres','Tyres'],['oil','Oil'],['other','Other']]})+
@@ -183,6 +187,7 @@
       else if(action==='create-maintenance'){endpointAction='create_maintenance';data.cost_amount=Number(data.cost_amount||0);if(data.odometer_km!==null)data.odometer_km=Number(data.odometer_km);if(data.scheduled_at)data.scheduled_at=new Date(data.scheduled_at).toISOString();}
       else if(action==='record-fuel'){endpointAction='record_fuel';data.liters=Number(data.liters);data.amount=Number(data.amount);if(data.odometer_km!==null)data.odometer_km=Number(data.odometer_km);if(data.logged_at)data.logged_at=new Date(data.logged_at).toISOString();}
       else if(action==='vehicle-event')endpointAction='record_vehicle_event';
+      else if(action==='assign-vehicle'){endpointAction='assign_vehicle_to_delivery';data.vehicle_id=id||data.vehicle_id;}
       else if(action==='request-leave')endpointAction='request_leave';
       else if(action==='payroll-period')endpointAction='create_payroll_period';
       else if(action==='payroll-entry'){endpointAction='upsert_payroll_entry';for(const k of ['base_salary','allowances','deductions'])data[k]=Number(data[k]||0);}
@@ -230,7 +235,7 @@
     const view=e.target.closest('[data-view]');if(view){e.preventDefault();setView(view.dataset.view).catch(err=>notice(err.message,'bad'));return;}
     const action=e.target.closest('[data-action]');if(!action)return;
     const a=action.dataset.action,id=action.dataset.id||null;
-    if(a==='create-vehicle'||a==='edit-vehicle'||a==='create-maintenance'||a==='record-fuel'||a==='vehicle-event'||a==='request-leave'||a==='payroll-period'||a==='payroll-entry')openModal(a,id);
+    if(a==='create-vehicle'||a==='edit-vehicle'||a==='assign-vehicle'||a==='create-maintenance'||a==='record-fuel'||a==='vehicle-event'||a==='request-leave'||a==='payroll-period'||a==='payroll-entry')openModal(a,id);
     else if(a==='approve-leave')leaveReview(id,'approved');
     else if(a==='reject-leave')leaveReview(id,'rejected');
     else if(a==='payroll-advance')payrollAdvance(id,action.dataset.status);
