@@ -80,6 +80,9 @@ const required = [
   'supabase/functions/notification-dispatch/index.ts',
   'supabase/functions/logistics-control-plane/index.ts',
   'supabase/functions/_shared/payment-providers.ts',
+  'enterprise-os.html', 'enterprise-os.css', 'enterprise-os.js',
+  'supabase/functions/fleet-hr-admin/index.ts',
+  'supabase/migrations/20261015190000_enterprise_fleet_hr_foundation.sql',
 ];
 const beforeReq = failures;
 for (const rel of required) {
