@@ -38,6 +38,49 @@ create index if not exists fleet_vehicles_branch_status_idx
 alter table public.delivery_assignments
   add column if not exists vehicle_id uuid
     references public.fleet_vehicles(id) on delete set null;
+
+-- Existing delivery-assignment RLS policies allow a driver to update their own row.
+-- Do not let that pre-existing policy become a shortcut around the new server-side
+-- driver/vehicle branch matching checks: direct JWT-authenticated vehicle changes
+-- are admin-only; fleet-hr-admin uses the server-only service role after validation.
+create or replace function public.gc_guard_delivery_vehicle_assignment()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $
+declare
+  v_actor uuid := auth.uid();
+  v_role text;
+  v_vehicle_changed boolean := false;
+begin
+  if tg_op = 'INSERT' then
+    v_vehicle_changed := new.vehicle_id is not null;
+  else
+    v_vehicle_changed := new.vehicle_id is distinct from old.vehicle_id;
+  end if;
+
+  if v_vehicle_changed and v_actor is not null then
+    select s.role into v_role
+    from public.staff s
+    where s.id = v_actor and s.is_active = true;
+
+    if v_role is null or v_role not in ('admin','super_admin') then
+      raise exception 'Vehicle assignment changes must use the authorized Fleet workflow'
+        using errcode = '42501';
+    end if;
+  end if;
+
+  return new;
+end;
+$;
+
+drop trigger if exists delivery_vehicle_assignment_guard on public.delivery_assignments;
+create trigger delivery_vehicle_assignment_guard
+before insert or update of vehicle_id on public.delivery_assignments
+for each row execute function public.gc_guard_delivery_vehicle_assignment();
+revoke all on function public.gc_guard_delivery_vehicle_assignment() from public, anon;
+
 create index if not exists delivery_assignments_vehicle_idx
   on public.delivery_assignments(vehicle_id, created_at desc)
   where vehicle_id is not null;
