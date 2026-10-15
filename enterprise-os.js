@@ -149,7 +149,31 @@
     state.modalAction={action,id};
     let title='',fields='';
     const vehicles=vehicleOptions();
-    if(action==='create-vehicle'||action==='edit-vehicle') {
+    if(action==='create-account') {
+      title='زیادکردنی حساب لە Chart of Accounts';
+      fields=field('account_code','کۆدی حساب','text')+field('account_type','جۆری حساب','select',{options:[['asset','Asset'],['liability','Liability'],['equity','Equity'],['revenue','Revenue'],['expense','Expense']]})+
+       field('name_en','Account name (English)','text')+field('name_ckb','ناوی حساب بە کوردی','text')+
+       field('is_cash_account','Cash / Bank account','select',{options:[['false','No'],['true','Yes']]})+
+       field('parent_account_id','Parent account','select',{required:false,options:[['','No parent'],...state.data.accounts.filter(x=>x.is_active).map(x=>[x.id,x.account_code+' · '+x.name_en])]});
+    } else if(action==='create-period') {
+      title='دروستکردنی Accounting Period';
+      fields=field('period_name','ناوی ماوە','text')+field('starts_on','لە بەرواری','date')+
+       field('ends_on','تا بەرواری','date')+field('note','تێبینی','textarea',{required:false,wide:true});
+    } else if(action==='create-journal') {
+      title='دروستکردنی Journal / Expense';
+      const accountOptions=state.data.accounts.filter(x=>x.is_active).map(x=>[x.id,x.account_code+' · '+x.name_en+' ('+x.account_type+')']);
+      fields=field('entry_date','بەرواری ژوورنال','date')+
+       field('branch','لق','select',{options:(state.data.summary?.scope||['erbil']).map(b=>[b,b.charAt(0).toUpperCase()+b.slice(1)])})+
+       field('description','وەسفی ژوورنال','text',{wide:true})+
+       field('source_type','جۆری مامەڵە','select',{options:[['manual','Manual journal'],['expense','Expense'],['shipment_invoice','Shipment invoice'],['payment','Payment'],['payroll','Payroll'],['customs','Customs'],['fuel','Fuel'],['maintenance','Maintenance'],['adjustment','Adjustment'],['reversal','Reversal']]})+
+       field('reference','ژمارەی پەیوەندیدار','text',{required:false})+
+       field('debit_account_id','Debit account','select',{options:accountOptions})+
+       field('credit_account_id','Credit account','select',{options:accountOptions})+
+       field('amount_iqd','بڕ بە IQD','number',{min:'0.01',step:'0.01'})+
+       field('memo','تێبینیی هێڵ','textarea',{required:false,wide:true})+
+       field('post_status','دۆخی سەرەتایی','select',{options:[['draft','Draft · پێش تۆمارکردن'],['posted','Post now · تۆمارکردنی کۆتایی']]})+
+       '<p class="form-hint full">ژوورنال بە دوو هێڵی یەکسانی Debit/Credit دروست دەبێت. Draft تا کاتی Post کردن لە P&amp;L حساب ناکرێت.</p>';
+    } else if(action==='create-vehicle'||action==='edit-vehicle') {
       title=action==='edit-vehicle'?'دەستکاری ئۆتۆمبێل':'تۆمارکردنی ئۆتۆمبێلی نوێ';
       const v=state.data.vehicles.find(x=>x.id===id)||{};
       fields=field('vehicle_code','کۆدی ئۆتۆمبێل','text',{value:v.vehicle_code})+field('plate_number','ژمارەی پلاک','text',{value:v.plate_number})+
@@ -216,6 +240,20 @@
     try {
       const {action,id}=state.modalAction;const data=formData();let endpointAction=action;
       if(action==='create-vehicle'||action==='edit-vehicle') {endpointAction=action==='edit-vehicle'?'update_vehicle':'create_vehicle';if(id)data.vehicle_id=id;data.model_year=data.model_year===null?null:Number(data.model_year);data.capacity_kg=data.capacity_kg===null?null:Number(data.capacity_kg);data.odometer_km=Number(data.odometer_km||0);}
+      else if(action==='create-account'){endpointAction='create_account';data.is_cash_account=data.is_cash_account==='true';}
+      else if(action==='create-period'){endpointAction='create_period';}
+      else if(action==='create-journal'){
+        endpointAction='create_journal';
+        if(data.debit_account_id===data.credit_account_id)throw new Error('Debit and Credit accounts must be different.');
+        const value=Number(data.amount_iqd);
+        if(!Number.isFinite(value)||value<=0)throw new Error('Journal amount must be greater than zero.');
+        data.lines=[
+          {account_id:data.debit_account_id,debit_iqd:value,credit_iqd:0,memo:data.memo||null,transaction_currency:'IQD'},
+          {account_id:data.credit_account_id,debit_iqd:0,credit_iqd:value,memo:data.memo||null,transaction_currency:'IQD'}
+        ];
+        data.post=data.post_status==='posted';
+        delete data.post_status;delete data.debit_account_id;delete data.credit_account_id;delete data.amount_iqd;delete data.memo;
+      }
       else if(action==='create-maintenance'){endpointAction='create_maintenance';data.cost_amount=Number(data.cost_amount||0);if(data.odometer_km!==null)data.odometer_km=Number(data.odometer_km);if(data.scheduled_at)data.scheduled_at=new Date(data.scheduled_at).toISOString();}
       else if(action==='record-fuel'){endpointAction='record_fuel';data.liters=Number(data.liters);data.amount=Number(data.amount);if(data.odometer_km!==null)data.odometer_km=Number(data.odometer_km);if(data.logged_at)data.logged_at=new Date(data.logged_at).toISOString();}
       else if(action==='vehicle-event')endpointAction='record_vehicle_event';
