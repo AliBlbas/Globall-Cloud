@@ -324,7 +324,7 @@
     const view=e.target.closest('[data-view]');if(view){e.preventDefault();setView(view.dataset.view).catch(err=>notice(err.message,'bad'));return;}
     const action=e.target.closest('[data-action]');if(!action)return;
     const a=action.dataset.action,id=action.dataset.id||null;
-    if(a==='create-vehicle'||a==='edit-vehicle'||a==='assign-vehicle'||a==='create-maintenance'||a==='record-fuel'||a==='vehicle-event'||a==='request-leave'||a==='payroll-period'||a==='payroll-entry')openModal(a,id);
+    if(a==='create-vehicle'||a==='edit-vehicle'||a==='assign-vehicle'||a==='create-maintenance'||a==='record-fuel'||a==='vehicle-event'||a==='request-leave'||a==='payroll-period'||a==='payroll-entry'||a==='create-account'||a==='create-period'||a==='create-journal')openModal(a,id);
     else if(a==='approve-leave')leaveReview(id,'approved');
     else if(a==='reject-leave')leaveReview(id,'rejected');
     else if(a==='payroll-advance')payrollAdvance(id,action.dataset.status);
