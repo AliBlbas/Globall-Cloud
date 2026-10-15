@@ -48,7 +48,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = public, pg_temp
-as $
+as $$
 declare
   v_actor uuid := auth.uid();
   v_role text;
@@ -73,7 +73,7 @@ begin
 
   return new;
 end;
-$;
+$$;
 
 drop trigger if exists delivery_vehicle_assignment_guard on public.delivery_assignments;
 create trigger delivery_vehicle_assignment_guard
