@@ -184,7 +184,7 @@ const list = async (service: ReturnType<typeof serviceClient>, staff: Staff, url
       .in('status',['assigned','accepted','picked_up','out_for_delivery'])
       .order('created_at',{ascending:false}),offset,limit)
     if (result.error) throw result.error
-    const byId = new Map(drivers.map((driver: Staff) => [driver.id,driver]))
+    const byId = new Map<string, Staff>(drivers.map((driver: Staff) => [driver.id,driver] as [string, Staff]))
     const items = (result.data || []).map((assignment: any) => {
       const driver = byId.get(assignment.assigned_staff_id)
       return {...assignment,driver_name:driver?.full_name || driver?.email || assignment.assigned_staff_id,driver_role:driver?.role,driver_branch:driver?.branch}
