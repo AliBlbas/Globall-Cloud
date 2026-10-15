@@ -68,8 +68,9 @@ jobs:
           grep -q 'verify_jwt = true' supabase/config.toml
           grep -Fq '[functions.fleet-hr-admin]' supabase/config.toml
           grep -q "fleet-hr-admin" enterprise-os.js
-            supabase/functions/fleet-hr-admin/index.ts \
-            supabase/functions/fleet-hr-admin/index.ts \
+          grep -q 'assign_vehicle_to_delivery' supabase/functions/fleet-hr-admin/index.ts
+          grep -q 'setPayrollPeriodStatus' supabase/functions/fleet-hr-admin/index.ts
+          grep -q 'data-panel="vehicle_events"' enterprise-os.html
           # Flags an actual hardcoded secret VALUE assigned to a service-role-shaped
           # name (e.g. SUPABASE_SERVICE_ROLE_KEY = "eyJ..." or "sb_secret_...").
           # Deliberately does NOT flag Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
