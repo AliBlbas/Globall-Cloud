@@ -122,7 +122,7 @@
       const v=state.data.vehicles.find(x=>x.id===id)||{};
       fields=field('vehicle_code','کۆدی ئۆتۆمبێل','text',{value:v.vehicle_code})+field('plate_number','ژمارەی پلاک','text',{value:v.plate_number})+
        field('vehicle_type','جۆری ئۆتۆمبێل','select',{options:[['car','Car'],['van','Van'],['truck','Truck']]} )+
-       field('branch','لق','select',{options:[['erbil','Erbil'],['china','China'],['dubai','Dubai']],value:v.branch})+
+       field('branch','لق','select',{options:(state.data.summary?.scope||['erbil']).map(b=>[b,b.charAt(0).toUpperCase()+b.slice(1)]),value:v.branch})+
        field('make','بەرهەمهێنەر','text',{required:false,value:v.make})+field('model','مۆدێل','text',{required:false,value:v.model})+
        field('model_year','ساڵ','number',{required:false,min:1980,max:2100,step:1,value:v.model_year})+
        field('fuel_type','جۆری سووتەمەنی','select',{required:false,options:[['','نادیار / هەڵبژێرە'],['diesel','Diesel'],['petrol','Petrol'],['hybrid','Hybrid'],['electric','Electric'],['other','Other']]} )+
