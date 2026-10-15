@@ -144,6 +144,85 @@ drop trigger if exists finance_journal_entries_touch_updated_at on public.financ
 create trigger finance_journal_entries_touch_updated_at before update on public.finance_journal_entries
 for each row execute function public.gc_finance_touch_updated_at();
 
+-- Posted ledger records are immutable. The only allowed mutation of a journal
+-- header is draft -> posted, and that transition must be balanced and inside
+-- an open period. Reversal must be represented by a new compensating journal.
+create or replace function public.gc_finance_guard_journal_entry()
+returns trigger
+language plpgsql
+set search_path = public, pg_temp
+as $
+declare
+  v_debit numeric(18,2);
+  v_credit numeric(18,2);
+  v_line_count bigint;
+begin
+  if tg_op = 'DELETE' then
+    if old.status <> 'draft' then
+      raise exception 'Posted finance journals cannot be deleted; create a reversal journal' using errcode='23514';
+    end if;
+    return old;
+  end if;
+  if old.status <> 'draft' then
+    raise exception 'Posted finance journals are immutable; create a reversal journal' using errcode='23514';
+  end if;
+  if new.status = 'draft' then
+    if new.posted_at is not null or new.posted_by is not null then
+      raise exception 'Draft journals cannot carry posting metadata' using errcode='23514';
+    end if;
+    return new;
+  end if;
+  if new.status <> 'posted' then
+    raise exception 'Only a draft journal may transition to posted' using errcode='23514';
+  end if;
+  if new.posted_at is null or new.posted_by is null then
+    raise exception 'Posting actor and timestamp are required' using errcode='23514';
+  end if;
+  if not exists (
+    select 1 from public.finance_periods p
+    where p.id=new.period_id and p.status='open' and new.entry_date between p.starts_on and p.ends_on
+  ) then
+    raise exception 'Finance period is closed' using errcode='23514';
+  end if;
+  select count(*),coalesce(sum(debit_iqd),0),coalesce(sum(credit_iqd),0)
+    into v_line_count,v_debit,v_credit
+  from public.finance_journal_lines l where l.journal_entry_id=new.id;
+  if v_line_count < 2 or v_debit <= 0 or round(v_debit,2) <> round(v_credit,2) then
+    raise exception 'Journal must contain at least two lines and equal debit/credit totals' using errcode='23514';
+  end if;
+  return new;
+end;
+$;
+
+create or replace function public.gc_finance_guard_journal_line()
+returns trigger
+language plpgsql
+set search_path = public, pg_temp
+as $
+declare
+  v_entry_id uuid;
+  v_status text;
+begin
+  if tg_op = 'UPDATE' and new.journal_entry_id <> old.journal_entry_id then
+    raise exception 'Journal lines cannot be moved between entries' using errcode='23514';
+  end if;
+  v_entry_id := case when tg_op='DELETE' then old.journal_entry_id else new.journal_entry_id end;
+  select e.status into v_status from public.finance_journal_entries e where e.id=v_entry_id;
+  if v_status is distinct from 'draft' then
+    raise exception 'Lines of a posted journal are immutable' using errcode='23514';
+  end if;
+  if tg_op='DELETE' then return old; end if;
+  return new;
+end;
+$;
+
+drop trigger if exists finance_journal_entries_guard on public.finance_journal_entries;
+create trigger finance_journal_entries_guard before update or delete on public.finance_journal_entries
+for each row execute function public.gc_finance_guard_journal_entry();
+drop trigger if exists finance_journal_lines_guard on public.finance_journal_lines;
+create trigger finance_journal_lines_guard before insert or update or delete on public.finance_journal_lines
+for each row execute function public.gc_finance_guard_journal_line();
+
 create or replace function public.gc_finance_assert_actor(p_actor_id uuid, p_branch text, p_admin_only boolean default false)
 returns void
 language plpgsql
@@ -274,6 +353,9 @@ begin
   if jsonb_typeof(p_lines) <> 'array' or jsonb_array_length(p_lines) < 2 or jsonb_array_length(p_lines) > 100 then
     raise exception 'Journal requires between 2 and 100 lines' using errcode = '22023';
   end if;
+  if (select count(distinct (value->>'account_id')) from jsonb_array_elements(p_lines)) < 2 then
+    raise exception 'Journal must use at least two distinct accounts' using errcode = '22023';
+  end if;
   select * into v_period
   from public.finance_periods p
   where p.status='open'
@@ -302,11 +384,10 @@ begin
     raise exception 'Journal is not balanced in IQD' using errcode = '23514';
   end if;
   v_journal_number := 'GCJ-' || to_char(p_entry_date,'YYYYMMDD') || '-' || upper(substr(replace(gen_random_uuid()::text,'-',''),1,8));
-  v_status := case when p_post then 'posted' else 'draft' end;
-  insert into public.finance_journal_entries(journal_number,entry_date,branch,period_id,description,reference,source_type,source_id,status,created_by,posted_by,posted_at)
+  v_status := 'draft';
+  insert into public.finance_journal_entries(journal_number,entry_date,branch,period_id,description,reference,source_type,source_id,status,created_by)
   values(v_journal_number,p_entry_date,case when lower(trim(p_branch))='uae' then 'dubai' else lower(trim(p_branch)) end,
-    v_period.id,trim(p_description),nullif(trim(coalesce(p_reference,'')),''),p_source_type,nullif(trim(coalesce(p_source_id,'')),''),v_status,p_actor_id,
-    case when p_post then p_actor_id else null end,case when p_post then now() else null end)
+    v_period.id,trim(p_description),nullif(trim(coalesce(p_reference,'')),''),p_source_type,nullif(trim(coalesce(p_source_id,'')),''),v_status,p_actor_id)
   returning * into v_entry;
 
   for v_line in select value from jsonb_array_elements(p_lines) loop
@@ -319,6 +400,11 @@ begin
       v_debit,v_credit,coalesce(nullif(v_line->>'transaction_currency',''),'IQD'),
       nullif(v_line->>'transaction_amount','')::numeric,nullif(v_line->>'exchange_rate_to_iqd','')::numeric);
   end loop;
+
+  if p_post then
+    update public.finance_journal_entries set status='posted',posted_by=p_actor_id,posted_at=now()
+      where id=v_entry.id returning * into v_entry;
+  end if;
 
   insert into public.staff_activity_log(staff_id,staff_name,action,target_id,details)
   select p_actor_id,s.full_name,case when p_post then 'finance_journal_posted' else 'finance_journal_draft_created' end,
@@ -513,6 +599,8 @@ grant select on public.finance_accounts,public.finance_periods,public.finance_jo
 grant select,insert,update,delete on public.finance_accounts,public.finance_periods,public.finance_journal_entries,public.finance_journal_lines to service_role;
 
 revoke all on function public.gc_finance_touch_updated_at() from public,anon,authenticated;
+revoke all on function public.gc_finance_guard_journal_entry() from public,anon,authenticated;
+revoke all on function public.gc_finance_guard_journal_line() from public,anon,authenticated;
 revoke all on function public.gc_finance_assert_actor(uuid,text,boolean) from public,anon,authenticated;
 revoke all on function public.gc_finance_create_period(uuid,text,date,date,text) from public,anon,authenticated;
 revoke all on function public.gc_finance_close_period(uuid,uuid) from public,anon,authenticated;
