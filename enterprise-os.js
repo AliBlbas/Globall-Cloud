@@ -73,7 +73,7 @@
     return state.data[kind];
   };
   const loadViewData = async(name) => {
-    const mapping={fleet:['vehicles','assignments'],maintenance:['vehicles','maintenance'],fuel:['vehicles','fuel'],attendance:['attendance'],leave:['leave_requests',...(isAdmin()?['staff']:[])],payroll:['payroll_periods','payroll_entries','staff']};
+    const mapping={fleet:['vehicles',...(canOperate()?['assignments']:[])],maintenance:['vehicles','maintenance'],fuel:['vehicles','fuel'],attendance:['attendance'],leave:['leave_requests',...(isAdmin()?['staff']:[])],payroll:['payroll_periods','payroll_entries','staff']};
     const kinds=mapping[name]||[];
     try { await Promise.all(kinds.map(loadKind)); renderView(name); }
     catch(e) { notice(e.message,'bad'); }
