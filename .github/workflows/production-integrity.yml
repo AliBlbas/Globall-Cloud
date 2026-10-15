@@ -66,6 +66,10 @@ jobs:
           grep -q 'project_id = "ahslifnthiwfkmaswjno"' supabase/config.toml
           grep -q '\[functions.account-admin\]' supabase/config.toml
           grep -q 'verify_jwt = true' supabase/config.toml
+          grep -q '\\[functions.fleet-hr-admin\\]' supabase/config.toml
+          grep -q "fleet-hr-admin" enterprise-os.js
+          grep -q "requireRole(staff,OPS_ROLES)" supabase/functions/fleet-hr-admin/index.ts
+          grep -q "setPayrollPeriodStatus" supabase/functions/fleet-hr-admin/index.ts
           # Flags an actual hardcoded secret VALUE assigned to a service-role-shaped
           # name (e.g. SUPABASE_SERVICE_ROLE_KEY = "eyJ..." or "sb_secret_...").
           # Deliberately does NOT flag Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
@@ -147,7 +151,9 @@ jobs:
             supabase/migrations/20260818130000_logistics_notifications_contract_hardening.sql \
             supabase/migrations/20260816120000_qicard_fib_payment_sessions.sql \
             supabase/migrations/20261008190000_harden_server_only_function_execute.sql \
-            release.json
+            release.json enterprise-os.html enterprise-os.css enterprise-os.js \\
+            supabase/functions/fleet-hr-admin/index.ts \\
+            supabase/migrations/20261015190000_enterprise_fleet_hr_foundation.sql
           do
             test -f "$file"
           done
