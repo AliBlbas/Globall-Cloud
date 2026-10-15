@@ -104,27 +104,35 @@ if (existsSync(migDir)) {
   if (failures === beforeMig) ok(`${migFiles.length} migrations OK`);
 }
 
-// 5. Prevent malformed PL/pgSQL function dollar delimiters in the new Finance ERP migration.
-// This is a lightweight guard, not a substitute for applying the migration on staging.
-console.log('Finance ERP SQL function delimiters');
-const financeSqlPath = join(ROOT, 'supabase', 'migrations', '20261015194000_finance_erp_foundation.sql');
-if (!existsSync(financeSqlPath)) {
-  fail('missing Finance ERP migration');
-} else {
-  const financeSql = readFileSync(financeSqlPath, 'utf8');
-  const hasBareFunctionDelimiter = /^\s*as \$(?=\s*declare)/m.test(financeSql);
-  const hasBareFunctionEnd = /^\$;\s*$/m.test(financeSql);
-  const functionCount = (financeSql.match(/create or replace function/gi) || []).length;
-  const delimiterStarts = (financeSql.match(/\bas \$\$\s*\n/g) || []).length;
-  const delimiterEnds = (financeSql.match(/^\$\$;\s*$/gm) || []).length;
-  if (hasBareFunctionDelimiter || hasBareFunctionEnd) fail('malformed bare dollar delimiter in Finance ERP migration');
-  if (delimiterStarts !== functionCount || delimiterEnds !== functionCount) {
-    fail('Finance ERP PL/pgSQL delimiter count mismatch: functions=' + functionCount + ', starts=' + delimiterStarts + ', ends=' + delimiterEnds);
+// 5. Prevent malformed PL/pgSQL dollar delimiters in the new enterprise migrations.
+// This lightweight check does not replace applying and testing migrations on staging.
+console.log('Enterprise SQL function delimiters');
+const sqlMigrationChecks = [
+  { path: 'supabase/migrations/20261015190000_enterprise_fleet_hr_foundation.sql', label: 'Fleet/HR' },
+  { path: 'supabase/migrations/20261015194000_finance_erp_foundation.sql', label: 'Finance ERP' },
+];
+for (const migration of sqlMigrationChecks) {
+  const sqlPath = join(ROOT, migration.path);
+  if (!existsSync(sqlPath)) {
+    fail('missing ' + migration.label + ' migration');
+    continue;
+  }
+  const sql = readFileSync(sqlPath, 'utf8');
+  const hasBareFunctionDelimiter = /^\s*as \$(?=\s*declare)/m.test(sql);
+  const hasBareFunctionEnd = /^\$;\s*$/m.test(sql);
+  const functionCount = (sql.match(/create or replace function/gi) || []).length;
+  const delimiterStarts = (sql.match(/\bas \$\$\s*\n/g) || []).length;
+  const delimiterEnds = (sql.match(/^\$\$;\s*$/gm) || []).length;
+  if (hasBareFunctionDelimiter || hasBareFunctionEnd) {
+    fail('malformed bare dollar delimiter in ' + migration.label + ' migration');
+  }
+  if (functionCount === 0 || delimiterStarts !== functionCount || delimiterEnds !== functionCount) {
+    fail(migration.label + ' PL/pgSQL delimiter count mismatch: functions=' + functionCount +
+      ', starts=' + delimiterStarts + ', ends=' + delimiterEnds);
   } else if (!hasBareFunctionDelimiter && !hasBareFunctionEnd) {
-    ok(functionCount + ' Finance ERP function bodies have balanced dollar delimiters');
+    ok(migration.label + ': ' + functionCount + ' PL/pgSQL function bodies have balanced dollar delimiters');
   }
 }
-
 console.log('');
 if (failures > 0) {
   console.error(`${failures} check(s) failed.`);
