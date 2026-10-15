@@ -44,6 +44,7 @@
         <button type="button" class="nav-item" data-view="vehicle_events"><span class="nav-icon">⌁</span><span><b>Vehicle Event Log</b><small>ڕووداو و route history</small></span></button>
         <button type="button" class="nav-item" data-view="attendance"><span class="nav-icon">◷</span><span><b>Attendance</b><small>ئامادەبوون</small></span></button>
         <button type="button" class="nav-item" data-view="leave"><span class="nav-icon">▤</span><span><b>Leave Management</b><small>داواکاری مۆڵەت</small></span></button>
+        <button type="button" class="nav-item finance-nav" data-view="finance"><span class="nav-icon">د.ع</span><span><b>Finance ERP</b><small>General Ledger · P&L · Cashflow</small></span></button>
         <button type="button" class="nav-item finance-nav" data-view="payroll"><span class="nav-icon">د.ع</span><span><b>Payroll</b><small>مووچە و خولی مووچە</small></span></button>
       </nav>
       <div class="sidebar-links">
@@ -84,7 +85,8 @@
           <button class="module-card" data-view="fuel"><span class="module-icon">⛽</span><b>Fuel Tracking</b><p>لیتری سووتەمەنی، نرخ، کیلۆمەتر و تێچووی هاتوچۆ.</p><span class="module-link">کردنەوە <i>←</i></span></button>
           <button class="module-card" data-view="attendance"><span class="module-icon">◷</span><b>HR · Attendance</b><p>تۆمارکردنی هاتن و چوون بە کاتی سێرڤەر و ڕۆژی هەولێر.</p><span class="module-link">کردنەوە <i>←</i></span></button>
           <button class="module-card" data-view="leave"><span class="module-icon">▤</span><b>HR · Leave</b><p>داواکاری مۆڵەت و بڕیاری بەڕێوەبەر.</p><span class="module-link">کردنەوە <i>←</i></span></button>
-          <button class="module-card finance-module" data-view="payroll"><span class="module-icon">د.ع</span><b>Finance · Payroll</b><p>خولی مووچە، مووچەی بنەڕەتی، زیادە و داشکاندن.</p><span class="module-link">کردنەوە <i>←</i></span></button>
+          <button class="module-card finance-module" data-view="finance"><span class="module-icon">د.ع</span><b>Finance ERP</b><p>General Ledger، ژوورنالی debit/credit، داهات، خەرجی، P&amp;L و cash flow لەسەر ژوورنالە پۆستکراوەکان.</p><span class="module-link">کردنەوە <i>←</i></span></button>
+          <button class="module-card finance-module" data-view="payroll"><span class="module-icon">▤</span><b>HR · Payroll</b><p>خولی مووچە، مووچەی بنەڕەتی، زیادە و داشکاندن.</p><span class="module-link">کردنەوە <i>←</i></span></button>
         </div>
         <div class="section-head"><div><span class="eyebrow">CORE LOGISTICS</span><h2>سیستەمە پەیوەستەکان</h2><p>ماژوولە بەردەستەکانی پلاتفۆرمەکە لە هەمان بنچینەی ڕەسەنەوە.</p></div></div>
         <div class="connected-grid">
@@ -120,6 +122,38 @@
       <section class="view" data-panel="leave">
         <div class="view-tools"><div><h2>Leave Requests</h2><p>کارمەند داواکاری دروست دەکات؛ بڕیار بۆ بەڕێوەبەر پارێزراوە.</p></div><button class="btn primary" data-action="request-leave">＋ داواکاری مۆڵەت</button></div>
         <div class="table-panel"><div class="table-scroll"><table><thead><tr><th>کارمەند</th><th>جۆر</th><th>لە</th><th>تا</th><th>هۆکار</th><th>دۆخ</th><th></th></tr></thead><tbody id="leaveRows"><tr><td colspan="7" class="empty">داتا بار دەکرێت…</td></tr></tbody></table></div></div>
+      </section>
+      <section class="view" data-panel="finance">
+        <div class="view-tools">
+          <div><h2>Finance ERP · General Ledger</h2><p>Double-entry IQD journal، Chart of Accounts، Accounting Periods و ڕاپۆرتی P&amp;L. تەنها journal ـە پۆستکراوەکان لە ڕاپۆرت حساب دەکرێن.</p></div>
+          <div class="tool-actions"><button class="btn secondary" data-action="create-account" id="createAccountBtn">＋ Chart of Accounts</button><button class="btn secondary finance-admin-only" data-action="create-period">＋ Accounting Period</button><button class="btn primary" data-action="create-journal">＋ Journal / Expense</button></div>
+        </div>
+        <div class="kpi-grid finance-kpi-grid">
+          <article class="kpi"><span class="kpi-icon">↗</span><small>Monthly revenue · IQD</small><b id="financeRevenue">—</b><span class="kpi-foot">Posted journal entries</span></article>
+          <article class="kpi"><span class="kpi-icon">↘</span><small>Monthly expenses · IQD</small><b id="financeExpenses">—</b><span class="kpi-foot">Posted journal entries</span></article>
+          <article class="kpi"><span class="kpi-icon">∑</span><small>Net profit / loss · IQD</small><b id="financeProfit">—</b><span class="kpi-foot">Revenue less expenses</span></article>
+          <article class="kpi"><span class="kpi-icon">◉</span><small>Net cash movement · IQD</small><b id="financeCashflow">—</b><span class="kpi-foot">Cash-account debits less credits</span></article>
+        </div>
+        <div class="section-head"><div><span class="eyebrow">PERIOD REPORT</span><h2>Profit &amp; Loss · Cash Flow</h2><p>ماوەی ڕاپۆرت هەڵبژێرە؛ ڕاپۆرت لە ژوورنالی پۆستکراوەکانەوە دروست دەبێت.</p></div></div>
+        <div class="view-tools report-filters">
+          <div class="tool-actions">
+            <label class="form-field"><span>لە بەرواری</span><input id="financeFrom" class="field-control" type="date"></label>
+            <label class="form-field"><span>تا بەرواری</span><input id="financeTo" class="field-control" type="date"></label>
+            <label class="form-field"><span>لق</span><select id="financeBranch" class="field-control"><option value="">هەموو لقە دەستپێگەیشتووەکان</option><option value="china">China</option><option value="dubai">Dubai</option><option value="erbil">Erbil</option></select></label>
+            <button class="btn secondary" id="runFinanceReport">نوێکردنەوەی ڕاپۆرت</button>
+          </div>
+          <span class="scope-tag" id="financeReportScope">IQD · Double entry</span>
+        </div>
+        <div class="connected-grid finance-reports-grid">
+          <div class="table-panel"><div class="table-scroll"><table><thead><tr><th>مانگ</th><th>داهات · IQD</th><th>خەرجی · IQD</th><th>قازانج/زەرەر · IQD</th></tr></thead><tbody id="financeMonthlyRows"><tr><td colspan="4" class="empty">داتا بار دەکرێت…</td></tr></tbody></table></div></div>
+          <div class="table-panel"><div class="table-scroll"><table><thead><tr><th>لق</th><th>داهات</th><th>خەرجی</th><th>Net</th><th>Cash flow</th></tr></thead><tbody id="financeBranchRows"><tr><td colspan="5" class="empty">داتا بار دەکرێت…</td></tr></tbody></table></div></div>
+        </div>
+        <div class="section-head"><div><span class="eyebrow">GENERAL LEDGER</span><h2>ژوورنالی دارایی</h2><p>ژوورنالی draft هێشتا لە P&amp;L حساب ناکرێت؛ هەر journal پێویستە debit و credit یەکسانی هەبێت.</p></div></div>
+        <div class="table-panel"><div class="table-scroll"><table><thead><tr><th>Journal</th><th>بەروار</th><th>لق</th><th>وەسف</th><th>Debit · IQD</th><th>Credit · IQD</th><th>دۆخ</th><th></th></tr></thead><tbody id="financeJournalRows"><tr><td colspan="8" class="empty">داتا بار دەکرێت…</td></tr></tbody></table></div></div>
+        <div class="section-head"><div><span class="eyebrow">ACCOUNT STRUCTURE</span><h2>Chart of Accounts</h2><p>بنچینەی سەرمایە، قەرز، داهات و خەرجی. کۆدی هەر حسابێک یەکتا دەبێت.</p></div></div>
+        <div class="table-panel"><div class="table-scroll"><table><thead><tr><th>کۆد</th><th>Account</th><th>Type</th><th>Cash account</th><th>دۆخ</th></tr></thead><tbody id="financeAccountsRows"><tr><td colspan="5" class="empty">داتا بار دەکرێت…</td></tr></tbody></table></div></div>
+        <div class="section-head"><div><span class="eyebrow">CLOSE CONTROL</span><h2>Accounting Periods</h2><p>پێش داخستنی ماوە، هیچ journal ـێکی draft لە ماوەکەدا نابێت بمێنێتەوە.</p></div></div>
+        <div class="table-panel"><div class="table-scroll"><table><thead><tr><th>Period</th><th>لە</th><th>تا</th><th>دۆخ</th><th>داخستراو لەلایەن</th><th></th></tr></thead><tbody id="financePeriodRows"><tr><td colspan="6" class="empty">داتا بار دەکرێت…</td></tr></tbody></table></div></div>
       </section>
       <section class="view" data-panel="payroll">
         <div class="view-tools"><div><h2>Payroll Control</h2><p>مووچەی سەرپەرشتیار و بەڕێوەبەر بە جیاوازی ڕۆڵ کۆنترۆڵ دەکرێت.</p></div><div class="tool-actions"><button class="btn secondary" data-action="payroll-entry">＋ تۆماری مووچە</button><button class="btn primary" data-action="payroll-period">＋ خولی مووچە</button></div></div>
