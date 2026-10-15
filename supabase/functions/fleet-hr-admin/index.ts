@@ -275,10 +275,13 @@ const vehicleWrite = async (service: ReturnType<typeof serviceClient>, staff: St
   let result
   if (update) {
     const id = requiredText(data.vehicle_id,'vehicle_id',80)
-    const existing = await service.from('fleet_vehicles').select('id,branch').eq('id',id).maybeSingle()
+    const existing = await service.from('fleet_vehicles').select('id,branch,status').eq('id',id).maybeSingle()
     if (existing.error) throw existing.error
     if (!existing.data) throw new Error('Vehicle not found')
     requireBranch(staff,existing.data.branch)
+    const activeJobs = await service.from('delivery_assignments').select('id,status').eq('vehicle_id',id).in('status',['assigned','accepted','picked_up','out_for_delivery']).limit(1).maybeSingle()
+    if (activeJobs.error) throw activeJobs.error
+    if (activeJobs.data && (branchName(existing.data.branch)!==branch || payload.status!=='active')) throw new Error('Cannot change the branch or deactivate a vehicle while it has an active delivery assignment')
     result = await service.from('fleet_vehicles').update(payload).eq('id',id).select('*').single()
   } else {
     payload.created_by = staff.id
@@ -302,7 +305,7 @@ const assignVehicleToDelivery = async (service: ReturnType<typeof serviceClient>
   const vehicleId = await vehicleIdInScope(service,staff,data.vehicle_id)
   const [assignmentResult, vehicleResult] = await Promise.all([
     service.from('delivery_assignments').select('id,shipment_id,assigned_staff_id,status,vehicle_id').eq('id',assignmentId).maybeSingle(),
-    service.from('fleet_vehicles').select('id,branch,vehicle_code,plate_number').eq('id',vehicleId).maybeSingle(),
+    service.from('fleet_vehicles').select('id,branch,vehicle_code,plate_number,status').eq('id',vehicleId).maybeSingle(),
   ])
   if (assignmentResult.error) throw assignmentResult.error
   if (vehicleResult.error) throw vehicleResult.error
@@ -311,12 +314,16 @@ const assignVehicleToDelivery = async (service: ReturnType<typeof serviceClient>
   if (!assignment) throw new Error('Delivery assignment not found')
   if (!vehicle) throw new Error('Vehicle not found')
   if (!['assigned','accepted','picked_up','out_for_delivery'].includes(String(assignment.status))) throw new Error('Only active delivery assignments can be linked to a vehicle')
+  if (vehicle.status !== 'active') throw new Error('Only active vehicles can be assigned to a delivery')
   if (!assignment.assigned_staff_id) throw new Error('Assign an active driver to the delivery before choosing a vehicle')
   const driverResult = await service.from('staff').select('id,full_name,role,branch,is_active').eq('id',assignment.assigned_staff_id).maybeSingle()
   if (driverResult.error) throw driverResult.error
   const driver = driverResult.data as Staff | null
   if (!driver?.is_active || !['driver','delivery'].includes(driver.role)) throw new Error('Delivery assignment is not linked to an active driver')
   if (branchName(driver.branch) !== branchName(vehicle.branch)) throw new Response(JSON.stringify({error:'Vehicle branch must match the assigned driver branch'}),{status:403})
+  const occupied = await service.from('delivery_assignments').select('id,shipment_id').eq('vehicle_id',vehicleId).in('status',['assigned','accepted','picked_up','out_for_delivery']).neq('id',assignmentId).limit(1).maybeSingle()
+  if (occupied.error) throw occupied.error
+  if (occupied.data) throw new Error('This vehicle is already linked to another active delivery')
   const result = await service.from('delivery_assignments').update({vehicle_id:vehicleId,updated_at:new Date().toISOString()})
     .eq('id',assignmentId).in('status',['assigned','accepted','picked_up','out_for_delivery'])
     .select('id,shipment_id,assigned_staff_id,status,vehicle_id').maybeSingle()
