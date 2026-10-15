@@ -71,6 +71,10 @@ jobs:
           grep -q 'assign_vehicle_to_delivery' supabase/functions/fleet-hr-admin/index.ts
           grep -q 'setPayrollPeriodStatus' supabase/functions/fleet-hr-admin/index.ts
           grep -q 'data-panel="vehicle_events"' enterprise-os.html
+          grep -Fq '[functions.finance-erp-admin]' supabase/config.toml
+          grep -q 'gc_finance_create_journal' supabase/migrations/20261015194000_finance_erp_foundation.sql
+          grep -q 'gc_finance_report' supabase/migrations/20261015194000_finance_erp_foundation.sql
+          grep -q 'gc_finance_create_journal' supabase/functions/finance-erp-admin/index.ts
           # Flags an actual hardcoded secret VALUE assigned to a service-role-shaped
           # name (e.g. SUPABASE_SERVICE_ROLE_KEY = "eyJ..." or "sb_secret_...").
           # Deliberately does NOT flag Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
@@ -153,6 +157,10 @@ jobs:
             supabase/migrations/20260816120000_qicard_fib_payment_sessions.sql \
             supabase/migrations/20261008190000_harden_server_only_function_execute.sql \
             release.json enterprise-os.html enterprise-os.css enterprise-os.js \
+            supabase/functions/fleet-hr-admin/index.ts \
+            supabase/functions/finance-erp-admin/index.ts \
+            supabase/migrations/20261015190000_enterprise_fleet_hr_foundation.sql \
+            supabase/migrations/20261015194000_finance_erp_foundation.sql
             supabase/functions/fleet-hr-admin/index.ts \
             supabase/migrations/20261015190000_enterprise_fleet_hr_foundation.sql
           do
