@@ -62,6 +62,8 @@ create table if not exists public.finance_periods (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   check (ends_on >= starts_on),
+  constraint finance_periods_no_overlapping_ranges
+    exclude using gist (daterange(starts_on, ends_on, '[]') with &&),
   check ((status = 'open' and closed_at is null and closed_by is null) or (status = 'closed' and closed_at is not null))
 );
 create index if not exists finance_periods_dates_status_idx
