@@ -160,9 +160,7 @@ jobs:
             supabase/functions/fleet-hr-admin/index.ts \
             supabase/functions/finance-erp-admin/index.ts \
             supabase/migrations/20261015190000_enterprise_fleet_hr_foundation.sql \
-            supabase/migrations/20261015194000_finance_erp_foundation.sql
-            supabase/functions/fleet-hr-admin/index.ts \
-            supabase/migrations/20261015190000_enterprise_fleet_hr_foundation.sql
+            supabase/migrations/20261015194000_finance_erp_foundation.sql \
           do
             test -f "$file"
           done
