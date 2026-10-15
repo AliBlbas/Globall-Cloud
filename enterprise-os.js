@@ -4,7 +4,7 @@
   const SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
   const API_URL = SUPABASE_URL + '/functions/v1/fleet-hr-admin';
   const $ = (id) => document.getElementById(id);
-  const state = { client:null, session:null, me:null, view:'overview', data:{summary:null,vehicles:[],maintenance:[],fuel:[],attendance:[],leave_requests:[],payroll_periods:[],payroll_entries:[],vehicle_events:[],staff:[],assignments:[]}, modalAction:null };
+  const state = { client:null, session:null, me:null, view:'overview', data:{summary:null,vehicles:[],maintenance:[],fuel:[],attendance:[],leave_requests:[],payroll_periods:[],payroll_entries:[],vehicle_events:[],staff:[],assignments:[],accounts:[],periods:[],journals:[],finance_report:null}, modalAction:null };
   const titles = {
     overview:['کورتەی سیستەم','دۆخی ماژوولەکان و کردارە پێویستەکان.'],
     fleet:['Fleet Management','تۆمار و چاودێری ئۆتۆمبێلەکانی branch ـە دەستپێگەیشتووەکان.'],
@@ -13,6 +13,7 @@
     vehicle_events:['Vehicle Event Log','مێژووی ڕووداو، ڕێگا، شوێن و بەستنی ئۆتۆمبێل بە shipment.'],
     attendance:['Attendance','تۆمارکردنی هاتن و چوون بە کاتی سێرڤەر.'],
     leave:['Leave Management','داواکاریی مۆڵەت و بڕیاری پارێزراو.'],
+    finance:['Finance ERP','ژوورنالی دوولایەنە، P&L، cash flow و حسابەکانی دارایی.'],
     payroll:['Payroll Control','مووچە، خولی مووچە و audit trail.']
   };
   const escapeHtml = (v) => String(v ?? '—').replace(/[&<>"']/g, (ch) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -41,11 +42,11 @@
     $('superAdminLink').classList.toggle('hidden',!isAdmin());
     document.querySelectorAll('[data-action="create-vehicle"],[data-action="vehicle-event"],[data-action="create-maintenance"]').forEach(el=>el.classList.toggle('hidden',!canOperate()));
     document.querySelectorAll('[data-action="record-fuel"]').forEach(el=>el.classList.toggle('hidden',!(['admin','super_admin','operations','accountant','finance'].includes(state.me?.role))));
-    document.querySelectorAll('[data-action="payroll-entry"],[data-action="payroll-period"]').forEach(el=>el.classList.toggle('hidden',!canPayrollWrite()));
+    document.querySelectorAll('[data-action="payroll-entry"],[data-action="payroll-period"],[data-action="create-account"],[data-action="create-period"],.finance-admin-only'.replace(',','.finance-admin-only')).forEach(el=>el.classList.toggle('hidden',!canPayrollWrite()));
   };
   const setView = async (name) => {
     if(!titles[name]) return;
-    if(name==='payroll'&&!isFinance()) { toast('دەستڕاگەیشتن بە Payroll تەنها بۆ Finance/Admin ـە.','bad'); return; }
+    if((name==='payroll'||name==='finance')&&!isFinance()) { toast('دەستڕاگەیشتن بە Payroll تەنها بۆ Finance/Admin ـە.','bad'); return; }
     state.view=name;
     document.querySelectorAll('[data-panel]').forEach(e=>e.classList.toggle('active',e.dataset.panel===name));
     document.querySelectorAll('[data-view]').forEach(e=>e.classList.toggle('active',e.dataset.view===name));
@@ -70,11 +71,12 @@
   };
   const loadKind = async(kind) => {
     const result=await api('GET',{kind,limit:100,offset:0});
+    if(kind==='report'||kind==='summary'){state.data.finance_report=result.report||null;return state.data.finance_report;}
     state.data[kind]=result.items||[];
     return state.data[kind];
   };
   const loadViewData = async(name) => {
-    const mapping={fleet:['vehicles',...(canOperate()?['assignments']:[])],maintenance:['vehicles','maintenance'],fuel:['vehicles','fuel'],vehicle_events:['vehicles','vehicle_events'],attendance:['attendance'],leave:['leave_requests',...(isAdmin()?['staff']:[])],payroll:['payroll_periods','payroll_entries','staff']};
+    const mapping={fleet:['vehicles',...(canOperate()?['assignments']:[])],maintenance:['vehicles','maintenance'],fuel:['vehicles','fuel'],vehicle_events:['vehicles','vehicle_events'],attendance:['attendance'],leave:['leave_requests',...(isAdmin()?['staff']:[])],payroll:['payroll_periods','payroll_entries','staff'],finance:['accounts','periods','journals','report']};
     const kinds=mapping[name]||[];
     try { await Promise.all(kinds.map(loadKind)); renderView(name); }
     catch(e) { notice(e.message,'bad'); }
@@ -102,6 +104,8 @@
       $('attendanceRows').innerHTML=rows.attendance.length?rows.attendance.map(v=>{let duration='—';if(v.check_in_at&&v.check_out_at) duration=((new Date(v.check_out_at)-new Date(v.check_in_at))/3600000).toFixed(2)+' h';return '<tr><td>'+escapeHtml(v.work_date)+'</td><td>'+escapeHtml(fmtDate(v.check_in_at,true))+'</td><td>'+escapeHtml(fmtDate(v.check_out_at,true))+'</td><td>'+escapeHtml(duration)+'</td><td>'+escapeHtml(v.check_in_source)+'</td></tr>'}).join(''):tableEmpty(5,'هێشتا تۆماری ئامادەبوون نییە.');
     } else if(name==='leave') {
       $('leaveRows').innerHTML=rows.leave_requests.length?rows.leave_requests.map(v=>'<tr><td>'+escapeHtml((state.data.staff.find(s=>s.id===v.staff_id)?.full_name)||String(v.staff_id).slice(0,8))+'</td><td>'+escapeHtml(v.leave_type)+'</td><td>'+escapeHtml(v.starts_on)+'</td><td>'+escapeHtml(v.ends_on)+'</td><td>'+escapeHtml(v.reason||'—')+'</td><td><span class="status-badge '+statusClass(v.status)+'">'+escapeHtml(v.status)+'</span></td><td>'+(canReviewLeave()&&v.status==='pending'?'<button class="row-action primary" data-action="approve-leave" data-id="'+escapeHtml(v.id)+'">پەسەند</button><button class="row-action" data-action="reject-leave" data-id="'+escapeHtml(v.id)+'">ڕەتکردنەوە</button>':'—')+'</td></tr>').join(''):tableEmpty(7,'داواکاری مۆڵەت نییە.');
+    } else if(name==='finance') {
+      renderFinance();
     } else if(name==='payroll') {
       $('payrollRows').innerHTML=rows.payroll_periods.length?rows.payroll_periods.map(p=>'<tr><td>'+escapeHtml(p.period_start)+'</td><td>'+escapeHtml(p.period_end)+'</td><td><span class="status-badge '+statusClass(p.status)+'">'+escapeHtml(p.status)+'</span></td><td>'+escapeHtml(fmtDate(p.approved_at,true))+'</td><td>'+escapeHtml(fmtDate(p.paid_at,true))+'</td><td>'+(['draft','approved','paid'].includes(p.status)&&canPayrollWrite()?'<button class="row-action primary" data-action="payroll-advance" data-id="'+escapeHtml(p.id)+'" data-status="'+escapeHtml(p.status)+'">'+(p.status==='draft'?'پەسەندکردن':p.status==='approved'?'تۆمارکردنی پارەدان':'داخستن')+'</button>':'—')+'</td></tr>').join(''):tableEmpty(6,'خولی مووچە نییە.');
       $('payrollEntryRows').innerHTML=rows.payroll_entries.length?rows.payroll_entries.map(p=>'<tr><td>'+escapeHtml(String(p.payroll_period_id).slice(0,8))+'</td><td class="mono">'+escapeHtml((state.data.staff.find(s=>s.id===p.staff_id)?.full_name)||String(p.staff_id).slice(0,8))+'</td><td>'+escapeHtml(fmtMoney(p.base_salary,p.currency))+'</td><td>'+escapeHtml(fmtMoney(p.allowances,p.currency))+'</td><td>'+escapeHtml(fmtMoney(p.deductions,p.currency))+'</td><td><b>'+escapeHtml(fmtMoney(p.net_pay,p.currency))+'</b></td><td>'+escapeHtml(p.currency)+'</td></tr>').join(''):tableEmpty(7,'تۆماری مووچە نییە.');
