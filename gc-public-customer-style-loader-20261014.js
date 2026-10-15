@@ -8,7 +8,8 @@
 
   const homeStyles = [
     '/gc-live-mobile-v3.css?v=20261014-4',
-    '/gc-homepage-elite-20261014.css?v=4'
+    '/gc-homepage-elite-20261014.css?v=4',
+    '/gc-mobile-layout-repair-20261015.css?v=20261015-1'
   ];
   const customerStyles = [
     '/gc-customer-workspace-elite-20261014.css?v=4'
