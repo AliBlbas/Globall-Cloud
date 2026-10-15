@@ -246,6 +246,7 @@ drop trigger if exists hr_payroll_entry_period_guard on public.hr_payroll_entrie
 create trigger hr_payroll_entry_period_guard
 before insert or update or delete on public.hr_payroll_entries
 for each row execute function public.gc_hr_guard_payroll_entry();
+revoke all on function public.gc_hr_guard_payroll_entry() from public, anon, authenticated;
 
 -- Shared updated_at trigger with a fixed search_path.
 create or replace function public.gc_enterprise_touch_updated_at()
