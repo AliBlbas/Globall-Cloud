@@ -163,10 +163,7 @@ const createJournal=async(service:ReturnType<typeof serviceClient>,staff:Staff,d
     p_source_type:sourceType,p_source_id:text(data.source_id,160),p_post:data.post!==false
   })
   if(result.error)throw result.error
-  const entry=result.data?.entry
-  await audit(service,staff,data.post===false?'finance_journal_draft_saved':'finance_journal_posted',String(entry?.id||''),{
-    journal_number:entry?.journal_number,branch,total_debit_iqd:totalDebit,total_credit_iqd:totalCredit
-  })
+  // The database RPC writes the audit row in the same transaction as the journal.
   return {item:result.data}
 }
 const postJournal=async(service:ReturnType<typeof serviceClient>,staff:Staff,data:Json)=>{
