@@ -15,7 +15,7 @@ const cors = (req: Request) => {
   const origin = req.headers.get('origin') || ''
   return {
     'Content-Type': 'application/json; charset=utf-8',
-    'Access-Control-Allow-Origin': ORIGINS.has(origin) ? origin : 'https://globall-cloud.pages.dev',
+    'Access-Control-Allow-Origin': (ORIGINS.has(origin) || /^https:\/\/[a-z0-9-]+\.globall-cloud\.pages\.dev$/.test(origin)) ? origin : 'https://globall-cloud.pages.dev',
     'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info',
     'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
     'Cache-Control': 'no-store',
