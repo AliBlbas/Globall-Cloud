@@ -125,7 +125,7 @@
        field('branch','لق','select',{options:[['erbil','Erbil'],['china','China'],['dubai','Dubai']],value:v.branch})+
        field('make','بەرهەمهێنەر','text',{required:false,value:v.make})+field('model','مۆدێل','text',{required:false,value:v.model})+
        field('model_year','ساڵ','number',{required:false,min:1980,max:2100,step:1,value:v.model_year})+
-       field('fuel_type','جۆری سووتەمەنی','select',{required:false,options:[['diesel','Diesel'],['petrol','Petrol'],['hybrid','Hybrid'],['electric','Electric'],['other','Other']]} )+
+       field('fuel_type','جۆری سووتەمەنی','select',{required:false,options:[['','نادیار / هەڵبژێرە'],['diesel','Diesel'],['petrol','Petrol'],['hybrid','Hybrid'],['electric','Electric'],['other','Other']]} )+
        field('capacity_kg','توانای بار (kg)','number',{required:false,min:0,step:'0.001',value:v.capacity_kg})+
        field('odometer_km','کیلۆمەتر','number',{min:0,step:'0.01',value:v.odometer_km||0})+
        field('status','دۆخ','select',{options:[['active','Active'],['inactive','Inactive'],['maintenance','Maintenance'],['retired','Retired']]})+
