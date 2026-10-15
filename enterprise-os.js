@@ -10,6 +10,7 @@
     fleet:['Fleet Management','تۆمار و چاودێری ئۆتۆمبێلەکانی branch ـە دەستپێگەیشتووەکان.'],
     maintenance:['Maintenance Schedule','سێرڤیس، چاکسازی و تێچووی ئۆتۆمبێل.'],
     fuel:['Fuel Tracking','خەرجی سووتەمەنی و مێژووی بڕ و نرخ.'],
+    vehicle_events:['Vehicle Event Log','مێژووی ڕووداو، ڕێگا، شوێن و بەستنی ئۆتۆمبێل بە shipment.'],
     attendance:['Attendance','تۆمارکردنی هاتن و چوون بە کاتی سێرڤەر.'],
     leave:['Leave Management','داواکاریی مۆڵەت و بڕیاری پارێزراو.'],
     payroll:['Payroll Control','مووچە، خولی مووچە و audit trail.']
@@ -73,7 +74,7 @@
     return state.data[kind];
   };
   const loadViewData = async(name) => {
-    const mapping={fleet:['vehicles',...(canOperate()?['assignments']:[])],maintenance:['vehicles','maintenance'],fuel:['vehicles','fuel'],attendance:['attendance'],leave:['leave_requests',...(isAdmin()?['staff']:[])],payroll:['payroll_periods','payroll_entries','staff']};
+    const mapping={fleet:['vehicles',...(canOperate()?['assignments']:[])],maintenance:['vehicles','maintenance'],fuel:['vehicles','fuel'],vehicle_events:['vehicles','vehicle_events'],attendance:['attendance'],leave:['leave_requests',...(isAdmin()?['staff']:[])],payroll:['payroll_periods','payroll_entries','staff']};
     const kinds=mapping[name]||[];
     try { await Promise.all(kinds.map(loadKind)); renderView(name); }
     catch(e) { notice(e.message,'bad'); }
@@ -92,6 +93,8 @@
       $('maintenanceRows').innerHTML=rows.maintenance.length?rows.maintenance.map(v=>'<tr><td>'+escapeHtml(vehicleLabel(v.vehicle_id))+'</td><td>'+escapeHtml(v.maintenance_type)+'</td><td>'+escapeHtml(v.description)+'</td><td>'+escapeHtml(fmtDate(v.scheduled_at))+'</td><td><span class="status-badge '+statusClass(v.status)+'">'+escapeHtml(v.status)+'</span></td><td>'+escapeHtml(fmtMoney(v.cost_amount,v.cost_currency))+'</td></tr>').join(''):tableEmpty(6,'تۆماری سێرڤیس نییە.');
     } else if(name==='fuel') {
       $('fuelRows').innerHTML=rows.fuel.length?rows.fuel.map(v=>'<tr><td>'+escapeHtml(vehicleLabel(v.vehicle_id))+'</td><td>'+escapeHtml(fmtDate(v.logged_at,true))+'</td><td>'+escapeHtml(v.liters)+'</td><td>'+escapeHtml(v.amount)+'</td><td>'+escapeHtml(v.currency)+'</td><td>'+escapeHtml(v.odometer_km??'—')+'</td><td>'+escapeHtml(v.station_name||'—')+'</td></tr>').join(''):tableEmpty(7,'تۆماری سووتەمەنی نییە.');
+    } else if(name==='vehicle_events') {
+      $('vehicleEventRows').innerHTML=rows.vehicle_events.length?rows.vehicle_events.map(v=>'<tr><td>'+escapeHtml(vehicleLabel(v.vehicle_id))+'</td><td><span class="status-badge '+statusClass(v.event_type)+'">'+escapeHtml(v.event_type)+'</span></td><td>'+escapeHtml(fmtDate(v.event_at,true))+'</td><td class="mono">'+escapeHtml(v.shipment_id||'—')+'</td><td class="mono">'+escapeHtml(String(v.delivery_assignment_id||'—').slice(0,12))+'</td><td>'+escapeHtml(v.latitude==null?'—':String(v.latitude)+', '+String(v.longitude))+'</td><td>'+escapeHtml(v.odometer_km==null?'—':String(v.odometer_km)+' km')+'</td><td>'+escapeHtml(v.note||'—')+'</td></tr>').join(''):tableEmpty(8,'هێشتا ڕووداوی ئۆتۆمبێل تۆمار نەکراوە.');
     } else if(name==='attendance') {
       const open=rows.attendance.find(x=>!x.check_out_at);
       $('attendanceState').textContent=open?'هاتنت تۆمار کراوە لە '+fmtDate(open.check_in_at,true)+'. دەتوانیت چوون تۆمار بکەیت.':'خولی کراوەی هاتن نییە. دەتوانیت هاتن تۆمار بکەیت.';
