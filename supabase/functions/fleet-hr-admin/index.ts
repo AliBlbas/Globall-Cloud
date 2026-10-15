@@ -154,6 +154,12 @@ const list = async (service: ReturnType<typeof serviceClient>, staff: Staff, url
       },
     }
   }
+  if (kind === 'staff') {
+    requireRole(staff, ADMIN_ROLES)
+    const result = await inRange(service.from('staff').select('id,full_name,email,role,branch,is_active').order('full_name',{ascending:true}),offset,limit)
+    if (result.error) throw result.error
+    return {kind,items:result.data || [],offset,limit}
+  }
   if (kind === 'vehicles') {
     requireRole(staff,[...FLEET_ROLES,...FINANCE_ROLES])
     const ids = await allowedVehicleIds(service,staff)
