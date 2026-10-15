@@ -105,7 +105,7 @@ const createAccount=async(service:ReturnType<typeof serviceClient>,staff:Staff,d
   if(!/^\d{3,8}$/.test(code))throw new Error('Account code must contain 3–8 digits')
   const type=requiredText(data.account_type,'account_type',20)
   if(!['asset','liability','equity','revenue','expense'].includes(type))throw new Error('Unsupported account type')
-  const cash=Boolean(data.is_cash_account)
+  const cash=data.is_cash_account===true||data.is_cash_account==='true'||data.is_cash_account===1||data.is_cash_account==='1'
   if(cash&&type!=='asset')throw new Error('Cash accounts must use the asset category')
   const parent=text(data.parent_account_id,80)
   if(parent){
