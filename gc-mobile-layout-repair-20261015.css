@@ -1,0 +1,233 @@
+/* Globall Cloud mobile home repair · 2026-10-15
+   Loaded after legacy bundles so the public homepage has one responsive layout.
+   No routing, auth, pricing, payment, or shipment logic is changed. */
+
+#gcApp{
+  min-width:320px;
+  color:#eff8fc;
+  background:
+    radial-gradient(900px 560px at 88% -10%,rgba(55,181,202,.12),transparent 64%),
+    linear-gradient(180deg,#071827 0%,#051321 58%,#071827 100%) !important;
+}
+#gcApp #gcMain{background:transparent!important}
+#gcApp .gc-mobile-dock-v3{z-index:9900!important}
+
+/* Keep the WhatsApp CTA above the dock, compact, and inside the viewport.
+   The button is mounted directly under body, not inside #gcApp. */
+@media(max-width:760px){
+  body:has(#gcApp){
+    min-width:320px;
+    overflow-x:clip;
+    padding-bottom:calc(116px + env(safe-area-inset-bottom,0px))!important;
+    background:#061423!important;
+    color:#eff8fc!important;
+  }
+  #gcApp{
+    background:
+      radial-gradient(900px 560px at 88% -10%,rgba(55,181,202,.12),transparent 64%),
+      linear-gradient(180deg,#071827 0%,#051321 58%,#071827 100%) !important;
+  }
+  #gcApp .gc-nav-inner{width:calc(100% - 20px)!important;min-height:60px!important;gap:9px!important}
+  #gcApp .gc-nav-actions{min-width:0;gap:6px!important}
+  #gcApp .gc-brand{min-width:0;gap:8px!important}
+  #gcApp .gc-brand img{width:36px!important;height:36px!important;flex:0 0 36px}
+  #gcApp .gc-brand b{font-size:13px!important;white-space:nowrap}
+  #gcApp .gc-brand small{font-size:7px!important;letter-spacing:.09em!important}
+  #gcApp .gc-nav-actions>.gc-btn-primary{min-height:38px!important;padding:7px 9px!important;font-size:10px!important}
+  #gcApp .gc-nav-actions>.gc-menu{width:40px!important;height:40px!important;flex:0 0 40px}
+  /* The old global toggle was fixed over the header and showed as a clipped cyan sliver. */
+  #gcApp .gc-nav-actions>.gc-global-theme-toggle,
+  #gcApp .gc-global-theme-toggle{display:none!important}
+
+  /* Restore the semantic source order: homepage hero first, then route studio,
+     customer quick actions, intelligence, services and contact. */
+  #gcApp #gcMain{
+    display:block!important;
+    width:100%!important;
+    margin:0!important;
+    padding:0 0 12px!important;
+    background:transparent!important;
+  }
+  #gcApp #gcMain>.gc-hero-rebuild{order:0!important;margin:0!important;width:100%!important}
+  #gcApp #gcMain>.gc-transport-studio,
+  #gcApp #gcMain>.gc-app-dashboard-preview,
+  #gcApp #gcMain>.gc-intelligence,
+  #gcApp #gcMain>.gc-section,
+  #gcApp #gcMain>.gc-rate-section,
+  #gcApp #gcMain>.gc-container{
+    order:0!important;
+    margin-inline:auto!important;
+  }
+  #gcApp .gc-hero-rebuild{min-height:0!important;padding:25px 0 22px!important}
+  #gcApp .gc-hero-grid{width:calc(100% - 24px)!important;gap:16px!important}
+  #gcApp .gc-hero-copy{min-width:0!important;padding:0!important}
+  #gcApp .gc-hero-copy h1{max-width:17ch!important;font-size:clamp(31px,8.4vw,42px)!important;line-height:1.24!important;overflow-wrap:normal!important}
+  #gcApp .gc-hero-copy>p{font-size:12px!important;line-height:1.9!important}
+  #gcApp .gc-hero-visual{margin:0!important;min-width:0!important}
+  #gcApp .gc-trust{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+  #gcApp .gc-trust-card{min-width:0!important;min-height:76px!important;padding:11px!important}
+  #gcApp .gc-map-shell{min-height:0!important}
+  #gcApp .route-map{min-height:205px!important}
+
+  /* Consistent vertical rhythm replaces stacked legacy margins and the white gap. */
+  #gcApp .gc-transport-studio,
+  #gcApp .gc-app-dashboard-preview,
+  #gcApp .gc-intelligence,
+  #gcApp .gc-section,
+  #gcApp .gc-rate-section{
+    width:calc(100% - 24px)!important;
+    margin:18px auto 0!important;
+  }
+  #gcApp .gc-app-dashboard-preview{
+    padding:16px!important;
+    border-radius:21px!important;
+    overflow:hidden!important;
+  }
+  #gcApp .gc-app-greeting{display:block!important;position:relative!important;margin:0 0 14px!important;padding:0!important}
+  #gcApp .gc-app-greeting:before,
+  #gcApp .gc-app-greeting:after{content:none!important;display:none!important}
+  #gcApp .gc-app-greeting h2{max-width:19ch!important;font-size:21px!important;line-height:1.4!important;letter-spacing:-.025em!important;margin:8px 0 6px!important}
+  #gcApp .gc-app-greeting p{font-size:11px!important;line-height:1.8!important}
+  #gcApp .gc-app-live-badge{display:inline-flex!important;margin-top:9px!important;padding:6px 9px!important;font-size:8px!important}
+  #gcApp .gc-app-quick-grid{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    align-items:stretch!important;
+    gap:8px!important;
+    margin-top:14px!important;
+  }
+  #gcApp .gc-app-quick-grid>a{
+    position:relative!important;
+    display:grid!important;
+    grid-template-columns:34px minmax(0,1fr)!important;
+    align-content:center!important;
+    align-items:center!important;
+    gap:3px 9px!important;
+    min-width:0!important;
+    min-height:82px!important;
+    padding:11px!important;
+    border:1px solid rgba(143,198,218,.16)!important;
+    border-radius:15px!important;
+    overflow:hidden!important;
+    background:linear-gradient(145deg,rgba(17,47,70,.82),rgba(7,24,40,.94))!important;
+    box-shadow:0 8px 20px rgba(0,0,0,.10)!important;
+    text-decoration:none!important;
+    transform:none!important;
+  }
+  #gcApp .gc-app-quick-grid>a:before,
+  #gcApp .gc-app-quick-grid>a:after{content:none!important;display:none!important}
+  #gcApp .gc-app-action-icon{
+    grid-row:span 2!important;
+    width:34px!important;height:34px!important;
+    display:grid!important;place-items:center!important;
+    border:1px solid rgba(82,215,229,.22)!important;
+    border-radius:11px!important;
+    background:rgba(82,215,229,.09)!important;
+    color:#76e5ec!important;
+    box-shadow:none!important;
+  }
+  #gcApp .gc-app-action-icon svg{width:19px!important;height:19px!important}
+  #gcApp .gc-app-quick-grid b{min-width:0!important;font-size:10px!important;line-height:1.5!important;color:#edf9fc!important;overflow-wrap:anywhere}
+  #gcApp .gc-app-quick-grid small{min-width:0!important;font-size:9px!important;line-height:1.45!important;color:#92adbe!important;overflow-wrap:anywhere}
+  /* Three actions remain visually balanced: the third action spans the final row. */
+  #gcApp .gc-app-quick-grid>a:last-child{grid-column:1/-1!important;min-height:70px!important}
+  #gcApp .gc-app-quick-grid>a:last-child .gc-app-action-icon{grid-row:span 2!important}
+  #gcApp .gc-intelligence{padding:16px!important;border-radius:20px!important}
+  #gcApp .gc-intelligence-head{display:block!important}
+  #gcApp .gc-intelligence-head h2{font-size:23px!important;line-height:1.4!important}
+  #gcApp .gc-intelligence-head p{font-size:11px!important;line-height:1.9!important}
+  #gcApp .gc-intelligence-online{justify-content:flex-start!important;margin-top:10px!important}
+  #gcApp .gc-intelligence-grid{grid-template-columns:minmax(0,1fr)!important;gap:9px!important}
+  #gcApp .gc-intelligence-metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  #gcApp .gc-intelligence-metric{min-width:0!important;min-height:90px!important;padding:11px!important}
+  #gcApp .gc-footer{margin-top:22px!important;padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))!important}
+  #gcApp .gc-footer-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important}
+  #gcApp .gc-footer-bottom{flex-wrap:wrap!important;gap:8px!important;font-size:9px!important}
+
+  /* The dock stays readable and the WhatsApp affordance no longer covers a whole card. */
+  body:has(#gcApp){padding-bottom:calc(126px + env(safe-area-inset-bottom,0px))!important}
+  .gc-mobile-dock-v3{
+    position:fixed!important;display:grid!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;
+    inset-inline:8px!important;bottom:calc(7px + env(safe-area-inset-bottom,0px))!important;
+    z-index:9900!important;width:auto!important;max-width:none!important;margin:0!important;transform:none!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;align-items:stretch!important;
+    gap:4px!important;height:70px!important;padding:5px!important;
+    border:1px solid rgba(143,198,218,.22)!important;border-radius:19px!important;
+    background:rgba(4,17,29,.97)!important;box-shadow:0 16px 46px rgba(0,0,0,.38)!important;
+    backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important;
+  }
+  .gc-mobile-dock-v3 a{
+    display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;
+    min-width:0!important;min-height:58px!important;padding:4px 2px!important;border:1px solid transparent!important;border-radius:13px!important;
+    color:#91adbf!important;text-decoration:none!important;font:800 8.5px/1.2 Vazirmatn,system-ui,sans-serif!important;
+  }
+  .gc-mobile-dock-v3 a svg{display:block!important;width:20px!important;height:20px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+  .gc-mobile-dock-v3 a span{display:block!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+  .gc-mobile-dock-v3 a.active{color:#68e0e9!important;background:rgba(82,215,229,.10)!important;border-color:rgba(82,215,229,.17)!important}
+  .gc-mobile-dock-v3 a.primary{background:linear-gradient(135deg,#73e4ec,#30c4d7)!important;color:#05242c!important;transform:translateY(-3px)!important;box-shadow:0 9px 21px rgba(48,196,215,.18)!important}
+  #gcWhatsAppFloat.gc-whatsapp-float{
+    position:fixed!important;inset-inline-start:12px!important;inset-inline-end:auto!important;
+    bottom:calc(87px + env(safe-area-inset-bottom,0px))!important;
+    z-index:7000!important;display:flex!important;align-items:center!important;justify-content:center!important;
+    width:46px!important;min-width:46px!important;height:46px!important;padding:0!important;gap:0!important;
+    border:1px solid rgba(212,175,55,.6)!important;border-radius:50%!important;
+    background:linear-gradient(135deg,#f3d27a,#d4af37)!important;color:#101a2d!important;
+    font-size:0!important;box-shadow:0 10px 26px rgba(0,0,0,.30)!important;
+  }
+  #gcWhatsAppFloat.gc-whatsapp-float span{display:none!important}
+  #gcWhatsAppFloat.gc-whatsapp-float svg{display:block!important;width:24px!important;height:24px!important;fill:currentColor!important}
+}
+
+/* Dark-mode surfaces: eliminate unintentional white strips between cards/sections. */
+html:not([data-gc-theme="light"]) body:has(#gcApp){background:#061423!important;color:#eff8fc!important}
+html:not([data-gc-theme="light"]) #gcApp{background:linear-gradient(180deg,#071827 0%,#051321 58%,#071827 100%)!important;color:#eff8fc!important}
+html:not([data-gc-theme="light"]) #gcApp #gcMain{background:transparent!important}
+
+/* Light mode is also coherent: do not let the premium dark overrides fight the shared theme. */
+html[data-gc-theme="light"] body:has(#gcApp){
+  background:linear-gradient(180deg,#f7fbfd,#edf5f8)!important;color:#10253b!important
+}
+html[data-gc-theme="light"] #gcApp{
+  background:linear-gradient(180deg,#f7fbfd 0%,#edf5f8 58%,#f7fbfd 100%)!important;color:#10253b!important
+}
+html[data-gc-theme="light"] #gcApp #gcMain{background:transparent!important}
+html[data-gc-theme="light"] #gcApp .gc-announcement{background:#edf6f8!important;color:#426176!important;border-color:#d6e7ec!important}
+html[data-gc-theme="light"] #gcApp .gc-nav{background:rgba(255,255,255,.96)!important;border-color:#d5e6ec!important;box-shadow:0 12px 28px rgba(31,75,101,.10)!important}
+html[data-gc-theme="light"] #gcApp .gc-brand b,
+html[data-gc-theme="light"] #gcApp .gc-nav-actions .gc-btn,
+html[data-gc-theme="light"] #gcApp .gc-hero-copy h1,
+html[data-gc-theme="light"] #gcApp .gc-studio-head h2,
+html[data-gc-theme="light"] #gcApp .gc-app-greeting h2,
+html[data-gc-theme="light"] #gcApp .gc-intelligence-head h2{color:#102b43!important}
+html[data-gc-theme="light"] #gcApp .gc-brand small,
+html[data-gc-theme="light"] #gcApp .gc-hero-copy>p,
+html[data-gc-theme="light"] #gcApp .gc-studio-head p,
+html[data-gc-theme="light"] #gcApp .gc-app-greeting p,
+html[data-gc-theme="light"] #gcApp .gc-intelligence-head p{color:#617a8d!important}
+html[data-gc-theme="light"] #gcApp .gc-hero-rebuild{background:linear-gradient(145deg,#f7fbfd,#eaf5f8)!important;border-color:#d5e7ed!important}
+html[data-gc-theme="light"] #gcApp .gc-hero-rebuild:after{opacity:.08!important}
+html[data-gc-theme="light"] #gcApp .gc-actions .gc-btn-ghost{background:#fff!important;border-color:#d3e3e9!important;color:#0d6073!important}
+html[data-gc-theme="light"] #gcApp .gc-actions .gc-btn-soft,
+html[data-gc-theme="light"] #gcApp .gc-nav-actions .gc-btn-primary{background:linear-gradient(135deg,#0caec2,#078ba1)!important;color:#fff!important}
+html[data-gc-theme="light"] #gcApp .gc-app-dashboard-preview,
+html[data-gc-theme="light"] #gcApp .gc-transport-studio,
+html[data-gc-theme="light"] #gcApp .gc-intelligence,
+html[data-gc-theme="light"] #gcApp .gc-rate-section{
+  background:linear-gradient(145deg,#fff,#f1f9fb)!important;border-color:#d5e7ed!important;
+  box-shadow:0 18px 46px rgba(25,91,126,.09)!important;color:#102b43!important
+}
+html[data-gc-theme="light"] #gcApp .gc-app-quick-grid>a{background:#fff!important;border-color:#d7e7ec!important;box-shadow:0 8px 22px rgba(17,77,111,.06)!important;color:#12334b!important}
+html[data-gc-theme="light"] #gcApp .gc-app-quick-grid b{color:#12334b!important}
+html[data-gc-theme="light"] #gcApp .gc-app-quick-grid small{color:#698295!important}
+html[data-gc-theme="light"] #gcApp .gc-app-action-icon{background:#e8f7fa!important;border-color:#cbe7ed!important;color:#087c99!important}
+html[data-gc-theme="light"] #gcApp .gc-studio-tab{background:#fff!important;border-color:#d5e7ed!important;color:#466276!important}
+html[data-gc-theme="light"] #gcApp .gc-studio-tab.active{background:#e8f7f9!important;border-color:#93dce4!important;color:#087f97!important}
+html[data-gc-theme="light"] #gcApp .gc-studio-content h3{color:#102b43!important}
+html[data-gc-theme="light"] #gcApp .gc-studio-content p{color:#617a8d!important}
+html[data-gc-theme="light"] #gcApp .gc-intelligence-metric{background:linear-gradient(145deg,#fff,#f2fafb)!important;border-color:#cfe3e8!important}
+html[data-gc-theme="light"] #gcApp .gc-intelligence-metric strong{color:#11354a!important}
+html[data-gc-theme="light"] #gcApp .gc-intelligence-metric span,
+html[data-gc-theme="light"] #gcApp .gc-intelligence-metric small{color:#668393!important}
+html[data-gc-theme="light"] #gcApp .gc-footer{background:#102b43!important;color:#eaf8fb!important;border-color:#d5e6ec!important}
+html[data-gc-theme="light"] #gcApp .gc-footer a,
+html[data-gc-theme="light"] #gcApp .gc-footer p{color:#b5d0da!important}
