@@ -191,6 +191,13 @@ begin
   if v_line_count < 2 or v_debit <= 0 or round(v_debit,2) <> round(v_credit,2) then
     raise exception 'Journal must contain at least two lines and equal debit/credit totals' using errcode='23514';
   end if;
+  if exists (
+    select 1 from public.finance_journal_lines l
+    join public.finance_accounts a on a.id = l.account_id
+    where l.journal_entry_id = new.id and a.is_active = false
+  ) then
+    raise exception 'Journal contains an inactive account' using errcode='23514';
+  end if;
   return new;
 end;
 $$;
@@ -208,7 +215,7 @@ begin
     raise exception 'Journal lines cannot be moved between entries' using errcode='23514';
   end if;
   v_entry_id := case when tg_op='DELETE' then old.journal_entry_id else new.journal_entry_id end;
-  select e.status into v_status from public.finance_journal_entries e where e.id=v_entry_id;
+  select e.status into v_status from public.finance_journal_entries e where e.id=v_entry_id for update;
   if v_status is distinct from 'draft' then
     raise exception 'Lines of a posted journal are immutable' using errcode='23514';
   end if;
