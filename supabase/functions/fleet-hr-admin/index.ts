@@ -122,16 +122,17 @@ const list = async (service: ReturnType<typeof serviceClient>, staff: Staff, url
   const kind = url.searchParams.get('kind') || 'summary'
   const { limit, offset } = paged(url)
   if (kind === 'summary') {
-    requireRole(staff, FLEET_ROLES)
+    requireRole(staff, [...FLEET_ROLES,...FINANCE_ROLES])
     const vehicleIds = await allowedVehicleIds(service, staff)
     const empty = { count: 0 }
+    const workDate = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Baghdad',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())
     const [vehicleCount, maintenanceCount, fuelMonth, attendanceCount, leaveCount] = await Promise.all([
       vehicleIds.length ? service.from('fleet_vehicles').select('id',{count:'exact',head:true}).in('id',vehicleIds) : Promise.resolve({count:0,error:null}),
       vehicleIds.length ? service.from('fleet_maintenance_records').select('id',{count:'exact',head:true}).in('vehicle_id',vehicleIds).in('status',['planned','in_progress']) : Promise.resolve({count:0,error:null}),
       vehicleIds.length ? service.from('fleet_fuel_logs').select('amount,currency,logged_at').in('vehicle_id',vehicleIds).gte('logged_at',new Date(Date.now()-30*86400000).toISOString()).limit(500) : Promise.resolve({data:[],error:null}),
       ADMIN_ROLES.includes(staff.role)
-        ? service.from('hr_attendance_records').select('id',{count:'exact',head:true}).gte('work_date',(new Date().toISOString().slice(0,10)))
-        : service.from('hr_attendance_records').select('id',{count:'exact',head:true}).eq('staff_id',staff.id).gte('work_date',(new Date().toISOString().slice(0,10))),
+        ? service.from('hr_attendance_records').select('id',{count:'exact',head:true}).gte('work_date',workDate)
+        : service.from('hr_attendance_records').select('id',{count:'exact',head:true}).eq('staff_id',staff.id).gte('work_date',workDate),
       ADMIN_ROLES.includes(staff.role)
         ? service.from('hr_leave_requests').select('id',{count:'exact',head:true}).eq('status','pending')
         : service.from('hr_leave_requests').select('id',{count:'exact',head:true}).eq('staff_id',staff.id).eq('status','pending'),
@@ -154,7 +155,7 @@ const list = async (service: ReturnType<typeof serviceClient>, staff: Staff, url
     }
   }
   if (kind === 'vehicles') {
-    requireRole(staff,FLEET_ROLES)
+    requireRole(staff,[...FLEET_ROLES,...FINANCE_ROLES])
     const ids = await allowedVehicleIds(service,staff)
     if (!ids.length) return {kind,items:[],offset,limit}
     const result = await inRange(service.from('fleet_vehicles').select('*').in('id',ids).order('created_at',{ascending:false}),offset,limit)
@@ -233,7 +234,7 @@ const vehicleWrite = async (service: ReturnType<typeof serviceClient>, staff: St
   if (!['car','van','truck'].includes(String(payload.vehicle_type))) throw new Error('Unsupported vehicle_type')
   if (payload.fuel_type && !['petrol','diesel','hybrid','electric','other'].includes(String(payload.fuel_type))) throw new Error('Unsupported fuel_type')
   if (!['active','inactive','maintenance','retired'].includes(String(payload.status))) throw new Error('Unsupported vehicle status')
-  if (payload.model_year && (Number(payload.model_year)>2100)) throw new Error('model_year is out of range')
+  if (payload.model_year && (!Number.isInteger(Number(payload.model_year)) || Number(payload.model_year)>2100)) throw new Error('model_year is out of range')
   let result
   if (update) {
     const id = requiredText(data.vehicle_id,'vehicle_id',80)
@@ -331,12 +332,12 @@ const vehicleEventWrite = async (service: ReturnType<typeof serviceClient>, staf
     if (eventType !== 'location_ping' || !assignmentId) throw new Response(JSON.stringify({error:'Drivers may only submit GPS pings for an assigned delivery'}),{status:403})
     const assignment = await service.from('delivery_assignments').select('id,vehicle_id,shipment_id,assigned_staff_id,status').eq('id',assignmentId).eq('assigned_staff_id',staff.id).maybeSingle()
     if (assignment.error) throw assignment.error
-    if (!assignment.data || assignment.data.vehicle_id !== vehicleId) throw new Response(JSON.stringify({error:'Vehicle is not assigned to this driver'}),{status:403})
+    if (!assignment.data || assignment.data.vehicle_id !== vehicleId || ['delivered','completed','cancelled','returned'].includes(String(assignment.data.status).toLowerCase())) throw new Response(JSON.stringify({error:'Vehicle is not assigned to an active delivery for this driver'}),{status:403})
     shipmentId = assignment.data.shipment_id
   } else requireRole(staff,OPS_ROLES)
   const lat = numberValue(data.latitude,'latitude',-90,true)
   const lng = numberValue(data.longitude,'longitude',-180,true)
-  if ((lat === null) !== (lng === null) || (lat !== null && lat > 90) || (lng !== null && lng > 180)) throw new Error('Valid latitude/longitude pair is required')
+  if ((lat === null) !== (lng === null) || (lat !== null && (lat < -90 || lat > 90)) || (lng !== null && (lng < -180 || lng > 180))) throw new Error('Valid latitude/longitude pair is required')
   if (driverSelf && (lat === null || lng === null)) throw new Error('GPS coordinates are required for driver pings')
   const result=await service.from('fleet_vehicle_events').insert({vehicle_id:vehicleId,event_type:eventType,event_at:new Date().toISOString(),driver_staff_id:driverSelf?staff.id:(text(data.driver_staff_id,80)),delivery_assignment_id:assignmentId,shipment_id:shipmentId,latitude:lat,longitude:lng,odometer_km:numberValue(data.odometer_km,'odometer_km',0,true),note:text(data.note,1000),metadata:{},created_by:staff.id}).select('*').single()
   if(result.error) throw result.error
@@ -422,6 +423,6 @@ Deno.serve(async (req: Request) => {
     const message=error instanceof Error?error.message:'Unexpected server error'
     console.error('fleet-hr-admin error',message)
     const forbidden = /not authorized|branch access denied/i.test(message)
-    return json(req,{error:message},{status:forbidden?403:400} as unknown as number)
+    return json(req,{error:message},forbidden?403:400)
   }
 })
