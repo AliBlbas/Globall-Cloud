@@ -160,6 +160,37 @@ const list = async (service: ReturnType<typeof serviceClient>, staff: Staff, url
     if (result.error) throw result.error
     return {kind,items:result.data || [],offset,limit}
   }
+  if (kind === 'drivers') {
+    requireRole(staff, OPS_ROLES)
+    const allowedBranches = branchesFor(staff)
+    const result = await service.from('staff').select('id,full_name,email,role,branch,is_active')
+      .in('role',['driver','delivery']).eq('is_active',true).order('full_name',{ascending:true}).limit(300)
+    if (result.error) throw result.error
+    const items = (result.data || []).filter((driver: Staff) => allowedBranches.includes('all') || allowedBranches.includes(branchName(driver.branch)))
+    return {kind,items,offset,limit}
+  }
+  if (kind === 'assignments') {
+    requireRole(staff, OPS_ROLES)
+    const allowedBranches = branchesFor(staff)
+    const driverResult = await service.from('staff').select('id,full_name,role,branch,is_active')
+      .in('role',['driver','delivery']).eq('is_active',true).limit(500)
+    if (driverResult.error) throw driverResult.error
+    const drivers = (driverResult.data || []).filter((driver: Staff) => allowedBranches.includes('all') || allowedBranches.includes(branchName(driver.branch)))
+    const driverIds = drivers.map((driver: Staff) => driver.id)
+    if (!driverIds.length) return {kind,items:[],offset,limit}
+    const result = await inRange(service.from('delivery_assignments')
+      .select('id,shipment_id,assigned_staff_id,status,vehicle_id,pickup_at,delivered_at,note,created_at')
+      .in('assigned_staff_id',driverIds)
+      .in('status',['assigned','accepted','picked_up','out_for_delivery'])
+      .order('created_at',{ascending:false}),offset,limit)
+    if (result.error) throw result.error
+    const byId = new Map(drivers.map((driver: Staff) => [driver.id,driver]))
+    const items = (result.data || []).map((assignment: any) => {
+      const driver = byId.get(assignment.assigned_staff_id)
+      return {...assignment,driver_name:driver?.full_name || driver?.email || assignment.assigned_staff_id,driver_role:driver?.role,driver_branch:driver?.branch}
+    })
+    return {kind,items,offset,limit}
+  }
   if (kind === 'vehicles') {
     requireRole(staff,[...FLEET_ROLES,...FINANCE_ROLES])
     const ids = await allowedVehicleIds(service,staff)
@@ -265,6 +296,36 @@ const vehicleIdInScope = async (service: ReturnType<typeof serviceClient>, staff
   requireBranch(staff,result.data.branch)
   return id
 }
+const assignVehicleToDelivery = async (service: ReturnType<typeof serviceClient>, staff: Staff, data: Json) => {
+  requireRole(staff, OPS_ROLES)
+  const assignmentId = requiredText(data.assignment_id,'assignment_id',80)
+  const vehicleId = await vehicleIdInScope(service,staff,data.vehicle_id)
+  const [assignmentResult, vehicleResult] = await Promise.all([
+    service.from('delivery_assignments').select('id,shipment_id,assigned_staff_id,status,vehicle_id').eq('id',assignmentId).maybeSingle(),
+    service.from('fleet_vehicles').select('id,branch,vehicle_code,plate_number').eq('id',vehicleId).maybeSingle(),
+  ])
+  if (assignmentResult.error) throw assignmentResult.error
+  if (vehicleResult.error) throw vehicleResult.error
+  const assignment = assignmentResult.data
+  const vehicle = vehicleResult.data
+  if (!assignment) throw new Error('Delivery assignment not found')
+  if (!vehicle) throw new Error('Vehicle not found')
+  if (!['assigned','accepted','picked_up','out_for_delivery'].includes(String(assignment.status))) throw new Error('Only active delivery assignments can be linked to a vehicle')
+  if (!assignment.assigned_staff_id) throw new Error('Assign an active driver to the delivery before choosing a vehicle')
+  const driverResult = await service.from('staff').select('id,full_name,role,branch,is_active').eq('id',assignment.assigned_staff_id).maybeSingle()
+  if (driverResult.error) throw driverResult.error
+  const driver = driverResult.data as Staff | null
+  if (!driver?.is_active || !['driver','delivery'].includes(driver.role)) throw new Error('Delivery assignment is not linked to an active driver')
+  if (branchName(driver.branch) !== branchName(vehicle.branch)) throw new Response(JSON.stringify({error:'Vehicle branch must match the assigned driver branch'}),{status:403})
+  const result = await service.from('delivery_assignments').update({vehicle_id:vehicleId,updated_at:new Date().toISOString()})
+    .eq('id',assignmentId).in('status',['assigned','accepted','picked_up','out_for_delivery'])
+    .select('id,shipment_id,assigned_staff_id,status,vehicle_id').maybeSingle()
+  if (result.error) throw result.error
+  if (!result.data) throw new Error('Delivery assignment changed; refresh and retry')
+  const auditLogged = await audit(service,staff,'fleet_vehicle_assigned_to_delivery',assignmentId,{vehicle_id:vehicleId,vehicle_code:vehicle.vehicle_code,plate_number:vehicle.plate_number,shipment_id:assignment.shipment_id,driver_id:driver.id})
+  return {item:result.data,driver_name:driver.full_name,audit_logged:auditLogged}
+}
+
 const attendanceWrite = async (service: ReturnType<typeof serviceClient>, staff: Staff, data: Json) => {
   const action = requiredText(data.action,'action',20).toLowerCase()
   const now = new Date()
@@ -414,6 +475,7 @@ Deno.serve(async (req: Request) => {
     if(action==='create_vehicle') result=await vehicleWrite(service,staff,data,false)
     else if(action==='update_vehicle') result=await vehicleWrite(service,staff,data,true)
     else if(action==='record_vehicle_event') result=await vehicleEventWrite(service,staff,data)
+    else if(action==='assign_vehicle_to_delivery') result=await assignVehicleToDelivery(service,staff,data)
     else if(action==='create_maintenance') result=await maintenanceWrite(service,staff,data)
     else if(action==='record_fuel') result=await fuelWrite(service,staff,data)
     else if(action==='attendance') result=await attendanceWrite(service,staff,data)
