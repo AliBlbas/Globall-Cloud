@@ -41,6 +41,7 @@
         <button type="button" class="nav-item" data-view="fleet"><span class="nav-icon">🚚</span><span><b>Fleet Management</b><small>ئۆتۆمبێل و شۆفێر</small></span></button>
         <button type="button" class="nav-item" data-view="maintenance"><span class="nav-icon">⚙</span><span><b>Maintenance</b><small>سێرڤیس و چاکسازی</small></span></button>
         <button type="button" class="nav-item" data-view="fuel"><span class="nav-icon">⛽</span><span><b>Fuel Tracking</b><small>خەرجی سووتەمەنی</small></span></button>
+        <button type="button" class="nav-item" data-view="vehicle_events"><span class="nav-icon">⌁</span><span><b>Vehicle Event Log</b><small>ڕووداو و route history</small></span></button>
         <button type="button" class="nav-item" data-view="attendance"><span class="nav-icon">◷</span><span><b>Attendance</b><small>ئامادەبوون</small></span></button>
         <button type="button" class="nav-item" data-view="leave"><span class="nav-icon">▤</span><span><b>Leave Management</b><small>داواکاری مۆڵەت</small></span></button>
         <button type="button" class="nav-item finance-nav" data-view="payroll"><span class="nav-icon">د.ع</span><span><b>Payroll</b><small>مووچە و خولی مووچە</small></span></button>
@@ -106,6 +107,10 @@
       <section class="view" data-panel="fuel">
         <div class="view-tools"><div><h2>Fuel Ledger</h2><p>خەرجی سووتەمەنی بە جیاوازی دراو و بەروار.</p></div><button class="btn primary" data-action="record-fuel">＋ زیادکردنی خەرجی سووتەمەنی</button></div>
         <div class="table-panel"><div class="table-scroll"><table><thead><tr><th>Vehicle</th><th>Date</th><th>Liters</th><th>Amount</th><th>Currency</th><th>Odometer</th><th>Station</th></tr></thead><tbody id="fuelRows"><tr><td colspan="7" class="empty">داتا بار دەکرێت…</td></tr></tbody></table></div></div>
+      </section>
+      <section class="view" data-panel="vehicle_events">
+        <div class="view-tools"><div><h2>Vehicle Event Log</h2><p>مێژووی ڕووداوەکانی ئۆتۆمبێل، ڕێگا و پەیوەندی بە shipment و delivery.</p></div><button class="btn secondary" data-action="vehicle-event">＋ تۆمارکردنی ڕووداو</button></div>
+        <div class="table-panel"><div class="table-scroll"><table><thead><tr><th>Vehicle</th><th>Event</th><th>Date</th><th>Shipment</th><th>Assignment</th><th>GPS</th><th>Odometer</th><th>Note</th></tr></thead><tbody id="vehicleEventRows"><tr><td colspan="8" class="empty">داتا بار دەکرێت…</td></tr></tbody></table></div></div>
       </section>
       <section class="view" data-panel="attendance">
         <div class="view-tools"><div><h2>Attendance</h2><p>کاتی هاتن و چوون لەلایەن سێرڤەرەوە تۆمار دەکرێت.</p></div><div class="tool-actions"><button class="btn secondary" id="checkInBtn">⏱ هاتن</button><button class="btn primary" id="checkOutBtn">↗ چوون</button></div></div>
