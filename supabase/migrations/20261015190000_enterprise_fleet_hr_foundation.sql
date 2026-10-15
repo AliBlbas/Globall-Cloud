@@ -221,7 +221,7 @@ create or replace function public.gc_hr_guard_payroll_entry()
 returns trigger
 language plpgsql
 set search_path = public, pg_temp
-as $
+as $$
 declare
   v_period_id uuid;
   v_period_status text;
@@ -240,7 +240,7 @@ begin
   if tg_op = 'DELETE' then return old; end if;
   return new;
 end;
-$;
+$$;
 
 drop trigger if exists hr_payroll_entry_period_guard on public.hr_payroll_entries;
 create trigger hr_payroll_entry_period_guard
