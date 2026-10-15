@@ -20,7 +20,7 @@
   const escapeHtml = (v) => String(v ?? '—').replace(/[&<>"']/g, (ch) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const fmtDate = (v, time=false) => { if(!v) return '—'; const d=new Date(v); return Number.isNaN(d.getTime())?'—':new Intl.DateTimeFormat('en-GB',time?{dateStyle:'medium',timeStyle:'short'}:{dateStyle:'medium'}).format(d); };
   const fmtMoney = (v,c='IQD') => Number(v||0).toLocaleString('en-US',{maximumFractionDigits:2})+' '+c;
-  const statusClass = (s) => /paid|approved|completed|active|delivered|closed/i.test(String(s||''))?'ok':/pending|planned|in_progress|draft/i.test(String(s||''))?'warn':/rejected|cancelled|retired|failed/i.test(String(s||''))?'bad':'';
+  const statusClass = (s) => { const value=String(s||'').toLowerCase(); if(['paid','approved','completed','active','delivered','closed','posted'].includes(value))return 'ok'; if(['pending','planned','in_progress','draft','assigned','accepted','picked_up','out_for_delivery'].includes(value))return 'warn'; if(['rejected','cancelled','retired','failed','inactive','reversed','damaged','lost'].includes(value))return 'bad'; return ''; };
   const toast = (message,kind='') => { const e=$('toast'); e.textContent=message; e.className='toast'+(kind?' '+kind:''); e.classList.remove('hidden'); window.clearTimeout(toast.timer); toast.timer=window.setTimeout(()=>e.classList.add('hidden'),5500); };
   const notice = (message,kind='') => { const e=$('notice'); e.textContent=message; e.className='notice'+(kind?' '+kind:''); e.classList.remove('hidden'); };
   const showLogin = () => { $('boot').classList.add('hidden'); $('app').classList.add('hidden'); $('login').classList.remove('hidden'); };
