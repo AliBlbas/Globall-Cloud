@@ -108,6 +108,7 @@
     if(scope.length===1&&$('financeBranch').value!==scope[0])$('financeBranch').value=scope[0];
     $('financeMonthlyRows').innerHTML=(report.monthly_trend||[]).length?(report.monthly_trend||[]).map(r=>'<tr><td class="mono">'+escapeHtml(r.month)+'</td><td>'+escapeHtml(fmtMoney(r.revenue_iqd,'IQD'))+'</td><td>'+escapeHtml(fmtMoney(r.expenses_iqd,'IQD'))+'</td><td><b>'+escapeHtml(fmtMoney(r.profit_iqd,'IQD'))+'</b></td></tr>').join(''):tableEmpty(4,'لەو ماوەیەدا ژوورنالی پۆستکراو نییە.');
     $('financeBranchRows').innerHTML=(report.branch_comparison||[]).length?(report.branch_comparison||[]).map(r=>'<tr><td>'+escapeHtml(r.branch)+'</td><td>'+escapeHtml(fmtMoney(r.revenue_iqd,'IQD'))+'</td><td>'+escapeHtml(fmtMoney(r.expenses_iqd,'IQD'))+'</td><td><b>'+escapeHtml(fmtMoney(r.profit_iqd,'IQD'))+'</b></td><td>'+escapeHtml(fmtMoney(r.cashflow_iqd,'IQD'))+'</td></tr>').join(''):tableEmpty(5,'بۆ ئەم ماوەیە داتای دارایی نییە.');
+    $('financeBalanceRows').innerHTML=[['Assets',report.asset_balance_iqd],['Liabilities',report.liability_balance_iqd],['Equity',report.equity_balance_iqd]].map(([label,value])=>'<tr><td>'+escapeHtml(label)+'</td><td>'+escapeHtml(fmtMoney(value,'IQD'))+'</td></tr>').join('');
     $('financeJournalRows').innerHTML=state.data.journals.length?state.data.journals.map(j=>{
       const lines=j.finance_journal_lines||[];
       const debit=lines.reduce((sum,l)=>sum+Number(l.debit_iqd||0),0);
