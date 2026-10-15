@@ -618,12 +618,16 @@ grant execute on function public.gc_record_attendance(text) to authenticated;
 revoke all on function public.gc_enterprise_touch_updated_at() from public, anon, authenticated;
 
 -- Explicit table grants; row-level policies remain the authorization boundary.
+-- Browser clients do not access these tables directly. The authenticated
+-- fleet-hr-admin Edge Function performs actor/role/branch checks before using
+-- its server-only service client; this prevents service-role bypass from becoming
+-- a client-side authorization bypass.
 revoke all on public.fleet_vehicles, public.fleet_vehicle_events,
   public.fleet_maintenance_records, public.fleet_fuel_logs,
   public.hr_attendance_records, public.hr_leave_requests,
-  public.hr_payroll_periods, public.hr_payroll_entries from anon, public;
+  public.hr_payroll_periods, public.hr_payroll_entries from anon, public, authenticated;
 grant select, insert, update, delete on public.fleet_vehicles,
   public.fleet_vehicle_events, public.fleet_maintenance_records,
   public.fleet_fuel_logs, public.hr_attendance_records,
   public.hr_leave_requests, public.hr_payroll_periods,
-  public.hr_payroll_entries to authenticated;
+  public.hr_payroll_entries to service_role;
