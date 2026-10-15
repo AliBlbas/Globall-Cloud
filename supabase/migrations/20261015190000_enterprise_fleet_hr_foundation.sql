@@ -41,6 +41,10 @@ alter table public.delivery_assignments
 create index if not exists delivery_assignments_vehicle_idx
   on public.delivery_assignments(vehicle_id, created_at desc)
   where vehicle_id is not null;
+-- A vehicle may serve at most one active delivery, including concurrent assignments.
+create unique index if not exists delivery_assignments_one_active_vehicle_idx
+  on public.delivery_assignments(vehicle_id)
+  where vehicle_id is not null and status in ('assigned','accepted','picked_up','out_for_delivery');
 
 -- Append-only fleet event/telematics ledger; GPS is private to authenticated operations.
 create table if not exists public.fleet_vehicle_events (
@@ -184,6 +188,7 @@ create table if not exists public.hr_payroll_periods (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (period_start, period_end),
+  exclude using gist (daterange(period_start, period_end, '[]') with &&),
   check (period_end >= period_start),
   check (status not in ('approved','paid','closed') or approved_at is not null),
   check (status <> 'paid' or paid_at is not null)
@@ -209,6 +214,38 @@ create index if not exists hr_payroll_period_status_idx
   on public.hr_payroll_periods(period_start desc, status);
 create index if not exists hr_payroll_entries_staff_idx
   on public.hr_payroll_entries(staff_id, payroll_period_id);
+
+-- Serialize payroll-entry writes with period status changes so an entry cannot be
+-- inserted, edited, or deleted after a payroll period has been approved.
+create or replace function public.gc_hr_guard_payroll_entry()
+returns trigger
+language plpgsql
+set search_path = public, pg_temp
+as $
+declare
+  v_period_id uuid;
+  v_period_status text;
+begin
+  v_period_id := case when tg_op = 'DELETE' then old.payroll_period_id else new.payroll_period_id end;
+  select p.status into v_period_status
+  from public.hr_payroll_periods p
+  where p.id = v_period_id
+  for update;
+  if not found then
+    raise exception 'Payroll period not found' using errcode = '23503';
+  end if;
+  if v_period_status <> 'draft' then
+    raise exception 'Payroll entries can only be changed while the period is draft' using errcode = '55000';
+  end if;
+  if tg_op = 'DELETE' then return old; end if;
+  return new;
+end;
+$;
+
+drop trigger if exists hr_payroll_entry_period_guard on public.hr_payroll_entries;
+create trigger hr_payroll_entry_period_guard
+before insert or update or delete on public.hr_payroll_entries
+for each row execute function public.gc_hr_guard_payroll_entry();
 
 -- Shared updated_at trigger with a fixed search_path.
 create or replace function public.gc_enterprise_touch_updated_at()
