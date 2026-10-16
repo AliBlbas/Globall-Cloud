@@ -27,7 +27,7 @@
     if (!response.ok) throw new Error(data.error || 'هەڵەیەک ڕوویدا.');
     return data;
   };
-  const normalizeCode = (value) => String(value || '').trim().toUpperCase();
+  const normalizeCode = (value) => String(value || '').normalize('NFKC').trim().toUpperCase().replace(/[–—−]/g, '-').replace(/\\s+/g, '');
 
   const login = async (event) => {
     event.preventDefault();
@@ -41,15 +41,27 @@
       const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
         auth: { persistSession: true, autoRefreshToken: true }
       });
-      await supabase.auth.setSession({
+      const { data: signedIn, error: sessionError } = await supabase.auth.setSession({
         access_token: data.session.access_token,
         refresh_token: data.session.refresh_token
       });
+      if (sessionError) throw new Error('کۆدی GC و وشەی نهێنی پشتڕاست بوونەوە، بەڵام session دروست نەبوو؛ جارێکی تر هەوڵ بدەوە.');
+      if (!signedIn?.session?.access_token) throw new Error('هەژمارەکەت بەڕاستی نەچووە ژوورەوە؛ تکایە جارێکی تر هەوڵ بدەوە.');
       sessionStorage.removeItem('gc-new-code');
       sessionStorage.removeItem('gc-registration-email');
       location.href = '/customer-portal.html';
     } catch (error) {
-      message(error.message, 'error');
+      const raw = String(error?.message || error || '');
+      const friendly = /invalid gc code or password|invalid login credentials/i.test(raw)
+        ? 'کۆدی GC یان وشەی نهێنی هەڵەیە؛ دڵنیابە هەردووکیان بە دروستی نووسراون.'
+        : /too many login attempts|rate limit/i.test(raw)
+          ? 'زۆر هەوڵی چوونەژوورەوەت داوە؛ تکایە ١٠ خولەک چاوەڕێ بکە پاشان هەوڵ بدەوە.'
+          : /customer account is not ready|account is not ready/i.test(raw)
+            ? 'هەژماری GC ـەکەت هێشتا تەواو ئامادە نییە؛ تکایە پەیوەندی بە ستافی Globall Cloud بکە.'
+            : /failed to fetch|networkerror|load failed/i.test(raw)
+              ? 'پەیوەندی ئینتەرنێت یان سێرڤەر کێشەی هەیە؛ ئینتەرنێتەکەت بپشکنە و دووبارە هەوڵ بدەوە.'
+              : raw || 'چوونەژوورەوە سەرکەوتوو نەبوو.';
+      message(friendly, 'error');
       setBusy(false);
     }
   };
