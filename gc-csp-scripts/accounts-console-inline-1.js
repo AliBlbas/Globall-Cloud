@@ -116,7 +116,7 @@ function renderList() {
         <td>${esc(manager?.full_name || '—')}<div class="muted">${esc(manager?.role || '')}</div></td>
         <td><b>${r.shipment_count || 0}</b><div class="muted">${money(r.outstanding_amount || 0)} due</div></td>
         <td>${badge(r.is_active)}</td>
-        <td><div class="toolbar"><button class="btn btn-outline" data-gc-onclick='editCustomer(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button>${r.auth_user_id ? '<span class="ok">Linked</span>' : r.is_active === false ? '<span class="muted">Inactive</span>' : `<button class="btn btn-primary" data-gc-onclick="bindCustomerAccount('${esc(r.id)}')">Bind login</button>`}<button class="btn btn-danger" data-gc-onclick="archiveCustomerAccount('${esc(r.id)}')">Archive</button></div></td>
+        <td><div class="toolbar"><button class="btn btn-outline" data-gc-onclick='editCustomer(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button>${r.auth_user_id ? '<span class="ok">Linked</span>' : r.is_active === false ? '<span class="muted">Inactive</span>' : state.role === 'super_admin' ? `<button class="btn btn-primary" data-gc-onclick="bindCustomerAccount('${esc(r.id)}')">Bind login</button>` : '<span class="muted">Super Admin only</span>'}<button class="btn btn-danger" data-gc-onclick="archiveCustomerAccount('${esc(r.id)}')">Archive</button></div></td>
       </tr>`;
     }).join('') || '<tr><td colspan="8">No customers found.</td></tr>';
   } else if (state.tab === 'staff') {
@@ -345,9 +345,14 @@ window.editStaff = (row) => {
   $('staffId').value = row.id || ''; $('staffFullName').value = row.full_name || ''; $('staffEmail').value = row.email || ''; $('staffRole').value = row.role || 'admin'; $('staffBranch').value = row.branch || 'all'; $('staffInvite').value = row.auth_user_id ? 'false' : 'true'; $('staffPassword').value = ''; setActiveTab('staff'); $('staffForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 window.bindCustomerAccount = async (id) => {
-  const password = prompt('Optional password (minimum 12 characters). Leave empty to generate a temporary password:') || '';
+  if (state.role !== 'super_admin') { alert('Only Super Admin can provision customer logins.'); return; }
+  const supplied = prompt('Optional password (minimum 12 characters). Leave empty to generate a temporary password:');
+  if (supplied === null) return;
+  const password = supplied.trim();
+  if (password && password.length < 12) { alert('Password must be at least 12 characters.'); return; }
   try {
-    const row = state.customers.find((item) => String(item.id) === String(id)) || {}; const res = await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'customer', action: 'bind', data: { id, password: password || undefined } }) });
+    const row = state.customers.find((item) => String(item.id) === String(id)) || {};
+    const res = await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'customer', action: 'bind', data: { id, password: password || undefined } }) });
     alert(`GC: ${res.gc_code || row.gc_code || row.code || ''}\nLogin: ${res.login_email || row.email || ''}\nTemporary password: ${res.temporary_password || ''}\n\nوشەی نهێنی تەنها ئێستا پیشان دەدرێت؛ بە شێوەی پارێزراو بۆ کڕیار بگەیەنە و داوای گۆڕینی بکە.`);
     await refreshAll();
   } catch (err) { alert(err.message || 'Unable to bind customer login'); }
