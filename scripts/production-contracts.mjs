@@ -135,6 +135,12 @@ else ok('Customer registration source has rate limits and origin validation')
 
 if (!staff.includes('staff-os-v5.js?v=20261016-17')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
 
+const mobileLoader = read('staff-os-v5-enhancement-loader.js')
+if (!staff.includes('staff-os-v5-enhancement-loader.js?v=20261016-6')) fail('Staff enhancement loader cache-buster is stale')
+if (!staff.includes('data-gc-mobile-dock-preload="1"') || !staff.includes('/gc-staff-mobile-dock-20261016.css?v=2')) fail('Mobile dock CSS must be preloaded before the app initializes')
+if (mobileLoader.indexOf("'/gc-staff-mobile-dock-20261016.js?v=2'") > mobileLoader.indexOf("'/staff-os-v5-shipment-create-fix.js?v=20260912-2'")) fail('Mobile navigation must initialize before optional staff bridges')
+if (!mobileLoader.includes("loadStyle('/gc-staff-mobile-dock-20261016.css?v=2')")) fail('Mobile dock CSS must remain the final responsive override')
+
 const cargoUi = read('staff-os-v5.js')
 const cargoControl = read('supabase/functions/staff-shipment-control/index.ts')
 const cargoCreate = read('supabase/functions/staff-shipment-v5/index.ts')
