@@ -54,6 +54,8 @@ function setActiveTab(tab) {
   $('shipmentForm').classList.toggle('hidden', tab !== 'shipments');
   $('quotePane').classList.toggle('hidden', tab !== 'quote');
   $('listPanel').classList.toggle('hidden', tab === 'quote');
+  $('customerLinkFilter')?.classList.toggle('hidden', tab !== 'customers');
+  $('customerLinkSummary')?.classList.toggle('hidden', tab !== 'customers');
   $('listTitle').textContent = tab === 'customers' ? 'Customer accounts & GC codes' : tab === 'shipments' ? 'Shipment control' : tab === 'staff' ? 'Staff accounts' : tab === 'receipts' ? 'Warehouse receipts' : tab === 'logs' ? 'Activity logs' : 'Overview';
   $('listSubtitle').textContent = tab === 'customers' ? 'Create customers and assign immutable GC codes' : tab === 'shipments' ? 'Create, update status, costs, weight, and payment state' : tab === 'staff' ? 'Manage staff roles and access' : tab === 'receipts' ? 'Goods received in Dubai, China, or Erbil with photos' : tab === 'logs' ? 'Latest management activity' : 'Latest customer accounts and records';
   if (tab !== 'quote') renderList();
@@ -103,7 +105,26 @@ function renderList() {
       <td><button class="btn btn-outline" data-gc-onclick='editShipment(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button></td>
     </tr>`).join('') || '<tr><td colspan="8">No shipments found.</td></tr>';
   } else if (state.tab === 'customers') {
-    const rows = state.customers.filter((r) => !q || JSON.stringify(r).toLowerCase().includes(q));
+    const linkFilter = $('customerLinkFilter')?.value || 'all';
+    const isLinked = (customer) => Boolean(customer.auth_user_id);
+    const isActive = (customer) => customer.is_active !== false;
+    const activeUnlinked = state.customers.filter((customer) => isActive(customer) && !isLinked(customer)).length;
+    const inactiveUnlinked = state.customers.filter((customer) => !isActive(customer) && !isLinked(customer)).length;
+    const linkedCount = state.customers.filter(isLinked).length;
+    const rows = state.customers.filter((customer) => {
+      const linked = isLinked(customer);
+      const active = isActive(customer);
+      const linkMatch = linkFilter === 'unlinked' ? (!linked && active)
+        : linkFilter === 'linked' ? linked
+        : linkFilter === 'inactive-unlinked' ? (!linked && !active)
+        : true;
+      return linkMatch && (!q || JSON.stringify(customer).toLowerCase().includes(q));
+    });
+    const summary = $('customerLinkSummary');
+    if (summary) {
+      summary.textContent = `${activeUnlinked} چالاک بێ هەژماری چوونەژوورەوە · ${linkedCount} پەیوەستکراو · ${inactiveUnlinked} ناچالاک و پەیوەست‌نەکراو. پەیوەستکردن تەنها دوای پشتڕاستکردنەوەی ناسنامە، لەلایەن Super Admin ـەوە بکرێت.`;
+    }
+    $('listSubtitle').textContent = `${rows.length} / ${state.customers.length} کریار پیشان دەدرێن · ${activeUnlinked} هەژماری چالاک پێویستی بە پەیوەستکردن هەیە`;
     $('tableHead').innerHTML = '<tr><th>Code</th><th>Name</th><th>Phone</th><th>Email</th><th>Manager</th><th>Shipments</th><th>Status</th><th>Actions</th></tr>';
     $('tableBody').innerHTML = rows.map((r) => {
       const manager = state.staff.find((s) => s.id === r.manager_staff_id);
@@ -118,7 +139,7 @@ function renderList() {
         <td>${badge(r.is_active)}</td>
         <td><div class="toolbar"><button class="btn btn-outline" data-gc-onclick='editCustomer(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button>${r.auth_user_id ? '<span class="ok">Linked</span>' : r.is_active === false ? '<span class="muted">Inactive</span>' : state.role === 'super_admin' ? `<button class="btn btn-primary" data-gc-onclick="bindCustomerAccount('${esc(r.id)}')">Bind login</button>` : '<span class="muted">Super Admin only</span>'}<button class="btn btn-danger" data-gc-onclick="archiveCustomerAccount('${esc(r.id)}')">Archive</button></div></td>
       </tr>`;
-    }).join('') || '<tr><td colspan="8">No customers found.</td></tr>';
+    }).join('') || `<tr><td colspan="8">${linkFilter === 'unlinked' ? 'No active unlinked customers found.' : linkFilter === 'linked' ? 'No linked customer accounts found.' : linkFilter === 'inactive-unlinked' ? 'No inactive unlinked customer accounts found.' : 'No customers found.'}</td></tr>`;
   } else if (state.tab === 'staff') {
     const rows = state.staff.filter((r) => !q || JSON.stringify(r).toLowerCase().includes(q));
     $('tableHead').innerHTML = '<tr><th>Name</th><th>Email / ID</th><th>Role</th><th>Branch</th><th>Status</th><th>Actions</th></tr>';
@@ -261,6 +282,7 @@ $('staffLoginForm').addEventListener('submit', async (e) => {
 $('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); await syncSessionUI(); });
 $('refreshBtn').addEventListener('click', refreshAll);
 $('searchBox').addEventListener('input', renderList);
+$('customerLinkFilter')?.addEventListener('change', renderList);
 function setDrawer(open){const tabs=$('consoleTabs');const backdrop=$('drawerBackdrop');const toggle=$('navToggle');if(!tabs)return;tabs.classList.toggle('drawer-open',open);backdrop?.classList.toggle('open',open);document.body.classList.toggle('drawer-locked',open);toggle?.setAttribute('aria-expanded',String(open));toggle?.setAttribute('aria-label',open?'Close navigation':'Open navigation');}
 document.querySelectorAll('.tab').forEach((btn) => btn.addEventListener('click', () => { setActiveTab(btn.dataset.tab); setDrawer(false); }));
 $('navToggle')?.addEventListener('click',()=>setDrawer(!$('consoleTabs')?.classList.contains('drawer-open')));
