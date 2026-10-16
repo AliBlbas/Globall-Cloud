@@ -332,8 +332,14 @@
   }
 
   async function renderShipments() {
-    const res = await ops('shipments');
+    const res = await ops('shipments', 'page=1&page_size=100');
     state.data.shipments = res.items || [];
+    let page = Number(res.page || 1);
+    let pageSize = Number(res.page_size || 100);
+    let total = Number(res.total ?? state.data.shipments.length);
+    let hasMore = Boolean(res.has_more);
+    let loadingMore = false;
+    let loadError = '';
 
     const dispatchedStatuses = new Set(['in_transit','at_transit_hub','customs','out_for_delivery','delivered']);
     document.getElementById('view').innerHTML = `<div class="section-head">
@@ -356,7 +362,8 @@
         ${STATUS.map(s=>`<option value="${s}">${statusLabel(s)}</option>`).join('')}
       </select>
     </div>
-    <div class="shipment-grid" id="shipmentCards"></div>`;
+    <div class="shipment-grid" id="shipmentCards"></div>
+    <div class="actions" id="shipmentPager" style="justify-content:center;align-items:center;margin:16px 0;gap:10px;flex-wrap:wrap" aria-live="polite"></div>`;
 
     const draw = () => {
       const q = text(document.getElementById('shipmentSearch')?.value).toLowerCase();
@@ -413,6 +420,36 @@
 
       document.querySelectorAll('[data-view-ship]').forEach(b => b.onclick = () => shipDetail(b.dataset.viewShip));
       document.querySelectorAll('[data-edit-ship]').forEach(b => b.onclick = () => editShipment(b.dataset.editShip));
+
+      const pager = document.getElementById('shipmentPager');
+      if (pager) {
+        const loaded = state.data.shipments.length;
+        pager.innerHTML = `<span class="pill">${hasMore ? `بارکراو: ${number(loaded)} لە ${number(total)}` : `کۆی بارە بارکراوەکان: ${number(loaded)}`}</span>${hasMore ? `<button class="btn" id="loadMoreShipments" ${loadingMore ? 'disabled' : ''}>${loadingMore ? 'بارکردن…' : 'بارکردنی زیاتر'}</button>` : ''}${loadError ? `<span class="pill red">${esc(loadError)}</span>` : ''}${hasMore ? '<small style="width:100%;text-align:center;opacity:.75">گەڕان و فلتەر لە بارە بارکراوەکاندا کار دەکەن؛ بۆ بارەکانی تر «بارکردنی زیاتر» بکە.</small>' : ''}`;
+        document.getElementById('loadMoreShipments')?.addEventListener('click', loadMoreShipments);
+      }
+    };
+
+    const loadMoreShipments = async () => {
+      if (loadingMore || !hasMore) return;
+      loadingMore = true;
+      loadError = '';
+      draw();
+      try {
+        const next = await ops('shipments', `page=${page + 1}&page_size=${pageSize}`);
+        const seen = new Set(state.data.shipments.map(item => String(item.id)));
+        for (const item of (next.items || [])) {
+          const id = String(item.id);
+          if (!seen.has(id)) { seen.add(id); state.data.shipments.push(item); }
+        }
+        page = Number(next.page || page + 1);
+        total = Number(next.total ?? total);
+        hasMore = Boolean(next.has_more);
+      } catch (error) {
+        loadError = errorText(error, 'بارە زیاترەکان نەهاتن');
+      } finally {
+        loadingMore = false;
+        draw();
+      }
     };
 
     ['shipmentSearch','shipmentMode','shipmentStatus'].forEach(id => document.getElementById(id).addEventListener('input', draw));
