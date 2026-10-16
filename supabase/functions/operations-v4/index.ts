@@ -95,13 +95,16 @@ async function listShipments(admin:any, gcCode?:string){
 }
 async function shipmentDetail(admin:any,id:string){
  const {data:shipment,error}=await admin.from('shipments').select('*').eq('id',id).maybeSingle();if(error)throw error;if(!shipment)throw new Error('Shipment not found')
- const [packages,events,receipts,insurance,ledger]=await Promise.all([
+ const [packages,cargoItems,events,receipts,insurance,ledger]=await Promise.all([
   admin.from('shipment_packages').select('*').eq('shipment_id',id).order('created_at',{ascending:false}),
+  admin.from('shipment_cargo_items').select('id,shipment_id,customer_directory_id,customer_gc_code,item_name,quantity_pc,box_count,weight_kg,declared_value,currency,item_status,notes,created_at,updated_at').eq('shipment_id',id).order('created_at',{ascending:false}),
   admin.from('shipment_tracking_events').select('*').eq('shipment_id',id).order('created_at',{ascending:false}),
   admin.from('warehouse_receipts').select('*').eq('shipment_id',id).order('received_at',{ascending:false}),
   admin.from('shipment_insurance').select('*').eq('shipment_id',id).order('purchased_at',{ascending:false}),
   admin.from('shipment_financial_ledger').select('*').eq('shipment_id',id).order('created_at',{ascending:false})
- ]);return {shipment,packages:packages.data||[],events:events.data||[],receipts:receipts.data||[],insurance:insurance.data||[],ledger:ledger.data||[]}
+ ]);
+ if(cargoItems.error)throw cargoItems.error;
+ return {shipment,packages:packages.data||[],cargo_items:cargoItems.data||[],events:events.data||[],receipts:receipts.data||[],insurance:insurance.data||[],ledger:ledger.data||[]}
 }
 async function customers(admin:any){
  const {data,error}=await admin.from('customer_directory').select('*').order('created_at',{ascending:false}).limit(2000);
