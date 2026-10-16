@@ -486,9 +486,201 @@
     try { await request(FN.shipmentControl, '/', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({data:{id, status:nextStatus, note}})}); closeModal(); toast(`بار نوێکرایەوە: ${statusLabel(nextStatus)}`); await renderShipments(); } catch (e) { toast(e.message, 'bad'); if (button) button.disabled = false; }
   }
 
-  function newShipmentModal() { openModal('دروستکردنی بار',`<form id="shipForm" class="form-grid"><div class="form-field"><label>GC code</label><input class="field" name="customer_gc_code" required placeholder="GC-1005"></div><div class="form-field"><label>Tracking</label><input class="field" name="tracking_id" required placeholder="GC-2026-0001"></div><div class="form-field"><label>Mode</label><select class="field" name="transport_mode">${MODES.map(x=>`<option value="${x}">${modeLabel(x)}</option>`).join('')}</select></div><div class="form-field"><label>Cartons</label><input class="field" name="carton_count" type="number" min="1" value="1"></div><div class="form-field"><label>Origin warehouse</label><input class="field" name="origin_warehouse" placeholder="China"></div><div class="form-field"><label>Destination warehouse</label><input class="field" name="destination_warehouse" value="Erbil"></div><div class="form-field"><label>Actual kg</label><input class="field" name="actual_weight_kg" type="number" step="0.01"></div><div class="form-field"><label>Length cm</label><input class="field" name="length_cm" type="number" step="0.01"></div><div class="form-field"><label>Width cm</label><input class="field" name="width_cm" type="number" step="0.01"></div><div class="form-field"><label>Height cm</label><input class="field" name="height_cm" type="number" step="0.01"></div><div class="form-field full"><label>کاڵا</label><textarea class="field" name="cargo_description" placeholder="2 laptop, 5 cover..."></textarea></div></form>`,'<button class="btn" data-close>هەڵوەشاندنەوە</button><button class="btn primary" id="saveShip">دروستکردن</button>'); document.getElementById('saveShip').onclick=async()=>{const d=Object.fromEntries(new FormData(document.getElementById('shipForm')).entries()); try{const r=await request(FN.shipmentCreate,'/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:{...d,status:'received_origin'}})}); closeModal(); toast('بارەکە تۆمار کرا'); await renderShipments(); return r;}catch(e){toast(e.message,'bad')}}; }
 
-  async function editShipment(id) { const d=await ops('shipment',`id=${encodeURIComponent(id)}`); const s=d.shipment||{}; openModal(`دەستکاری · ${s.customer_gc_code||s.tracking_id||''}`,`<form id="shipEdit" class="form-grid"><input type="hidden" name="id" value="${esc(s.id)}"><div class="form-field"><label>Status</label><select class="field" name="status">${STATUS.map(x=>`<option value="${x}" ${x===s.status?'selected':''}>${statusLabel(x)}</option>`).join('')}</select></div><div class="form-field"><label>Mode</label><select class="field" name="transport_mode">${MODES.map(x=>`<option value="${x}" ${x===s.transport_mode?'selected':''}>${modeLabel(x)}</option>`).join('')}</select></div><div class="form-field"><label>Origin warehouse</label><input class="field" name="origin_warehouse" value="${esc(s.origin_warehouse||s.origin_key||'')}"></div><div class="form-field"><label>Destination warehouse</label><input class="field" name="destination_warehouse" value="${esc(s.destination_warehouse||s.dest_key||'Erbil')}"></div><div class="form-field"><label>بەرواری ناردن</label><input class="field" type="datetime-local" name="dispatched_at" value="${esc(datetimeLocal(s.dispatched_at || s.step_dates?.departed))}" aria-label="بەرواری ناردن"></div><div class="form-field"><label>Cartons</label><input class="field" name="carton_count" type="number" min="0" value="${esc(s.carton_count||0)}"></div><div class="form-field"><label>Actual kg</label><input class="field" name="actual_weight_kg" type="number" step="0.01" value="${esc(s.actual_weight_kg??s.weight_kg??'')}"></div><div class="form-field"><label>Length</label><input class="field" name="length_cm" type="number" step="0.01" value="${esc(s.length_cm??'')}"></div><div class="form-field"><label>Width</label><input class="field" name="width_cm" type="number" step="0.01" value="${esc(s.width_cm??'')}"></div><div class="form-field"><label>Height</label><input class="field" name="height_cm" type="number" step="0.01" value="${esc(s.height_cm??'')}"></div><div class="form-field full"><label>کاڵا</label><textarea class="field" name="cargo_description">${esc(s.cargo_description||'')}</textarea></div></form>`,'<button class="btn" data-close>هەڵوەشاندنەوە</button><button class="btn primary" id="saveShipEdit">پاشەکەوت</button>'); document.getElementById('saveShipEdit').onclick=async()=>{const d=Object.fromEntries(new FormData(document.getElementById('shipEdit')).entries()); if(d.dispatched_at){const dispatchDate=new Date(d.dispatched_at);if(!Number.isFinite(dispatchDate.getTime())){toast('بەرواری ناردن دروست نییە','bad');return}d.dispatched_at=dispatchDate.toISOString()} try{await request(FN.shipmentControl,'/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:d})});closeModal();toast('بارەکە نوێکرایەوە');await renderShipments()}catch(e){toast(e.message,'bad')}}; }
+  function cargoItemRowHTML(item) {
+    item = item || {};
+    const selectedStatus = String(item.item_status || 'received_origin');
+    const states = Array.from(new Set(STATUS.concat([selectedStatus])));
+    const statusOptions = states.map(function(value) {
+      return '<option value="' + esc(value) + '"' + (value === selectedStatus ? ' selected' : '') + '>' + esc(statusLabel(value)) + '</option>';
+    }).join('');
+    const currencies = ['USD','IQD','AED'];
+    const currencyOptions = currencies.map(function(value) {
+      const selected = String(item.currency || 'USD') === value ? ' selected' : '';
+      return '<option value="' + value + '"' + selected + '>' + value + '</option>';
+    }).join('');
+    return '<div class="cargo-item-row" data-cargo-row data-item-id="' + esc(item.id || '') + '">' +
+      '<div class="form-field"><label>ناوی کاڵا</label><input class="field" data-cargo-field="item_name" maxlength="200" value="' + esc(item.item_name || '') + '" placeholder="مۆبایل، جل، پارچە..."></div>' +
+      '<div class="form-field"><label>کۆدی کڕیار</label><input class="field" data-cargo-field="customer_gc_code" maxlength="40" value="' + esc(item.customer_gc_code || '') + '" placeholder="GC-1005"></div>' +
+      '<div class="form-field"><label>دانە (pc)</label><input class="field" data-cargo-field="quantity_pc" type="number" min="0" step="1" value="' + esc(item.quantity_pc == null ? 0 : item.quantity_pc) + '"></div>' +
+      '<div class="form-field"><label>کارتۆن</label><input class="field" data-cargo-field="box_count" type="number" min="0" step="1" value="' + esc(item.box_count == null ? 0 : item.box_count) + '"></div>' +
+      '<div class="form-field"><label>کێش (kg)</label><input class="field" data-cargo-field="weight_kg" type="number" min="0" step="0.01" value="' + esc(item.weight_kg == null ? 0 : item.weight_kg) + '"></div>' +
+      '<div class="form-field"><label>بەهای ڕاگەیەنراو</label><input class="field" data-cargo-field="declared_value" type="number" min="0" step="0.01" value="' + esc(item.declared_value == null ? 0 : item.declared_value) + '"></div>' +
+      '<div class="form-field"><label>دراو</label><select class="field" data-cargo-field="currency">' + currencyOptions + '</select></div>' +
+      '<div class="form-field"><label>دۆخی کاڵا</label><select class="field" data-cargo-field="item_status">' + statusOptions + '</select></div>' +
+      '<div class="form-field cargo-item-notes"><label>تێبینی</label><input class="field" data-cargo-field="notes" maxlength="500" value="' + esc(item.notes || '') + '" placeholder="تێبینیی کاڵا"></div>' +
+      '<button type="button" class="btn cargo-item-remove" data-remove-cargo-item aria-label="لابردنی کاڵا">لابردن</button>' +
+    '</div>';
+  }
+
+  function cargoItemEditorHTML(items, defaultGcCode) {
+    const rows = Array.isArray(items) && items.length ? items : [{ customer_gc_code: defaultGcCode || '' }];
+    return '<section class="cargo-items-editor form-field full">' +
+      '<div class="cargo-items-head"><div><strong>ناوەڕۆکی وردی کاڵا</strong><small>بۆ هەر جۆر کاڵا یەک ڕیز زیاد بکە؛ کۆدی GC بۆ هەر کڕیارێک بە جیاوازی تۆمار دەکرێت.</small></div>' +
+      '<button type="button" class="btn" id="addCargoItem">+ زیادکردنی کاڵا</button></div>' +
+      '<input type="hidden" id="deletedCargoItemIds" value="[]">' +
+      '<div class="cargo-items-list" id="cargoItemsList">' + rows.map(cargoItemRowHTML).join('') + '</div></section>';
+  }
+
+  function bindCargoEditor(defaultGcCode) {
+    const list = document.getElementById('cargoItemsList');
+    if (!list) return;
+    const add = document.getElementById('addCargoItem');
+    if (add) add.onclick = function() {
+      list.insertAdjacentHTML('beforeend', cargoItemRowHTML({ customer_gc_code: defaultGcCode || '' }));
+    };
+    list.addEventListener('click', function(event) {
+      const button = event.target && event.target.closest ? event.target.closest('[data-remove-cargo-item]') : null;
+      if (!button) return;
+      const row = button.closest('[data-cargo-row]');
+      if (!row) return;
+      const id = String(row.dataset.itemId || '').trim();
+      if (id && !window.confirm('ئەم ڕیزی کاڵایە لە داتابەیسدا دەسڕدرێتەوە. دڵنیایت؟')) return;
+      if (id) {
+        const hidden = document.getElementById('deletedCargoItemIds');
+        let ids = [];
+        try { ids = JSON.parse(hidden && hidden.value || '[]'); } catch (_) { ids = []; }
+        if (!ids.includes(id)) ids.push(id);
+        if (hidden) hidden.value = JSON.stringify(ids);
+      }
+      row.remove();
+      if (!list.querySelector('[data-cargo-row]')) {
+        list.insertAdjacentHTML('beforeend', cargoItemRowHTML({ customer_gc_code: defaultGcCode || '' }));
+      }
+    });
+  }
+
+  function collectCargoItems(defaultGcCode) {
+    const rows = Array.from(document.querySelectorAll('#cargoItemsList [data-cargo-row]'));
+    const result = [];
+    rows.forEach(function(row) {
+      const field = function(name) {
+        const element = row.querySelector('[data-cargo-field="' + name + '"]');
+        return element ? String(element.value || '').trim() : '';
+      };
+      const itemName = field('item_name');
+      const gcCode = (field('customer_gc_code') || String(defaultGcCode || '')).trim().toUpperCase().replace(/\s+/g, '');
+      const notes = field('notes');
+      const quantity = Number(field('quantity_pc') || 0);
+      const boxes = Number(field('box_count') || 0);
+      const weight = Number(field('weight_kg') || 0);
+      const declared = Number(field('declared_value') || 0);
+      if (!itemName && !gcCode && !notes && quantity === 0 && boxes === 0 && weight === 0 && declared === 0) return;
+      if (!itemName) throw new Error('ناوی کاڵا بۆ هەر ڕیزی پڕکراو پێویستە.');
+      if (!gcCode) throw new Error('کۆدی GC بۆ هەر کاڵایەک پێویستە.');
+      if (![quantity, boxes, weight, declared].every(Number.isFinite) || quantity < 0 || boxes < 0 || weight < 0 || declared < 0 || !Number.isInteger(quantity) || !Number.isInteger(boxes)) {
+        throw new Error('ژمارەی دانە، کارتۆن، کێش و بەها دەبێت دروست و نەرێنی نەبن.');
+      }
+      const item = {
+        item_name: itemName,
+        customer_gc_code: gcCode,
+        quantity_pc: quantity,
+        box_count: boxes,
+        weight_kg: weight,
+        declared_value: declared,
+        currency: field('currency') || 'USD',
+        item_status: field('item_status') || 'received_origin',
+        notes: notes || null
+      };
+      if (row.dataset.itemId) item.id = row.dataset.itemId;
+      result.push(item);
+    });
+    if (result.length > 100) throw new Error('لە هەر بارێکدا زۆرترین ١٠٠ ڕیزی کاڵا ڕێگەپێدراوە.');
+    return result;
+  }
+
+  function readDeletedCargoIds() {
+    try {
+      const hidden = document.getElementById('deletedCargoItemIds');
+      const value = JSON.parse(hidden && hidden.value || '[]');
+      return Array.isArray(value) ? value.filter(function(id) { return typeof id === 'string'; }) : [];
+    } catch (_) { return []; }
+  }
+
+  function newShipmentModal() {
+    openModal('دروستکردنی بار',
+      '<form id="shipForm" class="form-grid">' +
+      '<div class="form-field"><label>GC code</label><input class="field" name="customer_gc_code" required placeholder="GC-1005"></div>' +
+      '<div class="form-field"><label>Tracking</label><input class="field" name="tracking_id" required placeholder="GC-2026-0001"></div>' +
+      '<div class="form-field"><label>Mode</label><select class="field" name="transport_mode">' + MODES.map(function(x) { return '<option value="' + x + '">' + modeLabel(x) + '</option>'; }).join('') + '</select></div>' +
+      '<div class="form-field"><label>کۆی کارتۆن</label><input class="field" name="carton_count" type="number" min="0" step="1" value="1"></div>' +
+      '<div class="form-field"><label>Origin warehouse</label><input class="field" name="origin_warehouse" placeholder="China"></div>' +
+      '<div class="form-field"><label>Destination warehouse</label><input class="field" name="destination_warehouse" value="Erbil"></div>' +
+      '<div class="form-field"><label>Actual kg</label><input class="field" name="actual_weight_kg" type="number" min="0" step="0.01"></div>' +
+      '<div class="form-field"><label>Length cm</label><input class="field" name="length_cm" type="number" min="0" step="0.01"></div>' +
+      '<div class="form-field"><label>Width cm</label><input class="field" name="width_cm" type="number" min="0" step="0.01"></div>' +
+      '<div class="form-field"><label>Height cm</label><input class="field" name="height_cm" type="number" min="0" step="0.01"></div>' +
+      '<div class="form-field full"><label>تێبینی گشتیی بار</label><textarea class="field" name="cargo_description" placeholder="تێبینی یان کورتەی ناوەڕۆکی بار"></textarea></div>' +
+      cargoItemEditorHTML([], '') + '</form>',
+      '<button class="btn" data-close>هەڵوەشاندنەوە</button><button class="btn primary" id="saveShip">دروستکردن</button>');
+    bindCargoEditor('');
+    document.getElementById('saveShip').onclick = async function() {
+      const button = document.getElementById('saveShip');
+      if (button) button.disabled = true;
+      try {
+        const d = Object.fromEntries(new FormData(document.getElementById('shipForm')).entries());
+        d.cargo_items = collectCargoItems(d.customer_gc_code);
+        if (!d.cargo_description && d.cargo_items.length) {
+          d.cargo_description = d.cargo_items.map(function(item) { return item.item_name + ' (' + item.quantity_pc + ' pc, ' + item.box_count + ' box)'; }).join(', ');
+        }
+        const r = await request(FN.shipmentCreate, '/', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({data:{...d,status:'received_origin'}}) });
+        closeModal();
+        toast('بارەکە و لیستی کاڵاکان تۆمار کران');
+        await renderShipments();
+        return r;
+      } catch (e) {
+        toast(e.message, 'bad');
+        if (button) button.disabled = false;
+      }
+    };
+  }
+
+  async function editShipment(id) {
+    const d = await ops('shipment', 'id=' + encodeURIComponent(id));
+    const s = d.shipment || {};
+    const cargoItems = Array.isArray(d.cargo_items) ? d.cargo_items : [];
+    openModal('دەستکاری · ' + (s.customer_gc_code || s.tracking_id || ''),
+      '<form id="shipEdit" class="form-grid">' +
+      '<input type="hidden" name="id" value="' + esc(s.id) + '">' +
+      '<input type="hidden" name="customer_gc_code" value="' + esc(s.customer_gc_code || '') + '">' +
+      '<div class="form-field"><label>Status</label><select class="field" name="status">' + STATUS.map(function(x) { return '<option value="' + x + '"' + (x === s.status ? ' selected' : '') + '>' + statusLabel(x) + '</option>'; }).join('') + '</select></div>' +
+      '<div class="form-field"><label>Mode</label><select class="field" name="transport_mode">' + MODES.map(function(x) { return '<option value="' + x + '"' + (x === s.transport_mode ? ' selected' : '') + '>' + modeLabel(x) + '</option>'; }).join('') + '</select></div>' +
+      '<div class="form-field"><label>Origin warehouse</label><input class="field" name="origin_warehouse" value="' + esc(s.origin_warehouse || s.origin_key || '') + '"></div>' +
+      '<div class="form-field"><label>Destination warehouse</label><input class="field" name="destination_warehouse" value="' + esc(s.destination_warehouse || s.dest_key || 'Erbil') + '"></div>' +
+      '<div class="form-field"><label>بەرواری ناردن</label><input class="field" type="datetime-local" name="dispatched_at" value="' + esc(datetimeLocal(s.dispatched_at || (s.step_dates && s.step_dates.departed))) + '" aria-label="بەرواری ناردن"></div>' +
+      '<div class="form-field"><label>کۆی کارتۆن</label><input class="field" name="carton_count" type="number" min="0" step="1" value="' + esc(s.carton_count == null ? 0 : s.carton_count) + '"></div>' +
+      '<div class="form-field"><label>Actual kg</label><input class="field" name="actual_weight_kg" type="number" min="0" step="0.01" value="' + esc(s.actual_weight_kg == null ? (s.weight_kg == null ? '' : s.weight_kg) : s.actual_weight_kg) + '"></div>' +
+      '<div class="form-field"><label>Length cm</label><input class="field" name="length_cm" type="number" min="0" step="0.01" value="' + esc(s.length_cm == null ? '' : s.length_cm) + '"></div>' +
+      '<div class="form-field"><label>Width cm</label><input class="field" name="width_cm" type="number" min="0" step="0.01" value="' + esc(s.width_cm == null ? '' : s.width_cm) + '"></div>' +
+      '<div class="form-field"><label>Height cm</label><input class="field" name="height_cm" type="number" min="0" step="0.01" value="' + esc(s.height_cm == null ? '' : s.height_cm) + '"></div>' +
+      '<div class="form-field full"><label>تێبینی گشتیی بار</label><textarea class="field" name="cargo_description">' + esc(s.cargo_description || '') + '</textarea></div>' +
+      cargoItemEditorHTML(cargoItems, s.customer_gc_code || '') + '</form>',
+      '<button class="btn" data-close>هەڵوەشاندنەوە</button><button class="btn primary" id="saveShipEdit">پاشەکەوت</button>');
+    bindCargoEditor(s.customer_gc_code || '');
+    document.getElementById('saveShipEdit').onclick = async function() {
+      const button = document.getElementById('saveShipEdit');
+      if (button) button.disabled = true;
+      try {
+        const d = Object.fromEntries(new FormData(document.getElementById('shipEdit')).entries());
+        d.cargo_items = collectCargoItems(d.customer_gc_code || s.customer_gc_code || '');
+        d.deleted_cargo_item_ids = readDeletedCargoIds();
+        if (d.dispatched_at) {
+          const dispatchDate = new Date(d.dispatched_at);
+          if (!Number.isFinite(dispatchDate.getTime())) throw new Error('بەرواری ناردن دروست نییە');
+          d.dispatched_at = dispatchDate.toISOString();
+        } else {
+          d.dispatched_at = null;
+        }
+        await request(FN.shipmentControl, '/', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({data:d}) });
+        closeModal();
+        toast('بار و ناوەڕۆکی کاڵاکان نوێکرانەوە');
+        await renderShipments();
+      } catch (e) {
+        toast(e.message, 'bad');
+        if (button) button.disabled = false;
+      }
+    };
+  }
 
   async function renderAlerts() { const r=await ops('alerts'); state.data.alerts=r.items||[]; const unread=state.data.alerts.filter(x=>!Array.isArray(x.read_by)||!x.read_by.includes(state.staff.id)).length; document.getElementById('view').innerHTML=`<div class="section-head"><div><div class="eyebrow">ALERT CENTER</div><h1>Alerts</h1><p>${number(unread)} ئاگادارییەکی ناخوێندراوە.</p></div></div><div class="list" id="alertList">${state.data.alerts.length?state.data.alerts.map(a=>`<article class="notice ${Array.isArray(a.read_by)&&a.read_by.includes(state.staff.id)?'':'unread'}"><div><b>${esc(a.title||a.kind||'Alert')}</b><p>${esc(a.body||a.message||'')}</p><small>${esc(date(a.created_at))}</small></div><button class="btn" data-alert-read="${esc(a.id)}">${Array.isArray(a.read_by)&&a.read_by.includes(state.staff.id)?'خوێندراوە':'خوێندنەوە'}</button></article>`).join(''):'<div class="empty">هیچ ئاگادارییەک نییە.</div>'}</div><section class="card" style="margin-top:10px"><div class="card-head"><h3>دروستکردنی Alert</h3></div><form id="alertForm" class="form-grid"><div class="form-field"><label>جۆر</label><input class="field" name="kind" value="operations"></div><div class="form-field"><label>Severity</label><select class="field" name="severity"><option>normal</option><option>high</option><option>critical</option></select></div><div class="form-field full"><label>ناونیشان</label><input class="field" name="title" required></div><div class="form-field full"><label>پەیام</label><textarea class="field" name="body"></textarea></div></form><button class="btn primary" id="createAlert" style="margin-top:9px">دروستکردنی Alert</button></section>`; document.querySelectorAll('[data-alert-read]').forEach(b=>b.onclick=async()=>{try{await opsPost('alert_read',{id:b.dataset.alertRead});await renderAlerts()}catch(e){toast(e.message,'bad')}});document.getElementById('createAlert').onclick=async()=>{const d=Object.fromEntries(new FormData(document.getElementById('alertForm')).entries());try{await opsPost('alert_create',d);toast('Alert دروست کرا');await renderAlerts()}catch(e){toast(e.message,'bad')}}; }
 
