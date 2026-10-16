@@ -7,9 +7,9 @@
   <meta name="description" content="Globall Cloud customer logistics workspace">
   <title>Globall Cloud — Customer Workspace</title>
   <link rel="stylesheet" href="/gc-theme-sync.css?v=20261003-3" data-gc-theme-css="1">
-  <script src="/gc-theme-sync.js?v=20261003-3" defer data-gc-theme-sync="1"></script>
-  <link rel="stylesheet" href="/gc-settings-hub.css?v=20261003-3" data-gc-settings-css="1">
-  <script src="/gc-settings-hub.js?v=20261003-3" defer data-gc-settings-hub="1"></script>
+  <script src="/gc-theme-sync.js?v=20261016-4" defer data-gc-theme-sync="1"></script>
+  <link rel="stylesheet" href="/gc-settings-hub.css?v=20261016-4" data-gc-settings-css="1">
+  <script src="/gc-settings-hub.js?v=20261016-4" defer data-gc-settings-hub="1"></script>
   <script src="/gc-account-entry.js?v=20261003-3" defer data-gc-account-entry="1"></script>
   <link rel="stylesheet" href="/gc-production-ui-20260927.css?v=3">
   <link rel="stylesheet" href="/gc-customer-account-20260923.css?v=20261003-3" data-gc-customer-account-css="1">
@@ -70,9 +70,14 @@
         <div id="shipments" class="shipment-list"><div class="empty-panel"><span data-dash-icon="shipments"></span><strong>Login بکە بۆ بینینی بارەکانت</strong><button class="app-primary-action" id="loginPromptBtn" type="button">چوونەژوورەوە</button></div></div>
       </section>
 
-      <section class="split-grid">
-        <article class="surface-card" id="activity"><div class="section-heading compact"><div><span class="eyebrow">ACTIVITY FEED</span><h2>ئاگادارییەکان</h2></div><span class="live-badge"><i></i> LIVE</span></div><div id="notifications" class="record-list"><div class="empty-line">هێشتا ئاگادارییەک نییە.</div></div></article>
-        <article class="surface-card" id="quotesPanel"><div class="section-heading compact"><div><span class="eyebrow">COMMERCIAL</span><h2>Quote ـەکان</h2></div><a class="icon-action" href="#newRequest" data-dash-icon="plus" aria-label="داواکاری نوێ"></a></div><div id="quotes" class="record-list"><div class="empty-line">هێشتا quote ـێک نییە.</div></div></article>
+      <section class="section-block" id="activity">
+        <div class="section-heading"><div><span class="eyebrow">ACTIVITY FEED</span><h2>ئاگادارییەکان</h2><p>هەموو ئاگادارییەک بە جیاواز دەبینەوە؛ دەتوانیت نەخوێندراوەکانیش بخوێنراوە بکەیت.</p></div><span class="live-badge"><i></i> LIVE</span></div>
+        <article class="surface-card"><div id="notifications" class="record-list"><div class="empty-line">هێشتا ئاگادارییەک نییە.</div></div></article>
+      </section>
+
+      <section class="section-block" id="quotesPanel">
+        <div class="section-heading"><div><span class="eyebrow">COMMERCIAL</span><h2>Quote ـەکان</h2><p>مێژووی داواکاریی نرخەکانت لێرە جیاوازە لە ئاگادارییەکان.</p></div><a class="icon-action" href="#newRequest" data-dash-icon="plus" aria-label="داواکاری نوێ"></a></div>
+        <article class="surface-card"><div id="quotes" class="record-list"><div class="empty-line">هێشتا quote ـێک نییە.</div></div></article>
       </section>
 
       <section class="section-block" id="commercial">
@@ -102,8 +107,8 @@
   <script src="/gc-csp-scripts/customer-portal-inline-1.js?v=20261016-3" defer data-gc-externalized="1"></script>
   <script src="/gc-customer-account-20260923.js?v=20261003-3" defer data-gc-customer-account="1"></script>
   <script src="/gc-customer-portal-rates.js?v=20261003-3" defer></script>
-  <script src="/gc-dashboard-preferences-20261003.js?v=20261016-7" defer></script>
+  <script src="/gc-dashboard-preferences-20261003.js?v=20261016-8" defer></script>
   <script src="/gc-customer-request-20261003.js?v=1" defer></script>
-<script src="/gc-public-customer-style-loader-20261014.js?v=7" defer data-gc-public-customer-style-loader="1"></script>
+<script src="/gc-public-customer-style-loader-20261014.js?v=8" defer data-gc-public-customer-style-loader="1"></script>
 </body>
 </html>
