@@ -21,7 +21,7 @@
     padding-bottom: calc(94px + env(safe-area-inset-bottom, 0px)) !important;
     overflow-x: clip !important;
   }
-  body:has(#app) #app .gc-side {
+  body.gc-staff-mobile-dock-active #app .gc-side {
     display: none !important;
   }
   body:has(#app) #app .gc-main {
