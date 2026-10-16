@@ -86,9 +86,9 @@ const staff = read('staff-os-v5.html')
 const staffLoader = read('staff-os-v5-enhancement-loader.js')
 const publicShell = read('index.html')
 const brandSystem = read('gc-brand-system-20260929.css')
-const brandRoot = brandSystem.match(/:root\\s*\\{([^}]+)\\}/)?.[1] || ''
+const brandRoot = brandSystem.match(/:root\s*\{([^}]+)\}/)?.[1] || ''
 if (!publicShell.includes('/gc-brand-system-20260929.css?v=2')) fail('Homepage brand token stylesheet cache-buster is stale')
-if (/--gc-(?:ink|navy|navy-2|muted|line)\\s*:/.test(brandRoot)) fail('Brand accent stylesheet must not override shared public UI color and border tokens')
+if (/--gc-(?:ink|navy|navy-2|muted|line)\s*:/.test(brandRoot)) fail('Brand accent stylesheet must not override shared public UI color and border tokens')
 else ok('Brand accents stay isolated from shared UI text, muted and border tokens')
 if (!['--gc-gold:', '--gc-gold-bright:', '--gc-gold-soft:'].every(token => brandRoot.includes(token))) fail('Premium brand gold tokens are incomplete')
 const publicIndex = read('gc-csp-scripts/index-inline-2.js')
