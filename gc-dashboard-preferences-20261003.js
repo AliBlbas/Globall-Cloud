@@ -96,7 +96,8 @@
     };
     items.forEach((item) => {
       if (item.dataset.dockTab === 'settings') {
-        item.addEventListener('click', () => {
+        item.addEventListener('click', (event) => {
+          event.stopPropagation();
           activate('settings');
           const trigger = document.querySelector('[data-gc-settings-trigger]');
           if (trigger) trigger.click();
