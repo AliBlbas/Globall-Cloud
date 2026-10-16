@@ -6,8 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="/gc-theme-sync.css?v=20260929-1" data-gc-theme-css="1">
 <script src="/gc-theme-sync.js?v=20260929-1" defer data-gc-theme-sync="1"></script>
-<link rel="stylesheet" href="/gc-settings-hub.css?v=20260929-1" data-gc-settings-css="1">
-<script src="/gc-settings-hub.js?v=20260929-1" defer data-gc-settings-hub="1"></script>
 <link rel="stylesheet" href="tracking-styles.css">
 <link rel="stylesheet" href="/gc-premium.css?v=20260928-2" data-gc-premium="1">
 <link rel="stylesheet" href="/gc-visual-v2.css?v=20260928-1" data-gc-visual-v2="1">
@@ -993,11 +991,6 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
       <li><a href="./careers.html" class="staff-nav-link"><span aria-hidden="true">✦</span> کار</a></li>
     </ul>
     <div class="nav-right">
-      <div class="lang-toggle">
-        <button id="langKuBtn" data-gc-onclick="setLang('ku')">KU</button>
-        <button id="langEnBtn" data-gc-onclick="setLang('en')">EN</button>
-      </div>
-      <button class="theme-toggle-btn" id="themeToggleBtn" data-gc-onclick="toggleTheme()" aria-label="Toggle light/dark theme"><svg><use href="#i-moon"></use></svg></button>
       <span class="nav-auth" data-gc-onclick="route('portal')"><svg class="icon-sm"><use href="#i-user"></use></svg><span id="authNavLabel"></span></span>
       <button class="btn btn-primary" data-gc-onclick="route('request')" data-i18n="nav.quote"></button>
     </div>
@@ -1012,34 +1005,16 @@ footer::before{content:''; position:absolute; top:-1px; inset-inline:0; height:2
     <a data-route="portal" data-gc-onclick="route('portal')" id="mobileAuthLabel"></a>
     <a href="./staff-os.html" class="staff-mobile-link">◈ بەشی ستاف</a>
     <a href="./careers.html" class="staff-mobile-link">✦ کار لەگەڵمان</a>
-    <div style="display:flex; gap:10px; margin-top:14px;">
-      <div class="lang-toggle" style="flex-shrink:0;">
-        <button data-gc-onclick="setLang('ku')">KU</button>
-        <button data-gc-onclick="setLang('en')">EN</button>
-      </div>
-      <button class="theme-toggle-btn" id="themeToggleBtnMobile" data-gc-onclick="toggleTheme()" aria-label="Toggle light/dark theme"><svg><use href="#i-moon"></use></svg></button>
-      <button class="btn btn-primary btn-block" data-gc-onclick="route('request')" data-i18n="nav.quote"></button>
-    </div>
+    <div class="mobile-menu-actions"><button class="btn btn-primary btn-block" data-gc-onclick="route('request')" data-i18n="nav.quote"></button></div>
   </div>
 </nav>
 
 <div class="gc-mobile-dock" id="gcMobileDock" aria-label="Globall Cloud mobile navigation">
-  <button class="gc-dock-item" data-route="home" data-gc-onclick="route('home')" type="button">
-    <svg><use href="#i-home"></use></svg><span data-i18n="nav.home"></span>
-  </button>
-  <button class="gc-dock-item" data-route="track" data-gc-onclick="route('track')" type="button">
-    <svg><use href="#i-search"></use></svg><span data-i18n="nav.track"></span>
-  </button>
-  <button class="gc-dock-action" data-gc-onclick="route('request')" type="button" aria-label="Request a quote">
-    <span class="gc-dock-action-icon"><svg><use href="#i-plus"></use></svg></span>
-    <span data-i18n="nav.quote"></span>
-  </button>
-  <button class="gc-dock-item" data-route="services" data-gc-onclick="route('services')" type="button">
-    <svg><use href="#i-box"></use></svg><span data-i18n="nav.services"></span>
-  </button>
-  <button class="gc-dock-item" data-route="portal" data-gc-onclick="route('portal')" type="button">
-    <svg><use href="#i-user"></use></svg><span data-i18n="pbn.profile"></span>
-  </button>
+  <button class="gc-dock-item" data-route="home" data-gc-onclick="route('home')" type="button"><svg><use href="#i-home"></use></svg><span data-i18n="nav.home"></span></button>
+  <button class="gc-dock-item" data-route="services" data-gc-onclick="route('services')" type="button"><svg><use href="#i-box"></use></svg><span data-i18n="nav.services"></span></button>
+  <button class="gc-dock-action" data-gc-onclick="route('request')" type="button" aria-label="Request a quote"><span class="gc-dock-action-icon"><svg><use href="#i-plus"></use></svg></span><span data-i18n="nav.quote"></span></button>
+  <button class="gc-dock-item" data-route="track" data-gc-onclick="goTrack()" type="button"><svg><use href="#i-route"></use></svg><span data-i18n="nav.track"></span></button>
+  <button class="gc-dock-item" data-route="portal" data-gc-onclick="route('portal')" type="button"><svg><use href="#i-user"></use></svg><span data-i18n="pbn.profile"></span></button>
 </div>
 
 <main>
