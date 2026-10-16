@@ -1,7 +1,7 @@
-/dashboard / 301
-/dashboard/ / 301
-/dashboard.html / 301
-/customer-portal.html / 301
+/dashboard /#auth 302
+/dashboard/ /#auth 302
+/dashboard.html /#auth 302
+/customer-portal.html /#auth 302
 /about /#about 302
 /about/ /#about 302
 /services /#services 302
@@ -12,10 +12,10 @@
 /quote/ /#request 302
 /request /#request 302
 /request/ /#request 302
-/customer-portal / 301
-/customer-portal/ / 301
-/portal / 301
-/portal/ / 301
+/customer-portal /#auth 302
+/customer-portal/ /#auth 302
+/portal /#auth 302
+/portal/ /#auth 302
 /staff /staff-os-v5.html 200
 /staff/ /staff-os-v5.html 200
 /staff-os /staff-os-v5.html 200
