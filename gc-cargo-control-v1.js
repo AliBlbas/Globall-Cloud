@@ -73,7 +73,7 @@
       const total=totalsFor(s);
       const content=total.rows.map(x=>x.item_name).join(' ');
       const searchable=[s.customer_gc_code,s.tracking_id,s.tracking_number,s.customer_name,s.origin,s.destination,s.origin_key,s.dest_key,s.cargo_description,content].join(' ').toLowerCase();
-      const statusOk=state.filter==='all'||(state.filter==='shipped'?SHIPPED.has(String(s.status||'')):String(s.status||'')===state.filter);
+      const statusOk=state.filter==='all'||(state.filter==='shipped'?(SHIPPED.has(String(s.status||''))||Boolean(s.dispatched_at||(s.step_dates&&s.step_dates.departed))):String(s.status||'')===state.filter);
       const mode=String(s.transport_mode||s.type||'').toLowerCase();
       return statusOk&&(state.mode==='all'||mode===state.mode)&&(!q||searchable.includes(q));
     });
@@ -93,7 +93,7 @@
   }
   function render() {
     const el=view(); if(!el)return;
-    const rows=state.shipments, visible=rows.filter(s=>SHIPPED.has(String(s.status||'')));
+    const rows=state.shipments, visible=rows.filter(s=>SHIPPED.has(String(s.status||''))||Boolean(s.dispatched_at||(s.step_dates&&s.step_dates.departed)));
     const box=rows.reduce((a,s)=>a+totalsFor(s).boxes,0), pc=rows.reduce((a,s)=>a+totalsFor(s).pcs,0), kg=rows.reduce((a,s)=>a+totalsFor(s).kg,0);
     const outstanding=rows.reduce((a,s)=>{const c=String(s.currency||'USD').toUpperCase();if(!Object.prototype.hasOwnProperty.call(a,c))return a;a[c]+=Math.max(0,Number(s.total_amount||0)-Number(s.paid_amount||0));return a;},{USD:0,IQD:0,AED:0});
     const customerSet=new Set(rows.map(s=>String(s.customer_gc_code||s.directory_customer_id||'')).filter(Boolean));
@@ -183,7 +183,7 @@
       '<div id="gcCargoLines">'+oldItems.map((r,i)=>itemRow(r,i)).join('')+'</div><button type="button" id="gcCargoAddLine" class="gc-cargo-btn gc-cargo-btn-quiet gc-cargo-add-line">+ زیادکردنی ڕیزی کاڵا</button>'+
       '<div class="gc-cargo-totals" id="gcCargoLiveTotals"></div>'+
       '<div class="gc-cargo-section-title"><b>٣. پارە و بەڕێوەبردن</b><span>تەنها ژمارەی پشتڕاستکراو بنووسە</span></div>'+
-      '<div class="gc-cargo-form-grid"><label><span>کۆی نرخی کڕیار</span><input name="total_amount" type="number" min="0" step="0.01" value="'+esc(existing?existing.total_amount:0)+'"></label><label><span>کۆی پارەی وەرگیراو</span><input name="paid_amount" type="number" min="0" step="0.01" value="'+esc(existing?existing.paid_amount:0)+'"></label><label><span>تێچووی بار</span><input name="cost_amount" type="number" min="0" step="0.01" value="'+esc(existing?existing.cargo_cost:0)+'"></label><label><span>شوێنی ئێستای بار</span><input name="current_location_label" maxlength="160" value="'+esc(existing?existing.current_location_label||existing.origin||'':'China')+'"></label><label class="gc-cargo-span-2"><span>تێبینی</span><textarea name="notes" maxlength="2000" rows="2" placeholder="زانیاری زیادە بۆ ستاف">'+esc(existing?existing.notes||'':'')+'</textarea></label></div>'+
+      '<div class="gc-cargo-form-grid"><label><span>کۆی نرخی کڕیار</span><input name="total_amount" type="number" min="0" step="0.01" value="'+esc(existing?existing.total_amount:0)+'"></label><label><span>کۆی پارەی وەرگیراو</span><input name="paid_amount" type="number" min="0" step="0.01" value="'+esc(existing?existing.paid_amount:0)+'"></label><label><span>تێچووی بار</span><input name="cost_amount" type="number" min="0" step="0.01" value="'+esc(existing?existing.cargo_cost:0)+'"></label><label><span>شوێنی ئێستای بار</span><input name="current_location_label" maxlength="160" value="'+esc(existing?existing.current_location_label||existing.origin||'':'China')+'"></label><label><span>کۆدی گروپی بار (Batch)</span><input name="batch_code" maxlength="80" value="'+esc(existing?existing.batch_code||'':'')+'" placeholder="GC-AIR-2026-001"></label><label class="gc-cargo-span-2"><span>تێبینی</span><textarea name="notes" maxlength="2000" rows="2" placeholder="زانیاری زیادە بۆ ستاف">'+esc(existing?existing.notes||'':'')+'</textarea></label></div>'+
       '<p class="gc-cargo-form-note">لە پاش پاشەکەوتکردن، ژمارەی tracking، کۆی بۆکس/PC/کیلۆ و audit log لە داتابەیسی ڕاستەقینەدا تۆمار دەکرێن. هەر بارێک tracking ID ـی تایبەتی خۆی دەبێت.</p>'+
       '</form>';
     const m=modal(existing?'دەستکاری بار و ناوەڕۆک':'تۆمارکردنی باری نوێ',content,'<button type="button" class="gc-cargo-btn gc-cargo-btn-quiet" data-cargo-close>پاشگەزبوونەوە</button><button type="submit" form="gcCargoForm" id="gcCargoSave" class="gc-cargo-btn gc-cargo-btn-primary">پاشەکەوتکردن</button>');
@@ -226,6 +226,7 @@
           status:String(fd.get('status')),dispatched_at:dispatched?new Date(dispatched).toISOString():null,
           currency:String(fd.get('currency')),total_amount:total,paid_amount:paid,cost_amount:cost,
           notes:String(fd.get('notes')||'').trim(),current_location_label:String(fd.get('current_location_label')||'').trim(),
+          batch_code:String(fd.get('batch_code')||'').trim()||null,
           cargo_description:rows.map(x=>x.item_name).join(', ')
         };
         save.disabled=true;save.textContent='پاشەکەوت دەکرێت…';

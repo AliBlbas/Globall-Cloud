@@ -210,7 +210,10 @@ BEGIN
     v_step_dates := coalesce(v_existing.step_dates, '{}'::jsonb);
   END IF;
 
-  IF v_dispatch IS NULL AND v_created AND v_status IN ('in_transit','at_transit_hub','customs','out_for_delivery','delivered') THEN v_dispatch := v_now; END IF;
+  IF v_dispatch IS NULL AND (v_created OR v_old_status IS DISTINCT FROM v_status)
+     AND v_status IN ('in_transit','at_transit_hub','customs','out_for_delivery','delivered') THEN
+    v_dispatch := v_now;
+  END IF;
   IF v_dispatch IS NOT NULL THEN v_step_dates := v_step_dates || jsonb_build_object('departed', v_dispatch::text); END IF;
   IF v_old_status IS DISTINCT FROM v_status THEN v_step_dates := v_step_dates || jsonb_build_object(v_status, v_now::text); END IF;
   v_step := CASE v_status WHEN 'received_origin' THEN 0 WHEN 'in_transit' THEN 1 WHEN 'at_transit_hub' THEN 2 WHEN 'customs' THEN 3 WHEN 'out_for_delivery' THEN 4 WHEN 'delivered' THEN 5 WHEN 'on_hold' THEN 6 WHEN 'cancelled' THEN 7 ELSE 0 END;
@@ -218,7 +221,8 @@ BEGIN
   UPDATE public.shipments
   SET route = v_origin_key || '-' || v_dest_key, type = v_mode, status = v_status,
       directory_customer_id = v_customer.id, customer_user_id = v_customer.auth_user_id,
-      tracking_number = v_tracking, origin = v_origin, destination = v_destination,
+      tracking_number = v_tracking, batch_code = nullif(trim(p_payload->>'batch_code'), ''),
+      origin = v_origin, destination = v_destination,
       customer_name = v_customer.name, customer_phone = v_customer.phone, customer_email = v_customer.email,
       origin_key = v_origin_key, dest_key = v_dest_key, customer_gc_code = v_gc, branch = v_branch,
       total_amount = v_total, paid_amount = v_paid, current_step_index = v_step, step_dates = v_step_dates,
