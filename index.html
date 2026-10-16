@@ -46,6 +46,14 @@
   <link rel="stylesheet" href="/gc-homepage-command-v6.css?v=1" data-gc-homepage-command-v6="1">
   <link rel="stylesheet" href="/gc-homepage-refresh-20261016.css?v=4" data-gc-homepage-refresh="20261016">
   <link rel="stylesheet" href="/gc-homepage-signature-20261016.css?v=7" data-gc-homepage-signature="20261016-5">
+
+<!-- Single-page customer workspace styles; activated only with body.gc-customer-app. -->
+<link rel="stylesheet" href="/gc-settings-hub.css?v=20261016-9" data-gc-settings-css="1">
+<link rel="stylesheet" href="/gc-customer-app-20261003.css?v=3" data-gc-customer-app-css="1">
+<link rel="stylesheet" href="/gc-customer-portal-rates.css?v=20261003-3" data-gc-customer-rates-css="1">
+<link rel="stylesheet" href="/gc-customer-workspace-elite-20261014.css?v=13" data-gc-customer-elite="1">
+<link rel="stylesheet" href="/gc-customer-mobile-dock-20261016.css?v=2" data-gc-customer-mobile-dock="1">
+<script src="/gc-settings-hub.js?v=20261016-10" defer data-gc-settings-hub="1"></script>
 </head>
 <body>
 <div class="gc-app" id="gcApp">
@@ -56,10 +64,10 @@
       <nav class="gc-desktop-nav" aria-label="ناڤیگەیشن">
         <a href="/" data-gc-route="home">سەرەکی</a><a href="/#services" data-gc-route="services">خزمەتگوزاری</a><a href="/track" data-gc-route="track">شوێنکەوتن</a><a href="/#request" data-gc-route="request">داواکردنی نرخ</a><a href="/#contact" data-gc-route="contact">پەیوەندی</a>
       </nav>
-      <div class="gc-nav-actions"><div class="gc-socials" aria-label="WhatsApp"><a href="https://wa.me/9647507577137" target="_blank" rel="noreferrer" aria-label="WhatsApp">◔</a></div><a class="gc-staff" href="/staff">▣ بەشی ستاف</a><a class="gc-btn gc-btn-primary gc-customer-entry" href="/dashboard#auth" aria-label="چوونەژوورەوەی هەژماری کڕیار"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20c.8-3.6 3.3-5.5 7.5-5.5s6.7 1.9 7.5 5.5"></path></svg><span>چوونەژوورەوە</span></a><a class="gc-btn gc-btn-soft gc-register-link" href="/dashboard#register">تۆمارکردن</a><button class="gc-menu" type="button" data-gc-menu aria-label="menu">☰</button></div>
+      <div class="gc-nav-actions"><div class="gc-socials" aria-label="WhatsApp"><a href="https://wa.me/9647507577137" target="_blank" rel="noreferrer" aria-label="WhatsApp">◔</a></div><a class="gc-staff" href="/staff">▣ بەشی ستاف</a><a class="gc-btn gc-btn-primary gc-customer-entry" href="/#auth" aria-label="چوونەژوورەوەی هەژماری کڕیار"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20c.8-3.6 3.3-5.5 7.5-5.5s6.7 1.9 7.5 5.5"></path></svg><span>چوونەژوورەوە</span></a><a class="gc-btn gc-btn-soft gc-register-link" href="/#auth">تۆمارکردن</a><button class="gc-menu" type="button" data-gc-menu aria-label="menu">☰</button></div>
     </div>
     <div class="gc-mobile-menu" data-gc-mobile-menu hidden>
-      <a href="/">سەرەکی</a><a href="/#services">خزمەتگوزاری</a><a href="/track">شوێنکەوتن</a><a href="/#request">داواکردنی نرخ</a><a href="/dashboard#auth">هەژماری کڕیار</a><a href="/staff">کۆنسۆڵی ستاف</a><a href="/#contact">پەیوەندی</a>
+      <a href="/">سەرەکی</a><a href="/#services">خزمەتگوزاری</a><a href="/track">شوێنکەوتن</a><a href="/#request">داواکردنی نرخ</a><a href="/#auth">هەژماری کڕیار</a><a href="/staff">کۆنسۆڵی ستاف</a><a href="/#contact">پەیوەندی</a>
     </div>
   </header>
 
@@ -118,7 +126,7 @@
           <span class="gc-launchpad-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M8 7h8M8 11h8M8 15h5"></path></svg></span>
           <span class="gc-launchpad-card-copy"><b>داواکردنی نرخ</b><small>سەرچاوە، جۆری بار و کێش تۆمار بکە</small></span>
         </a>
-        <a class="gc-launchpad-card" href="/dashboard">
+        <a class="gc-launchpad-card" href="/#auth">
           <span class="gc-launchpad-arrow" aria-hidden="true">↗</span>
           <span class="gc-launchpad-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"></circle><path d="M5 20c.8-3.3 3.2-5 7-5s6.2 1.7 7 5"></path></svg></span>
           <span class="gc-launchpad-card-copy"><b>هەژماری کڕیار</b><small>بار، بەڵگە، invoice و مێژووی پارەدان</small></span>
@@ -256,7 +264,7 @@
       <div id="requestSuccessWrap" hidden class="gc-request-success"></div>
     </section>
 
-    <section class="gc-container gc-page" id="page-portal" hidden><div class="gc-portal-panel"><span class="gc-eyebrow" style="color:#75e1eb">CUSTOMER PORTAL</span><h1>هەژماری کڕیار</h1><p>بارەکان، invoice، payment، documents و notifications ـەکانت لە هەژماری تایبەتی خۆتدا ببینە.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:18px"><a class="gc-btn" style="background:#fff;color:#0b2a3b" href="/dashboard">کردنەوەی داشبۆرد</a><a class="gc-btn" style="border-color:rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:#fff" href="/#request">داواکردنی نرخ</a></div></div></section>
+    <section class="gc-container gc-page" id="page-portal" hidden><div class="gc-portal-panel"><span class="gc-eyebrow" style="color:#75e1eb">CUSTOMER PORTAL</span><h1>هەژماری کڕیار</h1><p>بارەکان، invoice، payment، documents و notifications ـەکانت لە هەژماری تایبەتی خۆتدا ببینە.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:18px"><a class="gc-btn" style="background:#fff;color:#0b2a3b" href="/#auth">کردنەوەی داشبۆرد</a><a class="gc-btn" style="border-color:rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:#fff" href="/#request">داواکردنی نرخ</a></div></div></section>
 
     <section class="gc-container gc-page" id="page-contact" hidden>
       <span class="gc-eyebrow">CONTACT</span><h1>پەیوەندی</h1><p>پشتیوانی بۆ shipment، payment و هەموو پرسیارەکان.</p>
@@ -281,16 +289,102 @@
       <div id="testimonialsGrid"></div>
     </div>
 
-  <footer class="gc-footer"><div class="gc-container gc-footer-grid"><div><b>Globall Cloud</b><p style="font-size:11px;line-height:1.9">لۆجستیکی دیجیتاڵ بۆ عێراق. Air · Sea · Land</p></div><div><b>Customer</b><a href="/dashboard">هەژمار</a><a href="/track">Tracking</a><a href="/#request">Quote</a></div><div><b>Staff</b><a href="/staff">Staff Console</a><a href="/staff">Super Admin</a><a href="/staff">Operations</a></div><div><b>Support</b><a href="https://wa.me/9647507577137">WhatsApp</a><a href="mailto:tamanblbas271@gmail.com">Email</a></div></div><div class="gc-container gc-footer-bottom"><span>© 2026 Globall Cloud</span><span>Customer · Staff · Operations</span></div></footer>
+  <footer class="gc-footer"><div class="gc-container gc-footer-grid"><div><b>Globall Cloud</b><p style="font-size:11px;line-height:1.9">لۆجستیکی دیجیتاڵ بۆ عێراق. Air · Sea · Land</p></div><div><b>Customer</b><a href="/#auth">هەژمار</a><a href="/track">Tracking</a><a href="/#request">Quote</a></div><div><b>Staff</b><a href="/staff">Staff Console</a><a href="/staff">Super Admin</a><a href="/staff">Operations</a></div><div><b>Support</b><a href="https://wa.me/9647507577137">WhatsApp</a><a href="mailto:tamanblbas271@gmail.com">Email</a></div></div><div class="gc-container gc-footer-bottom"><span>© 2026 Globall Cloud</span><span>Customer · Staff · Operations</span></div></footer>
 
 
+</div>
+
+
+<!-- UNIFIED CUSTOMER WORKSPACE: same document as the public homepage; revealed after sign-in or #auth. -->
+<div id="gcCustomerWorkspace" hidden data-gc-unified-customer="1">
+<header class="app-header">
+    <div class="app-header-inner">
+      <a class="app-brand" href="/#public"><img src="logo-icon.png" alt="Globall Cloud"><span><strong>Globall Cloud</strong><small>LOGISTICS WORKSPACE</small></span></a>
+      <div class="app-header-actions">
+        <a class="app-header-link" href="/track"><span data-dash-icon="track"></span><span>شوێنکەوتن</span></a>
+        <button class="app-header-button" id="loginBtn" type="button"><span data-dash-icon="user"></span><span>چوونەژوورەوە</span></button>
+        <button class="app-header-button hidden" id="logoutBtn" type="button"><span data-dash-icon="logout"></span><span>دەرچوون</span></button>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <aside class="app-sidebar" aria-label="ناڤیگەیشتنی هەژمار">
+      <div class="workspace-profile"><div class="workspace-avatar" data-dash-icon="user"></div><div><span class="eyebrow">CUSTOMER ID</span><strong id="customerGcCode">GC-—</strong><small id="customerProfileContact">پەیوەندی تۆمار نەکراوە</small></div></div>
+      <nav class="app-side-nav">
+        <a class="active" href="#overview"><span data-dash-icon="home"></span><span>سەرەتا</span></a>
+        <a href="#shipments"><span data-dash-icon="shipments"></span><span>بارەکان</span></a>
+        <a href="#commercial"><span data-dash-icon="sales"></span><span>نرخ و فرۆشتن</span></a>
+        <a href="#records"><span data-dash-icon="documents"></span><span>بەڵگە و پارەدان</span></a>
+        <a href="#support"><span data-dash-icon="support"></span><span>پشتیوانی</span></a>
+        <a href="#gcAccountSettings"><span data-dash-icon="settings"></span><span>ڕێکخستن</span></a>
+      </nav>
+      <div class="sidebar-footer"><span class="status-dot"></span><span>سیستەم زیندووە</span><small>Supabase secure workspace</small></div>
+    </aside>
+
+    <main class="app-main">
+      <section class="workspace-toolbar" aria-label="ڕێکخستنەکانی سیستەم">
+        <div><span class="eyebrow">PRIVATE CUSTOMER WORKSPACE</span><h1 id="hello">بەخێربێیت</h1><p id="customerWelcome">هەموو جوڵەی بارەکانت لە یەک شوێنە.</p></div>
+        <div class="workspace-controls"><button class="control-button" type="button" data-dashboard-theme aria-label="گۆڕینی دۆخی نمایش"></button><label class="language-control"><span data-dash-icon="language"></span><select data-dashboard-language aria-label="گۆڕینی زمان"><option value="ckb">کوردی</option><option value="ar">العربية</option><option value="en">English</option></select></label></div>
+      </section>
+
+      <div id="portalStatus" class="portal-status" role="status" aria-live="polite"></div>
+
+      <section class="command-card" id="overview">
+        <div class="command-copy"><span class="eyebrow accent">LIVE OPERATIONS</span><h2>هەنگاوی دواترت لێرەیە</h2><p>بارەکان ببینە، نرخێکی نوێ داوا بکە یان پەیوەندی بە تیمی پشتیوانییەوە بکە.</p><div class="command-actions"><a class="app-primary-action" href="#shipments"><span data-dash-icon="shipments"></span>بینینی بارەکان</a><a class="app-secondary-action" href="#newRequest"><span data-dash-icon="plus"></span>داواکاری نوێ</a></div></div>
+        <div class="command-visual"><div class="route-orbit"><span class="orbit-node node-a"></span><span class="orbit-node node-b"></span><span class="orbit-node node-c"></span><div class="orbit-center" data-dash-icon="route"></div></div><div><span class="eyebrow">NETWORK STATUS</span><strong>China · Dubai · Erbil</strong><small>Live shipment visibility</small></div></div>
+      </section>
+
+      <section id="homeMetrics" class="metric-grid" aria-label="پوختەی هەژمار">
+        <article class="metric-card"><span class="metric-icon cyan" data-dash-icon="shipments"></span><div><small>SHIPMENTS</small><strong id="shipKpi">—</strong><span>هەموو بارەکانت</span></div></article>
+        <article class="metric-card"><span class="metric-icon violet" data-dash-icon="moving"></span><div><small>IN TRANSIT</small><strong id="movingKpi">—</strong><span>لە گواستنەوەدا</span></div></article>
+        <article class="metric-card"><span class="metric-icon amber" data-dash-icon="wallet"></span><div><small>BALANCE DUE</small><strong id="dueKpi">—</strong><span>پارەی ماوە</span></div></article>
+        <article class="metric-card"><span class="metric-icon mint" data-dash-icon="bell"></span><div><small>ALERTS</small><strong id="notifKpi">—</strong><span>ئاگادارییە نوێکان</span></div></article>
+      </section>
+
+      <section class="section-block" id="shipmentsSection">
+        <div class="section-heading"><div><span class="eyebrow">TRACKING CENTER</span><h2>بارەکانت</h2><p>دۆخ و شوێنی هەر بارێک بە ڕاستەوخۆ ببینە.</p></div><a class="text-action" href="/track">شوێنکەوتنی public ←</a></div>
+        <div id="shipments" class="shipment-list"><div class="empty-panel"><span data-dash-icon="shipments"></span><strong>Login بکە بۆ بینینی بارەکانت</strong><button class="app-primary-action" id="loginPromptBtn" type="button">چوونەژوورەوە</button></div></div>
+      </section>
+
+      <section class="section-block" id="activity">
+        <div class="section-heading"><div><span class="eyebrow">ACTIVITY FEED</span><h2>ئاگادارییەکان</h2><p>هەموو ئاگادارییەک بە جیاواز دەبینەوە؛ دەتوانیت نەخوێندراوەکانیش بخوێنراوە بکەیت.</p></div><span class="live-badge"><i></i> LIVE</span></div>
+        <article class="surface-card"><div id="notifications" class="record-list"><div class="empty-line">هێشتا ئاگادارییەک نییە.</div></div></article>
+      </section>
+
+      <section class="section-block" id="quotesPanel">
+        <div class="section-heading"><div><span class="eyebrow">COMMERCIAL</span><h2>Quote ـەکان</h2><p>مێژووی داواکاریی نرخەکانت لێرە جیاوازە لە ئاگادارییەکان.</p></div><a class="icon-action" href="#newRequest" data-dash-icon="plus" aria-label="داواکاری نوێ"></a></div>
+        <article class="surface-card"><div id="quotes" class="record-list"><div class="empty-line">هێشتا quote ـێک نییە.</div></div></article>
+      </section>
+
+      <section class="section-block" id="commercial">
+        <div class="section-heading"><div><span class="eyebrow">RATE ENGINE</span><h2>نرخ و فرۆشتن</h2><p>نرخی پێشبینیکراو ببینە و داواکارییەکی ڕاستەوخۆ بنێرە.</p></div><span class="section-mark" data-dash-icon="sales"></span></div>
+        <div class="commercial-grid">
+          <article class="surface-card rate-engine-card"><div class="card-title-row"><h3>حیسابکردنی نرخ</h3><span class="pill">ESTIMATE</span></div><div class="rate-tool"><div class="field-wrap"><label for="rateRoute">ڕێگا</label><select id="rateRoute" class="field"><option value="chinaAir">China Air</option><option value="chinaSea">China Sea</option><option value="usaAir">USA Air</option><option value="dubaiAir">Dubai Air</option><option value="dubaiLand">Dubai Land</option></select></div><div class="field-wrap"><label for="rateCategory">جۆری کاڵا</label><select id="rateCategory" class="field"></select></div><div class="field-wrap"><label for="rateAmount">کێش (kg)</label><input id="rateAmount" class="field" type="number" min="0" step="0.01" placeholder="0"></div><div class="field-wrap"><label for="rateVolume">قەبارە (CBM)</label><input id="rateVolume" class="field" type="number" min="0" step="0.001" placeholder="0"></div><div class="field-wrap"><label for="rateItems">ژمارەی دانە</label><input id="rateItems" class="field" type="number" min="0" step="1" placeholder="0"></div><div id="rateResult" class="rate-result"><strong>$0</strong><span>ڕێگا هەڵبژێرە بۆ دەستپێکردن</span></div></div><p id="rateMinimum" class="rate-minimum">Minimum rule: shipments under 1kg are charged at 5,000 IQD.</p><div id="rateCards" class="rate-cards"></div></article>
+          <article class="surface-card quote-engine-card"><div class="card-title-row"><h3>داواکارییەکی نوێ</h3><span class="pill accent-pill">LIVE REQUEST</span></div><form id="quoteForm" class="quote-form"><div class="field-wrap"><label for="quoteOrigin">سەرچاوە</label><input id="quoteOrigin" class="field" required placeholder="چین / دوبەی"></div><div class="field-wrap"><label for="quoteDestination">شوێنی گەیشتن</label><input id="quoteDestination" class="field" required value="هەولێر"></div><div class="field-wrap"><label for="quoteMode">شێوازی گواستنەوە</label><select id="quoteMode" class="field"><option value="air">ئاسمانی</option><option value="sea">دەریایی</option><option value="land">وشکانی</option></select></div><div class="field-wrap"><label for="quoteWeight">کێش (kg)</label><input id="quoteWeight" class="field" type="number" min="0" step="0.01" required></div><div class="field-wrap"><label for="quoteVolume">قەبارە (CBM)</label><input id="quoteVolume" class="field" type="number" min="0" step="0.001"></div><div class="field-wrap"><label for="quoteService">ئاستی خزمەت</label><select id="quoteService" class="field"><option value="standard">ستاندارد</option><option value="express">خێرا</option><option value="priority">پەلەدار</option></select></div><div class="field-wrap full"><label for="quoteNotes">تێبینییەکان</label><textarea id="quoteNotes" class="field textarea" maxlength="2000" placeholder="ناوی کاڵا و وردەکارییە گرنگەکان"></textarea></div><div class="form-submit full"><button class="app-primary-action" type="submit"><span data-dash-icon="send"></span>ناردنی داواکاری نرخ</button><div id="quoteMessage" class="form-message" aria-live="polite"></div></div><input id="quoteItems" type="hidden" value=""><input id="quoteIncoterm" type="hidden" value="EXW"></form></article>
+        </div>
+      </section>
+
+      <section class="section-block" id="records"><div class="section-heading"><div><span class="eyebrow">DOCUMENTS & FINANCE</span><h2>تۆمارەکانت</h2><p>بەڵگە، پارەدان و بەڵگەی گەیاندن لە یەک شوێن.</p></div></div><div class="records-grid"><article class="surface-card"><div class="card-title-row"><h3>بەڵگەکان</h3><span data-dash-icon="documents"></span></div><div id="docs" class="record-list"><div class="empty-line">هێشتا بەڵگەیەک نییە.</div></div></article><article class="surface-card"><div class="card-title-row"><h3>Proof of Delivery</h3><span data-dash-icon="check"></span></div><div id="pods" class="record-list"><div class="empty-line">هێشتا POD ـێک نییە.</div></div></article><article class="surface-card"><div class="card-title-row"><h3>پارەدان و invoice</h3><span data-dash-icon="wallet"></span></div><div id="payments" class="record-list"><div class="empty-line">هێشتا مامەڵەیەک نییە.</div></div><div id="invoices" class="record-list hidden"></div><div id="expenses" class="record-list hidden"></div></article></div></section>
+
+      <section class="section-block support-section" id="support"><div class="section-heading"><div><span class="eyebrow">CUSTOMER CARE</span><h2>پشتیوانی</h2><p>پەیوەندی ڕاستەوخۆ لەگەڵ تیمی Globall Cloud.</p></div><span class="section-mark" data-dash-icon="support"></span></div><div class="support-grid"><article class="surface-card chat-card"><div id="customerChatThreads" class="record-list"><div class="empty-line">پەیامێک بنووسە بۆ دەستپێکردن.</div></div><form id="customerChatForm" class="chat-form"><input id="customerChatInput" class="field" maxlength="4000" placeholder="پەیامەکەت بنووسە..." required><button class="app-primary-action" type="submit"><span data-dash-icon="send"></span>ناردن</button><div id="customerChatStatus" class="form-message"></div></form></article><article class="surface-card warehouse-card"><div class="card-title-row"><h3>کۆگا و ناونیشانەکان</h3><span data-dash-icon="warehouse"></span></div><div id="warehouseAddresses" class="record-list"><div class="empty-line">دوای login نیشان دەدرێت.</div></div><div id="warehouseDirectory" class="hidden"></div></article></div></section>
+
+      <section class="section-block request-section" id="newRequest"><div class="section-heading"><div><span class="eyebrow">SELF SERVICE</span><h2>داواکاری نوێی ناردنی بار</h2><p>زانیاری بارەکەت بنووسە؛ تیمەکەمان دواتر دۆخ و نرخەکە پشتڕاست دەکاتەوە.</p></div></div><form id="customerRequestForm" class="request-form surface-card"><div class="field-wrap"><label for="requestCountry">وڵاتی سەرچاوە</label><select id="requestCountry" class="field"><option value="china">چین</option><option value="dubai">دوبەی</option><option value="usa">ئەمریکا</option></select></div><div class="field-wrap"><label for="requestMode">جۆری گواستنەوە</label><select id="requestMode" class="field"><option value="air">ئاسمانی</option><option value="sea">دەریایی</option><option value="land">وشکانی</option></select></div><div class="field-wrap"><label for="requestWeight">کێش (KG)</label><input id="requestWeight" class="field" type="number" min="0.01" step="0.01" required></div><div class="field-wrap"><label for="requestItems">ژمارەی کاڵا</label><input id="requestItems" class="field" type="number" min="1" step="1"></div><div class="field-wrap full"><label for="requestDescription">وەسفی کاڵا</label><textarea id="requestDescription" class="field textarea" maxlength="2000" required placeholder="ناوی کاڵا، جۆر، باتری هەیە یان نا..."></textarea></div><div class="field-wrap full"><label for="requestImage">وێنەی کاڵا</label><input id="requestImage" class="field" type="file" accept="image/*"><small class="muted">ئارەزوومەندانە، تا 10MB.</small></div><div class="form-submit full"><button class="app-primary-action" type="submit"><span data-dash-icon="send"></span>ناردنی داواکاری</button><div id="requestMessage" class="form-message"></div></div><div class="section-head full"><h3>داواکارییەکانی من</h3></div><div id="requestHistory" class="record-list full"><div class="empty-line">Login بکە بۆ بینینی داواکارییەکانت.</div></div></form></section>
+    </main>
+  </div>
+
+  <nav class="mobile-dock" aria-label="ناڤیگەیشتنی مۆبایل"><a href="#overview" data-dock-tab="home" class="active" aria-current="page"><span data-dash-icon="home"></span><small data-dash-i18n="home">سەرەکی</small></a><a href="#shipmentsSection" data-dock-tab="shipments"><span data-dash-icon="shipments"></span><small data-dash-i18n="shipments">بارەکان</small></a><a href="#newRequest" data-dock-tab="requests" class="dock-primary"><span data-dash-icon="request"></span><small data-dash-i18n="request">داواکاری</small></a><a href="#activity" data-dock-tab="notifications"><span data-dash-icon="notifications"></span><small data-dash-i18n="notifications">ئاگاداری</small></a><a href="#records" data-dock-tab="records" aria-label="بەڵگە و پارە"><span data-dash-icon="records"></span><small data-dash-i18n="records">بەڵگە</small></a><button type="button" data-dock-tab="settings" aria-label="ڕێکخستن"><span data-dash-icon="settings"></span><small data-dash-i18n="settings">ڕێکخستن</small></button></nav>
+
+  <div id="shipmentDetail" class="app-modal hidden"><div class="detail-sheet"><div class="sheet-head"><div><span class="eyebrow">SHIPMENT DETAIL</span><h2 id="detailTitle">بار</h2></div><button id="closeShipmentDetail" class="icon-action" type="button">×</button></div><div id="detailStatus" class="detail-status"></div><div class="detail-route" id="detailRoute"></div><div id="detailMap" class="detail-map"></div><div class="detail-grid"><div><small>شوێن</small><strong id="detailLocation">—</strong></div><div><small>نوێکراوەتەوە</small><strong id="detailUpdated">—</strong></div></div><div id="detailTimeline" class="record-list"></div><div id="detailPackages" class="record-list"></div><div id="detailPhotos" class="photo-grid"></div><div id="detailEvidence" class="record-list"></div><div id="detailFinance" class="record-list"></div><div id="detailDocuments" class="record-list"></div></div></div>
+
+  <div id="auth" class="app-modal hidden"><div class="auth-sheet"><button id="close" class="icon-action auth-close" type="button">×</button><div class="auth-mark" data-dash-icon="lock"></div><span class="eyebrow">SECURE CUSTOMER ACCESS</span><h2>چوونەژوورەوەی کڕیار</h2><p>کۆدی GC یان ئیمەیڵی تۆمارکراوت لەگەڵ وشەی نهێنی بنووسە بۆ بینینی بار و زانیارییە تایبەتییەکانت.</p><form id="authForm"><label for="email">کۆدی کڕیار (GC-...) یان ئیمەیڵ<input id="email" class="field" type="text" inputmode="text" autocomplete="username" placeholder="GC-6263 یان name@example.com" autocapitalize="characters" spellcheck="false" required><small class="muted">کۆدی GC ـەکەت بە تەواوی بنووسە؛ بۆ نموونە GC-6263. هەمان وشەی نهێنیی هەژمارەکەت بەکاربهێنە.</small></label><label for="password">وشەی نهێنی<input id="password" class="field" type="password" autocomplete="current-password" required></label><div id="msg" class="form-message"></div><button id="signIn" class="app-primary-action" type="submit">چوونەژوورەوە</button></form></div></div>
 </div>
 <nav class="gc-mobile-dock-v3" aria-label="ناڤیگەیشنی مۆبایلی Globall Cloud">
     <a href="/" data-dock="home" aria-label="سەرەکی"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v11h14V9M9 20v-6h6v6"></path></svg><span>سەرەکی</span></a>
     <a href="/#services" data-dock="services" aria-label="خزمەتگوزاری"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4-8 4-8-4 8-4Z"></path><path d="M4 7v10l8 4 8-4V7M12 11v10"></path></svg><span>خزمەتگوزاری</span></a>
     <a href="/#request" data-dock="quote" class="primary" aria-label="داواکردنی نرخ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h8l4 4v14H5V3h2Z"></path><path d="M15 3v5h4M8 12h8M8 16h5"></path><path d="M12 10v4M10 12h4"></path></svg><span>داواکردنی نرخ</span></a>
     <a href="/track" data-dock="track" aria-label="شوێنکەوتن"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2"></circle><circle cx="18" cy="6" r="2"></circle><path d="M8 18h5c3 0 5-2 5-5v-3M18 8V6h-4c-3 0-5 2-5 5v3"></path></svg><span>شوێنکەوتن</span></a>
-    <a href="/dashboard#auth" data-dock="account" aria-label="هەژمار"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20c.8-3.6 3.3-5.5 7.5-5.5s6.7 1.9 7.5 5.5"></path></svg><span>هەژمار</span></a>
+    <a href="/#auth" data-dock="account" aria-label="هەژمار"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20c.8-3.6 3.3-5.5 7.5-5.5s6.7 1.9 7.5 5.5"></path></svg><span>هەژمار</span></a>
   </nav>
 
 <script src="/gc-live-mobile-v3.js?v=20261016-5" defer></script>
@@ -300,6 +394,13 @@
 <script src="/gc-landing-service-polish-20260929.js?v=1" defer></script>
 <script src="/gc-icon-hierarchy-20260930.js?v=1" defer></script>
 <script src="/gc-homepage-intelligence-20261001.js?v=2" defer></script>
-<script src="/gc-public-customer-style-loader-20261014.js?v=12" defer data-gc-public-customer-style-loader="1"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="/gc-csp-bridge.js?v=20260817-1" defer data-gc-csp-bridge="1"></script>
+<script src="/gc-csp-scripts/customer-portal-inline-1.js?v=20261016-6" defer data-gc-customer-portal="1"></script>
+<script src="/gc-customer-portal-rates.js?v=20261003-3" defer data-gc-customer-rates="1"></script>
+<script src="/gc-dashboard-preferences-20261003.js?v=20261016-12" defer data-gc-customer-preferences="1"></script>
+<script src="/gc-customer-request-20261003.js?v=20261016-2" defer data-gc-customer-requests="1"></script>
+<script src="/gc-unified-customer-experience-20261016.js?v=1" defer data-gc-unified-customer-experience="1"></script>
+<script src="/gc-public-customer-style-loader-20261014.js?v=13" defer data-gc-public-customer-style-loader="1"></script>
 </body>
 </html>
