@@ -72,7 +72,7 @@
     });
     applyTheme(currentTheme());
   };
-  const   const initMobileDock = () => {
+  const initMobileDock = () => {
     const dock = document.querySelector('body.gc-customer-app .mobile-dock');
     const main = document.querySelector('body.gc-customer-app .app-main');
     if (!dock || !main || dock.dataset.gcDockReady === '1') return;
