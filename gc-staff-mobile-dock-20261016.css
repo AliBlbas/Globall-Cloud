@@ -1,0 +1,235 @@
+/* Globall Cloud — dedicated mobile Staff OS navigation, 2026-10-16.
+   One mobile dock with five primary actions; remaining modules are in the accessible drawer. */
+.gc-staff-mobile-dock,
+.gc-staff-mobile-drawer,
+.gc-staff-mobile-backdrop,
+.gc-staff-mobile-menu-button {
+  display: none !important;
+}
+.gc-staff-mobile-icon svg {
+  display: block;
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (max-width: 760px) {
+  body:has(#app) {
+    padding-bottom: calc(94px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow-x: clip !important;
+  }
+  body:has(#app) #app .gc-side {
+    display: none !important;
+  }
+  body:has(#app) #app .gc-main {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  body:has(#app) #app .view {
+    padding-bottom: 110px !important;
+    min-width: 0 !important;
+  }
+  .gc-staff-mobile-menu-button {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 44px;
+    width: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    border: 1px solid rgba(73,212,229,.26);
+    border-radius: 12px;
+    background: rgba(73,212,229,.09);
+    color: #d9fbff;
+    font: 900 19px/1 system-ui, sans-serif;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .gc-staff-mobile-menu-button[aria-expanded="true"] {
+    border-color: rgba(73,212,229,.56);
+    background: rgba(73,212,229,.18);
+  }
+  .gc-staff-mobile-backdrop {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    z-index: 9400;
+    background: rgba(1,8,15,.68);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .18s ease, visibility .18s ease;
+  }
+  .gc-staff-mobile-backdrop.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .gc-staff-mobile-dock {
+    display: grid !important;
+    position: fixed;
+    inset-inline: 8px;
+    bottom: calc(7px + env(safe-area-inset-bottom, 0px));
+    z-index: 9500;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+    padding: 6px;
+    border: 1px solid rgba(143,203,224,.24);
+    border-radius: 20px;
+    background: rgba(4,17,30,.97);
+    box-shadow: 0 18px 50px rgba(0,0,0,.46);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+  .gc-staff-mobile-dock button {
+    display: grid;
+    grid-template-rows: 23px auto;
+    place-items: center;
+    align-content: center;
+    gap: 3px;
+    min-width: 0;
+    min-height: 58px;
+    padding: 5px 2px;
+    border: 1px solid transparent;
+    border-radius: 13px;
+    background: transparent;
+    color: #91aabd;
+    cursor: pointer;
+    font: 800 9px/1.35 Vazirmatn, system-ui, sans-serif;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .gc-staff-mobile-dock button.active {
+    border-color: rgba(73,212,229,.2);
+    background: linear-gradient(180deg, rgba(73,212,229,.15), rgba(73,212,229,.045));
+    color: #f2fdff;
+  }
+  .gc-staff-mobile-dock button.active .gc-staff-mobile-icon {
+    color: #7beaf3;
+  }
+  .gc-staff-mobile-icon { color: #8aa7ba; line-height: 0; }
+  .gc-staff-mobile-label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .gc-staff-mobile-drawer {
+    display: grid !important;
+    position: fixed;
+    inset-inline: 8px;
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+    z-index: 9600;
+    grid-template-columns: minmax(0,1fr);
+    gap: 10px;
+    max-height: min(68dvh, 590px);
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: 15px;
+    border: 1px solid rgba(143,203,224,.25);
+    border-radius: 22px;
+    background: linear-gradient(160deg, rgba(9,30,48,.99), rgba(3,14,25,.99));
+    box-shadow: 0 24px 90px rgba(0,0,0,.58);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
+  }
+  .gc-staff-mobile-drawer[hidden] { display: none !important; }
+  .gc-staff-mobile-drawer.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+  }
+  .gc-staff-mobile-drawer-head {
+    display: grid;
+    gap: 4px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(143,203,224,.13);
+  }
+  .gc-staff-mobile-drawer-head strong { color: #f4fbff; font-size: 16px; }
+  .gc-staff-mobile-drawer-head span {
+    color: #6fdce8;
+    font: 800 9px/1.5 "JetBrains Mono", monospace;
+    letter-spacing: 1px;
+  }
+  .gc-staff-mobile-module-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 7px;
+  }
+  .gc-staff-mobile-module-grid button {
+    display: grid;
+    grid-template-columns: 30px minmax(0,1fr);
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    min-height: 48px;
+    padding: 8px;
+    border: 1px solid rgba(143,203,224,.12);
+    border-radius: 13px;
+    background: rgba(255,255,255,.035);
+    color: #d1e4f0;
+    text-align: start;
+    font: 800 11px/1.5 Vazirmatn, system-ui, sans-serif;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .gc-staff-mobile-module-grid button.active {
+    border-color: rgba(73,212,229,.4);
+    background: rgba(73,212,229,.12);
+    color: #f4fcff;
+  }
+  .gc-staff-mobile-module-no {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid rgba(73,212,229,.17);
+    border-radius: 9px;
+    background: rgba(73,212,229,.08);
+    color: #7beaf3;
+    font: 900 9px/1 "JetBrains Mono", monospace;
+  }
+  .gc-staff-mobile-module-label { min-width: 0; overflow-wrap: anywhere; }
+  .gc-staff-mobile-user {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(143,203,224,.13);
+  }
+  .gc-staff-mobile-user span { display: grid; gap: 2px; min-width: 0; }
+  .gc-staff-mobile-user b { color: #f4fbff; font-size: 12px; overflow-wrap: anywhere; }
+  .gc-staff-mobile-user small { color: #8faabe; font-size: 10px; }
+  .gc-staff-mobile-user button {
+    flex: 0 0 auto;
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid rgba(255,126,141,.25);
+    border-radius: 11px;
+    background: rgba(255,126,141,.07);
+    color: #ffd8dd;
+    font: 800 11px Vazirmatn, system-ui, sans-serif;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+}
+@media (min-width: 761px) {
+  .gc-staff-mobile-dock,
+  .gc-staff-mobile-drawer,
+  .gc-staff-mobile-backdrop,
+  .gc-staff-mobile-menu-button { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gc-staff-mobile-dock *,
+  .gc-staff-mobile-drawer,
+  .gc-staff-mobile-backdrop { transition: none !important; }
+}
