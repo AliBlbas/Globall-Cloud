@@ -133,7 +133,7 @@ else ok('Customer registration source has rate limits and origin validation')
 
 
 
-if (!staff.includes('staff-os-v5.js?v=20261016-12')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
+if (!staff.includes('staff-os-v5.js?v=20261016-13')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
 
 const cargoUi = read('staff-os-v5.js')
 const cargoControl = read('supabase/functions/staff-shipment-control/index.ts')
@@ -141,6 +141,7 @@ const cargoCreate = read('supabase/functions/staff-shipment-v5/index.ts')
 const cargoCss = read('gc-shipment-detail-20261016.css')
 if (!staff.includes('/gc-shipment-detail-20261016.css?v=3')) fail('Structured cargo editor CSS cache-buster is missing')
 if (!cargoUi.includes('cargoItemEditorHTML') || !cargoUi.includes('collectCargoItems')) fail('Staff shipment editor must support structured cargo rows')
+if (!cargoUi.includes('list="gcCargoCustomerCodes"') || !cargoUi.includes('ops(\'customers\').then')) fail('Shipment and cargo GC fields should suggest known customer codes')
 if (!cargoUi.includes('if (!itemName && !notes && quantity === 0 && boxes === 0 && weight === 0 && declared === 0) return;')) fail('Empty prefilled GC-code row must not block deleting all cargo items')
 if (!cargoUi.includes('d.cargo_items = collectCargoItems') || !cargoUi.includes('deleted_cargo_item_ids')) fail('Staff shipment save must submit cargo edits and explicit removals')
 if (!cargoCreate.includes('normalizeCargoRows') || !cargoCreate.includes("from('shipment_cargo_items').insert(cargoRows)")) fail('Shipment creation must persist structured cargo rows')
