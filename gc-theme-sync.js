@@ -25,7 +25,8 @@
   };
   const mount = () => {
     let button = document.querySelector('[data-gc-theme-toggle]');
-    if (!button) {
+    const shouldMountStandaloneToggle = !document.body?.classList.contains('gc-customer-app') && !document.querySelector('#gcApp') && !document.querySelector('#page-home');
+    if (!button && shouldMountStandaloneToggle) {
       button = document.createElement('button');
       button.type = 'button';
       button.dataset.gcThemeToggle = '1';
