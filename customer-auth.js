@@ -38,6 +38,9 @@
         code: normalizeCode($('code').value),
         password: $('password').value
       });
+      if (!data?.session?.access_token || !data?.session?.refresh_token) {
+        throw new Error('وەڵامی چوونەژوورەوە تەواو نییە؛ تکایە جارێکی تر هەوڵ بدەوە.');
+      }
       const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
         auth: { persistSession: true, autoRefreshToken: true }
       });
