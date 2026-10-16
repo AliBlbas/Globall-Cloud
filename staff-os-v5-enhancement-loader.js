@@ -21,7 +21,7 @@
     '/staff-os-v5-stability.js?v=20260912-2',
     '/staff-workflow-chain.js?v=20260912-2',
     '/staff-os-premium-20260918.js?v=20260918-1',
-    '/gc-cargo-control-v1.js?v=3'
+    '/gc-cargo-control-v1.js?v=20261016-1'
   ];
 
   const loadStyle = (href) => {

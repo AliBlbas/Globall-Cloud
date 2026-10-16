@@ -121,7 +121,7 @@
     state.client=c;state.loading=true;
     const el=view();if(el)render();
     try {
-      const result=await c.from('shipments').select('id,tracking_id,tracking_number,customer_gc_code,directory_customer_id,customer_user_id,customer_name,customer_phone,origin,destination,origin_key,dest_key,route,type,transport_mode,status,operational_status,box_count,pc_count,carton_count,items_count,weight_kg,actual_weight_kg,chargeable_weight_kg,total_amount,paid_amount,currency,cargo_description,notes,dispatched_at,step_dates,created_at,updated_at,current_location_label,branch,priority,archived_at').is('archived_at',null).order('created_at',{ascending:false}).limit(1000);
+      const result=await c.from('shipments').select('id,tracking_id,tracking_number,customer_gc_code,directory_customer_id,customer_user_id,customer_name,customer_phone,origin,destination,origin_key,dest_key,route,type,transport_mode,status,operational_status,box_count,pc_count,carton_count,items_count,weight_kg,actual_weight_kg,chargeable_weight_kg,total_amount,paid_amount,currency,cargo_description,notes,dispatched_at,step_dates,created_at,updated_at,current_location_label,batch_code,branch,priority,archived_at').is('archived_at',null).order('created_at',{ascending:false}).limit(1000);
       if(result.error)throw result.error;
       state.shipments=result.data||[];
       const cr=await c.from('customer_directory').select('id,code,gc_code,normalized_gc_code,name,phone,city,is_active,customer_status').eq('is_active',true).order('name').limit(2000);
@@ -170,6 +170,7 @@
     const destination=existing?(existing.destination||existing.dest_key||'Erbil'):'Erbil';
     const curr=existing?(existing.currency||'USD'):'USD';
     const customer=state.customers.find(c=>codeOf(c)===codeOf({gc_code:currentCode}));
+    const isAdmin=['admin','super_admin'].includes(String(state.identity?.role||window.gcStaffIdentity?.role||''));
     const options=(values,current)=>values.map(v=>'<option value="'+esc(v[0])+'" '+(String(v[0]).toLowerCase()===String(current).toLowerCase()?'selected':'')+'>'+esc(v[1])+'</option>').join('');
     const countries=[['China','چین / China'],['Dubai','دوبەی / Dubai'],['USA','ئەمریکا / USA'],['Erbil','هەولێر / Erbil']];
     const content='<form id="gcCargoForm" class="gc-cargo-form">'+
@@ -179,6 +180,7 @@
       '<label><span>دۆخی بار *</span><select name="status">'+options(STATUS.map(s=>[s,STATUS_LABEL[s]]),status)+'</select></label>'+
       '<label><span>بنکەی سەرچاوە *</span><select name="origin">'+options(countries,origin)+'</select></label>'+
       '<label><span>شوێنی کۆتایی *</span><select name="destination">'+options(countries,destination)+'</select></label>'+
+      (isAdmin?'<label><span>لق / Branch</span><select name="branch">'+options([['all','هەموو'],['china','China'],['dubai','Dubai'],['uae','UAE'],['erbil','Erbil']],existing?existing.branch||'all':'all')+'</select></label>':'')+
       '<label><span>بەرواری ناردن</span><input name="dispatched_at" type="datetime-local" value="'+esc(localInputDate(existing&&(existing.dispatched_at||(existing.step_dates&&existing.step_dates.departed))))+'"></label>'+
       '<label><span>دراو</span><select name="currency">'+options([['USD','USD · دۆلار'],['IQD','IQD · دینار'],['AED','AED · درهەم']],curr)+'</select></label></div>'+
       '<div class="gc-cargo-section-title"><b>٢. وردەکاری کاڵاکان</b><span>هەر جۆر کاڵایەک لە ڕیزێکی جیاواز</span></div>'+
@@ -211,7 +213,7 @@
     lines.addEventListener('click',e=>{const b=e.target.closest('[data-cargo-remove-line]');if(!b)return;const rows=lines.querySelectorAll('[data-cargo-line]');if(rows.length<=1){notify('دەبێت لانیکەم یەک ڕیزی کاڵا بمێنێتەوە.',true);return;}b.closest('[data-cargo-line]').remove();updateNumbers();});
     const codeInput=m.querySelector('#gcCargoCustomerCode');
     codeInput.addEventListener('input',()=>{const c=state.customers.find(x=>codeOf(x)===codeOf({gc_code:codeInput.value}));m.querySelector('#gcCargoCustomerHint').textContent=c?'کڕیار: '+(c.name||'')+(c.phone?' · '+c.phone:''):'ئەگەر کۆدەکە لە لیستی کڕیارانی چالاکدا نییە، پاشەکەوت ناکرێت.';});
-    form.addEventListener('change',e=>{if(e.target.name==='status'){const di=form.elements.dispatched_at;if(SHIPPED.has(e.target.value)&&di&&!di.value)di.value=localInputDate(new Date());}});
+    form.addEventListener('change',e=>{if(e.target.name==='status'){const di=form.elements.dispatched_at;if(e.target.value==='in_transit'&&di&&!di.value)di.value=localInputDate(new Date());}});
     updateNumbers();
     form.addEventListener('submit',async e=>{
       e.preventDefault();const save=m.querySelector('#gcCargoSave');if(save.disabled)return;
