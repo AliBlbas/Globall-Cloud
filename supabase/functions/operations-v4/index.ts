@@ -65,7 +65,47 @@ async function shipmentDetail(admin:any,id:string){
   admin.from('shipment_financial_ledger').select('*').eq('shipment_id',id).order('created_at',{ascending:false})
  ]);return {shipment,packages:packages.data||[],events:events.data||[],receipts:receipts.data||[],insurance:insurance.data||[],ledger:ledger.data||[]}
 }
-async function customers(admin:any){const {data,error}=await admin.from('customer_directory').select('*').order('created_at',{ascending:false}).limit(2000);if(error)throw error;return data||[]}
+async function customers(admin:any){
+ const {data,error}=await admin.from('customer_directory').select('*').order('created_at',{ascending:false}).limit(2000);
+ if(error)throw error;
+ const rows:any[]=data||[];
+ const byId=new Map<string,any>();
+ const byCode=new Map<string,any>();
+ const normalizeCode=(value:any)=>String(value??'').normalize('NFKC').trim().toUpperCase().replace(/\\s+/g,'');
+ const finiteMoney=(value:any)=>{const n=Number(value??0);return Number.isFinite(n)?n:0};
+ for(const row of rows){
+  row.shipment_count=0;
+  row.outstanding_amount=0;
+  byId.set(String(row.id),row);
+  for(const value of [row.gc_code,row.code,row.normalized_gc_code]){
+   const key=normalizeCode(value);
+   if(key&&!byCode.has(key))byCode.set(key,row);
+  }
+ }
+ const pageSize=1000;
+ for(let start=0;start<100000;start+=pageSize){
+  const page=await admin.from('shipments')
+   .select('id,directory_customer_id,customer_gc_code,total_amount,paid_amount,operational_status,status,archived_at,created_at')
+   .is('archived_at',null)
+   .order('created_at',{ascending:true})
+   .order('id',{ascending:true})
+   .range(start,start+pageSize-1);
+  if(page.error)throw page.error;
+  const shipmentRows:any[]=page.data||[];
+  for(const shipment of shipmentRows){
+   let customer=shipment.directory_customer_id?byId.get(String(shipment.directory_customer_id)):null;
+   if(!customer&&shipment.customer_gc_code)customer=byCode.get(normalizeCode(shipment.customer_gc_code))||null;
+   if(!customer)continue;
+   customer.shipment_count+=1;
+   const status=String(shipment.operational_status||shipment.status||'').trim().toLowerCase();
+   if(!['cancelled','canceled','void','voided'].includes(status)){
+    customer.outstanding_amount+=Math.max(0,finiteMoney(shipment.total_amount)-finiteMoney(shipment.paid_amount));
+   }
+  }
+  if(shipmentRows.length<pageSize)return rows;
+ }
+ throw new Error('Customer summary reached the shipment safety limit; use a paginated report for more than 100,000 shipments');
+}
 async function alerts(admin:any,staffId:string){const {data,error}=await admin.from('staff_alerts').select('*').order('created_at',{ascending:false}).limit(200);if(error)throw error;const staffRow=await admin.from('staff').select('role').eq('id',staffId).maybeSingle();const role=String(staffRow.data?.role||'');return (data||[]).filter((x:any)=>!x.audience_role||x.audience_role===role)}
 async function pricing(admin:any){const [rates,fx,rules]=await Promise.all([admin.from('pricing_rates').select('*').order('origin_key').order('transport_mode').order('product_type'),admin.from('exchange_rates').select('*').order('created_at',{ascending:false}).limit(20),admin.from('pricing_rules').select('*').order('created_at',{ascending:false})]);if(rates.error)throw rates.error;if(fx.error)throw fx.error;if(rules.error)throw rules.error;return {rates:rates.data||[],exchange_rates:fx.data||[],rules:rules.data||[]}}
 async function finance(admin:any){
