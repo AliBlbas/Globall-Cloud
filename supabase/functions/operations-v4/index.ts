@@ -22,7 +22,7 @@ async function actor(req:Request){
 }
 async function requireStaff(req:Request,write=false){const a=await actor(req);if(!a.staff?.is_active||!STAFF_ROLES.has(String(a.staff.role)))throw new Error('Staff permission required');if(write&&!WRITE_ROLES.has(String(a.staff.role)))throw new Error('Admin permission required');return a}
 async function listShipments(admin:any, gcCode?:string){
- let q=admin.from('shipments').select('id,tracking_id,route,type,status,created_at,customer_name,customer_phone,customer_user_id,directory_customer_id,customer_gc_code,origin_key,dest_key,branch,total_amount,paid_amount,current_step_index,step_dates,eta,items_count,weight_kg,volume_cbm,transport_mode,origin_warehouse,destination_warehouse,cargo_description,carton_count,actual_weight_kg,length_cm,width_cm,height_cm,volumetric_weight_kg,chargeable_weight_kg,updated_at').order('created_at',{ascending:false}).limit(500)
+ let q=admin.from('shipments').select('id,tracking_id,route,type,status,created_at,customer_name,customer_phone,customer_user_id,directory_customer_id,customer_gc_code,origin_key,dest_key,branch,total_amount,paid_amount,current_step_index,step_dates,eta,items_count,weight_kg,volume_cbm,transport_mode,origin_warehouse,destination_warehouse,cargo_description,carton_count,actual_weight_kg,length_cm,width_cm,height_cm,volumetric_weight_kg,chargeable_weight_kg,dispatched_at,updated_at').order('created_at',{ascending:false}).limit(500)
  if(gcCode) q=q.or(`customer_gc_code.eq.${gcCode},tracking_id.eq.${gcCode}`)
  const {data,error}=await q;if(error)throw error;
  const rows=data||[];
