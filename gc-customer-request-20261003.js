@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const $ = (id) => document.getElementById(id);
-  const form = $('requestForm');
+  const form = $('customerRequestForm');
   if (!form) return;
   const setStatus = (message, kind = '') => {
     const node = $('requestMessage');
