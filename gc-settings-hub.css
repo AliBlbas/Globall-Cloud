@@ -57,3 +57,14 @@ body.gc-customer-app .gc-settings-panel a:focus-visible{outline:2px solid #72e6e
   body.gc-customer-app .gc-settings-auth-action{min-height:46px}
 }
 html[data-gc-theme="light"] body.gc-customer-app .gc-settings-auth-action{background:linear-gradient(135deg,#b6f4f4,#65dce5);color:#0c3343;border-color:#bde9ec}
+
+
+/* SETTINGS GEAR VISIBILITY · DESKTOP ENTRY / MOBILE DOCK ENTRY · 2026-10-16 */
+@media(min-width:901px){
+ body.gc-customer-app .gc-settings-trigger{top:82px!important;inset-inline-end:18px!important;width:44px!important;height:44px!important}
+ body.gc-customer-app .gc-settings-panel{top:135px!important;inset-inline-end:18px!important}
+}
+@media(max-width:900px){
+ body.gc-customer-app .gc-settings-trigger{display:none!important}
+ body.gc-customer-app .gc-settings-panel{z-index:10002!important}
+}
