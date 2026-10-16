@@ -43,7 +43,7 @@
           icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2"></circle><circle cx="18" cy="6" r="2"></circle><path d="M8 18h5c3 0 5-2 5-5v-3M18 8V6h-4c-3 0-5 2-5 5v3"></path></svg>'
         },
         {
-          key: 'account', href: '/dashboard#auth', label: 'هەژمار',
+          key: 'account', href: '/#auth', label: 'هەژمار',
           icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20c.8-3.6 3.3-5.5 7.5-5.5s6.7 1.9 7.5 5.5"></path></svg>'
         }
       ];
