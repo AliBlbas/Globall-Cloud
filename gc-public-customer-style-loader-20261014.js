@@ -1,14 +1,15 @@
-/* Globall Cloud public + customer premium style loader · 2026-10-14
+/* Globall Cloud public + customer style ordering guard · 2026-10-16
    Final presentation layer. The matching HTML also includes direct stylesheet links;
-   this loader moves those links to the document end after legacy theme loaders and
-   restores the public mobile dock if a late runtime unexpectedly removes it.
+   this loader moves public-home overrides after legacy theme layers, watches for late
+   stylesheet injection, and restores the public mobile dock if a runtime removes it.
    No routes, authentication, business data, or backend logic are changed. */
 (() => {
   'use strict';
 
   const homeStyles = [
     '/gc-live-mobile-v3.css?v=20261014-4',
-    '/gc-homepage-elite-20261014.css?v=4'
+    '/gc-homepage-elite-20261014.css?v=4',
+    '/gc-homepage-signature-20261016.css?v=2'
   ];
   const customerStyles = [
     '/gc-customer-workspace-elite-20261014.css?v=4',
@@ -71,10 +72,36 @@
     });
   }
 
+  function watchLateThemeStyles() {
+    if (!window.MutationObserver || !document.head) return;
+    let scheduled = false;
+    const observer = new MutationObserver((mutations) => {
+      const stylesheetChanged = mutations.some((mutation) =>
+        [...mutation.addedNodes, ...mutation.removedNodes].some((node) =>
+          node.nodeType === 1 && (
+            (typeof node.matches === 'function' && node.matches('link[rel="stylesheet"]')) ||
+            (typeof node.querySelector === 'function' && node.querySelector('link[rel="stylesheet"]'))
+          )
+        )
+      );
+      if (!stylesheetChanged || scheduled) return;
+      scheduled = true;
+      window.setTimeout(() => {
+        scheduled = false;
+        applyStyles();
+      }, 80);
+    });
+    observer.observe(document.head, { childList: true });
+  }
+
   function schedule() {
     applyStyles();
+    watchLateThemeStyles();
     window.setTimeout(applyStyles, 180);
     window.setTimeout(applyStyles, 900);
+    // The legacy renderer mounts one more theme layer at about 1.2 seconds.
+    window.setTimeout(applyStyles, 1550);
+    window.setTimeout(applyStyles, 2300);
   }
 
   if (document.readyState === 'loading') {
