@@ -694,3 +694,15 @@ html[data-gc-theme="light"] body.gc-customer-app .gc-settings-logout{background:
 
 /* CUSTOMER PERSONAL DATA LIVES IN SETTINGS ONLY */
 body.gc-customer-app .app-sidebar .workspace-profile{display:none!important}
+
+
+/* SINGLE-PAGE CUSTOMER MODE · 2026-10-16 */
+body.gc-customer-app #gcApp{display:none!important}
+body.gc-customer-app #gcCustomerWorkspace{display:block!important;min-height:100dvh;width:100%;isolation:isolate}
+body:not(.gc-customer-app) #gcCustomerWorkspace{display:none!important}
+body.gc-customer-app .gc-mobile-dock-v3,
+body.gc-customer-app #gcPrimaryMobileNav{display:none!important;visibility:hidden!important;pointer-events:none!important}
+body.gc-customer-app .app-header{position:sticky;top:0;z-index:9500}
+body.gc-customer-app #gcCustomerWorkspace .app-layout{min-height:calc(100dvh - 72px)}
+body.gc-customer-app #gcCustomerWorkspace .app-main{min-width:0}
+body.gc-customer-app #gcCustomerWorkspace .mobile-dock{z-index:9999!important}
