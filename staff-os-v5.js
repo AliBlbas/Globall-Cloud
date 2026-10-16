@@ -501,7 +501,7 @@
     }).join('');
     return '<div class="cargo-item-row" data-cargo-row data-item-id="' + esc(item.id || '') + '">' +
       '<div class="form-field"><label>ناوی کاڵا</label><input class="field" data-cargo-field="item_name" maxlength="200" value="' + esc(item.item_name || '') + '" placeholder="مۆبایل، جل، پارچە..."></div>' +
-      '<div class="form-field"><label>کۆدی کڕیار</label><input class="field" data-cargo-field="customer_gc_code" maxlength="40" value="' + esc(item.customer_gc_code || '') + '" placeholder="GC-1005"></div>' +
+      '<div class="form-field"><label>کۆدی کڕیار</label><input class="field" data-cargo-field="customer_gc_code" list="gcCargoCustomerCodes" maxlength="40" value="' + esc(item.customer_gc_code || '') + '" placeholder="GC-1005"></div>' +
       '<div class="form-field"><label>دانە (pc)</label><input class="field" data-cargo-field="quantity_pc" type="number" min="0" step="1" value="' + esc(item.quantity_pc == null ? 0 : item.quantity_pc) + '"></div>' +
       '<div class="form-field"><label>کارتۆن</label><input class="field" data-cargo-field="box_count" type="number" min="0" step="1" value="' + esc(item.box_count == null ? 0 : item.box_count) + '"></div>' +
       '<div class="form-field"><label>کێش (kg)</label><input class="field" data-cargo-field="weight_kg" type="number" min="0" step="0.01" value="' + esc(item.weight_kg == null ? 0 : item.weight_kg) + '"></div>' +
@@ -513,18 +513,44 @@
     '</div>';
   }
 
+  function cargoCustomerDatalistOptions() {
+    const customers = Array.isArray(state.data.customers) ? state.data.customers : [];
+    const seen = new Set();
+    return customers.map(function(customer) {
+      const code = String(customer.gc_code || customer.code || customer.customer_gc_code || '')
+        .normalize('NFKC').trim().toUpperCase().replace(/\s+/g, '');
+      if (!/^GC-[A-Z0-9-]{2,30}$/.test(code) || seen.has(code)) return '';
+      seen.add(code);
+      const name = String(customer.name || customer.full_name || '').trim();
+      return '<option value="' + esc(code) + '" label="' + esc(name || code) + '"></option>';
+    }).join('');
+  }
+
+  function refreshCargoCustomerDatalist() {
+    const datalist = document.getElementById('gcCargoCustomerCodes');
+    if (datalist) datalist.innerHTML = cargoCustomerDatalistOptions();
+    if (Array.isArray(state.data.customers) && state.data.customers.length) return;
+    ops('customers').then(function(result) {
+      state.data.customers = Array.isArray(result.items) ? result.items : [];
+      const activeDatalist = document.getElementById('gcCargoCustomerCodes');
+      if (activeDatalist) activeDatalist.innerHTML = cargoCustomerDatalistOptions();
+    }).catch(function() {});
+  }
+
   function cargoItemEditorHTML(items, defaultGcCode) {
     const rows = Array.isArray(items) && items.length ? items : [{ customer_gc_code: defaultGcCode || '' }];
     return '<section class="cargo-items-editor form-field full">' +
       '<div class="cargo-items-head"><div><strong>ناوەڕۆکی وردی کاڵا</strong><small>بۆ هەر جۆر کاڵا یەک ڕیز زیاد بکە؛ کۆدی GC بۆ هەر کڕیارێک بە جیاوازی تۆمار دەکرێت.</small></div>' +
       '<button type="button" class="btn" id="addCargoItem">+ زیادکردنی کاڵا</button></div>' +
       '<input type="hidden" id="deletedCargoItemIds" value="[]">' +
+      '<datalist id="gcCargoCustomerCodes">' + cargoCustomerDatalistOptions() + '</datalist>' +
       '<div class="cargo-items-list" id="cargoItemsList">' + rows.map(cargoItemRowHTML).join('') + '</div></section>';
   }
 
   function bindCargoEditor(defaultGcCode) {
     const list = document.getElementById('cargoItemsList');
     if (!list) return;
+    refreshCargoCustomerDatalist();
     const add = document.getElementById('addCargoItem');
     if (add) add.onclick = function() {
       list.insertAdjacentHTML('beforeend', cargoItemRowHTML({ customer_gc_code: defaultGcCode || '' }));
@@ -601,7 +627,7 @@
   function newShipmentModal() {
     openModal('دروستکردنی بار',
       '<form id="shipForm" class="form-grid">' +
-      '<div class="form-field"><label>GC code</label><input class="field" name="customer_gc_code" required placeholder="GC-1005"></div>' +
+      '<div class="form-field"><label>GC code</label><input class="field" name="customer_gc_code" list="gcCargoCustomerCodes" required placeholder="GC-1005"></div>' +
       '<div class="form-field"><label>Tracking</label><input class="field" name="tracking_id" required placeholder="GC-2026-0001"></div>' +
       '<div class="form-field"><label>Mode</label><select class="field" name="transport_mode">' + MODES.map(function(x) { return '<option value="' + x + '">' + modeLabel(x) + '</option>'; }).join('') + '</select></div>' +
       '<div class="form-field"><label>کۆی کارتۆن</label><input class="field" name="carton_count" type="number" min="0" step="1" value="1"></div>' +
