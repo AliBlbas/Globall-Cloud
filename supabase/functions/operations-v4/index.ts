@@ -71,7 +71,7 @@ async function customers(admin:any){
  const rows:any[]=data||[];
  const byId=new Map<string,any>();
  const byCode=new Map<string,any>();
- const normalizeCode=(value:any)=>String(value??'').normalize('NFKC').trim().toUpperCase().replace(/\\s+/g,'');
+ const normalizeCode=(value:any)=>String(value??'').normalize('NFKC').trim().toUpperCase().replace(/\s+/g,'');
  const finiteMoney=(value:any)=>{const n=Number(value??0);return Number.isFinite(n)?n:0};
  for(const row of rows){
   row.shipment_count=0;
