@@ -375,6 +375,10 @@
         const currentMode = String(x.transport_mode || x.type || x.mode || '').toLowerCase();
         const sentAt = x.dispatched_at || x.step_dates?.departed || x.shipped_at || x.created_at;
         const customerCount = Number(x.customer_goods_count || x.customer_count || x.customers_count || (x.customer_gc_code ? 1 : 0));
+        const hasStructuredCargo = Number(x.cargo_item_count || 0) > 0;
+        const pieceCount = hasStructuredCargo ? Number(x.cargo_piece_count ?? x.items_count ?? 0) : Number(x.items_count ?? x.pc_count ?? 0);
+        const cargoCartons = Number(x.cargo_carton_count || 0);
+        const cartonCount = cargoCartons > 0 ? cargoCartons : Number(x.carton_count ?? x.box_count ?? x.items_count ?? 0);
         const contentParts = [x.cargo_description, ...(Array.isArray(x.cargo_contents) ? x.cargo_contents : [])]
           .map(value => String(value ?? '').trim()).filter(Boolean);
         const contents = [...new Set(contentParts)].slice(0, 12).join(' · ') || x.description || 'ناوەڕۆکی کاڵا تۆمار نەکراوە';
@@ -392,8 +396,8 @@
           <div class="shipment-tags">
             <span class="pill">${esc(modeLabel(currentMode))}</span>
             <span class="pill">کڕیار: ${number(customerCount)}</span>
-            <span class="pill">دانە: ${number(x.cargo_piece_count || x.items_count)}</span>
-            <span class="pill">کارتۆن: ${number(x.carton_count || x.cargo_carton_count || x.items_count)}</span>
+            <span class="pill">دانە: ${number(pieceCount)}</span>
+            <span class="pill">کارتۆن: ${number(cartonCount)}</span>
           </div>
           <div class="shipment-content"><span>ناوەڕۆکی کاڵا</span><b>${esc(contents)}</b></div>
           <div class="shipment-facts">
