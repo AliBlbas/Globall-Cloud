@@ -73,8 +73,8 @@
     applyTheme(currentTheme());
   };
   const initMobileDock = () => {
-    const dock = document.querySelector('body.gc-customer-app .mobile-dock');
-    const main = document.querySelector('body.gc-customer-app .app-main');
+    const dock = document.querySelector('#gcCustomerWorkspace .mobile-dock, body.gc-customer-app .mobile-dock');
+    const main = document.querySelector('#gcCustomerWorkspace .app-main, body.gc-customer-app .app-main');
     if (!dock || !main || dock.dataset.gcDockReady === '1') return;
     dock.dataset.gcDockReady = '1';
     const items = [...dock.querySelectorAll('[data-dock-tab]')];
@@ -102,6 +102,9 @@
     };
     const activate = (requestedKey, options = {}) => {
       const key = viewGroups[requestedKey] ? requestedKey : 'home';
+      if (options.enterMode === true && !document.body.classList.contains('gc-customer-app') && typeof window.gcEnterCustomerMode === 'function') {
+        window.gcEnterCustomerMode({view:key, hash:options.hash || viewHash[key] || '#overview'});
+      }
       const visible = new Set(viewGroups[key]);
       allSections.forEach(section => {
         const show = visible.has(section.id) || visible.has(section.classList.contains('workspace-toolbar') ? 'workspace-toolbar' : '');
@@ -131,7 +134,7 @@
         event.preventDefault();
         event.stopPropagation();
         const key = item.dataset.dockTab || 'home';
-        activate(key, {hash:viewHash[key]});
+        activate(key, {hash:viewHash[key], enterMode:true});
       });
     });
 
@@ -141,12 +144,12 @@
         const hash = link.getAttribute('href') || '#overview';
         const key = keyForHash(hash);
         event.preventDefault();
-        activate(key, {hash});
+        activate(key, {hash, enterMode:true});
       });
     });
     window.addEventListener('hashchange', () => activate(keyForHash(window.location.hash), {writeHash:false}));
     window.addEventListener('popstate', () => activate(keyForHash(window.location.hash), {writeHash:false}));
-    window.gcSelectCustomerView = (key) => activate(key);
+    window.gcSelectCustomerView = (key) => activate(key, {enterMode:true});
 
     // Keep unread alerts visible without mixing alert content into other views.
     const alertsItem = items.find(item => item.dataset.dockTab === 'notifications');
