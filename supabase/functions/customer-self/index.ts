@@ -64,10 +64,7 @@ Deno.serve(async (req) => {
     if (!customer || customer.is_active !== true) return json(req, {error: 'Customer account is not active.'}, 403)
 
     if (req.method === 'POST') {
-      let body: Record<string, unknown> = {}
-      try { body = await req.json() } catch { return json(req, {error: 'Invalid JSON body.'}, 400) }
-      const action = text(body.action, 60)
-      const data = (body.data && typeof body.data === 'object') ? body.data as Record<string, unknown> : {}
+      // The request body was parsed once above; reusing it avoids consuming the stream twice.
 
       if (action === 'update_profile') {
         const name = text(data.full_name, 160)
@@ -217,7 +214,7 @@ Deno.serve(async (req) => {
       shipmentIds.length ? service.from('payment_transactions').select('id,invoice_id,shipment_id,provider,status,amount,currency,method,paid_at,created_at').in('shipment_id', shipmentIds).order('created_at', {ascending: false}).limit(20) : Promise.resolve({data: [], error: null}),
       shipmentIds.length ? service.from('shipment_tracking_events').select('id,shipment_id,status_key,title,note,location_label,lat,lng,occurred_at,photos').in('shipment_id', shipmentIds).order('occurred_at', {ascending: false}).limit(100) : Promise.resolve({data: [], error: null}),
       shipmentIds.length ? service.from('shipment_financial_ledger').select('shipment_id,entry_type,amount,currency,reference,note,created_at').in('shipment_id', shipmentIds).order('created_at', {ascending: false}).limit(100) : Promise.resolve({data: [], error: null}),
-      service.from('warehouse_receipts').select('id,batch_code,location,stage,photo_taken_at,gc_code_detected,verification_status,photos,shipment_id,received_at,created_at').eq('directory_customer_id', customer.id).order('received_at', {ascending: false}).limit(30),
+      service.from('warehouse_receipts').select('id,batch_code,location,stage,photo_taken_at,gc_code_detected,verification_status,photos,shipment_id,received_at').eq('directory_customer_id', customer.id).order('received_at', {ascending: false}).limit(30),
       shipmentIds.length ? service.from('shipment_packages').select('id,shipment_id,package_code,barcode,package_type,description,weight_kg,length_cm,width_cm,height_cm,declared_value,declared_currency,current_hub,status,created_at,updated_at').in('shipment_id', shipmentIds).order('created_at', {ascending: false}).limit(100) : Promise.resolve({data: [], error: null}),
       service.from('customer_chat_threads').select('id,subject,status,priority,last_message_at,created_at').eq('customer_user_id', user.id).neq('status','closed').order('last_message_at', {ascending:false}).limit(20),
     ])
@@ -255,7 +252,7 @@ Deno.serve(async (req) => {
       notification_preferences: preferences.data || {email_enabled:false,whatsapp_enabled:false,sms_enabled:false,in_app_enabled:true},
     })
   } catch (error) {
-    console.error('customer-self error', error instanceof Error ? error.message : String(error))
+    console.error('customer-self error', error instanceof Error ? error.message : JSON.stringify(error))
     return json(req, {error: 'Customer data could not be loaded.'}, 500)
   }
 })
