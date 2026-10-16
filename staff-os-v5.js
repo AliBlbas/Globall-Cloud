@@ -484,7 +484,7 @@
       return;
     }
     const code = customer.gc_code || customer.code || 'GC';
-    if (!window.confirm(`هەژماری چوونەژوورەوە بۆ ${code} · ${customer.name || ''} دروست بکرێت؟ هیچ زانیارییەکی کۆن ناگۆڕدرێت.`)) return;
+    if (!window.confirm(`هەژماری چوونەژوورەوە بۆ ${code} · ${customer.name || ''} دروست بکرێت؟ پێش بەستنەوە، ناسنامەی کڕیار پشتڕاست بکەرەوە و دڵنیابە لە ڕێگایەکی پارێزراوی گەیاندنی وشەی نهێنی. هیچ زانیارییەکی کۆن ناگۆڕدرێت.`)) return;
     const supplied = window.prompt('وشەی نهێنیی ئارەزوومەندانە (لانیکەم 12 پیت). بۆ دروستکردنی وشەی نهێنیی کاتی بەتاڵی بهێڵەوە.', '');
     if (supplied === null) return;
     const password = supplied.trim();
