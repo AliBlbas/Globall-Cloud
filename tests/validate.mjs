@@ -51,7 +51,7 @@ if (ts) {
 
 console.log('Required production files')
 const required = [
-  'index.html','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
+  'index.html','login.html','register.html','supabase/functions/customer-gc-register/index.ts','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
   'public-route-bootstrap.js','public-runtime-guarantee.js','public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js',
   'tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html',
   'staff-os-v5.html','staff-os-v5.css','staff-os-v5.js','gc-shipment-detail-20261016.css','staff-os-v5-rescue.js','staff-logistics-intelligence.js','staff-logistics-intelligence.css',
@@ -180,6 +180,11 @@ catch { fail('production contract validation failed') }
 
 console.log('Unified homepage/customer workspace')
 const accountsConsoleHtml = read('accounts-console.html')
+const retiredRegisterFunction = read('supabase/functions/customer-gc-register/index.ts')
+const supabaseAuthConfig = read('supabase/config.toml')
+const legacyLoginPage = read('login.html')
+const legacyRegisterPage = read('register.html')
+const authRedirects = read('_redirects')
 const accountsConsoleScript = read('gc-csp-scripts/accounts-console-inline-1.js')
 const staffConsoleHtml = read('staff-os-v5.html')
 const staffConsoleScript = read('staff-os-v5.js')
@@ -214,6 +219,11 @@ const unifiedContracts = [
   ['signed-out claim prompt offers support without self-linking', customerPortalAuth.includes('gc-account-help-action') && customerSelfSource.includes('self-service linking is disabled')],
   ['customer signup remains staff-provisioned', customerAccountEntry.includes('does not expose') && accountAdminSource.includes("Only Super Admin can bind customer accounts")],
   ['customer auth-help assets have matching cache references', unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=19') && unifiedShell.includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261016-8')],
+  ['public customer registration endpoint is retired', !retiredRegisterFunction.includes('SUPABASE_SERVICE_ROLE_KEY') && !retiredRegisterFunction.includes('createUser(') && !retiredRegisterFunction.includes('register_customer_with_gc') && retiredRegisterFunction.includes('CUSTOMER_REGISTRATION_DISABLED')],
+  ['retired registration function requires JWT at gateway', /^\\[functions\\.customer-gc-register\\]\\s*verify_jwt\\s*=\\s*true$/m.test(supabaseAuthConfig)],
+  ['GC-code login remains public for its credential check', /^\\[functions\\.customer-gc-login\\]\\s*verify_jwt\\s*=\\s*false$/m.test(supabaseAuthConfig) && read('supabase/functions/customer-gc-login/index.ts').includes('signInWithPassword')],
+  ['legacy login and registration files redirect into the one page', legacyLoginPage.includes("window.location.replace('/#auth')") && legacyRegisterPage.includes("window.location.replace('/#auth')") && !legacyLoginPage.includes('customer-gc-register') && !legacyRegisterPage.includes('customer-gc-register')],
+  ['legacy auth paths redirect to the unified customer entry', ['/login /#auth 302','/login/ /#auth 302','/login.html /#auth 302','/register /#auth 302','/register/ /#auth 302','/register.html /#auth 302'].every(route => authRedirects.includes(route))],
   ['staff console exposes customer linkage filters', accountsConsoleHtml.includes('id="customerLinkFilter"') && accountsConsoleHtml.includes('value="unlinked"') && accountsConsoleHtml.includes('value="linked"') && accountsConsoleHtml.includes('value="inactive-unlinked"')],
   ['customer linkage filter is functional', accountsConsoleScript.includes("customerLinkFilter')?.addEventListener('change', renderList)") && accountsConsoleScript.includes("linkFilter === 'unlinked' ? (!linked && active)") && accountsConsoleScript.includes("linkFilter === 'inactive-unlinked' ? (!linked && !active)")],
   ['customer linkage summary warns Super Admin to verify identity', accountsConsoleScript.includes('دوای پشتڕاستکردنەوەی ناسنامە') && accountAdminSource.includes('Only Super Admin can bind customer accounts')],
