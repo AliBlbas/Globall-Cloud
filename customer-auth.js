@@ -27,7 +27,7 @@
     if (!response.ok) throw new Error(data.error || 'هەڵەیەک ڕوویدا.');
     return data;
   };
-  const normalizeCode = (value) => String(value || '').normalize('NFKC').trim().toUpperCase().replace(/[–—−]/g, '-').replace(/\\s+/g, '');
+  const normalizeCode = (value) => String(value || '').normalize('NFKC').trim().toUpperCase().replace(/[–—−]/g, '-').replace(/\s+/g, '');
 
   const login = async (event) => {
     event.preventDefault();
