@@ -691,3 +691,6 @@ html[data-gc-theme="light"] body.gc-customer-app .gc-settings-logged-out{backgro
 html[data-gc-theme="light"] body.gc-customer-app .gc-settings-logged-out strong{color:#102b43}
 html[data-gc-theme="light"] body.gc-customer-app .gc-settings-secondary-action{color:#196d80;background:#eefbfc;border-color:#cce8ed}
 html[data-gc-theme="light"] body.gc-customer-app .gc-settings-logout{background:#fff2f3;color:#a23b50;border-color:#f2cbd2}
+
+/* CUSTOMER PERSONAL DATA LIVES IN SETTINGS ONLY */
+body.gc-customer-app .app-sidebar .workspace-profile{display:none!important}
