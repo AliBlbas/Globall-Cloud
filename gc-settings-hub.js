@@ -142,7 +142,7 @@
   };
   const renderSection = () => {
     if (document.querySelector('#gcAccountSettings')) return;
-    const main = document.querySelector('body.gc-customer-app .app-main');
+    const main = document.querySelector('#gcCustomerWorkspace .app-main, body.gc-customer-app .app-main');
     if (!main) return;
     section = document.createElement('section');
     section.id = 'gcAccountSettings';
@@ -338,7 +338,9 @@
     }
   };
   const mount = () => {
-    if (!document.body?.classList.contains('gc-customer-app')) return;
+    // The customer workspace is embedded in the single homepage document and remains
+    // hidden until the user opens the account area or a valid customer session is found.
+    if (!document.body?.classList.contains('gc-customer-app') && !document.querySelector('#gcCustomerWorkspace')) return;
     renderSection();
     if (!section) section = $('gcAccountSettings');
     applyCopy();
