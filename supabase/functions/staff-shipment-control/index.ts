@@ -80,6 +80,20 @@ Deno.serve(async (req:Request) => {
     add('height_cm', p.height_cm !== undefined ? finite(p.height_cm) : current.data.height_cm)
     add('eta', p.eta !== undefined ? (text(p.eta) || null) : current.data.eta)
     add('priority', p.priority !== undefined ? (text(p.priority) || 'normal') : current.data.priority)
+    if (p.dispatched_at !== undefined) {
+      const rawDispatchedAt = text(p.dispatched_at)
+      let normalizedDispatchedAt:string|null = null
+      if (rawDispatchedAt) {
+        const timestamp = new Date(rawDispatchedAt).getTime()
+        if (!Number.isFinite(timestamp)) return out(req,{error:'Invalid dispatch date'},400)
+        normalizedDispatchedAt = new Date(timestamp).toISOString()
+      }
+      patch.dispatched_at = normalizedDispatchedAt
+      const stepDates = { ...(current.data.step_dates || {}) }
+      if (normalizedDispatchedAt) stepDates.departed = normalizedDispatchedAt
+      else delete stepDates.departed
+      patch.step_dates = stepDates
+    }
 
     if (p.length_cm !== undefined || p.width_cm !== undefined || p.height_cm !== undefined || p.actual_weight_kg !== undefined) {
       const l = finite(addValue(p.length_cm,current.data.length_cm))
@@ -111,9 +125,9 @@ Deno.serve(async (req:Request) => {
     const changedLocation = text(p.current_location_label || p.location_label) && text(p.current_location_label || p.location_label) !== text(current.data.current_location_label)
     if (changedStatus) {
       const now = new Date().toISOString()
-      const stepDates = { ...(current.data.step_dates || {}) }
+      const stepDates = { ...(patch.step_dates || current.data.step_dates || {}) }
       stepDates[requestedStatus] = now
-      if (requestedStatus === 'in_transit' && !stepDates.departed) stepDates.departed = now
+      if (requestedStatus === 'in_transit' && !stepDates.departed && p.dispatched_at === undefined) stepDates.departed = now
       patch.step_dates = stepDates
       patch.current_step_index = stepIndex(requestedStatus)
     }
@@ -137,7 +151,7 @@ Deno.serve(async (req:Request) => {
       eventSeeded = true
     }
 
-    await activity(a.db,a.staff,'shipment.update',id,{before:{status:current.data.status,location:current.data.current_location_label},after:{status:row.status,location:row.current_location_label},role})
+    await activity(a.db,a.staff,'shipment.update',id,{before:{status:current.data.status,location:current.data.current_location_label,dispatched_at:current.data.dispatched_at},after:{status:row.status,location:row.current_location_label,dispatched_at:row.dispatched_at},role})
     return out(req,{shipment:row,event_seeded:eventSeeded})
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e)
