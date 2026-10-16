@@ -147,6 +147,8 @@ if (!cargoUi.includes('d.cargo_items = collectCargoItems') || !cargoUi.includes(
 if (!cargoCreate.includes('normalizeCargoRows') || !cargoCreate.includes("from('shipment_cargo_items').insert(cargoRows)")) fail('Shipment creation must persist structured cargo rows')
 if (!cargoControl.includes('normalizeCargoRows') || !cargoControl.includes("from('shipment_cargo_items').update(record)") || !cargoControl.includes("from('shipment_cargo_items').delete()")) fail('Shipment control must safely update and remove structured cargo rows')
 if (cargoControl.indexOf('Operational permission required') > cargoControl.indexOf('const hasCargoItems')) fail('Shipment control must authorize staff before loading cargo rows')
+if (cargoControl.indexOf('Operational permission required') > cargoControl.indexOf("from('shipments').select('*')")) fail('Shipment control must authorize staff before reading shipment records')
+if (!cargoControl.includes('if (liveItems.length > 0) patch.carton_count = totalBoxes')) fail('Cargo carton aggregate must remain synchronized when all item boxes are set to zero')
 if (!cargoCss.includes('.cargo-item-row') || !cargoCss.includes('@media (max-width: 390px)')) fail('Structured cargo editor responsive styles are missing')
 if (!failures) ok('Structured cargo editor, server persistence, authorization and responsive contracts OK')
 
