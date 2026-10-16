@@ -86,7 +86,8 @@
       { key: 'home', node: document.getElementById('overview') },
       { key: 'shipments', node: document.getElementById('shipmentsSection') },
       { key: 'requests', node: document.getElementById('newRequest') },
-      { key: 'notifications', node: document.getElementById('activity') }
+      { key: 'notifications', node: document.getElementById('activity') },
+      { key: 'settings', node: document.getElementById('gcAccountSettings') }
     ].filter((item) => item.node);
     const hashToTab = {
       '#overview': 'home',
@@ -94,7 +95,11 @@
       '#shipments': 'shipments',
       '#newRequest': 'requests',
       '#activity': 'notifications',
-      '#notifications': 'notifications'
+      '#notifications': 'notifications',
+      '#gcAccountSettings': 'settings',
+      '#records': 'settings',
+      '#payments': 'settings',
+      '#support': 'settings'
     };
     const activate = (key) => {
       items.forEach((item) => {
