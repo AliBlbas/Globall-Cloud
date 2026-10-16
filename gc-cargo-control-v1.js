@@ -1,5 +1,6 @@
 (() => {
   'use strict';
+  const GC_CARGO_BUILD = '2026-10-16.2';
   const TAB = 'cargo-workspace';
   const STATUS = ['received_origin','in_transit','at_transit_hub','customs','out_for_delivery','delivered','on_hold','cancelled'];
   const STATUS_LABEL = {
@@ -36,7 +37,8 @@
     const b = document.createElement('button');
     b.type='button'; b.className='nav-btn gc-cargo-nav-btn'; b.setAttribute('data-tab',TAB); b.setAttribute('data-cargo-cmd-nav','1');
     b.innerHTML='<span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5-9 4.5-9-4.5Z"/><path d="M3 12l9 4.5 9-4.5M3 16.5 12 21l9-4.5"/></svg></span><span>بار و کاڵا</span>';
-    nav.appendChild(b);
+    const shipmentsButton = nav.querySelector('[data-tab="shipments"]');
+    if (shipmentsButton) shipmentsButton.after(b); else nav.appendChild(b);
   }
   function setTitle() {
     const t=document.getElementById('pageTitle'), s=document.getElementById('pageSub');
