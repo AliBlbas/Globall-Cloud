@@ -11,7 +11,7 @@
     support: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H8l-4 4V5Z"/><path d="M8 9h8M8 12h5"/></svg>',
     request: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/><path d="m15 17 2 2 4-4"/></svg>',
     notifications: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>',
-    settings: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg>',
+    settings: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/><path d="m19.4 15 .1.1 1.4 1.1-1.7 3-1.7-.7a7.8 7.8 0 0 1-1.5.9l-.3 1.8h-3.4l-.3-1.8a7.8 7.8 0 0 1-1.5-.9l-1.7.7-1.7-3L6.5 15a7.7 7.7 0 0 1 0-2l-1.4-1.1 1.7-3 1.7.7a7.8 7.8 0 0 1 1.5-.9l.3-1.8h3.4l.3 1.8a7.8 7.8 0 0 1 1.5.9l1.7-.7 1.7 3-1.4 1.1a7.7 7.7 0 0 1-.1 2Z"/></svg>',
     sales: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/><path d="m15 16 2 2 4-4"/></svg>',
     sun: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
     moon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.4A8.5 8.5 0 0 1 8.6 4 8.5 8.5 0 1 0 20 15.4Z"/></svg>',
@@ -65,6 +65,10 @@
     });
     const select = document.querySelector('[data-dashboard-language]');
     if (select) select.value = next;
+    document.querySelectorAll('body.gc-customer-app .mobile-dock [data-dock-tab]').forEach((item) => {
+      const key = item.dataset.dockTab === 'requests' ? 'request' : item.dataset.dockTab;
+      if (labels[key]) item.setAttribute('aria-label', labels[key]);
+    });
     applyTheme(currentTheme());
   };
   const mountIcons = () => {
@@ -134,9 +138,12 @@
         item.addEventListener('click', (event) => {
           event.stopPropagation();
           activate('settings');
-          const trigger = document.querySelector('[data-gc-settings-trigger]');
-          if (trigger) trigger.click();
-          else console.warn('Globall Cloud settings panel is not mounted.');
+          if (typeof window.gcOpenSettings === 'function') window.gcOpenSettings();
+          else {
+            const trigger = document.querySelector('[data-gc-settings-trigger]');
+            if (trigger) trigger.click();
+            else console.warn('Globall Cloud settings panel is not mounted.');
+          }
         });
       } else {
         item.addEventListener('click', () => activate(item.dataset.dockTab));
