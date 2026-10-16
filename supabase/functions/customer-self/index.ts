@@ -48,59 +48,11 @@ Deno.serve(async (req) => {
     const data = (body.data && typeof body.data === 'object') ? body.data as Record<string, unknown> : {}
 
     if (req.method === 'POST' && action === 'claim_account') {
-      const normalizeGcCode = (value: unknown) => {
-        const raw = text(value, 50).toUpperCase().replace(/\s+/g, '')
-        if (/^GC-\d+$/.test(raw)) return raw
-        if (/^GC\d+$/.test(raw)) return 'GC-' + raw.slice(2)
-        if (/^\d+$/.test(raw)) return 'GC-' + raw
-        return ''
-      }
-      const normalizePhone = (value: unknown) => {
-        let digits = text(value, 50).replace(/\D/g, '')
-        if (digits.startsWith('00964')) digits = digits.slice(2)
-        if (digits.startsWith('964')) digits = '0' + digits.slice(3)
-        else if (/^7\d{9}$/.test(digits)) digits = '0' + digits
-        return digits
-      }
-      const gcCode = normalizeGcCode(data.gc_code || data.code)
-      const phone = normalizePhone(data.phone)
-      if (!gcCode || phone.length < 7) return json(req, {error: 'GC code و ژمارەی مۆبایل پێویستن.'}, 400)
-
-      const {data: alreadyLinked, error: alreadyLinkedError} = await service
-        .from('customer_directory')
-        .select('id,is_active')
-        .eq('auth_user_id', user.id)
-        .maybeSingle()
-      if (alreadyLinkedError) throw alreadyLinkedError
-      if (alreadyLinked) return json(req, {ok: true, already_linked: true})
-
-      const {data: candidates, error: candidateError} = await service
-        .from('customer_directory')
-        .select('id,code,gc_code,normalized_gc_code,name,email,phone,phone2,auth_user_id,is_active')
-        .eq('is_active', true)
-        .is('auth_user_id', null)
-        .or('normalized_gc_code.eq.' + gcCode + ',gc_code.eq.' + gcCode + ',code.eq.' + gcCode)
-        .limit(5)
-      if (candidateError) throw candidateError
-
-      const matches = (candidates || []).filter((candidate) => {
-        const a = normalizePhone(candidate.phone)
-        const b = normalizePhone(candidate.phone2)
-        return a && (a === phone || b === phone)
-      })
-      if (matches.length !== 1) return json(req, {error: 'GC code یان ژمارەی مۆبایل لەگەڵ تۆمارێکی active یەکتا ناگونجێت.'}, 403)
-
-      const target = matches[0]
-      const {data: claimed, error: claimError} = await service
-        .from('customer_directory')
-        .update({auth_user_id: user.id, updated_at: new Date().toISOString()})
-        .eq('id', target.id)
-        .is('auth_user_id', null)
-        .eq('is_active', true)
-        .select('id,code,gc_code,name,email,phone,phone2,preferred_language,is_active')
-        .single()
-      if (claimError) throw claimError
-      return json(req, {ok: true, claimed: true, profile: claimed})
+      // A GC code and a phone number alone do not prove ownership of an account.
+      // Keep legacy client compatibility, but require staff-verified provisioning.
+      return json(req, {
+        error: 'For account safety, self-service linking is disabled. Please contact Globall Cloud staff to verify your identity and link your customer account securely.'
+      }, 403)
     }
 
     const {data: customer, error: customerError} = await service
