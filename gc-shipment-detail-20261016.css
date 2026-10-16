@@ -1,0 +1,335 @@
+/* Globall Cloud — Shipment detail workspace, desktop + mobile */
+#gcModal .shipment-command {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  color: #edf6ff;
+}
+#gcModal .shipment-command h2,
+#gcModal .shipment-command h3,
+#gcModal .shipment-command p { overflow-wrap: anywhere; }
+#gcModal .shipment-command-banner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: clamp(16px, 2.4vw, 24px);
+  border: 1px solid rgba(93, 218, 234, .23);
+  border-radius: 20px;
+  background:
+    radial-gradient(ellipse at 90% 0%, rgba(39, 183, 205, .18), transparent 58%),
+    linear-gradient(145deg, #102f4c, #071a2b 78%);
+}
+#gcModal .shipment-command-banner h2 {
+  margin: 7px 0 6px;
+  color: #f5fbff;
+  font-size: clamp(20px, 2.5vw, 28px);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+#gcModal .shipment-command-banner p {
+  margin: 0;
+  color: #aac0d5;
+  font-size: 12px;
+  line-height: 1.8;
+}
+#gcModal .shipment-command-status {
+  display: grid;
+  justify-items: end;
+  gap: 12px;
+  min-width: 125px;
+  text-align: end;
+}
+#gcModal .shipment-command-status small {
+  color: #8faac1;
+  font-size: 10px;
+  line-height: 1.7;
+}
+#gcModal .shipment-command-status small b { color: #e7f3ff; }
+#gcModal .shipment-command-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+#gcModal .shipment-command-kpis > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 9px;
+  padding: 13px;
+  border: 1px solid rgba(143, 188, 218, .14);
+  border-radius: 15px;
+  background: linear-gradient(145deg, rgba(14, 41, 65, .86), rgba(5, 22, 37, .88));
+}
+#gcModal .shipment-command-kpis > div > span {
+  color: #8faac1;
+  font-size: 10px;
+}
+#gcModal .shipment-command-kpis > div > b {
+  color: #e9f6ff;
+  font-size: 12px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+#gcModal .shipment-progress-panel {
+  padding: 15px;
+  border: 1px solid rgba(143, 188, 218, .15);
+  border-radius: 18px;
+  background: rgba(7, 25, 42, .72);
+}
+#gcModal .shipment-milestones {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+#gcModal .shipment-milestone {
+  min-width: 0;
+  display: grid;
+  justify-items: start;
+  gap: 7px;
+  padding: 12px 9px;
+  border: 1px solid rgba(129, 163, 190, .15);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, .025);
+}
+#gcModal .shipment-milestone > span {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(126, 165, 193, .28);
+  border-radius: 9px;
+  color: #97aec4;
+  font-size: 11px;
+  font-weight: 800;
+}
+#gcModal .shipment-milestone b {
+  color: #b5c8d9;
+  font-size: 10px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+#gcModal .shipment-milestone small {
+  color: #7896b0;
+  font-size: 9px;
+}
+#gcModal .shipment-milestone.complete {
+  border-color: rgba(84, 221, 179, .2);
+  background: rgba(30, 155, 126, .07);
+}
+#gcModal .shipment-milestone.complete > span {
+  border-color: rgba(83, 226, 181, .4);
+  background: rgba(53, 201, 159, .13);
+  color: #7eebc6;
+}
+#gcModal .shipment-milestone.current {
+  border-color: rgba(70, 215, 234, .48);
+  background: linear-gradient(145deg, rgba(36, 164, 194, .15), rgba(9, 43, 62, .36));
+  box-shadow: inset 0 0 0 1px rgba(70, 215, 234, .04);
+}
+#gcModal .shipment-milestone.current b { color: #72e8f3; }
+#gcModal .shipment-command .two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 12px;
+}
+#gcModal .shipment-command .card {
+  min-width: 0;
+  padding: 15px;
+  border-color: rgba(143, 188, 218, .15);
+  border-radius: 17px;
+  background: linear-gradient(150deg, rgba(13, 37, 60, .88), rgba(5, 21, 36, .92));
+}
+#gcModal .shipment-command .card-head {
+  gap: 10px;
+  align-items: flex-start;
+}
+#gcModal .shipment-command .card-head h3 { color: #e5f3ff; }
+#gcModal .shipment-command .muted {
+  margin: 0 0 12px;
+  color: #a1b7cb;
+  font-size: 11px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+#gcModal .detail-lines { display: grid; gap: 0; }
+#gcModal .detail-lines p {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(151, 183, 208, .1);
+  color: #9eb5ca;
+  font-size: 11px;
+  line-height: 1.7;
+}
+#gcModal .detail-lines p:last-child { border-bottom: 0; }
+#gcModal .detail-lines p b {
+  color: #ecf6ff;
+  text-align: end;
+  overflow-wrap: anywhere;
+}
+#gcModal .package-list {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin-top: 12px;
+}
+#gcModal .package-row {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) minmax(60px, auto);
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid rgba(143, 188, 218, .13);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, .025);
+}
+#gcModal .package-index {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(70, 215, 234, .22);
+  border-radius: 9px;
+  background: rgba(51, 178, 201, .09);
+  color: #73e1f0;
+  font: 700 10px/1 "JetBrains Mono", monospace;
+}
+#gcModal .package-row > div { min-width: 0; display: grid; gap: 4px; }
+#gcModal .package-row > div b {
+  color: #e5f3ff;
+  font-size: 11px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+#gcModal .package-row > div small {
+  color: #91abc1;
+  font-size: 10px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+#gcModal .package-weight {
+  align-self: center;
+  color: #bae8f4;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: end;
+  white-space: nowrap;
+}
+#gcModal .shipment-command .timeline {
+  display: grid;
+  gap: 8px;
+}
+#gcModal .shipment-command .timeline-row {
+  display: grid;
+  grid-template-columns: minmax(92px, 120px) minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 11px;
+  border: 1px solid rgba(143, 188, 218, .12);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, .02);
+}
+#gcModal .shipment-command .timeline-row time {
+  color: #7fdce9;
+  font-size: 10px;
+  line-height: 1.7;
+}
+#gcModal .shipment-command .timeline-row > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+#gcModal .shipment-command .timeline-row b {
+  color: #e3f2ff;
+  font-size: 11px;
+}
+#gcModal .shipment-command .timeline-row span,
+#gcModal .shipment-command .timeline-row small {
+  color: #94acc2;
+  font-size: 10px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+#gcModal .shipment-command .photo-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+#gcModal .shipment-command .photo {
+  display: block;
+  overflow: hidden;
+  border: 1px solid rgba(143, 188, 218, .18);
+  border-radius: 12px;
+  background: #071a2b;
+}
+#gcModal .shipment-command .photo img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+#gcModal .shipment-command .shipment-command-actions,
+#gcModal .shipment-command + .modal-foot { flex-wrap: wrap; }
+
+@media (max-width: 760px) {
+  #gcModal .modal:has(.shipment-command) {
+    width: 100%;
+    max-height: calc(91dvh - env(safe-area-inset-bottom, 0px));
+    padding: 12px;
+    border-radius: 20px 20px 14px 14px;
+  }
+  #gcModal .shipment-command { gap: 10px; }
+  #gcModal .shipment-command-banner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding: 15px;
+    border-radius: 16px;
+  }
+  #gcModal .shipment-command-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    justify-items: initial;
+    min-width: 0;
+    gap: 12px;
+    text-align: start;
+  }
+  #gcModal .shipment-command-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+  #gcModal .shipment-command-kpis > div { padding: 10px; border-radius: 12px; gap: 6px; }
+  #gcModal .shipment-command-kpis > div > b { font-size: 11px; }
+  #gcModal .shipment-progress-panel { padding: 11px; border-radius: 15px; }
+  #gcModal .shipment-milestones { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
+  #gcModal .shipment-milestone { padding: 9px 7px; gap: 6px; }
+  #gcModal .shipment-milestone b { font-size: 10px; }
+  #gcModal .shipment-command .two-col { grid-template-columns: minmax(0, 1fr); gap: 9px; }
+  #gcModal .shipment-command .card { padding: 12px; border-radius: 14px; }
+  #gcModal .detail-lines p { font-size: 11px; }
+  #gcModal .package-row { grid-template-columns: 28px minmax(0, 1fr); gap: 8px; padding: 9px; }
+  #gcModal .package-index { width: 27px; height: 27px; }
+  #gcModal .package-weight { grid-column: 2; justify-self: start; text-align: start; padding-inline-start: 1px; }
+  #gcModal .shipment-command .timeline-row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  #gcModal .shipment-command .photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #gcModal .modal-foot { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+  #gcModal .modal-foot .btn { width: 100%; min-height: 44px; white-space: normal; }
+}
+@media (max-width: 390px) {
+  #gcModal .shipment-command-banner h2 { font-size: 20px; }
+  #gcModal .shipment-command-kpis > div { padding: 9px; }
+  #gcModal .shipment-milestones { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #gcModal .shipment-milestone { grid-template-columns: 25px minmax(0,1fr); align-items: center; column-gap: 7px; }
+  #gcModal .shipment-milestone > span { width: 25px; height: 25px; grid-row: span 2; }
+  #gcModal .shipment-milestone b { font-size: 9px; }
+  #gcModal .shipment-milestone small { font-size: 8px; }
+  #gcModal .detail-lines p { gap: 8px; }
+  #gcModal .shipment-command .photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #gcModal .shipment-command * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+}
