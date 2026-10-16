@@ -341,3 +341,35 @@ body:has(#gcModal) .gc-staff-mobile-menu-button { display: none !important; }
 @media (prefers-reduced-motion: reduce) {
   #gcModal .shipment-command * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
 }
+
+/* Structured cargo editor inside the staff shipment modal */
+#gcModal .cargo-items-editor { min-width: 0; margin-top: 4px; padding: 14px; border: 1px solid rgba(119, 163, 205, .24); border-radius: 16px; background: linear-gradient(145deg, rgba(11, 32, 53, .72), rgba(6, 19, 34, .8)); }
+#gcModal .cargo-items-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+#gcModal .cargo-items-head > div { display: grid; gap: 4px; min-width: 0; }
+#gcModal .cargo-items-head strong { color: #eff7ff; font-size: 14px; }
+#gcModal .cargo-items-head small { color: #98acc2; font-size: 11px; line-height: 1.7; }
+#gcModal .cargo-items-head .btn { flex: 0 0 auto; min-height: 38px; white-space: nowrap; }
+#gcModal .cargo-items-list { display: grid; gap: 10px; }
+#gcModal .cargo-item-row { display: grid; grid-template-columns: minmax(150px, 1.35fr) minmax(115px, 1fr) repeat(4, minmax(80px, .62fr)) minmax(84px, .7fr) minmax(130px, .9fr); gap: 9px; align-items: end; padding: 12px; border: 1px solid rgba(129, 169, 208, .18); border-radius: 12px; background: rgba(4, 15, 28, .58); }
+#gcModal .cargo-item-row .form-field { min-width: 0; }
+#gcModal .cargo-item-row .field { min-width: 0; width: 100%; }
+#gcModal .cargo-item-row .cargo-item-notes { grid-column: 1 / span 6; }
+#gcModal .cargo-item-row .cargo-item-remove { min-height: 40px; justify-self: stretch; border-color: rgba(239, 92, 112, .32); color: #ffb5c1; }
+#gcModal .cargo-items-editor .field { font-size: 13px; }
+@media (max-width: 1100px) {
+  #gcModal .cargo-item-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #gcModal .cargo-item-row .cargo-item-notes { grid-column: 1 / span 3; }
+}
+@media (max-width: 760px) {
+  #gcModal .cargo-items-editor { padding: 10px; border-radius: 13px; }
+  #gcModal .cargo-items-head { align-items: flex-start; flex-direction: column; gap: 9px; }
+  #gcModal .cargo-items-head .btn { width: 100%; }
+  #gcModal .cargo-item-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 10px; }
+  #gcModal .cargo-item-row .cargo-item-notes { grid-column: 1 / -1; }
+  #gcModal .cargo-item-row .cargo-item-remove { grid-column: 1 / -1; min-height: 44px; }
+}
+@media (max-width: 390px) {
+  #gcModal .cargo-item-row { grid-template-columns: minmax(0, 1fr); }
+  #gcModal .cargo-item-row .cargo-item-notes,
+  #gcModal .cargo-item-row .cargo-item-remove { grid-column: 1; }
+}
