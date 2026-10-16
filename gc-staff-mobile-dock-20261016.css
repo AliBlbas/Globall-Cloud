@@ -317,3 +317,279 @@
   #app .customer-control-hero .actions{grid-template-columns:minmax(0,1fr)}
   #app .customer-control-table tbody>tr{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+
+/* ============================================================
+   STAFF OS VISUAL SYSTEM · PASS 1 · 2026-10-16
+   Desktop command center + mobile-first operation screens.
+   Existing app behavior and shipment data contracts are preserved.
+   ============================================================ */
+:root{
+  --gc-staff-pass-bg:#061321;
+  --gc-staff-pass-panel:#0b2033;
+  --gc-staff-pass-panel-raised:#102a40;
+  --gc-staff-pass-border:rgba(145,196,218,.18);
+  --gc-staff-pass-text:#eff8fd;
+  --gc-staff-pass-muted:#adc2d1;
+  --gc-staff-pass-cyan:#70e3ed;
+  --gc-staff-pass-teal:#76e4c5;
+  --gc-staff-pass-gold:#e8c98d;
+}
+body:has(#app){
+  background:
+    radial-gradient(ellipse at 88% 0%,rgba(45,178,201,.12),transparent 35%),
+    radial-gradient(ellipse at 0% 52%,rgba(38,104,148,.08),transparent 38%),
+    linear-gradient(155deg,#071725,#030b14 68%,#061523)!important;
+  color:var(--gc-staff-pass-text);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+body:has(#app) #app{width:100%;max-width:1800px;margin-inline:auto}
+body:has(#app) #app .gc-shell{
+  grid-template-columns:260px minmax(0,1fr);
+  align-items:start;gap:16px;min-height:calc(100dvh - 20px);
+}
+body:has(#app) #app .gc-side{
+  padding:16px 13px;border:1px solid var(--gc-staff-pass-border);
+  border-radius:23px;background:linear-gradient(180deg,rgba(9,31,49,.98),rgba(3,13,23,.99));
+  box-shadow:0 22px 65px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.035);
+}
+body:has(#app) #app .brand{padding:8px 7px 17px;margin-bottom:13px}
+body:has(#app) #app .brand-row{gap:12px}
+body:has(#app) #app .brand-logo{
+  width:48px;height:48px;border-radius:15px;
+  background:linear-gradient(145deg,#baf8fa,#62dce8 58%,#147d99);
+  box-shadow:0 9px 23px rgba(24,201,232,.14),inset 0 1px rgba(255,255,255,.55);
+}
+body:has(#app) #app .brand b{font-size:16px;line-height:1.55}
+body:has(#app) #app .brand small{font-size:10px;line-height:1.7;color:#9ab9ca}
+body:has(#app) #app .nav{gap:6px}
+body:has(#app) #app .nav-btn{
+  min-height:46px;padding:11px 12px;border-radius:13px;
+  color:#c7dce8;font-size:13px;line-height:1.6;
+  border-color:transparent;transition:background .18s ease,border-color .18s ease,transform .18s ease;
+}
+body:has(#app) #app .nav-btn:hover{border-color:rgba(112,227,237,.18);background:rgba(112,227,237,.055)}
+body:has(#app) #app .nav-btn.active{
+  border-color:rgba(112,227,237,.24);
+  background:linear-gradient(110deg,rgba(49,171,195,.19),rgba(112,227,237,.045));
+  box-shadow:inset 3px 0 rgba(112,227,237,.65);
+}
+body:has(#app) #app .nav-icon{width:25px;color:#81e5ee;font-size:12px}
+body:has(#app) #app .nav-badge{min-width:21px;height:21px;font-size:10px}
+body:has(#app) #app .side-foot{padding:14px 6px 5px;font-size:11px;line-height:1.85}
+body:has(#app) #app .side-foot strong{font-size:13px}
+body:has(#app) #app .role-pill{font-size:10px}
+body:has(#app) #app .gc-main{min-width:0}
+body:has(#app) #app .topbar{
+  top:10px;gap:14px;padding:14px 17px;margin-bottom:14px;
+  border:1px solid var(--gc-staff-pass-border);border-radius:20px;
+  background:rgba(5,19,32,.88);box-shadow:0 18px 45px rgba(0,0,0,.22);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+}
+body:has(#app) #app .top-title strong{font-size:20px;line-height:1.4}
+body:has(#app) #app .top-title span{font-size:12px;line-height:1.7;color:#adc3d1}
+body:has(#app) #app .top-actions{gap:8px}
+body:has(#app) #app .status{min-height:35px;padding:8px 11px;font-size:10px}
+body:has(#app) #app .btn{
+  min-height:42px;padding:9px 13px;border-radius:12px;
+  font-size:12px;line-height:1.55;font-weight:850;
+  border-color:rgba(145,196,218,.18);
+  transition:transform .16s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+body:has(#app) #app .btn:hover{border-color:rgba(112,227,237,.4);transform:translateY(-1px)}
+body:has(#app) #app .btn.primary{
+  background:linear-gradient(135deg,#a4f0f2,#62dce8 58%,#38b7cf);
+  color:#05212a;box-shadow:0 8px 21px rgba(37,187,207,.14),inset 0 1px rgba(255,255,255,.45);
+}
+body:has(#app) #app .view{
+  min-width:0;padding:20px;border:1px solid var(--gc-staff-pass-border);
+  border-radius:24px;background:linear-gradient(150deg,rgba(8,29,48,.94),rgba(3,14,25,.98));
+  box-shadow:0 20px 56px rgba(0,0,0,.19);
+}
+body:has(#app) #app .section-head{gap:14px;margin-bottom:18px}
+body:has(#app) #app .section-head h1{font-size:clamp(22px,2vw,29px);line-height:1.45;color:#f2f9fd}
+body:has(#app) #app .section-head p{font-size:13px;line-height:1.9;color:var(--gc-staff-pass-muted)}
+body:has(#app) #app .eyebrow{font-size:10px;letter-spacing:.13em;color:#86e8ef}
+body:has(#app) #app .grid-kpi{gap:10px;margin-bottom:15px}
+body:has(#app) #app .kpi{
+  min-height:112px;padding:16px;border-radius:17px;
+  border:1px solid rgba(145,196,218,.16);
+  background:
+    radial-gradient(ellipse at 100% 0%,rgba(57,172,193,.11),transparent 57%),
+    linear-gradient(155deg,rgba(14,43,65,.92),rgba(5,20,35,.97));
+  box-shadow:inset 0 1px rgba(255,255,255,.035),0 10px 25px rgba(0,0,0,.1);
+}
+body:has(#app) #app .kpi span{font-size:12px;line-height:1.7;color:#b4c8d5}
+body:has(#app) #app .kpi strong{margin-top:9px;font-size:clamp(21px,2vw,27px);line-height:1.35;color:#a7edf2}
+body:has(#app) #app .kpi small{margin-top:6px;font-size:11px;line-height:1.65;color:#8aa9bd}
+body:has(#app) #app .two-col{gap:13px}
+body:has(#app) #app .three-col{gap:12px}
+body:has(#app) #app .card{
+  padding:17px;border-radius:18px;border-color:rgba(145,196,218,.15);
+  background:linear-gradient(150deg,rgba(12,36,56,.76),rgba(4,18,31,.8));
+  box-shadow:inset 0 1px rgba(255,255,255,.025);
+}
+body:has(#app) #app .card-head{gap:10px;margin-bottom:13px}
+body:has(#app) #app .card-head h3{font-size:15px;line-height:1.5;color:#eef8fd}
+body:has(#app) #app .muted{color:#aec4d2}
+body:has(#app) #app .mini-row{gap:12px;padding:12px;border-radius:13px;border-color:rgba(145,196,218,.11);background:rgba(255,255,255,.025)}
+body:has(#app) #app .mini-row b{font-size:12px;line-height:1.65;color:#eaf5fb}
+body:has(#app) #app .mini-row span{font-size:11px;line-height:1.65}
+body:has(#app) #app .table-wrap{
+  max-width:100%;border:1px solid rgba(145,196,218,.16);border-radius:15px;
+  background:rgba(2,13,23,.35);overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;
+}
+body:has(#app) #app .table{min-width:900px;border-collapse:separate;border-spacing:0}
+body:has(#app) #app .table th{
+  padding:12px 11px;background:#0e293f;color:#cfe5f1;
+  font:800 11px/1.55 Vazirmatn,system-ui,sans-serif;white-space:nowrap;
+}
+body:has(#app) #app .table td{
+  padding:12px 11px;border-bottom:1px solid rgba(145,196,218,.09);
+  color:#e1edf5;font-size:12px;line-height:1.7;
+}
+body:has(#app) #app .table tbody tr:hover td{background:rgba(112,227,237,.035)}
+body:has(#app) #app .mono{font-size:11px;color:#9de8ef}
+body:has(#app) #app .pill{padding:5px 9px;font-size:10px;line-height:1.5}
+body:has(#app) #app .toolbar{gap:8px;margin-bottom:13px}
+body:has(#app) #app .field{
+  min-width:0;min-height:44px;padding:11px 12px;border-radius:12px;
+  border-color:rgba(145,196,218,.2);background:#041523;color:#f2f9fd;
+  font-size:15px;line-height:1.5;
+}
+body:has(#app) #app .field::placeholder{color:#7f9eaf}
+body:has(#app) #app .field:focus{border-color:#66dce8;box-shadow:0 0 0 4px rgba(102,220,232,.1)}
+body:has(#app) #app .form-field label{margin-bottom:7px;font-size:12px;line-height:1.7;color:#b5d0de}
+body:has(#app) #app .form-grid{gap:12px}
+body:has(#app) #app .empty{padding:38px 20px;font-size:13px;line-height:1.9;border-radius:16px}
+body:has(#app) #app .timeline-row{gap:12px;padding:12px;border-radius:13px}
+body:has(#app) #app .timeline-row time{font-size:10px}
+body:has(#app) #app .timeline-row b{font-size:12px;line-height:1.6}
+body:has(#app) #app .timeline-row span{font-size:11px;line-height:1.8}
+body:has(#app) #app .notice{gap:12px;padding:13px;border-radius:14px;border-color:rgba(145,196,218,.13);background:rgba(255,255,255,.025)}
+body:has(#app) #app .notice b{font-size:12px;line-height:1.6}
+body:has(#app) #app .notice p{font-size:11px;line-height:1.8}
+body:has(#app) #app .notice time{font-size:10px}
+body:has(#app) #app .login-card{padding:29px;border-color:rgba(112,227,237,.2);border-radius:24px;background:linear-gradient(150deg,#0d2b43,#041522)}
+body:has(#app) #app .login-card h1{font-size:clamp(24px,3vw,31px);line-height:1.45}
+body:has(#app) #app .login-card p{font-size:13px;line-height:1.9}
+body:has(#app) #app .login-msg{font-size:12px;line-height:1.7}
+body:has(#app) #app :where(a,button,input,select,textarea):focus-visible{outline:3px solid rgba(112,227,237,.7);outline-offset:3px}
+#gcModal .modal{
+  border-color:rgba(112,227,237,.23);
+  background:linear-gradient(155deg,#0b2439,#03111e);
+  box-shadow:0 32px 100px rgba(0,0,0,.58);
+}
+#gcModal .modal-head h2{font-size:21px;line-height:1.5}
+#gcModal .card{border-radius:16px}
+#gcModal .field{font-size:14px}
+#gcModal .shipment-command-banner{border-radius:17px;background:linear-gradient(135deg,rgba(15,48,70,.96),rgba(5,21,36,.98))}
+#gcModal .shipment-command-kpis>div{padding:12px;border-radius:14px}
+#gcModal .shipment-command-kpis>div>span{font-size:11px;line-height:1.6}
+#gcModal .shipment-command-kpis>div>b{font-size:14px;line-height:1.6}
+#gcModal .shipment-milestone>b{font-size:11px;line-height:1.6}
+#gcModal .shipment-milestone>small{font-size:10px;line-height:1.6}
+#gcModal .package-row b{font-size:12px;line-height:1.6}
+#gcModal .package-row small{font-size:10px;line-height:1.7}
+@media(max-width:1100px){
+  body:has(#app) #app .gc-shell{grid-template-columns:220px minmax(0,1fr);gap:12px}
+  body:has(#app) #app .view{padding:17px}
+  body:has(#app) #app .grid-kpi{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  body:has(#app){padding:7px 7px calc(102px + env(safe-area-inset-bottom,0px))!important}
+  body:has(#app) #app .gc-shell{display:block!important;min-height:0!important}
+  body:has(#app) #app .gc-side{display:none!important}
+  body:has(#app) #app .gc-main{width:100%!important;min-width:0!important}
+  body:has(#app) #app .topbar{
+    position:relative!important;top:auto!important;display:grid;grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;gap:10px;padding:12px;margin-bottom:10px;border-radius:17px;
+  }
+  body:has(#app) #app .top-title strong{font-size:17px;line-height:1.5}
+  body:has(#app) #app .top-title span{font-size:11px;line-height:1.7}
+  body:has(#app) #app .top-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:7px;width:100%;margin:0}
+  body:has(#app) #app .top-actions>*{flex:1 1 110px;min-width:0}
+  body:has(#app) #app .top-actions .btn{min-height:42px;padding:9px;font-size:11px;white-space:normal}
+  body:has(#app) #app .view{padding:14px 11px 120px!important;min-height:0!important;border-radius:18px!important}
+  body:has(#app) #app .section-head{display:flex;flex-direction:column;align-items:stretch;gap:9px;margin-bottom:14px}
+  body:has(#app) #app .section-head h1{font-size:23px!important;line-height:1.45}
+  body:has(#app) #app .section-head p{font-size:12px;line-height:1.85}
+  body:has(#app) #app .section-head .actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;width:100%}
+  body:has(#app) #app .section-head .actions .btn{min-width:0;min-height:43px;padding:9px 8px;font-size:11px;white-space:normal}
+  body:has(#app) #app .grid-kpi{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px;margin-bottom:11px}
+  body:has(#app) #app .kpi{min-height:100px;padding:12px;border-radius:14px}
+  body:has(#app) #app .kpi span{font-size:11px;line-height:1.6}
+  body:has(#app) #app .kpi strong{font-size:clamp(18px,5vw,23px);white-space:normal;overflow-wrap:anywhere}
+  body:has(#app) #app .kpi small{font-size:10px;line-height:1.6}
+  body:has(#app) #app .two-col,body:has(#app) #app .three-col{grid-template-columns:minmax(0,1fr)!important;gap:9px}
+  body:has(#app) #app .card{padding:13px;border-radius:15px}
+  body:has(#app) #app .card-head h3{font-size:14px}
+  body:has(#app) #app .mini-row{align-items:flex-start;padding:11px;gap:8px}
+  body:has(#app) #app .mini-row b{font-size:12px}
+  body:has(#app) #app .mini-row span{font-size:11px}
+  body:has(#app) #app .toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  body:has(#app) #app .toolbar .field{min-width:0;width:100%;font-size:16px!important}
+  body:has(#app) #app .form-grid{grid-template-columns:minmax(0,1fr)!important;gap:10px}
+  body:has(#app) #app .form-field.full{grid-column:1}
+  body:has(#app) #app .form-field label{font-size:12px}
+  body:has(#app) #app .field{min-height:46px;padding:11px 12px;font-size:16px!important}
+  body:has(#app) #app .btn{min-height:43px;padding:9px 11px;font-size:12px}
+  body:has(#app) #app .table-wrap{width:100%;max-width:100%;overflow:auto;border-radius:12px}
+  body:has(#app) #app .table{min-width:780px}
+  body:has(#app) #app .table th{padding:11px 9px;font-size:10px}
+  body:has(#app) #app .table td{padding:11px 9px;font-size:11px}
+  body:has(#app) #app .empty{padding:30px 14px;font-size:12px}
+  body:has(#app) #app .photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body:has(#app) #app .room-list{gap:7px}
+  body:has(#app) #app .room{min-width:170px;padding:11px}
+  body:has(#app) #app .room b{font-size:12px;line-height:1.6}
+  body:has(#app) #app .room span{font-size:10px;line-height:1.6}
+  body:has(#app) #app .chat-box{grid-template-rows:auto minmax(210px,1fr) auto;padding:10px;border-radius:15px}
+  body:has(#app) #app .bubble{max-width:92%;padding:10px}
+  body:has(#app) #app .bubble p{font-size:12px;line-height:1.8}
+  body:has(#app) #app .notice{padding:11px}
+  body:has(#app) #app .notice b{font-size:12px}
+  body:has(#app) #app .notice p{font-size:11px}
+  body:has(#app) #app .timeline-row{grid-template-columns:minmax(0,1fr);gap:5px;padding:11px}
+  body:has(#app) #app .timeline-row time{font-size:10px}
+  body:has(#app) #app .timeline-row span{font-size:11px}
+  body:has(#app) #app .login-card{padding:20px;border-radius:20px}
+  body:has(#app) #app .login-card h1{font-size:25px}
+  body:has(#app) #app .login-card p{font-size:12px}
+  #gcModal.modal-backdrop{align-items:end;place-items:stretch;padding:7px 7px calc(7px + env(safe-area-inset-bottom,0px))}
+  #gcModal .modal{width:100%;max-height:88dvh;padding:12px;border-radius:20px 20px 15px 15px}
+  #gcModal .modal-head h2{font-size:18px;line-height:1.5}
+  #gcModal .modal-foot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  #gcModal .modal-foot .btn{width:100%;min-width:0;min-height:44px;padding:9px 7px;font-size:11px;white-space:normal}
+  #gcModal .shipment-command-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  #gcModal .shipment-command-kpis>div{padding:10px}
+  #gcModal .shipment-command-kpis>div>span{font-size:10px}
+  #gcModal .shipment-command-kpis>div>b{font-size:12px}
+  #gcModal .shipment-milestones{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  #gcModal .shipment-milestone{min-height:74px;padding:9px}
+  #gcModal .shipment-milestone>b{font-size:10px}
+  #gcModal .shipment-milestone>small{font-size:10px}
+  #gcModal .package-row{grid-template-columns:26px minmax(0,1fr);gap:8px;padding:10px}
+  #gcModal .package-weight{grid-column:2;justify-self:start}
+  .gc-staff-mobile-menu-button{width:42px;min-width:42px;min-height:42px}
+  .gc-staff-mobile-dock{inset-inline:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));padding:6px;gap:4px}
+  .gc-staff-mobile-dock button{min-height:60px;font-size:10px;gap:4px}
+  .gc-staff-mobile-icon svg{width:22px;height:22px}
+  .gc-staff-mobile-label{font-size:10px;line-height:1.4;white-space:normal;text-overflow:clip}
+}
+@media(max-width:390px){
+  body:has(#app) #app .top-title strong{font-size:16px}
+  body:has(#app) #app .view{padding-inline:9px!important}
+  body:has(#app) #app .grid-kpi{gap:7px}
+  body:has(#app) #app .kpi{padding:10px;min-height:91px}
+  body:has(#app) #app .kpi span{font-size:10px}
+  body:has(#app) #app .kpi strong{font-size:18px}
+  body:has(#app) #app .table{min-width:740px}
+  .gc-staff-mobile-dock{inset-inline:5px;padding:5px;gap:3px}
+  .gc-staff-mobile-dock button{min-height:57px;padding-inline:1px;font-size:9px}
+  .gc-staff-mobile-label{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+  body:has(#app) #app *,#gcModal *{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}
+}
