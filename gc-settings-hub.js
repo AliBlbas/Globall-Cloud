@@ -126,6 +126,9 @@
   const syncProfile = profile => {
     if (!profile || typeof profile !== 'object') return;
     profileCache = profile;
+    const savedLanguage = validLang(profile.preferred_language || currentLang());
+    try { window.localStorage?.setItem(LANG_KEY, savedLanguage); } catch (_) {}
+    if (typeof window.gcDashboardSetLanguage === 'function' && savedLanguage !== currentLang()) window.gcDashboardSetLanguage(savedLanguage);
     if ($('gcSettingsName')) $('gcSettingsName').value = profile.name || '';
     if ($('gcSettingsEmail')) $('gcSettingsEmail').value = profile.email || '';
     if ($('gcSettingsPhone')) $('gcSettingsPhone').value = profile.phone || '';
@@ -134,6 +137,7 @@
     if ($('gcSettingsIdentityEmail')) $('gcSettingsIdentityEmail').textContent = profile.email || '—';
     if ($('gcSettingsLanguage')) $('gcSettingsLanguage').value = validLang(profile.preferred_language || currentLang());
     setAvatar(profile.avatar_url || null, profile.name || profile.email);
+    applyCopy();
     syncAuthState();
   };
   const renderSection = () => {
