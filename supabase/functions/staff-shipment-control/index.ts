@@ -256,7 +256,7 @@ Deno.serve(async (req:Request) => {
     return out(req,{shipment:row,event_seeded:eventSeeded,cargo_items_saved:cargoRowsUpdated,cargo_items_deleted:deletedCargoIds.length})
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e)
-    const status = /Unauthorized/i.test(message) ? 401 : /permission|Forbidden/i.test(message) ? 403 : /required|Invalid|not found/i.test(message) ? 400 : 500
+    const status = /Unauthorized/i.test(message) ? 401 : /permission|Forbidden/i.test(message) ? 403 : /already exists/i.test(message) ? 409 : /required|requires|needs|Invalid|invalid|at most|cannot|must be|not found/i.test(message) ? 400 : 500
     return out(req,{error:message},status)
   }
 })
