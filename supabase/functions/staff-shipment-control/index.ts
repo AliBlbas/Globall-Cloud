@@ -18,6 +18,47 @@ const out = (req:Request, body:unknown, status=200) => new Response(JSON.stringi
 const text = (v:unknown) => v == null ? '' : String(v).trim()
 const finite = (v:unknown) => v == null || v === '' ? null : Number.isFinite(Number(v)) ? Number(v) : null
 
+const CARGO_CURRENCIES = new Set(['USD','IQD','AED']);
+function normalizeCargoRows(raw, fallbackCode, allowIds) {
+  if (!Array.isArray(raw)) throw new Error('Cargo items must be a list');
+  if (raw.length > 100) throw new Error('A shipment can contain at most 100 cargo rows');
+  return raw.map((entry) => {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) throw new Error('Invalid cargo item');
+    const itemName = text(entry.item_name);
+    if (!itemName || itemName.length > 200) throw new Error('Each cargo item needs a name of at most 200 characters');
+    const code = text(entry.customer_gc_code) || fallbackCode;
+    const customerCode = code ? String(code).normalize('NFKC').trim().toUpperCase().replace(/\s+/g,'') : '';
+    if (!/^GC-[A-Z0-9-]{2,30}$/.test(customerCode)) throw new Error('Each cargo item requires a valid GC customer code');
+    const id = text(entry.id);
+    if (id && (!allowIds || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))) throw new Error('Invalid cargo item id');
+    const number = (value, label, integer) => {
+      const n = value == null || value === '' ? 0 : Number(value);
+      if (!Number.isFinite(n) || n < 0 || (integer && !Number.isSafeInteger(n))) throw new Error('Invalid cargo ' + label);
+      return n;
+    };
+    const currency = text(entry.currency || 'USD').toUpperCase();
+    if (!CARGO_CURRENCIES.has(currency)) throw new Error('Invalid cargo currency');
+    const itemStatus = text(entry.item_status || 'received_origin');
+    if (!STATUS.has(itemStatus)) throw new Error('Invalid cargo item status');
+    const notes = text(entry.notes);
+    if (notes.length > 500) throw new Error('Cargo notes are limited to 500 characters');
+    return { id: id || null, customer_gc_code: customerCode, item_name: itemName, quantity_pc: number(entry.quantity_pc, 'piece count', true), box_count: number(entry.box_count, 'box count', true), weight_kg: number(entry.weight_kg, 'weight', false), declared_value: number(entry.declared_value, 'declared value', false), currency, item_status: itemStatus, notes: notes || null };
+  });
+}
+async function resolveCargoDirectoryIds(db, items) {
+  const cache = new Map();
+  for (const item of items) {
+    if (!cache.has(item.customer_gc_code)) {
+      const found = await db.from('customer_directory').select('id').or('gc_code.eq.' + item.customer_gc_code + ',code.eq.' + item.customer_gc_code).limit(1).maybeSingle();
+      if (found.error) throw found.error;
+      cache.set(item.customer_gc_code, found.data ? found.data.id : null);
+    }
+    item.customer_directory_id = cache.get(item.customer_gc_code);
+  }
+  return items;
+}
+
+
 async function auth(req:Request) {
   const url = Deno.env.get('SUPABASE_URL') || ''
   const anon = Deno.env.get('SUPABASE_ANON_KEY') || Deno.env.get('SUPABASE_PUBLISHABLE_KEY') || ''
@@ -54,6 +95,30 @@ Deno.serve(async (req:Request) => {
     const current = await a.db.from('shipments').select('*').eq('id',id).maybeSingle()
     if (current.error) throw current.error
     if (!current.data) return out(req,{error:'Shipment not found'},404)
+
+    const hasCargoItems = Object.prototype.hasOwnProperty.call(p, 'cargo_items')
+    const hasDeletedCargoIds = Object.prototype.hasOwnProperty.call(p, 'deleted_cargo_item_ids')
+    let cargoItems = []
+    let deletedCargoIds = []
+    let existingCargoIds = new Set()
+    if (hasCargoItems || hasDeletedCargoIds) {
+      const existingCargo = await a.db.from('shipment_cargo_items').select('id').eq('shipment_id',id)
+      if (existingCargo.error) throw existingCargo.error
+      existingCargoIds = new Set((existingCargo.data || []).map((item) => String(item.id)))
+    }
+    if (hasCargoItems) {
+      cargoItems = normalizeCargoRows(p.cargo_items, text(current.data.customer_gc_code), true)
+      for (const item of cargoItems) {
+        if (item.id && !existingCargoIds.has(item.id)) return out(req,{error:'Cargo item does not belong to this shipment'},400)
+      }
+      await resolveCargoDirectoryIds(a.db, cargoItems)
+    }
+    if (hasDeletedCargoIds) {
+      if (!Array.isArray(p.deleted_cargo_item_ids) || p.deleted_cargo_item_ids.length > 100) return out(req,{error:'Invalid deleted cargo item list'},400)
+      deletedCargoIds = Array.from(new Set(p.deleted_cargo_item_ids.map((value) => text(value))))
+      if (deletedCargoIds.some((cargoId) => !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(cargoId) || !existingCargoIds.has(cargoId))) return out(req,{error:'Deleted cargo item does not belong to this shipment'},400)
+      if (cargoItems.some((item) => item.id && deletedCargoIds.includes(item.id))) return out(req,{error:'Cargo row cannot be edited and deleted in the same request'},400)
+    }
 
     const role = String(a.staff.role)
     if (!OPS_ROLES.has(role)) return out(req,{error:'Operational permission required'},403)
@@ -118,6 +183,16 @@ Deno.serve(async (req:Request) => {
       delete patch.branch
     }
 
+    if (hasCargoItems) {
+      const liveItems = cargoItems.filter((item) => !item.id || !deletedCargoIds.includes(item.id))
+      const totalPieces = liveItems.reduce((sum, item) => sum + Number(item.quantity_pc || 0), 0)
+      const totalBoxes = liveItems.reduce((sum, item) => sum + Number(item.box_count || 0), 0)
+      patch.items_count = totalPieces
+      patch.pc_count = totalPieces
+      patch.box_count = totalBoxes
+      if (totalBoxes > 0) patch.carton_count = totalBoxes
+    }
+
     patch.updated_at = new Date().toISOString()
     patch.tracking_updated_at = new Date().toISOString()
 
@@ -135,6 +210,32 @@ Deno.serve(async (req:Request) => {
     const { data: row, error } = await a.db.from('shipments').update(patch).eq('id',id).select('*').single()
     if (error) throw error
 
+    let cargoRowsUpdated = 0
+    if (hasCargoItems) {
+      for (const item of cargoItems) {
+        const record = {
+          shipment_id:id, customer_directory_id:item.customer_directory_id, customer_gc_code:item.customer_gc_code,
+          item_name:item.item_name, quantity_pc:item.quantity_pc, box_count:item.box_count, weight_kg:item.weight_kg,
+          declared_value:item.declared_value, currency:item.currency, item_status:item.item_status, notes:item.notes,
+          updated_by:a.staff.id, updated_at:new Date().toISOString()
+        }
+        if (item.id) {
+          const updated = await a.db.from('shipment_cargo_items').update(record).eq('shipment_id',id).eq('id',item.id).select('id').maybeSingle()
+          if (updated.error) throw updated.error
+          if (!updated.data) throw new Error('Cargo item update failed')
+        } else {
+          record.created_by = a.staff.id
+          const inserted = await a.db.from('shipment_cargo_items').insert(record).select('id').single()
+          if (inserted.error) throw inserted.error
+        }
+        cargoRowsUpdated++
+      }
+      if (deletedCargoIds.length) {
+        const deleted = await a.db.from('shipment_cargo_items').delete().eq('shipment_id',id).in('id',deletedCargoIds)
+        if (deleted.error) throw deleted.error
+      }
+    }
+
     let eventSeeded = false
     if (changedStatus || changedLocation || text(p.note)) {
       const ev = await a.db.from('shipment_tracking_events').insert({
@@ -151,8 +252,8 @@ Deno.serve(async (req:Request) => {
       eventSeeded = true
     }
 
-    await activity(a.db,a.staff,'shipment.update',id,{before:{status:current.data.status,location:current.data.current_location_label,dispatched_at:current.data.dispatched_at},after:{status:row.status,location:row.current_location_label,dispatched_at:row.dispatched_at},role})
-    return out(req,{shipment:row,event_seeded:eventSeeded})
+    await activity(a.db,a.staff,'shipment.update',id,{before:{status:current.data.status,location:current.data.current_location_label,dispatched_at:current.data.dispatched_at},after:{status:row.status,location:row.current_location_label,dispatched_at:row.dispatched_at},cargo_items:{submitted:hasCargoItems,upserted:cargoRowsUpdated,deleted:deletedCargoIds.length,items:cargoItems.map((item) => ({id:item.id||null,customer_gc_code:item.customer_gc_code,item_name:item.item_name,quantity_pc:item.quantity_pc,box_count:item.box_count}))},role})
+    return out(req,{shipment:row,event_seeded:eventSeeded,cargo_items_saved:cargoRowsUpdated,cargo_items_deleted:deletedCargoIds.length})
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e)
     const status = /Unauthorized/i.test(message) ? 401 : /permission|Forbidden/i.test(message) ? 403 : /required|Invalid|not found/i.test(message) ? 400 : 500
