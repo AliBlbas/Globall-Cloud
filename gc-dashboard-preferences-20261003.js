@@ -80,7 +80,7 @@
     const items = [...dock.querySelectorAll('[data-dock-tab]')];
     const allSections = [...main.querySelectorAll(':scope > section')];
     const viewGroups = {
-      home: ['workspace-toolbar', 'overview', 'homeMetrics'],
+      home: ['workspace-toolbar', 'overview', 'homeMetrics', 'gcCustomerRouteOverview', 'activity'],
       shipments: ['shipmentsSection'],
       requests: ['quotesPanel', 'commercial', 'newRequest'],
       notifications: ['activity'],
@@ -89,7 +89,7 @@
       support: ['support']
     };
     const hashToTab = {
-      '#overview':'home', '#homeMetrics':'home', '#auth':'home', '#register':'home',
+      '#overview':'home', '#homeMetrics':'home', '#gcCustomerRouteOverview':'home', '#auth':'home', '#register':'home',
       '#shipmentsSection':'shipments', '#shipments':'shipments',
       '#newRequest':'requests', '#quoteForm':'requests', '#commercial':'requests', '#quotesPanel':'requests',
       '#activity':'notifications', '#notifications':'notifications',
@@ -139,7 +139,7 @@
     });
 
     // Preserve direct links and the desktop side-navigation, but show only one view.
-    document.querySelectorAll('body.gc-customer-app .app-side-nav a[href^="#"]').forEach(link => {
+    document.querySelectorAll('#gcCustomerWorkspace .app-side-nav a[href^="#"]').forEach(link => {
       link.addEventListener('click', event => {
         const hash = link.getAttribute('href') || '#overview';
         const key = keyForHash(hash);
@@ -152,10 +152,10 @@
     window.gcSelectCustomerView = (key) => activate(key, {enterMode:true});
 
     // Keep unread alerts visible without mixing alert content into other views.
-    const alertsItem = items.find(item => item.dataset.dockTab === 'notifications');
-    const iconWrap = alertsItem?.querySelector('[data-dash-icon="notifications"]');
-    let badge = alertsItem?.querySelector('[data-dock-unread]');
-    if (alertsItem && iconWrap && !badge) {
+    const homeItem = items.find(item => item.dataset.dockTab === 'home');
+    const iconWrap = homeItem?.querySelector('[data-dash-icon="home"]');
+    let badge = homeItem?.querySelector('[data-dock-unread]');
+    if (homeItem && iconWrap && !badge) {
       badge = document.createElement('span');
       badge.dataset.dockUnread = '1';
       badge.className = 'dock-unread-badge';
@@ -166,9 +166,11 @@
     const updateUnread = notifications => {
       const count = (Array.isArray(notifications) ? notifications : []).filter(item => !item?.read_at).length;
       if (badge) { badge.hidden = count < 1; badge.textContent = count > 9 ? '9+' : String(count); }
-      if (alertsItem) {
-        const label = copy[currentLang()].labels.notifications || 'Notifications';
-        alertsItem.setAttribute('aria-label', count ? label + ', ' + count + ' unread' : label);
+      if (homeItem) {
+        const labels = copy[currentLang()].labels;
+        const homeLabel = labels.home || 'Home';
+        const alertsLabel = labels.notifications || 'Notifications';
+        homeItem.setAttribute('aria-label', count ? homeLabel + ', ' + count + ' unread ' + alertsLabel : homeLabel);
       }
     };
     window.addEventListener('gc:customer-loaded', event => updateUnread(event.detail?.notifications));
