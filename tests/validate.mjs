@@ -181,6 +181,9 @@ catch { fail('production contract validation failed') }
 console.log('Unified homepage/customer workspace')
 const accountsConsoleHtml = read('accounts-console.html')
 const accountsConsoleScript = read('gc-csp-scripts/accounts-console-inline-1.js')
+const staffConsoleHtml = read('staff-os-v5.html')
+const staffConsoleScript = read('staff-os-v5.js')
+const staffConsoleStyles = read('staff-os-v5.css')
 const unifiedShell = read('index.html')
 const unifiedController = read('gc-unified-customer-experience-20261016.js')
 const customerNavigation = read('gc-dashboard-preferences-20261003.js')
@@ -215,6 +218,10 @@ const unifiedContracts = [
   ['customer linkage filter is functional', accountsConsoleScript.includes("customerLinkFilter')?.addEventListener('change', renderList)") && accountsConsoleScript.includes("linkFilter === 'unlinked' ? (!linked && active)") && accountsConsoleScript.includes("linkFilter === 'inactive-unlinked' ? (!linked && !active)")],
   ['customer linkage summary warns Super Admin to verify identity', accountsConsoleScript.includes('دوای پشتڕاستکردنەوەی ناسنامە') && accountAdminSource.includes('Only Super Admin can bind customer accounts')],
   ['staff console script cache is refreshed', accountsConsoleHtml.includes('gc-csp-scripts/accounts-console-inline-1.js?v=20261016-4')],
+  ['main Staff OS shows customer identity-linking guidance', staffConsoleScript.includes('customer-link-guidance') && staffConsoleScript.includes('پێش Bind، ناسنامەی کڕیار پشتڕاست بکەرەوە')],
+  ['main Staff OS filters inactive unlinked customers', staffConsoleScript.includes("filter==='inactive-unlinked'?x.is_active===false&&!x.auth_user_id:true") && staffConsoleScript.includes('value="inactive-unlinked"')],
+  ['customer binding stays Super Admin only', staffConsoleScript.includes("state.staff?.role !== 'super_admin'") && accountAdminSource.includes('Only Super Admin can bind customer accounts')],
+  ['main Staff OS loads current customer filter assets', staffConsoleHtml.includes('staff-os-v5.css?v=20261016-4') && staffConsoleHtml.includes('staff-os-v5.js?v=20261016-19') && staffConsoleStyles.includes('.customer-link-guidance')],
 ]
 for (const [label, passed] of unifiedContracts) {
   if (passed) ok(label)
