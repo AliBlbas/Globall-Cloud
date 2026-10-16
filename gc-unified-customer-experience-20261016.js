@@ -36,16 +36,18 @@
       else node.removeAttribute('hidden');
     });
   };
-  const setPublicMode = (keepPublicHash = false) => {
-    publicModeForced = true;
+  const originalTitle = document.title;
+  const setPublicMode = ({keepHash = false, forcePublic = true} = {}) => {
+    publicModeForced = forcePublic;
     auth?.classList.add('hidden');
     workspace.hidden = true;
     home.hidden = false;
     body.classList.remove('gc-customer-app');
     delete body.dataset.gcUnifiedExperience;
     delete body.dataset.gcCustomerView;
+    document.title = originalTitle;
     setDockVisibility(false);
-    if (!keepPublicHash && window.location.hash !== '#public') {
+    if (!keepHash && window.location.hash !== '#public') {
       history.replaceState({gcUnifiedExperience:'public'}, '', '/#public');
     }
     window.dispatchEvent(new CustomEvent('gc:unified-view-changed', {detail:{mode:'public'}}));
@@ -54,6 +56,7 @@
     publicModeForced = false;
     body.classList.add('gc-customer-app');
     body.dataset.gcUnifiedExperience = 'customer';
+    document.title = 'Globall Cloud — Customer Workspace';
     workspace.hidden = false;
     home.hidden = true;
     setDockVisibility(true);
@@ -75,7 +78,7 @@
   const customerRouteRequested = () => customerHashes.has(window.location.hash);
   const handleRoute = () => {
     if (window.location.hash === '#public') {
-      setPublicMode(true);
+      setPublicMode({keepHash:true, forcePublic:true});
       return;
     }
     if (customerRouteRequested()) {
@@ -84,7 +87,7 @@
       verifyExistingSession(true).catch(() => {});
       return;
     }
-    setPublicMode(true);
+    setPublicMode({keepHash:true, forcePublic:true});
   };
   const verifyExistingSession = async (routeNeedsCustomer = false) => {
     if (authCheckStarted) return;
@@ -134,9 +137,9 @@
       const client = window.sb || window.gcSupabase;
       try {
         const {data} = await client?.auth?.getSession?.();
-        if (!data?.session?.access_token) setPublicMode(false);
+        if (!data?.session?.access_token) setPublicMode({keepHash:false, forcePublic:true});
       } catch (_) {
-        setPublicMode(false);
+        setPublicMode({keepHash:false, forcePublic:true});
       }
     });
   });
@@ -152,7 +155,7 @@
     selectCustomerView(window.location.hash);
     verifyExistingSession(true).catch(() => {});
   } else {
-    setPublicMode(true);
+    setPublicMode({keepHash:true, forcePublic:false});
     verifyExistingSession(false).catch(() => {});
   }
 })();
