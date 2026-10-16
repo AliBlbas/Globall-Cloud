@@ -51,7 +51,8 @@ async function resolveCargoDirectoryIds(db, items) {
     if (!cache.has(item.customer_gc_code)) {
       const found = await db.from('customer_directory').select('id').or('gc_code.eq.' + item.customer_gc_code + ',code.eq.' + item.customer_gc_code).limit(1).maybeSingle();
       if (found.error) throw found.error;
-      cache.set(item.customer_gc_code, found.data ? found.data.id : null);
+      if (!found.data) throw new Error('GC customer code not found: ' + item.customer_gc_code);
+      cache.set(item.customer_gc_code, found.data.id);
     }
     item.customer_directory_id = cache.get(item.customer_gc_code);
   }
@@ -190,7 +191,7 @@ Deno.serve(async (req:Request) => {
       patch.items_count = totalPieces
       patch.pc_count = totalPieces
       patch.box_count = totalBoxes
-      if (liveItems.length > 0) patch.carton_count = totalBoxes
+      patch.carton_count = totalBoxes
     }
 
     patch.updated_at = new Date().toISOString()
