@@ -1,0 +1,198 @@
+/* Globall Cloud — Customer Workspace Mobile Dock Hardening · 2026-10-16
+   Explicit last-loaded layer for the five-action customer navigation on small screens. */
+body.gc-customer-app > .mobile-dock { display: none; }
+
+@media (max-width: 900px) {
+  html:has(body.gc-customer-app) {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+  body.gc-customer-app {
+    width: 100%;
+    max-width: 100%;
+    min-width: 320px;
+    overflow-x: clip !important;
+    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  body.gc-customer-app .app-header {
+    width: 100%;
+    max-width: 100%;
+  }
+  body.gc-customer-app .app-header-inner {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    padding: 10px 14px !important;
+  }
+  body.gc-customer-app .app-brand {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+  }
+  body.gc-customer-app .app-brand strong,
+  body.gc-customer-app .app-brand small { overflow-wrap: anywhere; }
+  body.gc-customer-app .app-header-actions {
+    min-width: 0 !important;
+    flex: 0 0 auto !important;
+    gap: 5px !important;
+  }
+  body.gc-customer-app .app-header-link { display: none !important; }
+  body.gc-customer-app .app-header-button {
+    min-height: 42px !important;
+    padding: 7px 10px !important;
+    white-space: nowrap;
+  }
+  body.gc-customer-app .app-layout {
+    display: block !important;
+    grid-template-columns: minmax(0,1fr) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+  }
+  body.gc-customer-app .app-sidebar { display: none !important; }
+  body.gc-customer-app .app-main {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    padding: 10px 10px calc(26px + env(safe-area-inset-bottom,0px)) !important;
+  }
+  body.gc-customer-app .workspace-toolbar,
+  body.gc-customer-app .command-card,
+  body.gc-customer-app .metric-grid,
+  body.gc-customer-app .section-block,
+  body.gc-customer-app .surface-card {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  body.gc-customer-app .workspace-toolbar {
+    display: grid !important;
+    grid-template-columns: minmax(0,1fr) !important;
+    gap: 10px !important;
+  }
+  body.gc-customer-app .workspace-controls {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    min-width: 0 !important;
+  }
+  body.gc-customer-app .metric-grid {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+    gap: 8px !important;
+  }
+  body.gc-customer-app > .mobile-dock {
+    display: grid !important;
+    position: fixed !important;
+    grid-template-columns: repeat(5,minmax(0,1fr)) !important;
+    align-items: stretch !important;
+    gap: 4px !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: calc(7px + env(safe-area-inset-bottom,0px)) !important;
+    z-index: 800 !important;
+    width: auto !important;
+    height: 70px !important;
+    min-height: 70px !important;
+    margin: 0 !important;
+    padding: 5px !important;
+    border: 1px solid rgba(143,198,218,.24) !important;
+    border-radius: 20px !important;
+    background: rgba(4,17,29,.97) !important;
+    box-shadow: 0 16px 45px rgba(0,0,0,.4) !important;
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+  body.gc-customer-app > .mobile-dock > a {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    min-width: 0 !important;
+    min-height: 56px !important;
+    padding: 4px 2px !important;
+    border: 1px solid transparent !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    color: #9bb4c3 !important;
+    background: transparent !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    font: 800 9px/1.2 Vazirmatn,system-ui,sans-serif !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body.gc-customer-app > .mobile-dock > a > span {
+    display: grid !important;
+    place-items: center !important;
+    flex: 0 0 22px !important;
+    width: 24px !important;
+    height: 22px !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    color: currentColor !important;
+  }
+  body.gc-customer-app > .mobile-dock > a > span svg {
+    display: block !important;
+    width: 20px !important;
+    height: 20px !important;
+    max-width: 20px !important;
+    max-height: 20px !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.8 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+  }
+  body.gc-customer-app > .mobile-dock > a > small {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font: inherit !important;
+    line-height: 1.3 !important;
+  }
+  body.gc-customer-app > .mobile-dock > a.active {
+    color: #82e6ee !important;
+    background: rgba(85,217,231,.11) !important;
+    border-color: rgba(85,217,231,.14) !important;
+  }
+  body.gc-customer-app > .mobile-dock > a.dock-primary {
+    color: #05242b !important;
+    background: linear-gradient(135deg,#73e4ec,#35c5d7) !important;
+    box-shadow: 0 8px 22px rgba(53,197,215,.2) !important;
+  }
+  body.gc-customer-app .app-modal {
+    z-index: 1200 !important;
+  }
+}
+@media (max-width: 390px) {
+  body.gc-customer-app .app-header-inner { padding-inline: 9px !important; }
+  body.gc-customer-app .app-main { padding-inline: 7px !important; }
+  body.gc-customer-app > .mobile-dock {
+    left: 5px !important;
+    right: 5px !important;
+    gap: 2px !important;
+    padding: 4px !important;
+  }
+  body.gc-customer-app > .mobile-dock > a { font-size: 8px !important; }
+}
+@media (min-width: 901px) {
+  body.gc-customer-app > .mobile-dock { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.gc-customer-app > .mobile-dock,
+  body.gc-customer-app > .mobile-dock * { transition: none !important; }
+}
