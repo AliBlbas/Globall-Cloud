@@ -92,13 +92,16 @@ Deno.serve(async (req:Request) => {
     const id = text(p.id)
     if (!id) return out(req,{error:'Shipment id is required'},400)
 
-    const current = await a.db.from('shipments').select('*').eq('id',id).maybeSingle()
-    if (current.error) throw current.error
-    if (!current.data) return out(req,{error:'Shipment not found'},404)
-
     const role = String(a.staff.role)
     if (!OPS_ROLES.has(role)) return out(req,{error:'Operational permission required'},403)
     if (['finance','accountant'].includes(role)) return out(req,{error:'Operational permission required'},403)
+
+    const requestedStatus = text(p.status)
+    if (requestedStatus && !STATUS.has(requestedStatus)) return out(req,{error:'Invalid shipment status'},400)
+
+    const current = await a.db.from('shipments').select('*').eq('id',id).maybeSingle()
+    if (current.error) throw current.error
+    if (!current.data) return out(req,{error:'Shipment not found'},404)
 
     const hasCargoItems = Object.prototype.hasOwnProperty.call(p, 'cargo_items')
     const hasDeletedCargoIds = Object.prototype.hasOwnProperty.call(p, 'deleted_cargo_item_ids')
@@ -123,9 +126,6 @@ Deno.serve(async (req:Request) => {
       if (deletedCargoIds.some((cargoId) => !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(cargoId) || !existingCargoIds.has(cargoId))) return out(req,{error:'Deleted cargo item does not belong to this shipment'},400)
       if (cargoItems.some((item) => item.id && deletedCargoIds.includes(item.id))) return out(req,{error:'Cargo row cannot be edited and deleted in the same request'},400)
     }
-
-    const requestedStatus = text(p.status)
-    if (requestedStatus && !STATUS.has(requestedStatus)) return out(req,{error:'Invalid shipment status'},400)
 
     const isAdmin = ADMIN_ROLES.has(role)
     const patch:any = {}
@@ -190,7 +190,7 @@ Deno.serve(async (req:Request) => {
       patch.items_count = totalPieces
       patch.pc_count = totalPieces
       patch.box_count = totalBoxes
-      if (totalBoxes > 0) patch.carton_count = totalBoxes
+      if (liveItems.length > 0) patch.carton_count = totalBoxes
     }
 
     patch.updated_at = new Date().toISOString()
