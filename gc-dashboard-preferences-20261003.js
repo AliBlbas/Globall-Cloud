@@ -9,15 +9,18 @@
     quote: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>',
     rates: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-8M22 19H2"/></svg>',
     support: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H8l-4 4V5Z"/><path d="M8 9h8M8 12h5"/></svg>',
+    request: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/><path d="m15 17 2 2 4-4"/></svg>',
+    notifications: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>',
+    settings: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg>',
     sales: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/><path d="m15 16 2 2 4-4"/></svg>',
     sun: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
     moon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.4A8.5 8.5 0 0 1 8.6 4 8.5 8.5 0 1 0 20 15.4Z"/></svg>',
     language: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.2 2.4 3.3 5.4 3.3 9s-1.1 6.6-3.3 9c-2.2-2.4-3.3-5.4-3.3-9S9.8 5.4 12 3Z"/></svg>'
   };
   const copy = {
-    ckb: { dir: 'rtl', labels: { home: 'سەرەتا', shipments: 'بارەکان', quote: 'داواکاری', rates: 'نرخەکان', support: 'پشتیوانی', sales: 'فرۆشتن و نرخ', theme: 'دۆخی ڕووناکی', language: 'زمان', dark: 'تاریک', light: 'ڕووناک' } },
-    ar: { dir: 'rtl', labels: { home: 'الرئيسية', shipments: 'الشحنات', quote: 'طلب سعر', rates: 'الأسعار', support: 'الدعم', sales: 'المبيعات والأسعار', theme: 'المظهر', language: 'اللغة', dark: 'داكن', light: 'فاتح' } },
-    en: { dir: 'ltr', labels: { home: 'Home', shipments: 'Shipments', quote: 'New quote', rates: 'Rates', support: 'Support', sales: 'Sales & rates', theme: 'Appearance', language: 'Language', dark: 'Dark', light: 'Light' } }
+    ckb: { dir: 'rtl', labels: { home: 'سەرەکی', shipments: 'بارەکان', quote: 'داواکاری', request: 'داواکاری', notifications: 'ئاگاداری', settings: 'ڕێکخستن', rates: 'نرخەکان', support: 'پشتیوانی', sales: 'فرۆشتن و نرخ', theme: 'دۆخی ڕووناکی', language: 'زمان', dark: 'تاریک', light: 'ڕووناک' } },
+    ar: { dir: 'rtl', labels: { home: 'الرئيسية', shipments: 'الشحنات', quote: 'طلب سعر', request: 'الطلبات', notifications: 'الإشعارات', settings: 'الإعدادات', rates: 'الأسعار', support: 'الدعم', sales: 'المبيعات والأسعار', theme: 'المظهر', language: 'اللغة', dark: 'داكن', light: 'فاتح' } },
+    en: { dir: 'ltr', labels: { home: 'Home', shipments: 'Shipments', quote: 'New quote', request: 'Requests', notifications: 'Notifications', settings: 'Settings', rates: 'Rates', support: 'Support', sales: 'Sales & rates', theme: 'Appearance', language: 'Language', dark: 'Dark', light: 'Light' } }
   };
   const validLang = (lang) => copy[lang] ? lang : 'ckb';
   const currentLang = () => validLang(localStorage.getItem(LANG_KEY) || document.documentElement.lang || 'ckb');
@@ -70,8 +73,46 @@
       if (icons[key]) el.innerHTML = icons[key];
     });
   };
+  const initMobileDock = () => {
+    const dock = document.querySelector('body.gc-customer-app .mobile-dock');
+    if (!dock || dock.dataset.gcDockReady === '1') return;
+    dock.dataset.gcDockReady = '1';
+    const items = [...dock.querySelectorAll('[data-dock-tab]')];
+    const hashToTab = {
+      '#overview': 'home',
+      '#shipmentsSection': 'shipments',
+      '#shipments': 'shipments',
+      '#newRequest': 'requests',
+      '#activity': 'notifications',
+      '#notifications': 'notifications'
+    };
+    const activate = (key) => {
+      items.forEach((item) => {
+        const active = item.dataset.dockTab === key;
+        item.classList.toggle('active', active);
+        if (active) item.setAttribute('aria-current', 'page');
+        else item.removeAttribute('aria-current');
+      });
+    };
+    items.forEach((item) => {
+      if (item.dataset.dockTab === 'settings') {
+        item.addEventListener('click', () => {
+          activate('settings');
+          const trigger = document.querySelector('[data-gc-settings-trigger]');
+          if (trigger) trigger.click();
+          else console.warn('Globall Cloud settings panel is not mounted.');
+        });
+      } else {
+        item.addEventListener('click', () => activate(item.dataset.dockTab));
+      }
+    });
+    const syncToHash = () => activate(hashToTab[window.location.hash] || 'home');
+    window.addEventListener('hashchange', syncToHash);
+    syncToHash();
+  };
   const mount = () => {
     mountIcons();
+    initMobileDock();
     document.querySelector('[data-dashboard-theme]')?.addEventListener('click', () => applyTheme(currentTheme() === 'dark' ? 'light' : 'dark'));
     document.querySelector('[data-dashboard-language]')?.addEventListener('change', (event) => applyLanguage(event.target.value));
     applyLanguage(currentLang());
