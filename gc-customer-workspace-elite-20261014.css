@@ -606,3 +606,88 @@ body.gc-customer-app .gc-settings-panel{z-index:10002!important}
  body.gc-customer-app .gc-settings-trigger{display:none!important}
  body.gc-customer-app .gc-settings-panel{z-index:10002!important}
 }
+
+
+
+/* ISOLATED CUSTOMER VIEWS + ACCOUNT SETTINGS · 2026-10-16 */
+body.gc-customer-app .gc-customer-view-hidden{display:none!important;visibility:hidden!important}
+body.gc-customer-app .app-main.gc-single-view{min-width:0}
+body.gc-customer-app .gc-account-settings-screen{padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+body.gc-customer-app .gc-account-settings-heading{align-items:flex-start;margin-bottom:16px}
+body.gc-customer-app .gc-account-settings-heading h2{margin:5px 0 4px;font-size:clamp(24px,3vw,32px);letter-spacing:-.035em}
+body.gc-customer-app .gc-account-settings-heading p{max-width:720px;margin:0;color:#93aebf;font-size:13px;line-height:1.8}
+body.gc-customer-app .gc-settings-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);align-items:start;gap:16px}
+body.gc-customer-app .gc-settings-right-column{display:grid;gap:16px;min-width:0}
+body.gc-customer-app .gc-settings-grid>.surface-card,
+body.gc-customer-app .gc-settings-right-column>.surface-card{min-width:0;padding:clamp(15px,2vw,23px);border:1px solid rgba(143,198,218,.17);border-radius:22px;background:linear-gradient(155deg,rgba(16,42,63,.9),rgba(7,24,39,.97));box-shadow:0 18px 44px rgba(0,0,0,.14)}
+body.gc-customer-app .gc-settings-card-heading{margin-bottom:15px}
+body.gc-customer-app .gc-settings-card-heading .eyebrow{font-size:9px;letter-spacing:.13em}
+body.gc-customer-app .gc-settings-card-heading h3{margin:4px 0 0;font-size:18px;font-weight:900}
+body.gc-customer-app .gc-settings-identity{display:flex;align-items:center;gap:14px;margin:4px 0 10px;min-width:0}
+body.gc-customer-app .gc-settings-avatar-wrap{position:relative;display:grid;place-items:center;flex:0 0 98px;width:98px;height:98px;border:1px solid rgba(117,227,237,.3);border-radius:29px;background:linear-gradient(145deg,rgba(117,227,237,.18),rgba(46,103,147,.24));box-shadow:inset 0 1px rgba(255,255,255,.09);overflow:hidden}
+body.gc-customer-app #gcSettingsAvatar{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+body.gc-customer-app #gcSettingsAvatar[hidden],body.gc-customer-app #gcSettingsAvatarFallback[hidden]{display:none!important}
+body.gc-customer-app .gc-settings-avatar-fallback{font-size:38px;font-weight:950;color:#8deaf2}
+body.gc-customer-app .gc-avatar-change{position:absolute;inset-inline:5px;bottom:5px;z-index:2;min-height:27px;padding:3px 4px;border:1px solid rgba(255,255,255,.22);border-radius:9px;background:rgba(3,15,26,.8);color:#f4fdff;font:800 10px/1.3 Vazirmatn,system-ui,sans-serif;cursor:pointer;backdrop-filter:blur(8px)}
+body.gc-customer-app .gc-settings-identity-copy{display:grid;gap:4px;min-width:0}
+body.gc-customer-app .gc-settings-identity-copy strong{font-size:18px;line-height:1.5;color:#eefbff}
+body.gc-customer-app .gc-settings-identity-copy small{color:#9cb8c8;font-size:11px;overflow-wrap:anywhere}
+body.gc-customer-app .gc-customer-code{display:inline-flex;align-items:center;justify-self:start;padding:4px 8px;border:1px solid rgba(117,227,237,.24);border-radius:8px;background:rgba(117,227,237,.07);color:#7ce4ee;font:900 12px/1.5 ui-monospace,monospace;direction:ltr}
+body.gc-customer-app .gc-avatar-hint{display:block;color:#7f9bab;font-size:10px;margin:2px 0 15px}
+body.gc-customer-app .gc-account-form{display:grid;gap:8px;min-width:0}
+body.gc-customer-app .gc-account-form>label,
+body.gc-customer-app .gc-settings-preferences-card>label{margin-top:5px;color:#b9d0dc;font-size:12px;font-weight:850}
+body.gc-customer-app .gc-account-form .field,
+body.gc-customer-app .gc-settings-preferences-card .field{width:100%;min-width:0;min-height:45px;border:1px solid rgba(143,198,218,.2);border-radius:12px;background:#071b2c;color:#f3fbff;font:500 14px/1.5 Vazirmatn,system-ui,sans-serif}
+body.gc-customer-app .gc-account-form .field[readonly]{opacity:.78;background:rgba(255,255,255,.035)}
+body.gc-customer-app .gc-account-form .field:focus,
+body.gc-customer-app .gc-settings-preferences-card .field:focus{border-color:#69dce7;outline:0;box-shadow:0 0 0 3px rgba(105,220,231,.1)}
+body.gc-customer-app .gc-email-hint,body.gc-customer-app .gc-password-hint{margin:0;color:#839eaf;font-size:10px;line-height:1.8}
+body.gc-customer-app .gc-settings-message{min-height:18px;color:#9db8c8;font-size:11px;line-height:1.7;overflow-wrap:anywhere}
+body.gc-customer-app .gc-settings-message.is-error{color:#ff9da8}
+body.gc-customer-app .gc-settings-message.is-success{color:#72e2b5}
+body.gc-customer-app .gc-account-form .app-primary-action{width:100%;min-height:46px;justify-content:center;margin-top:5px}
+body.gc-customer-app .gc-settings-preferences-card{display:grid;gap:8px}
+body.gc-customer-app .gc-settings-note{font-size:10px;margin:2px 0 0}
+body.gc-customer-app .gc-settings-actions-card{display:grid;gap:9px}
+body.gc-customer-app .gc-settings-secondary-action,body.gc-customer-app .gc-settings-logout{width:100%;min-height:44px;display:flex;justify-content:center;align-items:center;border:1px solid rgba(117,227,237,.2);border-radius:12px;padding:10px 12px;background:rgba(117,227,237,.06);color:#90e6ee;font:850 12px/1.6 Vazirmatn,system-ui,sans-serif;text-align:center;cursor:pointer}
+body.gc-customer-app .gc-settings-secondary-action:hover{background:rgba(117,227,237,.12);border-color:rgba(117,227,237,.45)}
+body.gc-customer-app .gc-settings-logout{background:rgba(255,111,128,.07);border-color:rgba(255,111,128,.22);color:#ffa9b3}
+body.gc-customer-app .gc-settings-logout:hover{background:rgba(255,111,128,.13)}
+body.gc-customer-app .gc-settings-logged-out{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:clamp(18px,4vw,30px);border:1px solid rgba(143,198,218,.18);border-radius:22px;background:linear-gradient(145deg,rgba(17,48,70,.8),rgba(7,24,39,.96))}
+body.gc-customer-app .gc-settings-logged-out[hidden],body.gc-customer-app .gc-settings-authenticated[hidden]{display:none!important}
+body.gc-customer-app .gc-settings-lock{width:48px;height:48px;display:grid;place-items:center;border-radius:16px;background:rgba(117,227,237,.1);color:#87e9f0;font-size:28px;font-weight:900}
+body.gc-customer-app .gc-settings-logged-out>div:nth-child(2){flex:1;min-width:180px}
+body.gc-customer-app .gc-settings-logged-out p{margin:3px 0 0;font-size:11px}
+body.gc-customer-app .gc-settings-logged-out .app-primary-action{min-height:44px;justify-content:center}
+@media(max-width:900px){
+ body.gc-customer-app .gc-settings-grid{grid-template-columns:minmax(0,1fr)}
+ body.gc-customer-app .gc-settings-right-column{grid-template-columns:minmax(0,1fr)}
+ body.gc-customer-app .gc-account-settings-screen{padding-bottom:22px}
+ body.gc-customer-app .mobile-dock{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:3px!important}
+ body.gc-customer-app .mobile-dock>a,body.gc-customer-app .mobile-dock>button{min-width:0!important;padding-inline:1px!important;font-size:9px!important}
+ body.gc-customer-app .mobile-dock>a svg,body.gc-customer-app .mobile-dock>button svg{width:20px!important;height:20px!important}
+ body.gc-customer-app .mobile-dock>a small{font-size:8px!important;white-space:nowrap!important}
+}
+@media(max-width:380px){
+ body.gc-customer-app .mobile-dock{left:4px!important;right:4px!important;gap:2px!important;padding:4px!important}
+ body.gc-customer-app .mobile-dock>a,body.gc-customer-app .mobile-dock>button{font-size:8px!important}
+ body.gc-customer-app .mobile-dock>a svg,body.gc-customer-app .mobile-dock>button svg{width:18px!important;height:18px!important}
+ body.gc-customer-app .mobile-dock>a small{font-size:7px!important}
+ body.gc-customer-app .gc-settings-avatar-wrap{width:86px;height:86px;flex-basis:86px;border-radius:25px}
+}
+html[data-gc-theme="light"] body.gc-customer-app .gc-settings-grid>.surface-card,
+html[data-gc-theme="light"] body.gc-customer-app .gc-settings-right-column>.surface-card{background:linear-gradient(155deg,#fff,#f7fbfd);border-color:#d3e4eb;color:#102b43}
+html[data-gc-theme="light"] body.gc-customer-app .gc-settings-identity-copy strong{color:#102b43}
+html[data-gc-theme="light"] body.gc-customer-app .gc-settings-identity-copy small,
+html[data-gc-theme="light"] body.gc-customer-app .gc-settings-heading p,
+html[data-gc-theme="light"] body.gc-customer-app .gc-avatar-hint,
+html[data-gc-theme="light"] body.gc-customer-app .gc-password-hint{color:#617f92}
+html[data-gc-theme="light"] body.gc-customer-app .gc-account-form>label,
+html[data-gc-theme="light"] body.gc-customer-app .gc-settings-preferences-card>label{color:#3c5e73}
+html[data-gc-theme="light"] body.gc-customer-app .gc-account-form .field,
+html[data-gc-theme="light"] body.gc-customer-app .gc-settings-preferences-card .field{background:#fff;color:#102b43;border-color:#cfdee7}
+html[data-gc-theme="light"] body.gc-customer-app .gc-settings-logged-out{background:linear-gradient(145deg,#fff,#f4fafc);border-color:#d3e4eb}
+html[data-gc-theme="light"] body.gc-customer-app .gc-settings-logged-out strong{color:#102b43}
+html[data-gc-theme="light"] body.gc-customer-app .gc-settings-secondary-action{color:#196d80;background:#eefbfc;border-color:#cce8ed}
+html[data-gc-theme="light"] body.gc-customer-app .gc-settings-logout{background:#fff2f3;color:#a23b50;border-color:#f2cbd2}
