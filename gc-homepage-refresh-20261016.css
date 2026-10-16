@@ -151,3 +151,33 @@
   .gc-rate-route>div{min-width:0}
   .gc-rate-route strong{overflow-wrap:anywhere}
 }
+
+
+/* Mobile navigation QA fix: use the existing accessible menu instead of squeezing desktop links */
+@media(max-width:760px){
+  .gc-nav-inner{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .gc-desktop-nav{display:none!important}
+  .gc-nav-actions{display:flex;align-items:center;gap:6px;min-width:0}
+  .gc-nav-actions .gc-btn-primary{max-width:116px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .gc-menu{flex:0 0 40px;min-width:40px;min-height:40px;padding:0!important}
+  .gc-mobile-menu:not([hidden]){display:block!important}
+  .gc-announcement-inner{gap:8px;flex-wrap:wrap}
+  .gc-announcement-inner>span:first-child{min-width:0;overflow-wrap:anywhere;font-size:10px}
+  .gc-announcement-inner .gc-live-pill{font-size:9px;white-space:nowrap}
+  .gc-map-shell .route-map{height:clamp(210px,58vw,270px);min-height:210px}
+  .gc-map-fleet{grid-template-columns:minmax(0,1fr)!important}
+  .gc-map-fleet>div{min-width:0}
+  .gc-map-fleet small{overflow-wrap:anywhere}
+  .gc-rate-presets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .gc-rate-presets>*{min-width:0}
+}
+@media(max-width:390px){
+  .gc-nav-inner{gap:5px}
+  .gc-brand{gap:7px;min-width:0}
+  .gc-brand img{width:32px;height:32px}
+  .gc-brand b{font-size:14px}
+  .gc-brand small{font-size:8px}
+  .gc-nav-actions .gc-btn-primary{max-width:92px;padding-inline:7px!important;font-size:10px!important}
+  .gc-menu{flex-basis:36px;min-width:36px;width:36px;height:36px}
+  .gc-announcement-inner>span:first-child{max-width:100%;font-size:9px}
+}
