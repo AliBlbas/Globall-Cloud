@@ -12,7 +12,7 @@
     '/gc-homepage-signature-20261016.css?v=7'
   ];
   const customerStyles = [
-    '/gc-customer-workspace-elite-20261014.css?v=17',
+    '/gc-customer-workspace-elite-20261014.css?v=19',
     '/gc-customer-mobile-dock-20261016.css?v=3'
   ];
 
