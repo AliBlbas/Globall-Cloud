@@ -78,7 +78,7 @@
     const root = document.createElement('div');
     root.dataset.gcSettingsRoot = '1';
     root.innerHTML =
-      '<button type="button" class="gc-settings-trigger" data-gc-settings-trigger hidden aria-expanded="false" aria-controls="gcSettingsPanel" data-gc-settings-aria-label="title" aria-label="' + copy.title + '"></button>' +
+      '<button type="button" class="gc-settings-trigger" data-gc-settings-trigger aria-expanded="false" aria-controls="gcSettingsPanel" data-gc-settings-aria-label="title" aria-label="' + copy.title + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19 13.5a7.5 7.5 0 0 0 0-3l2-1.2-2-3.4-2.2.8a7.4 7.4 0 0 0-2.5-1.4L14 3h-4l-.3 2.3a7.4 7.4 0 0 0-2.5 1.4L5 5.9 3 9.3 5 10.5a7.5 7.5 0 0 0 0 3l-2 1.2 2 3.4 2.2-.8a7.4 7.4 0 0 0 2.5 1.4L10 21h4l.3-2.3a7.4 7.4 0 0 0 2.5-1.4l2.2.8 2-3.4-2-1.2Z"></path></svg></button>' +
       '<aside class="gc-settings-panel" id="gcSettingsPanel" hidden role="dialog" aria-modal="false" aria-labelledby="gcSettingsTitle">' +
         '<div class="gc-settings-head"><div><strong id="gcSettingsTitle" data-gc-settings-label="title">' + copy.title + '</strong><small>GLOBALL CLOUD · CUSTOMER</small></div>' +
           '<button type="button" class="gc-settings-close" data-gc-settings-close data-gc-settings-aria-label="close" aria-label="' + copy.close + '">×</button></div>' +
