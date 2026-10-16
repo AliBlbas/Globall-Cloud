@@ -21,12 +21,15 @@ async function actor(req:Request){
  return {admin,user:data.user,staff}
 }
 async function requireStaff(req:Request,write=false){const a=await actor(req);if(!a.staff?.is_active||!STAFF_ROLES.has(String(a.staff.role)))throw new Error('Staff permission required');if(write&&!WRITE_ROLES.has(String(a.staff.role)))throw new Error('Admin permission required');return a}
-async function listShipments(admin:any, gcCode?:string){
- let q=admin.from('shipments').select('id,tracking_id,route,type,status,created_at,customer_name,customer_phone,customer_user_id,directory_customer_id,customer_gc_code,origin_key,dest_key,branch,total_amount,paid_amount,current_step_index,step_dates,eta,items_count,weight_kg,volume_cbm,transport_mode,origin_warehouse,destination_warehouse,cargo_description,carton_count,actual_weight_kg,length_cm,width_cm,height_cm,volumetric_weight_kg,chargeable_weight_kg,dispatched_at,updated_at').order('created_at',{ascending:false}).limit(500)
+async function listShipments(admin:any, gcCode?:string, page=1, pageSize=500){
+ const safePage=Number.isInteger(page)?Math.min(10000,Math.max(1,page)):1;
+ const safePageSize=Number.isInteger(pageSize)?Math.min(500,Math.max(1,pageSize)):500;
+ const offset=(safePage-1)*safePageSize;
+ let q=admin.from('shipments').select('id,tracking_id,route,type,status,created_at,customer_name,customer_phone,customer_user_id,directory_customer_id,customer_gc_code,origin_key,dest_key,branch,total_amount,paid_amount,current_step_index,step_dates,eta,items_count,weight_kg,volume_cbm,transport_mode,origin_warehouse,destination_warehouse,cargo_description,carton_count,actual_weight_kg,length_cm,width_cm,height_cm,volumetric_weight_kg,chargeable_weight_kg,dispatched_at,updated_at', {count:'exact'}).order('created_at',{ascending:false}).range(offset,offset+safePageSize-1)
  if(gcCode) q=q.or(`customer_gc_code.eq.${gcCode},tracking_id.eq.${gcCode}`)
- const {data,error}=await q;if(error)throw error;
+ const {data,error,count}=await q;if(error)throw error;
  const rows=data||[];
- if(!rows.length)return rows;
+ if(!rows.length)return {items:[],page:safePage,page_size:safePageSize,total:count??0,has_more:offset<(count??0)};
 
  const ids=rows.map((x:any)=>x.id).filter(Boolean);
  let packages:any[]=[];
@@ -52,7 +55,7 @@ async function listShipments(admin:any, gcCode?:string){
   if(!cargoByShipment.has(key))cargoByShipment.set(key,[]);
   cargoByShipment.get(key)!.push(item);
  }
- return rows.map((s:any)=>{
+ const items = rows.map((s:any)=>{
   const ps=packagesByShipment.get(String(s.id))||[];
   const cis=cargoByShipment.get(String(s.id))||[];
   const customers=new Set<string>();
@@ -92,6 +95,7 @@ async function listShipments(admin:any, gcCode?:string){
    cargo_contents:uniqueContents
   };
  });
+ return {items,page:safePage,page_size:safePageSize,total:count??items.length,has_more:offset+items.length<(count??offset+items.length)};
 }
 async function shipmentDetail(admin:any,id:string){
  const {data:shipment,error}=await admin.from('shipments').select('*').eq('id',id).maybeSingle();if(error)throw error;if(!shipment)throw new Error('Shipment not found')
@@ -192,4 +196,4 @@ async function post(req:Request,a:any){
  }
  throw new Error('Unsupported action')
 }
-Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors(req)});try{const a=await actor(req);if(req.method==='POST')return json(req,await post(req,a));const u=new URL(req.url);const kind=text(u.searchParams.get('kind'))||'overview';const staffOnly=['shipments','shipment','customers','alerts','pricing','finance','chat'];if(staffOnly.includes(kind)&&(!a.staff?.is_active||!STAFF_ROLES.has(String(a.staff.role))))throw new Error('Staff permission required');if(kind==='shipments')return json(req,{items:await listShipments(a.admin,gc(u.searchParams.get('gc'))||undefined)});if(kind==='shipment')return json(req,await shipmentDetail(a.admin,text(u.searchParams.get('id'))));if(kind==='customers')return json(req,{items:await customers(a.admin)});if(kind==='alerts')return json(req,{items:await alerts(a.admin,a.staff.id)});if(kind==='pricing')return json(req,await pricing(a.admin));if(kind==='finance')return json(req,await finance(a.admin));if(kind==='chat')return json(req,await chat(req,a));return json(req,{ok:true,service:'operations-v4',time:new Date().toISOString()})}catch(e){const m=e instanceof Error?e.message:String(e);const s=/Unauthorized/i.test(m)?401:/permission|Forbidden/i.test(m)?403:/not found|required|Invalid/i.test(m)?400:500;return json(req,{error:m},s)}})
+Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors(req)});try{const a=await actor(req);if(req.method==='POST')return json(req,await post(req,a));const u=new URL(req.url);const kind=text(u.searchParams.get('kind'))||'overview';const staffOnly=['shipments','shipment','customers','alerts','pricing','finance','chat'];if(staffOnly.includes(kind)&&(!a.staff?.is_active||!STAFF_ROLES.has(String(a.staff.role))))throw new Error('Staff permission required');if(kind==='shipments'){const pageRaw=Number(u.searchParams.get('page'));const pageSizeRaw=Number(u.searchParams.get('page_size'));const page=Number.isInteger(pageRaw)&&pageRaw>0?Math.min(10000,pageRaw):1;const pageSize=Number.isInteger(pageSizeRaw)&&pageSizeRaw>0?Math.min(500,pageSizeRaw):500;return json(req,await listShipments(a.admin,gc(u.searchParams.get('gc'))||undefined,page,pageSize))}if(kind==='shipment')return json(req,await shipmentDetail(a.admin,text(u.searchParams.get('id'))));if(kind==='customers')return json(req,{items:await customers(a.admin)});if(kind==='alerts')return json(req,{items:await alerts(a.admin,a.staff.id)});if(kind==='pricing')return json(req,await pricing(a.admin));if(kind==='finance')return json(req,await finance(a.admin));if(kind==='chat')return json(req,await chat(req,a));return json(req,{ok:true,service:'operations-v4',time:new Date().toISOString()})}catch(e){const m=e instanceof Error?e.message:String(e);const s=/Unauthorized/i.test(m)?401:/permission|Forbidden/i.test(m)?403:/not found|required|Invalid/i.test(m)?400:500;return json(req,{error:m},s)}})
