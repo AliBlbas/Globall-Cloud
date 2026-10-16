@@ -277,8 +277,16 @@
 }
 #gcModal .shipment-command .shipment-command-actions,
 #gcModal .shipment-command + .modal-foot { flex-wrap: wrap; }
+/* Keep shipment dialogs above the fixed five-item mobile dock. */
+#gcModal { z-index: 9800 !important; }
+body:has(#gcModal) .gc-staff-mobile-dock,
+body:has(#gcModal) .gc-staff-mobile-drawer,
+body:has(#gcModal) .gc-staff-mobile-backdrop,
+body:has(#gcModal) .gc-staff-mobile-menu-button { display: none !important; }
+
 
 @media (max-width: 760px) {
+  #gcModal { align-items: end; padding: max(8px, env(safe-area-inset-top, 0px)) 8px calc(8px + env(safe-area-inset-bottom, 0px)); }
   #gcModal .modal:has(.shipment-command) {
     width: 100%;
     max-height: calc(91dvh - env(safe-area-inset-bottom, 0px));
