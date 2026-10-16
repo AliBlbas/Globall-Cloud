@@ -65,7 +65,7 @@
     window.dispatchEvent(new CustomEvent('gc:unified-view-changed', {detail:{mode:'customer'}}));
   };
   window.gcEnterCustomerMode = (options = {}) => enterCustomerMode(options);
-  window.gcShowPublicHomepage = () => setPublicMode(false);
+  window.gcShowPublicHomepage = () => setPublicMode({keepHash:false, forcePublic:true});
 
   const selectCustomerView = (hash = window.location.hash) => {
     const view = hashToView[hash] || 'home';
@@ -116,7 +116,7 @@
     } catch (error) {
       // A stale, staff-only, or unlinked session must not expose the private workspace.
       if (routeNeedsCustomer && !publicModeForced) enterCustomerMode({showAuth:true});
-      else if (!publicModeForced) setPublicMode(true);
+      else if (!publicModeForced) setPublicMode({keepHash:true, forcePublic:true});
     } finally {
       authCheckStarted = false;
     }
@@ -149,7 +149,7 @@
 
   // Start in public mode unless the URL explicitly targets the customer workspace.
   if (window.location.hash === '#public') {
-    setPublicMode(true);
+    setPublicMode({keepHash:true, forcePublic:true});
   } else if (customerRouteRequested()) {
     enterCustomerMode({showAuth:true});
     selectCustomerView(window.location.hash);
