@@ -1,6 +1,6 @@
 /* Globall Cloud — Customer Workspace Mobile Dock Hardening · 2026-10-16
    Explicit last-loaded layer for the five-action customer navigation on small screens. */
-body.gc-customer-app > .mobile-dock { display: none; }
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock { display: none; }
 
 @media (max-width: 900px) {
   html:has(body.gc-customer-app) {
@@ -84,10 +84,10 @@ body.gc-customer-app > .mobile-dock { display: none; }
     grid-template-columns: repeat(2,minmax(0,1fr)) !important;
     gap: 8px !important;
   }
-  body.gc-customer-app > .mobile-dock {
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock {
     display: grid !important;
     position: fixed !important;
-    grid-template-columns: repeat(5,minmax(0,1fr)) !important;
+    grid-template-columns: repeat(6,minmax(0,1fr)) !important;
     align-items: stretch !important;
     gap: 4px !important;
     left: 8px !important;
@@ -110,7 +110,7 @@ body.gc-customer-app > .mobile-dock { display: none; }
     pointer-events: auto !important;
     transform: none !important;
   }
-  body.gc-customer-app > .mobile-dock > a {
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > a {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -130,7 +130,7 @@ body.gc-customer-app > .mobile-dock { display: none; }
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
   }
-  body.gc-customer-app > .mobile-dock > a > span {
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > a > span {
     display: grid !important;
     place-items: center !important;
     flex: 0 0 22px !important;
@@ -140,7 +140,7 @@ body.gc-customer-app > .mobile-dock { display: none; }
     overflow: visible !important;
     color: currentColor !important;
   }
-  body.gc-customer-app > .mobile-dock > a > span svg {
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > a > span svg {
     display: block !important;
     width: 20px !important;
     height: 20px !important;
@@ -152,7 +152,7 @@ body.gc-customer-app > .mobile-dock { display: none; }
     stroke-linecap: round !important;
     stroke-linejoin: round !important;
   }
-  body.gc-customer-app > .mobile-dock > a > small {
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > a > small {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -164,12 +164,12 @@ body.gc-customer-app > .mobile-dock { display: none; }
     font: inherit !important;
     line-height: 1.3 !important;
   }
-  body.gc-customer-app > .mobile-dock > a.active {
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > a.active {
     color: #82e6ee !important;
     background: rgba(85,217,231,.11) !important;
     border-color: rgba(85,217,231,.14) !important;
   }
-  body.gc-customer-app > .mobile-dock > a.dock-primary {
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > a.dock-primary {
     color: #05242b !important;
     background: linear-gradient(135deg,#73e4ec,#35c5d7) !important;
     box-shadow: 0 8px 22px rgba(53,197,215,.2) !important;
@@ -181,18 +181,23 @@ body.gc-customer-app > .mobile-dock { display: none; }
 @media (max-width: 390px) {
   body.gc-customer-app .app-header-inner { padding-inline: 9px !important; }
   body.gc-customer-app .app-main { padding-inline: 7px !important; }
-  body.gc-customer-app > .mobile-dock {
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock {
     left: 5px !important;
     right: 5px !important;
     gap: 2px !important;
     padding: 4px !important;
   }
-  body.gc-customer-app > .mobile-dock > a { font-size: 8px !important; }
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > a { font-size: 8px !important; }
 }
 @media (min-width: 901px) {
-  body.gc-customer-app > .mobile-dock { display: none !important; }
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock { display: none !important; }
 }
 @media (prefers-reduced-motion: reduce) {
-  body.gc-customer-app > .mobile-dock,
-  body.gc-customer-app > .mobile-dock * { transition: none !important; }
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock,
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock * { transition: none !important; }
 }
+
+/* The public dock stays hidden while the same document displays the customer workspace. */
+body.gc-customer-app .gc-mobile-dock-v3,
+body.gc-customer-app #gcPrimaryMobileNav{display:none!important;visibility:hidden!important;pointer-events:none!important}
+body:not(.gc-customer-app) #gcCustomerWorkspace{display:none!important}
