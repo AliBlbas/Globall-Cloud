@@ -78,6 +78,12 @@
     if (!dock || dock.dataset.gcDockReady === '1') return;
     dock.dataset.gcDockReady = '1';
     const items = [...dock.querySelectorAll('[data-dock-tab]')];
+    const sections = [
+      { key: 'home', node: document.getElementById('overview') },
+      { key: 'shipments', node: document.getElementById('shipmentsSection') },
+      { key: 'requests', node: document.getElementById('newRequest') },
+      { key: 'notifications', node: document.getElementById('activity') }
+    ].filter((item) => item.node);
     const hashToTab = {
       '#overview': 'home',
       '#shipmentsSection': 'shipments',
@@ -94,6 +100,35 @@
         else item.removeAttribute('aria-current');
       });
     };
+
+    // Keep the five destinations, while making unread alerts visible at a glance.
+    const alertsItem = items.find((item) => item.dataset.dockTab === 'notifications');
+    const iconWrap = alertsItem?.querySelector('[data-dash-icon="notifications"]');
+    let badge = alertsItem?.querySelector('[data-dock-unread]');
+    if (alertsItem && iconWrap && !badge) {
+      badge = document.createElement('span');
+      badge.dataset.dockUnread = '1';
+      badge.className = 'dock-unread-badge';
+      badge.setAttribute('aria-hidden', 'true');
+      badge.hidden = true;
+      iconWrap.appendChild(badge);
+    }
+    const updateUnread = (notifications) => {
+      const count = (Array.isArray(notifications) ? notifications : [])
+        .filter((item) => !item?.read_at).length;
+      if (badge) {
+        badge.hidden = count < 1;
+        badge.textContent = count > 9 ? '9+' : String(count);
+      }
+      if (alertsItem) {
+        const label = copy[currentLang()].labels.notifications || 'Notifications';
+        alertsItem.setAttribute('aria-label', count ? label + ', ' + count + ' unread' : label);
+      }
+    };
+    window.addEventListener('gc:customer-loaded', (event) => {
+      updateUnread(event.detail?.notifications);
+    });
+
     items.forEach((item) => {
       if (item.dataset.dockTab === 'settings') {
         item.addEventListener('click', (event) => {
@@ -107,8 +142,24 @@
         item.addEventListener('click', () => activate(item.dataset.dockTab));
       }
     });
+
     const syncToHash = () => activate(hashToTab[window.location.hash] || 'home');
     window.addEventListener('hashchange', syncToHash);
+    if ('IntersectionObserver' in window && sections.length) {
+      const ratios = new Map();
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          ratios.set(entry.target, entry.isIntersecting ? entry.intersectionRatio : 0);
+        });
+        const current = sections
+          .map((section) => ({ ...section, ratio: ratios.get(section.node) || 0 }))
+          .filter((section) => section.ratio > 0)
+          .sort((a, b) => b.ratio - a.ratio)[0];
+        if (current) activate(current.key);
+      }, { root: null, rootMargin: '-12% 0px -54% 0px', threshold: [0, 0.08, 0.2, 0.4, 0.65] });
+      sections.forEach(({ node }) => observer.observe(node));
+    }
+    updateUnread(window.__customerNotifications || []);
     syncToHash();
   };
   const mount = () => {
