@@ -132,6 +132,20 @@ if (!customerGcRegister.includes('consume_public_message_rate_limit') || !custom
 else ok('Customer registration source has rate limits and origin validation')
 
 
+
+const cargoUi = read('staff-os-v5.js')
+const cargoControl = read('supabase/functions/staff-shipment-control/index.ts')
+const cargoCreate = read('supabase/functions/staff-shipment-v5/index.ts')
+const cargoCss = read('gc-shipment-detail-20261016.css')
+if (!staff.includes('/gc-shipment-detail-20261016.css?v=3')) fail('Structured cargo editor CSS cache-buster is missing')
+if (!cargoUi.includes('cargoItemEditorHTML') || !cargoUi.includes('collectCargoItems')) fail('Staff shipment editor must support structured cargo rows')
+if (!cargoUi.includes('d.cargo_items = collectCargoItems') || !cargoUi.includes('deleted_cargo_item_ids')) fail('Staff shipment save must submit cargo edits and explicit removals')
+if (!cargoCreate.includes('normalizeCargoRows') || !cargoCreate.includes("from('shipment_cargo_items').insert(cargoRows)")) fail('Shipment creation must persist structured cargo rows')
+if (!cargoControl.includes('normalizeCargoRows') || !cargoControl.includes("from('shipment_cargo_items').update(record)") || !cargoControl.includes("from('shipment_cargo_items').delete()")) fail('Shipment control must safely update and remove structured cargo rows')
+if (cargoControl.indexOf('Operational permission required') > cargoControl.indexOf('const hasCargoItems')) fail('Shipment control must authorize staff before loading cargo rows')
+if (!cargoCss.includes('.cargo-item-row') || !cargoCss.includes('@media (max-width: 390px)')) fail('Structured cargo editor responsive styles are missing')
+if (!failures) ok('Structured cargo editor, server persistence, authorization and responsive contracts OK')
+
 console.log('')
 if (failures) { console.error(`${failures} production contract check(s) failed.`); process.exit(1) }
 console.log('All production contract checks passed.')
