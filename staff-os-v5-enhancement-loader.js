@@ -3,9 +3,9 @@
 
   /*
    * Staff OS runtime loader — clean production profile.
-   * Only feature bridges that extend the V5 console are loaded here.
-   * Legacy visual shells, duplicate mobile docks and floating command layers
-   * are intentionally excluded so one navigation shell remains authoritative.
+   * Feature bridges extend the V5 console. Desktop keeps the existing sidebar;
+   * mobile uses one five-action dock plus an accessible drawer for all modules.
+   * Legacy visual shells and duplicate floating command layers remain excluded.
    */
   const enhancementStyles = [
     '/staff-os-premium-20260918.css?v=20260918-1'
@@ -21,7 +21,8 @@
     '/staff-os-v5-stability.js?v=20260912-2',
     '/staff-workflow-chain.js?v=20260912-2',
     '/staff-os-premium-20260918.js?v=20260918-1',
-    '/gc-cargo-control-v1.js?v=20261016-1'
+    '/gc-cargo-control-v1.js?v=20261016-1',
+    '/gc-staff-mobile-dock-20261016.js?v=1'
   ];
 
   const loadStyle = (href) => {
@@ -51,9 +52,10 @@
     enhancementStyles.forEach(loadStyle);
     for (const src of enhancementScripts) await loadOne(src);
     loadStyle('/gc-final-ui-20260927.css?v=4');
-    // Keep the current console design layer last: later-loaded legacy bundles
-    // otherwise override responsive layout, cards, and mobile navigation.
     loadStyle('/gc-staff-elite-20261014.css?v=3');
+    // This scoped layer loads last so it can replace the old scrollable mobile
+    // sidebar dock without changing desktop navigation or shipment actions.
+    loadStyle('/gc-staff-mobile-dock-20261016.css?v=1');
   };
 
   const waitForShell = () => {
