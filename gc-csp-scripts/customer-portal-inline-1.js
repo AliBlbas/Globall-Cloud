@@ -332,8 +332,8 @@ $('loginBtn').addEventListener('click', () => { $('auth').classList.remove('hidd
 $('loginPromptBtn')?.addEventListener('click', () => { $('auth').classList.remove('hidden'); $('email')?.focus(); });
 $('close').addEventListener('click', () => { $('auth').classList.add('hidden'); $('loginBtn')?.focus(); });
 $('auth').addEventListener('click', (event) => { if (event.target === $('auth')) $('close').click(); });
-$('password').addEventListener('keydown', (event) => { if (event.key === 'Enter') $('signIn').click(); });
-$('signIn').addEventListener('click', async () => {
+$('authForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
   const identifier = $('email').value.trim();
   const password = $('password').value;
   const button = $('signIn');
