@@ -13,14 +13,15 @@
     notifications: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>',
     settings: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/><path d="m19.4 15 .1.1 1.4 1.1-1.7 3-1.7-.7a7.8 7.8 0 0 1-1.5.9l-.3 1.8h-3.4l-.3-1.8a7.8 7.8 0 0 1-1.5-.9l-1.7.7-1.7-3L6.5 15a7.7 7.7 0 0 1 0-2l-1.4-1.1 1.7-3 1.7.7a7.8 7.8 0 0 1 1.5-.9l.3-1.8h3.4l.3 1.8a7.8 7.8 0 0 1 1.5.9l1.7-.7 1.7 3-1.4 1.1a7.7 7.7 0 0 1-.1 2Z"/></svg>',
     sales: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/><path d="m15 16 2 2 4-4"/></svg>',
+    records: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M9 12h6M9 16h6"/></svg>',
     sun: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
     moon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.4A8.5 8.5 0 0 1 8.6 4 8.5 8.5 0 1 0 20 15.4Z"/></svg>',
     language: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.2 2.4 3.3 5.4 3.3 9s-1.1 6.6-3.3 9c-2.2-2.4-3.3-5.4-3.3-9S9.8 5.4 12 3Z"/></svg>'
   };
   const copy = {
-    ckb: { dir: 'rtl', labels: { home: 'سەرەکی', shipments: 'بارەکان', quote: 'داواکاری', request: 'داواکاری', notifications: 'ئاگاداری', settings: 'ڕێکخستن', rates: 'نرخەکان', support: 'پشتیوانی', sales: 'فرۆشتن و نرخ', theme: 'دۆخی ڕووناکی', language: 'زمان', dark: 'تاریک', light: 'ڕووناک' } },
-    ar: { dir: 'rtl', labels: { home: 'الرئيسية', shipments: 'الشحنات', quote: 'طلب سعر', request: 'الطلبات', notifications: 'الإشعارات', settings: 'الإعدادات', rates: 'الأسعار', support: 'الدعم', sales: 'المبيعات والأسعار', theme: 'المظهر', language: 'اللغة', dark: 'داكن', light: 'فاتح' } },
-    en: { dir: 'ltr', labels: { home: 'Home', shipments: 'Shipments', quote: 'New quote', request: 'Requests', notifications: 'Notifications', settings: 'Settings', rates: 'Rates', support: 'Support', sales: 'Sales & rates', theme: 'Appearance', language: 'Language', dark: 'Dark', light: 'Light' } }
+    ckb: { dir: 'rtl', labels: { home: 'سەرەکی', shipments: 'بارەکان', quote: 'داواکاری', request: 'داواکاری', notifications: 'ئاگاداری', records: 'بەڵگە', settings: 'ڕێکخستن', rates: 'نرخەکان', support: 'پشتیوانی', sales: 'فرۆشتن و نرخ', theme: 'دۆخی ڕووناکی', language: 'زمان', dark: 'تاریک', light: 'ڕووناک' } },
+    ar: { dir: 'rtl', labels: { home: 'الرئيسية', shipments: 'الشحنات', quote: 'طلب سعر', request: 'الطلبات', notifications: 'الإشعارات', records: 'المستندات', settings: 'الإعدادات', rates: 'الأسعار', support: 'الدعم', sales: 'المبيعات والأسعار', theme: 'المظهر', language: 'اللغة', dark: 'داكن', light: 'فاتح' } },
+    en: { dir: 'ltr', labels: { home: 'Home', shipments: 'Shipments', quote: 'New quote', request: 'Requests', notifications: 'Notifications', records: 'Records', settings: 'Settings', rates: 'Rates', support: 'Support', sales: 'Sales & rates', theme: 'Appearance', language: 'Language', dark: 'Dark', light: 'Light' } }
   };
   const validLang = (lang) => copy[lang] ? lang : 'ckb';
   const currentLang = () => validLang(localStorage.getItem(LANG_KEY) || document.documentElement.lang || 'ckb');
@@ -71,47 +72,84 @@
     });
     applyTheme(currentTheme());
   };
-  const mountIcons = () => {
-    document.querySelectorAll('[data-dash-icon]').forEach((el) => {
-      const key = el.dataset.dashIcon;
-      if (icons[key]) el.innerHTML = icons[key];
-    });
-  };
-  const initMobileDock = () => {
+  const   const initMobileDock = () => {
     const dock = document.querySelector('body.gc-customer-app .mobile-dock');
-    if (!dock || dock.dataset.gcDockReady === '1') return;
+    const main = document.querySelector('body.gc-customer-app .app-main');
+    if (!dock || !main || dock.dataset.gcDockReady === '1') return;
     dock.dataset.gcDockReady = '1';
     const items = [...dock.querySelectorAll('[data-dock-tab]')];
-    const sections = [
-      { key: 'home', node: document.getElementById('overview') },
-      { key: 'shipments', node: document.getElementById('shipmentsSection') },
-      { key: 'requests', node: document.getElementById('newRequest') },
-      { key: 'notifications', node: document.getElementById('activity') },
-      { key: 'settings', node: document.getElementById('gcAccountSettings') }
-    ].filter((item) => item.node);
-    const hashToTab = {
-      '#overview': 'home',
-      '#shipmentsSection': 'shipments',
-      '#shipments': 'shipments',
-      '#newRequest': 'requests',
-      '#activity': 'notifications',
-      '#notifications': 'notifications',
-      '#gcAccountSettings': 'settings',
-      '#records': 'settings',
-      '#payments': 'settings',
-      '#support': 'settings'
+    const allSections = [...main.querySelectorAll(':scope > section')];
+    const viewGroups = {
+      home: ['workspace-toolbar', 'overview', 'homeMetrics'],
+      shipments: ['shipmentsSection'],
+      requests: ['quotesPanel', 'commercial', 'newRequest'],
+      notifications: ['activity'],
+      records: ['records'],
+      settings: ['gcAccountSettings'],
+      support: ['support']
     };
-    const activate = (key) => {
-      items.forEach((item) => {
-        const active = item.dataset.dockTab === key;
+    const hashToTab = {
+      '#overview':'home', '#homeMetrics':'home', '#auth':'home', '#register':'home',
+      '#shipmentsSection':'shipments', '#shipments':'shipments',
+      '#newRequest':'requests', '#quoteForm':'requests', '#commercial':'requests', '#quotesPanel':'requests',
+      '#activity':'notifications', '#notifications':'notifications',
+      '#records':'records', '#payments':'records',
+      '#gcAccountSettings':'settings', '#settings':'settings', '#support':'support'
+    };
+    const viewHash = {
+      home:'#overview', shipments:'#shipmentsSection', requests:'#newRequest',
+      notifications:'#activity', records:'#records', settings:'#gcAccountSettings', support:'#support'
+    };
+    const activate = (requestedKey, options = {}) => {
+      const key = viewGroups[requestedKey] ? requestedKey : 'home';
+      const visible = new Set(viewGroups[key]);
+      allSections.forEach(section => {
+        const show = visible.has(section.id) || visible.has(section.classList.contains('workspace-toolbar') ? 'workspace-toolbar' : '');
+        section.classList.toggle('gc-customer-view-hidden', !show);
+        section.setAttribute('aria-hidden', String(!show));
+      });
+      document.body.dataset.gcCustomerView = key;
+      items.forEach(item => {
+        const itemKey = key === 'support' ? 'settings' : key;
+        const active = item.dataset.dockTab === itemKey;
         item.classList.toggle('active', active);
         if (active) item.setAttribute('aria-current', 'page');
         else item.removeAttribute('aria-current');
       });
+      if (options.writeHash !== false) {
+        const nextHash = options.hash || viewHash[key];
+        if (nextHash && window.location.hash !== nextHash) history.pushState({gcCustomerView:key}, '', nextHash);
+      }
+      if (options.scroll !== false) window.scrollTo({top:0, behavior:'auto'});
+      window.dispatchEvent(new CustomEvent('gc:customer-view-changed', {detail:{key}}));
     };
+    const keyForHash = hash => hashToTab[hash] || 'home';
 
-    // Keep the five destinations, while making unread alerts visible at a glance.
-    const alertsItem = items.find((item) => item.dataset.dockTab === 'notifications');
+    // The dock is a set of separate application views, not scroll anchors.
+    items.forEach(item => {
+      item.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        const key = item.dataset.dockTab || 'home';
+        activate(key, {hash:viewHash[key]});
+      });
+    });
+
+    // Preserve direct links and the desktop side-navigation, but show only one view.
+    document.querySelectorAll('body.gc-customer-app .app-side-nav a[href^="#"]').forEach(link => {
+      link.addEventListener('click', event => {
+        const hash = link.getAttribute('href') || '#overview';
+        const key = keyForHash(hash);
+        event.preventDefault();
+        activate(key, {hash});
+      });
+    });
+    window.addEventListener('hashchange', () => activate(keyForHash(window.location.hash), {writeHash:false}));
+    window.addEventListener('popstate', () => activate(keyForHash(window.location.hash), {writeHash:false}));
+    window.gcSelectCustomerView = (key) => activate(key);
+
+    // Keep unread alerts visible without mixing alert content into other views.
+    const alertsItem = items.find(item => item.dataset.dockTab === 'notifications');
     const iconWrap = alertsItem?.querySelector('[data-dash-icon="notifications"]');
     let badge = alertsItem?.querySelector('[data-dock-unread]');
     if (alertsItem && iconWrap && !badge) {
@@ -122,57 +160,17 @@
       badge.hidden = true;
       iconWrap.appendChild(badge);
     }
-    const updateUnread = (notifications) => {
-      const count = (Array.isArray(notifications) ? notifications : [])
-        .filter((item) => !item?.read_at).length;
-      if (badge) {
-        badge.hidden = count < 1;
-        badge.textContent = count > 9 ? '9+' : String(count);
-      }
+    const updateUnread = notifications => {
+      const count = (Array.isArray(notifications) ? notifications : []).filter(item => !item?.read_at).length;
+      if (badge) { badge.hidden = count < 1; badge.textContent = count > 9 ? '9+' : String(count); }
       if (alertsItem) {
         const label = copy[currentLang()].labels.notifications || 'Notifications';
         alertsItem.setAttribute('aria-label', count ? label + ', ' + count + ' unread' : label);
       }
     };
-    window.addEventListener('gc:customer-loaded', (event) => {
-      updateUnread(event.detail?.notifications);
-    });
-
-    items.forEach((item) => {
-      if (item.dataset.dockTab === 'settings') {
-        item.addEventListener('click', (event) => {
-          event.stopPropagation();
-          activate('settings');
-          if (typeof window.gcOpenSettings === 'function') window.gcOpenSettings();
-          else {
-            const trigger = document.querySelector('[data-gc-settings-trigger]');
-            if (trigger) trigger.click();
-            else console.warn('Globall Cloud settings panel is not mounted.');
-          }
-        });
-      } else {
-        item.addEventListener('click', () => activate(item.dataset.dockTab));
-      }
-    });
-
-    const syncToHash = () => activate(hashToTab[window.location.hash] || 'home');
-    window.addEventListener('hashchange', syncToHash);
-    if ('IntersectionObserver' in window && sections.length) {
-      const ratios = new Map();
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          ratios.set(entry.target, entry.isIntersecting ? entry.intersectionRatio : 0);
-        });
-        const current = sections
-          .map((section) => ({ ...section, ratio: ratios.get(section.node) || 0 }))
-          .filter((section) => section.ratio > 0)
-          .sort((a, b) => b.ratio - a.ratio)[0];
-        if (current) activate(current.key);
-      }, { root: null, rootMargin: '-12% 0px -54% 0px', threshold: [0, 0.08, 0.2, 0.4, 0.65] });
-      sections.forEach(({ node }) => observer.observe(node));
-    }
+    window.addEventListener('gc:customer-loaded', event => updateUnread(event.detail?.notifications));
     updateUnread(window.__customerNotifications || []);
-    syncToHash();
+    activate(keyForHash(window.location.hash), {writeHash:false, scroll:false});
   };
   const mount = () => {
     mountIcons();
