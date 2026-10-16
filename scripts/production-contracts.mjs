@@ -139,7 +139,7 @@ else ok('Customer registration source has rate limits and origin validation')
 
 
 
-if (!staff.includes('staff-os-v5.js?v=20261016-17')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
+if (!staff.includes('staff-os-v5.js?v=20261016-18')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
 
 const mobileLoader = read('staff-os-v5-enhancement-loader.js')
 if (!staff.includes('staff-os-v5-enhancement-loader.js?v=20261016-7')) fail('Staff enhancement loader cache-buster is stale')
@@ -151,7 +151,11 @@ if (!staffMobile.includes('#app .customer-control-hero') || !staffMobile.include
 if (!staffMobile.includes('#app .customer-control-table tbody>tr') || !staffMobile.includes('td:before{content:attr(data-label)')) fail('Staff customer rows must reflow into readable mobile cards')
 if (!staffMobile.includes('@media (max-width: 760px)') || !staffMobile.includes('@media (max-width: 390px)')) fail('Staff customer responsive breakpoints are missing')
 
+const operationsApi = read('supabase/functions/operations-v4/index.ts');
+if (!operationsApi.includes(".range(offset,offset+safePageSize-1)") || !operationsApi.includes("{count:'exact'}") || !operationsApi.includes('page_size:safePageSize') || !operationsApi.includes('has_more:offset+items.length')) fail('Staff shipment API must provide a counted, bounded pagination contract');
+if (!operationsApi.includes('pageRaw') || !operationsApi.includes('pageSizeRaw') || !operationsApi.includes("Math.min(500,pageSizeRaw)")) fail('Staff shipment API must validate requested page and cap page size');
 const cargoUi = read('staff-os-v5.js')
+if (!cargoUi.includes("ops('shipments', 'page=1&page_size=100')") || !cargoUi.includes('loadMoreShipments') || !cargoUi.includes('shipmentPager') || !cargoUi.includes('next.has_more')) fail('Staff shipment workspace must load more records without replacing previously loaded shipments');
 const cargoControl = read('supabase/functions/staff-shipment-control/index.ts')
 const cargoCreate = read('supabase/functions/staff-shipment-v5/index.ts')
 const cargoCss = read('gc-shipment-detail-20261016.css')
