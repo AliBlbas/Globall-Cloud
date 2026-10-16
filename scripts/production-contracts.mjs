@@ -146,6 +146,7 @@ if (!cargoUi.includes('list="gcCargoCustomerCodes"') || !cargoUi.includes('ops(\
 if (!cargoUi.includes('if (!itemName && !notes && quantity === 0 && boxes === 0 && weight === 0 && declared === 0) return;')) fail('Empty prefilled GC-code row must not block deleting all cargo items')
 if (!cargoUi.includes('d.cargo_items = collectCargoItems') || !cargoUi.includes('deleted_cargo_item_ids')) fail('Staff shipment save must submit cargo edits and explicit removals')
 if (!cargoCreate.includes('normalizeCargoRows') || !cargoCreate.includes("from('shipment_cargo_items').insert(cargoRows)")) fail('Shipment creation must persist structured cargo rows')
+if (!cargoCreate.includes("A valid GC customer code is required") || !cargoCreate.includes('Invalid transport mode')) fail('Shipment creation must validate customer GC codes and transport mode')
 if (!cargoControl.includes('normalizeCargoRows') || !cargoControl.includes("from('shipment_cargo_items').update(record)") || !cargoControl.includes("from('shipment_cargo_items').delete()")) fail('Shipment control must safely update and remove structured cargo rows')
 if (cargoControl.indexOf('Operational permission required') > cargoControl.indexOf('const hasCargoItems')) fail('Shipment control must authorize staff before loading cargo rows')
 if (cargoControl.indexOf('Operational permission required') > cargoControl.indexOf("from('shipments').select('*')")) fail('Shipment control must authorize staff before reading shipment records')
