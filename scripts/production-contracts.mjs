@@ -134,8 +134,24 @@ const customerGcLogin = read('supabase/functions/customer-gc-login/index.ts')
 if (!customerGcLogin.includes('consume_public_message_rate_limit') || !customerGcLogin.includes('MAX_LOGIN_REQUESTS_PER_IP = 40') || !customerGcLogin.includes('MAX_LOGIN_REQUESTS_PER_IP_CODE = 8') || !customerGcLogin.includes('MAX_LOGIN_REQUESTS_PER_GC_CODE = 12') || !customerGcLogin.includes('originAllowed(req)')) fail('GC-code login must apply network/code rate limits and origin validation')
 else ok('GC-code login applies server-side attempt limits and origin validation')
 const customerGcRegister = read('supabase/functions/customer-gc-register/index.ts')
-if (!customerGcRegister.includes('consume_public_message_rate_limit') || !customerGcRegister.includes('MAX_REGISTER_REQUESTS_PER_IP = 5') || !customerGcRegister.includes('originAllowed(req)')) fail('Customer registration endpoint must apply rate limits and origin validation')
-else ok('Customer registration source has rate limits and origin validation')
+const supabaseConfig = read('supabase/config.toml')
+const legacyLoginPage = read('login.html')
+const legacyRegisterPage = read('register.html')
+const redirects = read('_redirects')
+if (customerGcRegister.includes('SUPABASE_SERVICE_ROLE_KEY') || customerGcRegister.includes('createUser(') || customerGcRegister.includes('register_customer_with_gc') || !customerGcRegister.includes('CUSTOMER_REGISTRATION_DISABLED')) fail('Public customer registration must be disabled and must not create Auth users')
+else ok('Public customer registration endpoint is retired without service-role account creation')
+if (!/^\\[functions\\.customer-gc-register\\]\\s*verify_jwt\\s*=\\s*true$/m.test(supabaseConfig)) fail('Retired customer registration endpoint must require a valid JWT at the gateway')
+else ok('Retired customer registration requires JWT verification')
+if (!/^\\[functions\\.customer-gc-login\\]\\s*verify_jwt\\s*=\\s*false$/m.test(supabaseConfig) || !read('supabase/functions/customer-gc-login/index.ts').includes('signInWithPassword')) fail('GC-code customer login must remain available through its rate-limited credential flow')
+else ok('GC-code login remains available through the dedicated credential flow')
+for (const [label, page] of [['login.html', legacyLoginPage], ['register.html', legacyRegisterPage]]) {
+  if (!page.includes("window.location.replace('/#auth')") || page.includes('customer-gc-register')) fail(`Legacy ${label} must route to the unified customer entry without a separate auth flow`)
+  else ok(`Legacy ${label} routes to the unified customer entry`)
+}
+for (const route of ['/login /#auth 302','/login/ /#auth 302','/login.html /#auth 302','/register /#auth 302','/register/ /#auth 302','/register.html /#auth 302']) {
+  if (!redirects.includes(route)) fail(`Legacy auth redirect missing: ${route}`)
+}
+if (!failures) ok('Legacy auth routes converge on the single customer page')
 
 
 
