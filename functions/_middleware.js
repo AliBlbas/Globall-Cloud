@@ -160,7 +160,7 @@ export async function onRequest(context) {
     html=addBodyAsset(html,'src="/gc-csp-scripts/logistics-pricing-ui.js',`<script src="/gc-csp-scripts/logistics-pricing-ui.js?v=${VERSION}" defer data-gc-logistics-pricing-ui="1"></script>`);
     html=addBodyAsset(html,'src="/site-navigation-20260909.js',`<script src="/site-navigation-20260909.js?v=${VERSION}" defer data-gc-site-navigation="1"></script>`);
     html=addBodyAsset(html,'src="/public-core-recovery.js',`<script src="/public-core-recovery.js?v=${VERSION}" defer data-gc-public-core-recovery="1"></script>`);
-    html=addBodyAsset(html,'id="gcPrimaryMobileNav"',MOBILE_PRIMARY_NAV);
+    // index.html owns the single public dock; do not inject a second overlapping navbar.
   }
   if (STAFF_V5.test(path)) {
     html=addHeadAsset(html,'src="/staff-blank-screen-recovery-20261003.js',`<script src="/staff-blank-screen-recovery-20261003.js?v=${VERSION}" defer data-gc-staff-blank-recovery="1"></script>`);
