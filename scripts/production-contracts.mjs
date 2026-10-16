@@ -133,6 +133,8 @@ else ok('Customer registration source has rate limits and origin validation')
 
 
 
+if (!staff.includes('staff-os-v5.js?v=20261016-12')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
+
 const cargoUi = read('staff-os-v5.js')
 const cargoControl = read('supabase/functions/staff-shipment-control/index.ts')
 const cargoCreate = read('supabase/functions/staff-shipment-v5/index.ts')
