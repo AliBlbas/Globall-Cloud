@@ -595,3 +595,14 @@ html[data-gc-theme="light"] body.gc-customer-app #notifications .notification-ac
  body.gc-customer-app .gc-settings-trigger{z-index:10001!important}
  body.gc-customer-app .gc-settings-panel{z-index:10002!important;padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))!important}
 }
+
+
+/* FINAL CUSTOMER SETTINGS PRIORITY · HIDE OLD TOOLBAR CONTROLS · 2026-10-16 */
+body.gc-customer-app .workspace-controls{display:none!important;visibility:hidden!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important}
+body.gc-customer-app .app-header-actions #loginBtn,
+body.gc-customer-app .app-header-actions #logoutBtn{display:none!important}
+body.gc-customer-app .gc-settings-panel{z-index:10002!important}
+@media(max-width:900px){
+ body.gc-customer-app .gc-settings-trigger{display:none!important}
+ body.gc-customer-app .gc-settings-panel{z-index:10002!important}
+}
