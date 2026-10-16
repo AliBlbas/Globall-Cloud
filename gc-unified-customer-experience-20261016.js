@@ -11,13 +11,13 @@
   if (!body || !home || !workspace) return;
 
   const customerHashes = new Set([
-    '#auth','#overview','#homeMetrics','#shipments','#shipmentsSection',
+    '#auth','#register','#overview','#homeMetrics','#gcCustomerRouteOverview','#shipments','#shipmentsSection',
     '#commercial','#quotesPanel','#newRequest','#quoteForm','#activity',
     '#notifications','#records','#payments','#gcAccountSettings','#settings','#support'
   ]);
   const publicHashes = new Set(['#public','#services','#request','#contact','#about','#track','#pricing','#countries','#warehouses','#quote']);
   const hashToView = {
-    '#overview':'home','#homeMetrics':'home','#auth':'home',
+    '#overview':'home','#homeMetrics':'home','#gcCustomerRouteOverview':'home','#auth':'home','#register':'home',
     '#shipments':'shipments','#shipmentsSection':'shipments',
     '#commercial':'requests','#quotesPanel':'requests','#newRequest':'requests','#quoteForm':'requests',
     '#activity':'notifications','#notifications':'notifications',
