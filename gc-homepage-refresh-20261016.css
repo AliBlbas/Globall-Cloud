@@ -181,3 +181,68 @@
   .gc-menu{flex-basis:36px;min-width:36px;width:36px;height:36px}
   .gc-announcement-inner>span:first-child{max-width:100%;font-size:9px}
 }
+
+
+/* Mobile QA pass 2 — prevent clipping, protect Kurdish RTL text, and enforce compact nav */
+.gc-hero-copy,
+.gc-hero-copy h1,
+.gc-hero-copy h1 em,
+.gc-hero-copy > p{
+  min-width:0;
+  max-width:100%;
+  overflow:visible;
+  height:auto;
+  max-height:none;
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+.gc-hero-copy h1{
+  line-height:1.42;
+  padding-block:.08em .18em;
+  text-wrap:pretty;
+}
+.gc-announcement-inner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  min-width:0;
+}
+.gc-announcement-inner>span:first-child{
+  min-width:0;
+  flex:1 1 auto;
+  line-height:1.7;
+}
+.gc-announcement-inner .gc-live-pill{flex:0 0 auto}
+.gc-footer-grid>*{min-width:0}
+.gc-footer-grid a,
+.gc-footer-grid p{
+  overflow-wrap:anywhere;
+  word-break:normal;
+  line-height:1.9;
+}
+.gc-footer-grid a{display:block}
+.gc-footer-bottom{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px 16px;
+}
+@media(max-width:760px){
+  .gc-nav-inner{display:flex!important;flex-wrap:nowrap!important;min-width:0}
+  .gc-desktop-nav{display:none!important}
+  .gc-nav-actions{flex:0 0 auto;min-width:0}
+  .gc-nav-actions .gc-menu{display:inline-flex!important;align-items:center;justify-content:center;visibility:visible!important}
+  .gc-mobile-menu:not([hidden]){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:12px}
+  .gc-mobile-menu a{min-width:0;padding:11px 9px;border:1px solid var(--gc-refresh-line);border-radius:10px;background:rgba(255,255,255,.035);line-height:1.65;overflow-wrap:anywhere}
+  .gc-hero-grid{grid-template-columns:minmax(0,1fr)!important}
+  .gc-hero-copy h1{font-size:clamp(30px,8vw,42px);line-height:1.45}
+  .gc-announcement-inner{align-items:flex-start}
+  .gc-announcement-inner>span:first-child{flex-basis:100%;font-size:10px}
+  .gc-footer-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:18px}
+}
+@media(max-width:360px){
+  .gc-footer-grid{grid-template-columns:minmax(0,1fr)!important}
+  .gc-mobile-menu:not([hidden]){grid-template-columns:minmax(0,1fr)}
+  .gc-brand small{display:none}
+}
