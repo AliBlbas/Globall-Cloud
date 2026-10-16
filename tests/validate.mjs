@@ -51,7 +51,7 @@ if (ts) {
 
 console.log('Required production files')
 const required = [
-  'index.html','gc-settings-hub.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
+  'index.html','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
   'public-route-bootstrap.js','public-runtime-guarantee.js','public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js',
   'tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html',
   'staff-os-v5.html','staff-os-v5.css','staff-os-v5.js','gc-shipment-detail-20261016.css','staff-os-v5-rescue.js','staff-logistics-intelligence.js','staff-logistics-intelligence.css',
@@ -179,6 +179,8 @@ try { execFileSync(process.execPath, [join(ROOT, 'scripts', 'production-contract
 catch { fail('production contract validation failed') }
 
 console.log('Unified homepage/customer workspace')
+const accountsConsoleHtml = read('accounts-console.html')
+const accountsConsoleScript = read('gc-csp-scripts/accounts-console-inline-1.js')
 const unifiedShell = read('index.html')
 const unifiedController = read('gc-unified-customer-experience-20261016.js')
 const customerNavigation = read('gc-dashboard-preferences-20261003.js')
@@ -209,6 +211,10 @@ const unifiedContracts = [
   ['signed-out claim prompt offers support without self-linking', customerPortalAuth.includes('gc-account-help-action') && customerSelfSource.includes('self-service linking is disabled')],
   ['customer signup remains staff-provisioned', customerAccountEntry.includes('does not expose') && accountAdminSource.includes("Only Super Admin can bind customer accounts")],
   ['customer auth-help assets have matching cache references', unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=19') && unifiedShell.includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261016-8')],
+  ['staff console exposes customer linkage filters', accountsConsoleHtml.includes('id="customerLinkFilter"') && accountsConsoleHtml.includes('value="unlinked"') && accountsConsoleHtml.includes('value="linked"') && accountsConsoleHtml.includes('value="inactive-unlinked"')],
+  ['customer linkage filter is functional', accountsConsoleScript.includes("customerLinkFilter')?.addEventListener('change', renderList)") && accountsConsoleScript.includes("linkFilter === 'unlinked' ? (!linked && active)") && accountsConsoleScript.includes("linkFilter === 'inactive-unlinked' ? (!linked && !active)")],
+  ['customer linkage summary warns Super Admin to verify identity', accountsConsoleScript.includes('دوای پشتڕاستکردنەوەی ناسنامە') && accountsConsoleScript.includes('Only Super Admin can bind customer accounts')],
+  ['staff console script cache is refreshed', accountsConsoleHtml.includes('gc-csp-scripts/accounts-console-inline-1.js?v=20261016-4')],
 ]
 for (const [label, passed] of unifiedContracts) {
   if (passed) ok(label)
