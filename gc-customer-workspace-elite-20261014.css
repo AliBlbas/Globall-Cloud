@@ -563,3 +563,27 @@ html[data-gc-theme="light"] body.gc-customer-app .mobile-dock>button.active{colo
  html[dir="rtl"] body.gc-customer-app .mobile-dock .dock-unread-badge{right:auto;left:-9px}
 }
 html[data-gc-theme="light"] body.gc-customer-app .mobile-dock .dock-unread-badge{border-color:#fff}
+
+
+/* CUSTOMER NOTIFICATION STATES · READABILITY PASS · 2026-10-16 */
+body.gc-customer-app #notifications{display:flex;flex-direction:column;gap:10px}
+body.gc-customer-app #notifications .notification-item{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:10px;padding:14px 15px;border:1px solid rgba(140,194,215,.14);border-radius:15px;background:rgba(3,17,29,.46);transition:border-color .18s ease,background .18s ease,opacity .18s ease}
+body.gc-customer-app #notifications .notification-item.is-unread{border-color:rgba(105,220,231,.4);background:linear-gradient(115deg,rgba(48,170,190,.1),rgba(4,22,36,.56));box-shadow:inset 3px 0 0 rgba(105,220,231,.9)}
+body.gc-customer-app #notifications .notification-item.is-read{opacity:.84}
+body.gc-customer-app #notifications .notification-item-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+body.gc-customer-app #notifications .notification-item-head>strong{font-size:13px;line-height:1.7;color:#f1f9fc}
+body.gc-customer-app #notifications .notification-body{font-size:12px;line-height:1.9;color:#b6cbd7;overflow-wrap:anywhere}
+body.gc-customer-app #notifications .notification-time{font-size:10px;line-height:1.7;color:#87a3b3}
+body.gc-customer-app #notifications .notification-action{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:7px 11px;border:1px solid rgba(105,220,231,.28);border-radius:10px;background:rgba(105,220,231,.1);color:#aaf0f2;font-size:11px;font-weight:850;white-space:nowrap}
+body.gc-customer-app #notifications .notification-action:disabled{opacity:.55;cursor:wait}
+html[data-gc-theme="light"] body.gc-customer-app #notifications .notification-item{background:#fff;border-color:#d8e6eb;box-shadow:0 7px 18px rgba(31,75,101,.04)}
+html[data-gc-theme="light"] body.gc-customer-app #notifications .notification-item.is-unread{background:linear-gradient(115deg,#e7f9fa,#fff);border-color:#b8e7ec;box-shadow:inset 3px 0 0 #36bfd0,0 8px 22px rgba(31,75,101,.05)}
+html[data-gc-theme="light"] body.gc-customer-app #notifications .notification-item-head>strong{color:#102b43}
+html[data-gc-theme="light"] body.gc-customer-app #notifications .notification-body{color:#587486}
+html[data-gc-theme="light"] body.gc-customer-app #notifications .notification-time{color:#668092}
+html[data-gc-theme="light"] body.gc-customer-app #notifications .notification-action{background:#e9f8fa;color:#126175;border-color:#c5e9ee}
+@media(max-width:900px){
+ body.gc-customer-app #notifications .notification-item{padding:13px;border-radius:13px}
+ body.gc-customer-app #notifications .notification-item-head{align-items:flex-start;flex-direction:column}
+ body.gc-customer-app #notifications .notification-action{width:100%;min-height:42px}
+}
