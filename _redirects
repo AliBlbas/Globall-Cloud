@@ -1,3 +1,4 @@
+# Legacy authentication URLs intentionally converge on the single customer entry.
 /login /#auth 302
 /login/ /#auth 302
 /login.html /#auth 302
