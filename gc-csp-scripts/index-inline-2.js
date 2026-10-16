@@ -1550,8 +1550,8 @@ function applyI18n(){
   populateRequestSelects();
   if(document.getElementById('page-services').classList.contains('active')) renderServicesDetail();
   document.getElementById('yearNow').textContent = new Date().getFullYear();
-  document.getElementById('langKuBtn').classList.toggle('active', currentLang==='ku');
-  document.getElementById('langEnBtn').classList.toggle('active', currentLang==='en');
+  document.getElementById('langKuBtn')?.classList.toggle('active', currentLang==='ku');
+  document.getElementById('langEnBtn')?.classList.toggle('active', currentLang==='en');
 }
 
 async function setLang(lang){
