@@ -362,18 +362,22 @@
       const q = text(document.getElementById('shipmentSearch')?.value).toLowerCase();
       const m = document.getElementById('shipmentMode').value;
       const st = document.getElementById('shipmentStatus').value;
-      const rows = state.data.shipments.filter(x =>
-        (m === 'all' || x.transport_mode === m) &&
-        (st === 'dispatched' ? dispatchedStatuses.has(String(x.status)) : (st === 'all' || x.status === st)) &&
-        (!q || JSON.stringify(x).toLowerCase().includes(q))
-      );
+      const rows = state.data.shipments.filter(x => {
+        const currentStatus = String(x.status || x.operational_status || '').toLowerCase();
+        const currentMode = String(x.transport_mode || x.type || x.mode || '').toLowerCase();
+        return (m === 'all' || currentMode === m) &&
+          (st === 'dispatched' ? dispatchedStatuses.has(currentStatus) : (st === 'all' || currentStatus === st)) &&
+          (!q || JSON.stringify(x).toLowerCase().includes(q));
+      });
 
       document.getElementById('shipmentCards').innerHTML = rows.length ? rows.map(x => {
-        const sentAt = x.step_dates?.departed || x.dispatched_at || x.shipped_at || x.created_at;
+        const currentStatus = String(x.status || x.operational_status || '').toLowerCase();
+        const currentMode = String(x.transport_mode || x.type || x.mode || '').toLowerCase();
+        const sentAt = x.dispatched_at || x.step_dates?.departed || x.shipped_at || x.created_at;
         const customerCount = Number(x.customer_goods_count || x.customer_count || x.customers_count || (x.customer_gc_code ? 1 : 0));
-        const contents = Array.isArray(x.cargo_contents) && x.cargo_contents.length
-          ? x.cargo_contents.join(' · ')
-          : (x.cargo_description || x.description || 'ناوەڕۆکی کاڵا تۆمار نەکراوە');
+        const contentParts = [x.cargo_description, ...(Array.isArray(x.cargo_contents) ? x.cargo_contents : [])]
+          .map(value => String(value ?? '').trim()).filter(Boolean);
+        const contents = [...new Set(contentParts)].slice(0, 12).join(' · ') || x.description || 'ناوەڕۆکی کاڵا تۆمار نەکراوە';
 
         return `<article class="shipment-card">
           <div class="shipment-card-head">
@@ -381,12 +385,12 @@
               <b class="mono">${esc(x.customer_gc_code || x.tracking_id || '—')}</b>
               <span class="shipment-track mono">${esc(x.tracking_id || '—')}</span>
             </div>
-            <span class="pill ${x.status==='delivered'?'mint':x.status==='cancelled'?'red':'warn'}">${esc(statusLabel(x.status))}</span>
+            <span class="pill ${currentStatus==='delivered'?'mint':currentStatus==='cancelled'?'red':'warn'}">${esc(statusLabel(currentStatus))}</span>
           </div>
           <div class="shipment-customer"><span>کڕیار</span><b>${esc(x.customer_name || 'کڕیار نەناسراو')}</b></div>
           <div class="shipment-route"><span>${esc(x.origin_key || x.origin_warehouse || '—')}</span><b>→</b><span>${esc(x.dest_key || x.destination_warehouse || '—')}</span></div>
           <div class="shipment-tags">
-            <span class="pill">${esc(modeLabel(x.transport_mode || x.type))}</span>
+            <span class="pill">${esc(modeLabel(currentMode))}</span>
             <span class="pill">کڕیار: ${number(customerCount)}</span>
             <span class="pill">کارتۆن: ${number(x.carton_count || x.items_count)}</span>
           </div>
