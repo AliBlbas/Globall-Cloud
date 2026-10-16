@@ -185,6 +185,9 @@ const customerNavigation = read('gc-dashboard-preferences-20261003.js')
 const customerStyleLoader = read('gc-public-customer-style-loader-20261014.js')
 const customerDockStyles = read('gc-customer-mobile-dock-20261016.css')
 const customerWorkspaceStyles = read('gc-customer-workspace-elite-20261014.css')
+const customerPortalAuth = read('gc-csp-scripts/customer-portal-inline-1.js')
+const customerAccountEntry = read('gc-account-entry.js')
+const accountAdminSource = read('supabase/functions/account-admin/index.ts')
 const customerDockStart = unifiedShell.indexOf('<nav class="mobile-dock"')
 const customerDockEnd = unifiedShell.indexOf('</nav>', customerDockStart)
 const customerDockMarkup = customerDockStart >= 0 && customerDockEnd > customerDockStart ? unifiedShell.slice(customerDockStart, customerDockEnd + 6) : ''
@@ -198,9 +201,13 @@ const unifiedContracts = [
   ['unread alert count is shown on Home icon', customerNavigation.includes("const homeItem = items.find(item => item.dataset.dockTab === 'home')") && customerNavigation.includes('data-dock-unread')],
   ['customer dock uses five responsive columns', customerDockStyles.includes('repeat(5,minmax(0,1fr))') && !customerDockStyles.includes('repeat(6,minmax(0,1fr))') && !customerWorkspaceStyles.includes('repeat(6,minmax(0,1fr))')],
   ['integrated services have responsive polished styles', customerWorkspaceStyles.includes('.gc-customer-route-overview') && customerWorkspaceStyles.includes('@media (max-width: 900px)')],
-  ['style loader references current cache versions', customerStyleLoader.includes('gc-customer-workspace-elite-20261014.css?v=17') && customerStyleLoader.includes('gc-customer-mobile-dock-20261016.css?v=3')],
-  ['style loader script is cache-busted in index', unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=16')],
+  ['style loader references current cache versions', customerStyleLoader.includes('gc-customer-workspace-elite-20261014.css?v=19') && customerStyleLoader.includes('gc-customer-mobile-dock-20261016.css?v=3')],
+  ['style loader script is cache-busted in index', unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=17')],
   ['support remains reachable from account settings', read('gc-settings-hub.js').includes("gcSelectCustomerView('support')")],
+  ['legacy GC sign-in explains secure staff linking', unifiedShell.includes('gc-auth-support-note') && unifiedShell.includes('wa.me/9647507577137')],
+  ['signed-out claim prompt offers support without self-linking', customerPortalAuth.includes('gc-account-help-action') && customerPortalAuth.includes('self-service linking is disabled')],
+  ['customer signup remains staff-provisioned', customerAccountEntry.includes('does not expose') && accountAdminSource.includes("Only Super Admin can bind customer accounts")],
+  ['customer auth-help assets have matching cache references', unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=19') && unifiedShell.includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261016-8')],
 ]
 for (const [label, passed] of unifiedContracts) {
   if (passed) ok(label)
