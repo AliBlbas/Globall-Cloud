@@ -12,8 +12,8 @@
     '/gc-homepage-signature-20261016.css?v=7'
   ];
   const customerStyles = [
-    '/gc-customer-workspace-elite-20261014.css?v=12',
-    '/gc-customer-mobile-dock-20261016.css?v=1'
+    '/gc-customer-workspace-elite-20261014.css?v=13',
+    '/gc-customer-mobile-dock-20261016.css?v=2'
   ];
 
   const desiredStyles = () => {
@@ -38,7 +38,7 @@
         '<a href="/#services" data-dock="services" aria-label="خزمەتگوزاری"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4-8 4-8-4 8-4Z"></path><path d="M4 7v10l8 4 8-4V7M12 11v10"></path></svg><span>خزمەتگوزاری</span></a>',
         '<a href="/#request" data-dock="quote" class="primary" aria-label="داواکردنی نرخ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h8l4 4v14H5V3h2Z"></path><path d="M15 3v5h4M8 12h8M8 16h5"></path><path d="M12 10v4M10 12h4"></path></svg><span>داواکردنی نرخ</span></a>',
         '<a href="/track" data-dock="track" aria-label="شوێنکەوتن"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2"></circle><circle cx="18" cy="6" r="2"></circle><path d="M8 18h5c3 0 5-2 5-5v-3M18 8V6h-4c-3 0-5 2-5 5v3"></path></svg><span>شوێنکەوتن</span></a>',
-        '<a href="/dashboard#auth" data-dock="account" aria-label="هەژمار"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20c.8-3.6 3.3-5.5 7.5-5.5s6.7 1.9 7.5 5.5"></path></svg><span>هەژمار</span></a>'      ].join('');
+        '<a href="/#auth" data-dock="account" aria-label="هەژمار"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20c.8-3.6 3.3-5.5 7.5-5.5s6.7 1.9 7.5 5.5"></path></svg><span>هەژمار</span></a>'      ].join('');
     }
     // Keep the fixed dock outside any transformed/overflow-clipped application shell.
     if (document.body && app && app.contains(dock)) document.body.appendChild(dock);
