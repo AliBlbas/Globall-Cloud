@@ -18,3 +18,71 @@
 .shipment-empty{grid-column:1/-1}
 @media(max-width:1100px){.shipment-grid{grid-template-columns:1fr}}
 @media(max-width:520px){.shipment-card{padding:11px}.shipment-route{gap:5px}.shipment-route span{font-size:9px}.shipment-facts{grid-template-columns:1fr}.shipment-actions{display:grid!important;grid-template-columns:1fr 1fr!important}.shipment-actions .btn{width:100%!important}}
+
+/* GC_SHIPMENT_DETAIL_RESPONSIVE_20261016 — enterprise shipment detail and mobile layout */
+#gcModal .shipment-command{display:grid;gap:13px;min-width:0;color:var(--text,#e8f4ff);font-size:12px}
+#gcModal .shipment-command-banner{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:16px;border:1px solid rgba(99,214,232,.2);border-radius:18px;background:linear-gradient(140deg,rgba(11,54,78,.95),rgba(5,22,39,.98));}
+#gcModal .shipment-command-banner>div:first-child{min-width:0}
+#gcModal .shipment-command-banner h2{margin:0 0 8px;font-size:22px;line-height:1.25;overflow-wrap:anywhere;color:#f0f9ff}
+#gcModal .shipment-command-banner p{margin:0;color:#acc3d8;font-size:12px;line-height:1.7;overflow-wrap:anywhere}
+#gcModal .shipment-command-status{display:flex;flex-direction:column;align-items:flex-end;gap:9px;max-width:190px;text-align:end}
+#gcModal .shipment-command-status small{color:#9cb7cb;font-size:10px;line-height:1.7}
+#gcModal .shipment-command-status small b{color:#e4f4ff}
+#gcModal .shipment-command-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;min-width:0}
+#gcModal .shipment-command-kpis>div{display:grid;gap:5px;align-content:start;min-width:0;padding:11px 12px;border:1px solid rgba(137,188,216,.14);border-radius:13px;background:rgba(12,35,55,.76)}
+#gcModal .shipment-command-kpis>div>span{color:#8faec5;font-size:9px;line-height:1.55}
+#gcModal .shipment-command-kpis>div>b{color:#e5f5ff;font-size:12px;line-height:1.55;overflow-wrap:anywhere}
+#gcModal .shipment-progress-panel{min-width:0;padding:14px;border:1px solid rgba(137,188,216,.14);border-radius:16px;background:rgba(7,25,42,.76)}
+#gcModal .shipment-progress-panel .card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#gcModal .shipment-milestones{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;min-width:0}
+#gcModal .shipment-milestone{display:grid;align-content:start;justify-items:start;gap:7px;min-width:0;min-height:86px;padding:10px 8px;border:1px solid rgba(131,180,207,.13);border-radius:12px;background:rgba(255,255,255,.018)}
+#gcModal .shipment-milestone>span{display:grid;place-items:center;width:23px;height:23px;border:1px solid rgba(150,187,210,.26);border-radius:50%;color:#a8c2d7;font-size:10px;font-weight:800}
+#gcModal .shipment-milestone>b{font-size:10px;line-height:1.5;overflow-wrap:anywhere;color:#adc6d9}
+#gcModal .shipment-milestone>small{font-size:9px;line-height:1.5;color:#7292aa}
+#gcModal .shipment-milestone.complete{border-color:rgba(77,213,188,.22);background:rgba(26,112,104,.1)}
+#gcModal .shipment-milestone.complete>span{border-color:rgba(83,230,199,.38);background:rgba(38,173,150,.16);color:#86f1d2}
+#gcModal .shipment-milestone.current{border-color:rgba(85,213,235,.48);box-shadow:inset 0 0 0 1px rgba(85,213,235,.08);background:rgba(38,130,164,.12)}
+#gcModal .shipment-milestone.current>b{color:#effcff}
+#gcModal .shipment-command .two-col{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:11px;min-width:0}
+#gcModal .shipment-command .card{min-width:0;overflow:hidden}
+#gcModal .detail-lines p{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:8px 0;color:#9fb7c9;font-size:11px;line-height:1.65}
+#gcModal .detail-lines p>b{max-width:62%;text-align:end;overflow-wrap:anywhere;color:#e1f1fb}
+#gcModal .package-list{display:grid;gap:7px;margin-top:10px;min-width:0}
+#gcModal .package-row{display:grid;grid-template-columns:27px minmax(0,1fr) auto;align-items:center;gap:9px;min-width:0;padding:10px;border:1px solid rgba(137,188,216,.13);border-radius:12px;background:linear-gradient(120deg,rgba(11,36,57,.72),rgba(6,22,38,.65))}
+#gcModal .package-index{display:grid;place-items:center;width:25px;height:25px;border:1px solid rgba(90,211,229,.24);border-radius:8px;background:rgba(40,157,182,.1);color:#8ee6f1;font-size:9px;font-weight:800}
+#gcModal .package-row>div{min-width:0}
+#gcModal .package-row b{display:block;color:#e6f5ff;font-size:11px;line-height:1.55;overflow-wrap:anywhere}
+#gcModal .package-row small{display:block;margin-top:3px;color:#92adc2;font-size:9px;line-height:1.6;overflow-wrap:anywhere;word-break:break-word}
+#gcModal .package-weight{color:#c2d9e9;font-size:10px;white-space:nowrap;align-self:center}
+#gcModal .timeline-row{min-width:0}
+#gcModal .timeline-row span{overflow-wrap:anywhere;word-break:break-word}
+@media(max-width:760px){
+  #gcModal.modal-backdrop{place-items:stretch;align-items:end;padding:7px 7px calc(7px + env(safe-area-inset-bottom,0px))}
+  #gcModal .modal{width:100%;max-height:88dvh;padding:12px;border-radius:20px 20px 15px 15px}
+  #gcModal .modal-head{align-items:center;gap:8px}
+  #gcModal .modal-head h2{font-size:15px;line-height:1.45;overflow-wrap:anywhere}
+  #gcModal .modal-foot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  #gcModal .modal-foot .btn{width:100%;min-width:0;min-height:44px;padding:9px 7px;font-size:11px;white-space:normal}
+  #gcModal .shipment-command{gap:10px}
+  #gcModal .shipment-command-banner{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding:13px}
+  #gcModal .shipment-command-banner h2{font-size:19px}
+  #gcModal .shipment-command-status{flex-direction:row;align-items:center;justify-content:space-between;gap:10px;max-width:none;text-align:start}
+  #gcModal .shipment-command-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  #gcModal .shipment-command-kpis>div{padding:9px}
+  #gcModal .shipment-progress-panel{padding:11px}
+  #gcModal .shipment-milestones{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  #gcModal .shipment-milestone{min-height:70px;padding:9px}
+  #gcModal .shipment-command .two-col{grid-template-columns:minmax(0,1fr)!important;gap:9px!important}
+  #gcModal .package-row{grid-template-columns:24px minmax(0,1fr);gap:7px;padding:9px}
+  #gcModal .package-index{width:23px;height:23px}
+  #gcModal .package-weight{grid-column:2;justify-self:start;margin-top:-2px}
+  #gcModal .detail-lines p{gap:8px;font-size:10px}
+  #gcModal .detail-lines p>b{max-width:65%}
+  #gcModal .timeline-row{grid-template-columns:minmax(0,1fr);gap:4px}
+}
+@media(max-width:380px){
+  #gcModal .shipment-command-kpis>div>span{font-size:8px}
+  #gcModal .shipment-command-kpis>div>b{font-size:11px}
+  #gcModal .shipment-milestone>b{font-size:9px}
+  #gcModal .package-row small{font-size:8px}
+}
