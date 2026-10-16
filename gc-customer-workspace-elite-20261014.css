@@ -553,3 +553,13 @@ html[data-gc-theme="light"] body.gc-customer-app .detail-sheet,html[data-gc-them
 }
 html[data-gc-theme="light"] body.gc-customer-app .mobile-dock>button{color:#59778b}
 html[data-gc-theme="light"] body.gc-customer-app .mobile-dock>button.active{color:#10364b!important;background:#e4f6f8!important}
+
+
+/* CUSTOMER MOBILE DOCK · UNREAD BADGE · PASS 3 · 2026-10-16 */
+@media(max-width:900px){
+ body.gc-customer-app .mobile-dock [data-dash-icon="notifications"]{position:relative;display:inline-flex;align-items:center;justify-content:center;overflow:visible}
+ body.gc-customer-app .mobile-dock .dock-unread-badge{position:absolute;top:-7px;right:-9px;z-index:2;display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border:2px solid #061826;border-radius:999px;background:#fb5869;color:#fff;font-size:9px;font-weight:950;line-height:1;box-shadow:0 3px 8px rgba(251,88,105,.34);pointer-events:none}
+ body.gc-customer-app .mobile-dock .dock-unread-badge[hidden]{display:none!important}
+ html[dir="rtl"] body.gc-customer-app .mobile-dock .dock-unread-badge{right:auto;left:-9px}
+}
+html[data-gc-theme="light"] body.gc-customer-app .mobile-dock .dock-unread-badge{border-color:#fff}
