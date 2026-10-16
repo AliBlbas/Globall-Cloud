@@ -587,3 +587,11 @@ html[data-gc-theme="light"] body.gc-customer-app #notifications .notification-ac
  body.gc-customer-app #notifications .notification-item-head{align-items:flex-start;flex-direction:column}
  body.gc-customer-app #notifications .notification-action{width:100%;min-height:42px}
 }
+
+
+/* CUSTOMER SETTINGS SHEET · MOBILE STACKING FIX · 2026-10-16 */
+@media(max-width:900px){
+ body.gc-customer-app [data-gc-settings-root]{position:relative;z-index:10000!important}
+ body.gc-customer-app .gc-settings-trigger{z-index:10001!important}
+ body.gc-customer-app .gc-settings-panel{z-index:10002!important;padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))!important}
+}
