@@ -28,23 +28,23 @@
       const definitions = [
         {
           key: 'home', href: '/', label: 'سەرەکی',
-          icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 10 8-6 8 6v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"></path></svg>'
-        },
-        {
-          key: 'quote', href: '/#request', label: 'داواکردنی نرخ',
-          icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M4 12h16"></path></svg>'
+          icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v11h14V9M9 20v-6h6v6"></path></svg>'
         },
         {
           key: 'services', href: '/#services', label: 'خزمەتگوزاری',
-          icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v14H5z"></path><path d="M9 9h6M9 13h6M9 17h3"></path></svg>'
+          icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4-8 4-8-4 8-4Z"></path><path d="M4 7v10l8 4 8-4V7M12 11v10"></path></svg>'
+        },
+        {
+          key: 'quote', href: '/#request', label: 'داواکردنی نرخ',
+          icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h8l4 4v14H5V3h2Z"></path><path d="M15 3v5h4M8 12h8M8 16h5"></path><path d="M12 10v4M10 12h4"></path></svg>'
         },
         {
           key: 'track', href: '/track', label: 'شوێنکەوتن',
-          icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"></circle><path d="m16 16 4 4M8.5 11h5"></path></svg>'
+          icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2"></circle><circle cx="18" cy="6" r="2"></circle><path d="M8 18h5c3 0 5-2 5-5v-3M18 8V6h-4c-3 0-5 2-5 5v3"></path></svg>'
         },
         {
-          key: 'account', href: '/dashboard#profile', label: 'هەژمار',
-          icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"></circle><path d="M5 20c.8-3.3 3.2-5 7-5s6.2 1.7 7 5"></path></svg>'
+          key: 'account', href: '/dashboard#auth', label: 'هەژمار',
+          icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20c.8-3.6 3.3-5.5 7.5-5.5s6.7 1.9 7.5 5.5"></path></svg>'
         }
       ];
       const items = [...dock.querySelectorAll('a[data-dock]')].slice(0, 5);
@@ -54,6 +54,7 @@
         item.dataset.dock = def.key;
         item.href = def.href;
         item.setAttribute('aria-label', def.label);
+        item.classList.toggle('primary', def.key === 'quote');
         item.innerHTML = def.icon + '<span>' + def.label + '</span>';
       });
 
