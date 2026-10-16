@@ -186,6 +186,7 @@ const customerStyleLoader = read('gc-public-customer-style-loader-20261014.js')
 const customerDockStyles = read('gc-customer-mobile-dock-20261016.css')
 const customerWorkspaceStyles = read('gc-customer-workspace-elite-20261014.css')
 const customerPortalAuth = read('gc-csp-scripts/customer-portal-inline-1.js')
+const customerSelfSource = read('supabase/functions/customer-self/index.ts')
 const customerAccountEntry = read('gc-account-entry.js')
 const accountAdminSource = read('supabase/functions/account-admin/index.ts')
 const customerDockStart = unifiedShell.indexOf('<nav class="mobile-dock"')
@@ -205,7 +206,7 @@ const unifiedContracts = [
   ['style loader script is cache-busted in index', unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=17')],
   ['support remains reachable from account settings', read('gc-settings-hub.js').includes("gcSelectCustomerView('support')")],
   ['legacy GC sign-in explains secure staff linking', unifiedShell.includes('gc-auth-support-note') && unifiedShell.includes('wa.me/9647507577137')],
-  ['signed-out claim prompt offers support without self-linking', customerPortalAuth.includes('gc-account-help-action') && customerPortalAuth.includes('self-service linking is disabled')],
+  ['signed-out claim prompt offers support without self-linking', customerPortalAuth.includes('gc-account-help-action') && customerSelfSource.includes('self-service linking is disabled')],
   ['customer signup remains staff-provisioned', customerAccountEntry.includes('does not expose') && accountAdminSource.includes("Only Super Admin can bind customer accounts")],
   ['customer auth-help assets have matching cache references', unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=19') && unifiedShell.includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261016-8')],
 ]
