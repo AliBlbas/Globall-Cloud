@@ -111,6 +111,7 @@
     menu.addEventListener('click', () => drawer.hidden ? open() : close());
     topActions.prepend(menu);
     document.body.append(backdrop, drawer, dock);
+    document.body.classList.add('gc-staff-mobile-dock-active');
 
     let drawerSignature = '';
     function renderDrawer() {
