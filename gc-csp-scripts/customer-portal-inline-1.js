@@ -44,6 +44,7 @@ const renderClaimPrompt = () => {
       <strong>هەژماری کڕیار پێویستی بە پشتڕاستکردنەوە هەیە</strong>
       <span>بۆ پاراستنی داتاکانی کڕیار، پەیوەستکردنی هەژمار بە GC Code و ژمارەی مۆبایل بە تەنیا بەردەست نییە. تکایە لەگەڵ ستافی Globall Cloud پەیوەندی بکە تا ناسنامەکەت پشتڕاست بکەنەوە و هەژمارەکەت بە شێوەی پارێزراو ببەستنەوە.</span>
       <div class="muted" role="status">GC Code ـەکەت ئامادە بێت. وشەی نهێنیی خۆت لە ڕێگای نەپارێزراو هاوبەش مەکە.</div>
+      <a class="app-secondary-action gc-account-help-action" href="https://wa.me/9647507577137" target="_blank" rel="noopener noreferrer">پەیوەندی بە تیمی پشتیوانی لە WhatsApp <span aria-hidden="true">↗</span></a>
     </div>`;
 };
 
