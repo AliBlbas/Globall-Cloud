@@ -559,13 +559,14 @@
         return element ? String(element.value || '').trim() : '';
       };
       const itemName = field('item_name');
-      const gcCode = (field('customer_gc_code') || String(defaultGcCode || '')).trim().toUpperCase().replace(/\s+/g, '');
+      const rawGcCode = field('customer_gc_code');
+      const gcCode = (rawGcCode || String(defaultGcCode || '')).trim().toUpperCase().replace(/\s+/g, '');
       const notes = field('notes');
       const quantity = Number(field('quantity_pc') || 0);
       const boxes = Number(field('box_count') || 0);
       const weight = Number(field('weight_kg') || 0);
       const declared = Number(field('declared_value') || 0);
-      if (!itemName && !gcCode && !notes && quantity === 0 && boxes === 0 && weight === 0 && declared === 0) return;
+      if (!itemName && !rawGcCode && !notes && quantity === 0 && boxes === 0 && weight === 0 && declared === 0) return;
       if (!itemName) throw new Error('ناوی کاڵا بۆ هەر ڕیزی پڕکراو پێویستە.');
       if (!gcCode) throw new Error('کۆدی GC بۆ هەر کاڵایەک پێویستە.');
       if (![quantity, boxes, weight, declared].every(Number.isFinite) || quantity < 0 || boxes < 0 || weight < 0 || declared < 0 || !Number.isInteger(quantity) || !Number.isInteger(boxes)) {
