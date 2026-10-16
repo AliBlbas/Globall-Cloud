@@ -133,7 +133,7 @@ else ok('Customer registration source has rate limits and origin validation')
 
 
 
-if (!staff.includes('staff-os-v5.js?v=20261016-14')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
+if (!staff.includes('staff-os-v5.js?v=20261016-15')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
 
 const cargoUi = read('staff-os-v5.js')
 const cargoControl = read('supabase/functions/staff-shipment-control/index.ts')
@@ -143,7 +143,8 @@ if (!staff.includes('/gc-shipment-detail-20261016.css?v=3')) fail('Structured ca
 if (!cargoUi.includes('cargoItemEditorHTML') || !cargoUi.includes('collectCargoItems')) fail('Staff shipment editor must support structured cargo rows')
 if (!cargoUi.includes('const hasStructuredCargo = Number(x.cargo_item_count || 0) > 0') || !cargoUi.includes('number(pieceCount)') || !cargoUi.includes('number(cartonCount)')) fail('Shipment cards must display structured cargo counts without treating zero as missing')
 if (!cargoUi.includes('list="gcCargoCustomerCodes"') || !cargoUi.includes('ops(\'customers\').then')) fail('Shipment and cargo GC fields should suggest known customer codes')
-if (!cargoUi.includes('if (!itemName && !notes && quantity === 0 && boxes === 0 && weight === 0 && declared === 0) return;')) fail('Empty prefilled GC-code row must not block deleting all cargo items')
+if (!cargoUi.includes('if (!row.dataset.itemId && !itemName && !notes && quantity === 0 && boxes === 0 && weight === 0 && declared === 0) return;')) fail('Empty prefilled GC-code row must not block deleting all cargo items')
+if (!cargoUi.includes("if (row.dataset.itemId) item.id = row.dataset.itemId;") || !cargoUi.includes("if (!itemName) throw new Error('ناوی کاڵا بۆ هەر ڕیزی پڕکراو پێویستە.');")) fail('Existing cargo rows must not silently disappear from updates when their names are cleared')
 if (!cargoUi.includes('d.cargo_items = collectCargoItems') || !cargoUi.includes('deleted_cargo_item_ids')) fail('Staff shipment save must submit cargo edits and explicit removals')
 if (!cargoCreate.includes('normalizeCargoRows') || !cargoCreate.includes("from('shipment_cargo_items').insert(cargoRows)")) fail('Shipment creation must persist structured cargo rows')
 if (!cargoCreate.includes("A valid GC customer code is required") || !cargoCreate.includes('Invalid transport mode')) fail('Shipment creation must validate customer GC codes and transport mode')
