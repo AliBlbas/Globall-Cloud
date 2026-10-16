@@ -367,10 +367,14 @@ $('signIn').addEventListener('click', async () => {
   } catch (error) {
     const raw = String(error?.message || error || '');
     msg.textContent = /invalid login credentials|invalid gc code or password/i.test(raw)
-      ? 'کۆدی GC یان ئیمەیل یان وشەی نهێنی هەڵەیە.'
-      : /account is not ready/i.test(raw)
-        ? 'هەژماری GC ـەکەت هێشتا بەستراو نییە؛ تکایە پەیوەندی بە ستاف بکە.'
-        : raw || 'چوونەژوورەوە سەرکەوتوو نەبوو.';
+      ? 'کۆدی GC یان ئیمەیڵ یان وشەی نهێنی هەڵەیە؛ دڵنیابە کۆد و وشەی نهێنی دروستن.'
+      : /too many login attempts|rate limit/i.test(raw)
+        ? 'زۆر هەوڵی چوونەژوورەوەت داوە؛ تکایە ١٠ خولەک چاوەڕێ بکە پاشان جارێکی تر هەوڵ بدەوە.'
+        : /account is not ready/i.test(raw)
+          ? 'هەژماری GC ـەکەت هێشتا بە تەواوی ئامادە نییە؛ تکایە پەیوەندی بە ستافی Globall Cloud بکە.'
+          : /failed to fetch|networkerror|load failed/i.test(raw)
+            ? 'پەیوەندی ئینتەرنێت یان سێرڤەر کێشەی هەیە؛ ئینتەرنێتەکەت بپشکنە و دواتر هەوڵ بدەوە.'
+            : raw || 'چوونەژوورەوە سەرکەوتوو نەبوو.';
   } finally {
     button.disabled = false;
     button.removeAttribute('aria-busy');
