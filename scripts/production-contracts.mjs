@@ -153,7 +153,10 @@ if (!cargoControl.includes('normalizeCargoRows') || !cargoControl.includes("from
 if (cargoControl.indexOf('Operational permission required') > cargoControl.indexOf('const hasCargoItems')) fail('Shipment control must authorize staff before loading cargo rows')
 if (cargoControl.indexOf('Operational permission required') > cargoControl.indexOf("from('shipments').select('*')")) fail('Shipment control must authorize staff before reading shipment records')
 if (!cargoControl.includes('requires|needs|Invalid|invalid|at most|cannot|must be|not found/i.test(message) ? 400 : 500')) fail('Shipment control must return cargo validation failures as HTTP 400')
-if (!cargoControl.includes('if (liveItems.length > 0) patch.carton_count = totalBoxes')) fail('Cargo carton aggregate must remain synchronized when all item boxes are set to zero')
+if (!cargoControl.includes('patch.carton_count = totalBoxes') || cargoControl.includes('if (liveItems.length > 0) patch.carton_count = totalBoxes')) fail('Cargo carton aggregate must be set to zero when all cargo rows are removed')
+if (!cargoControl.includes("GC customer code not found: ' + item.customer_gc_code")) fail('Cargo edits must reject unknown GC customer codes')
+if (!cargoCreate.includes("GC customer code not found: '+item.customer_gc_code") || !cargoCreate.includes("if(!q.data)return out(req,{error:'Customer GC code not found'},404)")) fail('Shipment creation must reject customer codes that are not in the directory')
+if (!cargoCreate.includes('/customer gc code not found/i.test(message)?404')) fail('Unknown customer GC codes must return HTTP 404')
 if (!cargoCss.includes('.cargo-item-row') || !cargoCss.includes('@media (max-width: 390px)')) fail('Structured cargo editor responsive styles are missing')
 if (!failures) ok('Structured cargo editor, server persistence, authorization and responsive contracts OK')
 
