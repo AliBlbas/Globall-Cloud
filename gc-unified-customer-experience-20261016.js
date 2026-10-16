@@ -15,6 +15,7 @@
     '#commercial','#quotesPanel','#newRequest','#quoteForm','#activity',
     '#notifications','#records','#payments','#gcAccountSettings','#settings','#support'
   ]);
+  const publicHashes = new Set(['#public','#services','#request','#contact','#about','#track','#pricing','#countries','#warehouses','#quote']);
   const hashToView = {
     '#overview':'home','#homeMetrics':'home','#auth':'home',
     '#shipments':'shipments','#shipmentsSection':'shipments',
@@ -148,13 +149,15 @@
   window.addEventListener('popstate', handleRoute);
 
   // Start in public mode unless the URL explicitly targets the customer workspace.
-  if (window.location.hash === '#public') {
+  if (publicHashes.has(window.location.hash)) {
+    // Public sections must remain public after refresh, even when the customer has a session.
     setPublicMode({keepHash:true, forcePublic:true});
   } else if (customerRouteRequested()) {
     enterCustomerMode({showAuth:true});
     selectCustomerView(window.location.hash);
     verifyExistingSession(true).catch(() => {});
   } else {
+    // The root URL without a section hash restores a signed-in customer's workspace.
     setPublicMode({keepHash:true, forcePublic:false});
     verifyExistingSession(false).catch(() => {});
   }
