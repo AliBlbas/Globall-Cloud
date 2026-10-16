@@ -199,6 +199,18 @@ export async function onRequest(context) {
   }
   if (path === '/operations-control-v2.html') html=addBodyAsset(html,'src="/operations-events.js',`<script src="/operations-events.js?v=${VERSION}" defer data-gc-operations-events="1"></script>`);
   if (path === '/operations-command-center.html') html=addBodyAsset(html,'src="/operations-exception-engine.js',`<script src="/operations-exception-engine.js?v=${VERSION}" defer data-gc-exception-engine="1"></script>`);
+  // Keep the signature homepage CSS as the final stylesheet in the rendered document.
+  // Compatibility/theme layers are injected after index.html, so move this one
+  // scoped layer to the end only for the public homepage.
+  if (path === '/' || path === '/index.html') {
+    html = html.replace(/<link\b(?=[^>]*\bhref=["']\/gc-homepage-signature-20261016\.css(?:\?[^"']*)?["'])[^>]*>\s*/gi, '');
+    html = addHeadAsset(
+      html,
+      'href="/gc-homepage-signature-20261016.css',
+      '<link rel="stylesheet" href="/gc-homepage-signature-20261016.css?v=3" data-gc-homepage-signature="20261016">'
+    );
+  }
+
   const headers=applySecurityHeaders(new Headers(response.headers)); headers.delete('content-encoding'); headers.delete('content-length'); headers.delete('etag'); headers.set('content-type','text/html; charset=UTF-8'); if(STAFF_V5.test(path)) headers.set('cache-control','no-store, max-age=0, must-revalidate');
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
