@@ -903,3 +903,70 @@ html[data-gc-theme="light"] body.gc-customer-app .gc-customer-route-footer { bac
   body.gc-customer-app #gcCustomerWorkspace > .mobile-dock { left: 4px !important; right: 4px !important; padding: 4px !important; gap: 3px !important; }
   body.gc-customer-app #gcCustomerWorkspace > .mobile-dock [data-dock-tab] { font-size: 8px !important; }
 }
+
+
+/* Customer account-help layer: keep legacy GC-code sign-in safe and actionable. */
+body.gc-customer-app .gc-auth-support-note {
+  display: grid;
+  gap: 8px;
+  margin-top: 15px;
+  padding: 13px 14px;
+  border: 1px solid rgba(231, 197, 120, .19);
+  border-radius: 15px;
+  background: linear-gradient(135deg, rgba(231, 197, 120, .065), rgba(255, 255, 255, .018));
+}
+body.gc-customer-app .gc-auth-support-note > strong {
+  color: #e5d4a5;
+  font-size: 11px;
+  font-weight: 900;
+}
+body.gc-customer-app .gc-auth-support-note > span {
+  color: #a9bfca;
+  font-size: 10px;
+  line-height: 1.9;
+}
+body.gc-customer-app .gc-auth-support-note > a,
+body.gc-customer-app .gc-account-help-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  margin-top: 3px;
+  padding: 9px 12px;
+  border: 1px solid rgba(85, 217, 231, .22);
+  border-radius: 12px;
+  background: rgba(85, 217, 231, .075);
+  color: #82e5ec;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.75;
+  text-align: center;
+  text-decoration: none;
+  touch-action: manipulation;
+}
+body.gc-customer-app .gc-auth-support-note > a:focus-visible,
+body.gc-customer-app .gc-account-help-action:focus-visible {
+  outline: 3px solid rgba(85, 217, 231, .55);
+  outline-offset: 3px;
+}
+body.gc-customer-app .gc-account-help-action {
+  width: fit-content;
+  max-width: 100%;
+}
+html[data-gc-theme="light"] body.gc-customer-app .gc-auth-support-note {
+  border-color: #e8dcb8;
+  background: linear-gradient(135deg, #fffaf0, #f8fbfc);
+}
+html[data-gc-theme="light"] body.gc-customer-app .gc-auth-support-note > strong { color: #715b24; }
+html[data-gc-theme="light"] body.gc-customer-app .gc-auth-support-note > span { color: #647b89; }
+html[data-gc-theme="light"] body.gc-customer-app .gc-auth-support-note > a,
+html[data-gc-theme="light"] body.gc-customer-app .gc-account-help-action {
+  border-color: #c6e6eb;
+  background: #eefbfc;
+  color: #176c7c;
+}
+@media (max-width: 390px) {
+  body.gc-customer-app .gc-auth-support-note { padding: 11px; }
+  body.gc-customer-app .gc-auth-support-note > a { width: 100%; }
+}
