@@ -1,14 +1,8 @@
-/* Globall Cloud — unified premium gold / dark navy system */
+/* Globall Cloud — unified gold accents. Keep core gc-ink/gc-muted/gc-line tokens owned by the UI bundles. */
 :root{
   --gc-gold:#d4af37;
   --gc-gold-bright:#f3d27a;
   --gc-gold-soft:#ffe6a3;
-  --gc-navy:#061428;
-  --gc-navy-2:#0b1d34;
-  --gc-ink:#f7fbff;
-  --gc-muted:#9eb2c8;
-  --gc-line:rgba(212,175,55,.24);
-  --gc-glow:rgba(212,175,55,.18);
   --gc-ease:cubic-bezier(.23,1,.32,1);
 }
 
