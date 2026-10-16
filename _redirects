@@ -1,3 +1,9 @@
+/login /#auth 302
+/login/ /#auth 302
+/login.html /#auth 302
+/register /#auth 302
+/register/ /#auth 302
+/register.html /#auth 302
 /dashboard /#auth 302
 /dashboard/ /#auth 302
 /dashboard.html /#auth 302
