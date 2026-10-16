@@ -706,3 +706,200 @@ body.gc-customer-app .app-header{position:sticky;top:0;z-index:9500}
 body.gc-customer-app #gcCustomerWorkspace .app-layout{min-height:calc(100dvh - 72px)}
 body.gc-customer-app #gcCustomerWorkspace .app-main{min-width:0}
 body.gc-customer-app #gcCustomerWorkspace .mobile-dock{z-index:9999!important}
+
+
+/* Unified customer home: bring the public service story into the authenticated workspace. */
+body.gc-customer-app .gc-customer-route-overview {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(16px, 2.4vw, 26px);
+  border: 1px solid rgba(111, 205, 220, .16);
+  border-radius: 24px;
+  background:
+    radial-gradient(550px 230px at 100% 0%, rgba(70, 199, 216, .10), transparent 70%),
+    linear-gradient(145deg, rgba(12, 34, 52, .88), rgba(6, 23, 37, .94));
+}
+body.gc-customer-app .gc-route-overview-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+body.gc-customer-app .gc-route-overview-heading h2 {
+  margin: 5px 0 7px;
+  color: #f0fbff;
+  font-size: clamp(19px, 2.2vw, 27px);
+  font-weight: 850;
+  line-height: 1.45;
+}
+body.gc-customer-app .gc-route-overview-heading p {
+  max-width: 680px;
+  margin: 0;
+  color: #a8c0ce;
+  font-size: 12px;
+  line-height: 1.95;
+}
+body.gc-customer-app .gc-route-track-link {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 13px;
+  border: 1px solid rgba(105, 211, 222, .25);
+  border-radius: 13px;
+  color: #79e4ea;
+  background: rgba(74, 184, 202, .08);
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+}
+body.gc-customer-app .gc-customer-service-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+body.gc-customer-app .gc-customer-service-card {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  overflow: hidden;
+  padding: 17px;
+  border: 1px solid rgba(133, 190, 207, .17);
+  border-radius: 19px;
+  background: linear-gradient(155deg, rgba(18, 48, 69, .94), rgba(7, 25, 40, .96));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .025), 0 12px 28px rgba(0, 0, 0, .12);
+}
+body.gc-customer-app .gc-customer-service-card::after {
+  position: absolute;
+  inset-inline-end: -38px;
+  inset-block-start: -42px;
+  width: 118px;
+  height: 118px;
+  border: 1px solid rgba(88, 215, 225, .08);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+body.gc-customer-app .gc-service-card-top {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+body.gc-customer-app .gc-service-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(93, 220, 230, .19);
+  border-radius: 14px;
+  background: rgba(61, 177, 198, .12);
+  color: #76e0e8;
+}
+body.gc-customer-app .gc-service-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+body.gc-customer-app .gc-service-tag {
+  color: #80acbe;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .11em;
+}
+body.gc-customer-app .gc-customer-service-card h3 {
+  margin: 1px 0 0;
+  color: #f0fbff;
+  font-size: 15px;
+  font-weight: 850;
+  line-height: 1.55;
+}
+body.gc-customer-app .gc-customer-service-card p {
+  min-height: 52px;
+  margin: 0;
+  color: #a9bfcb;
+  font-size: 11px;
+  line-height: 1.9;
+}
+body.gc-customer-app .gc-customer-service-card > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 4px;
+  color: #72dfe8;
+  font-size: 11px;
+  font-weight: 850;
+  text-decoration: none;
+}
+body.gc-customer-app .gc-service-air { border-top-color: rgba(77, 209, 224, .48); }
+body.gc-customer-app .gc-service-sea { border-top-color: rgba(117, 163, 248, .48); }
+body.gc-customer-app .gc-service-land { border-top-color: rgba(223, 191, 116, .48); }
+body.gc-customer-app .gc-customer-route-footer {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+  padding: 12px 13px;
+  border: 1px solid rgba(126, 184, 201, .13);
+  border-radius: 13px;
+  background: rgba(4, 19, 31, .48);
+  color: #a8c0ce;
+  font-size: 10px;
+}
+body.gc-customer-app .gc-customer-route-footer strong { color: #e7f6fa; font-weight: 800; }
+body.gc-customer-app .gc-customer-route-footer .gc-route-arrow { color: #65dbe5; font-size: 16px; }
+body.gc-customer-app .gc-route-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #64d9c2;
+  box-shadow: 0 0 0 4px rgba(100, 217, 194, .09);
+}
+body.gc-customer-app .gc-customer-route-footer > a {
+  margin-inline-start: auto;
+  color: #71dce6;
+  font-weight: 800;
+  text-decoration: none;
+}
+body.gc-customer-app .gc-customer-view-hidden { display: none !important; }
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock [data-dock-tab="home"] { position: relative; }
+html[data-gc-theme="light"] body.gc-customer-app .gc-customer-route-overview {
+  border-color: #d3e5eb;
+  background: linear-gradient(145deg, #fff, #f2f8fb);
+}
+html[data-gc-theme="light"] body.gc-customer-app .gc-route-overview-heading h2,
+html[data-gc-theme="light"] body.gc-customer-app .gc-customer-service-card h3,
+html[data-gc-theme="light"] body.gc-customer-app .gc-customer-route-footer strong { color: #102b43; }
+html[data-gc-theme="light"] body.gc-customer-app .gc-route-overview-heading p,
+html[data-gc-theme="light"] body.gc-customer-app .gc-customer-service-card p,
+html[data-gc-theme="light"] body.gc-customer-app .gc-customer-route-footer { color: #617d8e; }
+html[data-gc-theme="light"] body.gc-customer-app .gc-customer-service-card {
+  border-color: #d6e6eb;
+  background: linear-gradient(155deg, #fff, #f2f8fb);
+  box-shadow: 0 10px 25px rgba(31, 75, 101, .07);
+}
+html[data-gc-theme="light"] body.gc-customer-app .gc-customer-route-footer { background: #f7fbfc; }
+@media (max-width: 900px) {
+  body.gc-customer-app .gc-route-overview-heading { align-items: flex-start; flex-direction: column; }
+  body.gc-customer-app .gc-customer-service-grid { grid-template-columns: 1fr; }
+  body.gc-customer-app .gc-customer-service-card { padding: 15px; }
+  body.gc-customer-app .gc-customer-service-card p { min-height: 0; }
+  body.gc-customer-app .gc-customer-route-footer { align-items: center; line-height: 1.8; }
+  body.gc-customer-app .gc-customer-route-footer > a { margin-inline-start: 0; width: 100%; }
+}
+@media (max-width: 360px) {
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock { left: 4px !important; right: 4px !important; padding: 4px !important; gap: 3px !important; }
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock [data-dock-tab] { font-size: 8px !important; }
+}
