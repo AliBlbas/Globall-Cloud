@@ -6,9 +6,9 @@
   const LANG_KEY = 'gc-language';
   const THEME_KEY = 'gc-theme';
   const labels = {
-    ckb: { dir:'rtl', title:'ڕێکخستن', language:'زمان', theme:'دۆخی نمایش', dark:'تاریک', light:'ڕووناک', account:'هەژمار و چوونەژوورەوە', login:'چوونەژوورەوە', logout:'دەرچوون', profile:'پڕۆفایل و پاراستن', payments:'بەڵگە و پارەدان', support:'پشتیوانی', close:'داخستن', saved:'گۆڕانکارییەکانی زمان و دۆخی نمایش لەسەر هەمان هەژمار بەکاردێن.' },
-    ar: { dir:'rtl', title:'الإعدادات', language:'اللغة', theme:'المظهر', dark:'داكن', light:'فاتح', account:'الحساب وتسجيل الدخول', login:'تسجيل الدخول', logout:'تسجيل الخروج', profile:'الملف الشخصي والأمان', payments:'المستندات والمدفوعات', support:'الدعم', close:'إغلاق', saved:'يتم تطبيق اللغة والمظهر في مساحة العميل.' },
-    en: { dir:'ltr', title:'Settings', language:'Language', theme:'Appearance', dark:'Dark', light:'Light', account:'Account & sign-in', login:'Sign in', logout:'Sign out', profile:'Profile & security', payments:'Documents & payments', support:'Support', close:'Close', saved:'Language and appearance are applied to the customer workspace.' }
+    ckb: { dir:'rtl', title:'ڕێکخستن', language:'زمان', theme:'دۆخی نمایش', dark:'تاریک', light:'ڕووناک', account:'هەژمار و چوونەژوورەوە', login:'چوونەژوورەوە', logout:'دەرچوون', profile:'پڕۆفایل و پاراستن', payments:'بەڵگە و پارەدان', support:'پشتیوانی', close:'داخستن', saved:'زمان و دۆخی نمایش لەم ئامێرەدا هەڵدەگیرێن.' },
+    ar: { dir:'rtl', title:'الإعدادات', language:'اللغة', theme:'المظهر', dark:'داكن', light:'فاتح', account:'الحساب وتسجيل الدخول', login:'تسجيل الدخول', logout:'تسجيل الخروج', profile:'الملف الشخصي والأمان', payments:'المستندات والمدفوعات', support:'الدعم', close:'إغلاق', saved:'يتم حفظ اللغة والمظهر في هذا المتصفح.' },
+    en: { dir:'ltr', title:'Settings', language:'Language', theme:'Appearance', dark:'Dark', light:'Light', account:'Account & sign-in', login:'Sign in', logout:'Sign out', profile:'Profile & security', payments:'Documents & payments', support:'Support', close:'Close', saved:'Language and appearance are saved in this browser.' }
   };
   const validLang = value => Object.prototype.hasOwnProperty.call(labels, value) ? value : 'ckb';
   const getLang = () => validLang(window.localStorage?.getItem(LANG_KEY) || document.documentElement.lang);
