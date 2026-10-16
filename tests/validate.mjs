@@ -54,7 +54,7 @@ const required = [
   'index.html','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
   'public-route-bootstrap.js','public-runtime-guarantee.js','public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js',
   'tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html',
-  'staff-os-v5.html','staff-os-v5.css','staff-os-v5.js','staff-os-v5-rescue.js','staff-logistics-intelligence.js','staff-logistics-intelligence.css',
+  'staff-os-v5.html','staff-os-v5.css','staff-os-v5.js','gc-shipment-detail-20261016.css','staff-os-v5-rescue.js','staff-logistics-intelligence.js','staff-logistics-intelligence.css',
   'staff-mobile-command-dock.css','staff-mobile-command-dock.js','staff-os-pro-20260909.css','staff-os-pro-20260909.js',
   'staff-shell-polish-20260909.css','staff-shell-polish-20260909.js','staff-premium-mobile-20260909.css','staff-premium-mobile-20260909.js',
   'warehouse-offline-sync.js','gc-platform-vnext.js','gc-platform-vnext-plus.js','gc-runtime-safety-v2026.js','production-brand-repair.js',
