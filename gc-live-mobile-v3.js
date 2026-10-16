@@ -27,7 +27,7 @@
     if (dock) {
       const definitions = [
         {
-          key: 'home', href: '/', label: 'سەرەکی',
+          key: 'home', href: '/#public', label: 'سەرەکی',
           icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v11h14V9M9 20v-6h6v6"></path></svg>'
         },
         {
