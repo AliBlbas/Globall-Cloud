@@ -39,37 +39,10 @@ const renderClaimPrompt = () => {
   status.className = 'portal-status';
   status.innerHTML = `
     <div>
-      <strong>هەژماری کڕیاری خۆت پەیوەست بکە</strong>
-      <span>ئەم هەژمارەی login ـە هێشتا بە customer profile ـەکەت نەبەستراوە. GC Code و ژمارەی مۆبایلەکەت بنووسە بۆ پەیوەستکردنی هەژمارەکەت بە زانیارییەکانی کۆمپانیا.</span>
-      <div style="display:grid;gap:10px;margin-top:14px;max-width:520px">
-        <input id="gcClaimCode" class="field" inputmode="text" autocomplete="off" placeholder="GC-1008" aria-label="GC Code">
-        <input id="gcClaimPhone" class="field" inputmode="tel" autocomplete="tel" placeholder="+964 750 000 0000" aria-label="ژمارەی مۆبایل">
-        <button id="gcClaimBtn" class="btn primary" type="button">پەیوەستکردنی هەژمار</button>
-        <div id="gcClaimMsg" class="muted" role="status" aria-live="polite"></div>
-      </div>
+      <strong>هەژماری کڕیار پێویستی بە پشتڕاستکردنەوە هەیە</strong>
+      <span>بۆ پاراستنی داتاکانی کڕیار، پەیوەستکردنی هەژمار بە GC Code و ژمارەی مۆبایل بە تەنیا بەردەست نییە. تکایە لەگەڵ ستافی Globall Cloud پەیوەندی بکە تا ناسنامەکەت پشتڕاست بکەنەوە و هەژمارەکەت بە شێوەی پارێزراو ببەستنەوە.</span>
+      <div class="muted" role="status">GC Code ـەکەت ئامادە بێت. وشەی نهێنیی خۆت لە ڕێگای نەپارێزراو هاوبەش مەکە.</div>
     </div>`;
-  $('gcClaimBtn')?.addEventListener('click', claimExistingCustomer);
-};
-
-const claimExistingCustomer = async () => {
-  const code = $('gcClaimCode')?.value.trim() || '';
-  const phone = $('gcClaimPhone')?.value.trim() || '';
-  const button = $('gcClaimBtn');
-  const msg = $('gcClaimMsg');
-  if (!code || !phone) {
-    if (msg) msg.textContent = 'GC Code و ژمارەی مۆبایل پڕبکەرەوە.';
-    return;
-  }
-  if (button) { button.disabled = true; button.textContent = 'پشکنین دەکرێت…'; }
-  if (msg) msg.textContent = '';
-  try {
-    await customerApi({ method: 'POST', body: { action: 'claim_account', data: { gc_code: code, phone } } });
-    if (msg) msg.textContent = 'هەژمارەکەت بە سەرکەوتوویی پەیوەست کرا. داتا بارکراوە.';
-    await load();
-  } catch (error) {
-    if (msg) msg.textContent = error.message || 'پەیوەستکردنی هەژمار سەرکەوتوو نەبوو.';
-    if (button) { button.disabled = false; button.textContent = 'پەیوەستکردنی هەژمار'; }
-  }
 };
 
 const emptyState = (icon, title, text) => `<div class="gc-data-empty"><span class="gc-empty-icon">${icon}</span><div><strong>${title}</strong><span>${text}</span></div></div>`;
