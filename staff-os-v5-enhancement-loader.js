@@ -55,7 +55,7 @@
     loadStyle('/gc-staff-elite-20261014.css?v=3');
     // This scoped layer loads last so it can replace the old scrollable mobile
     // sidebar dock without changing desktop navigation or shipment actions.
-    loadStyle('/gc-staff-mobile-dock-20261016.css?v=2');
+    loadStyle('/gc-staff-mobile-dock-20261016.css?v=3');
   };
 
   const waitForShell = () => {
