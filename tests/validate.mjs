@@ -178,6 +178,34 @@ console.log('Production contracts')
 try { execFileSync(process.execPath, [join(ROOT, 'scripts', 'production-contracts.mjs')], { stdio: 'inherit' }) }
 catch { fail('production contract validation failed') }
 
+console.log('Unified homepage/customer workspace')
+const unifiedShell = read('index.html')
+const unifiedController = read('gc-unified-customer-experience-20261016.js')
+const customerNavigation = read('gc-dashboard-preferences-20261003.js')
+const customerStyleLoader = read('gc-public-customer-style-loader-20261014.js')
+const customerDockStyles = read('gc-customer-mobile-dock-20261016.css')
+const customerWorkspaceStyles = read('gc-customer-workspace-elite-20261014.css')
+const customerDockStart = unifiedShell.indexOf('<nav class="mobile-dock"')
+const customerDockEnd = unifiedShell.indexOf('</nav>', customerDockStart)
+const customerDockMarkup = customerDockStart >= 0 && customerDockEnd > customerDockStart ? unifiedShell.slice(customerDockStart, customerDockEnd + 6) : ''
+const customerDockCount = (customerDockMarkup.match(/data-dock-tab=/g) || []).length
+const unifiedContracts = [
+  ['one canonical homepage shell', (unifiedShell.match(/id="gcApp"/g) || []).length === 1 && (unifiedShell.match(/id="gcCustomerWorkspace"/g) || []).length === 1],
+  ['public services integrated into customer home', unifiedShell.includes('id="gcCustomerRouteOverview"') && unifiedShell.includes('gc-customer-service-grid')],
+  ['customer mobile dock has five primary icons', customerDockCount === 5],
+  ['registration hash stays in customer mode', unifiedController.includes("'#auth','#register'") && unifiedController.includes("'#register':'home'")],
+  ['customer home includes route services and alerts', customerNavigation.includes("'gcCustomerRouteOverview', 'activity'")],
+  ['unread alert count is shown on Home icon', customerNavigation.includes("const homeItem = items.find(item => item.dataset.dockTab === 'home')") && customerNavigation.includes('data-dock-unread')],
+  ['customer dock uses five responsive columns', customerDockStyles.includes('repeat(5,minmax(0,1fr))') && !customerDockStyles.includes('repeat(6,minmax(0,1fr))')],
+  ['integrated services have responsive polished styles', customerWorkspaceStyles.includes('.gc-customer-route-overview') && customerWorkspaceStyles.includes('@media (max-width: 900px)')],
+  ['style loader references current cache versions', customerStyleLoader.includes('gc-customer-workspace-elite-20261014.css?v=15') && customerStyleLoader.includes('gc-customer-mobile-dock-20261016.css?v=3')],
+  ['support remains reachable from account settings', read('gc-settings-hub.js').includes("gcSelectCustomerView('support')")],
+]
+for (const [label, passed] of unifiedContracts) {
+  if (passed) ok(label)
+  else fail(label)
+}
+
 console.log('')
 if (failures) { console.error(`${failures} check(s) failed.`); process.exit(1) }
 console.log('All repository validation checks passed.')
