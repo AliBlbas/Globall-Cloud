@@ -86,3 +86,20 @@
   #gcModal .shipment-milestone>b{font-size:9px}
   #gcModal .package-row small{font-size:8px}
 }
+
+
+/* Customer identity-linking guidance in the staff workspace. */
+.customer-link-guidance{
+  display:grid;gap:6px;margin:0 0 12px;padding:13px 15px;
+  border:1px solid rgba(245,192,98,.24);border-radius:15px;
+  background:linear-gradient(120deg,rgba(245,192,98,.075),rgba(255,255,255,.018));
+  color:var(--text);font-size:11px;line-height:1.9;
+}
+.customer-link-guidance strong{font-size:12px;font-weight:900;color:#f2d58b}
+.customer-link-guidance span{color:var(--muted);overflow-wrap:anywhere}
+.customer-control-toolbar select{min-width:155px;max-width:100%}
+@media(max-width:780px){
+  .customer-link-guidance{padding:11px 12px;font-size:10px}
+  .customer-control-toolbar{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+  .customer-control-toolbar .field{width:100%;min-width:0}
+}
