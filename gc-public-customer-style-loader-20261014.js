@@ -17,12 +17,15 @@
   ];
 
   const desiredStyles = () => {
-    if (document.getElementById('gcApp') || document.querySelector('#gcApp.gc-app')) return homeStyles;
+    // The homepage now owns both public marketing and authenticated customer views.
+    // Check customer mode before #gcApp, which intentionally remains in the DOM.
     if (document.body && document.body.classList.contains('gc-customer-app')) return customerStyles;
+    if (document.getElementById('gcApp') || document.querySelector('#gcApp.gc-app')) return homeStyles;
     return [];
   };
 
   function ensureHomeDock() {
+    if (document.body?.classList.contains('gc-customer-app')) return;
     const app = document.getElementById('gcApp');
     let dock = document.querySelector('.gc-mobile-dock-v3');
     if (!dock) {
