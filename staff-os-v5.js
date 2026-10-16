@@ -392,7 +392,8 @@
           <div class="shipment-tags">
             <span class="pill">${esc(modeLabel(currentMode))}</span>
             <span class="pill">کڕیار: ${number(customerCount)}</span>
-            <span class="pill">کارتۆن: ${number(x.carton_count || x.items_count)}</span>
+            <span class="pill">دانە: ${number(x.cargo_piece_count || x.items_count)}</span>
+            <span class="pill">کارتۆن: ${number(x.carton_count || x.cargo_carton_count || x.items_count)}</span>
           </div>
           <div class="shipment-content"><span>ناوەڕۆکی کاڵا</span><b>${esc(contents)}</b></div>
           <div class="shipment-facts">
