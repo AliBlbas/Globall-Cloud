@@ -51,8 +51,8 @@
 <link rel="stylesheet" href="/gc-settings-hub.css?v=20261016-9" data-gc-settings-css="1">
 <link rel="stylesheet" href="/gc-customer-app-20261003.css?v=3" data-gc-customer-app-css="1">
 <link rel="stylesheet" href="/gc-customer-portal-rates.css?v=20261003-3" data-gc-customer-rates-css="1">
-<link rel="stylesheet" href="/gc-customer-workspace-elite-20261014.css?v=14" data-gc-customer-elite="1">
-<link rel="stylesheet" href="/gc-customer-mobile-dock-20261016.css?v=2" data-gc-customer-mobile-dock="1">
+<link rel="stylesheet" href="/gc-customer-workspace-elite-20261014.css?v=15" data-gc-customer-elite="1">
+<link rel="stylesheet" href="/gc-customer-mobile-dock-20261016.css?v=3" data-gc-customer-mobile-dock="1">
 <script src="/gc-settings-hub.js?v=20261016-10" defer data-gc-settings-hub="1"></script>
 </head>
 <body>
@@ -342,6 +342,31 @@
         <article class="metric-card"><span class="metric-icon mint" data-dash-icon="bell"></span><div><small>ALERTS</small><strong id="notifKpi">—</strong><span>ئاگادارییە نوێکان</span></div></article>
       </section>
 
+      <section class="section-block gc-customer-route-overview" id="gcCustomerRouteOverview" aria-labelledby="gcCustomerRouteTitle">
+        <div class="section-heading gc-route-overview-heading">
+          <div><span class="eyebrow">GLOBALL NETWORK · AIR / SEA / LAND</span><h2 id="gcCustomerRouteTitle">لە جیهانەوە تا هەولێر، لە یەک شوێن</h2><p>خزمەتگوزارییەکانی Globall Cloud لە پەڕەی سەرەکییەوە هێنراونەتە ناو هەژماری کڕیار؛ ڕێگا هەڵبژێرە، داوای نرخ بکە و بارەکانت بەڕێوەببە.</p></div>
+          <a class="gc-route-track-link" href="/track"><span aria-hidden="true">↗</span> شوێنکەوتنی گشتی</a>
+        </div>
+        <div class="gc-customer-service-grid">
+          <article class="gc-customer-service-card gc-service-air">
+            <div class="gc-service-card-top"><span class="gc-service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 14.5 21 8l-7 13-2.2-6.1L3 14.5Z"/><path d="m11.8 14.9 5-5"/></svg></span><span class="gc-service-tag">AIR FREIGHT</span></div>
+            <h3>گواستنەوەی ئاسمانی</h3><p>بۆ بارە پەلەدارەکان لە چین، ئەمریکا و دوبەی بۆ هەولێر.</p>
+            <a href="#newRequest">داواکردنی نرخ <span aria-hidden="true">←</span></a>
+          </article>
+          <article class="gc-customer-service-card gc-service-sea">
+            <div class="gc-service-card-top"><span class="gc-service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 14h18l-3 5H7l-4-5Z"/><path d="M7 14V5h10v9M7 9h10M2 21c2-1 3-1 5 0s3 1 5 0 3-1 5 0 3 1 5 0"/></svg></span><span class="gc-service-tag">SEA FREIGHT</span></div>
+            <h3>گواستنەوەی دەریایی</h3><p>هەڵبژاردەیەک بۆ بارە گەورە و قورسەکان، بە ڕێکخستنی بەڵگە و پەیڕەوکردن.</p>
+            <a href="#newRequest">داواکردنی نرخ <span aria-hidden="true">←</span></a>
+          </article>
+          <article class="gc-customer-service-card gc-service-land">
+            <div class="gc-service-card-top"><span class="gc-service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h11v11H3zM14 10h4l3 4v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></span><span class="gc-service-tag">LAND FREIGHT</span></div>
+            <h3>گواستنەوەی وشکانی</h3><p>ڕێگای دوبەی بۆ هەولێر بۆ گواستنەوەی بار و هەماهەنگیی گەیاندن.</p>
+            <a href="#newRequest">داواکردنی نرخ <span aria-hidden="true">←</span></a>
+          </article>
+        </div>
+        <div class="gc-customer-route-footer"><span class="gc-route-status-dot" aria-hidden="true"></span><span>چین · ئەمریکا · دوبەی</span><span class="gc-route-arrow" aria-hidden="true">→</span><strong>هەولێر · عێراق</strong><a href="#support">پێویستت بە یارمەتییە؟</a></div>
+      </section>
+
       <section class="section-block" id="shipmentsSection">
         <div class="section-heading"><div><span class="eyebrow">TRACKING CENTER</span><h2>بارەکانت</h2><p>دۆخ و شوێنی هەر بارێک بە ڕاستەوخۆ ببینە.</p></div><a class="text-action" href="/track">شوێنکەوتنی public ←</a></div>
         <div id="shipments" class="shipment-list"><div class="empty-panel"><span data-dash-icon="shipments"></span><strong>Login بکە بۆ بینینی بارەکانت</strong><button class="app-primary-action" id="loginPromptBtn" type="button">چوونەژوورەوە</button></div></div>
@@ -373,7 +398,7 @@
     </main>
   </div>
 
-  <nav class="mobile-dock" aria-label="ناڤیگەیشتنی مۆبایل"><a href="#overview" data-dock-tab="home" class="active" aria-current="page"><span data-dash-icon="home"></span><small data-dash-i18n="home">سەرەکی</small></a><a href="#shipmentsSection" data-dock-tab="shipments"><span data-dash-icon="shipments"></span><small data-dash-i18n="shipments">بارەکان</small></a><a href="#newRequest" data-dock-tab="requests" class="dock-primary"><span data-dash-icon="request"></span><small data-dash-i18n="request">داواکاری</small></a><a href="#activity" data-dock-tab="notifications"><span data-dash-icon="notifications"></span><small data-dash-i18n="notifications">ئاگاداری</small></a><a href="#records" data-dock-tab="records" aria-label="بەڵگە و پارە"><span data-dash-icon="records"></span><small data-dash-i18n="records">بەڵگە</small></a><button type="button" data-dock-tab="settings" aria-label="ڕێکخستن"><span data-dash-icon="settings"></span><small data-dash-i18n="settings">ڕێکخستن</small></button></nav>
+  <nav class="mobile-dock" aria-label="ناڤیگەیشتنی مۆبایل"><a href="#overview" data-dock-tab="home" class="active" aria-current="page"><span data-dash-icon="home"></span><small data-dash-i18n="home">سەرەتا</small></a><a href="#shipmentsSection" data-dock-tab="shipments"><span data-dash-icon="shipments"></span><small data-dash-i18n="shipments">بارەکان</small></a><a href="#newRequest" data-dock-tab="requests" class="dock-primary"><span data-dash-icon="request"></span><small data-dash-i18n="request">داواکاری</small></a><a href="#records" data-dock-tab="records" aria-label="بەڵگە و پارە"><span data-dash-icon="records"></span><small data-dash-i18n="records">پارە و بەڵگە</small></a><button type="button" data-dock-tab="settings" aria-label="هەژمار و ڕێکخستن"><span data-dash-icon="settings"></span><small data-dash-i18n="settings">هەژمار</small></button></nav>
 
   <div id="shipmentDetail" class="app-modal hidden"><div class="detail-sheet"><div class="sheet-head"><div><span class="eyebrow">SHIPMENT DETAIL</span><h2 id="detailTitle">بار</h2></div><button id="closeShipmentDetail" class="icon-action" type="button">×</button></div><div id="detailStatus" class="detail-status"></div><div class="detail-route" id="detailRoute"></div><div id="detailMap" class="detail-map"></div><div class="detail-grid"><div><small>شوێن</small><strong id="detailLocation">—</strong></div><div><small>نوێکراوەتەوە</small><strong id="detailUpdated">—</strong></div></div><div id="detailTimeline" class="record-list"></div><div id="detailPackages" class="record-list"></div><div id="detailPhotos" class="photo-grid"></div><div id="detailEvidence" class="record-list"></div><div id="detailFinance" class="record-list"></div><div id="detailDocuments" class="record-list"></div></div></div>
 
@@ -398,9 +423,9 @@
 <script src="/gc-csp-bridge.js?v=20260817-1" defer data-gc-csp-bridge="1"></script>
 <script src="/gc-csp-scripts/customer-portal-inline-1.js?v=20261016-6" defer data-gc-customer-portal="1"></script>
 <script src="/gc-customer-portal-rates.js?v=20261003-3" defer data-gc-customer-rates="1"></script>
-<script src="/gc-dashboard-preferences-20261003.js?v=20261016-12" defer data-gc-customer-preferences="1"></script>
+<script src="/gc-dashboard-preferences-20261003.js?v=20261016-13" defer data-gc-customer-preferences="1"></script>
 <script src="/gc-customer-request-20261003.js?v=20261016-2" defer data-gc-customer-requests="1"></script>
-<script src="/gc-unified-customer-experience-20261016.js?v=4" defer data-gc-unified-customer-experience="1"></script>
-<script src="/gc-public-customer-style-loader-20261014.js?v=14" defer data-gc-public-customer-style-loader="1"></script>
+<script src="/gc-unified-customer-experience-20261016.js?v=5" defer data-gc-unified-customer-experience="1"></script>
+<script src="/gc-public-customer-style-loader-20261014.js?v=15" defer data-gc-public-customer-style-loader="1"></script>
 </body>
 </html>
