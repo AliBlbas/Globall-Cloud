@@ -87,7 +87,7 @@ body.gc-customer-app #gcCustomerWorkspace > .mobile-dock { display: none; }
   body.gc-customer-app #gcCustomerWorkspace > .mobile-dock {
     display: grid !important;
     position: fixed !important;
-    grid-template-columns: repeat(6,minmax(0,1fr)) !important;
+    grid-template-columns: repeat(5,minmax(0,1fr)) !important;
     align-items: stretch !important;
     gap: 4px !important;
     left: 8px !important;
@@ -201,3 +201,28 @@ body.gc-customer-app #gcCustomerWorkspace > .mobile-dock { display: none; }
 body.gc-customer-app .gc-mobile-dock-v3,
 body.gc-customer-app #gcPrimaryMobileNav{display:none!important;visibility:hidden!important;pointer-events:none!important}
 body:not(.gc-customer-app) #gcCustomerWorkspace{display:none!important}
+
+
+/* Five clear primary actions; the unread-alert indicator is attached to Home. */
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock [data-dock-tab="home"] [data-dash-icon="home"] {
+  position: relative !important;
+}
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock [data-dock-unread] {
+  position: absolute !important;
+  inset-block-start: -5px !important;
+  inset-inline-end: -7px !important;
+  display: grid !important;
+  min-width: 15px !important;
+  height: 15px !important;
+  padding: 0 3px !important;
+  place-items: center !important;
+  border: 1.5px solid #061827 !important;
+  border-radius: 99px !important;
+  background: #ef6c6c !important;
+  color: #fff !important;
+  font: 800 8px/1 system-ui, sans-serif !important;
+  z-index: 2 !important;
+}
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock [data-dock-unread][hidden] {
+  display: none !important;
+}
