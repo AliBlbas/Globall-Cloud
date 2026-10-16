@@ -525,3 +525,31 @@ html[data-gc-theme="light"] body.gc-customer-app .detail-sheet,html[data-gc-them
  body.gc-customer-app .rate-tool,body.gc-customer-app .quote-form,body.gc-customer-app .request-form{grid-template-columns:minmax(0,1fr)!important}
 }
 @media(prefers-reduced-motion:reduce){body.gc-customer-app *{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+
+
+/* CUSTOMER MOBILE DOCK · FIVE DESTINATIONS · PASS 2 · 2026-10-16 */
+@media(max-width:900px){
+ body.gc-customer-app .mobile-dock{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;align-items:stretch!important;gap:3px!important}
+ body.gc-customer-app .mobile-dock>a,
+ body.gc-customer-app .mobile-dock>button{box-sizing:border-box;display:flex;flex:initial;align-items:center;justify-content:center;flex-direction:column;gap:5px;width:100%;min-width:0;min-height:57px;margin:0;padding:6px 2px;border:0;border-radius:14px;background:transparent;color:#a4bcc9;font:inherit;font-size:10px;line-height:1.4;text-align:center;text-decoration:none;cursor:pointer;-webkit-appearance:none;appearance:none}
+ body.gc-customer-app .mobile-dock>a svg,
+ body.gc-customer-app .mobile-dock>button svg{display:block;width:22px!important;height:22px!important;flex:0 0 22px;max-width:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+ body.gc-customer-app .mobile-dock>a small,
+ body.gc-customer-app .mobile-dock>button small{display:block;max-width:100%;margin:0;font-size:10px;line-height:1.35;font-weight:800;white-space:nowrap!important;overflow:hidden;text-overflow:clip}
+ body.gc-customer-app .mobile-dock>a.active,
+ body.gc-customer-app .mobile-dock>button.active{color:#ecfbfe!important;background:rgba(117,227,237,.12)!important;box-shadow:inset 0 0 0 1px rgba(117,227,237,.16)}
+ body.gc-customer-app .mobile-dock>a.dock-primary{background:linear-gradient(135deg,#a3f1f2,#63dce8 58%,#39b8cf)!important;color:#05232b!important;box-shadow:0 8px 21px rgba(48,190,211,.17)!important}
+ body.gc-customer-app .mobile-dock>a:focus-visible,
+ body.gc-customer-app .mobile-dock>button:focus-visible{outline:2px solid #69dce7;outline-offset:2px}
+}
+@media(max-width:430px){
+ body.gc-customer-app .mobile-dock{left:5px!important;right:5px!important;gap:2px!important;padding:4px!important}
+ body.gc-customer-app .mobile-dock>a,
+ body.gc-customer-app .mobile-dock>button{min-height:54px;padding:5px 1px;gap:4px}
+ body.gc-customer-app .mobile-dock>a svg,
+ body.gc-customer-app .mobile-dock>button svg{width:21px!important;height:21px!important;flex-basis:21px}
+ body.gc-customer-app .mobile-dock>a small,
+ body.gc-customer-app .mobile-dock>button small{font-size:9px}
+}
+html[data-gc-theme="light"] body.gc-customer-app .mobile-dock>button{color:#59778b}
+html[data-gc-theme="light"] body.gc-customer-app .mobile-dock>button.active{color:#10364b!important;background:#e4f6f8!important}
