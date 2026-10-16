@@ -28,31 +28,69 @@ async function listShipments(admin:any, gcCode?:string){
  const rows=data||[];
  if(!rows.length)return rows;
 
+ const ids=rows.map((x:any)=>x.id).filter(Boolean);
  let packages:any[]=[];
+ let cargoItems:any[]=[];
  try{
-   const ids=rows.map((x:any)=>x.id).filter(Boolean);
-   const r=await admin.from('shipment_packages').select('shipment_id,package_code,package_type,description,weight_kg,metadata').in('shipment_id',ids);
-   if(!r.error)packages=r.data||[];
+  const r=await admin.from('shipment_packages').select('shipment_id,package_code,package_type,description,weight_kg,metadata').in('shipment_id',ids);
+  if(!r.error)packages=r.data||[];
+ }catch(_){}
+ try{
+  const r=await admin.from('shipment_cargo_items').select('shipment_id,customer_gc_code,item_name,quantity_pc,box_count,weight_kg,notes').in('shipment_id',ids);
+  if(!r.error)cargoItems=r.data||[];
  }catch(_){}
 
- const byShipment=new Map<string,any[]>();
+ const packagesByShipment=new Map<string,any[]>();
+ const cargoByShipment=new Map<string,any[]>();
  for(const p of packages){
-   const key=String(p.shipment_id);
-   if(!byShipment.has(key))byShipment.set(key,[]);
-   byShipment.get(key)!.push(p);
+  const key=String(p.shipment_id);
+  if(!packagesByShipment.has(key))packagesByShipment.set(key,[]);
+  packagesByShipment.get(key)!.push(p);
+ }
+ for(const item of cargoItems){
+  const key=String(item.shipment_id);
+  if(!cargoByShipment.has(key))cargoByShipment.set(key,[]);
+  cargoByShipment.get(key)!.push(item);
  }
  return rows.map((s:any)=>{
-   const ps=byShipment.get(String(s.id))||[];
-   const customers=new Set<string>();
-   const contents:string[]=[];
-   for(const p of ps){
-     const meta=p.metadata&&typeof p.metadata==='object'?p.metadata:{};
-     const gc=meta.customer_gc_code||meta.gc_code||meta.customer_code;
-     if(gc)customers.add(String(gc).toUpperCase());
-     const desc=p.description||meta.contents||meta.description;
-     if(desc)contents.push(String(desc));
-   }
-   return {...s,package_count:ps.length,customer_goods_count:customers.size||((s.customer_gc_code)?1:0),cargo_contents:[...new Set(contents)].slice(0,12)};
+  const ps=packagesByShipment.get(String(s.id))||[];
+  const cis=cargoByShipment.get(String(s.id))||[];
+  const customers=new Set<string>();
+  const contents:string[]=[];
+  for(const p of ps){
+   const meta=p.metadata&&typeof p.metadata==='object'?p.metadata:{};
+   const customerCode=meta.customer_gc_code||meta.gc_code||meta.customer_code;
+   if(customerCode)customers.add(String(customerCode).normalize('NFKC').trim().toUpperCase());
+   const desc=p.description||meta.contents||meta.description;
+   if(desc)contents.push(String(desc));
+  }
+  let pieces=0;
+  let cartons=0;
+  for(const item of cis){
+   if(item.customer_gc_code)customers.add(String(item.customer_gc_code).normalize('NFKC').trim().toUpperCase());
+   const name=String(item.item_name||'').trim();
+   const qty=Number(item.quantity_pc||0);
+   const boxes=Number(item.box_count||0);
+   if(Number.isFinite(qty))pieces+=Math.max(0,qty);
+   if(Number.isFinite(boxes))cartons+=Math.max(0,boxes);
+   if(name){
+    const details:string[]=[];
+    if(Number.isFinite(qty)&&qty>0)details.push(`${qty} pc`);
+    if(Number.isFinite(boxes)&&boxes>0)details.push(`${boxes} box`);
+    if(item.weight_kg!=null&&Number.isFinite(Number(item.weight_kg)))details.push(`${Number(item.weight_kg)} kg`);
+    contents.push(details.length?`${name} (${details.join(', ')})`:name);
+   }else if(item.notes)contents.push(String(item.notes));
+  }
+  const uniqueContents=[...new Set(contents.map((value:string)=>value.trim()).filter(Boolean))].slice(0,12);
+  return {
+   ...s,
+   package_count:ps.length,
+   cargo_item_count:cis.length,
+   cargo_piece_count:pieces,
+   cargo_carton_count:cartons,
+   customer_goods_count:customers.size||((s.customer_gc_code)?1:0),
+   cargo_contents:uniqueContents
+  };
  });
 }
 async function shipmentDetail(admin:any,id:string){
