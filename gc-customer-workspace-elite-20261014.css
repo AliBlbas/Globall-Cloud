@@ -280,7 +280,7 @@ html[data-gc-theme="light"] body.gc-customer-app .mobile-dock a.dock-primary{bac
   body.gc-customer-app .chat-form .app-primary-action{width:100%}
   body.gc-customer-app .request-form{padding:13px}
   body.gc-customer-app .request-form .section-head{grid-column:auto}
-  body.gc-customer-app .mobile-dock{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important}
+  body.gc-customer-app .mobile-dock{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important}
   body.gc-customer-app .detail-sheet,body.gc-customer-app .auth-sheet{max-height:calc(90dvh - env(safe-area-inset-bottom));padding:17px;border-radius:20px}
   body.gc-customer-app .app-modal{align-items:end;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
 }
