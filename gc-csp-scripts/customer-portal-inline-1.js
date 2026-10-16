@@ -77,7 +77,14 @@ const renderCustomerChat = (threads) => { const list=$('customerChatThreads'); i
 const sendCustomerChat = async (event) => { event.preventDefault(); const input=$('customerChatInput'); const status=$('customerChatStatus'); const body=input?.value.trim()||''; if(!body)return; const button=event.currentTarget.querySelector('button'); if(button)button.disabled=true; if(status)status.textContent='پەیامەکە دەنێردرێت…'; try{ await customerApi({method:'POST',body:{action:'chat_send',data:{thread_id:input.dataset.threadId||undefined,body}}}); input.value=''; delete input.dataset.threadId; if(status)status.textContent='پەیام بە سەرکەوتوویی نێردرا.'; await load(); }catch(error){if(status)status.textContent=error.message||'ناردنی پەیام سەرکەوتوو نەبوو.';}finally{if(button)button.disabled=false;} };
 const renderNotifications = (items) => setHtml('notifications',
   items.length
-    ? items.map((item) => `<div class="item"><div class="row"><strong>${esc(item.title)}</strong>${item.read_at ? '<span class="pill">خوێندراوە</span>' : `<button class="btn notification-action" type="button" data-read-notification="${esc(item.id)}">خوێندراوە بکە</button>`}</div><div class="muted">${esc(item.body)}</div><small>${esc(date(item.created_at))}</small></div>`).join('')
+    ? items.map((item) => {
+      const isRead = Boolean(item.read_at);
+      return `<article class="item notification-item ${isRead ? 'is-read' : 'is-unread'}" data-notification-state="${isRead ? 'read' : 'unread'}">
+        <div class="row notification-item-head"><strong>${esc(item.title)}</strong>${isRead ? '<span class="pill">خوێندراوە</span>' : `<button class="btn notification-action" type="button" data-read-notification="${esc(item.id)}">خوێندراوە بکە</button>`}</div>
+        <div class="muted notification-body">${esc(item.body)}</div>
+        <small class="notification-time">${esc(date(item.created_at))}</small>
+      </article>`;
+    }).join('')
     : emptyState(EMPTY.bell,'هیچ ئاگادارییەکی نوێ نییە','کاتێک update ـێکی shipment یان پەیامێک هەبێت، لێرە پیشان دەدرێت.')
 );
 
