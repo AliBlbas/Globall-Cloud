@@ -137,7 +137,7 @@ const customerGcRegister = read('supabase/functions/customer-gc-register/index.t
 const supabaseConfig = read('supabase/config.toml')
 const legacyLoginPage = read('login.html')
 const legacyRegisterPage = read('register.html')
-const redirects = read('_redirects')
+const legacyAuthRedirects = read('_redirects')
 if (customerGcRegister.includes('SUPABASE_SERVICE_ROLE_KEY') || customerGcRegister.includes('createUser(') || customerGcRegister.includes('register_customer_with_gc') || !customerGcRegister.includes('CUSTOMER_REGISTRATION_DISABLED')) fail('Public customer registration must be disabled and must not create Auth users')
 else ok('Public customer registration endpoint is retired without service-role account creation')
 if (!supabaseConfig.includes('[functions.customer-gc-register]\nverify_jwt = true')) fail('Retired customer registration endpoint must require a valid JWT at the gateway')
@@ -149,7 +149,7 @@ for (const [label, page] of [['login.html', legacyLoginPage], ['register.html', 
   else ok(`Legacy ${label} routes to the unified customer entry`)
 }
 for (const route of ['/login /#auth 302','/login/ /#auth 302','/login.html /#auth 302','/register /#auth 302','/register/ /#auth 302','/register.html /#auth 302']) {
-  if (!redirects.includes(route)) fail(`Legacy auth redirect missing: ${route}`)
+  if (!legacyAuthRedirects.includes(route)) fail(`Legacy auth redirect missing: ${route}`)
 }
 if (!failures) ok('Legacy auth routes converge on the single customer page')
 if (!read('tests/validate.mjs').includes('public customer registration endpoint is retired')) fail('Repository validator must guard against reintroducing public customer registration')
