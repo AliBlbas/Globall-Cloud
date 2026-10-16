@@ -355,8 +355,9 @@
           <div class="customer-list-tools">
             <select class="field customer-link-filter hidden" id="customerLinkFilter" aria-label="Filter customer login status">
               <option value="all">All customer accounts</option>
-              <option value="unlinked">Needs login linking</option>
+              <option value="unlinked">Active — needs login linking</option>
               <option value="linked">Login already linked</option>
+              <option value="inactive-unlinked">Inactive — no login linked</option>
             </select>
             <input class="field search" id="searchBox" placeholder="Search records..." aria-label="Search customer or shipment records">
           </div>
@@ -375,7 +376,7 @@
     </section>
   </div>
 
-<script src="/gc-csp-scripts/accounts-console-inline-1.js?v=20261016-3" defer data-gc-externalized="1"></script>
+<script src="/gc-csp-scripts/accounts-console-inline-1.js?v=20261016-4" defer data-gc-externalized="1"></script>
 <script src="/gc-whatsapp-float-20260929.js?v=1" defer></script>
 <script src="/gc-icon-hierarchy-20260930.js?v=1" defer></script>
 <script src="/gc-dashboard-console-polish-20260930.js?v=1" defer></script>
