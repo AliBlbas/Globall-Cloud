@@ -566,7 +566,7 @@
       const boxes = Number(field('box_count') || 0);
       const weight = Number(field('weight_kg') || 0);
       const declared = Number(field('declared_value') || 0);
-      if (!itemName && !rawGcCode && !notes && quantity === 0 && boxes === 0 && weight === 0 && declared === 0) return;
+      if (!itemName && !notes && quantity === 0 && boxes === 0 && weight === 0 && declared === 0) return;
       if (!itemName) throw new Error('ناوی کاڵا بۆ هەر ڕیزی پڕکراو پێویستە.');
       if (!gcCode) throw new Error('کۆدی GC بۆ هەر کاڵایەک پێویستە.');
       if (![quantity, boxes, weight, declared].every(Number.isFinite) || quantity < 0 || boxes < 0 || weight < 0 || declared < 0 || !Number.isInteger(quantity) || !Number.isInteger(boxes)) {
