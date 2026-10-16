@@ -26,6 +26,8 @@ const customerApi = async ({ method = 'GET', body } = {}) => {
   }
   return payload;
 };
+// Shared only within this signed-in customer page; all requests remain session-authenticated.
+window.gcCustomerApi = customerApi;
 const $ = (id) => document.getElementById(id);
 const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const setHtml = (id, html) => { const element = $(id); if (element) element.innerHTML = html; };
