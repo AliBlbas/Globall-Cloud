@@ -107,7 +107,7 @@ const guards = [
   ['active homepage uses current experience script', publicShell.includes('/globall-redesign-20260922.js')],
   ['public production UI layer loaded', publicShell.includes('/gc-production-ui-20260927.css?v=1')],
   ['staff production UI layer loaded', read('staff-os-v5.html').includes('/gc-production-ui-20260927.css?v=1')],
-  ['unified customer workspace UI layer loaded', publicShell.includes('gc-customer-workspace-elite-20261014.css?v=22')],
+  ['unified customer workspace UI layer loaded', publicShell.includes('gc-customer-workspace-elite-20261014.css?v=23')],
   ['legacy customer portal redirects to the unified customer entry', read('customer-portal.html').includes("window.location.replace('/#auth')") && !read('customer-portal.html').includes('gc-csp-scripts/customer-portal-inline-1.js')],
   ['customer-access has no independent login form', legacyAccessPage.includes("window.location.replace('/#auth')") && !legacyAccessPage.includes('id="loginForm"') && !legacyAccessPage.includes('functions/v1/customer-gc-login')],
   ['active homepage avoids legacy monolithic script', !publicShell.includes('gc-csp-scripts/index-inline-2.js')],
@@ -200,6 +200,7 @@ const customerDockStyles = read('gc-customer-mobile-dock-20261016.css')
 const customerWorkspaceStyles = read('gc-customer-workspace-elite-20261014.css')
 const customerSignatureStyles = read('gc-customer-experience-signature-20261017.css')
 const customerPortalAuth = read('gc-csp-scripts/customer-portal-inline-1.js')
+const customerSettingsHub = read('gc-settings-hub.js')
 const customerSelfSource = read('supabase/functions/customer-self/index.ts')
 const customerAccountEntry = read('gc-account-entry.js')
 const accountAdminSource = read('supabase/functions/account-admin/index.ts')
@@ -207,6 +208,7 @@ const customerDockStart = unifiedShell.indexOf('<nav class="mobile-dock"')
 const customerDockEnd = unifiedShell.indexOf('</nav>', customerDockStart)
 const customerDockMarkup = customerDockStart >= 0 && customerDockEnd > customerDockStart ? unifiedShell.slice(customerDockStart, customerDockEnd + 6) : ''
 const customerDockCount = (customerDockMarkup.match(/data-dock-tab=/g) || []).length
+const customerDockTabs = [...customerDockMarkup.matchAll(/data-dock-tab="([^"]+)"/g)].map((match) => match[1])
 const unifiedContracts = [
   ['one customer-first shell with old marketing area hidden', (unifiedShell.match(/id="gcApp"/g) || []).length === 1 && (unifiedShell.match(/id="gcCustomerWorkspace"/g) || []).length === 1 && unifiedShell.includes('<body class="gc-customer-app"') && unifiedShell.includes('<div class="gc-app" id="gcApp" hidden>') && unifiedShell.includes('<div id="gcCustomerWorkspace" data-gc-unified-customer="1">') && !unifiedShell.includes('<nav class="gc-mobile-dock-v3"')],
   ['legacy public dock cannot be reinjected', customerStyleLoader.includes('function ensureHomeDock() { return; }') && !customerStyleLoader.includes('dock.innerHTML')],
@@ -215,6 +217,10 @@ const unifiedContracts = [
   ['customer console is the default root and login is ready', unifiedController.includes("window.location.hash || '#auth'") && unifiedShell.includes('<div id="auth" class="app-modal">')],
   ['public services integrated into customer home', unifiedShell.includes('id="gcCustomerRouteOverview"') && unifiedShell.includes('gc-customer-service-grid')],
   ['customer mobile dock has five primary icons', customerDockCount === 5],
+  ['customer mobile dock uses Home, Orders, Requests, Notifications, and Settings', customerDockTabs.join(',') === 'home,shipments,requests,notifications,settings'],
+  ['customer Home and Notifications are isolated views', customerNavigation.includes("home: ['workspace-toolbar', 'overview', 'homeMetrics', 'gcCustomerRouteOverview']") && customerNavigation.includes("notifications: ['activity']")],
+  ['customer Orders includes shipments and related records', customerNavigation.includes("shipments: ['shipmentsSection', 'records']") && customerNavigation.includes("'#records':'shipments'") && unifiedController.includes("'#records':'shipments'")],
+  ['customer Settings has profile, avatar, password, and preference controls', customerSettingsHub.includes("section.id = 'gcAccountSettings'") && customerSettingsHub.includes("account-self-password") && customerSettingsHub.includes("sb.storage.from('avatars')") && customerSettingsHub.includes("window.gcSelectCustomerView('shipments')")],
   ['premium homepage keeps public dock off the content on mobile', customerStyleLoader.includes('gc-homepage-signature-20261016.css?v=10') && customerWorkspaceStyles.includes('gc-customer-service-card') && read('gc-homepage-signature-20261016.css').includes('body:not(.gc-customer-app) .gc-mobile-dock-v3{display:none!important')],
   ['premium hero uses existing logistics imagery', read('gc-homepage-signature-20261016.css').includes("url('/assets/gc-air-freight-hero-1440.webp')")],
   ['mobile homepage is compact and does not float over form inputs', read('gc-homepage-signature-20261016.css').includes('#gcApp .gc-announcement { display:none!important; }') && read('gc-homepage-signature-20261016.css').includes('body .gc-whatsapp-float {display:none!important;}') && read('gc-homepage-signature-20261016.css').includes('#gcApp {padding-bottom:0!important;}')],
@@ -231,7 +237,7 @@ const unifiedContracts = [
   ['unread alert count is shown on Home icon', customerNavigation.includes("const homeItem = items.find(item => item.dataset.dockTab === 'home')") && customerNavigation.includes('data-dock-unread')],
   ['customer dock uses five responsive columns', customerDockStyles.includes('repeat(5,minmax(0,1fr))') && !customerDockStyles.includes('repeat(6,minmax(0,1fr))') && !customerWorkspaceStyles.includes('repeat(6,minmax(0,1fr))')],
   ['integrated services have responsive polished styles', customerWorkspaceStyles.includes('.gc-customer-route-overview') && customerWorkspaceStyles.includes('@media (max-width: 900px)')],
-  ['style loader references current cache versions', customerStyleLoader.includes('gc-customer-workspace-elite-20261014.css?v=22') && customerStyleLoader.includes('gc-customer-mobile-dock-20261016.css?v=4')],
+  ['style loader references current cache versions', customerStyleLoader.includes('gc-customer-workspace-elite-20261014.css?v=23') && customerStyleLoader.includes('gc-customer-mobile-dock-20261016.css?v=4')],
   ['style loader script is cache-busted in index', unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=21')],
   ['signature customer layer is loaded after the mobile dock', unifiedShell.includes('gc-customer-experience-signature-20261017.css?v=2') && customerStyleLoader.includes('gc-customer-experience-signature-20261017.css?v=2')],
   ['customer home has three direct paths to shipments, billing, and support', (unifiedShell.match(/class="gc-quick-action"/g)||[]).length === 3 && unifiedShell.includes('href="#shipmentsSection"') && unifiedShell.includes('href="#records"') && unifiedShell.includes('href="#support"')],
@@ -240,7 +246,7 @@ const unifiedContracts = [
   ['legacy GC sign-in explains secure staff linking', unifiedShell.includes('gc-auth-support-note') && unifiedShell.includes('wa.me/9647507577137')],
   ['signed-out claim prompt offers support without self-linking', customerPortalAuth.includes('gc-account-help-action') && customerSelfSource.includes('self-service linking is disabled')],
   ['customer signup remains staff-provisioned', customerAccountEntry.includes('does not expose') && accountAdminSource.includes("Only Super Admin can bind customer accounts")],
-  ['customer auth-help assets have matching cache references', unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=22') && unifiedShell.includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261016-10')],
+  ['customer auth-help assets have matching cache references', unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=23') && unifiedShell.includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261016-10')],
   ['public customer registration endpoint is retired', !retiredRegisterFunction.includes('SUPABASE_SERVICE_ROLE_KEY') && !retiredRegisterFunction.includes('createUser(') && !retiredRegisterFunction.includes('register_customer_with_gc') && retiredRegisterFunction.includes('CUSTOMER_REGISTRATION_DISABLED')],
   ['retired registration function requires JWT at gateway', supabaseAuthConfig.includes('[functions.customer-gc-register]\nverify_jwt = true')],
   ['GC-code login remains public for its credential check', supabaseAuthConfig.includes('[functions.customer-gc-login]\nverify_jwt = false') && read('supabase/functions/customer-gc-login/index.ts').includes('signInWithPassword')],
