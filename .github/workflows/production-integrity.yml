@@ -63,7 +63,7 @@ jobs:
           grep -q '/gc-production-ui-20260927.css?v=1' index.html
           grep -q '/gc-production-ui-20260927.css?v=1' staff-os-v5.html
           grep -Fq "window.location.replace('/#auth')" customer-portal.html
-          grep -q 'staff-os-v5-20261017.js?v=20261017-16' staff-os-v5.html
+          grep -q 'staff-os-v5-20261017.js?v=20261017-17' staff-os-v5.html
           grep -q 'gc-staff-command-system-20261017.css?v=2' staff-os-v5.html
           grep -Fq 'receipt-owner-routing-hint' staff-os-v5-20261017.js
           grep -Fq 'fullCode.slice(0,suffix.index)' staff-os-v5-20261017.js
