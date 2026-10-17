@@ -151,11 +151,11 @@
     window.addEventListener('popstate', () => activate(keyForHash(window.location.hash), {writeHash:false}));
     window.gcSelectCustomerView = (key) => activate(key, {enterMode:true});
 
-    // Keep unread alerts visible without mixing alert content into other views.
-    const homeItem = items.find(item => item.dataset.dockTab === 'home');
-    const iconWrap = homeItem?.querySelector('[data-dash-icon="home"]');
-    let badge = homeItem?.querySelector('[data-dock-unread]');
-    if (homeItem && iconWrap && !badge) {
+    // Keep unread counts on the Notifications tab, not on Home.
+    const notificationsItem = items.find(item => item.dataset.dockTab === 'notifications');
+    const iconWrap = notificationsItem?.querySelector('[data-dash-icon="notifications"]');
+    let badge = notificationsItem?.querySelector('[data-dock-unread]');
+    if (notificationsItem && iconWrap && !badge) {
       badge = document.createElement('span');
       badge.dataset.dockUnread = '1';
       badge.className = 'dock-unread-badge';
@@ -166,11 +166,10 @@
     const updateUnread = notifications => {
       const count = (Array.isArray(notifications) ? notifications : []).filter(item => !item?.read_at).length;
       if (badge) { badge.hidden = count < 1; badge.textContent = count > 9 ? '9+' : String(count); }
-      if (homeItem) {
+      if (notificationsItem) {
         const labels = copy[currentLang()].labels;
-        const homeLabel = labels.home || 'Home';
-        const alertsLabel = labels.notifications || 'Notifications';
-        homeItem.setAttribute('aria-label', count ? homeLabel + ', ' + count + ' unread ' + alertsLabel : homeLabel);
+        const notificationsLabel = labels.notifications || 'Notifications';
+        notificationsItem.setAttribute('aria-label', count ? notificationsLabel + ', ' + count + ' unread' : notificationsLabel);
       }
     };
     window.addEventListener('gc:customer-loaded', event => updateUnread(event.detail?.notifications));

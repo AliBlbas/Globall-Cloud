@@ -203,8 +203,8 @@ body.gc-customer-app #gcPrimaryMobileNav{display:none!important;visibility:hidde
 body:not(.gc-customer-app) #gcCustomerWorkspace{display:none!important}
 
 
-/* Five clear primary actions; the unread-alert indicator is attached to Home. */
-body.gc-customer-app #gcCustomerWorkspace > .mobile-dock [data-dock-tab="home"] [data-dash-icon="home"] {
+/* Five clear primary actions; the unread-alert indicator is attached to Notifications. */
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock [data-dock-tab="notifications"] [data-dash-icon="notifications"] {
   position: relative !important;
 }
 body.gc-customer-app #gcCustomerWorkspace > .mobile-dock [data-dock-unread] {
