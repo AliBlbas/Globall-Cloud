@@ -128,10 +128,14 @@ const renderNotifications = (items) => setHtml('notifications',
   items.length
     ? items.map((item) => {
       const isRead = Boolean(item.read_at);
+      const action = typeof item.action_url === 'string' && (/^\\//.test(item.action_url) || /^#/.test(item.action_url)) && !item.action_url.startsWith('//')
+        ? item.action_url
+        : '';
+      const actionLabel = item.kind === 'warehouse_received' ? 'بینینی وێنە و بەڵگەی کۆگا' : 'بینینی بەشە پەیوەندیدارەکە';
       return `<article class="item notification-item ${isRead ? 'is-read' : 'is-unread'}" data-notification-state="${isRead ? 'read' : 'unread'}">
         <div class="row notification-item-head"><strong>${esc(item.title)}</strong>${isRead ? '<span class="pill">خوێندراوە</span>' : `<button class="btn notification-action" type="button" data-read-notification="${esc(item.id)}">خوێندراوە بکە</button>`}</div>
         <div class="muted notification-body">${esc(item.body)}</div>
-        <small class="notification-time">${esc(date(item.created_at))}</small>
+        <div class="row notification-item-foot"><small class="notification-time">${esc(date(item.created_at))}</small>${action ? `<a class="btn notification-open-action" href="${esc(action)}">${esc(actionLabel)} ↗</a>` : ''}</div>
       </article>`;
     }).join('')
     : emptyState(EMPTY.bell,'هیچ ئاگادارییەکی نوێ نییە','کاتێک update ـێکی shipment یان پەیامێک هەبێت، لێرە پیشان دەدرێت.')
@@ -172,13 +176,19 @@ const renderPods = (items) => {
 
 const renderReceipts = (items) => {
   const html = items.map((item) => {
-    const photos = Array.isArray(item.photos) ? item.photos.filter((url) => typeof url === 'string' && url.startsWith('http')) : [];
-    return `<div class="item">
-      <div class="row"><strong>${esc(item.batch_code || 'Receipt')}</strong><span class="pill">${esc(item.verification_status || 'pending')}</span></div>
-      <div class="muted">${esc(item.location || '—')} · ${esc(item.stage || 'received')} · ${esc(date(item.received_at))}</div>
-      <small>${item.gc_code_detected ? `GC: ${esc(item.gc_code_detected)} · ` : ''}${photos.length} وێنە</small>
-      ${photos.length ? `<div class="photo-grid">${photos.map((url) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img class="receipt-photo" src="${esc(url)}" alt="Receipt ${esc(item.batch_code || '')}" loading="lazy"></a>`).join('')}</div>` : ''}
-    </div>`;
+    const photos = Array.isArray(item.photos) ? item.photos.filter((url) => typeof url === 'string' && /^https?:\\/\\//i.test(url)) : [];
+    const gc = item.gc_code_detected || item.gc_code || '—';
+    const cartons = Math.max(1, Number(item.carton_count || 1));
+    const weight = Number(item.weight_actual || 0);
+    return `<article class="item warehouse-receipt-evidence" data-receipt-id="${esc(item.id)}">
+      <div class="row"><strong>${esc(gc)} · ${esc(item.batch_code || 'Receipt')}</strong><span class="pill">${esc(item.verification_status || 'pending')}</span></div>
+      <div class="muted">کۆگا: <b>${esc(item.location || '—')}</b> · ${esc(item.stage || 'received')} · وەرگیرا: ${esc(date(item.received_at))}</div>
+      <div class="row"><small>کارتۆن: ${esc(cartons)} · کێش: ${weight > 0 ? esc(num(weight)) + ' kg' : '—'}</small><small>${esc(item.created_by_name || '')}</small></div>
+      ${item.scan_code ? `<small>کۆدی سکەن: ${esc(item.scan_code)}</small>` : ''}
+      ${item.notes ? `<small class="muted">${esc(item.notes)}</small>` : ''}
+      <small>بەڵگەی وێنە: ${photos.length} دانە${item.photo_taken_at ? ' · وێنەگیراو: ' + esc(date(item.photo_taken_at)) : ''}</small>
+      ${photos.length ? `<div class="photo-grid">${photos.map((url, index) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img class="receipt-photo" src="${esc(url)}" alt="بەڵگەی وەرگرتنی ${esc(gc)} · ${index + 1}" loading="lazy"></a>`).join('')}</div>` : '<small class="muted">وێنەی بەستراو بەردەست نییە؛ کونسۆڵی ستاف دەتوانێت بەڵگەکە بپشکنێت.</small>'}
+    </article>`;
   }).join('');
   setHtml('receipts', html || emptyState(EMPTY.file, 'هێشتا warehouse evidence نییە', 'کاتێک بار لە کۆگا وەردەگیرێت، بەڵگە و وێنەکان لێرە دەردەکەون.'));
 };
