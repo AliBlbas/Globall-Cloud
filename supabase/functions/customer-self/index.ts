@@ -29,7 +29,7 @@ const WAREHOUSE_RECEIPT_SIGNED_URL_TTL = 24 * 60 * 60
 function warehouseReceiptStoragePath(value: unknown): string | null {
   const raw = String(value ?? '').trim()
   if (!raw) return null
-  if (!/^https?:\\/\\//i.test(raw)) return decodeURIComponent(raw.replace(/^\\/+/, ''))
+  if (!/^https?:\/\//i.test(raw)) return decodeURIComponent(raw.replace(/^\/+/, ''))
   const markers = [
     `/storage/v1/object/public/${WAREHOUSE_RECEIPT_BUCKET}/`,
     `/storage/v1/object/sign/${WAREHOUSE_RECEIPT_BUCKET}/`,
@@ -48,7 +48,7 @@ async function secureWarehouseReceiptPhotos(service: any, receipt: Record<string
   try {
     const { data, error } = await service.storage.from(WAREHOUSE_RECEIPT_BUCKET).createSignedUrls(paths, WAREHOUSE_RECEIPT_SIGNED_URL_TTL)
     if (error) throw error
-    const photos = (data || []).map((item: any) => item?.signedUrl || null).filter((value: unknown): value is string => typeof value === 'string' && /^https?:\\/\\//i.test(value))
+    const photos = (data || []).map((item: any) => item?.signedUrl || null).filter((value: unknown): value is string => typeof value === 'string' && /^https?:\/\//i.test(value))
     return { ...receipt, photos }
   } catch (error) {
     console.warn('[customer-self] receipt evidence signing failed', error instanceof Error ? error.message : String(error))
