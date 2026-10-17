@@ -20,17 +20,22 @@ jobs:
         uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
+
       - name: Setup Node.js
         uses: actions/setup-node@v7.0.0
         with:
           node-version: 24
           package-manager-cache: false
+
       - name: Install locked dependencies
         run: npm ci --ignore-scripts
+
       - name: Repository validation
         run: npm test
+
       - name: Production contract validation
         run: npm run test:contracts
+
       - name: Runtime reference and security invariants
         shell: bash
         run: |
@@ -43,8 +48,11 @@ jobs:
           grep -q 'X-Content-Type-Options: nosniff' _headers
           ! grep -q "script-src[^;]*unsafe-inline" _headers
           grep -q 'https://ahslifnthiwfkmaswjno.supabase.co' production-bridge.js
-          grep -q '^/staff /staff-os-v5.html 200$' _redirects
-          grep -q '^/tracking-integration.html /track 301' _redirects
+          grep -Fq '/staff /staff-os-v5.html 200' _redirects
+          grep -Fq '/tracking-integration.html /track 301' _redirects
+          grep -Fq '/login.html /#auth 302' _redirects
+          grep -Fq '/register.html /#auth 302' _redirects
+
       - name: Public and Staff smoke validation
         shell: bash
         run: |
@@ -55,6 +63,17 @@ jobs:
           grep -q '/gc-production-ui-20260927.css?v=1' index.html
           grep -q '/gc-production-ui-20260927.css?v=1' staff-os-v5.html
           grep -q '/gc-production-ui-20260927.css?v=1' customer-portal.html
+          grep -q 'staff-os-v5.js?v=20261016-19' staff-os-v5.html
+          grep -q 'staff-os-v5.css?v=20261016-4' staff-os-v5.html
+          grep -q 'gc-csp-scripts/customer-portal-inline-1.js?v=20261016-9' index.html
+          grep -q 'gc-csp-scripts/customer-portal-inline-1.js?v=20261016-9' customer-portal.html
+          grep -Fq "$('authForm').addEventListener('submit', async (event) => {" gc-csp-scripts/customer-portal-inline-1.js
+          grep -Fq 'event.preventDefault();' gc-csp-scripts/customer-portal-inline-1.js
+          grep -Fq 'CUSTOMER_REGISTRATION_DISABLED' supabase/functions/customer-gc-register/index.ts
+          ! grep -Fq 'SUPABASE_SERVICE_ROLE_KEY' supabase/functions/customer-gc-register/index.ts
+          ! grep -Fq 'createUser(' supabase/functions/customer-gc-register/index.ts
+          grep -F -A1 '[functions.customer-gc-register]' supabase/config.toml | grep -Fq 'verify_jwt = true'
+          grep -F -A1 '[functions.customer-gc-login]' supabase/config.toml | grep -Fq 'verify_jwt = false'
           ! grep -q 'staff-reference-mobile-20260922.js?v=' staff-os-v5.html
           ! grep -q 'staff-premium-mobile-20260909.js?v=' staff-os-v5.html
           ! grep -q 'staff-mobile-command-dock.js?v=' staff-os-v5-enhancement-loader.js
@@ -64,6 +83,7 @@ jobs:
           grep -q 'renderEmergencyShell' public-runtime-guarantee.js
           ! grep -q 'YOUR_PROJECT_ID' staff-os-v5.html
           ! grep -q 'YOUR_ANON_KEY' staff-os-v5.html
+
       - name: Public live smoke test
         env:
           EXPECTED_SHA: ${{ github.sha }}
@@ -73,7 +93,7 @@ jobs:
           python3 - "$EXPECTED_SHA" <<'PY'
           import json,sys,time,urllib.parse,urllib.request
           site='https://globall-cloud.pages.dev'; expected=sys.argv[1]; legacy='Supabase هێشتا پەیوەست نەکراوە'
-          paths=('/','/track','/tracking-integration.html','/warehouse-os.html','/customer-portal.html','/staff')
+          paths=('/','/track','/tracking-integration.html','/warehouse-os.html','/customer-portal.html','/staff','/login.html','/register.html','/dashboard')
           for attempt in range(1,25):
             try:
               with urllib.request.urlopen(urllib.request.Request(site+'/release.json?verify='+urllib.parse.quote(expected),headers={'Cache-Control':'no-cache'}),timeout=15) as r: release=json.loads(r.read().decode())
@@ -81,49 +101,8 @@ jobs:
               for path in paths:
                 with urllib.request.urlopen(urllib.request.Request(site+path+'?ci='+str(attempt),headers={'Cache-Control':'no-cache'}),timeout=15) as r:
                   body=r.read().decode('utf-8','replace'); assert r.status==200 and len(body)>200; assert legacy not in body
-              with urllib.request.urlopen(site+'/api/health?ci=1',timeout=15) as r: health=json.loads(r.read().decode()); assert r.status==200 and health.get('ok') is True
-              print(json.dumps(release,ensure_ascii=False)); print(json.dumps(health,ensure_ascii=False)); break
-            except Exception as exc:
-              if attempt==24: raise
-              print('Waiting for live release ({}/24): {}'.format(attempt,exc)); time.sleep(5)
-          PY
- _redirects
-      - name: Public and Staff smoke validation
-        shell: bash
-        run: |
-          set -euo pipefail
-          grep -q 'gc-staff-final-20260922.js?v=' staff-os-v5.html
-          grep -q '/gc-final-ui-20260927.css' staff-os-v5.html
-          grep -q '/gc-final-ui-20260927.css' customer-portal.html
-          grep -q '/gc-production-ui-20260927.css?v=1' index.html
-          grep -q '/gc-production-ui-20260927.css?v=1' staff-os-v5.html
-          grep -q '/gc-production-ui-20260927.css?v=1' customer-portal.html
-          ! grep -q 'staff-reference-mobile-20260922.js?v=' staff-os-v5.html
-          ! grep -q 'staff-premium-mobile-20260909.js?v=' staff-os-v5.html
-          ! grep -q 'staff-mobile-command-dock.js?v=' staff-os-v5-enhancement-loader.js
-          grep -q 'functions/v1/public-quote' gc-csp-scripts/index-inline-2.js
-          grep -q 'functions/v1/public-message' gc-csp-scripts/index-inline-2.js
-          grep -q '/public-runtime-guarantee.js' public-route-bootstrap.js
-          grep -q 'renderEmergencyShell' public-runtime-guarantee.js
-          ! grep -q 'YOUR_PROJECT_ID' staff-os-v5.html
-          ! grep -q 'YOUR_ANON_KEY' staff-os-v5.html
-      - name: Public live smoke test
-        env:
-          EXPECTED_SHA: ${{ github.sha }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - "$EXPECTED_SHA" <<'PY'
-          import json,sys,time,urllib.parse,urllib.request
-          site='https://globall-cloud.pages.dev'; expected=sys.argv[1]; legacy='Supabase هێشتا پەیوەست نەکراوە'
-          paths=('/','/track','/tracking-integration.html','/warehouse-os.html','/customer-portal.html','/staff')
-          for attempt in range(1,25):
-            try:
-              with urllib.request.urlopen(urllib.request.Request(site+'/release.json?verify='+urllib.parse.quote(expected),headers={'Cache-Control':'no-cache'}),timeout=15) as r: release=json.loads(r.read().decode())
-              assert release.get('commit')==expected, release
-              for path in paths:
-                with urllib.request.urlopen(urllib.request.Request(site+path+'?ci='+str(attempt),headers={'Cache-Control':'no-cache'}),timeout=15) as r:
-                  body=r.read().decode('utf-8','replace'); assert r.status==200 and len(body)>200; assert legacy not in body
+                  if path in ('/login.html','/register.html','/dashboard'):
+                    assert 'customer-gc-register' not in body, path
               with urllib.request.urlopen(site+'/api/health?ci=1',timeout=15) as r: health=json.loads(r.read().decode()); assert r.status==200 and health.get('ok') is True
               print(json.dumps(release,ensure_ascii=False)); print(json.dumps(health,ensure_ascii=False)); break
             except Exception as exc:
