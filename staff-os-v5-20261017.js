@@ -859,7 +859,12 @@
       const shipmentLinkStatus = result.warning
         ? 'ئاگاداری: هەندێک پەیوەندیی باری پێشوو نوێ نەکرایەوە؛ پێویستە لەلایەن Super Admin ـەوە بپشکنرێت.'
         : 'ژمارەی پەیوەندییەکانی باری پێشوو کە نوێ کرانەوە: ' + Number(result.shipment_links_updated || 0);
-      window.alert('هەژماری کڕیار ئامادەیە\nGC Code / Login ID: ' + (result.gc_code || code) + '\nTemporary password: ' + result.temporary_password + '\n' + shipmentLinkStatus + '\n\nکڕیار بە کۆدی GC و ئەم وشەی نهێنییە دەچێتە ژوورەوە؛ پێویست نییە ئیمەیل بنووسێت. وشەی نهێنی بە شێوەی پارێزراو بگەیەنە و داوای گۆڕینی بکە.');
+      const receiptNoticeStatus = result.receipt_notification_warning
+        ? 'ئاگاداری: پشکنینی ئاگادارکردنەوەکانی کۆگای پێشوو سەرکەوتوو نەبوو؛ ' + result.receipt_notification_warning
+        : result.receipt_notifications_disabled
+          ? 'ئاگادارکردنەوەی ناو ئەکاونت بەپێی هەڵبژاردەی کڕیار داخراوە.'
+          : 'ئاگادارکردنەوەی وەرگرتنی پێشوو کە نوێ دروست کران: ' + Number(result.receipt_notifications_queued || 0) + ' · تۆمارەکانی پێشوو پشکنراون: ' + Number(result.receipt_notifications_checked || 0) + (Number(result.receipt_notifications_skipped_gc_mismatch || 0) ? ' · تۆماری ناتەبای GC پشتگوێ خرا: ' + Number(result.receipt_notifications_skipped_gc_mismatch || 0) : '');
+      window.alert('هەژماری کڕیار ئامادەیە\nGC Code / Login ID: ' + (result.gc_code || code) + '\nTemporary password: ' + result.temporary_password + '\n' + shipmentLinkStatus + '\n' + receiptNoticeStatus + '\n\nکڕیار بە کۆدی GC و ئەم وشەی نهێنییە دەچێتە ژوورەوە؛ پێویست نییە ئیمەیل بنووسێت. وشەی نهێنی بە شێوەی پارێزراو بگەیەنە و داوای گۆڕینی بکە.');
       await renderCustomers();
     } catch (error) {
       toast(error?.message || 'دروستکردنی هەژمار سەرکەوتوو نەبوو.', 'bad');
