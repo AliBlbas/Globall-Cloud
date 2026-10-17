@@ -63,7 +63,7 @@ const required = [
   'supabase/migrations/20261017181944_fix_warehouse_receipt_portal_route.sql',
   'supabase/migrations/20261017182723_warehouse_receipt_respect_in_app_preferences.sql',
   'supabase/migrations/20261017185000_warehouse_receipt_cartons.sql',
-  'supabase/migrations/20261017203300_fix_customer_notification_uuid_text_join.sql',
+  'supabase/migrations/20261017203455_fix_customer_notification_uuid_text_join.sql',
   'supabase/functions/public-config/index.ts',
   'supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
   'supabase/functions/notification-dispatch/index.ts','supabase/functions/warehouse-receiving/index.ts','supabase/functions/warehouse-notify/index.ts',
@@ -324,7 +324,7 @@ const warehouseNotifySource = read('supabase/functions/warehouse-notify/index.ts
 const warehouseReceiptNotificationMigration = read('supabase/migrations/20261017181111_fix_warehouse_receipt_customer_notifications.sql')
 const warehouseReceiptPortalRouteMigration = read('supabase/migrations/20261017181944_fix_warehouse_receipt_portal_route.sql')
 const warehouseReceiptPreferenceMigration = read('supabase/migrations/20261017182723_warehouse_receipt_respect_in_app_preferences.sql')
-const customerNotificationFanoutMigration = read('supabase/migrations/20261017203300_fix_customer_notification_uuid_text_join.sql')
+const customerNotificationFanoutMigration = read('supabase/migrations/20261017203455_fix_customer_notification_uuid_text_join.sql')
 const customerWarehouseEvidenceCss = read('gc-customer-warehouse-evidence-20261017.css')
 
 const mobileUiContracts = [
