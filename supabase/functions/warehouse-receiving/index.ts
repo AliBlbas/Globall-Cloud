@@ -193,14 +193,38 @@ async function linkShipmentChain(
  if(cartonResult.error)throw cartonResult.error;
  const cartons=cartonResult.data||[];
  if(!cartons.length)return{linked:false,reason:'carton_manifest_empty',cartons_linked:0};
+ const wantedCode=gcCode(code);
+ const activeShipment=(row:Record<string,any>)=>!['delivered','completed','cancelled'].includes(String(row.status||row.operational_status||'').toLowerCase());
+ // If the batch reference does not explicitly identify a shipment, auto-link only
+ // when exactly one active shipment belongs to this verified customer. Never guess
+ // between multiple shipments: receipt manifest + owner notification still succeed.
+ if(!shipmentId&&receipt.directory_customer_id){
+  const directoryResult=await admin.from('shipments')
+   .select('id,customer_user_id,directory_customer_id,customer_gc_code,current_step_index,operational_status,current_location_label,status,created_at')
+   .eq('directory_customer_id',receipt.directory_customer_id)
+   .order('created_at',{ascending:false}).limit(30);
+  if(directoryResult.error)throw directoryResult.error;
+  const activeDirectoryShipments=(directoryResult.data||[]).filter(activeShipment);
+  if(activeDirectoryShipments.length===1)shipmentId=String(activeDirectoryShipments[0].id);
+  else if(activeDirectoryShipments.length>1)return{linked:false,reason:'multiple_matching_shipments',cartons_linked:cartons.length,carton_codes:cartons.map((x:any)=>x.carton_code),candidate_count:activeDirectoryShipments.length};
+ }
+ if(!shipmentId&&wantedCode){
+  const gcResult=await admin.from('shipments')
+   .select('id,customer_user_id,directory_customer_id,customer_gc_code,current_step_index,operational_status,current_location_label,status,created_at')
+   .eq('customer_gc_code',wantedCode)
+   .order('created_at',{ascending:false}).limit(30);
+  if(gcResult.error)throw gcResult.error;
+  const activeGcShipments=(gcResult.data||[]).filter(activeShipment);
+  if(activeGcShipments.length===1)shipmentId=String(activeGcShipments[0].id);
+  else if(activeGcShipments.length>1)return{linked:false,reason:'multiple_matching_shipments',cartons_linked:cartons.length,carton_codes:cartons.map((x:any)=>x.carton_code),candidate_count:activeGcShipments.length};
+ }
  if(!shipmentId)return{linked:false,reason:'no_shipment_id',cartons_linked:cartons.length,carton_codes:cartons.map((x:any)=>x.carton_code)};
  const shipmentResult=await admin.from('shipments')
-  .select('id,customer_user_id,directory_customer_id,customer_gc_code,current_step_index,operational_status,current_location_label')
+  .select('id,customer_user_id,directory_customer_id,customer_gc_code,current_step_index,operational_status,current_location_label,status')
   .eq('id',shipmentId).maybeSingle();
  if(shipmentResult.error)throw shipmentResult.error;
  const shipment=shipmentResult.data;
  if(!shipment)throw new Error(`Shipment ${shipmentId} was not found`);
- const wantedCode=gcCode(code);
  const shipmentCode=gcCode(String(shipment.customer_gc_code||''));
  let ownerMatched=false;
  if(shipment.directory_customer_id){
