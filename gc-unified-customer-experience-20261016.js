@@ -33,7 +33,7 @@
     '#shipments':'shipments','#shipmentsSection':'shipments',
     '#commercial':'requests','#quotesPanel':'requests','#newRequest':'requests','#quoteForm':'requests',
     '#activity':'notifications','#notifications':'notifications',
-    '#records':'records','#payments':'records',
+    '#records':'shipments','#payments':'shipments',
     '#gcAccountSettings':'settings','#settings':'settings','#support':'support'
   };
   const privateHashes = new Set([
