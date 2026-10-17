@@ -80,8 +80,8 @@
     const items = [...dock.querySelectorAll('[data-dock-tab]')];
     const allSections = [...main.querySelectorAll(':scope > section')];
     const viewGroups = {
-      home: ['workspace-toolbar', 'overview', 'homeMetrics', 'gcCustomerRouteOverview', 'activity'],
-      shipments: ['shipmentsSection'],
+      home: ['workspace-toolbar', 'overview', 'homeMetrics', 'gcCustomerRouteOverview'],
+      shipments: ['shipmentsSection', 'records'],
       requests: ['quotesPanel', 'commercial', 'newRequest'],
       notifications: ['activity'],
       records: ['records'],
@@ -93,12 +93,12 @@
       '#shipmentsSection':'shipments', '#shipments':'shipments',
       '#newRequest':'requests', '#quoteForm':'requests', '#commercial':'requests', '#quotesPanel':'requests',
       '#activity':'notifications', '#notifications':'notifications',
-      '#records':'records', '#payments':'records',
+      '#records':'shipments', '#payments':'shipments',
       '#gcAccountSettings':'settings', '#settings':'settings', '#support':'support'
     };
     const viewHash = {
       home:'#overview', shipments:'#shipmentsSection', requests:'#newRequest',
-      notifications:'#activity', records:'#records', settings:'#gcAccountSettings', support:'#support'
+      notifications:'#activity', settings:'#gcAccountSettings', support:'#support'
     };
     const activate = (requestedKey, options = {}) => {
       const key = viewGroups[requestedKey] ? requestedKey : 'home';
@@ -113,7 +113,7 @@
       });
       document.body.dataset.gcCustomerView = key;
       items.forEach(item => {
-        const itemKey = key === 'support' ? 'settings' : key;
+        const itemKey = key;
         const active = item.dataset.dockTab === itemKey;
         item.classList.toggle('active', active);
         if (active) item.setAttribute('aria-current', 'page');
