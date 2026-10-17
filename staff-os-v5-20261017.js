@@ -1139,7 +1139,21 @@
   async function scannerModal(kind){
     openModal(kind==='customer'?'Scan GC Customer':'Scan GC for Warehouse',`<div class="scanner"><video id="scanVideo" autoplay playsinline muted></video><div class="scanline"></div></div><div id="scanStatus" class="muted" style="margin-top:9px">Camera دەستپێدەکات…</div>`,'<button class="btn" id="manualScan">دابینکردنی دستی</button><button class="btn" data-close>داخستن</button>');
     try { state.scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});const v=document.getElementById('scanVideo');v.srcObject=state.scanStream; await v.play(); if('BarcodeDetector' in window){const detector=new BarcodeDetector({formats:['qr_code','code_128','ean_13','code_39']});const tick=async()=>{if(!state.scanStream)return;try{const found=await detector.detect(v);if(found?.length){const raw=text(found[0].rawValue).toUpperCase().replace(/\s+/g,'');const fullCode=(raw.match(/GC-[A-Z0-9-]{2,80}/)||[])[0]||raw;const suffix=fullCode.match(/-[A-F0-9]{12}-C\d{3}$/i);const code=suffix?fullCode.slice(0,suffix.index):fullCode;stopScanner();closeModal(); if(kind==='customer'){const c=state.data.customers.find(x=>String(x.gc_code||x.code).toUpperCase()===code); if(c)customerDetail(c.id); else toast(`کۆدی ${code} نەدۆزرایەوە`,'bad')}else{const existing=(state.data.receipts||[]).find(receipt=>(receipt.cartons||[]).some(carton=>String(carton.carton_code||'').toUpperCase()===fullCode));if(suffix&&existing){void receiptDetail(existing.id);toast(`کارتۆنی تۆمارکراوەی ${code} دۆزرایەوە؛ وردەکاری و شوێنی پێشوو بکەرەوە.`)}else newReceiptModal({code,tracking:suffix?fullCode:raw,scanType:'barcode'});}return;}}catch{}requestAnimationFrame(tick)};requestAnimationFrame(tick)}else document.getElementById('scanStatus').textContent='Browser ـەکەت BarcodeDetector پشتگیری ناکات؛ دابینکردنی دستی بەکاربهێنە.';}catch(e){document.getElementById('scanStatus').textContent=`Camera بەردەست نییە: ${e.message}`;}
-    document.getElementById('manualScan').onclick=()=>{const code=prompt('GC code بنووسە');closeModal();if(code){if(kind==='customer'){const c=state.data.customers.find(x=>String(x.gc_code||x.code).toUpperCase()===code.toUpperCase());c?customerDetail(c.id):toast('GC نەدۆزرایەوە','bad')}else newReceiptModal({code:code.toUpperCase()});}};
+    document.getElementById('manualScan').onclick=()=>{
+      const raw=text(prompt('GC code یان کۆدی کارتۆن بنووسە')).toUpperCase().replace(/\s+/g,'');
+      closeModal();if(!raw)return;
+      const fullCode=(raw.match(/GC-[A-Z0-9-]{2,80}/)||[])[0]||raw;
+      const suffix=fullCode.match(/-[A-F0-9]{12}-C\d{3}$/i);
+      const code=suffix?fullCode.slice(0,suffix.index):fullCode;
+      if(kind==='customer'){
+        const customer=state.data.customers.find(x=>String(x.gc_code||x.code).toUpperCase()===code);
+        customer?customerDetail(customer.id):toast('GC نەدۆزرایەوە','bad');
+      }else{
+        const existing=(state.data.receipts||[]).find(receipt=>(receipt.cartons||[]).some(carton=>String(carton.carton_code||'').toUpperCase()===fullCode));
+        if(suffix&&existing){void receiptDetail(existing.id);toast('کارتۆنی تۆمارکراوە دۆزرایەوە؛ وردەکاری و شوێنی پێشوو بکەرەوە.');}
+        else newReceiptModal({code,tracking:suffix?fullCode:raw,scanType:'manual'});
+      }
+    };
   }
   function stopScanner(){if(state.scanStream){state.scanStream.getTracks().forEach(t=>t.stop());state.scanStream=null;}}
 
