@@ -199,14 +199,14 @@ const customerStyleLoader = read('gc-public-customer-style-loader-20261014.js')
 const customerDockStyles = read('gc-customer-mobile-dock-20261016.css')
 const customerWorkspaceStyles = read('gc-customer-workspace-elite-20261014.css')
 const customerSignatureStyles = read('gc-customer-experience-signature-20261017.css')
-const customerPortalAuth = read('gc-csp-scripts/customer-portal-inline-1.js')
+const customerPortalAuth = read('gc-csp-scripts/customer-portal-inline-20261017.js')
 const customerSettingsHub = read('gc-settings-hub.js')
 const customerSelfSource = read('supabase/functions/customer-self/index.ts')
 const staffShipmentSource = read('supabase/functions/staff-shipment-v5/index.ts')
 const staffShipmentControlSource = read('supabase/functions/staff-shipment-control/index.ts')
 const shipmentCustomerLinksMigration = read('supabase/migrations/20261017120000_staff_customer_unified_shipment_links.sql')
 const notificationIndexMigration = read('supabase/migrations/20261017040435_customer_notification_idempotency_unique_index.sql')
-const customerPortalSource = read('gc-csp-scripts/customer-portal-inline-1.js')
+const customerPortalSource = read('gc-csp-scripts/customer-portal-inline-20261017.js')
 const customerPortalVersionedScript = read('gc-csp-scripts/customer-portal-inline-20261017.js')
 const staffConsoleVersionedScript = read('staff-os-v5-20261017.js')
 const staffOpsHubSource = read('supabase/functions/staff-ops-hub/index.ts')
@@ -241,7 +241,7 @@ const unifiedContracts = [
   ['customer finance ledger is scoped to canonical GC and customer-facing transaction types', customerSelfSource.includes(".eq('gc_code',financeCode).in('type',['customer_charge','customer_payment','refund','adjustment'])") && customerSelfSource.includes('customer_transactions:customerTransactions.data||[]')],
   ['staff finance charge/payment creates and updates send deduplicated customer notifications', staffOpsHubSource.includes('async function notifyCustomerFinance') && staffOpsHubSource.includes("onConflict:'customer_user_id,event_key'") && staffOpsHubSource.includes("notifyCustomerFinance(a,created,'created')") && staffOpsHubSource.includes("notifyCustomerFinance(a,updated,'updated')")],
   ['customer portal displays only returned customer finance transaction history', customerPortalSource.includes('customerTransactions = []') && customerPortalSource.includes('dashboard.customer_transactions || []') && customerPortalSource.includes('customer_charge')],
-  ['customer portal uses a versioned filename and includes cargo/finance integration', unifiedShell.includes('/gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-2') && customerPortalVersionedScript.includes('dashboard.customer_transactions || []') && customerPortalVersionedScript.includes('renderShipments(rows, dashboard.cargo_items || [])')],
+  ['customer portal uses a versioned filename and includes cargo/finance integration', unifiedShell.includes('/gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-3') && customerPortalVersionedScript.includes('dashboard.customer_transactions || []') && customerPortalVersionedScript.includes('renderShipments(rows, dashboard.cargo_items || [])')],
   ['shipment membership migration is locked to service role and backfills cargo owners', shipmentCustomerLinksMigration.includes('shipment_customer_links_shipment_customer_key') && shipmentCustomerLinksMigration.includes('revoke all on table public.shipment_customer_links from anon, authenticated') && shipmentCustomerLinksMigration.includes('from public.shipment_cargo_items ci')],
   ['customer notification upsert conflict target has a matching full unique index', notificationIndexMigration.includes('create unique index if not exists customer_notifications_event_key_full_uidx') && notificationIndexMigration.includes('rename to customer_notifications_event_key_uidx')],
   ['customer navigation initializes all declared icons without runtime reference errors', customerNavigation.includes('const mountIcons = (root = document) =>') && customerNavigation.includes('node.innerHTML = icons[key]') && ['user','wallet','documents','moving','warehouse','route','send','lock','logout'].every(icon => customerNavigation.includes(icon + ':'))],
@@ -273,7 +273,7 @@ const unifiedContracts = [
   ['legacy GC sign-in explains secure staff linking', unifiedShell.includes('gc-auth-support-note') && unifiedShell.includes('wa.me/9647507577137')],
   ['signed-out claim prompt offers support without self-linking', customerPortalAuth.includes('gc-account-help-action') && customerSelfSource.includes('self-service linking is disabled')],
   ['customer signup remains staff-provisioned', customerAccountEntry.includes('does not expose') && accountAdminSource.includes("Only Super Admin can bind customer accounts")],
-  ['customer auth-help assets have matching cache references', unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=23') && unifiedShell.includes('/gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-2')],
+  ['customer auth-help assets have matching cache references', unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=23') && unifiedShell.includes('/gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-3')],
   ['public customer registration endpoint is retired', !retiredRegisterFunction.includes('SUPABASE_SERVICE_ROLE_KEY') && !retiredRegisterFunction.includes('createUser(') && !retiredRegisterFunction.includes('register_customer_with_gc') && retiredRegisterFunction.includes('CUSTOMER_REGISTRATION_DISABLED')],
   ['retired registration function requires JWT at gateway', supabaseAuthConfig.includes('[functions.customer-gc-register]\nverify_jwt = true')],
   ['GC-code login remains public for its credential check', supabaseAuthConfig.includes('[functions.customer-gc-login]\nverify_jwt = false') && read('supabase/functions/customer-gc-login/index.ts').includes('signInWithPassword')],
