@@ -1,0 +1,414 @@
+/* Globall Cloud — Mobile UI Integrity Layer · 2026-10-17
+   Additive, scoped guardrails for the customer and Staff OS mobile experience.
+   Keeps the existing brand, routes, navigation, auth, and Supabase logic intact. */
+
+/* Shared: prevent accidental viewport widening and keep RTL text readable. */
+html:has(body.gc-customer-app),
+body.gc-customer-app,
+body:has(#app) {
+  max-width: 100%;
+  overflow-x: clip !important;
+}
+body.gc-customer-app #gcCustomerWorkspace,
+body.gc-customer-app #gcCustomerWorkspace .app-layout,
+body.gc-customer-app #gcCustomerWorkspace .app-main,
+body:has(#app) #app,
+body:has(#app) #app .gc-shell,
+body:has(#app) #app .gc-main,
+body:has(#app) #app .view {
+  min-width: 0 !important;
+  max-width: 100%;
+}
+body.gc-customer-app #gcCustomerWorkspace :where(h1,h2,h3,p,a,button,label,small,strong,span) {
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+/* Customer account settings: clearer signed-out state with a readable CTA. */
+body.gc-customer-app #gcCustomerWorkspace .gc-account-settings-screen {
+  width: 100%;
+  min-width: 0;
+}
+body.gc-customer-app #gcCustomerWorkspace #gcSettingsLoggedOut,
+body.gc-customer-app #gcCustomerWorkspace #gcSettingsStaffAccess {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px 14px;
+  width: min(100%, 880px);
+  margin-inline: auto;
+  min-width: 0;
+  padding: clamp(16px, 2.6vw, 25px);
+  border-radius: 22px;
+}
+body.gc-customer-app #gcCustomerWorkspace #gcSettingsLoggedOut[hidden],
+body.gc-customer-app #gcCustomerWorkspace #gcSettingsStaffAccess[hidden] {
+  display: none !important;
+}
+body.gc-customer-app #gcCustomerWorkspace #gcSettingsLoggedOut .gc-settings-lock,
+body.gc-customer-app #gcCustomerWorkspace #gcSettingsStaffAccess .gc-settings-lock {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  background: rgba(89, 218, 231, .12);
+  color: #78e5ed;
+  font-size: 23px;
+  line-height: 1;
+}
+body.gc-customer-app #gcCustomerWorkspace #gcSettingsLoggedOut > div:nth-child(2),
+body.gc-customer-app #gcCustomerWorkspace #gcSettingsStaffAccess > div:nth-child(2) {
+  min-width: 0;
+}
+body.gc-customer-app #gcCustomerWorkspace #gcSettingsLoggedOut strong,
+body.gc-customer-app #gcCustomerWorkspace #gcSettingsStaffAccess strong {
+  display: block;
+  color: #f2fbff;
+  font-size: clamp(14px, 1.8vw, 18px);
+  line-height: 1.8;
+  font-weight: 850;
+}
+body.gc-customer-app #gcCustomerWorkspace #gcSettingsLoggedOut p,
+body.gc-customer-app #gcCustomerWorkspace #gcSettingsStaffAccess p {
+  margin: 5px 0 0;
+  color: #8faebf;
+  font-size: 12px;
+  line-height: 1.7;
+}
+body.gc-customer-app #gcCustomerWorkspace #gcSettingsLoggedOut > button,
+body.gc-customer-app #gcCustomerWorkspace #gcSettingsStaffAccess > button {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  margin-top: 3px;
+  white-space: normal;
+  line-height: 1.6;
+}
+
+/* Customer dock: uniform icon geometry and larger, reliable touch targets. */
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock {
+  box-sizing: border-box;
+  max-width: calc(100vw - 12px);
+  overflow: hidden;
+}
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > a,
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > button {
+  min-width: 0 !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  touch-action: manipulation;
+}
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock [data-dash-icon] {
+  display: grid;
+  place-items: center;
+  flex: 0 0 22px;
+  min-width: 22px;
+  min-height: 22px;
+}
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock [data-dash-icon] svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  max-width: 20px;
+  max-height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Staff data tables: scroll horizontally as a unit; never crush words into columns. */
+body:has(#app) #app .table-wrap {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto !important;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+body:has(#app) #app .table-wrap table {
+  width: max-content;
+  min-width: 740px;
+  max-width: none;
+  table-layout: auto;
+}
+body:has(#app) #app .table-wrap th,
+body:has(#app) #app .table-wrap td {
+  min-width: 74px;
+  white-space: normal;
+  word-break: normal !important;
+  overflow-wrap: break-word;
+  line-height: 1.65;
+}
+body:has(#app) #app .table-wrap :where(.status,.pill,.badge,.ok,.warn,.bad,.nav-badge) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  max-width: 100%;
+  min-width: max-content;
+  white-space: nowrap !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+}
+body:has(#app) #app :where(input,select,textarea,button,a) {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+body:has(#app) #app :where(input,select,textarea):focus-visible {
+  outline: 2px solid rgba(91, 222, 237, .8);
+  outline-offset: 2px;
+}
+
+/* Staff Intelligence assistant: constrained width, predictable grid, natural wrapping. */
+#gcStaffAiButton {
+  box-sizing: border-box;
+  max-width: calc(100vw - 24px);
+}
+#gcStaffAiPanel,
+#gcStaffAiPanel * {
+  box-sizing: border-box;
+}
+#gcStaffAiPanel {
+  max-width: calc(100vw - 24px);
+  min-width: 0;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+}
+#gcStaffAiPanel :where(header,div,section,form,button,input) {
+  min-width: 0;
+}
+#gcStaffAiPanel .gc-ai-head {
+  align-items: center;
+  min-width: 0;
+}
+#gcStaffAiPanel .gc-ai-brand {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+#gcStaffAiPanel .gc-ai-brand > div:last-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+#gcStaffAiPanel .gc-ai-brand b {
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  line-height: 1.5;
+}
+#gcStaffAiPanel .gc-ai-brand span,
+#gcStaffAiPanel .gc-ai-status {
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  line-height: 1.75;
+}
+#gcStaffAiPanel .gc-ai-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 7px;
+  min-width: 0;
+}
+#gcStaffAiPanel .gc-ai-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 1 auto;
+  max-width: 100%;
+  min-width: 0;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  text-align: center;
+  line-height: 1.55;
+}
+#gcStaffAiPanel .gc-ai-messages {
+  min-width: 0;
+  overscroll-behavior: contain;
+  overflow-wrap: break-word;
+}
+#gcStaffAiPanel .gc-ai-msg {
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: min(92%, 100%);
+  min-width: 0;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  line-height: 1.8;
+}
+#gcStaffAiPanel .gc-ai-msg > div {
+  min-width: 0;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+}
+#gcStaffAiPanel .gc-ai-route {
+  display: inline-flex;
+  max-width: 100%;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  line-height: 1.6;
+}
+#gcStaffAiPanel .gc-ai-compose {
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-width: 0;
+}
+#gcStaffAiPanel .gc-ai-compose input {
+  width: 100%;
+  min-width: 0;
+  font-size: 16px;
+}
+#gcStaffAiPanel .gc-ai-send {
+  min-width: 64px;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  body.gc-customer-app #gcCustomerWorkspace .gc-account-settings-screen {
+    padding-bottom: 22px;
+  }
+  body.gc-customer-app #gcCustomerWorkspace #gcSettingsLoggedOut,
+  body.gc-customer-app #gcCustomerWorkspace #gcSettingsStaffAccess {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 10px 11px;
+    padding: 15px 13px;
+    border-radius: 18px;
+  }
+  body.gc-customer-app #gcCustomerWorkspace #gcSettingsLoggedOut .gc-settings-lock,
+  body.gc-customer-app #gcCustomerWorkspace #gcSettingsStaffAccess .gc-settings-lock {
+    width: 40px;
+    height: 40px;
+    border-radius: 13px;
+    font-size: 20px;
+  }
+  body.gc-customer-app #gcCustomerWorkspace #gcSettingsLoggedOut strong,
+  body.gc-customer-app #gcCustomerWorkspace #gcSettingsStaffAccess strong {
+    font-size: 14px;
+    line-height: 1.85;
+  }
+  body.gc-customer-app #gcCustomerWorkspace #gcSettingsLoggedOut p,
+  body.gc-customer-app #gcCustomerWorkspace #gcSettingsStaffAccess p {
+    font-size: 11px;
+  }
+  body:has(#app) #app .view {
+    overflow: hidden;
+  }
+  body:has(#app) #app .table-wrap {
+    max-width: calc(100vw - 36px);
+  }
+  #gcStaffAiButton {
+    inset-inline-end: 12px !important;
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
+    width: 50px;
+    height: 50px;
+    border-radius: 16px;
+  }
+  #gcStaffAiPanel {
+    inset-inline-start: 8px !important;
+    inset-inline-end: 8px !important;
+    bottom: calc(82px + env(safe-area-inset-bottom, 0px)) !important;
+    width: auto !important;
+    height: min(620px, calc(100dvh - 118px - env(safe-area-inset-bottom, 0px))) !important;
+    max-height: calc(100dvh - 108px - env(safe-area-inset-bottom, 0px)) !important;
+    border-radius: 20px !important;
+  }
+  #gcStaffAiPanel .gc-ai-head {
+    padding: 10px 11px;
+    gap: 8px;
+  }
+  #gcStaffAiPanel .gc-ai-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    flex: 0 0 34px;
+  }
+  #gcStaffAiPanel .gc-ai-brand b {
+    font-size: 12px;
+  }
+  #gcStaffAiPanel .gc-ai-brand span {
+    font-size: 9px;
+  }
+  #gcStaffAiPanel .gc-ai-status {
+    padding: 8px 11px;
+    font-size: 10px;
+  }
+  #gcStaffAiPanel .gc-ai-chips {
+    gap: 5px;
+    padding: 0 10px 8px;
+  }
+  #gcStaffAiPanel .gc-ai-chip {
+    padding: 7px 8px;
+    font-size: 10px;
+  }
+  #gcStaffAiPanel .gc-ai-messages {
+    padding: 9px 10px;
+    gap: 8px;
+  }
+  #gcStaffAiPanel .gc-ai-msg {
+    max-width: 96%;
+    padding: 9px 10px;
+    font-size: 11px;
+  }
+  #gcStaffAiPanel .gc-ai-compose {
+    padding: 9px 10px;
+    gap: 6px;
+  }
+  #gcStaffAiPanel .gc-ai-send {
+    min-width: 58px;
+    padding-inline: 9px;
+  }
+  body:has(#app) #app .topbar {
+    gap: 9px;
+  }
+  body:has(#app) #app .top-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    width: 100%;
+  }
+  body:has(#app) #app .top-actions > * {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+  body:has(#app) #app .section-head h2 {
+    line-height: 1.55;
+    overflow-wrap: break-word;
+  }
+}
+@media (max-width: 390px) {
+  #gcStaffAiPanel {
+    inset-inline-start: 6px !important;
+    inset-inline-end: 6px !important;
+    bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+    height: min(590px, calc(100dvh - 110px - env(safe-area-inset-bottom, 0px))) !important;
+    border-radius: 18px !important;
+  }
+  #gcStaffAiPanel .gc-ai-brand b {
+    font-size: 11px;
+  }
+  #gcStaffAiPanel .gc-ai-chip {
+    font-size: 9px;
+    padding: 6px 7px;
+  }
+  body:has(#app) #app .table-wrap {
+    max-width: calc(100vw - 28px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #gcStaffAiButton,
+  #gcStaffAiPanel,
+  #gcStaffAiPanel * {
+    animation: none !important;
+    transition-duration: .01ms !important;
+  }
+}
