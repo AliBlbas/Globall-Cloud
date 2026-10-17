@@ -63,9 +63,17 @@ jobs:
           grep -q '/gc-production-ui-20260927.css?v=1' index.html
           grep -q '/gc-production-ui-20260927.css?v=1' staff-os-v5.html
           grep -Fq "window.location.replace('/#auth')" customer-portal.html
-          grep -q 'staff-os-v5-20261017.js?v=20261017-10' staff-os-v5.html
+          grep -q 'staff-os-v5-20261017.js?v=20261017-11' staff-os-v5.html
           grep -q 'staff-os-v5.css?v=20261016-4' staff-os-v5.html
           grep -q 'gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-8' index.html
+          grep -q 'gc-customer-carton-manifest-20261017.js?v=1' index.html
+          grep -q 'gc-customer-carton-manifest-20261017.css?v=1' index.html
+          grep -q 'gc-staff-carton-tools-20261017.js?v=1' staff-os-v5.html
+          grep -q 'warehouse_receipt_cartons' supabase/migrations/20261017185000_warehouse_receipt_cartons.sql
+          grep -Fq 'ensureReceiptCartons' supabase/functions/warehouse-receiving/index.ts
+          grep -Fq 'carton_codes:cartonCodes' supabase/functions/warehouse-receiving/index.ts
+          grep -Fq 'carton_codes: cartonCodes' supabase/functions/warehouse-notify/index.ts
+          grep -Fq "cartonsByReceipt.get(String(receipt.id))" supabase/functions/customer-self/index.ts
           grep -q 'gc-realtime-notifications-20261003.js?v=4' index.html
           grep -Fq 'async function queueReceiptNotifications' supabase/functions/warehouse-receiving/index.ts
           grep -Fq 'preferences?.whatsapp_enabled===true' supabase/functions/warehouse-receiving/index.ts
