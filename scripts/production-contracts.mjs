@@ -183,6 +183,20 @@ else ok('Customer shipment requests handle sea CBM and air/land kilograms')
 if (!unifiedShell.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-3') || !customerQuoteController.includes('const syncQuoteMeasurements = () =>') || !customerQuoteController.includes('volume.required = isSea') || !customerQuoteController.includes('volume_cbm: volume') || !customerQuoteController.includes("const quantityValid = transportMode === 'sea'")) fail('Customer quotes must enforce the server quantity rule and submit null-safe weight/volume values')
 else ok('Customer quotes enforce sea CBM versus air/land weight before submission')
 
+const privateCargoPhotoRequest = read('gc-customer-request-20261003.js')
+const privateCargoPhotoBackend = read('supabase/functions/customer-self/index.ts')
+const privateCargoPhotoAdmin = read('supabase/functions/account-admin/index.ts')
+const privateCargoPhotoStaff = read('staff-os-v5-20261017.js')
+const privateCargoPhotoMigration = read('supabase/migrations/20261017130000_restrict_customer_request_photo_uploads.sql')
+if (!unifiedShell.includes('id="requestImage"') || !unifiedShell.includes('gc-customer-request-20261003.js?v=20261017-4') || !privateCargoPhotoRequest.includes("storage?.from?.('customer-request-photos')") || !privateCargoPhotoRequest.includes('cargo_image_path: uploadedPath') || !privateCargoPhotoRequest.includes("remove?.([uploadedPath])")) fail('Customer shipment photos must upload privately, attach their path, and clean up rejected uploads')
+else ok('Customer shipment requests upload optional private cargo photos')
+if (!privateCargoPhotoBackend.includes("const CARGO_PHOTO_BUCKET = 'customer-request-photos'") || !privateCargoPhotoBackend.includes('cargo_image_path: cargoImagePath') || !privateCargoPhotoBackend.includes('pathParts[0] !== user.id') || !privateCargoPhotoBackend.includes('size > CARGO_PHOTO_MAX_BYTES')) fail('Customer backend must enforce cargo photo ownership and size')
+else ok('Customer backend verifies private cargo photo ownership and size')
+if (!privateCargoPhotoAdmin.includes('request_type,cargo_country,cargo_description,cargo_image_path') || !privateCargoPhotoStaff.includes('createSignedUrl(q.cargo_image_path, 300)') || !privateCargoPhotoStaff.includes('data-request-photo')) fail('Staff must see request metadata and preview private images through short-lived signed URLs')
+else ok('Staff request inbox can preview private cargo photos through temporary URLs')
+if (!privateCargoPhotoMigration.includes('file_size_limit = 10485760') || !privateCargoPhotoMigration.includes('allowed_mime_types')) fail('Private customer-photo bucket must enforce 10MB and image MIME limits')
+else ok('Private customer-photo bucket enforces size and image MIME limits')
+
 
 
 if (!unifiedController.includes("'#public':'#overview'") || !unifiedController.includes("'#services':'#gcCustomerRouteOverview'") || !unifiedController.includes("'#request':'#newRequest'") || !unifiedController.includes("'#contact':'#support'")) fail('Legacy marketing routes must map into customer console views')
