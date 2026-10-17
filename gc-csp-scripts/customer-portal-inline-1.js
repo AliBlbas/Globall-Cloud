@@ -384,8 +384,8 @@ $('authForm').addEventListener('submit', async (event) => {
   }
 });
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !$('auth').classList.contains('hidden')) $('close').click(); });
-$('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); location.replace('/#public'); });
-$('trackBtn').addEventListener('click', () => { location.href = './index.html#track'; });
+$('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); location.replace('/#auth'); });
+$('trackBtn').addEventListener('click', () => { location.href = '/#shipmentsSection'; });
 $('quoteBtn').addEventListener('click', () => { $('quoteForm').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('quoteOrigin').focus(); });
 $('quoteForm').addEventListener('submit', (event) => submitQuote(event).catch((error) => showMessage(error.message, 'error')));
 $('customerChatForm')?.addEventListener('submit', sendCustomerChat);
