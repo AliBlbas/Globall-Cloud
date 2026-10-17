@@ -971,6 +971,8 @@
           toast(summary+'؛ ئاگادارکردنەوە پێویستی بە پشکنینە','bad');
         }else if(channels.length){
           toast(summary+' · '+channels.join(' / '),'ok');
+        }else if(result.notification?.external_opt_in===false){
+          toast(summary+'؛ WhatsApp/Email بێ ڕەزامەندیی کڕیار نەنێردران','ok');
         }else{
           toast(summary+'؛ هەژماری login یان ژمارەی پەیوەندی نەدۆزرایەوە','bad');
         }
