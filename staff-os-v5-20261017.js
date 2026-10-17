@@ -838,7 +838,53 @@
   async function renderCustomerChat(){const r=await ops('chat');state.data.customerChat=r;const threads=r.threads||[];if(!state.activeCustomerThread)state.activeCustomerThread=threads[0]?.id;document.getElementById('view').innerHTML=`<div class="section-head"><div><div class="eyebrow">CUSTOMER SUPPORT</div><h1>چاتی کڕیار</h1><p>پرسیارەکانی کڕیاران، وەڵام و GC-linked conversations.</p></div></div><div class="chat-layout"><div class="room-list" id="customerRooms"></div><section class="chat-box"><div class="chat-head"><b id="customerChatTitle"></b><span id="customerChatDesc"></span></div><div class="messages" id="customerMessages"></div><form id="customerChatForm" class="composer"><input class="field" id="customerMessage" maxlength="4000" placeholder="وەڵام بنووسە…"><button class="btn primary" type="submit">ناردن</button></form></section></div>`;drawCustomerChat();document.getElementById('customerChatForm').onsubmit=async e=>{e.preventDefault();const body=text(document.getElementById('customerMessage').value);const th=threads.find(t=>String(t.id)===String(state.activeCustomerThread));if(!body||!th)return;try{await opsPost('chat_send',{thread_id:th.id,body,gc_code:th.gc_code,customer_user_id:th.customer_user_id});document.getElementById('customerMessage').value='';await renderCustomerChat()}catch(err){toast(err.message,'bad')}};}
   function drawCustomerChat(){const r=state.data.customerChat||{};const threads=r.threads||[];const msgs=r.messages||[];document.getElementById('customerRooms').innerHTML=threads.map(t=>`<button class="room ${String(t.id)===String(state.activeCustomerThread)?'active':''}" data-thread="${esc(t.id)}"><b>${esc(t.gc_code||'GC')}</b><span>${esc(t.subject||'Support')} · ${esc(t.status||'open')}</span><em>${esc(shortDate(t.last_message_at))}</em></button>`).join('')||'<div class="empty">هیچ customer chat ـێک نییە.</div>';document.querySelectorAll('[data-thread]').forEach(b=>b.onclick=()=>{state.activeCustomerThread=b.dataset.thread;drawCustomerChat()});const t=threads.find(x=>String(x.id)===String(state.activeCustomerThread));document.getElementById('customerChatTitle').textContent=t?`${t.gc_code||'GC'} · ${t.subject||'Support'}`:'Customer chat';document.getElementById('customerChatDesc').textContent=t?'کڕیار: '+(t.customer_user_id||'unknown'):'';document.getElementById('customerMessages').innerHTML=msgs.filter(m=>!t||String(m.thread_id)===String(t.id)).map(m=>`<article class="bubble ${String(m.sender_user_id)===String(state.staff.id)?'own':''}"><strong>${esc(m.sender_type||'customer')}</strong><p>${esc(m.body)}</p><time>${esc(date(m.created_at))}</time></article>`).join('')||'<div class="empty">هیچ پەیامێک نییە.</div>';}
 
-  async function renderRequests(){const r=await account('quote_requests');state.data.quoteRequests=r.items||[];document.getElementById('view').innerHTML=`<div class="section-head"><div><div class="eyebrow">INBOX · REQUESTS</div><h1>ئاگاداری / داواکاری</h1><p>پرسیاری نرخ، داوای account و داواکارییەکانی کڕیار.</p></div></div><div class="list">${state.data.quoteRequests.length?state.data.quoteRequests.map(q=>`<article class="notice"><div><b>${esc(q.customer_name||'کڕیاری بێناو')}</b><p>${esc(kindLabel(q.kind||q.type))} · ${esc(q.customer_phone||q.customer_email||'')}</p><p>${esc(q.origin_key||'—')} → ${esc(q.dest_key||'—')} · ${esc(q.transport_mode||'—')} · ${esc(q.weight_kg??'—')} kg</p><small>${esc(date(q.created_at))}</small></div><div class="actions"><button class="btn" data-request-chat="${esc(q.id)}">Chat</button><button class="btn primary" data-request-account="${esc(q.id)}">دروستکردنی account</button></div></article>`).join(''):'<div class="empty">هیچ داواکارییەکی نوێ نییە.</div>'}</div>`;document.querySelectorAll('[data-request-account]').forEach(b=>b.onclick=()=>{const q=state.data.quoteRequests.find(x=>String(x.id)===String(b.dataset.requestAccount));newCustomerModal();if(q){setTimeout(()=>{const f=document.getElementById('customerForm');if(f){f.name.value=q.customer_name||'';f.phone.value=q.customer_phone||'';f.email.value=q.customer_email||''}},30)}});document.querySelectorAll('[data-request-chat]').forEach(b=>b.onclick=()=>loadTab('customer-chat'));}
+  async function renderRequests(){
+    const r = await account('quote_requests');
+    state.data.quoteRequests = r.items || [];
+    const cards = state.data.quoteRequests.map((q) => {
+      const mode = String(q.transport_mode || '—').toLowerCase();
+      const measurement = mode === 'sea'
+        ? `${esc(q.volume_cbm ?? '—')} CBM${q.weight_kg != null ? ` · ${esc(q.weight_kg)} kg` : ''}`
+        : `${esc(q.weight_kg ?? '—')} kg`;
+      const requestKind = q.request_type === 'shipment' ? 'داواکاری ناردنی بار' : kindLabel(q.kind || q.type || q.request_type);
+      const cargoDescription = q.cargo_description ? `<p>وەسف: ${esc(q.cargo_description)}</p>` : '';
+      const country = q.cargo_country ? `<small>وڵاتی سەرچاوە: ${esc(q.cargo_country)}</small>` : '';
+      const quantity = q.items_count != null ? ` · ${esc(q.items_count)} کاڵا` : '';
+      const photoButton = q.cargo_image_path ? `<button class="btn" type="button" data-request-photo="${esc(q.id)}">بینینی وێنە</button>` : '';
+      return `<article class="notice"><div><b>${esc(q.customer_name || 'کڕیاری بێناو')}</b><p>${esc(requestKind)} · ${esc(q.customer_phone || q.customer_email || '')}</p><p>${esc(q.origin_key || '—')} → ${esc(q.dest_key || '—')} · ${esc(mode)} · ${measurement}${quantity}</p>${cargoDescription}${country}<p><span class="pill">${esc(q.status || 'pending')}</span> · <small>${esc(date(q.created_at))}</small></p></div><div class="actions">${photoButton}<button class="btn" data-request-chat="${esc(q.id)}">Chat</button><button class="btn primary" data-request-account="${esc(q.id)}">دروستکردنی account</button></div></article>`;
+    }).join('');
+    document.getElementById('view').innerHTML = `<div class="section-head"><div><div class="eyebrow">INBOX · REQUESTS</div><h1>ئاگاداری / داواکاری</h1><p>پرسیاری نرخ، داوای account و داواکارییەکانی کڕیار.</p></div></div><div class="list">${cards || '<div class="empty">هیچ داواکارییەکی نوێ نییە.</div>'}</div>`;
+    document.querySelectorAll('[data-request-photo]').forEach((button) => {
+      button.onclick = async () => {
+        const q = state.data.quoteRequests.find((item) => String(item.id) === String(button.dataset.requestPhoto));
+        if (!q?.cargo_image_path) return;
+        button.disabled = true;
+        try {
+          if (!state.client?.storage) throw new Error('خزمەتی وێنە بەردەست نییە.');
+          const { data, error } = await state.client.storage.from('customer-request-photos').createSignedUrl(q.cargo_image_path, 300);
+          if (error || !data?.signedUrl) throw error || new Error('وێنەکە نەدۆزرایەوە.');
+          openModal('وێنەی کاڵا', `<div style="display:grid;gap:12px"><img src="${esc(data.signedUrl)}" alt="وێنەی بار" style="display:block;width:100%;max-height:70dvh;object-fit:contain;border-radius:14px;background:#f5f7fa"><p>${esc(q.cargo_description || '')}</p><small>ئەم لینکی تایبەتە تەنها بۆ ٥ خولەک کار دەکات.</small></div>`, '<button class="btn" data-close>داخستن</button>');
+        } catch (error) {
+          toast(error.message || 'نەتوانرا وێنەکە پیشان بدرێت.', 'bad');
+        } finally {
+          button.disabled = false;
+        }
+      };
+    });
+    document.querySelectorAll('[data-request-account]').forEach((b) => b.onclick = () => {
+      const q = state.data.quoteRequests.find((x) => String(x.id) === String(b.dataset.requestAccount));
+      newCustomerModal();
+      if (q) setTimeout(() => {
+        const f = document.getElementById('customerForm');
+        if (f) {
+          f.name.value = q.customer_name || '';
+          f.phone.value = q.customer_phone || '';
+          f.email.value = q.customer_email || '';
+        }
+      }, 30);
+    });
+    document.querySelectorAll('[data-request-chat]').forEach((b) => b.onclick = () => loadTab('customer-chat'));
+  }
 
   async function renderActivity(){const r=await account('log');state.data.logs=r.items||[];document.getElementById('view').innerHTML=`<div class="section-head"><div><div class="eyebrow">IMMUTABLE OPERATIONS TRACE</div><h1>Audit Log</h1><p>کێ چی کرد و لە کام entity ـەدا.</p></div></div><div class="toolbar"><input class="field" id="auditSearch" placeholder="گەڕان بە actor / action / target"></div><div class="table-wrap"><table class="table"><thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Target</th><th>Details</th></tr></thead><tbody id="auditRows"></tbody></table></div>`;const draw=()=>{const q=text(document.getElementById('auditSearch').value).toLowerCase();const rows=state.data.logs.filter(x=>!q||JSON.stringify(x).toLowerCase().includes(q));document.getElementById('auditRows').innerHTML=rows.map(x=>`<tr><td>${esc(date(x.created_at))}</td><td>${esc(x.staff_name||'—')}</td><td><span class="pill">${esc(x.action)}</span></td><td class="mono">${esc(x.target_id||'—')}</td><td>${esc(typeof x.details==='string'?x.details:JSON.stringify(x.details||''))}</td></tr>`).join('')||'<tr><td colspan="5"><div class="empty">هیچ audit record ـێک نییە.</div></td></tr>'};document.getElementById('auditSearch').oninput=draw;draw();}
 
