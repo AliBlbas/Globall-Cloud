@@ -37,4 +37,6 @@
 /shop/ /services 302
 /shop/* /services 302
 
-/customer-access /customer-access.html 200
+/customer-access /#auth 302
+/customer-access/ /#auth 302
+/customer-access.html /#auth 302
