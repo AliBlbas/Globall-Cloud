@@ -975,7 +975,9 @@
         if(result.notification?.whatsapp_queued)channels.push('WhatsApp queue');
         if(result.notification?.email_queued)channels.push('Email queue');
         const summary=`GC ${code} لە ${result.receipt?.location||defaultLocation} تۆمار کرا${batch?' · Batch '+batch:''}`;
-        if(Array.isArray(result.notification?.errors)&&result.notification.errors.length){
+        if(result.notification?.account_linked===false){
+          toast(summary+'؛ ئاگادارکردنەوەی ناو ئەکاونت ناتوانرێت بگاتەوە چونکە ئەکاونتی ئەم GC ـە پەیوەست نییە. سوپەر ئەدمین لە بەشی کڕیاران Bind بکات.','bad');
+        }else if(Array.isArray(result.notification?.errors)&&result.notification.errors.length){
           toast(summary+'؛ ئاگادارکردنەوە پێویستی بە پشکنینە','bad');
         }else if(channels.length){
           toast(summary+' · '+channels.join(' / '),'ok');
