@@ -212,6 +212,7 @@ const customerPortalAuth = read('gc-csp-scripts/customer-portal-inline-20261017.
 const customerSettingsHub = read('gc-settings-hub.js')
 const customerSelfSource = read('supabase/functions/customer-self/index.ts')
 const operationsV4Source = read('supabase/functions/operations-v4/index.ts')
+const invoiceAiSource = read('supabase/functions/invoice-ai/index.ts')
 const publicConfigSource = read('supabase/functions/public-config/index.ts')
 const staffShipmentSource = read('supabase/functions/staff-shipment-v5/index.ts')
 const staffShipmentControlSource = read('supabase/functions/staff-shipment-control/index.ts')
@@ -400,6 +401,8 @@ const mobileUiContracts = [
   ['unsupported operations actions return a client error instead of 500', operationsV4Source.includes('Invalid|Unsupported action/i.test(m)')],
   ['production advisor foreign-key indexes are covered idempotently', ['customer_legacy_code_review_reviewed_by_idx','financial_records_gc_code_idx','shop_order_items_product_id_idx','warehouse_items_gc_code_idx','warehouse_receipt_cartons_created_by_idx'].every(name => fkIndexMigration.includes('CREATE INDEX IF NOT EXISTS ' + name))],
   ['customer/staff order RLS policies evaluate auth.uid through a scalar subquery', ['gc_customer_shipments_select','shop_orders_customer_read','shop_order_items_customer_read'].every(name => rlsOptimizationMigration.includes('ALTER POLICY ' + name)) && (rlsOptimizationMigration.match(/\(SELECT auth\.uid\(\)\)/g)||[]).length >= 5],
+  ['invoice OCR uses an image-capable documented model with the Responses API', invoiceAiSource.includes("Deno.env.get('INVOICE_AI_MODEL')||'gpt-4.1-mini'") && invoiceAiSource.includes("type:'input_image'") && invoiceAiSource.includes('https://api.openai.com/v1/responses')],
+  ['invoice OCR requires a server-side OpenAI key and an active staff role', invoiceAiSource.includes("Deno.env.get('OPENAI_API_KEY')") && invoiceAiSource.includes("Deno.env.get('OPENAI_SECRET_KEY')") && invoiceAiSource.includes('Staff role required')],
   ['public-config preflight returns an empty 204 response body', publicConfigSource.includes("new Response(null, { status: 204, headers: headers(origin) })") && !publicConfigSource.includes("new Response('ok', { status: 204")],
   ['customer warehouse evidence styles include responsive photo proof cards', customerWarehouseEvidenceCss.includes('.warehouse-receipt-evidence') && customerWarehouseEvidenceCss.includes('.photo-grid')],
   ['owner-account warehouse notifications carry only that owner’s freshly signed receipt photos', customerSelfSource.includes("body,action_url,event_key,read_at,created_at") && customerSelfSource.includes("receiptsById.get(eventKey.slice(prefix.length))") && customerSelfSource.includes('receipt_photos: Array.isArray(receipt.photos)') && customerPortalVersionedScript.includes('notification-receipt-photo-grid') && customerWarehouseEvidenceCss.includes('notification-receipt-photo-grid')],
