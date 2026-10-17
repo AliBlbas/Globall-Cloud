@@ -175,6 +175,8 @@ if (!staffV5Script.includes('const suffix=fullCode.match') || !staffV5Script.inc
 else ok('Carton scanning resolves the owning GC code before lookup')
 if (!staffV5Script.includes('receipt-owner-routing-hint') || !staffCommandSystemStyles.includes('.receipt-owner-routing-hint')) fail('Warehouse intake must explain that every receipt belongs to one GC owner')
 else ok('Warehouse intake UI makes per-GC owner assignment explicit')
+if (!staffV5Script.includes("(['super_admin','admin'].includes(staffRole)?'':'Dubai')") || !staffV5Script.includes('یەکەم کۆگای وەرگرتن هەڵبژێرە')) fail('Admin and Super Admin must select the actual receiving warehouse explicitly')
+else ok('Warehouse assignment cannot default silently for all-warehouse administrators')
 const customerSelfWarehouseSource = read('supabase/functions/customer-self/index.ts')
 const customerReceiptUiSource = read('gc-csp-scripts/customer-portal-inline-20261017.js')
 const realtimeSource = read('gc-realtime-notifications-20261003.js')
