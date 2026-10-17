@@ -887,6 +887,12 @@
     const photos=(r.photos||[]).map((u,i)=>`<a class="photo" href="${esc(u)}" target="_blank" rel="noopener noreferrer"><img src="${esc(u)}" alt="GC receipt evidence ${i+1}" loading="lazy"></a>`).join('');
     const md=r.label_metadata||{};
     const cartons=Array.isArray(r.cartons)?r.cartons:[];
+    const hasGps=r.latitude!==null&&r.latitude!==undefined&&r.longitude!==null&&r.longitude!==undefined&&Number.isFinite(Number(r.latitude))&&Number.isFinite(Number(r.longitude))&&Math.abs(Number(r.latitude))<=90&&Math.abs(Number(r.longitude))<=180;
+    const gpsCoordinates=hasGps?Number(r.latitude).toFixed(6)+', '+Number(r.longitude).toFixed(6):'تۆمارنەکراوە';
+    const gpsMapUrl=hasGps?'https://maps.google.com/?q='+encodeURIComponent(String(r.latitude)+','+String(r.longitude)):null;
+    const linkedCustomer=(state.data.customers||[]).find(customer=>String(customer.id)===String(r.directory_customer_id));
+    const accountLinkKnown=typeof r.account_linked==='boolean'||Boolean(linkedCustomer);
+    const customerAccountLinked=typeof r.account_linked==='boolean'?r.account_linked:Boolean(linkedCustomer?.auth_user_id);
     const cartonRowsHTML=cartons.map((carton)=>`<article class="warehouse-carton-row">
       <div><strong class="mono">${esc(carton.carton_code||'—')}</strong><small>${esc(carton.carton_index||'—')} / ${esc(carton.carton_total||cartons.length)} · ${esc(carton.warehouse_location||r.location||'—')}</small></div>
       <span class="pill ${carton.status==='received'||carton.status==='stored'?'mint':'warn'}">${esc(({received:'وەرگیراوە',stored:'هەڵگیراوە',in_transit:'لە ڕێگایە',delivered:'گەیشتووە',damaged:'زیانی پێگەیشتووە',lost:'ون بووە',on_hold:'وەستێنراوە',cancelled:'هەڵوەشێنراوە'})[carton.status]||carton.status||'—')}</span>
@@ -902,8 +908,10 @@
         <p>Tracking / Scan: <span class="mono">${esc(r.scan_code||r.barcode||md.tracking_number||'—')}</span></p>
         <p>وەرگیرا لەلایەن: ${esc(r.created_by_name||'—')}</p>
         <p>کاتی وەرگرتن: ${esc(date(r.received_at||r.scanned_at||r.updated_at))}</p>
-        <p>کاتی وێنەگرتن: ${esc(date(r.photo_taken_at||r.received_at))}</p>
-        <p>هەژماری کڕیار: <span class="pill ${r.directory_customer_id?'mint':'warn'}">${r.directory_customer_id?'پەیوەستکراوە':'پێویستی بە پشکنینە'}</span></p>
+        <p>کاتی تۆمارکردنی وێنە: ${esc(date(r.photo_taken_at||r.received_at))}</p>
+        <p>شوێنی کۆگا (GPS): ${gpsMapUrl?'<a href="'+esc(gpsMapUrl)+'" target="_blank" rel="noopener noreferrer">'+esc(gpsCoordinates)+' ↗</a>':esc(gpsCoordinates)}</p>
+        <p>کاتی گرتنی GPS: ${esc(date(md.location_captured_at||''))}</p>
+        <p>هەژماری چوونەژوورەوەی کڕیار: <span class="pill ${accountLinkKnown?(customerAccountLinked?'mint':'warn'):'warn'}">${accountLinkKnown?(customerAccountLinked?'پەیوەستە':'هەژماری Portal پەیوەست نییە'):'دۆخی بەستنەوە پشکنین بکرێت'}</span></p>
       </section>
       <section class="card"><h3>بەڵگە / Scan</h3>
         <p>Verification: <span class="pill ${r.verification_status==='verified'?'mint':'warn'}">${esc(r.verification_status||'—')}</span></p>
@@ -951,12 +959,48 @@
       <div class="form-field"><label>دراو</label><select class="field" name="declared_currency"><option>USD</option><option>IQD</option><option>CNY</option><option>AED</option></select></div>
       <div class="form-field full"><label>ناوەڕۆکی کارتۆن / کاڵاکان</label><textarea class="field" name="item_summary" placeholder="جۆری کاڵا، ژمارەی PC و وردەکاریی گرنگ"></textarea></div>
       <div class="form-field full"><label>وێنەی کارتۆن و لیبێڵی GC (پێویستە)</label><input class="field" name="photos" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple capture="environment" required><small>تا ٨ وێنە؛ وێنەکە دەبێت بە بەڵگەی هەژماری ئەم GC ـەوە ببەسترێتەوە.</small></div>
-      <div class="form-field"><label>Latitude (هەڵبژاردەیی)</label><input class="field" name="latitude" type="number" step="any"></div>
-      <div class="form-field"><label>Longitude (هەڵبژاردەیی)</label><input class="field" name="longitude" type="number" step="any"></div>
+      <div class="form-field"><label>Latitude (GPS)</label><input class="field" name="latitude" type="number" step="any" inputmode="decimal" placeholder="35.56"></div>
+      <div class="form-field"><label>Longitude (GPS)</label><input class="field" name="longitude" type="number" step="any" inputmode="decimal" placeholder="44.00"></div>
+      <div class="form-field full"><button class="btn" id="receiptGpsBtn" type="button">⌖ گرتنی شوێنی ئێستا بە GPS</button><small id="receiptGpsStatus" aria-live="polite">بە ڕەزامەندیی تۆ شوێن لە مۆبایلەکەوە تۆمار دەکرێت؛ دەتوانیت بە دەستیش بنووسیت.</small></div>
+      <input type="hidden" name="photo_taken_at" value="">
+      <input type="hidden" name="location_captured_at" value="">
       <div class="form-field full"><label>تێبینیی وەرگرتن</label><textarea class="field" name="notes" placeholder="بارودۆخی کارتۆن، کێشە، ژمارەی پەکەج یان زانیاریی زیاتری کۆگا"></textarea></div>
     </form>`,'<button class="btn" data-close>هەڵوەشاندنەوە</button><button class="btn primary" id="saveReceipt">تۆمارکردن و ئاگادارکردنەوەی کڕیار</button>');
-    const locationField=document.querySelector('#receiptForm select[name="location"]');
+    const receiptForm=document.getElementById('receiptForm');
+    const locationField=receiptForm?.querySelector('select[name="location"]');
     if(locationField)locationField.value=defaultLocation;
+    const photoInput=receiptForm?.querySelector('input[name="photos"]');
+    const photoTakenAt=receiptForm?.querySelector('input[name="photo_taken_at"]');
+    photoInput?.addEventListener('change',()=>{
+      if(photoTakenAt)photoTakenAt.value=photoInput.files?.length?new Date().toISOString():'';
+    });
+    const gpsButton=document.getElementById('receiptGpsBtn');
+    gpsButton?.addEventListener('click',()=>{
+      const status=document.getElementById('receiptGpsStatus');
+      const latitude=receiptForm?.querySelector('input[name="latitude"]');
+      const longitude=receiptForm?.querySelector('input[name="longitude"]');
+      const capturedAt=receiptForm?.querySelector('input[name="location_captured_at"]');
+      if(!navigator.geolocation){
+        if(status)status.textContent='GPS لەم براوزەرەدا بەردەست نییە؛ Latitude/Longitude بە دەست بنووسە.';
+        toast('GPS بەردەست نییە؛ شوێن بە دەست بنووسە','bad');
+        return;
+      }
+      if(gpsButton.disabled)return;
+      gpsButton.disabled=true;
+      if(status)status.textContent='چاوەڕێی ڕەزامەندی و دۆزینەوەی شوێن…';
+      navigator.geolocation.getCurrentPosition(position=>{
+        if(latitude)latitude.value=position.coords.latitude.toFixed(6);
+        if(longitude)longitude.value=position.coords.longitude.toFixed(6);
+        if(capturedAt)capturedAt.value=new Date(position.timestamp||Date.now()).toISOString();
+        if(status)status.textContent='شوێن تۆمار کرا · ±'+Math.round(position.coords.accuracy)+' m';
+        gpsButton.disabled=false;
+      },error=>{
+        const message=error.code===1?'ڕەزامەندی بۆ GPS نەدرا.':error.code===2?'شوێنی GPS نەدۆزرایەوە.':'کاتی وەڵامی GPS تەواو بوو.';
+        if(status)status.textContent=message+' دەتوانیت بە دەست بنووسیت.';
+        toast(message,'bad');
+        gpsButton.disabled=false;
+      },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+    });
     document.getElementById('saveReceipt').onclick=async()=>{
       const form=document.getElementById('receiptForm');
       const button=document.getElementById('saveReceipt');
@@ -998,7 +1042,7 @@
         }else{
           toast(summary+'؛ تۆمار کرا، بەڵام ئاگادارکردنەوەی ناو ئەکاونت پشتڕاست نەکراوەتەوە','bad');
         }
-        await renderWarehouses();
+        void renderWarehouses().catch(refreshError=>toast('وەرگرتن تۆمار کرا، بەڵام لیستی کۆگا نوێ نەبووە: '+errorText(refreshError,'هەڵەی نوێکردنەوە'),'bad'));
       }catch(error){
         toast('تۆمارکردن: '+errorText(error,'هەڵەی نەناسراو'),'bad');
       }finally{
