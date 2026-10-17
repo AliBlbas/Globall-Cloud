@@ -63,8 +63,14 @@ jobs:
           grep -q '/gc-production-ui-20260927.css?v=1' index.html
           grep -q '/gc-production-ui-20260927.css?v=1' staff-os-v5.html
           grep -Fq "window.location.replace('/#auth')" customer-portal.html
-          grep -q 'staff-os-v5-20261017.js?v=20261017-5' staff-os-v5.html
+          grep -q 'staff-os-v5-20261017.js?v=20261017-6' staff-os-v5.html
           grep -q 'staff-os-v5.css?v=20261016-4' staff-os-v5.html
+          grep -q 'gc-staff-command-system-20261017.css?v=1' staff-os-v5.html
+          grep -Fq "storageKey: 'gc-staff-os-auth-v5-ahslifnthiwfkmaswjno'" staff-os-v5-20261017.js
+          grep -Fq 'const customerBridgePanel =' staff-os-v5-20261017.js
+          grep -Fq 'CUSTOMER WORKSPACE · SHARED DATA' staff-os-v5-20261017.js
+          grep -Fq "original.querySelector('.nav-icon svg')" gc-staff-mobile-dock-20261016.js
+          grep -Fq "loadStyle('/gc-staff-command-system-20261017.css?v=1')" staff-os-v5-enhancement-loader-20261017.js
           grep -q 'gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-6' index.html
           grep -Fq "window.location.replace('/#auth')" customer-portal.html
           grep -Fq 'authForm' gc-csp-scripts/customer-portal-inline-20261017.js
