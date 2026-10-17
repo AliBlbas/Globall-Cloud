@@ -74,7 +74,9 @@ body.gc-customer-app #gcCustomerWorkspace #customerWelcome {
 body.gc-customer-app #gcCustomerWorkspace #portalStatus {
   position: relative;
   margin: 0 0 16px;
-  padding: 13px 15px 13px 42px;
+  padding-block: 13px;
+  padding-inline-start: 42px;
+  padding-inline-end: 15px;
   border: 1px solid rgba(255, 187, 105, .31);
   border-radius: 16px;
   background: linear-gradient(135deg, rgba(105, 61, 19, .27), rgba(14, 31, 44, .92));
