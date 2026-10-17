@@ -24,6 +24,37 @@ const numberOrNull = (value: unknown, max: number) => {
   return Number.isFinite(number) && number >= 0 && number <= max ? number : null
 }
 const CARGO_PHOTO_BUCKET = 'customer-request-photos'
+const WAREHOUSE_RECEIPT_BUCKET = 'warehouse-receipts'
+const WAREHOUSE_RECEIPT_SIGNED_URL_TTL = 24 * 60 * 60
+function warehouseReceiptStoragePath(value: unknown): string | null {
+  const raw = String(value ?? '').trim()
+  if (!raw) return null
+  if (!/^https?:\\/\\//i.test(raw)) return decodeURIComponent(raw.replace(/^\\/+/, ''))
+  const markers = [
+    `/storage/v1/object/public/${WAREHOUSE_RECEIPT_BUCKET}/`,
+    `/storage/v1/object/sign/${WAREHOUSE_RECEIPT_BUCKET}/`,
+    `/storage/v1/object/authenticated/${WAREHOUSE_RECEIPT_BUCKET}/`
+  ]
+  for (const marker of markers) {
+    const index = raw.indexOf(marker)
+    if (index >= 0) return decodeURIComponent(raw.slice(index + marker.length).split('?')[0])
+  }
+  return null
+}
+async function secureWarehouseReceiptPhotos(service: any, receipt: Record<string, any>) {
+  const values = Array.isArray(receipt.photos) ? receipt.photos : []
+  const paths = values.map(warehouseReceiptStoragePath).filter((value): value is string => Boolean(value))
+  if (!paths.length) return { ...receipt, photos: [] }
+  try {
+    const { data, error } = await service.storage.from(WAREHOUSE_RECEIPT_BUCKET).createSignedUrls(paths, WAREHOUSE_RECEIPT_SIGNED_URL_TTL)
+    if (error) throw error
+    const photos = (data || []).map((item: any) => item?.signedUrl || null).filter((value: unknown): value is string => typeof value === 'string' && /^https?:\\/\\//i.test(value))
+    return { ...receipt, photos }
+  } catch (error) {
+    console.warn('[customer-self] receipt evidence signing failed', error instanceof Error ? error.message : String(error))
+    return { ...receipt, photos: [] }
+  }
+}
 const CARGO_PHOTO_MAX_BYTES = 10 * 1024 * 1024
 const CARGO_PHOTO_MIMES_BY_EXTENSION: Record<string, string[]> = {
   jpg: ['image/jpeg', 'image/jpg', 'image/pjpeg'],
@@ -342,13 +373,16 @@ Deno.serve(async (req) => {
       service.from('shipment_documents').select('id,shipment_id,document_type,title,file_url,is_public,document_status,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(30),
       service.from('shipment_invoices').select('id,invoice_number,shipment_id,total,paid_total,currency,status,due_at,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(50),
       shipmentIds.length?service.from('shipment_tracking_events').select('id,shipment_id,status_key,title,note,location_label,lat,lng,occurred_at,photos').in('shipment_id',shipmentIds).eq('is_public',true).order('occurred_at',{ascending:false}).limit(200):Promise.resolve({data:[],error:null}),
-      service.from('warehouse_receipts').select('id,batch_code,location,stage,photo_taken_at,gc_code_detected,verification_status,photos,shipment_id,received_at').eq('directory_customer_id',customer.id).order('received_at',{ascending:false}).limit(50),
+      service.from('warehouse_receipts').select('id,batch_code,location,stage,photo_taken_at,gc_code,gc_code_detected,verification_status,photos,shipment_id,received_at,carton_count,weight_actual,created_by_name,scan_code,notes').eq('directory_customer_id',customer.id).order('received_at',{ascending:false}).limit(50),
       service.from('customer_chat_threads').select('id,subject,status,priority,last_message_at,created_at').eq('customer_user_id',user.id).neq('status','closed').order('last_message_at',{ascending:false}).limit(30),
       financeCode ? service.from('finance_transactions').select('id,type,gc_code,amount_usd,reference,created_at').eq('gc_code',financeCode).in('type',['customer_charge','customer_payment','refund','adjustment']).order('created_at',{ascending:false}).limit(100) : Promise.resolve({data:[],error:null}),
     ])
     const firstResults=[notifications,preferences,quotes,documentsByUser,invoicesByUser,events,receipts,chatThreads,customerTransactions]
     const firstFailure=firstResults.find((result:any)=>result?.error)
     if(firstFailure?.error)throw firstFailure.error
+    // The receipt query is scoped by directory_customer_id. Sign private evidence URLs server-side;
+    // never return raw Storage object paths to a customer's browser.
+    const customerReceipts = await Promise.all((receipts.data || []).map((receipt: Record<string, any>) => secureWarehouseReceiptPhotos(service, receipt)))
     // Include public documents and legacy invoices attached to single-owner
     // shipments even when older staff records predate customer_user_id linking.
     // Never attach an unowned invoice/document from a consolidated shipment.
@@ -391,7 +425,7 @@ Deno.serve(async (req) => {
       },
       shipments:safeShipments,cargo_items:ownCargoRows,notifications:notifications.data||[],
       quotes:quotes.data||[],documents,pods:pods.data||[],invoices,
-      payments:payments.data||[],customer_transactions:customerTransactions.data||[],events:events.data||[],ledger:ledger.data||[],receipts:receipts.data||[],
+      payments:payments.data||[],customer_transactions:customerTransactions.data||[],events:events.data||[],ledger:ledger.data||[],receipts:customerReceipts,
       packages:packages.data||[],chat_threads:chatThreads.data||[],
       notification_preferences:preferences.data||{email_enabled:false,whatsapp_enabled:false,sms_enabled:false,in_app_enabled:true}
     })
