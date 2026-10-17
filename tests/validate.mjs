@@ -312,12 +312,13 @@ const staffEnhancementLoader = read('staff-os-v5-enhancement-loader-20261017.js'
 const staffOsHtml = read('staff-os-v5.html')
 
 const mobileUiContracts = [
-  ['customer workspace references the final mobile integrity CSS', publicShell.includes('gc-ui-integrity-mobile-20261017.css?v=4')],
-  ['customer style loader puts integrity CSS after signature styles', customerStyleLoader.indexOf('gc-ui-integrity-mobile-20261017.css?v=4') > customerStyleLoader.indexOf('gc-customer-experience-signature-20261017.css?v=2')],
-  ['Staff OS references the current integrity CSS and cache-busted loader', staffOsHtml.includes('gc-ui-integrity-mobile-20261017.css?v=4') && staffOsHtml.includes('staff-os-v5-enhancement-loader-20261017.js?v=2')],
-  ['staff enhancement loader loads integrity CSS after the mobile dock', staffEnhancementLoader.indexOf("loadStyle('/gc-ui-integrity-mobile-20261017.css?v=4')") > staffEnhancementLoader.indexOf("loadStyle('/gc-staff-mobile-dock-20261016.css?v=4')")],
-  ['customer view selector includes the toolbar and isolated section views', customerViewScript.includes("const allSections = () => [...main.querySelectorAll(':scope > section, :scope > .workspace-toolbar')]") && customerViewScript.includes("settings: ['gcAccountSettings']")],
+  ['customer workspace references the final mobile integrity CSS', publicShell.includes('gc-ui-integrity-mobile-20261017.css?v=5')],
+  ['customer style loader puts integrity CSS after signature styles', customerStyleLoader.indexOf('gc-ui-integrity-mobile-20261017.css?v=5') > customerStyleLoader.indexOf('gc-customer-experience-signature-20261017.css?v=2')],
+  ['Staff OS references the current integrity CSS and cache-busted loader', staffOsHtml.includes('gc-ui-integrity-mobile-20261017.css?v=5') && staffOsHtml.includes('staff-os-v5-enhancement-loader-20261017.js?v=3')],
+  ['staff enhancement loader loads integrity CSS after the mobile dock', staffEnhancementLoader.indexOf("loadStyle('/gc-ui-integrity-mobile-20261017.css?v=5')") > staffEnhancementLoader.indexOf("loadStyle('/gc-staff-mobile-dock-20261016.css?v=4')")],
+  ['customer view selector includes the toolbar and isolated section views', customerViewScript.includes("const allSections = () => [...main.querySelectorAll(':scope > section, :scope > .workspace-toolbar')]") && customerViewScript.includes("settings: ['gcAccountSettings']") && customerViewScript.includes("shipments: ['shipmentsSection']") && customerViewScript.includes("requests: ['quotesPanel', 'newRequest']") && customerViewScript.includes("'#commercial': ['commercial']") && customerViewScript.includes("'#records': ['records']")],
   ['customer dock declares five separate destinations', ['home','shipments','requests','notifications','settings'].every(key => publicShell.includes('data-dock-tab="' + key + '"'))],
+  ['orders and requests expose distinct secondary screens', publicShell.includes('href="#records">بەڵگە و پارەدان') && publicShell.includes('href="#commercial">حیسابکردنی نرخ')],
   ['Staff Intelligence chat has a dedicated flexible message row', mobileUiCss.includes('grid-template-rows: auto auto auto minmax(0, 1fr) auto !important') && mobileUiCss.includes('#gcStaffAiPanel .gc-ai-messages')],
   ['only the active customer dock destination receives the bright active treatment', mobileUiCss.includes('.dock-primary:not(.active)') && mobileUiCss.includes('button[aria-current="page"]')],
 ]
