@@ -132,9 +132,16 @@ const renderNotifications = (items) => setHtml('notifications',
         ? item.action_url
         : '';
       const actionLabel = item.kind === 'warehouse_received' ? 'بینینی وێنە و بەڵگەی کۆگا' : 'بینینی بەشە پەیوەندیدارەکە';
+      const receiptPhotos = Array.isArray(item.receipt_photos)
+        ? item.receipt_photos.filter((url) => typeof url === 'string' && /^https?:\/\//i.test(url)).slice(0, 4)
+        : [];
+      const receiptPhotoPreview = item.kind === 'warehouse_received' && receiptPhotos.length
+        ? `<div class="photo-grid notification-receipt-photo-grid" role="group" aria-label="وێنەکانی وەرگرتنی ${esc(item.receipt_gc_code || 'GC')}">${receiptPhotos.map((url, index) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img class="receipt-photo" src="${esc(url)}" alt="${esc(item.receipt_gc_code || 'GC')} · وێنەی ${index + 1}" loading="lazy"></a>`).join('')}</div>`
+        : '';
       return `<article class="item notification-item ${isRead ? 'is-read' : 'is-unread'}" data-notification-state="${isRead ? 'read' : 'unread'}">
         <div class="row notification-item-head"><strong>${esc(item.title)}</strong>${isRead ? '<span class="pill">خوێندراوە</span>' : `<button class="btn notification-action" type="button" data-read-notification="${esc(item.id)}">خوێندراوە بکە</button>`}</div>
         <div class="muted notification-body">${esc(item.body)}</div>
+        ${receiptPhotoPreview}
         <div class="row notification-item-foot"><small class="notification-time">${esc(date(item.created_at))}</small>${action ? `<a class="btn notification-open-action" href="${esc(action)}">${esc(actionLabel)} ↗</a>` : ''}</div>
       </article>`;
     }).join('')
