@@ -230,7 +230,7 @@ else ok('Repository validation guards the retired public registration endpoint')
 
 
 
-if (!staff.includes('staff-os-v5-20261017.js?v=20261017-4')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
+if (!staff.includes('staff-os-v5-20261017.js?v=20261017-5')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
 
 const mobileLoader = read('staff-os-v5-enhancement-loader.js')
 if (!staff.includes('staff-os-v5-enhancement-loader.js?v=20261016-7')) fail('Staff enhancement loader cache-buster is stale')

@@ -391,7 +391,7 @@
       const summaryMetrics = { total: rows.length, air: 0, land: 0, sea: 0, customers: 0, pieces: 0, cartons: 0 };
       rows.forEach((shipment) => {
         const mode = String(shipment.transport_mode || shipment.type || shipment.mode || '').toLowerCase();
-        if (Object.prototype.hasOwnProperty.call(summaryMetrics, mode) && mode !== 'total') summaryMetrics[mode] += 1;
+        if (MODES.includes(mode)) summaryMetrics[mode] += 1;
         summaryMetrics.customers += Number(shipment.customer_goods_count || shipment.customer_count || shipment.customers_count || (shipment.customer_gc_code ? 1 : 0));
         const structuredCargo = Number(shipment.cargo_item_count || 0) > 0;
         summaryMetrics.pieces += structuredCargo
