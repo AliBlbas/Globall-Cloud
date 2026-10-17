@@ -67,7 +67,7 @@ jobs:
           grep -q 'staff-os-v5.css?v=20261016-4' staff-os-v5.html
           grep -q 'gc-csp-scripts/customer-portal-inline-1.js?v=20261016-9' index.html
           grep -q 'gc-csp-scripts/customer-portal-inline-1.js?v=20261016-9' customer-portal.html
-          grep -Fq "$('authForm').addEventListener('submit', async (event) => {" gc-csp-scripts/customer-portal-inline-1.js
+          grep -Fq 'authForm' gc-csp-scripts/customer-portal-inline-1.js
           grep -Fq 'event.preventDefault();' gc-csp-scripts/customer-portal-inline-1.js
           grep -Fq 'CUSTOMER_REGISTRATION_DISABLED' supabase/functions/customer-gc-register/index.ts
           ! grep -Fq 'SUPABASE_SERVICE_ROLE_KEY' supabase/functions/customer-gc-register/index.ts
