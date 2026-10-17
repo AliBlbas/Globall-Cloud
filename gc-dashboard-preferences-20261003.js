@@ -106,9 +106,7 @@
       shipments: ['shipmentsSection', 'records'],
       requests: ['quotesPanel', 'commercial', 'newRequest'],
       notifications: ['activity'],
-      records: ['records'],
       settings: ['gcAccountSettings'],
-      support: ['support']
     };
     const hashToTab = {
       '#overview':'home', '#homeMetrics':'home', '#gcCustomerRouteOverview':'home', '#auth':'home', '#register':'home',
@@ -116,18 +114,19 @@
       '#newRequest':'requests', '#quoteForm':'requests', '#commercial':'requests', '#quotesPanel':'requests',
       '#activity':'notifications', '#notifications':'notifications',
       '#records':'shipments', '#payments':'shipments',
-      '#gcAccountSettings':'settings', '#settings':'settings', '#support':'support'
+      '#gcAccountSettings':'settings', '#settings':'settings', '#support':'requests'
     };
     const viewHash = {
       home:'#overview', shipments:'#shipmentsSection', requests:'#newRequest',
-      notifications:'#activity', settings:'#gcAccountSettings', support:'#support'
+      notifications:'#activity', settings:'#gcAccountSettings'
     };
     const activate = (requestedKey, options = {}) => {
-      const key = viewGroups[requestedKey] ? requestedKey : 'home';
+      const key = requestedKey === 'support' ? 'requests' : (viewGroups[requestedKey] ? requestedKey : 'home');
+      const nextHash = options.hash || (requestedKey === 'support' ? '#support' : (viewHash[key] || '#overview'));
       if (options.enterMode === true && !document.body.classList.contains('gc-customer-app') && typeof window.gcEnterCustomerMode === 'function') {
-        window.gcEnterCustomerMode({view:key, hash:options.hash || viewHash[key] || '#overview'});
+        window.gcEnterCustomerMode({view:key, hash:nextHash});
       }
-      const visible = new Set(viewGroups[key]);
+      const visible = new Set(nextHash === '#support' ? ['support'] : viewGroups[key]);
       allSections().forEach(section => {
         const show = visible.has(section.id) || visible.has(section.classList.contains('workspace-toolbar') ? 'workspace-toolbar' : '');
         section.classList.toggle('gc-customer-view-hidden', !show);
@@ -142,7 +141,6 @@
         else item.removeAttribute('aria-current');
       });
       if (options.writeHash !== false) {
-        const nextHash = options.hash || viewHash[key];
         if (nextHash && window.location.hash !== nextHash) history.pushState({gcCustomerView:key}, '', nextHash);
       }
       if (options.scroll !== false) window.scrollTo({top:0, behavior:'auto'});
