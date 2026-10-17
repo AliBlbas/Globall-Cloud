@@ -3,6 +3,30 @@ const ALLOWED_ORIGINS=new Set(['https://globall-cloud.pages.dev','https://global
 const ALLOWED_ROLES=new Set(['admin','super_admin','warehouse','warehouse_china','warehouse_uae','warehouse_erbil','operations','delivery'])
 const BUCKET='warehouse-receipts'
 const SIGNED_URL_TTL=60*60*24
+const MAX_RECEIPT_PHOTOS=8
+const MAX_RECEIPT_PHOTO_BYTES=12*1024*1024
+const PHOTO_MIME_BY_EXTENSION:Record<string,string[]> = {
+ jpg:['image/jpeg','image/pjpeg'],jpeg:['image/jpeg','image/pjpeg'],
+ png:['image/png'],webp:['image/webp'],heic:['image/heic','image/heif'],heif:['image/heif','image/heic']
+}
+function photoMimeType(file:File){
+ const extension=String(file.name||'').split('.').pop()?.toLowerCase()||''
+ const allowed=PHOTO_MIME_BY_EXTENSION[extension]
+ if(!allowed)return null
+ const supplied=String(file.type||'').split(';')[0].trim().toLowerCase()
+ if(supplied&&!allowed.includes(supplied))return null
+ return supplied==='image/pjpeg'?'image/jpeg':(supplied||allowed[0])
+}
+function coordinate(value:FormDataEntryValue|null,min:number,max:number){
+ if(typeof value!=='string'||!value.trim())return null
+ const parsed=Number(value)
+ return Number.isFinite(parsed)&&parsed>=min&&parsed<=max?parsed:null
+}
+function timestampIso(value:string|null,fallback:string){
+ if(!value)return fallback
+ const parsed=new Date(value)
+ return Number.isFinite(parsed.getTime())?parsed.toISOString():fallback
+}
 function cors(req:Request){const origin=req.headers.get('origin')||'';return{'Access-Control-Allow-Origin':ALLOWED_ORIGINS.has(origin)?origin:'https://globall-cloud.pages.dev','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info, x-supabase-auth-token, x-idempotency-key','Access-Control-Allow-Methods':'GET,POST,OPTIONS','Cache-Control':'no-store','Vary':'Origin'}}
 function json(req:Request,body:unknown,status=200){return new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8',...cors(req)}})}
 function text(v:FormDataEntryValue|null){if(typeof v!=='string')return null;const s=v.trim();return s||null}
@@ -310,18 +334,47 @@ async function linkShipmentChain(
  };
 }
 async function retryExistingChain(admin:ReturnType<typeof createClient>,staff:Record<string,unknown>,existing:Record<string,any>){const directoryId=existing.directory_customer_id?String(existing.directory_customer_id):null;let customerAuthUserId:string|null=null;if(directoryId){const{data,error}=await admin.from('customer_directory').select('auth_user_id').eq('id',directoryId).maybeSingle();if(error)throw error;customerAuthUserId=data?.auth_user_id||null}const metadata=existing.label_metadata&&typeof existing.label_metadata==='object'?{...existing.label_metadata,gross_weight_kg:existing.weight_actual??existing.label_metadata.gross_weight_kg,tracking_number:existing.barcode??existing.label_metadata.tracking_number,carrier_tracking_number:existing.barcode??existing.label_metadata.carrier_tracking_number}: {gross_weight_kg:existing.weight_actual??null,tracking_number:existing.barcode??null,carrier_tracking_number:existing.barcode??null};const location=String(existing.location||existing.warehouse||'Dubai');return linkShipmentChain(admin,staff,String(existing.id),customerAuthUserId,String(existing.gc_code||''),String(existing.batch_code||''),location,String(existing.stage||stageForLocation(location)),metadata,existing.shipment_id?String(existing.shipment_id):null,String(existing.idempotency_key||'retry'))}
-async function createReceipt(req:Request){const{admin,staff}=await actor(req);const form=await req.formData();const code=gcCode(text(form.get('customer_code')));const location=text(form.get('location'))||'Dubai';const submittedBatchCode=text(form.get('batch_code'));const batchCode=submittedBatchCode||`${code}-${new Date().toISOString().replace(/[^0-9]/g,'').slice(0,14)}-${crypto.randomUUID().slice(0,8).toUpperCase()}`;if(!code)throw new Error('Valid GC customer code is required');if(!batchCode)throw new Error('Batch code is required');if(!locationAllowed(staff,location))throw new Error('Warehouse branch is not authorized for this location');const{data:customer,error:customerError}=await admin.from('customer_directory').select('id,code,gc_code,normalized_gc_code,name,phone,phone2,whatsapp_phone,email,auth_user_id,preferred_language').or(`gc_code.eq.${code},normalized_gc_code.eq.${code},code.eq.${code}`).maybeSingle();if(customerError)throw customerError;if(!customer)throw new Error(`Customer ${code} was not found`);const tracking=text(form.get('tracking_number'));const grossWeight=num(form.get('gross_weight_kg'));const declaredValue=num(form.get('declared_value'));const totalPackages=num(form.get('total_packages'));if(totalPackages!==null&&(!Number.isInteger(totalPackages)||totalPackages<1||totalPackages>999))throw new Error('Carton count must be between 1 and 999');const itemSummary=text(form.get('item_summary'));const notes=text(form.get('notes'));const labelMetadata={invoice_number:text(form.get('invoice_number')),quantity:num(form.get('quantity')),gross_weight_kg:grossWeight,declared_value:declaredValue,declared_currency:text(form.get('declared_currency'))||'USD',total_packages:totalPackages,carrier:text(form.get('carrier')),service_level:text(form.get('service_level')),tracking_number:tracking,carrier_tracking_number:tracking,shipper:text(form.get('shipper')),origin:text(form.get('origin')),destination:text(form.get('destination')),item_summary:itemSummary,source:'warehouse_receiving'};const idempotency=text(form.get('idempotency_key'))||req.headers.get('x-idempotency-key')||crypto.randomUUID();const{data:existing}=await admin.from('warehouse_receipts').select('*').eq('idempotency_key',idempotency).maybeSingle();if(existing){
+async function createReceipt(req:Request){const{admin,staff}=await actor(req);const form=await req.formData();const code=gcCode(text(form.get('customer_code')));const location=text(form.get('location'))||'Dubai';if(!['china','dubai','uae','erbil','usa'].includes(location.toLowerCase()))throw new Error('Unsupported warehouse location');const submittedBatchCode=text(form.get('batch_code'));const batchCode=submittedBatchCode||`${code}-${new Date().toISOString().replace(/[^0-9]/g,'').slice(0,14)}-${crypto.randomUUID().slice(0,8).toUpperCase()}`;if(!code)throw new Error('Valid GC customer code is required');if(!batchCode)throw new Error('Batch code is required');if(!locationAllowed(staff,location))throw new Error('Warehouse branch is not authorized for this location');const{data:customer,error:customerError}=await admin.from('customer_directory').select('id,code,gc_code,normalized_gc_code,name,phone,phone2,whatsapp_phone,email,auth_user_id,preferred_language').or(`gc_code.eq.${code},normalized_gc_code.eq.${code},code.eq.${code}`).maybeSingle();if(customerError)throw customerError;if(!customer)throw new Error(`Customer ${code} was not found`);const tracking=text(form.get('tracking_number'));const grossWeight=num(form.get('gross_weight_kg'));const declaredValue=num(form.get('declared_value'));const totalPackages=num(form.get('total_packages'));if(totalPackages!==null&&(!Number.isInteger(totalPackages)||totalPackages<1||totalPackages>999))throw new Error('Carton count must be between 1 and 999');const itemSummary=text(form.get('item_summary'));const notes=text(form.get('notes'));const labelMetadata={invoice_number:text(form.get('invoice_number')),quantity:num(form.get('quantity')),gross_weight_kg:grossWeight,declared_value:declaredValue,declared_currency:text(form.get('declared_currency'))||'USD',total_packages:totalPackages,carrier:text(form.get('carrier')),service_level:text(form.get('service_level')),tracking_number:tracking,carrier_tracking_number:tracking,shipper:text(form.get('shipper')),origin:text(form.get('origin')),destination:text(form.get('destination')),item_summary:itemSummary,source:'warehouse_receiving'};const idempotency=text(form.get('idempotency_key'))||req.headers.get('x-idempotency-key')||crypto.randomUUID();const{data:existing}=await admin.from('warehouse_receipts').select('*').eq('idempotency_key',idempotency).maybeSingle();if(existing){
  const existingCode=gcCode(String(existing.gc_code_detected||existing.gc_code||code));
  if(!existingCode||existingCode!==code)throw new Error('Idempotency key was already used for another GC code');
  const existingCartonCount=Math.max(1,Number(existing.carton_count??existing.label_metadata?.total_packages??1)||1);
  const cartons=await ensureReceiptCartons(admin,staff,existing,existingCode,String(existing.location||existing.source_warehouse||existing.warehouse||location),existingCartonCount);
  let chain;try{chain=await retryExistingChain(admin,staff,existing)}catch(error){const message=error instanceof Error?error.message:String(error);console.error('[warehouse-receiving] retry existing chain failed',message);chain={linked:false,reason:'retry_failed',error:message}}
- const signed=await signedPhotos(admin,existing.photos);
+ let signed:string[]=[];
+ let photoSigningWarning:string|null=null;
+ try{signed=await signedPhotos(admin,existing.photos)}catch(error){
+  photoSigningWarning='Private photo links could not be refreshed; evidence remains stored.';
+  console.error('[warehouse-receiving] duplicate receipt photo signing failed',{receipt_id:String(existing.id),error:error instanceof Error?error.message:'unknown'});
+ }
  const receiptWithCartons={...existing,cartons};
- const notification=await queueReceiptNotifications(admin,receiptWithCartons,undefined,signed).catch(error=>({ok:false,account_linked:Boolean(existing.directory_customer_id),in_app_queued:false,whatsapp_queued:false,email_queued:false,photo_count:signed.length,errors:[error instanceof Error?error.message:String(error)]}));
- return{receipt:{...receiptWithCartons,photos:signed},duplicate:true,chain,notification}
+ let notification:any=await queueReceiptNotifications(admin,receiptWithCartons,undefined,signed).catch(error=>({ok:false,account_linked:Boolean(existing.directory_customer_id),in_app_queued:false,whatsapp_queued:false,email_queued:false,photo_count:signed.length,errors:[error instanceof Error?error.message:String(error)]}));
+ if(photoSigningWarning)notification={...notification,ok:false,errors:[...(Array.isArray(notification.errors)?notification.errors:[]),photoSigningWarning]};
+ return{receipt:{...receiptWithCartons,photos:signed},duplicate:true,chain,notification,photo_signing_warning:Boolean(photoSigningWarning)}
 }
-const files=form.getAll('photos').filter((x):x is File=>x instanceof File).slice(0,8);if(!files.length)throw new Error('At least one package photo is required');const photoPaths:string[]=[];const receiptKey=`${code}/${new Date().toISOString().slice(0,10)}/${crypto.randomUUID()}`;for(const file of files){if(!file.type.startsWith('image/'))throw new Error('Only image files are allowed');if(file.size>12*1024*1024)throw new Error('Each photo must 12MB or smaller');const path=`${receiptKey}/${safeName(file.name)}`;const{error}=await admin.storage.from(BUCKET).upload(path,file,{contentType:file.type||'image/jpeg',upsert:false});if(error)throw error;photoPaths.push(path)}const receivedAt=new Date().toISOString();const stage=stageForLocation(location);const cartonCount=totalPackages!=null?totalPackages:1;const whatsappMessage=[`Globall Cloud | ${code}`,`وەرگیرا: ${location} · ${stage}`,`Batch: ${batchCode}`,labelMetadata.invoice_number?`Invoice: ${labelMetadata.invoice_number}`:null,labelMetadata.carrier?`Carrier: ${labelMetadata.carrier}`:null,tracking?`Tracking: ${tracking}`:null,grossWeight!=null?`Weight: ${grossWeight} kg`:null,declaredValue!=null?`Declared: ${declaredValue} ${labelMetadata.declared_currency}`:null,`Packages: ${cartonCount}`,`${photoPaths.length} وێنەی بەڵگەی وەرگرتن`].filter(Boolean).join('\n');const payload={gc_code:code,batch_code:batchCode,warehouse:location,carton_count:cartonCount,weight_actual:grossWeight,received_at:receivedAt,photos:photoPaths,product_type:itemSummary,description:notes,barcode:tracking,source_warehouse:location,customer_name:customer.name,notes,idempotency_key:idempotency,location,created_by:staff.id,created_by_name:staff.full_name,directory_customer_id:customer.id,directory_phone:customer.phone||customer.phone2||text(form.get('customer_phone')),scan_code:code,scan_type:text(form.get('scan_type'))==='barcode'?'barcode':'qr',scanned_at:receivedAt,verified_at:receivedAt,verification_status:'verified',stage,photo_taken_at:text(form.get('photo_taken_at'))||receivedAt,latitude:num(form.get('latitude')),longitude:num(form.get('longitude')),gc_code_detected:code,ocr_text:text(form.get('ocr_text')),ocr_confidence:num(form.get('ocr_confidence')),ai_detected_items:itemSummary?[{summary:itemSummary}]:[],auto_assigned:true,label_metadata:labelMetadata,label_captured_at:receivedAt,label_capture_method:text(form.get('label_capture_method'))||(text(form.get('scan_type'))==='barcode'?'barcode':'manual'),whatsapp_message:whatsappMessage,evidence_version:1,shipment_id:text(form.get('shipment_id')),consolidated:false};const{data:receipt,error}=await admin.from('warehouse_receipts').insert(payload).select('*').single();
+const files=form.getAll('photos').filter((x):x is File=>x instanceof File&&x.size>0);
+if(!files.length)throw new Error('At least one package photo is required');
+if(files.length>MAX_RECEIPT_PHOTOS)throw new Error(`A receipt may contain at most ${MAX_RECEIPT_PHOTOS} photos`);
+const photoTypes=files.map(photoMimeType);
+if(photoTypes.some(type=>!type))throw new Error('Unsupported photo type. Use JPEG, PNG, WebP or HEIC/HEIF images.');
+if(files.some(file=>file.size>MAX_RECEIPT_PHOTO_BYTES))throw new Error('Each photo must be 12 MB or smaller');
+const photoPaths:string[]=[];
+const receiptKey=`${code}/${new Date().toISOString().slice(0,10)}/${crypto.randomUUID()}`;
+try{
+ for(let index=0;index<files.length;index++){
+  const file=files[index],contentType=photoTypes[index]!;
+  const objectPath=`${receiptKey}/${safeName(file.name)}`;
+  const{error}=await admin.storage.from(BUCKET).upload(objectPath,file,{contentType,upsert:false});
+  if(error)throw error;
+  photoPaths.push(objectPath);
+ }
+}catch(uploadError){
+ if(photoPaths.length){
+  const cleanup=await admin.storage.from(BUCKET).remove(photoPaths);
+  if(cleanup.error)console.error('[warehouse-receiving] partial photo cleanup failed',cleanup.error.message);
+ }
+ console.error('[warehouse-receiving] photo upload failed',{count:files.length,uploaded:photoPaths.length,error:uploadError instanceof Error?uploadError.message:'unknown'});
+ throw new Error('Photo upload failed; no warehouse receipt was recorded.');
+}const receivedAt=new Date().toISOString();const stage=stageForLocation(location);const cartonCount=totalPackages!=null?totalPackages:1;const whatsappMessage=[`Globall Cloud | ${code}`,`وەرگیرا: ${location} · ${stage}`,`Batch: ${batchCode}`,labelMetadata.invoice_number?`Invoice: ${labelMetadata.invoice_number}`:null,labelMetadata.carrier?`Carrier: ${labelMetadata.carrier}`:null,tracking?`Tracking: ${tracking}`:null,grossWeight!=null?`Weight: ${grossWeight} kg`:null,declaredValue!=null?`Declared: ${declaredValue} ${labelMetadata.declared_currency}`:null,`Packages: ${cartonCount}`,`${photoPaths.length} وێنەی بەڵگەی وەرگرتن`].filter(Boolean).join('\n');const payload={gc_code:code,batch_code:batchCode,warehouse:location,carton_count:cartonCount,weight_actual:grossWeight,received_at:receivedAt,photos:photoPaths,product_type:itemSummary,description:notes,barcode:tracking,source_warehouse:location,customer_name:customer.name,notes,idempotency_key:idempotency,location,created_by:staff.id,created_by_name:staff.full_name,directory_customer_id:customer.id,directory_phone:customer.phone||customer.phone2||text(form.get('customer_phone')),scan_code:code,scan_type:text(form.get('scan_type'))==='barcode'?'barcode':'qr',scanned_at:receivedAt,verified_at:receivedAt,verification_status:'verified',stage,photo_taken_at:timestampIso(text(form.get('photo_taken_at')),receivedAt),latitude:coordinate(form.get('latitude'),-90,90),longitude:coordinate(form.get('longitude'),-180,180),gc_code_detected:code,ocr_text:text(form.get('ocr_text')),ocr_confidence:num(form.get('ocr_confidence')),ai_detected_items:itemSummary?[{summary:itemSummary}]:[],auto_assigned:true,label_metadata:labelMetadata,label_captured_at:receivedAt,label_capture_method:text(form.get('label_capture_method'))||(text(form.get('scan_type'))==='barcode'?'barcode':'manual'),whatsapp_message:whatsappMessage,evidence_version:1,shipment_id:text(form.get('shipment_id')),consolidated:false};const{data:receipt,error}=await admin.from('warehouse_receipts').insert(payload).select('*').single();
  if(error){await admin.storage.from(BUCKET).remove(photoPaths);throw error}
  let cartonManifest:Array<Record<string,any>>;
  try{
@@ -335,9 +388,15 @@ const files=form.getAll('photos').filter((x):x is File=>x instanceof File).slice
  let chain;
  try{chain=await linkShipmentChain(admin,staff,receipt.id,customer.auth_user_id||null,code,batchCode,location,stage,labelMetadata,text(form.get('shipment_id')),idempotency)}
  catch(error){const message=error instanceof Error?error.message:String(error);console.error('[warehouse-receiving] chain link failed',message);chain={linked:false,reason:'chain_link_failed',error:message,cartons_linked:0};}
- const securedPhotos=await signedPhotos(admin,receipt.photos);
+ let securedPhotos:string[]=[];
+ let photoSigningWarning:string|null=null;
+ try{securedPhotos=await signedPhotos(admin,receipt.photos)}catch(error){
+  photoSigningWarning='Private photo links could not be refreshed; receipt and carton evidence remain stored.';
+  console.error('[warehouse-receiving] saved receipt photo signing failed',{receipt_id:String(receipt.id),error:error instanceof Error?error.message:'unknown'});
+ }
  const receiptWithCartons={...receipt,cartons:cartonManifest};
- const notification=await queueReceiptNotifications(admin,receiptWithCartons,customer,securedPhotos).catch(error=>({ok:false,account_linked:Boolean(customer.auth_user_id),in_app_queued:false,whatsapp_queued:false,email_queued:false,photo_count:securedPhotos.length,errors:[error instanceof Error?error.message:String(error)]}));
+ let notification:any=await queueReceiptNotifications(admin,receiptWithCartons,customer,securedPhotos).catch(error=>({ok:false,account_linked:Boolean(customer.auth_user_id),in_app_queued:false,whatsapp_queued:false,email_queued:false,photo_count:securedPhotos.length,errors:[error instanceof Error?error.message:String(error)]}));
+ if(photoSigningWarning)notification={...notification,ok:false,errors:[...(Array.isArray(notification.errors)?notification.errors:[]),photoSigningWarning]};
  try{
   await admin.from('staff_activity_log').insert({
    staff_id:staff.id,staff_name:staff.full_name,action:'warehouse.receipt.created',target_id:String(receipt.id),
@@ -364,9 +423,27 @@ async function listReceipts(req:Request){
  }
  const items=await Promise.all(visible.map(async item=>({
   ...item,
-  photos:await signedPhotos(admin,item.photos),
+  photos:await signedPhotos(admin,item.photos).catch(error=>{console.error('[warehouse-receiving] list photo signing failed',{receipt_id:String(item.id),error:error instanceof Error?error.message:'unknown'});return[];}),
   cartons:(byReceipt.get(String(item.id))||[]).filter(carton=>String(carton.customer_directory_id)===String(item.directory_customer_id))
  })));
  return{items}
 }
-Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors(req)});try{if(req.method==='POST')return json(req,await createReceipt(req));if(req.method==='GET')return json(req,await listReceipts(req));return json(req,{error:'Method not allowed'},405)}catch(error){const message=error instanceof Error?error.message:String(error);const status=/Unauthorized/i.test(message)?401:/Forbidden|permission|branch/i.test(message)?403:/not found|required|must be|belong/i.test(message)?400:500;return json(req,{error:message},status)}})
+Deno.serve(async(req)=>{
+ if(req.method==='OPTIONS')return new Response(null,{headers:cors(req)});
+ if(req.method!=='POST'&&req.method!=='GET')return json(req,{error:'Method not allowed'},405);
+ try{
+  if(req.method==='POST')return json(req,await createReceipt(req));
+  return json(req,await listReceipts(req));
+ }catch(error){
+  const message=error instanceof Error?error.message:String(error);
+  const status=/Unauthorized/i.test(message)?401:/Forbidden|permission|branch/i.test(message)?403:/not found|required|must be|belong|unsupported photo|unsupported warehouse|12 MB|at most/i.test(message)?400:500;
+  console.error('[warehouse-receiving] request failed',JSON.stringify({
+   request_id:req.headers.get('x-request-id'),
+   method:req.method,
+   path:new URL(req.url).pathname,
+   error_name:error instanceof Error?error.name:'UnknownError',
+   error:message.slice(0,240)
+  }));
+  return json(req,{error:status===500?'Warehouse request failed. Check the request ID with an administrator.':message,request_id:req.headers.get('x-request-id')||null},status);
+ }
+})
