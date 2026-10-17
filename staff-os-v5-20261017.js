@@ -953,11 +953,11 @@
     const staffRole=String(state.staff?.role||'');
     const staffBranch=String(state.staff?.branch||'all').toLowerCase();
     const branchScopedLocation=branchLocation[staffBranch];
-    const defaultLocation=prefill.location||roleLocation[staffRole]||branchScopedLocation||'Dubai';
+    const defaultLocation=prefill.location||roleLocation[staffRole]||branchScopedLocation||(['super_admin','admin'].includes(staffRole)?'':'Dubai');
     const availableLocations=roleLocation[staffRole]?[roleLocation[staffRole]]:(['super_admin','admin'].includes(staffRole)||staffBranch==='all'?allLocations:(branchScopedLocation?[branchScopedLocation]:allLocations));
     openModal('وەرگرتنی کاڵا لە کۆگا · GC Evidence',`<form id="receiptForm" class="form-grid" enctype="multipart/form-data">
       <div class="form-field full"><label>کۆدی کڕیار لەسەر کارتۆن (GC Code)</label><input class="field" name="customer_code" required value="${esc(prefill.code||'')}" placeholder="GC-1005" autocomplete="off" autocapitalize="characters"><small class="receipt-owner-routing-hint">گرنگ: ئەم وەرگرتنە بۆ یەک کۆدی GC ـە. ئەگەر کارتۆنەکان کۆدی GC ـی جیاوازیان هەیە، هەر کۆدێک بە جیا تۆمار بکە تا وێنە و ئاگادارکردنەوەکە بۆ خاوەنی دروست بڕوات.</small></div>
-      <div class="form-field"><label>کۆگای وەرگرتن</label><select class="field" name="location" required>${availableLocations.map(location => `<option value="${location}">${location}</option>`).join('')}</select></div>
+      <div class="form-field"><label>کۆگای وەرگرتن</label><select class="field" name="location" required>${['super_admin','admin'].includes(staffRole)?'<option value="" disabled>یەکەم کۆگای وەرگرتن هەڵبژێرە</option>':''}${availableLocations.map(location => `<option value="${location}">${location}</option>`).join('')}</select></div>
       <div class="form-field"><label>Batch code</label><input class="field" name="batch_code" value="${esc(prefill.batch||'')}" placeholder="بەتاڵ بهێڵەوە بۆ کۆدی تایبەتی خۆکار"></div>
       <div class="form-field"><label>Tracking / Barcode</label><input class="field" name="tracking_number" value="${esc(prefill.tracking||'')}" placeholder="Tracking ـی کۆمپانیا"></div>
       <div class="form-field"><label>ژمارەی کارتۆن (هەموویان بۆ هەمان GC)</label><input class="field" name="total_packages" type="number" min="1" max="999" step="1" value="${esc(prefill.carton_count||1)}" required></div>
