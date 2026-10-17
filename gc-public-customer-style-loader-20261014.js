@@ -7,14 +7,14 @@
   'use strict';
 
   const homeStyles = [
-    '/gc-live-mobile-v3.css?v=20261014-4',
+    '/gc-live-mobile-v3.css?v=20261017-2',
     '/gc-homepage-elite-20261014.css?v=4',
-    '/gc-homepage-signature-20261016.css?v=8'
+    '/gc-homepage-signature-20261016.css?v=9'
   ];
   const customerStyles = [
     '/gc-customer-workspace-elite-20261014.css?v=23',
     '/gc-customer-mobile-dock-20261016.css?v=4',
-    '/gc-customer-experience-signature-20261017.css?v=1'
+    '/gc-customer-experience-signature-20261017.css?v=2'
   ];
 
   const desiredStyles = () => {
