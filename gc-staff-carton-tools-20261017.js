@@ -32,7 +32,7 @@
     const root = node(doc, 'main', 'grid');
     rows.forEach((row, index) => {
       const label = node(doc, 'article', 'label');
-      const gcCode = row.code.replace(/-[A-F0-9]{12}-C\\d+$/i, '');
+      const gcCode = row.code.replace(/-[A-F0-9]{12}-C\d+$/i, '');
       label.appendChild(node(doc, 'div', 'brand', 'GLOBALL CLOUD · WAREHOUSE'));
       label.appendChild(node(doc, 'div', 'gc', gcCode || 'GC'));
       const svg = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
