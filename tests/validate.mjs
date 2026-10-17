@@ -211,7 +211,7 @@ const unifiedContracts = [
   ['public services integrated into customer home', unifiedShell.includes('id="gcCustomerRouteOverview"') && unifiedShell.includes('gc-customer-service-grid')],
   ['customer mobile dock has five primary icons', customerDockCount === 5],
   ['registration hash stays in customer mode', unifiedController.includes("'#auth','#register'") && unifiedController.includes("'#register':'home'")],
-  ['customer navigation prompts for login only on explicit auth routes', unifiedController.includes("const explicitAuthRoute = () => ['#auth', '#register'].includes(window.location.hash)") && (unifiedController.match(/enterCustomerMode\\(\\{showAuth:explicitAuthRoute\\(\\)\\}\\);/g) || []).length === 2],
+  ['customer navigation prompts for login only on explicit auth routes', unifiedController.includes("const explicitAuthRoute = () => ['#auth', '#register'].includes(window.location.hash)") && unifiedController.split('enterCustomerMode({showAuth:explicitAuthRoute()});').length - 1 === 2],
   ['unified customer controller cache key is current', unifiedShell.includes('gc-unified-customer-experience-20261016.js?v=6')],
   ['customer home includes route services and alerts', customerNavigation.includes("'gcCustomerRouteOverview', 'activity'")],
   ['unread alert count is shown on Home icon', customerNavigation.includes("const homeItem = items.find(item => item.dataset.dockTab === 'home')") && customerNavigation.includes('data-dock-unread')],
