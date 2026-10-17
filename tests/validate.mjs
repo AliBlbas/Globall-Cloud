@@ -315,7 +315,7 @@ const staffShipmentScript = read('staff-os-v5-20261017.js')
 const mobileUiContracts = [
   ['customer workspace references the final mobile integrity CSS', publicShell.includes('gc-ui-integrity-mobile-20261017.css?v=6')],
   ['customer style loader puts integrity CSS after signature styles', customerStyleLoader.indexOf('gc-ui-integrity-mobile-20261017.css?v=6') > customerStyleLoader.indexOf('gc-customer-experience-signature-20261017.css?v=2')],
-  ['Staff OS references the current integrity CSS and cache-busted loader', staffOsHtml.includes('gc-ui-integrity-mobile-20261017.css?v=6') && staffOsHtml.includes('staff-os-v5-enhancement-loader-20261017.js?v=5')],
+  ['Staff OS references the current integrity CSS and cache-busted loader', staffOsHtml.includes('gc-ui-integrity-mobile-20261017.css?v=6') && staffOsHtml.includes('staff-os-v5-enhancement-loader-20261017.js?v=6')],
   ['Staff OS loads the scoped command-system design layer', staffOsHtml.includes('gc-staff-command-system-20261017.css?v=1') && staffOsHtml.includes('<body class="gc-staff-os-shell">')],
   ['Staff auth persistence is isolated from customer portal sessions', staffShipmentScript.includes("storageKey: 'gc-staff-os-auth-v5-ahslifnthiwfkmaswjno'")],
   ['Staff overview connects to the shared customer workspace', staffShipmentScript.includes('const customerBridgePanel =') && staffShipmentScript.includes('${customerBridgePanel}') && staffShipmentScript.includes('CUSTOMER WORKSPACE · SHARED DATA')],
