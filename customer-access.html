@@ -1,1 +1,26 @@
-<!doctype html><html lang="ckb" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Globall Cloud — Customer Access</title><link rel="stylesheet" href="/gc-customer-account-20260923.css?v=20261001-3"><style>body{min-height:100vh;display:grid;place-items:center;background:#061428;color:#f5f9fd;font-family:system-ui,sans-serif}.box{width:min(440px,calc(100% - 28px));padding:26px;border:1px solid #214363;border-radius:22px;background:#0d2039}.field{display:block;width:100%;margin:8px 0 14px;padding:12px;border-radius:12px;border:1px solid #214363;background:#081a30;color:#fff;font:inherit}.btn{width:100%;padding:12px;border:0;border-radius:999px;background:#58e5ef;color:#06222a;font-weight:800;font:inherit}.muted{color:#92aac7}.error{color:#ff9d9d}</style></head><body><main class="box"><h1>چوونەژوورەوەی کڕیار</h1><p class="muted">بە کۆدی GC و وشەی نهێنییەکەت بچۆ ناو داشبۆرد.</p><form id="loginForm"><label>کۆدی GC<input id="code" class="field" placeholder="GC-833" required autocomplete="username"></label><label>وشەی نهێنی<input id="password" class="field" type="password" required autocomplete="current-password"></label><button class="btn">چوونەژوورەوە</button><p id="msg" class="muted" aria-live="polite"></p></form><p><a href="/customer-portal.html" class="muted">کڕیاری نوێیت؟ بۆ بەستنەوەی کۆد پەیوەندی بە ستاف بکە</a></p><p><a href="/" class="muted">گەڕانەوە بۆ سەرەکی</a></p></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>const URL='https://ahslifnthiwfkmaswjno.supabase.co',KEY='sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';document.getElementById('loginForm').addEventListener('submit',async e=>{e.preventDefault();const m=document.getElementById('msg');m.textContent='چاوەڕوان بە...';try{const r=await fetch(URL+'/functions/v1/customer-gc-login',{method:'POST',headers:{apikey:KEY,'content-type':'application/json'},body:JSON.stringify({code:document.getElementById('code').value,password:document.getElementById('password').value})});const b=await r.json();if(!r.ok||!b.session)throw new Error(b.error||'Login failed');const sb=supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true}});const saved=await sb.auth.setSession(b.session);if(saved.error)throw saved.error;location.href='/customer-portal.html'}catch(err){m.className='error';m.textContent=err.message||'Login failed'}});</script></body></html>
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#071c2e">
+  <meta http-equiv="refresh" content="0;url=/#auth">
+  <link rel="canonical" href="https://globall-cloud.pages.dev/">
+  <title>Globall Cloud — Customer Access</title>
+  <script>window.location.replace('/#auth');</script>
+  <style>
+    *{box-sizing:border-box}body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:22px;background:#071421;color:#eef9fc;font:15px/1.9 system-ui,sans-serif}
+    main{width:min(460px,100%);padding:26px;border:1px solid #234155;border-radius:22px;background:linear-gradient(155deg,#102b43,#081a2a);box-shadow:0 24px 70px #0005}
+    .brand{font-weight:900;font-size:20px;letter-spacing:-.02em}p{color:#a8c0ce;font-size:13px}
+    a{display:inline-flex;align-items:center;justify-content:center;min-height:46px;margin-top:8px;padding:10px 16px;border-radius:12px;background:#63dce6;color:#06212c;font-weight:900;text-decoration:none}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="brand">Globall Cloud</div>
+    <p>هەموو چوونەژوورەوەکانی کڕیار لە پەڕەی سەرەکی یەکخراون؛ کۆدی GC یان ئیمەیڵ و وشەی نهێنییەکەت لەوێ بنووسە.</p>
+    <a href="/#auth">چوونەژوورەوەی کڕیار</a>
+  </main>
+</body>
+</html>
