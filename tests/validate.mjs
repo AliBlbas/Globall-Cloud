@@ -296,8 +296,8 @@ const unifiedContracts = [
   ['main Staff OS filters inactive unlinked customers', staffConsoleScript.includes("filter==='inactive-unlinked'?x.is_active===false&&!x.auth_user_id:true") && staffConsoleScript.includes('value="inactive-unlinked"')],
   ['customer binding stays Super Admin only', staffConsoleScript.includes("state.staff?.role !== 'super_admin'") && accountAdminSource.includes('Only Super Admin can bind customer accounts')],
   ['customer account binding instructs GC-code login without exposing the internal auth email', staffConsoleScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleScript.includes('Login: ${result.login_email}') && staffConsoleScript.includes('پێویست نییە ئیمەیل بنووسێت')],
-  ['staff console uses a versioned filename and the GC-code login instructions', staffConsoleHtml.includes('/staff-os-v5-20261017.js?v=20261017-5') && staffConsoleVersionedScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleVersionedScript.includes('Login: ${result.login_email}')],
-  ['main Staff OS loads current customer filter assets', staffConsoleHtml.includes('staff-os-v5.css?v=20261016-4') && staffConsoleHtml.includes('staff-os-v5-20261017.js?v=20261017-5') && staffConsoleStyles.includes('.customer-link-guidance')],
+  ['staff console uses a versioned filename and the GC-code login instructions', staffConsoleHtml.includes('/staff-os-v5-20261017.js?v=20261017-6') && staffConsoleVersionedScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleVersionedScript.includes('Login: ${result.login_email}')],
+  ['main Staff OS loads current customer filter assets', staffConsoleHtml.includes('staff-os-v5.css?v=20261016-4') && staffConsoleHtml.includes('staff-os-v5-20261017.js?v=20261017-6') && staffConsoleStyles.includes('.customer-link-guidance')],
 ]
 for (const [label, passed] of unifiedContracts) {
   if (passed) ok(label)
@@ -315,7 +315,13 @@ const staffShipmentScript = read('staff-os-v5-20261017.js')
 const mobileUiContracts = [
   ['customer workspace references the final mobile integrity CSS', publicShell.includes('gc-ui-integrity-mobile-20261017.css?v=6')],
   ['customer style loader puts integrity CSS after signature styles', customerStyleLoader.indexOf('gc-ui-integrity-mobile-20261017.css?v=6') > customerStyleLoader.indexOf('gc-customer-experience-signature-20261017.css?v=2')],
-  ['Staff OS references the current integrity CSS and cache-busted loader', staffOsHtml.includes('gc-ui-integrity-mobile-20261017.css?v=6') && staffOsHtml.includes('staff-os-v5-enhancement-loader-20261017.js?v=4')],
+  ['Staff OS references the current integrity CSS and cache-busted loader', staffOsHtml.includes('gc-ui-integrity-mobile-20261017.css?v=6') && staffOsHtml.includes('staff-os-v5-enhancement-loader-20261017.js?v=5')],
+  ['Staff OS loads the scoped command-system design layer', staffOsHtml.includes('gc-staff-command-system-20261017.css?v=1') && staffOsHtml.includes('<body class="gc-staff-os-shell">')],
+  ['Staff auth persistence is isolated from customer portal sessions', staffShipmentScript.includes("storageKey: 'gc-staff-os-auth-v5-ahslifnthiwfkmaswjno'")],
+  ['Staff overview connects to the shared customer workspace', staffShipmentScript.includes('const customerBridgePanel =') && staffShipmentScript.includes('${customerBridgePanel}') && staffShipmentScript.includes('CUSTOMER WORKSPACE · SHARED DATA')],
+  ['Staff and customer consoles expose a direct safe portal handoff', staffOsHtml.includes('href="/#auth"') && staffShipmentScript.includes('gc-customer-console-link')],
+  ['Mobile staff drawer reuses the core navigation SVG icons', staffEnhancementLoader.includes("'/gc-staff-mobile-dock-20261016.js?v=3'") && staffEnhancementLoader.includes("loadStyle('/gc-staff-command-system-20261017.css?v=1')')],
+
   ['staff enhancement loader loads integrity CSS after the mobile dock', staffEnhancementLoader.indexOf("loadStyle('/gc-ui-integrity-mobile-20261017.css?v=6')") > staffEnhancementLoader.indexOf("loadStyle('/gc-staff-mobile-dock-20261016.css?v=4')")],
   ['customer view selector includes the toolbar and isolated section views', customerViewScript.includes("const allSections = () => [...main.querySelectorAll(':scope > section, :scope > .workspace-toolbar')]") && customerViewScript.includes("settings: ['gcAccountSettings']") && customerViewScript.includes("shipments: ['shipmentsSection']") && customerViewScript.includes("requests: ['quotesPanel', 'newRequest']") && customerViewScript.includes("'#commercial': ['commercial']") && customerViewScript.includes("'#records': ['records']")],
   ['customer dock declares five separate destinations', ['home','shipments','requests','notifications','settings'].every(key => publicShell.includes('data-dock-tab="' + key + '"'))],
