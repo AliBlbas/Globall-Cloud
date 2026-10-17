@@ -1,3 +1,6 @@
+# The single customer workspace owns the root, tracking, login, and registration flows.
+/track /#shipmentsSection 302
+/track/ /#shipmentsSection 302
 # Legacy authentication URLs intentionally converge on the single customer entry.
 /login /#auth 302
 /login/ /#auth 302
