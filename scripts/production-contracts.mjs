@@ -167,7 +167,7 @@ if (!customerReceiptUiSource.includes('warehouse-receipt-evidence') || !customer
 else ok('Customer portal displays warehouse location, timestamp, image evidence, and action links')
 if (!read('index.html').includes('gc-realtime-notifications-20261003.js?v=3') || !realtimeSource.includes("page === '/' && Boolean(document.querySelector('#gcCustomerWorkspace'))")) fail('Root customer workspace must load the real-time notification bridge')
 else ok('Root customer workspace subscribes to real-time account notifications')
-if (!/^\\[functions\\.warehouse-receiving\\]\\s*verify_jwt\\s*=\\s*true$/m.test(read('supabase/config.toml')) || !/^\\[functions\\.warehouse-notify\\]\\s*verify_jwt\\s*=\\s*true$/m.test(read('supabase/config.toml'))) fail('Warehouse endpoints must continue requiring authenticated JWTs')
+if (!/^\[functions\.warehouse-receiving\]\s*verify_jwt\s*=\s*true$/m.test(read('supabase/config.toml')) || !/^\[functions\.warehouse-notify\]\s*verify_jwt\s*=\s*true$/m.test(read('supabase/config.toml'))) fail('Warehouse endpoints must continue requiring authenticated JWTs')
 else ok('Warehouse receipt and notification endpoints keep JWT verification enabled')
 if (!staffV5EnhancementLoader.includes("'/gc-staff-mobile-dock-20261016.js?v=3'") || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-command-system-20261017.css?v=1')")) fail('Staff mobile icon script or final command layer is stale')
 else ok('Staff enhancement loader applies the refreshed mobile navigation and final visual layer')
