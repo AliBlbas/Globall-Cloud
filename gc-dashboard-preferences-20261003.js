@@ -104,8 +104,8 @@
     const allSections = () => [...main.querySelectorAll(':scope > section, :scope > .workspace-toolbar')];
     const viewGroups = {
       home: ['workspace-toolbar', 'overview', 'homeMetrics', 'gcCustomerRouteOverview'],
-      shipments: ['shipmentsSection', 'records'],
-      requests: ['quotesPanel', 'commercial', 'newRequest'],
+      shipments: ['shipmentsSection'],
+      requests: ['quotesPanel', 'newRequest'],
       notifications: ['activity'],
       settings: ['gcAccountSettings'],
     };
@@ -127,7 +127,13 @@
       if (options.enterMode === true && !document.body.classList.contains('gc-customer-app') && typeof window.gcEnterCustomerMode === 'function') {
         window.gcEnterCustomerMode({view:key, hash:nextHash});
       }
-      const visible = new Set(nextHash === '#support' ? ['support'] : viewGroups[key]);
+      // Secondary screens remain within their related primary tab without mixing their contents.
+      const isolatedHashViews = {
+        '#support': ['support'],
+        '#records': ['records'], '#payments': ['records'], '#docs': ['records'], '#invoices': ['records'], '#pods': ['records'],
+        '#commercial': ['commercial'],
+      };
+      const visible = new Set(isolatedHashViews[nextHash] || viewGroups[key]);
       allSections().forEach(section => {
         const show = visible.has(section.id) || visible.has(section.classList.contains('workspace-toolbar') ? 'workspace-toolbar' : '');
         section.classList.toggle('gc-customer-view-hidden', !show);
