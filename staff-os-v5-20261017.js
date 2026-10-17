@@ -154,16 +154,16 @@
       pricing: icon('M6 3h9l3 3v15H6zM9 8h6M9 12h6M9 16h4'),
       warehouses: icon('M3 10h18v10H3zM5 10 12 4l7 6M7 13h3v7H7M14 13h3v7h-3'),
       finance: icon('M4 19V9M10 19V5M16 19v-7M22 19H2'),
-      'staff-chat': icon('M4 5h16v11H8l-4 4z'),
-      'customer-chat': icon('M4 5h16v11H8l-4 4zM8 10h8'),
+      'staff-chat': icon('M7 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6M2 20c.3-3 2-5 5-5s4.7 2 5 5M16 10a3 3 0 1 0 0-6M16 14c3.5 0 5 2 5 5'),
+      'customer-chat': icon('M4 4h16v13h-9l-4 3v-3H4zM8 8h8M8 12h5'),
       requests: icon('M5 4h14v16H5zM8 8h8M8 12h8M8 16h5'),
       activity: icon('M6 4h12M6 8h12M6 12h8M6 16h10'),
       settings: icon('M12 3l1.6 2.8 3.2.5-.8 3.1 2.1 2.3-2.1 2.3.8 3.1-3.2.5L12 21l-1.6-2.8-3.2-.5.8-3.1-2.1-2.3L8 10.1 7.2 7l3.2-.5zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6')
     };
     const items = [
-      ['overview','داشبۆرد',''],['shipments','بارەکان',''],['alerts','Alerts','alertsBadge'],['customers','کڕیاران',''],
+      ['overview','داشبۆرد',''],['shipments','بارەکان',''],['alerts','ئاگادارییەکان','alertsBadge'],['customers','کڕیاران',''],
       ['pricing','نرخەکان',''],['warehouses','کۆگاكان',''],['finance','دارایی',''],['staff-chat','چاتی ستاف','staffChatBadge'],
-      ['customer-chat','چاتی کڕیار','customerChatBadge'],['requests','ئاگاداری / داواکاری','requestBadge'],['activity','Audit Log',''],['settings','ڕێکخستنەکان','']
+      ['customer-chat','چاتی کڕیار','customerChatBadge'],['requests','داواکاری و پرسیارەکان','requestBadge'],['activity','تۆماری کردارەکان',''],['settings','ڕێکخستنەکان','']
     ];
     const navButtons = items.map(([id,label,badge]) =>
       '<button class="nav-btn '+(state.tab===id?'active':'')+'" data-tab="'+id+'"><span class="nav-icon">'+(icons[id]||'')+'</span><span>'+label+'</span>'+(badge?'<em class="nav-badge '+(badge==='alertsBadge'?'hidden':'')+'" id="'+badge+'">0</em>':'')+'</button>'
