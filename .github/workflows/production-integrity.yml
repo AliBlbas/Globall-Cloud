@@ -65,7 +65,7 @@ jobs:
           grep -Fq "window.location.replace('/#auth')" customer-portal.html
           grep -q 'staff-os-v5-20261017.js?v=20261017-5' staff-os-v5.html
           grep -q 'staff-os-v5.css?v=20261016-4' staff-os-v5.html
-          grep -q 'gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-5' index.html
+          grep -q 'gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-6' index.html
           grep -Fq "window.location.replace('/#auth')" customer-portal.html
           grep -Fq 'authForm' gc-csp-scripts/customer-portal-inline-20261017.js
           grep -Fq 'event.preventDefault();' gc-csp-scripts/customer-portal-inline-20261017.js
