@@ -227,10 +227,16 @@ const renderFinance = (invoices, payments, ledger) => {
   const expenseRows = ledger.filter((item) => ['charge', 'adjustment'].includes(item.entry_type));
   const expenseTotals = totalsByCurrency(expenseRows, 'amount');
 
-  $('billedKpi').textContent = formatBuckets(billed);
-  $('paidKpi').textContent = formatBuckets(paid);
-  $('balanceKpi').textContent = formatBuckets(balance);
-  $('expenseKpi').textContent = formatBuckets(expenseTotals);
+  // KPI tiles are optional in the unified workspace layout. Render finance records
+  // even when an older shell does not include the four legacy summary elements.
+  const billedKpi = $('billedKpi');
+  const paidKpi = $('paidKpi');
+  const balanceKpi = $('balanceKpi');
+  const expenseKpi = $('expenseKpi');
+  if (billedKpi) billedKpi.textContent = formatBuckets(billed);
+  if (paidKpi) paidKpi.textContent = formatBuckets(paid);
+  if (balanceKpi) balanceKpi.textContent = formatBuckets(balance);
+  if (expenseKpi) expenseKpi.textContent = formatBuckets(expenseTotals);
 
   const invoiceHtml = invoices.map((item) => {
     const due = Math.max(0, Number(item.total || 0) - Number(item.paid_total || 0));
@@ -479,8 +485,8 @@ $('authForm').addEventListener('submit', async (event) => {
 });
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !$('auth').classList.contains('hidden')) $('close').click(); });
 $('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); location.replace('/#auth'); });
-$('trackBtn').addEventListener('click', () => { location.href = '/#shipmentsSection'; });
-$('quoteBtn').addEventListener('click', () => { $('quoteForm').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('quoteOrigin').focus(); });
+$('trackBtn')?.addEventListener('click', () => { location.href = '/#shipmentsSection'; });
+$('quoteBtn')?.addEventListener('click', () => { $('quoteForm')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); $('quoteOrigin')?.focus(); });
 $('quoteMode')?.addEventListener('change', syncQuoteMeasurements);
 syncQuoteMeasurements();
 $('quoteForm').addEventListener('submit', (event) => submitQuote(event).catch((error) => showMessage(error.message, 'error')));
