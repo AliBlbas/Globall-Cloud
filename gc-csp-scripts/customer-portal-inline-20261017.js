@@ -434,8 +434,23 @@ $('authForm').addEventListener('submit', async (event) => {
     }
     msg.textContent = 'چوونەژوورەوە سەرکەوتوو بوو.';
     $('auth').classList.add('hidden');
+    // Enter the private workspace as soon as Auth issues a session. Data loading
+    // errors must not send the customer back to the login/home screen.
+    if (window.location.hash !== '#overview') window.location.hash = '#overview';
+    if (typeof window.gcEnterCustomerMode === 'function') window.gcEnterCustomerMode({showAuth:false});
+    document.body.classList.add('gc-customer-app');
     $('loginBtn')?.focus();
-    await load();
+    try {
+      await load();
+    } catch (loadError) {
+      console.error('[gc-customer] signed in but dashboard data failed to load', loadError);
+      const status = $('portalStatus');
+      if (status) {
+        status.classList.remove('hidden');
+        status.textContent = 'چوونەژوورەوە سەرکەوتوو بوو، بەڵام بارکردنی داتای کونسۆڵ سەرکەوتوو نەبوو. تکایە refresh بکە یان پەیوەندی بە پشتیوانی بکە.';
+      }
+      setHtml('notifications', '<div class="alert">هەژمارەکەت چووەتە ژوورەوە؛ بەڵام داتاکانی کونسۆڵ نەهاتن. تکایە جارێکی تر refresh بکەرەوە.</div>');
+    }
   } catch (error) {
     const raw = String(error?.message || error || '');
     msg.textContent = /invalid login credentials|invalid gc code or password/i.test(raw)
