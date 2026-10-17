@@ -81,6 +81,10 @@ jobs:
           grep -Fq "event === 'SIGNED_OUT'" gc-realtime-notifications-20261003.js
           grep -Fq 'x.location||x.source_warehouse||x.warehouse' staff-os-v5-20261017.js
           grep -Fq 'item.location || item.source_warehouse || item.warehouse' gc-csp-scripts/customer-portal-inline-20261017.js
+          grep -Fq 'item.received_at || item.photo_taken_at' gc-csp-scripts/customer-portal-inline-20261017.js
+          grep -Fq 'x.received_at||x.scanned_at||x.updated_at' staff-os-v5-20261017.js
+          grep -Fq 'client.auth.onAuthStateChange' gc-realtime-notifications-20261003.js
+          grep -Fq 'const receivedAt=receipt.received_at||new Date().toISOString()' supabase/functions/warehouse-receiving/index.ts
           grep -Fq "page === '/' && Boolean(document.querySelector('#gcCustomerWorkspace'))" gc-realtime-notifications-20261003.js
           grep -q 'staff-os-v5-enhancement-loader-20261017.js?v=6' staff-os-v5.html
           grep -q 'gc-realtime-notifications-20261003.js?v=3' staff-os-v5.html
