@@ -176,12 +176,24 @@ Deno.serve(async (req: Request) => {
     const weight = Number(receipt.weight_actual ?? metadata.gross_weight_kg ?? 0) || 0
     const receivedAt = receipt.received_at || new Date().toISOString()
     const photoUrls = await signedPhotos(admin, receipt.photos)
+    const cartonResult = await admin.from('warehouse_receipt_cartons')
+      .select('carton_index,carton_total,carton_code,warehouse_location,received_at,status,package_id')
+      .eq('receipt_id', receipt.id)
+      .eq('customer_directory_id', customer.id)
+      .order('carton_index', {ascending:true})
+    if (cartonResult.error) throw cartonResult.error
+    const cartonManifest = cartonResult.data || []
+    const cartonCodes = cartonManifest.map((item: Record<string, any>) => String(item.carton_code || '')).filter(Boolean)
+    const cartonSummary = cartonCodes.length
+      ? `کۆدی کارتۆنەکان: ${cartonCodes.slice(0, 15).join(', ')}${cartonCodes.length > 15 ? ` و ${cartonCodes.length - 15} دانەی تر` : ''}`
+      : 'کۆدی تاکەکارتۆن: بەردەست نییە'
     const localTime = new Intl.DateTimeFormat('ku-IQ', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Baghdad' }).format(new Date(receivedAt))
     const title = 'کاڵاکەت لە کۆگا وەرگیرا'
     const bodyText = [
       `GC: ${gcCode}`,
       `کۆگا: ${warehouse}`,
       `کارتۆن: ${cartons}`,
+      cartonSummary,
       `کێش: ${weight > 0 ? `${weight} kg` : 'تۆمارنەکراوە'}`,
       `بەروار و کات (هەولێر): ${localTime}`,
       `ژمارەی وێنەکان: ${photoUrls.length}`,
@@ -195,6 +207,8 @@ Deno.serve(async (req: Request) => {
       batch_code: String(receipt.batch_code || ''), received_at: String(receivedAt),
       photo_taken_at: receipt.photo_taken_at ? String(receipt.photo_taken_at) : null,
       photo_count: photoUrls.length, media_url: photoUrls[0] || null, media_urls: photoUrls,
+      carton_codes: cartonCodes, carton_manifest_count: cartonManifest.length,
+      cartons: cartonManifest.slice(0, 100),
       template_name: Deno.env.get('WHATSAPP_TEMPLATE_NAME') || 'globall_warehouse_received',
       template_language: String(customer.preferred_language || 'ckb'),
     }
@@ -257,7 +271,8 @@ Deno.serve(async (req: Request) => {
       photo_count: photoUrls.length,
       notification: {
         in_app: inAppQueued, in_app_queued: inAppQueued, whatsapp_queued: Boolean(whatsapp?.queued),
-        email_queued: Boolean(email?.queued), whatsapp_status: whatsapp?.status || (!whatsappRecipient ? 'no_recipient' : whatsappOptedIn ? 'error' : 'disabled_by_preference'),
+        email_queued: Boolean(email?.queued), carton_manifest_count: cartonManifest.length,
+        carton_codes: cartonCodes, whatsapp_status: whatsapp?.status || (!whatsappRecipient ? 'no_recipient' : whatsappOptedIn ? 'error' : 'disabled_by_preference'),
         email_status: email?.status || (!emailRecipient ? 'no_recipient' : emailOptedIn ? 'error' : 'disabled_by_preference'),
         whatsapp_opted_in: whatsappOptedIn,
         email_opted_in: emailOptedIn,
