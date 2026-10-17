@@ -794,7 +794,10 @@
       if (!result?.ok || !result?.temporary_password || !result?.login_email) {
         throw new Error(result?.error || 'دروستکردنی هەژمار پشتڕاست نەکرایەوە.');
       }
-      window.alert(`هەژماری کڕیار ئامادەیە\nGC Code / Login ID: ${result.gc_code || code}\nTemporary password: ${result.temporary_password}\n\nکڕیار بە کۆدی GC و ئەم وشەی نهێنییە دەچێتە ژوورەوە؛ پێویست نییە ئیمەیل بنووسێت. وشەی نهێنی بە شێوەی پارێزراو بگەیەنە و داوای گۆڕینی بکە.`);
+      const shipmentLinkStatus = result.warning
+        ? 'ئاگاداری: هەندێک پەیوەندیی باری پێشوو نوێ نەکرایەوە؛ پێویستە لەلایەن Super Admin ـەوە بپشکنرێت.'
+        : 'ژمارەی پەیوەندییەکانی باری پێشوو کە نوێ کرانەوە: ' + Number(result.shipment_links_updated || 0);
+      window.alert('هەژماری کڕیار ئامادەیە\nGC Code / Login ID: ' + (result.gc_code || code) + '\nTemporary password: ' + result.temporary_password + '\n' + shipmentLinkStatus + '\n\nکڕیار بە کۆدی GC و ئەم وشەی نهێنییە دەچێتە ژوورەوە؛ پێویست نییە ئیمەیل بنووسێت. وشەی نهێنی بە شێوەی پارێزراو بگەیەنە و داوای گۆڕینی بکە.');
       await renderCustomers();
     } catch (error) {
       toast(error?.message || 'دروستکردنی هەژمار سەرکەوتوو نەبوو.', 'bad');
