@@ -125,13 +125,19 @@
           const button = document.createElement('button');
           button.type = 'button';
           button.dataset.mobileTab = tab;
-          const number = document.createElement('span');
-          number.className = 'gc-staff-mobile-module-no';
-          number.textContent = String(index + 1).padStart(2, '0');
+          const graphic = document.createElement('span');
+          graphic.className = 'gc-staff-mobile-module-icon';
+          graphic.setAttribute('aria-hidden', 'true');
+          const sourceIcon = original.querySelector('.nav-icon svg');
+          if (sourceIcon) {
+            graphic.appendChild(sourceIcon.cloneNode(true));
+          } else {
+            graphic.textContent = String(index + 1).padStart(2, '0');
+          }
           const caption = document.createElement('span');
           caption.className = 'gc-staff-mobile-module-label';
           caption.textContent = labelOf(original);
-          button.append(number, caption);
+          button.append(graphic, caption);
           button.addEventListener('click', () => {
             findNav(tab)?.click();
             close(false);
