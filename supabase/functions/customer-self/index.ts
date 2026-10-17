@@ -380,9 +380,34 @@ Deno.serve(async (req) => {
     const firstResults=[notifications,preferences,quotes,documentsByUser,invoicesByUser,events,receipts,chatThreads,customerTransactions]
     const firstFailure=firstResults.find((result:any)=>result?.error)
     if(firstFailure?.error)throw firstFailure.error
-    // The receipt query is scoped by directory_customer_id. Sign private evidence URLs server-side;
-    // never return raw Storage object paths to a customer's browser.
-    const customerReceipts = await Promise.all((receipts.data || []).map((receipt: Record<string, any>) => secureWarehouseReceiptPhotos(service, receipt)))
+    // Receipts and their carton manifest are scoped to the authenticated customer's
+    // directory record. Do not return a carton merely because it shares a shipment ID.
+    const receiptRows = receipts.data || []
+    const receiptIds = receiptRows.map((receipt: Record<string, any>) => String(receipt.id)).filter(Boolean)
+    let receiptCartons: Record<string, any>[] = []
+    if (receiptIds.length) {
+      const cartonResult = await service.from('warehouse_receipt_cartons')
+        .select('id,receipt_id,customer_directory_id,gc_code,carton_index,carton_total,carton_code,warehouse_location,received_at,status,package_id,created_by_name,notes,created_at')
+        .in('receipt_id', receiptIds)
+        .eq('customer_directory_id', customer.id)
+        .order('carton_index', {ascending:true})
+      if (cartonResult.error) throw cartonResult.error
+      receiptCartons = cartonResult.data || []
+    }
+    const cartonsByReceipt = new Map<string, Record<string, any>[]>()
+    for (const carton of receiptCartons) {
+      const key = String(carton.receipt_id)
+      const items = cartonsByReceipt.get(key) || []
+      items.push(carton)
+      cartonsByReceipt.set(key, items)
+    }
+    // The photo helper signs private object paths before the response reaches the browser.
+    const customerReceipts = await Promise.all(receiptRows.map((receipt: Record<string, any>) =>
+      secureWarehouseReceiptPhotos(service, {
+        ...receipt,
+        cartons: cartonsByReceipt.get(String(receipt.id)) || [],
+      })
+    ))
     // Include public documents and legacy invoices attached to single-owner
     // shipments even when older staff records predate customer_user_id linking.
     // Never attach an unowned invoice/document from a consolidated shipment.
