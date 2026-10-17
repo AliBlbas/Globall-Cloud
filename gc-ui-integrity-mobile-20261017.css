@@ -412,3 +412,24 @@ body:has(#app) #app :where(input,select,textarea):focus-visible {
     transition-duration: .01ms !important;
   }
 }
+
+
+/* Clear selected-state hierarchy: the Requests action is not permanently highlighted.
+   Exactly the active destination gets the bright surface, including the Settings button. */
+@media (max-width: 900px) {
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > a.dock-primary:not(.active) {
+    color: #9bb4c3 !important;
+    background: rgba(255,255,255,.025) !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > a.dock-primary.active,
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > button.active,
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > a[aria-current="page"],
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > button[aria-current="page"] {
+    color: #062a32 !important;
+    background: linear-gradient(135deg,#73e4ec,#35c5d7) !important;
+    border-color: rgba(124,225,238,.68) !important;
+    box-shadow: 0 8px 24px rgba(53,197,215,.2) !important;
+  }
+}
