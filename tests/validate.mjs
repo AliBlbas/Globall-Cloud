@@ -193,6 +193,7 @@ const staffConsoleHtml = read('staff-os-v5.html')
 const staffConsoleScript = read('staff-os-v5.js')
 const staffConsoleStyles = read('staff-os-v5.css')
 const unifiedShell = read('index.html')
+const productionMiddleware = read('functions/_middleware.js')
 const unifiedController = read('gc-unified-customer-experience-20261016.js')
 const customerNavigation = read('gc-dashboard-preferences-20261003.js')
 const customerStyleLoader = read('gc-public-customer-style-loader-20261014.js')
@@ -255,7 +256,8 @@ const unifiedContracts = [
   ['customer transport cards use real air sea and land images', ['gc-air-freight-hero-640.webp','gc-sea-freight-hero-640.webp','gc-land-freight-hero-640.webp'].every(image => customerWorkspaceStyles.includes(image))],
   ['customer content clears the five-tab mobile navigation', customerWorkspaceStyles.includes('padding-bottom:calc(132px + env(safe-area-inset-bottom))') && customerDockStyles.includes('padding-bottom:calc(136px + env(safe-area-inset-bottom))')],
   ['current premium styles are cache-busted in the index', unifiedShell.includes('gc-homepage-signature-20261016.css?v=10') && unifiedShell.includes('gc-live-mobile-v3.css?v=20261017-2') && unifiedShell.includes('gc-customer-mobile-dock-20261016.css?v=5') && unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=21')],
-  ['customer route scripts are cache-busted after navigation fixes', unifiedShell.includes('gc-settings-hub.js?v=20261017-12') && unifiedShell.includes('gc-dashboard-preferences-20261003.js?v=20261017-2') && unifiedShell.includes('gc-unified-customer-experience-20261016.js?v=20261017-1')],
+  ['customer route scripts are cache-busted after navigation fixes', unifiedShell.includes('gc-settings-hub.js?v=20261017-13') && unifiedShell.includes('gc-dashboard-preferences-20261003.js?v=20261017-3') && unifiedShell.includes('gc-unified-customer-experience-20261016.js?v=20261017-1')],
+  ['middleware refreshes the versioned settings and injected assets', productionMiddleware.includes("const VERSION = '20261017-13';") && productionMiddleware.includes('/gc-settings-hub.js?v=${VERSION}') && productionMiddleware.includes('/gc-settings-hub.css?v=${VERSION}')],
   ['tracking URL redirects to the customer shipment view', authRedirects.includes('/track /#shipmentsSection 302') && authRedirects.includes('/track/ /#shipmentsSection 302')],
   ['registration hash stays in customer mode', unifiedController.includes("'#auth':'home'") && unifiedController.includes("'#register':'home'")],
   ['private views require customer authentication', unifiedController.includes('const privateHashes = new Set([') && unifiedController.includes('verifyExistingSession(hash === \'#auth\' || hash === \'#register\' || privateHashes.has(hash))')],
@@ -290,7 +292,7 @@ const unifiedContracts = [
   ['main Staff OS filters inactive unlinked customers', staffConsoleScript.includes("filter==='inactive-unlinked'?x.is_active===false&&!x.auth_user_id:true") && staffConsoleScript.includes('value="inactive-unlinked"')],
   ['customer binding stays Super Admin only', staffConsoleScript.includes("state.staff?.role !== 'super_admin'") && accountAdminSource.includes('Only Super Admin can bind customer accounts')],
   ['customer account binding instructs GC-code login without exposing the internal auth email', staffConsoleScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleScript.includes('Login: ${result.login_email}') && staffConsoleScript.includes('پێویست نییە ئیمەیل بنووسێت')],
-  ['staff console uses a versioned filename and the GC-code login instructions', staffConsoleHtml.includes('/staff-os-v5-20261017.js?v=20261017-2') && staffConsoleVersionedScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleVersionedScript.includes('Login: ${result.login_email}')],
+  ['staff console uses a versioned filename and the GC-code login instructions', staffConsoleHtml.includes('/staff-os-v5-20261017.js?v=20261017-3') && staffConsoleVersionedScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleVersionedScript.includes('Login: ${result.login_email}')],
   ['main Staff OS loads current customer filter assets', staffConsoleHtml.includes('staff-os-v5.css?v=20261016-4') && staffConsoleHtml.includes('staff-os-v5.js?v=20261016-19') && staffConsoleStyles.includes('.customer-link-guidance')],
 ]
 for (const [label, passed] of unifiedContracts) {
