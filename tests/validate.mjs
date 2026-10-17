@@ -207,6 +207,8 @@ const staffShipmentControlSource = read('supabase/functions/staff-shipment-contr
 const shipmentCustomerLinksMigration = read('supabase/migrations/20261017120000_staff_customer_unified_shipment_links.sql')
 const notificationIndexMigration = read('supabase/migrations/20261017040435_customer_notification_idempotency_unique_index.sql')
 const customerPortalSource = read('gc-csp-scripts/customer-portal-inline-1.js')
+const customerPortalVersionedScript = read('gc-csp-scripts/customer-portal-inline-20261017.js')
+const staffConsoleVersionedScript = read('staff-os-v5-20261017.js')
 const staffOpsHubSource = read('supabase/functions/staff-ops-hub/index.ts')
 const customerAccountEntry = read('gc-account-entry.js')
 const accountAdminSource = read('supabase/functions/account-admin/index.ts')
@@ -237,7 +239,7 @@ const unifiedContracts = [
   ['customer finance ledger is scoped to canonical GC and customer-facing transaction types', customerSelfSource.includes(".eq('gc_code',financeCode).in('type',['customer_charge','customer_payment','refund','adjustment'])") && customerSelfSource.includes('customer_transactions:customerTransactions.data||[]')],
   ['staff finance charge/payment creates and updates send deduplicated customer notifications', staffOpsHubSource.includes('async function notifyCustomerFinance') && staffOpsHubSource.includes("onConflict:'customer_user_id,event_key'") && staffOpsHubSource.includes("notifyCustomerFinance(a,created,'created')") && staffOpsHubSource.includes("notifyCustomerFinance(a,updated,'updated')")],
   ['customer portal displays only returned customer finance transaction history', customerPortalSource.includes('customerTransactions = []') && customerPortalSource.includes('dashboard.customer_transactions || []') && customerPortalSource.includes('customer_charge')],
-  ['modified customer portal script is cache-busted in the active homepage', unifiedShell.includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261017-3')],
+  ['customer portal uses a versioned filename and includes cargo/finance integration', unifiedShell.includes('/gc-csp-scripts/customer-portal-inline-20261017.js') && customerPortalVersionedScript.includes('dashboard.customer_transactions || []') && customerPortalVersionedScript.includes('renderShipments(rows, dashboard.cargo_items || [])')],
   ['shipment membership migration is locked to service role and backfills cargo owners', shipmentCustomerLinksMigration.includes('shipment_customer_links_shipment_customer_key') && shipmentCustomerLinksMigration.includes('revoke all on table public.shipment_customer_links from anon, authenticated') && shipmentCustomerLinksMigration.includes('from public.shipment_cargo_items ci')],
   ['customer notification upsert conflict target has a matching full unique index', notificationIndexMigration.includes('create unique index if not exists customer_notifications_event_key_full_uidx') && notificationIndexMigration.includes('rename to customer_notifications_event_key_uidx')],
   ['customer navigation initializes all declared icons without runtime reference errors', customerNavigation.includes('const mountIcons = (root = document) =>') && customerNavigation.includes('node.innerHTML = icons[key]') && ['user','wallet','documents','moving','warehouse','route','send','lock','logout'].every(icon => customerNavigation.includes(icon + ':'))],
@@ -284,7 +286,7 @@ const unifiedContracts = [
   ['main Staff OS filters inactive unlinked customers', staffConsoleScript.includes("filter==='inactive-unlinked'?x.is_active===false&&!x.auth_user_id:true") && staffConsoleScript.includes('value="inactive-unlinked"')],
   ['customer binding stays Super Admin only', staffConsoleScript.includes("state.staff?.role !== 'super_admin'") && accountAdminSource.includes('Only Super Admin can bind customer accounts')],
   ['customer account binding instructs GC-code login without exposing the internal auth email', staffConsoleScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleScript.includes('Login: ${result.login_email}') && staffConsoleScript.includes('پێویست نییە ئیمەیل بنووسێت')],
-  ['staff script cache is refreshed after GC login instruction change', staffConsoleHtml.includes('staff-os-v5.js?v=20261017-1')],
+  ['staff console uses a versioned filename and the GC-code login instructions', staffConsoleHtml.includes('/staff-os-v5-20261017.js') && staffConsoleVersionedScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleVersionedScript.includes('Login: ${result.login_email}')],
   ['main Staff OS loads current customer filter assets', staffConsoleHtml.includes('staff-os-v5.css?v=20261016-4') && staffConsoleHtml.includes('staff-os-v5.js?v=20261016-19') && staffConsoleStyles.includes('.customer-link-guidance')],
 ]
 for (const [label, passed] of unifiedContracts) {
