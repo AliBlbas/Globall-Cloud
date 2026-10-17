@@ -349,7 +349,6 @@ const acceptQuote = async (quoteId) => {
   showMessage('Quote پەسەندکرا.', 'success'); await load();
 };
 
-$('authForm')?.addEventListener('submit', (event) => { event.preventDefault(); $('signIn').click(); });
 $('loginBtn').addEventListener('click', () => { $('auth').classList.remove('hidden'); $('email')?.focus(); });
 $('loginPromptBtn')?.addEventListener('click', () => { $('auth').classList.remove('hidden'); $('email')?.focus(); });
 $('close').addEventListener('click', () => { $('auth').classList.add('hidden'); $('loginBtn')?.focus(); });
