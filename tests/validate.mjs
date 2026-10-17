@@ -67,7 +67,7 @@ const required = [
   'supabase/functions/public-config/index.ts',
   'supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
   'supabase/functions/notification-dispatch/index.ts','supabase/functions/warehouse-receiving/index.ts','supabase/functions/warehouse-notify/index.ts',
-  'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/invoice-ai/index.ts',
+  'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/invoice-ai/index.ts','supabase/functions/operations-v4/index.ts',
   'supabase/functions/customer-debt-assistant/index.ts','supabase/functions/fx-refresh/index.ts','supabase/functions/_shared/payment-providers.ts',
 ]
 const beforeReq = failures
@@ -209,6 +209,7 @@ const customerSignatureStyles = read('gc-customer-experience-signature-20261017.
 const customerPortalAuth = read('gc-csp-scripts/customer-portal-inline-20261017.js')
 const customerSettingsHub = read('gc-settings-hub.js')
 const customerSelfSource = read('supabase/functions/customer-self/index.ts')
+const operationsV4Source = read('supabase/functions/operations-v4/index.ts')
 const publicConfigSource = read('supabase/functions/public-config/index.ts')
 const staffShipmentSource = read('supabase/functions/staff-shipment-v5/index.ts')
 const staffShipmentControlSource = read('supabase/functions/staff-shipment-control/index.ts')
@@ -391,6 +392,8 @@ const mobileUiContracts = [
   ['warehouse receipt alerts lead to the supported customer records route', warehouseReceivingSource.includes("const actionUrl='/#records'") && warehouseNotifySource.includes("const actionUrl = '/#records'")],
   ['warehouse receipt trigger uses the valid composite idempotency conflict target', warehouseReceiptNotificationMigration.includes('ON CONFLICT (customer_user_id, event_key) DO NOTHING') && warehouseReceiptNotificationMigration.includes("'/#records'")],
   ['customer notification fan-out safely matches UUID shipments to legacy text notification ids', customerNotificationFanoutMigration.includes("s.id::text = NULLIF(BTRIM(NEW.shipment_id), '')") && customerNotificationFanoutMigration.includes('CREATE OR REPLACE FUNCTION public.fanout_customer_notification()')],
+  ['staff quote calculator handles numeric/volumetric weights server-side and requires staff access', operationsV4Source.includes("if(action==='quote_calculate')") && operationsV4Source.includes('length*width*height/6000') && operationsV4Source.includes('Invalid quote calculation input') && operationsV4Source.includes('Staff permission required')],
+  ['unsupported operations actions return a client error instead of 500', operationsV4Source.includes('Invalid|Unsupported action/i.test(m)')],
   ['public-config preflight returns an empty 204 response body', publicConfigSource.includes("new Response(null, { status: 204, headers: headers(origin) })") && !publicConfigSource.includes("new Response('ok', { status: 204")],
   ['customer warehouse evidence styles include responsive photo proof cards', customerWarehouseEvidenceCss.includes('.warehouse-receipt-evidence') && customerWarehouseEvidenceCss.includes('.photo-grid')],
   ['owner-account warehouse notifications carry only that owner’s freshly signed receipt photos', customerSelfSource.includes("body,action_url,event_key,read_at,created_at") && customerSelfSource.includes("receiptsById.get(eventKey.slice(prefix.length))") && customerSelfSource.includes('receipt_photos: Array.isArray(receipt.photos)') && customerPortalVersionedScript.includes('notification-receipt-photo-grid') && customerWarehouseEvidenceCss.includes('notification-receipt-photo-grid')],
