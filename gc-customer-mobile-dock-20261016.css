@@ -226,3 +226,59 @@ body.gc-customer-app #gcCustomerWorkspace > .mobile-dock [data-dock-unread] {
 body.gc-customer-app #gcCustomerWorkspace > .mobile-dock [data-dock-unread][hidden] {
   display: none !important;
 }
+
+
+/* FINAL MOBILE NAV OVERRIDE · safe-area first, five equal customer actions. */
+body.gc-customer-app #gcCustomerWorkspace .app-main{
+  padding-bottom:calc(136px + env(safe-area-inset-bottom))!important;
+}
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock{
+  display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  position:fixed!important;z-index:10020!important;
+  left:5px!important;right:5px!important;bottom:calc(5px + env(safe-area-inset-bottom))!important;
+  height:auto!important;min-height:72px!important;padding:5px!important;gap:3px!important;
+  align-items:stretch!important;overflow:visible!important;
+  border:1px solid rgba(104,198,222,.26)!important;border-radius:19px!important;
+  background:rgba(4,17,29,.97)!important;
+  box-shadow:0 18px 46px rgba(0,0,0,.45),inset 0 1px rgba(255,255,255,.05)!important;
+  -webkit-backdrop-filter:blur(23px) saturate(150%)!important;backdrop-filter:blur(23px) saturate(150%)!important;
+}
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > a,
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > button{
+  display:flex!important;min-width:0!important;min-height:59px!important;height:auto!important;
+  padding:5px 2px!important;gap:4px!important;border-radius:13px!important;border:1px solid transparent!important;
+  flex-direction:column!important;align-items:center!important;justify-content:center!important;
+  background:transparent!important;color:#98b4c4!important;font-size:9px!important;font-weight:850!important;line-height:1.3!important;
+  white-space:normal!important;overflow-wrap:anywhere!important;
+}
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > a.active,
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > button.active{
+  color:#83eaf0!important;border-color:rgba(86,219,232,.25)!important;
+  background:linear-gradient(160deg,rgba(45,197,218,.17),rgba(15,80,108,.22))!important;
+}
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > a.dock-primary{
+  background:linear-gradient(145deg,#89f0f2,#3bcbdc)!important;color:#04252d!important;
+  border-color:rgba(157,244,246,.45)!important;box-shadow:0 8px 22px rgba(31,177,207,.18)!important;
+}
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock svg{
+  display:block!important;flex:0 0 20px!important;width:20px!important;height:20px!important;max-width:20px!important;
+}
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock small{
+  display:block!important;max-width:100%!important;margin:0!important;
+  font-size:clamp(7px,2.1vw,9px)!important;font-weight:850!important;line-height:1.3!important;
+  text-align:center!important;white-space:normal!important;overflow-wrap:anywhere!important;
+}
+body.gc-customer-app #gcCustomerWorkspace > .mobile-dock [data-dock-unread]{
+  border:1.5px solid #061827!important;background:#ef6c6c!important;color:#fff!important;z-index:3!important;
+}
+body.gc-customer-app .gc-mobile-dock-v3,
+body.gc-customer-app #gcPrimaryMobileNav{display:none!important;visibility:hidden!important;pointer-events:none!important}
+@media(max-width:390px){
+  body.gc-customer-app #gcCustomerWorkspace .app-main{padding-inline:8px!important;padding-bottom:calc(130px + env(safe-area-inset-bottom))!important}
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock{left:4px!important;right:4px!important;padding:4px!important;gap:2px!important}
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > a,
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock > button{font-size:8px!important}
+}
+@media(min-width:901px){
+  body.gc-customer-app #gcCustomerWorkspace > .mobile-dock{display:none!important}
+}
