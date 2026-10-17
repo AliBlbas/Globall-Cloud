@@ -83,6 +83,75 @@ async function activity(db:any, staff:any, action:string, targetId:string, detai
   })
 }
 
+
+async function syncShipmentCustomerLinks(db:any, shipmentId:string, primaryDirectoryId:string|null, staffId:string, reconcile=true) {
+  const idsSet=new Set<string>(); if(primaryDirectoryId)idsSet.add(String(primaryDirectoryId));
+  const cargoResult=await db.from('shipment_cargo_items').select('customer_directory_id').eq('shipment_id',shipmentId);
+  if(cargoResult.error)throw cargoResult.error;
+  for(const item of cargoResult.data||[])if(item.customer_directory_id)idsSet.add(String(item.customer_directory_id));
+  if(!idsSet.size)return [];
+  const ids=[...idsSet];
+  const customerResult=await db.from('customer_directory').select('id,code,gc_code,name,auth_user_id,is_active,preferred_language').in('id',ids);
+  if(customerResult.error)throw customerResult.error;
+  const customers=customerResult.data||[];
+  const byId=new Map(customers.map((item:any)=>[String(item.id),item]));
+  if(ids.some(id=>!byId.has(id)))throw new Error('Shipment cargo points to a missing customer directory record');
+  const existingResult=await db.from('shipment_customer_links').select('id,customer_directory_id').eq('shipment_id',shipmentId);
+  if(existingResult.error)throw existingResult.error;
+  const existing=existingResult.data||[];
+  const existingIds=new Set(existing.map((item:any)=>String(item.customer_directory_id)));
+  const newRows=customers.filter((item:any)=>!existingIds.has(String(item.id))).map((item:any)=>({
+    shipment_id:shipmentId,customer_directory_id:item.id,customer_user_id:item.auth_user_id||null,
+    customer_gc_code:item.gc_code||item.code||null,created_by:staffId
+  }));
+  if(newRows.length){
+    const added=await db.from('shipment_customer_links').upsert(newRows,{onConflict:'shipment_id,customer_directory_id',ignoreDuplicates:true});
+    if(added.error)throw added.error;
+  }
+  const freshResult=await db.from('shipment_customer_links').select('id,customer_directory_id').eq('shipment_id',shipmentId);
+  if(freshResult.error)throw freshResult.error;
+  const fresh=freshResult.data||[];
+  for(const link of fresh){
+    const directoryId=String(link.customer_directory_id); if(!idsSet.has(directoryId))continue;
+    const customer=byId.get(directoryId) as any;
+    const saved=await db.from('shipment_customer_links').update({
+      customer_user_id:customer.auth_user_id||null,customer_gc_code:customer.gc_code||customer.code||null,updated_at:new Date().toISOString()
+    }).eq('id',link.id);
+    if(saved.error)throw saved.error;
+  }
+  if(reconcile){
+    const stale=fresh.filter((item:any)=>!idsSet.has(String(item.customer_directory_id))).map((item:any)=>item.id);
+    if(stale.length){const removed=await db.from('shipment_customer_links').delete().in('id',stale);if(removed.error)throw removed.error;}
+  }
+  return customers;
+}
+async function notifyShipmentCustomers(db:any, customers:any[], shipmentId:string, trackingId:string, suffix:string, eventKind:string, status:string|null=null, location:string|null=null) {
+  const users=new Map<string,any>();
+  for(const customer of customers||[])if(customer?.is_active===true&&customer?.auth_user_id)users.set(String(customer.auth_user_id),customer);
+  const rows=[...users.entries()].map(([userId,customer])=>{
+    const language=String(customer.preferred_language||'ckb').toLowerCase();
+    let title='بارەکەت نوێکرایەوە'; let body='دۆخی بارەکەت لە Globall Cloud نوێکرایەوە.';
+    if(eventKind==='shipment_created'){
+      title=language==='en'?'Shipment registered':language==='ar'?'تم تسجيل الشحنة':'بارەکەت تۆمار کرا';
+      body=language==='en'?'Shipment '+trackingId+' was registered and is now available in your customer console.':language==='ar'?'تم تسجيل الشحنة '+trackingId+' وأصبحت متاحة في حسابك.':'باری '+trackingId+' تۆمار کرا و لە کونسۆلی کڕیارەکەتدا بەردەستە.';
+    }else if(eventKind==='shipment_status'){
+      title=language==='en'?'Shipment status updated':language==='ar'?'تم تحديث حالة الشحنة':'دۆخی بارەکەت نوێکرایەوە';
+      body=language==='en'?'The public status for shipment '+trackingId+' is now '+String(status||'updated')+(location?' · '+location:'')+'.':language==='ar'?'تم تحديث حالة الشحنة '+trackingId+' إلى '+String(status||'updated')+(location?' · '+location:'')+'.':'دۆخی گشتی باری '+trackingId+' نوێکرایەوە'+(location?' · شوێن: '+location:'')+'.';
+    }else if(eventKind==='shipment_contents'){
+      title=language==='en'?'Shipment contents updated':language==='ar'?'تم تحديث محتويات الشحنة':'ناوەڕۆکی باری کڕیار نوێکرایەوە';
+      body=language==='en'?'The cargo details for shipment '+trackingId+' were updated.':language==='ar'?'تم تحديث تفاصيل البضائع للشحنة '+trackingId+'.':'وردەکاریی کاڵاکانی باری '+trackingId+' نوێکرانەوە.';
+    }else{
+      title=language==='en'?'Shipment update':language==='ar'?'تحديث الشحنة':'نوێکردنەوەی بار';
+      body=language==='en'?'There is a new public update for shipment '+trackingId+'.':language==='ar'?'هناك تحديث جديد للشحنة '+trackingId+'.':'نوێکردنەوەیەکی گشتی بۆ باری '+trackingId+' هەیە.';
+    }
+    return {customer_user_id:userId,shipment_id:String(shipmentId),kind:eventKind,title,body,action_url:'/#shipmentsSection',event_key:'shipment:'+String(shipmentId)+':'+suffix};
+  });
+  if(!rows.length)return {attempted:0,saved:0,warning:null as string|null};
+  const result=await db.from('customer_notifications').upsert(rows,{onConflict:'customer_user_id,event_key',ignoreDuplicates:true});
+  if(result.error){console.warn('customer shipment notification insert failed',result.error.message);return {attempted:rows.length,saved:0,warning:result.error.message};}
+  return {attempted:rows.length,saved:rows.length,warning:null as string|null};
+}
+
 Deno.serve(async (req:Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', {headers:cors(req)})
   try {
@@ -237,24 +306,33 @@ Deno.serve(async (req:Request) => {
       }
     }
 
+    const linkedCustomers = await syncShipmentCustomerLinks(a.db,id,current.data.directory_customer_id ? String(current.data.directory_customer_id) : null,a.staff.id,true)
     let eventSeeded = false
-    if (changedStatus || changedLocation || text(p.note)) {
+    let notificationResult = {attempted:0,saved:0,warning:null as string|null}
+    if (changedStatus || changedLocation || text(p.note) || hasCargoItems || hasDeletedCargoIds) {
+      const isContentUpdate = Boolean(hasCargoItems || hasDeletedCargoIds)
+      const title = changedStatus ? 'Status گۆڕدرا بۆ ' + requestedStatus : isContentUpdate ? 'ناوەڕۆکی بار نوێکرایەوە' : 'نوێکردنەوەی عملیات'
+      const note = text(p.note) || (changedStatus ? 'Status لەلایەن ' + a.staff.full_name + ' نوێکرایەوە.' : isContentUpdate ? 'وردەکاریی ناوەڕۆکی بار لەلایەن ' + a.staff.full_name + ' نوێکرایەوە.' : 'دۆخی بار لەلایەن ' + a.staff.full_name + ' نوێکرایەوە.')
       const ev = await a.db.from('shipment_tracking_events').insert({
         shipment_id:id,
         status_key:requestedStatus || row.status || 'received_origin',
-        title: changedStatus ? `Status گۆڕدرا بۆ ${requestedStatus}` : 'نوێکردنەوەی عملیات',
-        note: text(p.note) || (changedStatus ? `Status لەلایەن ${a.staff.full_name} نوێکرایەوە.` : `دۆخی بار لەلایەن ${a.staff.full_name} نوێکرایەوە.`),
+        title,
+        note,
         location_label: text(p.current_location_label || p.location_label) || row.current_location_label || row.origin_warehouse,
         created_by:a.staff.id,
         created_by_name:a.staff.full_name,
         is_public:p.is_public !== false
-      })
+      }).select('id').single()
       if (ev.error) throw ev.error
       eventSeeded = true
+      if (p.is_public !== false) {
+        const kind = changedStatus ? 'shipment_status' : isContentUpdate ? 'shipment_contents' : 'shipment_update'
+        notificationResult = await notifyShipmentCustomers(a.db,linkedCustomers,String(id),String(row.tracking_id || row.tracking_number || row.customer_gc_code || id),'event-' + String(ev.data.id),kind,String(row.operational_status || row.status || ''),String(row.current_location_label || row.origin_warehouse || ''))
+      }
     }
 
     await activity(a.db,a.staff,'shipment.update',id,{before:{status:current.data.status,location:current.data.current_location_label,dispatched_at:current.data.dispatched_at},after:{status:row.status,location:row.current_location_label,dispatched_at:row.dispatched_at},cargo_items:{submitted:hasCargoItems,upserted:cargoRowsUpdated,deleted:deletedCargoIds.length,items:cargoItems.map((item) => ({id:item.id||null,customer_gc_code:item.customer_gc_code,item_name:item.item_name,quantity_pc:item.quantity_pc,box_count:item.box_count}))},role})
-    return out(req,{shipment:row,event_seeded:eventSeeded,cargo_items_saved:cargoRowsUpdated,cargo_items_deleted:deletedCargoIds.length})
+    return out(req,{shipment:row,event_seeded:eventSeeded,cargo_items_saved:cargoRowsUpdated,cargo_items_deleted:deletedCargoIds.length,linked_customer_count:linkedCustomers.length,notifications_attempted:notificationResult.attempted,notifications_saved:notificationResult.saved,notification_warning:notificationResult.warning})
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e)
     const status = /Unauthorized/i.test(message) ? 401 : /permission|Forbidden/i.test(message) ? 403 : /already exists/i.test(message) ? 409 : /required|requires|needs|Invalid|invalid|at most|cannot|must be|not found/i.test(message) ? 400 : 500

@@ -202,6 +202,10 @@ const customerSignatureStyles = read('gc-customer-experience-signature-20261017.
 const customerPortalAuth = read('gc-csp-scripts/customer-portal-inline-1.js')
 const customerSettingsHub = read('gc-settings-hub.js')
 const customerSelfSource = read('supabase/functions/customer-self/index.ts')
+const staffShipmentSource = read('supabase/functions/staff-shipment-v5/index.ts')
+const staffShipmentControlSource = read('supabase/functions/staff-shipment-control/index.ts')
+const shipmentCustomerLinksMigration = read('supabase/migrations/20261017120000_staff_customer_unified_shipment_links.sql')
+const customerPortalSource = read('gc-csp-scripts/customer-portal-inline-1.js')
 const customerAccountEntry = read('gc-account-entry.js')
 const accountAdminSource = read('supabase/functions/account-admin/index.ts')
 const customerDockStart = unifiedShell.indexOf('<nav class="mobile-dock"')
@@ -221,6 +225,14 @@ const unifiedContracts = [
   ['customer Home and Notifications are isolated views', customerNavigation.includes("home: ['workspace-toolbar', 'overview', 'homeMetrics', 'gcCustomerRouteOverview']") && customerNavigation.includes("notifications: ['activity']")],
   ['customer Orders includes shipments and related records', customerNavigation.includes("shipments: ['shipmentsSection', 'records']") && customerNavigation.includes("'#records':'shipments'") && unifiedController.includes("'#records':'shipments'")],
   ['customer Settings has profile, avatar, password, and preference controls', customerSettingsHub.includes("section.id = 'gcAccountSettings'") && customerSettingsHub.includes("account-self-password") && customerSettingsHub.includes("sb.storage.from('avatars')") && customerSettingsHub.includes("window.gcSelectCustomerView('shipments')")],
+  ['staff shipment creation links trusted directory customers and sends in-app notifications', staffShipmentSource.includes("customer_user_id:customer?.auth_user_id||null") && staffShipmentSource.includes("syncShipmentCustomerLinks(a.db,id,customer.id,a.staff.id,true)") && staffShipmentSource.includes("notifyShipmentCustomers(a.db,linkedCustomers,id,tracking,'created','shipment_created'")],
+  ['staff shipment updates reconcile cargo membership and notify only public updates', staffShipmentControlSource.includes('hasCargoItems || hasDeletedCargoIds') && staffShipmentControlSource.includes('syncShipmentCustomerLinks(a.db,id,current.data.directory_customer_id') && staffShipmentControlSource.includes('notifyShipmentCustomers') && staffShipmentControlSource.includes('if (p.is_public !== false)')],
+  ['customer self-service filters tracking events to public rows', customerSelfSource.includes(".eq('is_public',true)")],
+  ['customer payments are scoped to invoices owned by the authenticated customer', customerSelfSource.includes(".in('invoice_id',invoiceIds)") && customerSelfSource.includes("shipment_customer_links")],
+  ['shared shipments hide global totals and return only owned cargo rows', customerSelfSource.includes('is_consolidated:shared') && customerSelfSource.includes('cargo_items:ownCargoRows') && customerSelfSource.includes('total_amount:shared?null')],
+  ['Super Admin account binding refreshes shipment memberships', accountAdminSource.includes("from('shipment_customer_links').update({customer_user_id:userId")],
+  ['customer console displays tracking IDs and the customer's cargo', customerPortalSource.includes('item.tracking_id||item.tracking_number||item.customer_gc_code||item.id') && customerPortalSource.includes('renderShipments(rows, dashboard.cargo_items || [])')],
+  ['shipment membership migration is locked to service role and backfills cargo owners', shipmentCustomerLinksMigration.includes('shipment_customer_links_shipment_customer_key') && shipmentCustomerLinksMigration.includes('revoke all on table public.shipment_customer_links from anon, authenticated') && shipmentCustomerLinksMigration.includes('from public.shipment_cargo_items ci')],
   ['customer navigation initializes all declared icons without runtime reference errors', customerNavigation.includes('const mountIcons = (root = document) =>') && customerNavigation.includes('node.innerHTML = icons[key]') && ['user','wallet','documents','moving','warehouse','route','send','lock','logout'].every(icon => customerNavigation.includes(icon + ':'))],
   ['customer view controller includes dynamically-mounted account settings', customerNavigation.includes("const allSections = () => [...main.querySelectorAll(':scope > section')]") && customerNavigation.includes('allSections().forEach(section =>')],
   ['staff console is visible only after backend role verification', customerSettingsHub.includes("/functions/v1/account-self-profile") && customerSettingsHub.includes("profile?.kind === 'staff'") && customerSettingsHub.includes("STAFF_ROLES.has(profile.role)") && customerSettingsHub.includes("if (staffAccessVerified) window.location.assign('/staff')")],

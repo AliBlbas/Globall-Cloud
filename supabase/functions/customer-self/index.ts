@@ -194,62 +194,126 @@ Deno.serve(async (req) => {
       return json(req, {error: 'Unsupported customer action.'}, 400)
     }
 
-    const {data: shipmentRows, error: shipmentError} = await service
-      .from('shipments')
-      .select('id,origin_key,dest_key,current_step_index,operational_status,current_location_label,current_lat,current_lng,tracking_updated_at,total_amount,paid_amount,eta,created_at')
-      .eq('customer_user_id', user.id)
-      .order('created_at', {ascending: false})
-      .limit(30)
-    if (shipmentError) throw shipmentError
-    const shipments = shipmentRows || []
-    const shipmentIds = shipments.map((item) => item.id).filter(Boolean)
 
-    const [notifications, preferences, quotes, documents, pods, invoices, payments, events, ledger, receipts, packages, chatThreads] = await Promise.all([
-      service.from('customer_notifications').select('id,title,body,read_at,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(12),
-      service.from('customer_notification_preferences').select('email_enabled,whatsapp_enabled,sms_enabled,in_app_enabled,quiet_hours_start,quiet_hours_end,updated_at').eq('customer_user_id', user.id).maybeSingle(),
-      service.from('quote_requests').select('id,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,status,quoted_amount,currency,valid_until,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(12),
-      service.from('shipment_documents').select('id,shipment_id,document_type,title,file_url,is_public,document_status,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(12),
-      shipmentIds.length ? service.from('delivery_proofs').select('shipment_id,delivered_at,receiver_name,note,photo_urls,latitude,longitude,created_at').in('shipment_id', shipmentIds).order('created_at', {ascending: false}).limit(12) : Promise.resolve({data: [], error: null}),
-      service.from('shipment_invoices').select('id,invoice_number,shipment_id,total,paid_total,currency,status,due_at,created_at').eq('customer_user_id', user.id).order('created_at', {ascending: false}).limit(20),
-      shipmentIds.length ? service.from('payment_transactions').select('id,invoice_id,shipment_id,provider,status,amount,currency,method,paid_at,created_at').in('shipment_id', shipmentIds).order('created_at', {ascending: false}).limit(20) : Promise.resolve({data: [], error: null}),
-      shipmentIds.length ? service.from('shipment_tracking_events').select('id,shipment_id,status_key,title,note,location_label,lat,lng,occurred_at,photos').in('shipment_id', shipmentIds).order('occurred_at', {ascending: false}).limit(100) : Promise.resolve({data: [], error: null}),
-      shipmentIds.length ? service.from('shipment_financial_ledger').select('shipment_id,entry_type,amount,currency,reference,note,created_at').in('shipment_id', shipmentIds).order('created_at', {ascending: false}).limit(100) : Promise.resolve({data: [], error: null}),
-      service.from('warehouse_receipts').select('id,batch_code,location,stage,photo_taken_at,gc_code_detected,verification_status,photos,shipment_id,received_at').eq('directory_customer_id', customer.id).order('received_at', {ascending: false}).limit(30),
-      shipmentIds.length ? service.from('shipment_packages').select('id,shipment_id,package_code,barcode,package_type,description,weight_kg,length_cm,width_cm,height_cm,declared_value,declared_currency,current_hub,status,created_at,updated_at').in('shipment_id', shipmentIds).order('created_at', {ascending: false}).limit(100) : Promise.resolve({data: [], error: null}),
-      service.from('customer_chat_threads').select('id,subject,status,priority,last_message_at,created_at').eq('customer_user_id', user.id).neq('status','closed').order('last_message_at', {ascending:false}).limit(20),
+    const shipmentSelect = 'id,tracking_id,tracking_number,customer_gc_code,customer_name,origin,destination,origin_key,dest_key,type,transport_mode,status,operational_status,current_step_index,current_location_label,current_lat,current_lng,tracking_updated_at,total_amount,paid_amount,eta,items_count,box_count,carton_count,weight_kg,cargo_description,directory_customer_id,created_at,updated_at'
+    const [ownedLinksResult, ownCargoResult, userShipmentsResult, directoryShipmentsResult] = await Promise.all([
+      service.from('shipment_customer_links').select('shipment_id,customer_directory_id,customer_user_id,customer_gc_code').eq('customer_directory_id', customer.id).limit(2000),
+      service.from('shipment_cargo_items').select('id,shipment_id,customer_directory_id,item_name,quantity_pc,box_count,weight_kg,item_status,notes,declared_value,currency,created_at').eq('customer_directory_id', customer.id).order('created_at', {ascending:false}).limit(2000),
+      service.from('shipments').select(shipmentSelect).eq('customer_user_id', user.id).order('created_at', {ascending:false}).limit(100),
+      service.from('shipments').select(shipmentSelect).eq('directory_customer_id', customer.id).order('created_at', {ascending:false}).limit(100),
     ])
-    const results = [notifications, preferences, quotes, documents, pods, invoices, payments, events, ledger, receipts, packages, chatThreads]
-    const failed = results.find((result) => result?.error)
-    if (failed?.error) throw failed.error
-
-    return json(req, {
-      ok: true,
-      profile: {
-        id: customer.id,
-        code: customer.gc_code || customer.code || null,
-        name: customer.name || user.user_metadata?.full_name || user.email || 'Customer',
-        email: customer.email || user.email || null,
-        phone: customer.phone || customer.phone2 || user.phone || null,
-        whatsapp_phone: customer.whatsapp_phone || customer.phone || customer.phone2 || user.phone || null,
-        whatsapp_group_name: customer.whatsapp_group_name || (customer.gc_code ? String(customer.gc_code).replace(/^GC-/,'Gc-') : null),
-        purchase_first_name: customer.purchase_first_name || (customer.gc_code ? String(customer.gc_code).replace(/^GC-/,'Gc-') : null),
-        purchase_last_name: customer.purchase_last_name || customer.name || user.user_metadata?.full_name || user.email || 'Customer',
-        preferred_language: customer.preferred_language || user.user_metadata?.preferred_language || 'ckb',
-        avatar_url: user.user_metadata?.avatar_url || null,
+    const initialResults = [ownedLinksResult, ownCargoResult, userShipmentsResult, directoryShipmentsResult]
+    const initialFailed = initialResults.find((result:any) => result?.error)
+    if (initialFailed?.error) throw initialFailed.error
+    const ownedLinks = ownedLinksResult.data || []
+    const ownCargoAll = ownCargoResult.data || []
+    const relatedIds = new Set<string>()
+    for (const link of ownedLinks) if (link.shipment_id) relatedIds.add(String(link.shipment_id))
+    for (const item of ownCargoAll) if (item.shipment_id) relatedIds.add(String(item.shipment_id))
+    let relatedShipments:any[] = []
+    if (relatedIds.size) {
+      const relatedResult = await service.from('shipments').select(shipmentSelect).in('id', [...relatedIds]).order('created_at', {ascending:false}).limit(1000)
+      if (relatedResult.error) throw relatedResult.error
+      relatedShipments = relatedResult.data || []
+    }
+    const shipmentMap = new Map<string, any>()
+    for (const item of userShipmentsResult.data || []) {
+      if (!item.directory_customer_id || String(item.directory_customer_id) === String(customer.id)) shipmentMap.set(String(item.id), item)
+    }
+    for (const item of directoryShipmentsResult.data || []) shipmentMap.set(String(item.id), item)
+    for (const item of relatedShipments) shipmentMap.set(String(item.id), item)
+    const shipmentRows = [...shipmentMap.values()].sort((a:any,b:any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()).slice(0,100)
+    const shipmentIds = shipmentRows.map((item:any) => String(item.id)).filter(Boolean)
+    const ownCargoRows = ownCargoAll.filter((item:any) => shipmentIds.includes(String(item.shipment_id))).map((item:any) => ({
+      id:item.id, shipment_id:String(item.shipment_id), item_name:item.item_name || 'Cargo item',
+      quantity_pc:Number(item.quantity_pc || 0), box_count:Number(item.box_count || 0),
+      weight_kg:Number(item.weight_kg || 0), item_status:item.item_status || null,
+      notes:item.notes || null, declared_value:item.declared_value ?? null, currency:item.currency || null,
+      created_at:item.created_at || null
+    }))
+    let membershipRows:any[] = []
+    if (shipmentIds.length) {
+      const membershipResult = await service.from('shipment_customer_links').select('shipment_id,customer_directory_id').in('shipment_id', shipmentIds).limit(5000)
+      if (membershipResult.error) throw membershipResult.error
+      membershipRows = membershipResult.data || []
+    }
+    const membershipCount = new Map<string, number>()
+    for (const link of membershipRows) {
+      const key=String(link.shipment_id)
+      membershipCount.set(key,(membershipCount.get(key)||0)+1)
+    }
+    const ownCargoByShipment=new Map<string,any[]>()
+    for(const item of ownCargoRows){
+      const key=String(item.shipment_id)
+      if(!ownCargoByShipment.has(key))ownCargoByShipment.set(key,[])
+      ownCargoByShipment.get(key)!.push(item)
+    }
+    const soloShipmentIds=shipmentRows.filter((item:any)=>(membershipCount.get(String(item.id))||0)<=1).map((item:any)=>String(item.id))
+    const safeShipments=shipmentRows.map((item:any)=>{
+      const key=String(item.id)
+      const mine=ownCargoByShipment.get(key)||[]
+      const shared=(membershipCount.get(key)||0)>1
+      const ownPieces=mine.reduce((sum:number,row:any)=>sum+Number(row.quantity_pc||0),0)
+      const ownBoxes=mine.reduce((sum:number,row:any)=>sum+Number(row.box_count||0),0)
+      const ownWeight=mine.reduce((sum:number,row:any)=>sum+Number(row.weight_kg||0),0)
+      const ownDescription=mine.slice(0,8).map((row:any)=>String(row.item_name||'').trim()).filter(Boolean).join(' · ')
+      return {
+        ...item,
+        tracking_id:item.tracking_id||item.tracking_number||null,
+        customer_gc_code:customer.gc_code||customer.code||null,
+        customer_name:customer.name||user.user_metadata?.full_name||user.email||'Customer',
+        status:item.operational_status||item.status||null,
+        total_amount:shared?null:item.total_amount,
+        paid_amount:shared?null:item.paid_amount,
+        items_count:shared?ownPieces:(mine.length?ownPieces:item.items_count),
+        box_count:shared?ownBoxes:(mine.length?ownBoxes:item.box_count),
+        weight_kg:shared?ownWeight:(mine.length?ownWeight:item.weight_kg),
+        cargo_description:shared?(ownDescription||'کاڵای تایبەت بە هەژماری تۆ'):(ownDescription||item.cargo_description),
+        customer_cargo_count:mine.length,
+        is_consolidated:shared
+      }
+    })
+    const [notifications,preferences,quotes,documents,invoices,events,receipts,chatThreads]=await Promise.all([
+      service.from('customer_notifications').select('id,shipment_id,kind,title,body,action_url,read_at,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(30),
+      service.from('customer_notification_preferences').select('email_enabled,whatsapp_enabled,sms_enabled,in_app_enabled,quiet_hours_start,quiet_hours_end,updated_at').eq('customer_user_id',user.id).maybeSingle(),
+      service.from('quote_requests').select('id,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,status,quoted_amount,currency,valid_until,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(30),
+      service.from('shipment_documents').select('id,shipment_id,document_type,title,file_url,is_public,document_status,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(30),
+      service.from('shipment_invoices').select('id,invoice_number,shipment_id,total,paid_total,currency,status,due_at,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(50),
+      shipmentIds.length?service.from('shipment_tracking_events').select('id,shipment_id,status_key,title,note,location_label,lat,lng,occurred_at,photos').in('shipment_id',shipmentIds).eq('is_public',true).order('occurred_at',{ascending:false}).limit(200):Promise.resolve({data:[],error:null}),
+      service.from('warehouse_receipts').select('id,batch_code,location,stage,photo_taken_at,gc_code_detected,verification_status,photos,shipment_id,received_at').eq('directory_customer_id',customer.id).order('received_at',{ascending:false}).limit(50),
+      service.from('customer_chat_threads').select('id,subject,status,priority,last_message_at,created_at').eq('customer_user_id',user.id).neq('status','closed').order('last_message_at',{ascending:false}).limit(30),
+    ])
+    const firstResults=[notifications,preferences,quotes,documents,invoices,events,receipts,chatThreads]
+    const firstFailure=firstResults.find((result:any)=>result?.error)
+    if(firstFailure?.error)throw firstFailure.error
+    const invoiceIds=(invoices.data||[]).map((item:any)=>item.id).filter(Boolean)
+    const [payments,pods,ledger,packages]=await Promise.all([
+      invoiceIds.length?service.from('payment_transactions').select('id,invoice_id,shipment_id,provider,status,amount,currency,method,paid_at,created_at').in('invoice_id',invoiceIds).order('created_at',{ascending:false}).limit(100):Promise.resolve({data:[],error:null}),
+      soloShipmentIds.length?service.from('delivery_proofs').select('shipment_id,delivered_at,receiver_name,note,photo_urls,latitude,longitude,created_at').in('shipment_id',soloShipmentIds).order('created_at',{ascending:false}).limit(30):Promise.resolve({data:[],error:null}),
+      soloShipmentIds.length?service.from('shipment_financial_ledger').select('shipment_id,entry_type,amount,currency,reference,note,created_at').in('shipment_id',soloShipmentIds).order('created_at',{ascending:false}).limit(200):Promise.resolve({data:[],error:null}),
+      soloShipmentIds.length?service.from('shipment_packages').select('id,shipment_id,package_code,package_type,description,weight_kg,metadata').in('shipment_id',soloShipmentIds).order('created_at',{ascending:false}).limit(200):Promise.resolve({data:[],error:null}),
+    ])
+    const secondResults=[payments,pods,ledger,packages]
+    const secondFailure=secondResults.find((result:any)=>result?.error)
+    if(secondFailure?.error)throw secondFailure.error
+    return json(req,{
+      ok:true,
+      profile:{
+        id:customer.id,code:customer.gc_code||customer.code||null,
+        name:customer.name||user.user_metadata?.full_name||user.email||'Customer',
+        email:customer.email||user.email||null,phone:customer.phone||customer.phone2||user.phone||null,
+        whatsapp_phone:customer.whatsapp_phone||customer.phone||customer.phone2||user.phone||null,
+        whatsapp_group_name:customer.whatsapp_group_name||(customer.gc_code?String(customer.gc_code).replace(/^GC-/,'Gc-'):null),
+        purchase_first_name:customer.purchase_first_name||(customer.gc_code?String(customer.gc_code).replace(/^GC-/,'Gc-'):null),
+        purchase_last_name:customer.purchase_last_name||customer.name||user.user_metadata?.full_name||user.email||'Customer',
+        preferred_language:customer.preferred_language||user.user_metadata?.preferred_language||'ckb',
+        avatar_url:user.user_metadata?.avatar_url||null
       },
-      shipments,
-      notifications: notifications.data || [],
-      quotes: quotes.data || [],
-      documents: documents.data || [],
-      pods: pods.data || [],
-      invoices: invoices.data || [],
-      payments: payments.data || [],
-      events: events.data || [],
-      ledger: ledger.data || [],
-      receipts: receipts.data || [],
-      packages: packages.data || [],
-      chat_threads: chatThreads.data || [],
-      notification_preferences: preferences.data || {email_enabled:false,whatsapp_enabled:false,sms_enabled:false,in_app_enabled:true},
+      shipments:safeShipments,cargo_items:ownCargoRows,notifications:notifications.data||[],
+      quotes:quotes.data||[],documents:documents.data||[],pods:pods.data||[],invoices:invoices.data||[],
+      payments:payments.data||[],events:events.data||[],ledger:ledger.data||[],receipts:receipts.data||[],
+      packages:packages.data||[],chat_threads:chatThreads.data||[],
+      notification_preferences:preferences.data||{email_enabled:false,whatsapp_enabled:false,sms_enabled:false,in_app_enabled:true}
     })
   } catch (error) {
     console.error('customer-self error', error instanceof Error ? error.message : JSON.stringify(error))

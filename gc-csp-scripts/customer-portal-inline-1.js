@@ -71,11 +71,33 @@ const renderWarehouseAddresses = (items) => {
   }).join('');
   setHtml('warehouseAddresses', rows || '<div class="muted">هێشتا ناونیشانی warehouse بۆ هەژمارەکەت دانەنراوە.</div>');
 };
-const renderShipments = (items) => setHtml('shipments',
-  items.length
-    ? items.map((item) => `<button class="item shipment-card" type="button" data-shipment-id="${esc(item.id)}"><div class="row"><strong>${esc(item.id)}</strong><span class="pill">${esc(item.operational_status || 'in_progress')}</span></div><div class="muted">${esc(item.origin_key)} → ${esc(item.dest_key)}</div><small>${esc(item.current_location_label || 'دۆخی شوێن بەردەست نییە')} · ETA ${esc(date(item.eta))}</small><span class="shipment-open">کردنەوەی وردەکاری ←</span></button>`).join('')
-    : emptyState(EMPTY.box,'هیچ بارێک نییە','کاتێک shipment ـێک بۆ هەژمارەکەت تۆمار بکرێت، لێرە دەردەکەوێت.')
-);
+const renderShipments = (items, cargoItems = []) => {
+  const cargoByShipment = new Map();
+  (cargoItems || []).forEach((cargo) => {
+    const key=String(cargo.shipment_id||''); if(!key)return;
+    if(!cargoByShipment.has(key))cargoByShipment.set(key,[]);
+    cargoByShipment.get(key).push(cargo);
+  });
+  const rows=(items||[]).map((item)=>{
+    const tracking=item.tracking_id||item.tracking_number||item.customer_gc_code||item.id;
+    const cargo=cargoByShipment.get(String(item.id))||[];
+    const cargoSummary=cargo.slice(0,4).map((row)=>{
+      const counts=[];
+      if(Number(row.quantity_pc||0)>0)counts.push(String(Number(row.quantity_pc))+' pc');
+      if(Number(row.box_count||0)>0)counts.push(String(Number(row.box_count))+' box');
+      if(Number(row.weight_kg||0)>0)counts.push(String(Number(row.weight_kg))+' kg');
+      return esc(row.item_name||'Cargo item')+(counts.length?' · '+counts.join(' / '):'');
+    }).join(' · ');
+    return '<button class="item shipment-card" type="button" data-shipment-id="'+esc(item.id)+'">'+
+      '<div class="row"><strong>'+esc(tracking)+'</strong><span class="pill">'+esc(item.operational_status||item.status||'in_progress')+'</span></div>'+
+      '<div class="muted">'+esc(item.origin_key||item.origin||'—')+' → '+esc(item.dest_key||item.destination||'—')+'</div>'+
+      '<small>'+esc(item.current_location_label||'دۆخی شوێن بەردەست نییە')+' · ETA '+esc(date(item.eta))+'</small>'+
+      (cargoSummary?'<div class="shipment-content"><small>ناوەڕۆکی کاڵای هەژمارەکەت</small><div>'+cargoSummary+'</div></div>':'')+
+      (item.is_consolidated?'<small class="muted">بارێکی کۆکراوە؛ تەنها کاڵا و زانیاریی دارایی تایبەت بە هەژماری خۆت پیشان دەدرێت.</small>':'')+
+      '<span class="shipment-open">کردنەوەی وردەکاری ←</span></button>';
+  }).join('');
+  setHtml('shipments',rows||emptyState(EMPTY.box,'هیچ بارێک نییە','کاتێک shipment ـێک بۆ هەژمارەکەت تۆمار بکرێت، لێرە دەردەکەوێت.'));
+};
 const renderCustomerChat = (threads) => { const list=$('customerChatThreads'); if(!list)return; const rows=threads||[]; list.innerHTML=rows.map((thread)=>`<article class="item"><div class="row"><strong>${esc(thread.subject||'Customer Support')}</strong><span class="pill">${esc(thread.status||'open')}</span></div><small class="muted">${esc(date(thread.last_message_at||thread.created_at))}</small><div class="chat-messages">${(thread.messages||[]).map((message)=>`<div class="message ${message.sender_type==='customer'?'me':''}"><b>${message.sender_type==='customer'?'تۆ':'Staff'}</b><p>${esc(message.body)}</p><small>${esc(date(message.created_at))}</small></div>`).join('')||'<span class="muted">هێشتا پەیام نییە.</span>'}</div><button class="btn tiny" type="button" data-chat-thread="${esc(thread.id)}">وەڵامدانەوە</button></article>`).join('') || '<div class="muted">هیچ chat ـێک نییە؛ پەیامێک بنووسە بۆ دەستپێکردن.</div>'; document.querySelectorAll('[data-chat-thread]').forEach((button)=>button.addEventListener('click',()=>{ const input=$('customerChatInput'); if(input){ input.dataset.threadId=button.dataset.chatThread; input.focus(); } })); };
 const sendCustomerChat = async (event) => { event.preventDefault(); const input=$('customerChatInput'); const status=$('customerChatStatus'); const body=input?.value.trim()||''; if(!body)return; const button=event.currentTarget.querySelector('button'); if(button)button.disabled=true; if(status)status.textContent='پەیامەکە دەنێردرێت…'; try{ await customerApi({method:'POST',body:{action:'chat_send',data:{thread_id:input.dataset.threadId||undefined,body}}}); input.value=''; delete input.dataset.threadId; if(status)status.textContent='پەیام بە سەرکەوتوویی نێردرا.'; await load(); }catch(error){if(status)status.textContent=error.message||'ناردنی پەیام سەرکەوتوو نەبوو.';}finally{if(button)button.disabled=false;} };
 const renderNotifications = (items) => setHtml('notifications',
@@ -255,7 +277,7 @@ const load = async () => {
   }, {});
   $('dueKpi').textContent = Object.entries(dueByCurrency).map(([cur,v]) => `${Number(v).toLocaleString('en-US',{maximumFractionDigits:2})} ${cur}`).join(' · ') || '0 USD';
   $('notifKpi').textContent = (dashboard.notifications || []).filter((item) => !item.read_at).length;
-  renderCustomerIdentity(dashboard.profile); renderWarehouseAddresses(dashboard.warehouse_addresses || []); renderShipments(rows); renderNotifications(dashboard.notifications || []); renderCustomerChat(dashboard.chat_threads || []); renderQuotes(dashboard.quotes || []); renderDocuments(dashboard.documents || []); renderPods(dashboard.pods || []); renderReceipts(dashboard.receipts || []); renderPayments(invoicesRows, dashboard.payments || []); renderFinance(invoicesRows, dashboard.payments || [], dashboard.ledger || []);
+  renderCustomerIdentity(dashboard.profile); renderWarehouseAddresses(dashboard.warehouse_addresses || []); renderShipments(rows, dashboard.cargo_items || []); renderNotifications(dashboard.notifications || []); renderCustomerChat(dashboard.chat_threads || []); renderQuotes(dashboard.quotes || []); renderDocuments(dashboard.documents || []); renderPods(dashboard.pods || []); renderReceipts(dashboard.receipts || []); renderPayments(invoicesRows, dashboard.payments || []); renderFinance(invoicesRows, dashboard.payments || [], dashboard.ledger || []);
   window.__customerShipments = rows; window.__customerQuotes = dashboard.quotes || []; window.__customerNotifications = dashboard.notifications || []; window.__customerEvents = dashboard.events || []; window.__customerPods = dashboard.pods || []; window.__customerRelated = { packages: dashboard.packages || [], documents: dashboard.documents || [], invoices: dashboard.invoices || [], payments: dashboard.payments || [], receipts: dashboard.receipts || [], pods: dashboard.pods || [] }; window.dispatchEvent(new CustomEvent('gc:customer-loaded', { detail: dashboard }));
   window.gcCustomerReload = () => load().catch((error) => console.warn('[gc-realtime] customer reload', error));
 };

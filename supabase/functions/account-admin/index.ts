@@ -515,8 +515,11 @@ async function bindCustomerAuth(client: ReturnType<typeof createClient>, payload
       throw linkError
     }
   }
-  await logActivity(client, actor.id, actor.name, 'bind_customer_auth_account', id, { gc_code: code, auth_user_id: userId, synthetic_email: email.endsWith('@customers.globall-cloud.internal') })
-  return { ok: true, status: 'linked', customer_id: id, gc_code: code, auth_user_id: userId, login_email: email, temporary_password: password, note: 'Deliver this password securely; it is not shown again.' }
+  const linkedRows = await client.from('shipment_customer_links').update({customer_user_id:userId,customer_gc_code:code,updated_at:new Date().toISOString()}).eq('customer_directory_id',id).select('shipment_id')
+  const linkSyncWarning = linkedRows.error ? linkedRows.error.message : null
+  if (linkSyncWarning) console.error('Customer account linked, but shipment memberships need repair:', linkSyncWarning)
+  await logActivity(client, actor.id, actor.name, 'bind_customer_auth_account', id, { gc_code: code, auth_user_id: userId, synthetic_email: email.endsWith('@customers.globall-cloud.internal'), shipment_links_updated: linkedRows.data?.length || 0, shipment_link_sync_warning: linkSyncWarning })
+  return { ok: true, status: 'linked', customer_id: id, gc_code: code, auth_user_id: userId, login_email: email, temporary_password: password, shipment_links_updated: linkedRows.data?.length || 0, warning: linkSyncWarning, note: 'Deliver this password securely; it is not shown again.' }
 }
 
 async function updateCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, isSuperAdmin: boolean }) {
