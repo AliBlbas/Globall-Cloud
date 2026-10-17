@@ -12,7 +12,7 @@
   ];
 
   const enhancementScripts = [
-    '/gc-staff-mobile-dock-20261016.js?v=2',
+    '/gc-staff-mobile-dock-20261016.js?v=3',
     '/staff-os-v5-shipment-create-fix.js?v=20260912-2',
     '/staff-os-v5-shipment-control-bridge.js?v=20260912-2',
     '/staff-os-data-health-panel.js?v=20260912-2',
@@ -26,8 +26,19 @@
   ];
 
   const loadStyle = (href) => {
-    if (document.querySelector('link[data-gc-enhancement-style="' + href + '"]')) return;
-    const link = document.createElement('link');
+    let link = document.querySelector('link[data-gc-enhancement-style="' + href + '"]');
+    if (link) {
+      // Re-append existing styles so the final command-system layer wins the cascade.
+      document.head.appendChild(link);
+      return;
+    }
+    link = document.querySelector('link[href="' + href + '"]');
+    if (link) {
+      link.dataset.gcEnhancementStyle = href;
+      document.head.appendChild(link);
+      return;
+    }
+    link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = href;
     link.dataset.gcEnhancementStyle = href;
@@ -56,8 +67,9 @@
     // This scoped layer loads last so it can replace the old scrollable mobile
     // sidebar dock without changing desktop navigation or shipment actions.
     loadStyle('/gc-staff-mobile-dock-20261016.css?v=4');
-    // Append the UI integrity layer last so its mobile wrapping rules win.
+    // Keep the known mobile integrity guard, then restore the dedicated staff command layer as the final cascade.
     loadStyle('/gc-ui-integrity-mobile-20261017.css?v=6');
+    loadStyle('/gc-staff-command-system-20261017.css?v=1');
   };
 
   const waitForShell = () => {
