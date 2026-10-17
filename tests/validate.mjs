@@ -311,7 +311,6 @@ for (const [label, passed] of unifiedContracts) {
 console.log('Mobile UI integrity contracts')
 const mobileUiCss = read('gc-ui-integrity-mobile-20261017.css')
 const customerViewScript = read('gc-dashboard-preferences-20261003.js')
-const customerStyleLoader = read('gc-public-customer-style-loader-20261014.js')
 const staffEnhancementLoader = read('staff-os-v5-enhancement-loader-20261017.js')
 const staffOsHtml = read('staff-os-v5.html')
 const staffShipmentScript = read('staff-os-v5-20261017.js')
