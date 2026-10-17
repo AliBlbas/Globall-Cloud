@@ -1025,3 +1025,12 @@ body.gc-customer-app .gc-route-track-link{white-space:normal;text-align:center}
   body.gc-customer-app #gcCustomerWorkspace .mobile-dock a span,
   body.gc-customer-app #gcCustomerWorkspace .mobile-dock a small{font-size:8px}
 }
+
+
+/* The floating marketing WhatsApp bubble is replaced by in-workspace Support. */
+body.gc-customer-app #gcWhatsAppFloat,
+body.gc-customer-app .gc-whatsapp-float {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
