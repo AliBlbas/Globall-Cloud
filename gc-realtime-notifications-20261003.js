@@ -7,7 +7,7 @@
   let lastRefresh = 0;
   const page = location.pathname;
   const isStaff = /staff-os-v5|staff-os|operations-command|accounts-console/i.test(page);
-  const isCustomer = /customer-portal|dashboard/i.test(page);
+  const isCustomer = /customer-portal|dashboard/i.test(page) || (page === '/' && Boolean(document.querySelector('#gcCustomerWorkspace')));
   const escapeHtml = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const showToast = (title, body) => {
     let node = document.getElementById('gcRealtimeToast');
