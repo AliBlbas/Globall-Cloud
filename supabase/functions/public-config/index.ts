@@ -27,7 +27,7 @@ function withinRateLimit(key: string) {
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get('origin') || ''
   if (origin && !ALLOWED_ORIGINS.has(origin)) return json(req, { error: 'Origin not allowed' }, 403)
-  if (req.method === 'OPTIONS') return new Response('ok', { status: 204, headers: headers(origin) })
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: headers(origin) })
   if (req.method !== 'GET') return json(req, { error: 'Method not allowed' }, 405)
   if (!withinRateLimit(`public-config:${clientKey(req)}`)) return json(req, { error: 'Too many requests. Please try again later.' }, 429)
   const key = new URL(req.url).searchParams.get('key') || 'usd_iqd_rate'
