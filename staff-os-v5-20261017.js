@@ -886,6 +886,12 @@
     if(!r)return;
     const photos=(r.photos||[]).map((u,i)=>`<a class="photo" href="${esc(u)}" target="_blank" rel="noopener noreferrer"><img src="${esc(u)}" alt="GC receipt evidence ${i+1}" loading="lazy"></a>`).join('');
     const md=r.label_metadata||{};
+    const cartons=Array.isArray(r.cartons)?r.cartons:[];
+    const cartonRowsHTML=cartons.map((carton)=>`<article class="warehouse-carton-row">
+      <div><strong class="mono">${esc(carton.carton_code||'—')}</strong><small>${esc(carton.carton_index||'—')} / ${esc(carton.carton_total||cartons.length)} · ${esc(carton.warehouse_location||r.location||'—')}</small></div>
+      <span class="pill ${carton.status==='received'||carton.status==='stored'?'mint':'warn'}">${esc(({received:'وەرگیراوە',stored:'هەڵگیراوە',in_transit:'لە ڕێگایە',delivered:'گەیشتووە',damaged:'زیانی پێگەیشتووە',lost:'ون بووە',on_hold:'وەستێنراوە',cancelled:'هەڵوەشێنراوە'})[carton.status]||carton.status||'—')}</span>
+      <small class="muted">${esc(date(carton.received_at||r.received_at))}</small>
+    </article>`).join('');
     openModal(`Receipt · ${r.gc_code_detected||r.gc_code||''}`,`<div class="two-col">
       <section class="card"><h3>زانیاریی وەرگرتن</h3>
         <p>کڕیار: <b class="mono">${esc(r.gc_code_detected||r.gc_code||'—')}</b></p>
@@ -905,6 +911,7 @@
         <p class="muted">${esc(r.ocr_text||'OCR بەردەست نییە')}</p>
         <p class="muted">${esc(r.notes||r.description||'')}</p>
       </section>
+      <section class="card warehouse-carton-manifest-card" style="grid-column:1/-1"><div class="card-head"><h3>کۆدی هەر کارتۆن · ${cartons.length}</h3><span class="pill">${cartons.length?'MANIFEST READY':'بەردەست نییە'}</span></div><div class="list warehouse-carton-list">${cartonRowsHTML||'<div class="empty">مانیفێستی تاکەکارتۆن لە تۆماری کۆندا نییە؛ تۆمارە نوێکان لە کاتی وەرگرتن دروست دەکرێن.</div>'}</div></section>
       <section class="card" style="grid-column:1/-1"><h3>وێنەکانی وەرگرتن · ${(r.photos||[]).length}</h3><div class="photo-grid">${photos||'<div class="empty">وێنە نییە.</div>'}</div></section>
     </div>`,'<button class="btn" id="notifyReceiptBtn">ناردن / دووبارەکردنەوەی ئاگادارکردنەوە</button><button class="btn" data-close>داخستن</button>');
     document.getElementById('notifyReceiptBtn').onclick=async()=>{
