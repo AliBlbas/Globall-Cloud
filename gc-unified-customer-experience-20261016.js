@@ -9,13 +9,52 @@
   const homeDock = document.querySelector('.gc-mobile-dock-v3');
   const injectedDock = document.getElementById('gcPrimaryMobileNav');
   if (!body || !home || !workspace) return;
+  const publicMain = document.getElementById('gcMain');
+  const publicPageTargets = {
+    '#about':'page-about','#page-about':'page-about',
+    '#services':'page-services','#page-services':'page-services',
+    '#track':'page-track','#page-track':'page-track',
+    '#request':'page-request','#quote':'page-request','#page-request':'page-request',
+    '#contact':'page-contact','#page-contact':'page-contact'
+  };
+  const publicScrollTargets = {
+    '#pricing':'gcRateExplorer',
+    '#countries':'gcTransportStudio',
+    '#warehouses':'warehouseCardsGrid'
+  };
+  const syncPublicPageRoute = ({scroll = true} = {}) => {
+    const hash = window.location.hash || '';
+    const pageId = publicPageTargets[hash] || '';
+    const pages = home.querySelectorAll('.gc-page');
+    pages.forEach(page => {
+      const active = page.id === pageId;
+      page.hidden = !active;
+      page.style.display = active ? '' : 'none';
+      page.classList.toggle('active', active);
+    });
+    if (publicMain) {
+      const showHome = !pageId;
+      publicMain.hidden = !showHome;
+      publicMain.style.display = showHome ? '' : 'none';
+    }
+    let target = pageId ? document.getElementById(pageId) : null;
+    if (!target && !pageId && hash && hash !== '#public') {
+      const targetId = publicScrollTargets[hash];
+      target = targetId ? document.getElementById(targetId) : null;
+    }
+    if (scroll && target) {
+      window.requestAnimationFrame(() => target.scrollIntoView({behavior:'smooth', block:'start'}));
+    } else if (scroll && (hash === '#public' || !hash)) {
+      window.scrollTo({top:0, behavior:'auto'});
+    }
+  };
 
   const customerHashes = new Set([
     '#auth','#register','#overview','#homeMetrics','#gcCustomerRouteOverview','#shipments','#shipmentsSection',
     '#commercial','#quotesPanel','#newRequest','#quoteForm','#activity',
     '#notifications','#records','#payments','#gcAccountSettings','#settings','#support'
   ]);
-  const publicHashes = new Set(['#public','#services','#request','#contact','#about','#track','#pricing','#countries','#warehouses','#quote']);
+  const publicHashes = new Set(['#public','#home','#services','#request','#contact','#about','#track','#pricing','#countries','#warehouses','#quote','#page-about','#page-services','#page-track','#page-request','#page-contact']);
   const hashToView = {
     '#overview':'home','#homeMetrics':'home','#gcCustomerRouteOverview':'home','#auth':'home','#register':'home',
     '#shipments':'shipments','#shipmentsSection':'shipments',
@@ -43,6 +82,7 @@
     auth?.classList.add('hidden');
     workspace.hidden = true;
     home.hidden = false;
+    syncPublicPageRoute();
     body.classList.remove('gc-customer-app');
     delete body.dataset.gcUnifiedExperience;
     delete body.dataset.gcCustomerView;
