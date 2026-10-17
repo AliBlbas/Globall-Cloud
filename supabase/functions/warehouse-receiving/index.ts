@@ -6,7 +6,7 @@ const SIGNED_URL_TTL=60*60*24
 const MAX_RECEIPT_PHOTOS=8
 const MAX_RECEIPT_PHOTO_BYTES=12*1024*1024
 const PHOTO_MIME_BY_EXTENSION:Record<string,string[]> = {
- jpg:['image/jpeg','image/pjpeg'],jpeg:['image/jpeg','image/pjpeg'],
+ jpg:['image/jpeg','image/jpg','image/pjpeg'],jpeg:['image/jpeg','image/jpg','image/pjpeg'],
  png:['image/png'],webp:['image/webp'],heic:['image/heic','image/heif'],heif:['image/heif','image/heic']
 }
 function photoMimeType(file:File){
@@ -15,7 +15,7 @@ function photoMimeType(file:File){
  if(!allowed)return null
  const supplied=String(file.type||'').split(';')[0].trim().toLowerCase()
  if(supplied&&!allowed.includes(supplied))return null
- return supplied==='image/pjpeg'?'image/jpeg':(supplied||allowed[0])
+ return supplied==='image/pjpeg'||supplied==='image/jpg'?'image/jpeg':(supplied||allowed[0])
 }
 function coordinate(value:FormDataEntryValue|null,min:number,max:number){
  if(typeof value!=='string'||!value.trim())return null
@@ -334,7 +334,7 @@ async function linkShipmentChain(
  };
 }
 async function retryExistingChain(admin:ReturnType<typeof createClient>,staff:Record<string,unknown>,existing:Record<string,any>){const directoryId=existing.directory_customer_id?String(existing.directory_customer_id):null;let customerAuthUserId:string|null=null;if(directoryId){const{data,error}=await admin.from('customer_directory').select('auth_user_id').eq('id',directoryId).maybeSingle();if(error)throw error;customerAuthUserId=data?.auth_user_id||null}const metadata=existing.label_metadata&&typeof existing.label_metadata==='object'?{...existing.label_metadata,gross_weight_kg:existing.weight_actual??existing.label_metadata.gross_weight_kg,tracking_number:existing.barcode??existing.label_metadata.tracking_number,carrier_tracking_number:existing.barcode??existing.label_metadata.carrier_tracking_number}: {gross_weight_kg:existing.weight_actual??null,tracking_number:existing.barcode??null,carrier_tracking_number:existing.barcode??null};const location=String(existing.location||existing.warehouse||'Dubai');return linkShipmentChain(admin,staff,String(existing.id),customerAuthUserId,String(existing.gc_code||''),String(existing.batch_code||''),location,String(existing.stage||stageForLocation(location)),metadata,existing.shipment_id?String(existing.shipment_id):null,String(existing.idempotency_key||'retry'))}
-async function createReceipt(req:Request){const{admin,staff}=await actor(req);const form=await req.formData();const code=gcCode(text(form.get('customer_code')));const location=text(form.get('location'))||'Dubai';if(!['china','dubai','uae','erbil','usa'].includes(location.toLowerCase()))throw new Error('Unsupported warehouse location');const submittedBatchCode=text(form.get('batch_code'));const batchCode=submittedBatchCode||`${code}-${new Date().toISOString().replace(/[^0-9]/g,'').slice(0,14)}-${crypto.randomUUID().slice(0,8).toUpperCase()}`;if(!code)throw new Error('Valid GC customer code is required');if(!batchCode)throw new Error('Batch code is required');if(!locationAllowed(staff,location))throw new Error('Warehouse branch is not authorized for this location');const{data:customer,error:customerError}=await admin.from('customer_directory').select('id,code,gc_code,normalized_gc_code,name,phone,phone2,whatsapp_phone,email,auth_user_id,preferred_language').or(`gc_code.eq.${code},normalized_gc_code.eq.${code},code.eq.${code}`).maybeSingle();if(customerError)throw customerError;if(!customer)throw new Error(`Customer ${code} was not found`);const tracking=text(form.get('tracking_number'));const grossWeight=num(form.get('gross_weight_kg'));const declaredValue=num(form.get('declared_value'));const totalPackages=num(form.get('total_packages'));if(totalPackages!==null&&(!Number.isInteger(totalPackages)||totalPackages<1||totalPackages>999))throw new Error('Carton count must be between 1 and 999');const itemSummary=text(form.get('item_summary'));const notes=text(form.get('notes'));const labelMetadata={invoice_number:text(form.get('invoice_number')),quantity:num(form.get('quantity')),gross_weight_kg:grossWeight,declared_value:declaredValue,declared_currency:text(form.get('declared_currency'))||'USD',total_packages:totalPackages,carrier:text(form.get('carrier')),service_level:text(form.get('service_level')),tracking_number:tracking,carrier_tracking_number:tracking,shipper:text(form.get('shipper')),origin:text(form.get('origin')),destination:text(form.get('destination')),item_summary:itemSummary,source:'warehouse_receiving'};const idempotency=text(form.get('idempotency_key'))||req.headers.get('x-idempotency-key')||crypto.randomUUID();const{data:existing}=await admin.from('warehouse_receipts').select('*').eq('idempotency_key',idempotency).maybeSingle();if(existing){
+async function createReceipt(req:Request){const{admin,staff}=await actor(req);const form=await req.formData();const code=gcCode(text(form.get('customer_code')));const location=text(form.get('location'))||'Dubai';if(!['china','dubai','uae','erbil','usa'].includes(location.toLowerCase()))throw new Error('Unsupported warehouse location');const submittedBatchCode=text(form.get('batch_code'));const batchCode=submittedBatchCode||`${code}-${new Date().toISOString().replace(/[^0-9]/g,'').slice(0,14)}-${crypto.randomUUID().slice(0,8).toUpperCase()}`;if(!code)throw new Error('Valid GC customer code is required');if(!batchCode)throw new Error('Batch code is required');if(!locationAllowed(staff,location))throw new Error('Warehouse branch is not authorized for this location');const{data:customer,error:customerError}=await admin.from('customer_directory').select('id,code,gc_code,normalized_gc_code,name,phone,phone2,whatsapp_phone,email,auth_user_id,preferred_language').or(`gc_code.eq.${code},normalized_gc_code.eq.${code},code.eq.${code}`).maybeSingle();if(customerError)throw customerError;if(!customer)throw new Error(`Customer ${code} was not found`);const tracking=text(form.get('tracking_number'));const grossWeight=num(form.get('gross_weight_kg'));const declaredValue=num(form.get('declared_value'));const totalPackages=num(form.get('total_packages'));if(totalPackages!==null&&(!Number.isInteger(totalPackages)||totalPackages<1||totalPackages>999))throw new Error('Carton count must be between 1 and 999');const itemSummary=text(form.get('item_summary'));const notes=text(form.get('notes'));const labelMetadata={invoice_number:text(form.get('invoice_number')),quantity:num(form.get('quantity')),gross_weight_kg:grossWeight,declared_value:declaredValue,declared_currency:text(form.get('declared_currency'))||'USD',total_packages:totalPackages,carrier:text(form.get('carrier')),service_level:text(form.get('service_level')),tracking_number:tracking,carrier_tracking_number:tracking,shipper:text(form.get('shipper')),origin:text(form.get('origin')),destination:text(form.get('destination')),item_summary:itemSummary,location_captured_at:timestampIso(text(form.get('location_captured_at')),receivedAt),source:'warehouse_receiving'};const idempotency=text(form.get('idempotency_key'))||req.headers.get('x-idempotency-key')||crypto.randomUUID();const{data:existing}=await admin.from('warehouse_receipts').select('*').eq('idempotency_key',idempotency).maybeSingle();if(existing){
  const existingCode=gcCode(String(existing.gc_code_detected||existing.gc_code||code));
  if(!existingCode||existingCode!==code)throw new Error('Idempotency key was already used for another GC code');
  const existingCartonCount=Math.max(1,Number(existing.carton_count??existing.label_metadata?.total_packages??1)||1);
@@ -404,7 +404,7 @@ try{
   });
  }catch{}
  const securedReceipt={...receiptWithCartons,photos:securedPhotos};
- return{receipt:securedReceipt,customer:{id:customer.id,code:customer.gc_code||customer.code,name:customer.name,phone:customer.whatsapp_phone||customer.phone||customer.phone2},chain,whatsapp_message:whatsappMessage,notification,duplicate:false}}
+ return{receipt:securedReceipt,customer:{id:customer.id,code:customer.gc_code||customer.code,name:customer.name,phone:customer.whatsapp_phone||customer.phone||customer.phone2,account_linked:Boolean(customer.auth_user_id)},chain,whatsapp_message:whatsappMessage,notification,duplicate:false}}
 async function listReceipts(req:Request){
  const{admin,staff}=await actor(req);
  const{data,error}=await admin.from('warehouse_receipts').select('*').order('received_at',{ascending:false}).limit(500);
@@ -421,8 +421,16 @@ async function listReceipts(req:Request){
   const list=byReceipt.get(String(carton.receipt_id))||[];
   list.push(carton);byReceipt.set(String(carton.receipt_id),list);
  }
+ const customerIds=[...new Set(visible.map(item=>String(item.directory_customer_id||'')).filter(Boolean))];
+ const customerLinks=new Map<string,boolean>();
+ if(customerIds.length){
+  const customers=await admin.from('customer_directory').select('id,auth_user_id,is_active').in('id',customerIds);
+  if(customers.error)throw customers.error;
+  for(const customer of customers.data||[])customerLinks.set(String(customer.id),Boolean(customer.auth_user_id&&customer.is_active));
+ }
  const items=await Promise.all(visible.map(async item=>({
   ...item,
+  account_linked:customerLinks.get(String(item.directory_customer_id||''))===true,
   photos:await signedPhotos(admin,item.photos).catch(error=>{console.error('[warehouse-receiving] list photo signing failed',{receipt_id:String(item.id),error:error instanceof Error?error.message:'unknown'});return[];}),
   cartons:(byReceipt.get(String(item.id))||[]).filter(carton=>String(carton.customer_directory_id)===String(item.directory_customer_id))
  })));
