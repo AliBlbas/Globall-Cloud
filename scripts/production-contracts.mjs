@@ -167,6 +167,8 @@ if (!warehouseReceivingSource.includes('MAX_RECEIPT_TOTAL_PHOTO_BYTES=48*1024*10
 else ok('Warehouse intake protects upload size and preserves saved receipts when signed-photo URLs fail')
 if (!warehousePhotoBucketMigration.includes('file_size_limit = 12582912') || !warehousePhotoBucketMigration.includes('public IS FALSE') || !warehousePhotoBucketMigration.includes("'image/heic'")) fail('Private warehouse photo bucket safety migration is missing')
 else ok('Private warehouse evidence storage enforces image type and size limits')
+if (!staffCommandSystemStyles.includes('.gc-customer-bridge-panel') || !staffCommandSystemStyles.includes('@media (max-width: 760px)')) fail('Staff command UI must style the customer bridge and mobile controls')
+else ok('Staff command UI includes the responsive customer integration panel')
 if (!staffV5Script.includes('openReceiptCustomer') || !staffV5Script.includes('navigator.geolocation.getCurrentPosition')) fail('Staff receipt details must link the owning customer and support consent-based GPS capture')
 else ok('Staff receipt management links to the owner record and supports consent-based GPS')
 const customerSelfWarehouseSource = read('supabase/functions/customer-self/index.ts')
