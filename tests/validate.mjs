@@ -58,7 +58,7 @@ const required = [
   'staff-mobile-command-dock.css','staff-mobile-command-dock.js','staff-os-pro-20260909.css','staff-os-pro-20260909.js',
   'staff-shell-polish-20260909.css','staff-shell-polish-20260909.js','staff-premium-mobile-20260909.css','staff-premium-mobile-20260909.js',
   'warehouse-offline-sync.js','gc-platform-vnext.js','gc-platform-vnext-plus.js','gc-runtime-safety-v2026.js','production-brand-repair.js',
-  'supabase/config.toml','package.json','scripts/production-contracts.mjs','tests/e2e/run.mjs',
+  'supabase/config.toml','package.json','scripts/production-contracts.mjs','tests/e2e/run.mjs','supabase/migrations/20261017130000_restrict_customer_request_photo_uploads.sql',
   'supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
   'supabase/functions/notification-dispatch/index.ts','supabase/functions/warehouse-receiving/index.ts','supabase/functions/warehouse-notify/index.ts',
   'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/invoice-ai/index.ts',
@@ -209,6 +209,8 @@ const shipmentCustomerLinksMigration = read('supabase/migrations/20261017120000_
 const notificationIndexMigration = read('supabase/migrations/20261017040435_customer_notification_idempotency_unique_index.sql')
 const customerPortalSource = read('gc-csp-scripts/customer-portal-inline-20261017.js')
 const customerPortalVersionedScript = read('gc-csp-scripts/customer-portal-inline-20261017.js')
+const customerRequestController = read('gc-customer-request-20261003.js')
+const customerPhotoBucketMigration = read('supabase/migrations/20261017130000_restrict_customer_request_photo_uploads.sql')
 const staffConsoleVersionedScript = read('staff-os-v5-20261017.js')
 const staffOpsHubSource = read('supabase/functions/staff-ops-hub/index.ts')
 const customerAccountEntry = read('gc-account-entry.js')
@@ -219,6 +221,8 @@ const customerDockMarkup = customerDockStart >= 0 && customerDockEnd > customerD
 const customerDockCount = (customerDockMarkup.match(/data-dock-tab=/g) || []).length
 const customerDockTabs = [...customerDockMarkup.matchAll(/data-dock-tab="([^"]+)"/g)].map((match) => match[1])
 const unifiedContracts = [
+  ['customer shipment requests validate photo type/size and upload to the private bucket', unifiedShell.includes('id="requestImage"') && unifiedShell.includes('accept="image/jpeg,image/png,image/webp,image/avif,image/gif,image/heic,image/heif"') && customerRequestController.includes("storage?.from?.('customer-request-photos')") && customerRequestController.includes('cargo_image_path: uploadedPath') && customerRequestController.includes('maxImageBytes = 10 * 1024 * 1024') && customerSelfSource.includes('pathParts[0] !== user.id') && customerSelfSource.includes('cargo_image_path: cargoImagePath') && customerPhotoBucketMigration.includes('file_size_limit = 10485760') && customerPhotoBucketMigration.includes('allowed_mime_types')],
+  ['staff request inbox shows cargo details and uses temporary private image URLs', accountAdminSource.includes('request_type,cargo_country,cargo_description,cargo_image_path') && staffConsoleVersionedScript.includes('createSignedUrl(q.cargo_image_path, 300)') && staffConsoleVersionedScript.includes('data-request-photo')],
   ['one customer-first shell with old marketing area hidden', (unifiedShell.match(/id="gcApp"/g) || []).length === 1 && (unifiedShell.match(/id="gcCustomerWorkspace"/g) || []).length === 1 && unifiedShell.includes('<body class="gc-customer-app"') && unifiedShell.includes('<div class="gc-app" id="gcApp" hidden>') && unifiedShell.includes('<div id="gcCustomerWorkspace" data-gc-unified-customer="1">') && !unifiedShell.includes('<nav class="gc-mobile-dock-v3"')],
   ['legacy public dock cannot be reinjected', customerStyleLoader.includes('function ensureHomeDock() { return; }') && !customerStyleLoader.includes('dock.innerHTML')],
   ['floating marketing WhatsApp bubble is hidden inside customer app', customerWorkspaceStyles.includes('body.gc-customer-app #gcWhatsAppFloat') && customerWorkspaceStyles.includes('body.gc-customer-app .gc-whatsapp-float')],
