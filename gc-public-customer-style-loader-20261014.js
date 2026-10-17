@@ -9,11 +9,11 @@
   const homeStyles = [
     '/gc-live-mobile-v3.css?v=20261014-4',
     '/gc-homepage-elite-20261014.css?v=4',
-    '/gc-homepage-signature-20261016.css?v=7'
+    '/gc-homepage-signature-20261016.css?v=8'
   ];
   const customerStyles = [
-    '/gc-customer-workspace-elite-20261014.css?v=21',
-    '/gc-customer-mobile-dock-20261016.css?v=3'
+    '/gc-customer-workspace-elite-20261014.css?v=22',
+    '/gc-customer-mobile-dock-20261016.css?v=4'
   ];
 
   const desiredStyles = () => {
