@@ -210,7 +210,7 @@
 
     $('gcSettingsSignIn')?.addEventListener('click', () => document.getElementById('loginBtn')?.click());
     $('gcSettingsLogout')?.addEventListener('click', () => document.getElementById('logoutBtn')?.click());
-    $('gcSettingsRecords')?.addEventListener('click', () => window.gcSelectCustomerView ? window.gcSelectCustomerView('records') : (location.hash = '#records'));
+    $('gcSettingsRecords')?.addEventListener('click', () => window.gcSelectCustomerView ? window.gcSelectCustomerView('shipments') : (location.hash = '#shipmentsSection'));
     $('gcSettingsSupport')?.addEventListener('click', () => window.gcSelectCustomerView ? window.gcSelectCustomerView('support') : (location.hash = '#support'));
     $('gcAvatarChoose')?.addEventListener('click', () => $('gcAvatarFile')?.click());
     $('gcAvatarFile')?.addEventListener('change', () => {
