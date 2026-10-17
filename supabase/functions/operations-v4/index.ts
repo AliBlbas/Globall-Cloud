@@ -169,6 +169,24 @@ async function chat(req:Request, a:any){
 async function post(req:Request,a:any){
  const body=await req.json();const action=text(body.action);const data=body.data||{};const isStaff=!!a.staff?.is_active&&STAFF_ROLES.has(String(a.staff.role));
  if(['customer_create','customer_update','customer_delete','pricing_update','fx_update','alert_create','shipment_update'].includes(action)&&(!isStaff||!WRITE_ROLES.has(String(a.staff.role))))throw new Error('Admin permission required')
+ if(action==='quote_calculate'){
+  if(!isStaff) throw new Error('Staff permission required');
+  const actual=Number(data.actual_weight??data.actual_weight_kg??0);
+  const length=Number(data.length_cm??0);
+  const width=Number(data.width_cm??0);
+  const height=Number(data.height_cm??0);
+  const rate=Number(data.rate??0);
+  const inputs=[actual,length,width,height,rate];
+  if(!inputs.every(Number.isFinite)||inputs.some((value)=>value<0)) throw new Error('Invalid quote calculation input');
+  const volumetric=length*width*height/6000;
+  const chargeable=Math.max(actual,volumetric);
+  const total=chargeable*rate;
+  if(![volumetric,chargeable,total].every(Number.isFinite)) throw new Error('Invalid quote calculation input');
+  const round=(value:number)=>Math.round((value+Number.EPSILON)*100)/100;
+  const submittedCurrency=text(data.currency).toUpperCase();
+  const currency=['USD','IQD'].includes(submittedCurrency)?submittedCurrency:'USD';
+  return {actual_weight:round(actual),volumetric_weight:round(volumetric),chargeable_weight:round(chargeable),rate:round(rate),total:round(total),currency};
+ }
  if(action==='customer_create'){
   const code=gc(data.gc_code||data.code)||`GC-${String(Math.floor(1000+Math.random()*9000))}`;const password=text(data.password)||crypto.randomUUID().slice(0,12)+'Aa!';
   const email=text(data.email)||`${code.toLowerCase()}@globall-cloud.local`;const {data:u,error:ue}=await a.admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{full_name:text(data.name),gc_code:code,phone:text(data.phone)}});if(ue)throw ue
@@ -196,4 +214,4 @@ async function post(req:Request,a:any){
  }
  throw new Error('Unsupported action')
 }
-Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors(req)});try{const a=await actor(req);if(req.method==='POST')return json(req,await post(req,a));const u=new URL(req.url);const kind=text(u.searchParams.get('kind'))||'overview';const staffOnly=['shipments','shipment','customers','alerts','pricing','finance','chat'];if(staffOnly.includes(kind)&&(!a.staff?.is_active||!STAFF_ROLES.has(String(a.staff.role))))throw new Error('Staff permission required');if(kind==='shipments'){const pageRaw=Number(u.searchParams.get('page'));const pageSizeRaw=Number(u.searchParams.get('page_size'));const page=Number.isInteger(pageRaw)&&pageRaw>0?Math.min(10000,pageRaw):1;const pageSize=Number.isInteger(pageSizeRaw)&&pageSizeRaw>0?Math.min(500,pageSizeRaw):500;return json(req,await listShipments(a.admin,gc(u.searchParams.get('gc'))||undefined,page,pageSize))}if(kind==='shipment')return json(req,await shipmentDetail(a.admin,text(u.searchParams.get('id'))));if(kind==='customers')return json(req,{items:await customers(a.admin)});if(kind==='alerts')return json(req,{items:await alerts(a.admin,a.staff.id)});if(kind==='pricing')return json(req,await pricing(a.admin));if(kind==='finance')return json(req,await finance(a.admin));if(kind==='chat')return json(req,await chat(req,a));return json(req,{ok:true,service:'operations-v4',time:new Date().toISOString()})}catch(e){const m=e instanceof Error?e.message:String(e);const s=/Unauthorized/i.test(m)?401:/permission|Forbidden/i.test(m)?403:/not found|required|Invalid/i.test(m)?400:500;return json(req,{error:m},s)}})
+Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response(null,{headers:cors(req)});try{const a=await actor(req);if(req.method==='POST')return json(req,await post(req,a));const u=new URL(req.url);const kind=text(u.searchParams.get('kind'))||'overview';const staffOnly=['shipments','shipment','customers','alerts','pricing','finance','chat'];if(staffOnly.includes(kind)&&(!a.staff?.is_active||!STAFF_ROLES.has(String(a.staff.role))))throw new Error('Staff permission required');if(kind==='shipments'){const pageRaw=Number(u.searchParams.get('page'));const pageSizeRaw=Number(u.searchParams.get('page_size'));const page=Number.isInteger(pageRaw)&&pageRaw>0?Math.min(10000,pageRaw):1;const pageSize=Number.isInteger(pageSizeRaw)&&pageSizeRaw>0?Math.min(500,pageSizeRaw):500;return json(req,await listShipments(a.admin,gc(u.searchParams.get('gc'))||undefined,page,pageSize))}if(kind==='shipment')return json(req,await shipmentDetail(a.admin,text(u.searchParams.get('id'))));if(kind==='customers')return json(req,{items:await customers(a.admin)});if(kind==='alerts')return json(req,{items:await alerts(a.admin,a.staff.id)});if(kind==='pricing')return json(req,await pricing(a.admin));if(kind==='finance')return json(req,await finance(a.admin));if(kind==='chat')return json(req,await chat(req,a));return json(req,{ok:true,service:'operations-v4',time:new Date().toISOString()})}catch(e){const m=e instanceof Error?e.message:String(e);const s=/Unauthorized/i.test(m)?401:/permission|Forbidden/i.test(m)?403:/not found|required|Invalid|Unsupported action/i.test(m)?400:500;return json(req,{error:m},s)}})
