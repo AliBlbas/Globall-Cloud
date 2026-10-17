@@ -137,7 +137,7 @@ if (!customerGcLogin.includes('consume_public_message_rate_limit') || !customerG
 else ok('GC-code login applies server-side attempt limits and origin validation')
 const unifiedCustomerAuth = read('gc-csp-scripts/customer-portal-inline-1.js')
 const unifiedCustomerController = read('gc-unified-customer-experience-20261016.js')
-if (!read('index.html').includes('gc-unified-customer-experience-20261016.js?v=6') || !unifiedCustomerController.includes("const explicitAuthRoute = () => ['#auth', '#register'].includes(window.location.hash)") || (unifiedCustomerController.match(/enterCustomerMode\\(\\{showAuth:explicitAuthRoute\\(\\)\\}\\);/g) || []).length !== 2) fail('Customer workspace navigation must only show the login modal for explicit auth routes')
+if (!read('index.html').includes('gc-unified-customer-experience-20261016.js?v=6') || !unifiedCustomerController.includes("const explicitAuthRoute = () => ['#auth', '#register'].includes(window.location.hash)") || unifiedCustomerController.split('enterCustomerMode({showAuth:explicitAuthRoute()});').length - 1 !== 2) fail('Customer workspace navigation must only show the login modal for explicit auth routes')
 else ok('Customer workspace navigation avoids login modal flicker')
 if (!read('index.html').includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261016-9')) fail('Unified customer login cache-buster is stale')
 if (!unifiedCustomerAuth.includes("$('authForm').addEventListener('submit', async (event) => {") || !unifiedCustomerAuth.includes('event.preventDefault();') || unifiedCustomerAuth.includes("$('signIn').addEventListener('click'")) fail('Customer login must prevent native form navigation and support form submission')
