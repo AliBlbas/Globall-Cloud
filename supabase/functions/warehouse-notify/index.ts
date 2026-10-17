@@ -173,7 +173,8 @@ Deno.serve(async (req: Request) => {
           shipment_id: receipt.shipment_id ? String(receipt.shipment_id) : null,
           kind: 'warehouse_received', event_key: eventKey, title, body: bodyText, action_url: actionUrl,
         })
-        if (error) errors.push(`in_app: ${error.message}`)
+        if (error?.code === '23505') inAppQueued = true
+        else if (error) errors.push(`in_app: ${error.message}`)
         else inAppQueued = true
       } else if (existing.read_at) {
         const { error } = await admin.from('customer_notifications').update({ read_at: null, title, body: bodyText, action_url: actionUrl, created_at: new Date().toISOString() })
