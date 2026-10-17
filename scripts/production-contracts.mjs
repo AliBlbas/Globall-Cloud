@@ -39,12 +39,12 @@ else fail('Service Worker network-first/lifecycle contract is incomplete')
 const required = [
   'index.html','gc-customer-experience-signature-20261017.css','login.html','register.html','customer-access.html','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js','public-route-bootstrap.js','public-runtime-guarantee.js',
   'public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js','tracking-integration.html','tracking-intelligence.js',
-  'tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os-v5.html','staff-os-v5.css','staff-os-v5.js',
+  'tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os-v5.html','staff-os-v5.css','staff-os-v5.js','staff-os-v5-20261017.js',
   'staff-os-v5-rescue.js','staff-logistics-intelligence.css','staff-logistics-intelligence.js','staff-mobile-command-dock.css','staff-mobile-command-dock.js',
   'staff-os-pro-20260909.css','staff-os-pro-20260909.js','staff-shell-polish-20260909.css','staff-shell-polish-20260909.js',
   'staff-premium-mobile-20260909.css','staff-premium-mobile-20260909.js','warehouse-offline-sync.js','production-mobile-ux-v2026.css','gc-platform-vnext.js',
   'gc-platform-vnext-plus.js','gc-runtime-safety-v2026.js','production-brand-repair.js','gc-csp-scripts/logistics-pricing-ui.js','supabase/config.toml',
-  'package.json','gc-account-entry.js','gc-csp-scripts/customer-portal-inline-1.js','gc-unified-customer-experience-20261016.js','supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
+  'package.json','gc-account-entry.js','gc-csp-scripts/customer-portal-inline-1.js','gc-csp-scripts/customer-portal-inline-20261017.js','gc-unified-customer-experience-20261016.js','supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
   'supabase/functions/notification-dispatch/index.ts','supabase/functions/warehouse-receiving/index.ts','supabase/functions/warehouse-notify/index.ts',
   'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/invoice-ai/index.ts',
   'supabase/functions/customer-debt-assistant/index.ts','supabase/functions/fx-refresh/index.ts','supabase/functions/public-config/index.ts',
@@ -135,7 +135,7 @@ for (const fn of publicFns) {
   else if (block[1] !== 'false') fail(`${fn} must be publicly callable`)
 }
 if (!failures) ok('Public function JWT posture is explicit')
-const customerPortalLogin = read('gc-csp-scripts/customer-portal-inline-1.js')
+const customerPortalLogin = read('gc-csp-scripts/customer-portal-inline-20261017.js')
 const customerAccountEntry = read('gc-account-entry.js')
 if (!customerPortalLogin.includes('/functions/v1/customer-gc-login') || !customerPortalLogin.includes('sb.auth.setSession')) fail('Customer portal must authenticate GC codes via customer-gc-login and persist the returned session')
 else ok('GC-code sign-in uses the dedicated Edge Function and stores the Supabase session')
@@ -147,7 +147,7 @@ if (!read('functions/_middleware.js').includes('gc-account-entry.js?v=20261014-1
 const customerGcLogin = read('supabase/functions/customer-gc-login/index.ts')
 if (!customerGcLogin.includes('consume_public_message_rate_limit') || !customerGcLogin.includes('MAX_LOGIN_REQUESTS_PER_IP = 40') || !customerGcLogin.includes('MAX_LOGIN_REQUESTS_PER_IP_CODE = 8') || !customerGcLogin.includes('MAX_LOGIN_REQUESTS_PER_GC_CODE = 12') || !customerGcLogin.includes('originAllowed(req)')) fail('GC-code login must apply network/code rate limits and origin validation')
 else ok('GC-code login applies server-side attempt limits and origin validation')
-const unifiedCustomerAuth = read('gc-csp-scripts/customer-portal-inline-1.js')
+const unifiedCustomerAuth = read('gc-csp-scripts/customer-portal-inline-20261017.js')
 const unifiedCustomerController = read('gc-unified-customer-experience-20261016.js')
 if (!read('index.html').includes('gc-unified-customer-experience-20261016.js?v=20261017-1') || !unifiedCustomerController.includes("const normalizeHash =") || !unifiedCustomerController.includes("window.location.hash || '#auth'") || !unifiedCustomerController.includes("verifyExistingSession(hash === '#auth'")) fail('Unified root must open customer mode and normalize its starting route')
 else ok('Root opens the unified customer workspace and guards authenticated sections')
@@ -155,7 +155,7 @@ if (!unifiedCustomerController.includes("const legacyRoutes = {") || !unifiedCus
 else ok('Legacy homepage actions map into the customer console')
 if (unifiedCustomerController.includes('const syncPublicPageRoute =') || unifiedCustomerController.includes('setPublicMode')) fail('Obsolete public homepage route controller must be removed')
 else ok('Legacy public home mode is not rendered by the unified shell')
-if (!read('index.html').includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261017-2')) fail('Unified customer login cache-buster is stale')
+if (!read('index.html').includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-2')) fail('Unified customer login cache-buster is stale')
 const customerSubmitHandlers = unifiedCustomerAuth.match(/\$\('authForm'\)\??\.addEventListener\('submit'/g) || []
 if (customerSubmitHandlers.length !== 1 || !unifiedCustomerAuth.includes("$('authForm').addEventListener('submit', async (event) => {") || !unifiedCustomerAuth.includes('event.preventDefault();') || unifiedCustomerAuth.includes("$('signIn').click();")) fail('Customer login must use exactly one submit handler without programmatic resubmission')
 else ok('Customer login form submits once and prevents native navigation')
@@ -175,12 +175,12 @@ const mobileDockTabs = (unifiedShell.match(/data-dock-tab="(home|shipments|reque
 if (mobileDockTabs.length !== 5 || !unifiedShell.includes('gc-dashboard-preferences-20261003.js?v=20261017-3') || !customerPreferencesRuntime.includes("'#support':'requests'") || !customerPreferencesRuntime.includes("requestedKey === 'support' ? 'requests'") || !customerPreferencesRuntime.includes("new Set(nextHash === '#support' ? ['support'] : viewGroups[key])") || customerPreferencesRuntime.includes("support: ['support']")) fail('Customer navigation must keep exactly five tabs and open support as a Requests subview')
 else ok('Customer navigation keeps five primary tabs with a focused Support subview')
 const customerRequestUi = read('gc-customer-request-20261003.js')
-const customerQuoteController = read('gc-csp-scripts/customer-portal-inline-1.js')
+const customerQuoteController = read('gc-csp-scripts/customer-portal-inline-20261017.js')
 const requestFormStart = unifiedShell.indexOf('id="newRequest"')
 const requestFieldsHtml = requestFormStart >= 0 ? unifiedShell.slice(requestFormStart, unifiedShell.indexOf('</form>', requestFormStart)) : ''
 if (!unifiedShell.includes('gc-customer-request-20261003.js?v=20261017-3') || !requestFieldsHtml.includes('id="requestVolumeWrap"') || !requestFieldsHtml.includes('id="requestVolume"') || !customerRequestUi.includes('volumeInput.required = isSea') || !customerRequestUi.includes('volume_cbm: volume') || !customerRequestUi.includes("const volumeValid = mode === 'sea'")) fail('Customer shipment requests must collect CBM for sea freight and submit valid measurement units')
 else ok('Customer shipment requests handle sea CBM and air/land kilograms')
-if (!unifiedShell.includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261017-3') || !customerQuoteController.includes('const syncQuoteMeasurements = () =>') || !customerQuoteController.includes('volume.required = isSea') || !customerQuoteController.includes('volume_cbm: volume') || !customerQuoteController.includes("const quantityValid = transportMode === 'sea'")) fail('Customer quotes must enforce the server quantity rule and submit null-safe weight/volume values')
+if (!unifiedShell.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-2') || !customerQuoteController.includes('const syncQuoteMeasurements = () =>') || !customerQuoteController.includes('volume.required = isSea') || !customerQuoteController.includes('volume_cbm: volume') || !customerQuoteController.includes("const quantityValid = transportMode === 'sea'")) fail('Customer quotes must enforce the server quantity rule and submit null-safe weight/volume values')
 else ok('Customer quotes enforce sea CBM versus air/land weight before submission')
 
 
@@ -188,7 +188,7 @@ else ok('Customer quotes enforce sea CBM versus air/land weight before submissio
 if (!unifiedController.includes("'#public':'#overview'") || !unifiedController.includes("'#services':'#gcCustomerRouteOverview'") || !unifiedController.includes("'#request':'#newRequest'") || !unifiedController.includes("'#contact':'#support'")) fail('Legacy marketing routes must map into customer console views')
 if (!customerStyleLoader.includes('function ensureHomeDock() { return; }') || customerStyleLoader.includes('dock.innerHTML')) fail('Legacy public dock injector must remain disabled')
 if (!read('gc-customer-workspace-elite-20261014.css').includes('body.gc-customer-app #gcWhatsAppFloat') || !read('gc-customer-workspace-elite-20261014.css').includes('body.gc-customer-app .gc-whatsapp-float')) fail('Floating marketing WhatsApp bubble must not overlap customer app navigation')
-if (!unifiedShell.includes('gc-unified-customer-experience-20261016.js?v=20261017-1') || !unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=23') || !unifiedShell.includes('gc-customer-experience-signature-20261017.css?v=2') || !unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=21') || !unifiedShell.includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261017-2')) fail('Customer-first app shell cache references are stale')
+if (!unifiedShell.includes('gc-unified-customer-experience-20261016.js?v=20261017-1') || !unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=23') || !unifiedShell.includes('gc-customer-experience-signature-20261017.css?v=2') || !unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=21') || !unifiedShell.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-2')) fail('Customer-first app shell cache references are stale')
 else ok('Customer-first app shell loads current assets')
 const customerGcRegister = read('supabase/functions/customer-gc-register/index.ts')
 const supabaseConfig = read('supabase/config.toml')
