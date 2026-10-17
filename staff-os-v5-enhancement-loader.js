@@ -56,6 +56,8 @@
     // This scoped layer loads last so it can replace the old scrollable mobile
     // sidebar dock without changing desktop navigation or shipment actions.
     loadStyle('/gc-staff-mobile-dock-20261016.css?v=4');
+    // Append the UI integrity layer last so its mobile wrapping rules win.
+    loadStyle('/gc-ui-integrity-mobile-20261017.css?v=3');
   };
 
   const waitForShell = () => {
