@@ -156,6 +156,8 @@ else ok('Legacy homepage actions map into the customer console')
 if (unifiedCustomerController.includes('const syncPublicPageRoute =') || unifiedCustomerController.includes('setPublicMode')) fail('Obsolete public homepage route controller must be removed')
 else ok('Legacy public home mode is not rendered by the unified shell')
 if (!read('index.html').includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-6')) fail('Unified customer login cache-buster is stale')
+if (!customerPortalLogin.includes("if (billedKpi) billedKpi.textContent = formatBuckets(billed);") || !customerPortalLogin.includes("$('trackBtn')?.addEventListener") || !customerPortalLogin.includes("$('quoteBtn')?.addEventListener")) fail('Customer dashboard loading must tolerate optional finance and home-action elements')
+else ok('Customer dashboard loading tolerates optional finance and home-action elements')
 const customerSubmitHandlers = unifiedCustomerAuth.match(/\$\('authForm'\)\??\.addEventListener\('submit'/g) || []
 if (customerSubmitHandlers.length !== 1 || !unifiedCustomerAuth.includes("$('authForm').addEventListener('submit', async (event) => {") || !unifiedCustomerAuth.includes('event.preventDefault();') || unifiedCustomerAuth.includes("$('signIn').click();")) fail('Customer login must use exactly one submit handler without programmatic resubmission')
 else ok('Customer login form submits once and prevents native navigation')
