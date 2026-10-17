@@ -51,7 +51,7 @@ if (ts) {
 
 console.log('Required production files')
 const required = [
-  'index.html','login.html','register.html','customer-access.html','supabase/functions/customer-gc-register/index.ts','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
+  'index.html','login.html','register.html','customer-access.html','supabase/functions/customer-gc-register/index.ts','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','gc-unified-customer-experience-20261016.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
   'public-route-bootstrap.js','public-runtime-guarantee.js','public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js',
   'tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html',
   'staff-os-v5.html','staff-os-v5.css','staff-os-v5.js','gc-shipment-detail-20261016.css','staff-os-v5-rescue.js','staff-logistics-intelligence.js','staff-logistics-intelligence.css',
@@ -211,6 +211,8 @@ const unifiedContracts = [
   ['public services integrated into customer home', unifiedShell.includes('id="gcCustomerRouteOverview"') && unifiedShell.includes('gc-customer-service-grid')],
   ['customer mobile dock has five primary icons', customerDockCount === 5],
   ['registration hash stays in customer mode', unifiedController.includes("'#auth','#register'") && unifiedController.includes("'#register':'home'")],
+  ['customer navigation prompts for login only on explicit auth routes', unifiedController.includes("const explicitAuthRoute = () => ['#auth', '#register'].includes(window.location.hash)") && (unifiedController.match(/enterCustomerMode\\(\\{showAuth:explicitAuthRoute\\(\\)\\}\\);/g) || []).length === 2],
+  ['unified customer controller cache key is current', unifiedShell.includes('gc-unified-customer-experience-20261016.js?v=6')],
   ['customer home includes route services and alerts', customerNavigation.includes("'gcCustomerRouteOverview', 'activity'")],
   ['unread alert count is shown on Home icon', customerNavigation.includes("const homeItem = items.find(item => item.dataset.dockTab === 'home')") && customerNavigation.includes('data-dock-unread')],
   ['customer dock uses five responsive columns', customerDockStyles.includes('repeat(5,minmax(0,1fr))') && !customerDockStyles.includes('repeat(6,minmax(0,1fr))') && !customerWorkspaceStyles.includes('repeat(6,minmax(0,1fr))')],
