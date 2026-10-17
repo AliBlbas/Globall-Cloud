@@ -387,7 +387,7 @@ Deno.serve(async (req) => {
     let receiptCartons: Record<string, any>[] = []
     if (receiptIds.length) {
       const cartonResult = await service.from('warehouse_receipt_cartons')
-        .select('id,receipt_id,customer_directory_id,gc_code,carton_index,carton_total,carton_code,warehouse_location,received_at,status,package_id,created_by_name,notes,created_at')
+        .select('receipt_id,gc_code,carton_index,carton_total,carton_code,warehouse_location,received_at,status')
         .in('receipt_id', receiptIds)
         .eq('customer_directory_id', customer.id)
         .order('carton_index', {ascending:true})
