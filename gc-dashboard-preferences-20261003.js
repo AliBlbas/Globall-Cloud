@@ -100,7 +100,8 @@
     if (!dock || !main || dock.dataset.gcDockReady === '1') return;
     dock.dataset.gcDockReady = '1';
     const items = [...dock.querySelectorAll('[data-dock-tab]')];
-    const allSections = () => [...main.querySelectorAll(':scope > section')];
+    // Include the toolbar as a view element too; it is a direct-child div, not a section.
+    const allSections = () => [...main.querySelectorAll(':scope > section, :scope > .workspace-toolbar')];
     const viewGroups = {
       home: ['workspace-toolbar', 'overview', 'homeMetrics', 'gcCustomerRouteOverview'],
       shipments: ['shipmentsSection', 'records'],
