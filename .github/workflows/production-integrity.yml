@@ -65,6 +65,10 @@ jobs:
           grep -Fq "window.location.replace('/#auth')" customer-portal.html
           grep -q 'staff-os-v5-20261017.js?v=20261017-7' staff-os-v5.html
           grep -q 'staff-os-v5.css?v=20261016-4' staff-os-v5.html
+          grep -q 'staff-os-v5-enhancement-loader-20261017.js?v=6' staff-os-v5.html
+          grep -q 'gc-realtime-notifications-20261003.js?v=2' staff-os-v5.html
+          grep -Fq 'lockCommandStylesLast' staff-os-v5-enhancement-loader-20261017.js
+          grep -Fq 'if (isStaff) client = window.gcSupabase;' gc-realtime-notifications-20261003.js
           grep -q 'gc-staff-command-system-20261017.css?v=1' staff-os-v5.html
           grep -Fq "storageKey: 'gc-staff-os-auth-v5-ahslifnthiwfkmaswjno'" staff-os-v5-20261017.js
           grep -Fq 'const customerBridgePanel =' staff-os-v5-20261017.js
