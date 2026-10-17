@@ -65,6 +65,16 @@ jobs:
           grep -Fq "window.location.replace('/#auth')" customer-portal.html
           grep -q 'staff-os-v5-20261017.js?v=20261017-7' staff-os-v5.html
           grep -q 'staff-os-v5.css?v=20261016-4' staff-os-v5.html
+          grep -q 'gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-7' index.html
+          grep -q 'gc-realtime-notifications-20261003.js?v=3' index.html
+          grep -Fq 'async function queueReceiptNotifications' supabase/functions/warehouse-receiving/index.ts
+          grep -Fq 'submittedBatchCode' supabase/functions/warehouse-receiving/index.ts
+          grep -Fq 'async function queueOutboxChannel' supabase/functions/warehouse-notify/index.ts
+          grep -Fq "['failed','cancelled'].includes" supabase/functions/warehouse-notify/index.ts
+          grep -Fq 'secureWarehouseReceiptPhotos' supabase/functions/customer-self/index.ts
+          grep -Fq 'receipts:customerReceipts' supabase/functions/customer-self/index.ts
+          grep -Fq 'warehouse-receipt-evidence' gc-csp-scripts/customer-portal-inline-20261017.js
+          grep -Fq "page === '/' && Boolean(document.querySelector('#gcCustomerWorkspace'))" gc-realtime-notifications-20261003.js
           grep -q 'staff-os-v5-enhancement-loader-20261017.js?v=6' staff-os-v5.html
           grep -q 'gc-realtime-notifications-20261003.js?v=2' staff-os-v5.html
           grep -Fq 'lockCommandStylesLast' staff-os-v5-enhancement-loader-20261017.js
@@ -75,7 +85,7 @@ jobs:
           grep -Fq 'CUSTOMER WORKSPACE · SHARED DATA' staff-os-v5-20261017.js
           grep -Fq "original.querySelector('.nav-icon svg')" gc-staff-mobile-dock-20261016.js
           grep -Fq "loadStyle('/gc-staff-command-system-20261017.css?v=1')" staff-os-v5-enhancement-loader-20261017.js
-          grep -q 'gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-6' index.html
+          grep -q 'gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-7' index.html
           grep -Fq "window.location.replace('/#auth')" customer-portal.html
           grep -Fq 'authForm' gc-csp-scripts/customer-portal-inline-20261017.js
           grep -Fq 'event.preventDefault();' gc-csp-scripts/customer-portal-inline-20261017.js
