@@ -19,13 +19,19 @@ function nextDeliveryTimeOutsideQuietHours(quietStart:unknown,quietEnd:unknown,n
  const start=parse(quietStart),end=parse(quietEnd);
  if(start===null||end===null||start===end)return now.toISOString();
  const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Baghdad',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now);
- const hour=Number(parts.find(p=>p.type==='hour')?.value||0),minute=Number(parts.find(p=>p.type==='minute')?.value||0);
- const current=hour*60+minute;
+ const hour=Number(parts.find(p=>p.type==='hour')?.value||0),minute=Number(parts.find(p=>p.type==='minute')?.value||0),current=hour*60+minute;
  const quiet=start<end?(current>=start&&current<end):(current>=start||current<end);
  if(!quiet)return now.toISOString();
- let delay=(end-current+1440)%1440;
- if(delay===0)delay=1440;
+ let delay=(end-current+1440)%1440;if(delay===0)delay=1440;
  return new Date(now.getTime()+delay*60000+1000).toISOString();
+}
+async function cancelQueuedReceiptChannel(admin:ReturnType<typeof createClient>,eventKey:string,channel:'email'|'whatsapp',reason:string){
+ const {data,error}=await admin.from('notification_outbox')
+  .update({status:'cancelled',last_error:reason,updated_at:new Date().toISOString()})
+  .eq('event_key',eventKey).eq('channel',channel).in('status',['pending','processing','retry','queued'])
+  .select('id');
+ if(error)throw error;
+ return (data||[]).length;
 }
 async function queueReceiptNotifications(admin:ReturnType<typeof createClient>,receipt:Record<string,any>,knownCustomer?:Record<string,any>,signedPhotoUrls?:string[]){
  const errors:string[]=[];
@@ -50,11 +56,10 @@ async function queueReceiptNotifications(admin:ReturnType<typeof createClient>,r
  const payloadBase={title,body:bodyText,action_url:actionUrl,gc_code:gc,warehouse,carton_count:cartons,weight_kg:weight||null,receipt_id:String(receipt.id),batch_code:String(receipt.batch_code||''),received_at:String(receivedAt),photo_count:photos.length,media_url:photos[0]||null};
  let preferences:Record<string,any>|null=null;
  if(customer.auth_user_id){
-  const result=await admin.from('customer_notification_preferences')
-   .select('email_enabled,whatsapp_enabled,in_app_enabled,quiet_hours_start,quiet_hours_end')
-   .eq('customer_user_id',customer.auth_user_id).maybeSingle();
+  const result=await admin.from('customer_notification_preferences').select('email_enabled,whatsapp_enabled,in_app_enabled,quiet_hours_start,quiet_hours_end').eq('customer_user_id',customer.auth_user_id).maybeSingle();
   if(result.error)errors.push('preferences: '+result.error.message);else preferences=result.data;
  }
+ // In-app notifications default on for linked customers; external channels require explicit opt-in.
  const inAppAllowed=Boolean(customer.auth_user_id)&&preferences?.in_app_enabled!==false;
  const whatsappOptedIn=preferences?.whatsapp_enabled===true;
  const emailOptedIn=preferences?.email_enabled===true;
@@ -62,8 +67,7 @@ async function queueReceiptNotifications(admin:ReturnType<typeof createClient>,r
  let inAppQueued=false,whatsappQueued=false,emailQueued=false;
  if(inAppAllowed){
   const r=await admin.from('customer_notifications').upsert({
-   customer_user_id:customer.auth_user_id,
-   shipment_id:receipt.shipment_id?String(receipt.shipment_id):null,
+   customer_user_id:customer.auth_user_id,shipment_id:receipt.shipment_id?String(receipt.shipment_id):null,
    kind:'warehouse_received',event_key:eventKey,title,body:bodyText,action_url:actionUrl
   },{onConflict:'customer_user_id,event_key',ignoreDuplicates:true});
   if(r.error)errors.push('in_app: '+r.error.message);else inAppQueued=true;
@@ -71,22 +75,23 @@ async function queueReceiptNotifications(admin:ReturnType<typeof createClient>,r
  const whatsappRecipient=String(customer.whatsapp_phone||customer.phone||customer.phone2||'').trim();
  if(whatsappOptedIn&&whatsappRecipient){
   const r=await admin.from('notification_outbox').upsert({
-   customer_user_id:customer.auth_user_id||null,
-   shipment_id:receipt.shipment_id?String(receipt.shipment_id):null,
+   customer_user_id:customer.auth_user_id||null,shipment_id:receipt.shipment_id?String(receipt.shipment_id):null,
    channel:'whatsapp',event_key:eventKey,recipient:whatsappRecipient,next_attempt_at:nextAttemptAt,
    payload:{...payloadBase,template_name:Deno.env.get('WHATSAPP_TEMPLATE_NAME')||'globall_warehouse_received',template_language:String(customer.preferred_language||'ckb')}
   },{onConflict:'event_key,channel',ignoreDuplicates:true});
   if(r.error)errors.push('whatsapp: '+r.error.message);else whatsappQueued=true;
+ }else{
+  try{await cancelQueuedReceiptChannel(admin,eventKey,'whatsapp','Customer has not opted in to WhatsApp notifications.')}catch(error){errors.push('whatsapp_cancel: '+(error instanceof Error?error.message:String(error)))}
  }
  const emailRecipient=String(customer.email||'').trim();
  if(emailOptedIn&&emailRecipient){
   const r=await admin.from('notification_outbox').upsert({
-   customer_user_id:customer.auth_user_id||null,
-   shipment_id:receipt.shipment_id?String(receipt.shipment_id):null,
-   channel:'email',event_key:eventKey,recipient:emailRecipient,next_attempt_at:nextAttemptAt,
-   payload:{...payloadBase,subject:title}
+   customer_user_id:customer.auth_user_id||null,shipment_id:receipt.shipment_id?String(receipt.shipment_id):null,
+   channel:'email',event_key:eventKey,recipient:emailRecipient,next_attempt_at:nextAttemptAt,payload:{...payloadBase,subject:title}
   },{onConflict:'event_key,channel',ignoreDuplicates:true});
   if(r.error)errors.push('email: '+r.error.message);else emailQueued=true;
+ }else{
+  try{await cancelQueuedReceiptChannel(admin,eventKey,'email','Customer has not opted in to email notifications.')}catch(error){errors.push('email_cancel: '+(error instanceof Error?error.message:String(error)))}
  }
  return{ok:errors.length===0,account_linked:Boolean(customer.auth_user_id),in_app_queued:inAppQueued,whatsapp_queued:whatsappQueued,email_queued:emailQueued,whatsapp_opted_in:whatsappOptedIn,email_opted_in:emailOptedIn,external_opt_in:whatsappOptedIn||emailOptedIn,photo_count:photos.length,next_external_attempt_at:nextAttemptAt,errors};
 }
