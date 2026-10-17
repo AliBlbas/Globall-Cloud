@@ -331,6 +331,7 @@ const mobileUiContracts = [
   ['Warehouse receipt table shows each customer portal-link state and opens the owner record', staffShipmentScript.includes('هەژماری Portal') && staffShipmentScript.includes('openReceiptCustomer') && staffShipmentScript.includes("await loadTab('customers')")],
   ['Staff scan normalizes generated carton barcodes to the owning GC code', staffShipmentScript.includes('const suffix=fullCode.match') && staffShipmentScript.includes('fullCode.slice(0,suffix.index)') && staffShipmentScript.includes('tracking:suffix?fullCode:raw') && staffShipmentScript.includes('receipt.cartons||[]')],
   ['Warehouse intake warns that mixed customer codes must be received separately', staffShipmentScript.includes('receipt-owner-routing-hint') && staffShipmentScript.includes('هەر کۆدێک بە جیا تۆمار بکە')],
+  ['Admin and Super Admin must choose the actual receiving warehouse explicitly', staffShipmentScript.includes("(['super_admin','admin'].includes(staffRole)?'':'Dubai')") && staffShipmentScript.includes('یەکەم کۆگای وەرگرتن هەڵبژێرە')],
   ['Final Staff command styles include clear GC ownership guidance for mobile', read('gc-staff-command-system-20261017.css').includes('.receipt-owner-routing-hint') && read('gc-staff-command-system-20261017.css').includes('max-width: 760px')],
 
   ['Warehouse receipt details visibly warn when photo signing needs retry', staffShipmentScript.includes('r.photo_signing_warning') && staffShipmentScript.includes('دروستکردنی لینک سەرکەوتوو نەبوو')],
