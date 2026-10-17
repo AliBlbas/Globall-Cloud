@@ -37,7 +37,7 @@ if (sw.includes("fetch(request, { cache: 'no-store' })") && sw.includes('self.sk
 else fail('Service Worker network-first/lifecycle contract is incomplete')
 
 const required = [
-  'index.html','login.html','register.html','customer-access.html','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js','public-route-bootstrap.js','public-runtime-guarantee.js',
+  'index.html','gc-customer-experience-signature-20261017.css','login.html','register.html','customer-access.html','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js','public-route-bootstrap.js','public-runtime-guarantee.js',
   'public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js','tracking-integration.html','tracking-intelligence.js',
   'tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os-v5.html','staff-os-v5.css','staff-os-v5.js',
   'staff-os-v5-rescue.js','staff-logistics-intelligence.css','staff-logistics-intelligence.js','staff-mobile-command-dock.css','staff-mobile-command-dock.js',
@@ -106,8 +106,9 @@ if (!staff.includes('mobile-premium-responsive-v2026.css?v=')) fail('Staff respo
 if (!publicShell.includes('/gc-production-ui-20260927.css?v=1')) fail('Public production UI layer is not loaded')
 if (!staff.includes('/gc-production-ui-20260927.css?v=1')) fail('Staff production UI layer is not loaded')
 if (!read('index.html').includes('gc-customer-workspace-elite-20261014.css?v=22')) fail('Unified customer workspace UI layer is not loaded')
+if (!read('index.html').includes('gc-customer-experience-signature-20261017.css?v=1') || !read('gc-public-customer-style-loader-20261014.js').includes('gc-customer-experience-signature-20261017.css?v=1')) fail('Signature customer experience layer is not loaded last')
 if (!read('index.html').includes('gc-homepage-signature-20261016.css?v=8') || !read('index.html').includes('gc-live-mobile-v3.css?v=20261017-1')) fail('Premium mobile homepage style layer is not loaded')
-if (!read('index.html').includes('gc-customer-mobile-dock-20261016.css?v=4') || !read('index.html').includes('gc-public-customer-style-loader-20261014.js?v=19')) fail('Customer mobile navigation stylesheet cache-busters are stale')
+if (!read('index.html').includes('gc-customer-mobile-dock-20261016.css?v=4') || !read('index.html').includes('gc-public-customer-style-loader-20261014.js?v=20')) fail('Customer mobile navigation stylesheet cache-busters are stale')
 const premiumHomeStyles = read('gc-homepage-signature-20261016.css')
 const premiumCustomerStyles = read('gc-customer-workspace-elite-20261014.css')
 const premiumDockStyles = read('gc-customer-mobile-dock-20261016.css')
@@ -162,7 +163,7 @@ else ok('Root opens the single customer workspace and no public mobile dock')
 if (!unifiedController.includes("'#public':'#overview'") || !unifiedController.includes("'#services':'#gcCustomerRouteOverview'") || !unifiedController.includes("'#request':'#newRequest'") || !unifiedController.includes("'#contact':'#support'")) fail('Legacy marketing routes must map into customer console views')
 if (!customerStyleLoader.includes('function ensureHomeDock() { return; }') || customerStyleLoader.includes('dock.innerHTML')) fail('Legacy public dock injector must remain disabled')
 if (!read('gc-customer-workspace-elite-20261014.css').includes('body.gc-customer-app #gcWhatsAppFloat') || !read('gc-customer-workspace-elite-20261014.css').includes('body.gc-customer-app .gc-whatsapp-float')) fail('Floating marketing WhatsApp bubble must not overlap customer app navigation')
-if (!unifiedShell.includes('gc-unified-customer-experience-20261016.js?v=9') || !unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=22') || !unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=19') || !unifiedShell.includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261016-10')) fail('Customer-first app shell cache references are stale')
+if (!unifiedShell.includes('gc-unified-customer-experience-20261016.js?v=9') || !unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=22') || !unifiedShell.includes('gc-customer-experience-signature-20261017.css?v=1') || !unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=20') || !unifiedShell.includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261016-10')) fail('Customer-first app shell cache references are stale')
 else ok('Customer-first app shell loads current assets')
 const customerGcRegister = read('supabase/functions/customer-gc-register/index.ts')
 const supabaseConfig = read('supabase/config.toml')
