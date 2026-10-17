@@ -970,3 +970,58 @@ html[data-gc-theme="light"] body.gc-customer-app .gc-account-help-action {
   body.gc-customer-app .gc-auth-support-note { padding: 11px; }
   body.gc-customer-app .gc-auth-support-note > a { width: 100%; }
 }
+
+
+/* Unified app shell — legacy public landing/dock are not rendered in customer mode. */
+html,body.gc-customer-app{min-height:100%;overflow-x:clip}
+body.gc-customer-app{padding-bottom:calc(82px + env(safe-area-inset-bottom))!important}
+body.gc-customer-app #gcApp{display:none!important;visibility:hidden!important;pointer-events:none!important}
+body.gc-customer-app #gcCustomerWorkspace{display:block!important;visibility:visible!important;min-height:100dvh;width:100%;isolation:isolate}
+body.gc-customer-app .gc-mobile-dock-v3,
+body.gc-customer-app #gcPrimaryMobileNav{display:none!important;visibility:hidden!important;pointer-events:none!important}
+body.gc-customer-app #gcCustomerWorkspace .app-header{
+  position:sticky;top:0;z-index:9500;
+  background:rgba(5,20,32,.92);
+  border-bottom:1px solid rgba(115,193,211,.16);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  backdrop-filter:blur(18px) saturate(140%);
+}
+body.gc-customer-app #gcCustomerWorkspace .app-header-inner{
+  min-height:65px;padding-inline:clamp(12px,3vw,24px);gap:10px;
+}
+body.gc-customer-app #gcCustomerWorkspace .app-brand{min-width:0;gap:9px}
+body.gc-customer-app #gcCustomerWorkspace .app-brand img{width:36px;height:36px;object-fit:contain;flex:0 0 auto}
+body.gc-customer-app #gcCustomerWorkspace .app-header-actions{min-width:0;gap:7px}
+body.gc-customer-app #gcCustomerWorkspace .app-header-link,
+body.gc-customer-app #gcCustomerWorkspace .app-header-button{min-height:40px;border-radius:12px}
+body.gc-customer-app #gcCustomerWorkspace .app-main{padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+body.gc-customer-app #gcCustomerWorkspace .mobile-dock{z-index:9999!important}
+body.gc-customer-app .gc-route-track-link{white-space:normal;text-align:center}
+@media(max-width:600px){
+  body.gc-customer-app #gcCustomerWorkspace .app-header-inner{min-height:60px;padding-inline:10px;gap:7px}
+  body.gc-customer-app #gcCustomerWorkspace .app-brand img{width:31px;height:31px}
+  body.gc-customer-app #gcCustomerWorkspace .app-brand strong{font-size:13px}
+  body.gc-customer-app #gcCustomerWorkspace .app-brand small{font-size:8px;letter-spacing:.06em}
+  body.gc-customer-app #gcCustomerWorkspace .app-header-actions{gap:5px}
+  body.gc-customer-app #gcCustomerWorkspace .app-header-link{gap:5px;padding-inline:9px;font-size:10px}
+  body.gc-customer-app #gcCustomerWorkspace .app-header-button{padding-inline:9px;font-size:10px}
+  body.gc-customer-app #gcCustomerWorkspace .workspace-toolbar{align-items:flex-start;gap:12px;flex-wrap:wrap}
+  body.gc-customer-app #gcCustomerWorkspace .workspace-controls{width:100%;justify-content:flex-start}
+  body.gc-customer-app #gcCustomerWorkspace .command-card{gap:16px}
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-route-overview{border-radius:18px}
+  body.gc-customer-app #gcCustomerWorkspace .gc-route-overview-heading h2{font-size:20px}
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock{
+    left:8px!important;right:8px!important;bottom:calc(6px + env(safe-area-inset-bottom))!important;
+    height:68px!important;gap:4px!important;padding:5px!important;border-radius:18px!important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock a{min-height:55px;padding:5px 3px;gap:4px;font-size:9px}
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock a span,
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock a small{font-size:9px;line-height:1.35;white-space:normal}
+  body.gc-customer-app .gc-auth-support-note{margin-top:12px}
+}
+@media(max-width:360px){
+  body.gc-customer-app #gcCustomerWorkspace .app-header-link span:last-child{display:none}
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock{left:4px!important;right:4px!important;gap:2px!important;padding:4px!important}
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock a span,
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock a small{font-size:8px}
+}
