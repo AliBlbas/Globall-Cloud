@@ -207,6 +207,7 @@ const staffShipmentControlSource = read('supabase/functions/staff-shipment-contr
 const shipmentCustomerLinksMigration = read('supabase/migrations/20261017120000_staff_customer_unified_shipment_links.sql')
 const notificationIndexMigration = read('supabase/migrations/20261017040435_customer_notification_idempotency_unique_index.sql')
 const customerPortalSource = read('gc-csp-scripts/customer-portal-inline-1.js')
+const staffOpsHubSource = read('supabase/functions/staff-ops-hub/index.ts')
 const customerAccountEntry = read('gc-account-entry.js')
 const accountAdminSource = read('supabase/functions/account-admin/index.ts')
 const customerDockStart = unifiedShell.indexOf('<nav class="mobile-dock"')
@@ -233,6 +234,9 @@ const unifiedContracts = [
   ['shared shipments hide global totals and return only owned cargo rows', customerSelfSource.includes('is_consolidated:shared') && customerSelfSource.includes('cargo_items:ownCargoRows') && customerSelfSource.includes('total_amount:shared?null')],
   ['Super Admin account binding refreshes shipment memberships', accountAdminSource.includes("from('shipment_customer_links').update({customer_user_id:userId")],
   ['customer console displays tracking IDs and the customer's cargo', customerPortalSource.includes('item.tracking_id || item.tracking_number || item.customer_gc_code || item.id') && customerPortalSource.includes('renderShipments(rows, dashboard.cargo_items || [])')],
+  ['customer finance ledger is scoped to canonical GC and customer-facing transaction types', customerSelfSource.includes(".eq('gc_code',financeCode).in('type',['customer_charge','customer_payment','refund','adjustment'])") && customerSelfSource.includes('customer_transactions:customerTransactions.data||[]')],
+  ['staff finance charge/payment creates and updates send deduplicated customer notifications', staffOpsHubSource.includes('async function notifyCustomerFinance') && staffOpsHubSource.includes("onConflict:'customer_user_id,event_key'") && staffOpsHubSource.includes("notifyCustomerFinance(a,created,'created')") && staffOpsHubSource.includes("notifyCustomerFinance(a,updated,'updated')")],
+  ['customer portal displays only returned customer finance transaction history', customerPortalSource.includes('customerTransactions = []') && customerPortalSource.includes('dashboard.customer_transactions || []') && customerPortalSource.includes('customer_charge')],
   ['modified customer portal script is cache-busted in the active homepage', unifiedShell.includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261017-1')],
   ['shipment membership migration is locked to service role and backfills cargo owners', shipmentCustomerLinksMigration.includes('shipment_customer_links_shipment_customer_key') && shipmentCustomerLinksMigration.includes('revoke all on table public.shipment_customer_links from anon, authenticated') && shipmentCustomerLinksMigration.includes('from public.shipment_cargo_items ci')],
   ['customer notification upsert conflict target has a matching full unique index', notificationIndexMigration.includes('CREATE UNIQUE INDEX IF NOT EXISTS customer_notifications_event_key_full_uidx') && notificationIndexMigration.includes('rename to customer_notifications_event_key_uidx')],
