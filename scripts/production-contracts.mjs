@@ -141,6 +141,20 @@ if (!customerPortalLogin.includes('/functions/v1/customer-gc-login') || !custome
 else ok('GC-code sign-in uses the dedicated Edge Function and stores the Supabase session')
 if (!customerAccountEntry.includes("email.setAttribute('type', 'text')")) fail('Customer login identifier must accept GC codes without email-type validation')
 else ok('Customer login input accepts GC codes')
+
+const staffV5Script = read('staff-os-v5-20261017.js')
+const staffV5EnhancementLoader = read('staff-os-v5-enhancement-loader-20261017.js')
+const staffMobileDock = read('gc-staff-mobile-dock-20261016.js')
+if (!staff.includes('gc-staff-command-system-20261017.css?v=1') || !staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=5') || !staff.includes('<body class="gc-staff-os-shell">')) fail('Staff OS command-system styles or scoped shell are missing')
+else ok('Staff OS loads the scoped command-system design layer')
+if (!staffV5Script.includes("storageKey: 'gc-staff-os-auth-v5-ahslifnthiwfkmaswjno'")) fail('Staff authentication storage must be isolated from customer portal sessions')
+else ok('Staff and customer auth sessions use separate browser storage keys')
+if (!staffV5Script.includes('const customerBridgePanel =') || !staffV5Script.includes('${customerBridgePanel}') || !staffV5Script.includes('CUSTOMER WORKSPACE · SHARED DATA')) fail('Staff overview must expose the live customer workspace integration panel')
+else ok('Staff overview exposes customer account linkage and portal access')
+if (!staffV5EnhancementLoader.includes("'/gc-staff-mobile-dock-20261016.js?v=3'") || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-command-system-20261017.css?v=1')")) fail('Staff mobile icon script or final command layer is stale')
+else ok('Staff enhancement loader applies the refreshed mobile navigation and final visual layer')
+if (!staffMobileDock.includes("original.querySelector('.nav-icon svg')") || !staffMobileDock.includes('gc-staff-mobile-module-icon')) fail('Mobile staff module drawer must reuse the same SVG icons as the main navigation')
+else ok('Mobile staff module drawer uses consistent SVG navigation icons')
 if (!read('customer-portal.html').includes("window.location.replace('/#auth')") || read('customer-portal.html').includes('gc-csp-scripts/customer-portal-inline-1.js')) fail('Legacy customer portal must redirect to the unified customer entry')
 else ok('Legacy customer portal redirects to the unified customer entry')
 if (!read('functions/_middleware.js').includes('gc-account-entry.js?v=20261014-1')) fail('Customer GC login helper cache-buster is stale')
@@ -232,7 +246,7 @@ else ok('Repository validation guards the retired public registration endpoint')
 
 
 
-if (!staff.includes('staff-os-v5-20261017.js?v=20261017-5')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
+if (!staff.includes('staff-os-v5-20261017.js?v=20261017-6')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
 
 const mobileLoader = read('staff-os-v5-enhancement-loader.js')
 if (!staff.includes('staff-os-v5-enhancement-loader.js?v=20261016-7')) fail('Staff enhancement loader cache-buster is stale')
