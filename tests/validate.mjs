@@ -51,7 +51,7 @@ if (ts) {
 
 console.log('Required production files')
 const required = [
-  'index.html','login.html','register.html','supabase/functions/customer-gc-register/index.ts','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
+  'index.html','login.html','register.html','customer-access.html','supabase/functions/customer-gc-register/index.ts','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
   'public-route-bootstrap.js','public-runtime-guarantee.js','public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js',
   'tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html',
   'staff-os-v5.html','staff-os-v5.css','staff-os-v5.js','gc-shipment-detail-20261016.css','staff-os-v5-rescue.js','staff-logistics-intelligence.js','staff-logistics-intelligence.css',
@@ -109,6 +109,7 @@ const guards = [
   ['staff production UI layer loaded', read('staff-os-v5.html').includes('/gc-production-ui-20260927.css?v=1')],
   ['unified customer workspace UI layer loaded', publicShell.includes('gc-customer-workspace-elite-20261014.css?v=19')],
   ['legacy customer portal redirects to the unified customer entry', read('customer-portal.html').includes("window.location.replace('/#auth')") && !read('customer-portal.html').includes('gc-csp-scripts/customer-portal-inline-1.js')],
+  ['customer-access has no independent login form', legacyAccessPage.includes("window.location.replace('/#auth')") && !legacyAccessPage.includes('id="loginForm"') && !legacyAccessPage.includes('functions/v1/customer-gc-login')],
   ['active homepage avoids legacy monolithic script', !publicShell.includes('gc-csp-scripts/index-inline-2.js')],
   ['public bootstrap loads runtime guarantee', publicBootstrap.includes('/public-runtime-guarantee.js')],
   ['public runtime has emergency fallback', publicRuntime.includes('renderEmergencyShell')],
@@ -185,6 +186,7 @@ const retiredRegisterFunction = read('supabase/functions/customer-gc-register/in
 const supabaseAuthConfig = read('supabase/config.toml')
 const legacyLoginPage = read('login.html')
 const legacyRegisterPage = read('register.html')
+const legacyAccessPage = read('customer-access.html')
 const authRedirects = read('_redirects')
 const accountsConsoleScript = read('gc-csp-scripts/accounts-console-inline-1.js')
 const staffConsoleHtml = read('staff-os-v5.html')
@@ -224,8 +226,8 @@ const unifiedContracts = [
   ['retired registration function requires JWT at gateway', supabaseAuthConfig.includes('[functions.customer-gc-register]\nverify_jwt = true')],
   ['GC-code login remains public for its credential check', supabaseAuthConfig.includes('[functions.customer-gc-login]\nverify_jwt = false') && read('supabase/functions/customer-gc-login/index.ts').includes('signInWithPassword')],
   ['customer login prevents native form navigation', customerPortalAuth.includes("$('authForm').addEventListener('submit', async (event) => {") && customerPortalAuth.includes('event.preventDefault();') && !customerPortalAuth.includes("$('signIn').addEventListener('click'")],
-  ['legacy login and registration files redirect into the one page', legacyLoginPage.includes("window.location.replace('/#auth')") && legacyRegisterPage.includes("window.location.replace('/#auth')") && !legacyLoginPage.includes('customer-gc-register') && !legacyRegisterPage.includes('customer-gc-register')],
-  ['legacy auth paths redirect to the unified customer entry', ['/login /#auth 302','/login/ /#auth 302','/login.html /#auth 302','/register /#auth 302','/register/ /#auth 302','/register.html /#auth 302'].every(route => authRedirects.includes(route))],
+  ['legacy login, registration, and customer-access files redirect into the one page', [legacyLoginPage, legacyRegisterPage, legacyAccessPage].every(page => page.includes("window.location.replace('/#auth')") && !page.includes('customer-gc-register') && !page.includes('loginForm'))],
+  ['legacy auth paths redirect to the unified customer entry', ['/login /#auth 302','/login/ /#auth 302','/login.html /#auth 302','/register /#auth 302','/register/ /#auth 302','/register.html /#auth 302','/customer-access /#auth 302','/customer-access/ /#auth 302','/customer-access.html /#auth 302'].every(route => authRedirects.includes(route))],
   ['staff console exposes customer linkage filters', accountsConsoleHtml.includes('id="customerLinkFilter"') && accountsConsoleHtml.includes('value="unlinked"') && accountsConsoleHtml.includes('value="linked"') && accountsConsoleHtml.includes('value="inactive-unlinked"')],
   ['customer linkage filter is functional', accountsConsoleScript.includes("customerLinkFilter')?.addEventListener('change', renderList)") && accountsConsoleScript.includes("linkFilter === 'unlinked' ? (!linked && active)") && accountsConsoleScript.includes("linkFilter === 'inactive-unlinked' ? (!linked && !active)")],
   ['customer linkage summary warns Super Admin to verify identity', accountsConsoleScript.includes('دوای پشتڕاستکردنەوەی ناسنامە') && accountAdminSource.includes('Only Super Admin can bind customer accounts')],
