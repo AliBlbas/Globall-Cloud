@@ -44,7 +44,7 @@ const required = [
   'staff-os-pro-20260909.css','staff-os-pro-20260909.js','staff-shell-polish-20260909.css','staff-shell-polish-20260909.js',
   'staff-premium-mobile-20260909.css','staff-premium-mobile-20260909.js','warehouse-offline-sync.js','production-mobile-ux-v2026.css','gc-platform-vnext.js',
   'gc-platform-vnext-plus.js','gc-runtime-safety-v2026.js','production-brand-repair.js','gc-csp-scripts/logistics-pricing-ui.js','supabase/config.toml',
-  'package.json','gc-account-entry.js','gc-csp-scripts/customer-portal-inline-1.js','supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
+  'package.json','gc-account-entry.js','gc-csp-scripts/customer-portal-inline-1.js','gc-unified-customer-experience-20261016.js','supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
   'supabase/functions/notification-dispatch/index.ts','supabase/functions/warehouse-receiving/index.ts','supabase/functions/warehouse-notify/index.ts',
   'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/invoice-ai/index.ts',
   'supabase/functions/customer-debt-assistant/index.ts','supabase/functions/fx-refresh/index.ts','supabase/functions/public-config/index.ts',
@@ -136,6 +136,9 @@ const customerGcLogin = read('supabase/functions/customer-gc-login/index.ts')
 if (!customerGcLogin.includes('consume_public_message_rate_limit') || !customerGcLogin.includes('MAX_LOGIN_REQUESTS_PER_IP = 40') || !customerGcLogin.includes('MAX_LOGIN_REQUESTS_PER_IP_CODE = 8') || !customerGcLogin.includes('MAX_LOGIN_REQUESTS_PER_GC_CODE = 12') || !customerGcLogin.includes('originAllowed(req)')) fail('GC-code login must apply network/code rate limits and origin validation')
 else ok('GC-code login applies server-side attempt limits and origin validation')
 const unifiedCustomerAuth = read('gc-csp-scripts/customer-portal-inline-1.js')
+const unifiedCustomerController = read('gc-unified-customer-experience-20261016.js')
+if (!read('index.html').includes('gc-unified-customer-experience-20261016.js?v=6') || !unifiedCustomerController.includes("const explicitAuthRoute = () => ['#auth', '#register'].includes(window.location.hash)") || (unifiedCustomerController.match(/enterCustomerMode\\(\\{showAuth:explicitAuthRoute\\(\\)\\}\\);/g) || []).length !== 2) fail('Customer workspace navigation must only show the login modal for explicit auth routes')
+else ok('Customer workspace navigation avoids login modal flicker')
 if (!read('index.html').includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261016-9')) fail('Unified customer login cache-buster is stale')
 if (!unifiedCustomerAuth.includes("$('authForm').addEventListener('submit', async (event) => {") || !unifiedCustomerAuth.includes('event.preventDefault();') || unifiedCustomerAuth.includes("$('signIn').addEventListener('click'")) fail('Customer login must prevent native form navigation and support form submission')
 else ok('Customer login is handled as a prevented form submission')
