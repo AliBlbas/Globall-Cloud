@@ -56,6 +56,56 @@ async function pricingCreate(a:any,data:Json){
   await audit(a.admin,a.staff,'pricing.create',row.id,{rate_key:rateKey,amount})
   return {rate:row}
 }
+
+async function notifyCustomerFinance(a:any, transaction:any, eventType:'created'|'updated') {
+  const type=String(transaction?.type || '');
+  if (!['customer_charge','customer_payment','refund','adjustment'].includes(type)) return {status:'not_customer_facing'};
+  const code=gc(transaction?.gc_code);
+  if (!code) return {status:'missing_gc_code'};
+  try {
+    let lookup=await a.admin.from('customer_directory').select('id,auth_user_id,name,is_active,preferred_language,gc_code,code').eq('gc_code',code).maybeSingle();
+    if (lookup.error) throw lookup.error;
+    if (!lookup.data) {
+      lookup=await a.admin.from('customer_directory').select('id,auth_user_id,name,is_active,preferred_language,gc_code,code').eq('code',code).maybeSingle();
+      if (lookup.error) throw lookup.error;
+    }
+    const customer=lookup.data;
+    if (!customer || customer.is_active!==true || !customer.auth_user_id) return {status:customer?'customer_login_not_linked_or_inactive':'gc_customer_not_found'};
+    const language=String(customer.preferred_language||'ckb').toLowerCase();
+    const english={
+      customer_charge:['New customer charge','A new customer charge has been recorded on your account.'],
+      customer_payment:['Customer payment recorded','A customer payment has been recorded on your account.'],
+      refund:['Refund recorded','A refund has been recorded on your account.'],
+      adjustment:['Account balance updated','A customer-account adjustment has been recorded.']
+    };
+    const arabic={
+      customer_charge:['تم تسجيل مبلغ مستحق جديد','تم تسجيل مبلغ مستحق جديد على حسابك.'],
+      customer_payment:['تم تسجيل دفعة','تم تسجيل دفعة على حسابك.'],
+      refund:['تم تسجيل استرداد','تم تسجيل استرداد على حسابك.'],
+      adjustment:['تم تحديث رصيد الحساب','تم تسجيل تعديل على حسابك.']
+    };
+    const kurdish={
+      customer_charge:['قەرزی نوێ تۆمار کرا','بڕێکی نوێ لەسەر هەژماری کڕیاری تۆ تۆمار کرا.'],
+      customer_payment:['پارەدان تۆمار کرا','پارەدانێک لە هەژماری کڕیاری تۆ تۆمار کرا.'],
+      refund:['گەڕاندنەوەی پارە تۆمار کرا','گەڕاندنەوەیەک لە هەژماری کڕیاری تۆ تۆمار کرا.'],
+      adjustment:['باڵانسی هەژمار نوێکرایەوە','ڕێکخستنێک لە باڵانسی هەژماری تۆ تۆمار کرا.']
+    };
+    const copy=(language.startsWith('en')?english:language.startsWith('ar')?arabic:kurdish)[type]||kurdish[type];
+    const amount=Number(transaction.amount_usd||0);
+    const body=copy[1]+' · '+amount.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' USD';
+    const eventKey='finance:'+String(transaction.id)+':'+eventType+':'+type+':'+amount.toFixed(2);
+    const saved=await a.admin.from('customer_notifications').upsert({
+      customer_user_id:customer.auth_user_id,shipment_id:null,kind:'customer_finance_'+type,
+      title:copy[0],body,action_url:'/#payments',event_key:eventKey
+    },{onConflict:'customer_user_id,event_key',ignoreDuplicates:true});
+    if(saved.error)throw saved.error;
+    return {status:'queued',customer_id:customer.id};
+  } catch(error) {
+    console.warn('Customer finance notification could not be saved:',error instanceof Error?error.message:String(error));
+    return {status:'warning',warning:error instanceof Error?error.message:String(error)};
+  }
+}
+
 async function financeCreate(a:any,data:Json){
   if(!FINANCE_ROLES.has(a.role))throw new Error('Finance permission required')
   const type=txt(data.type)||'income',amount=num(data.amount_usd)
@@ -65,18 +115,20 @@ async function financeCreate(a:any,data:Json){
   const row={type,gc_code:gc(data.gc_code),amount_usd:amount,reference:txt(data.reference),note:txt(data.note),created_at:txt(data.created_at)||new Date().toISOString()}
   const {data:created,error}=await a.admin.from('finance_transactions').insert(row).select('*').single();if(error)throw error
   await audit(a.admin,a.staff,'finance.create',created.id,{type,amount_usd:amount,gc_code:row.gc_code,reference:row.reference,note:row.note})
-  return {transaction:created}
+  const notification=await notifyCustomerFinance(a,created,'created')
+  return {transaction:created,customer_notification:notification}
 }
 async function financeUpdate(a:any,data:Json){
   if(!FINANCE_ROLES.has(a.role))throw new Error('Finance permission required')
   const id=txt(data.id),type=txt(data.type)||'income',amount=num(data.amount_usd)
   if(!FINANCE_TYPES.has(type))throw new Error('Invalid finance type')
   if(!id||amount===null||amount<0)throw new Error('Invalid finance data')
-  const existing=await a.admin.from('finance_transactions').select('reference,note').eq('id',id).maybeSingle();if(existing.error)throw existing.error;if(!existing.data)throw new Error('Finance transaction not found')
+  const existing=await a.admin.from('finance_transactions').select('reference,note,type,gc_code,amount_usd').eq('id',id).maybeSingle();if(existing.error)throw existing.error;if(!existing.data)throw new Error('Finance transaction not found')
   const patch={type,gc_code:gc(data.gc_code),amount_usd:amount,reference:Object.prototype.hasOwnProperty.call(data,'reference')?txt(data.reference):existing.data.reference,note:Object.prototype.hasOwnProperty.call(data,'note')?txt(data.note):existing.data.note}
   const {data:updated,error}=await a.admin.from('finance_transactions').update(patch).eq('id',id).select('*').single();if(error)throw error
-  await audit(a.admin,a.staff,'finance.update',id,{type,amount_usd:amount,reference:txt(data.reference),note:txt(data.note)})
-  return {transaction:updated}
+  await audit(a.admin,a.staff,'finance.update',id,{before:{type:existing.data.type,gc_code:existing.data.gc_code,amount_usd:existing.data.amount_usd},after:{type,amount_usd:amount,gc_code:patch.gc_code,reference:txt(data.reference),note:txt(data.note)}})
+  const notification=await notifyCustomerFinance(a,updated,'updated')
+  return {transaction:updated,customer_notification:notification}
 }
 Deno.serve(async(req:Request)=>{
   if(req.method==='OPTIONS')return new Response(null,{headers:cors(req)})
