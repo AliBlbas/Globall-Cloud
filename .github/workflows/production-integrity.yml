@@ -44,7 +44,50 @@ jobs:
           ! grep -q "script-src[^;]*unsafe-inline" _headers
           grep -q 'https://ahslifnthiwfkmaswjno.supabase.co' production-bridge.js
           grep -q '^/staff /staff-os-v5.html 200$' _redirects
-          grep -q '^/track /tracking-integration.html 200$' _redirects
+          grep -q '^/tracking-integration.html /track 301
+      - name: Public and Staff smoke validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'gc-staff-final-20260922.js?v=' staff-os-v5.html
+          grep -q '/gc-final-ui-20260927.css' staff-os-v5.html
+          grep -q '/gc-final-ui-20260927.css' customer-portal.html
+          grep -q '/gc-production-ui-20260927.css?v=1' index.html
+          grep -q '/gc-production-ui-20260927.css?v=1' staff-os-v5.html
+          grep -q '/gc-production-ui-20260927.css?v=1' customer-portal.html
+          ! grep -q 'staff-reference-mobile-20260922.js?v=' staff-os-v5.html
+          ! grep -q 'staff-premium-mobile-20260909.js?v=' staff-os-v5.html
+          ! grep -q 'staff-mobile-command-dock.js?v=' staff-os-v5-enhancement-loader.js
+          grep -q 'functions/v1/public-quote' gc-csp-scripts/index-inline-2.js
+          grep -q 'functions/v1/public-message' gc-csp-scripts/index-inline-2.js
+          grep -q '/public-runtime-guarantee.js' public-route-bootstrap.js
+          grep -q 'renderEmergencyShell' public-runtime-guarantee.js
+          ! grep -q 'YOUR_PROJECT_ID' staff-os-v5.html
+          ! grep -q 'YOUR_ANON_KEY' staff-os-v5.html
+      - name: Public live smoke test
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - "$EXPECTED_SHA" <<'PY'
+          import json,sys,time,urllib.parse,urllib.request
+          site='https://globall-cloud.pages.dev'; expected=sys.argv[1]; legacy='Supabase هێشتا پەیوەست نەکراوە'
+          paths=('/','/track','/tracking-integration.html','/warehouse-os.html','/customer-portal.html','/staff')
+          for attempt in range(1,25):
+            try:
+              with urllib.request.urlopen(urllib.request.Request(site+'/release.json?verify='+urllib.parse.quote(expected),headers={'Cache-Control':'no-cache'}),timeout=15) as r: release=json.loads(r.read().decode())
+              assert release.get('commit')==expected, release
+              for path in paths:
+                with urllib.request.urlopen(urllib.request.Request(site+path+'?ci='+str(attempt),headers={'Cache-Control':'no-cache'}),timeout=15) as r:
+                  body=r.read().decode('utf-8','replace'); assert r.status==200 and len(body)>200; assert legacy not in body
+              with urllib.request.urlopen(site+'/api/health?ci=1',timeout=15) as r: health=json.loads(r.read().decode()); assert r.status==200 and health.get('ok') is True
+              print(json.dumps(release,ensure_ascii=False)); print(json.dumps(health,ensure_ascii=False)); break
+            except Exception as exc:
+              if attempt==24: raise
+              print('Waiting for live release ({}/24): {}'.format(attempt,exc)); time.sleep(5)
+          PY
+ _redirects
       - name: Public and Staff smoke validation
         shell: bash
         run: |
