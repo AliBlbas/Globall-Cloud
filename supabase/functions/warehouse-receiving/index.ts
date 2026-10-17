@@ -14,14 +14,27 @@ function locationAllowed(role:string,location:string){const loc=hubForLocation(l
 function safeName(name:string){return name.normalize('NFKC').replace(/[^A-Za-z0-9._-]+/g,'_').slice(-120)||'package.jpg'}
 function storagePath(value:unknown){const raw=String(value||'').trim();if(!raw)return null;if(!raw.startsWith('http'))return raw.replace(/^\/+/, '');const markers=[`/storage/v1/object/public/${BUCKET}/`,`/storage/v1/object/sign/${BUCKET}/`,`/storage/v1/object/authenticated/${BUCKET}/`];for(const marker of markers){const index=raw.indexOf(marker);if(index>=0)return decodeURIComponent(raw.slice(index+marker.length).split('?')[0])}return null}
 async function signedPhotos(admin:ReturnType<typeof createClient>,photos:unknown){const values=Array.isArray(photos)?photos:[];const paths=values.map(storagePath).filter((v):v is string=>Boolean(v));if(!paths.length)return[];const{data,error}=await admin.storage.from(BUCKET).createSignedUrls(paths,SIGNED_URL_TTL);if(error)throw error;return(data||[]).map(item=>item.signedUrl).filter((v):v is string=>Boolean(v))}
+function nextDeliveryTimeOutsideQuietHours(quietStart:unknown,quietEnd:unknown,now=new Date()){
+ const parse=(value:unknown)=>{const match=String(value||'').match(/^(\\d{1,2}):(\\d{2})/);if(!match)return null;const h=Number(match[1]),m=Number(match[2]);return h>=0&&h<24&&m>=0&&m<60?h*60+m:null};
+ const start=parse(quietStart),end=parse(quietEnd);
+ if(start===null||end===null||start===end)return now.toISOString();
+ const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Baghdad',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now);
+ const hour=Number(parts.find(p=>p.type==='hour')?.value||0),minute=Number(parts.find(p=>p.type==='minute')?.value||0);
+ const current=hour*60+minute;
+ const quiet=start<end?(current>=start&&current<end):(current>=start||current<end);
+ if(!quiet)return now.toISOString();
+ let delay=(end-current+1440)%1440;
+ if(delay===0)delay=1440;
+ return new Date(now.getTime()+delay*60000+1000).toISOString();
+}
 async function queueReceiptNotifications(admin:ReturnType<typeof createClient>,receipt:Record<string,any>,knownCustomer?:Record<string,any>,signedPhotoUrls?:string[]){
  const errors:string[]=[];
  let customer=knownCustomer||null;
  if(!customer&&receipt.directory_customer_id){
-  const r=await admin.from('customer_directory').select('id,code,gc_code,name,phone,phone2,whatsapp_phone,email,auth_user_id').eq('id',receipt.directory_customer_id).maybeSingle();
+  const r=await admin.from('customer_directory').select('id,code,gc_code,name,phone,phone2,whatsapp_phone,email,auth_user_id,preferred_language').eq('id',receipt.directory_customer_id).maybeSingle();
   if(r.error)errors.push('customer_lookup: '+r.error.message);else customer=r.data;
  }
- if(!customer)return{ok:false,account_linked:false,in_app_queued:false,whatsapp_queued:false,email_queued:false,photo_count:0,errors:[...errors,'Customer directory record was not found.']};
+ if(!customer)return{ok:false,account_linked:false,in_app_queued:false,whatsapp_queued:false,email_queued:false,whatsapp_opted_in:false,email_opted_in:false,photo_count:0,errors:[...errors,'Customer directory record was not found.']};
  const metadata=receipt.label_metadata&&typeof receipt.label_metadata==='object'?receipt.label_metadata:{};
  const gc=String(customer.gc_code||customer.code||receipt.gc_code_detected||receipt.gc_code||'').normalize('NFKC').trim().toUpperCase();
  const warehouse=String(receipt.location||receipt.source_warehouse||receipt.warehouse||'warehouse');
@@ -34,46 +47,50 @@ async function queueReceiptNotifications(admin:ReturnType<typeof createClient>,r
  const localTime=new Intl.DateTimeFormat('ku-IQ',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Baghdad'}).format(new Date(receivedAt));
  const title='کاڵاکەت لە کۆگا وەرگیرا';
  const bodyText=`GC: ${gc}\nکۆگا: ${warehouse}\nکارتۆن: ${cartons}\nکێش: ${weight>0?`${weight} kg`:'تۆمارنەکراوە'}\nبەروار و کات (هەولێر): ${localTime}\nژمارەی وێنەکان: ${photos.length}\nBatch: ${String(receipt.batch_code||'—')}`;
- const payloadBase={title: title,body:bodyText,action_url:actionUrl,gc_code:gc,warehouse,carton_count:cartons,weight_kg:weight||null,receipt_id:String(receipt.id),batch_code:String(receipt.batch_code||''),received_at:String(receivedAt),photo_count:photos.length,media_url:photos[0]||null};
- let inAppQueued=false,whatsappQueued=false,emailQueued=false;
+ const payloadBase={title,body:bodyText,action_url:actionUrl,gc_code:gc,warehouse,carton_count:cartons,weight_kg:weight||null,receipt_id:String(receipt.id),batch_code:String(receipt.batch_code||''),received_at:String(receivedAt),photo_count:photos.length,media_url:photos[0]||null};
+ let preferences:Record<string,any>|null=null;
  if(customer.auth_user_id){
+  const result=await admin.from('customer_notification_preferences')
+   .select('email_enabled,whatsapp_enabled,in_app_enabled,quiet_hours_start,quiet_hours_end')
+   .eq('customer_user_id',customer.auth_user_id).maybeSingle();
+  if(result.error)errors.push('preferences: '+result.error.message);else preferences=result.data;
+ }
+ const inAppAllowed=Boolean(customer.auth_user_id)&&preferences?.in_app_enabled!==false;
+ const whatsappOptedIn=preferences?.whatsapp_enabled===true;
+ const emailOptedIn=preferences?.email_enabled===true;
+ const nextAttemptAt=nextDeliveryTimeOutsideQuietHours(preferences?.quiet_hours_start,preferences?.quiet_hours_end);
+ let inAppQueued=false,whatsappQueued=false,emailQueued=false;
+ if(inAppAllowed){
   const r=await admin.from('customer_notifications').upsert({
    customer_user_id:customer.auth_user_id,
    shipment_id:receipt.shipment_id?String(receipt.shipment_id):null,
-   kind:'warehouse_received',
-   event_key:eventKey,
-   title,
-   body:bodyText,
-   action_url:actionUrl
+   kind:'warehouse_received',event_key:eventKey,title,body:bodyText,action_url:actionUrl
   },{onConflict:'customer_user_id,event_key',ignoreDuplicates:true});
   if(r.error)errors.push('in_app: '+r.error.message);else inAppQueued=true;
  }
  const whatsappRecipient=String(customer.whatsapp_phone||customer.phone||customer.phone2||'').trim();
- if(whatsappRecipient){
+ if(whatsappOptedIn&&whatsappRecipient){
   const r=await admin.from('notification_outbox').upsert({
    customer_user_id:customer.auth_user_id||null,
    shipment_id:receipt.shipment_id?String(receipt.shipment_id):null,
-   channel:'whatsapp',
-   event_key:eventKey,
-   recipient:whatsappRecipient,
+   channel:'whatsapp',event_key:eventKey,recipient:whatsappRecipient,next_attempt_at:nextAttemptAt,
    payload:{...payloadBase,template_name:Deno.env.get('WHATSAPP_TEMPLATE_NAME')||'globall_warehouse_received',template_language:String(customer.preferred_language||'ckb')}
   },{onConflict:'event_key,channel',ignoreDuplicates:true});
   if(r.error)errors.push('whatsapp: '+r.error.message);else whatsappQueued=true;
  }
  const emailRecipient=String(customer.email||'').trim();
- if(emailRecipient){
+ if(emailOptedIn&&emailRecipient){
   const r=await admin.from('notification_outbox').upsert({
    customer_user_id:customer.auth_user_id||null,
    shipment_id:receipt.shipment_id?String(receipt.shipment_id):null,
-   channel:'email',
-   event_key:eventKey,
-   recipient:emailRecipient,
+   channel:'email',event_key:eventKey,recipient:emailRecipient,next_attempt_at:nextAttemptAt,
    payload:{...payloadBase,subject:title}
   },{onConflict:'event_key,channel',ignoreDuplicates:true});
   if(r.error)errors.push('email: '+r.error.message);else emailQueued=true;
  }
- return{ok:errors.length===0,account_linked:Boolean(customer.auth_user_id),in_app_queued:inAppQueued,whatsapp_queued:whatsappQueued,email_queued:emailQueued,photo_count:photos.length,errors};
+ return{ok:errors.length===0,account_linked:Boolean(customer.auth_user_id),in_app_queued:inAppQueued,whatsapp_queued:whatsappQueued,email_queued:emailQueued,whatsapp_opted_in:whatsappOptedIn,email_opted_in:emailOptedIn,external_opt_in:whatsappOptedIn||emailOptedIn,photo_count:photos.length,next_external_attempt_at:nextAttemptAt,errors};
 }
+
 async function actor(req:Request){const url=Deno.env.get('SUPABASE_URL')!;const anon=Deno.env.get('SUPABASE_ANON_KEY')||Deno.env.get('SUPABASE_PUBLISHABLE_KEY')!;const service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;const auth=req.headers.get('Authorization')||'';if(!auth.toLowerCase().startsWith('bearer '))throw new Error('Unauthorized');const authClient=createClient(url,anon,{global:{headers:{Authorization:auth}},auth:{persistSession:false}});const{data,error}=await authClient.auth.getUser();if(error||!data.user)throw new Error('Unauthorized');const admin=createClient(url,service,{auth:{persistSession:false}});const{data:staff,error:staffError}=await admin.from('staff').select('id,full_name,role,branch,is_active').eq('id',data.user.id).maybeSingle();if(staffError)throw staffError;if(!staff?.is_active||!ALLOWED_ROLES.has(String(staff.role)))throw new Error('Warehouse permission required');return{admin,staff}}
 async function linkShipmentChain(admin:ReturnType<typeof createClient>,staff:Record<string,unknown>,receiptId:string,customerAuthUserId:string|null,code:string,batchCode:string,location:string,stage:string,metadata:Record<string,unknown>,explicitShipmentId:string|null,idempotency:string){let shipmentId=explicitShipmentId;if(!shipmentId){const{data}=await admin.from('shipments').select('id,customer_user_id,current_step_index,operational_status,current_location_label').eq('external_reference',batchCode).maybeSingle();shipmentId=data?.id||null}if(!shipmentId)return{linked:false,reason:'no_shipment_id'};const{data:shipment,error:shipmentError}=await admin.from('shipments').select('id,customer_user_id,current_step_index,operational_status,current_location_label').eq('id',shipmentId).maybeSingle();if(shipmentError)throw shipmentError;if(!shipment)throw new Error(`Shipment ${shipmentId} was not found`);if(shipment.customer_user_id&&customerAuthUserId&&String(shipment.customer_user_id)!==String(customerAuthUserId))throw new Error(`Shipment ${shipmentId} does not belong to ${code}`);const packageCode=String(metadata.carrier_tracking_number||metadata.tracking_number||`${code}-${batchCode}`).slice(0,120);const packageResult=await admin.rpc('upsert_shipment_package',{p_actor_id:staff.id,p_shipment_id:shipmentId,p_package_code:packageCode,p_weight_kg:metadata.gross_weight_kg??null,p_length_cm:null,p_width_cm:null,p_height_cm:null,p_hub_code:hubForLocation(location),p_status:'received',p_metadata:{gc_code:code,batch_code:batchCode,receipt_id:receiptId,stage}});if(packageResult.error)throw packageResult.error;const packageId=packageResult.data?.id;const movementResult=await admin.rpc('record_warehouse_movement',{p_actor_id:staff.id,p_shipment_id:shipmentId,p_package_id:packageId||null,p_receipt_id:receiptId,p_from_hub:shipment.current_location_label||null,p_to_hub:hubForLocation(location),p_movement_type:'intake',p_scan_code:code,p_notes:`Warehouse receipt ${receiptId} for ${code}`,p_metadata:{stage,batch_code:batchCode,carrier:metadata.carrier||null,tracking_number:metadata.carrier_tracking_number||metadata.tracking_number||null},p_idempotency_key:`${idempotency}:movement`});if(movementResult.error)throw movementResult.error;const target=stage==='china_received'?{status:'received_origin',step:0}:stage==='uae_arrived'?{status:'at_transit_hub',step:2}:null;let transition=null;if(target&&Number(shipment.current_step_index||0)<target.step){const transitionResult=await admin.rpc('record_shipment_transition',{p_actor_id:staff.id,p_shipment_id:shipmentId,p_to_status:target.status,p_to_step:target.step,p_location_code:hubForLocation(location),p_note:`Warehouse receipt ${receiptId} linked to ${code}`,p_metadata:{receipt_id:receiptId,batch_code:batchCode,gc_code:code},p_idempotency_key:`${idempotency}:transition:${target.status}`});if(transitionResult.error)throw transitionResult.error;transition=transitionResult.data}return{linked:true,shipment_id:shipmentId,package_id:packageId||null,movement:movementResult.data,transition}}
 async function retryExistingChain(admin:ReturnType<typeof createClient>,staff:Record<string,unknown>,existing:Record<string,any>){const directoryId=existing.directory_customer_id?String(existing.directory_customer_id):null;let customerAuthUserId:string|null=null;if(directoryId){const{data,error}=await admin.from('customer_directory').select('auth_user_id').eq('id',directoryId).maybeSingle();if(error)throw error;customerAuthUserId=data?.auth_user_id||null}const metadata=existing.label_metadata&&typeof existing.label_metadata==='object'?{...existing.label_metadata,gross_weight_kg:existing.weight_actual??existing.label_metadata.gross_weight_kg,tracking_number:existing.barcode??existing.label_metadata.tracking_number,carrier_tracking_number:existing.barcode??existing.label_metadata.carrier_tracking_number}: {gross_weight_kg:existing.weight_actual??null,tracking_number:existing.barcode??null,carrier_tracking_number:existing.barcode??null};const location=String(existing.location||existing.warehouse||'Dubai');return linkShipmentChain(admin,staff,String(existing.id),customerAuthUserId,String(existing.gc_code||''),String(existing.batch_code||''),location,String(existing.stage||stageForLocation(location)),metadata,existing.shipment_id?String(existing.shipment_id):null,String(existing.idempotency_key||'retry'))}
