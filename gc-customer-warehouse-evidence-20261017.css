@@ -1,0 +1,122 @@
+/* Globall Cloud customer workspace — private warehouse receipt evidence.
+   Styles the authenticated customer's owner-filtered receipt data. */
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-warehouse-evidence-panel {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+  padding: clamp(14px, 2vw, 22px);
+  border: 1px solid rgba(94, 191, 213, .22);
+  border-radius: 22px;
+  background:
+    radial-gradient(320px 180px at 100% 0%, rgba(52, 174, 207, .08), transparent 74%),
+    linear-gradient(145deg, rgba(8, 31, 51, .95), rgba(4, 19, 33, .97));
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .14);
+  scroll-margin-top: 100px;
+}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-warehouse-evidence-panel > .card-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-warehouse-evidence-panel h3 {
+  margin: 0;
+  color: #effaff;
+  font-weight: 900;
+  line-height: 1.65;
+}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-warehouse-evidence-panel .card-title-row p {
+  margin: 5px 0 0;
+  color: #9cb6c8;
+  font-size: 11px;
+  line-height: 1.85;
+}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-warehouse-evidence-panel [data-dash-icon="warehouse"] {
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(94, 191, 213, .22);
+  border-radius: 12px;
+  background: rgba(94, 191, 213, .09);
+  color: #77e1eb;
+}
+body.gc-customer-app #gcCustomerWorkspace #receipts.record-list {
+  display: grid;
+  gap: 11px;
+  min-width: 0;
+}
+body.gc-customer-app #gcCustomerWorkspace .warehouse-receipt-evidence {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid rgba(126, 192, 218, .16);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(12, 39, 61, .78), rgba(4, 19, 33, .88));
+}
+body.gc-customer-app #gcCustomerWorkspace .warehouse-receipt-evidence .row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 7px 12px;
+}
+body.gc-customer-app #gcCustomerWorkspace .warehouse-receipt-evidence .row > strong {
+  min-width: 0;
+  color: #f1f9ff;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+body.gc-customer-app #gcCustomerWorkspace .warehouse-receipt-evidence > .muted {
+  color: #a2bacb;
+  font-size: 11px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+body.gc-customer-app #gcCustomerWorkspace .warehouse-receipt-evidence .photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(106px, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+body.gc-customer-app #gcCustomerWorkspace .warehouse-receipt-evidence .photo-grid a {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border: 1px solid rgba(122, 203, 222, .2);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, .18);
+}
+body.gc-customer-app #gcCustomerWorkspace .warehouse-receipt-evidence .receipt-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: cover;
+  transition: transform .18s ease;
+}
+body.gc-customer-app #gcCustomerWorkspace .warehouse-receipt-evidence .photo-grid a:hover .receipt-photo {
+  transform: scale(1.035);
+}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-warehouse-evidence-panel .empty-state,
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-warehouse-evidence-panel .empty-line {
+  color: #9cb6c8;
+  line-height: 1.85;
+}
+@media (max-width: 600px) {
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-warehouse-evidence-panel {
+    gap: 11px;
+    padding: 12px;
+    border-radius: 18px;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-warehouse-evidence-panel h3 { font-size: 14px; }
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-warehouse-evidence-panel .card-title-row p { font-size: 10px; }
+  body.gc-customer-app #gcCustomerWorkspace .warehouse-receipt-evidence { padding: 10px; }
+  body.gc-customer-app #gcCustomerWorkspace .warehouse-receipt-evidence .photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.gc-customer-app #gcCustomerWorkspace .warehouse-receipt-evidence .receipt-photo { transition: none; }
+}

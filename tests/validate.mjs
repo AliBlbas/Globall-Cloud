@@ -51,7 +51,7 @@ if (ts) {
 
 console.log('Required production files')
 const required = [
-  'index.html','gc-customer-experience-signature-20261017.css','gc-ui-integrity-mobile-20261017.css','gc-dashboard-preferences-20261003.js','gc-public-customer-style-loader-20261014.js','staff-os-v5-enhancement-loader-20261017.js','login.html','register.html','customer-access.html','supabase/functions/customer-gc-register/index.ts','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','gc-unified-customer-experience-20261016.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
+  'index.html','gc-customer-warehouse-evidence-20261017.css','gc-customer-experience-signature-20261017.css','gc-ui-integrity-mobile-20261017.css','gc-dashboard-preferences-20261003.js','gc-public-customer-style-loader-20261014.js','staff-os-v5-enhancement-loader-20261017.js','login.html','register.html','customer-access.html','supabase/functions/customer-gc-register/index.ts','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','gc-unified-customer-experience-20261016.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
   'public-route-bootstrap.js','public-runtime-guarantee.js','public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js',
   'tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html',
   'staff-os-v5.html','staff-os-v5.css','staff-os-v5.js','gc-shipment-detail-20261016.css','staff-os-v5-rescue.js','staff-logistics-intelligence.js','staff-logistics-intelligence.css',
@@ -59,6 +59,7 @@ const required = [
   'staff-shell-polish-20260909.css','staff-shell-polish-20260909.js','staff-premium-mobile-20260909.css','staff-premium-mobile-20260909.js',
   'warehouse-offline-sync.js','gc-platform-vnext.js','gc-platform-vnext-plus.js','gc-runtime-safety-v2026.js','production-brand-repair.js',
   'supabase/config.toml','package.json','scripts/production-contracts.mjs','tests/e2e/run.mjs','supabase/migrations/20261017130000_restrict_customer_request_photo_uploads.sql',
+  'supabase/migrations/20261017181111_fix_warehouse_receipt_customer_notifications.sql',
   'supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
   'supabase/functions/notification-dispatch/index.ts','supabase/functions/warehouse-receiving/index.ts','supabase/functions/warehouse-notify/index.ts',
   'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/invoice-ai/index.ts',
@@ -312,6 +313,11 @@ const staffEnhancementLoader = read('staff-os-v5-enhancement-loader-20261017.js'
 const staffOsHtml = read('staff-os-v5.html')
 const staffShipmentScript = read('staff-os-v5-20261017.js')
 
+const warehouseReceivingSource = read('supabase/functions/warehouse-receiving/index.ts')
+const warehouseNotifySource = read('supabase/functions/warehouse-notify/index.ts')
+const warehouseReceiptNotificationMigration = read('supabase/migrations/20261017181111_fix_warehouse_receipt_customer_notifications.sql')
+const customerWarehouseEvidenceCss = read('gc-customer-warehouse-evidence-20261017.css')
+
 const mobileUiContracts = [
   ['customer workspace references the final mobile integrity CSS', publicShell.includes('gc-ui-integrity-mobile-20261017.css?v=6')],
   ['customer style loader puts integrity CSS after signature styles', customerStyleLoader.indexOf('gc-ui-integrity-mobile-20261017.css?v=6') > customerStyleLoader.indexOf('gc-customer-experience-signature-20261017.css?v=2')],
@@ -347,6 +353,10 @@ const mobileUiContracts = [
   ['Staff shipment summary has two-column mobile styles', mobileUiCss.includes('.shipment-summary-grid') && mobileUiCss.includes('grid-template-columns: repeat(2, minmax(0, 1fr))') && mobileUiCss.includes('.shipment-summary-note')],
   ['Staff Intelligence chat has a dedicated flexible message row', mobileUiCss.includes('grid-template-rows: auto auto auto minmax(0, 1fr) auto !important') && mobileUiCss.includes('#gcStaffAiPanel .gc-ai-messages')],
   ['only the active customer dock destination receives the bright active treatment', mobileUiCss.includes('.dock-primary:not(.active)') && mobileUiCss.includes('button[aria-current="page"]')],
+  ['Customer workspace renders the receipt list target used by the evidence renderer', publicShell.includes('id="receipts"') && customerPortalVersionedScript.includes("setHtml('receipts'")],
+  ['warehouse receipt alerts lead to the supported customer records route', warehouseReceivingSource.includes("const actionUrl='/#records'") && warehouseNotifySource.includes("const actionUrl = '/#records'")],
+  ['warehouse receipt trigger uses the valid composite idempotency conflict target', warehouseReceiptNotificationMigration.includes('ON CONFLICT (customer_user_id, event_key) DO NOTHING') && warehouseReceiptNotificationMigration.includes("'/#records'")],
+  ['customer warehouse evidence styles include responsive photo proof cards', customerWarehouseEvidenceCss.includes('.warehouse-receipt-evidence') && customerWarehouseEvidenceCss.includes('.photo-grid')],
 ]
 for (const [label, passed] of mobileUiContracts) {
   if (passed) ok(label)

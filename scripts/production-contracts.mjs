@@ -312,6 +312,20 @@ if (!cargoCreate.includes('/customer gc code not found/i.test(message)?404')) fa
 if (!cargoCss.includes('.cargo-item-row') || !cargoCss.includes('@media (max-width: 390px)')) fail('Structured cargo editor responsive styles are missing')
 if (!failures) ok('Structured cargo editor, server persistence, authorization and responsive contracts OK')
 
+const customerWarehouseHtml = read('index.html')
+const customerWarehouseCss = read('gc-customer-warehouse-evidence-20261017.css')
+const customerWarehouseReceiving = read('supabase/functions/warehouse-receiving/index.ts')
+const customerWarehouseNotify = read('supabase/functions/warehouse-notify/index.ts')
+const customerWarehouseMigration = read('supabase/migrations/20261017181111_fix_warehouse_receipt_customer_notifications.sql')
+const customerSelfSourceForReceiptEvidence = read('supabase/functions/customer-self/index.ts')
+if (!customerWarehouseHtml.includes('id="receipts"') || !customerWarehouseHtml.includes('gc-customer-warehouse-evidence-20261017.css?v=1')) fail('Customer portal must render a dedicated warehouse receipt evidence panel')
+else ok('Customer portal has a styled warehouse receipt evidence destination')
+if (!customerWarehouseCss.includes('.warehouse-receipt-evidence') || !customerWarehouseCss.includes('.receipt-photo')) fail('Customer warehouse evidence responsive styles are incomplete')
+if (!customerSelfSourceForReceiptEvidence.includes(".from('warehouse_receipts')") || !customerSelfSourceForReceiptEvidence.includes('secureWarehouseReceiptPhotos')) fail('Customer self API must return owner-scoped warehouse receipts with signed private photos')
+if (!customerWarehouseReceiving.includes("const actionUrl='/#records'") || !customerWarehouseNotify.includes("const actionUrl = '/#records'")) fail('Warehouse alerts must link directly to the customer records/evidence section')
+if (!customerWarehouseMigration.includes('ON CONFLICT (customer_user_id, event_key) DO NOTHING') || !customerWarehouseMigration.includes("'/#records'")) fail('Warehouse notification trigger must use the valid per-customer idempotency key and portal route')
+else ok('Warehouse receipt notification trigger is idempotent and opens customer records')
+
 console.log('')
 if (failures) { console.error(`${failures} production contract check(s) failed.`); process.exit(1) }
 console.log('All production contract checks passed.')

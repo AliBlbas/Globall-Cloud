@@ -97,6 +97,11 @@ jobs:
           grep -Fq 'lockCommandStylesLast' staff-os-v5-enhancement-loader-20261017.js
           grep -Fq 'if (isStaff) client = window.gcSupabase;' gc-realtime-notifications-20261003.js
           grep -q 'gc-staff-command-system-20261017.css?v=1' staff-os-v5.html
+          grep -q 'id="receipts"' index.html
+          grep -q 'gc-customer-warehouse-evidence-20261017.css?v=1' index.html
+          grep -Fq "const actionUrl='/#records'" supabase/functions/warehouse-receiving/index.ts
+          grep -Fq "const actionUrl = '/#records'" supabase/functions/warehouse-notify/index.ts
+          grep -Fq 'ON CONFLICT (customer_user_id, event_key) DO NOTHING' supabase/migrations/20261017181111_fix_warehouse_receipt_customer_notifications.sql
           grep -Fq "storageKey: 'gc-staff-os-auth-v5-ahslifnthiwfkmaswjno'" staff-os-v5-20261017.js
           grep -Fq 'const customerBridgePanel =' staff-os-v5-20261017.js
           grep -Fq 'CUSTOMER WORKSPACE · SHARED DATA' staff-os-v5-20261017.js

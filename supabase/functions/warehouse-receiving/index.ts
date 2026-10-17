@@ -48,7 +48,7 @@ async function queueReceiptNotifications(admin:ReturnType<typeof createClient>,r
  const weight=Number(receipt.weight_actual??metadata.gross_weight_kg??0)||0;
  const photos=Array.isArray(signedPhotoUrls)?signedPhotoUrls:await signedPhotos(admin,receipt.photos);
  const eventKey=`warehouse_received:${String(receipt.id)}`;
- const actionUrl='/#shipmentsSection';
+ const actionUrl='/#records';
  const receivedAt=receipt.received_at||new Date().toISOString();
  const localTime=new Intl.DateTimeFormat('ku-IQ',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Baghdad'}).format(new Date(receivedAt));
  const title='کاڵاکەت لە کۆگا وەرگیرا';

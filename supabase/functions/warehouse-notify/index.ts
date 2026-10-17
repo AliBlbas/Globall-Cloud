@@ -188,7 +188,7 @@ Deno.serve(async (req: Request) => {
       `Batch: ${String(receipt.batch_code || '—')}`,
     ].join('\n')
     const eventKey = `warehouse_received:${String(receipt.id)}`
-    const actionUrl = '/#shipmentsSection'
+    const actionUrl = '/#records'
     const payload: Json = {
       title, subject: title, body: bodyText, action_url: actionUrl, gc_code: gcCode, warehouse,
       carton_count: cartons, weight_kg: weight || null, receipt_id: String(receipt.id),
