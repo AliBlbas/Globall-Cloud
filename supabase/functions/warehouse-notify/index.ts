@@ -59,9 +59,35 @@ async function signedPhotos(admin: ReturnType<typeof createClient>, value: unkno
   if (error) throw error
   return (data || []).map(item => item.signedUrl).filter((url): url is string => typeof url === 'string' && /^https?:\/\//i.test(url))
 }
+function nextDeliveryTimeOutsideQuietHours(quietStart: unknown, quietEnd: unknown, now = new Date()) {
+  const parse = (value: unknown) => {
+    const match = String(value || '').match(/^(\\d{1,2}):(\\d{2})/)
+    if (!match) return null
+    const h = Number(match[1]), m = Number(match[2])
+    return h >= 0 && h < 24 && m >= 0 && m < 60 ? h * 60 + m : null
+  }
+  const start = parse(quietStart), end = parse(quietEnd)
+  if (start === null || end === null || start === end) return now.toISOString()
+  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Baghdad', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(now)
+  const hour = Number(parts.find(p => p.type === 'hour')?.value || 0), minute = Number(parts.find(p => p.type === 'minute')?.value || 0)
+  const current = hour * 60 + minute
+  const quiet = start < end ? current >= start && current < end : current >= start || current < end
+  if (!quiet) return now.toISOString()
+  let delay = (end - current + 1440) % 1440
+  if (delay === 0) delay = 1440
+  return new Date(now.getTime() + delay * 60000 + 1000).toISOString()
+}
+async function cancelQueuedChannel(admin: ReturnType<typeof createClient>, eventKey: string, channel: Channel, reason: string) {
+  const { data, error } = await admin.from('notification_outbox')
+    .update({ status: 'cancelled', last_error: reason, updated_at: new Date().toISOString() })
+    .eq('event_key', eventKey).eq('channel', channel).in('status', ['pending', 'processing', 'retry', 'queued'])
+    .select('id')
+  if (error) throw error
+  return (data || []).length
+}
 async function queueOutboxChannel(
   admin: ReturnType<typeof createClient>,
-  args: { channel: Channel; eventKey: string; recipient: string; customerUserId: string | null; shipmentId: string | null; payload: Json },
+  args: { channel: Channel; eventKey: string; recipient: string; customerUserId: string | null; shipmentId: string | null; payload: Json; nextAttemptAt: string },
 ) {
   const now = new Date().toISOString()
   const { data: existing, error: lookupError } = await admin.from('notification_outbox')
@@ -73,7 +99,7 @@ async function queueOutboxChannel(
   if (existing) {
     if (['failed','cancelled'].includes(String(existing.status))) {
       const { data: refreshed, error } = await admin.from('notification_outbox')
-        .update({ status: 'pending', attempts: 0, last_error: null, next_attempt_at: now, recipient: args.recipient, payload: args.payload, updated_at: now })
+        .update({ status: 'pending', attempts: 0, last_error: null, next_attempt_at: args.nextAttemptAt, recipient: args.recipient, payload: args.payload, updated_at: now })
         .eq('id', existing.id)
         .select('id,status')
         .single()
@@ -91,7 +117,7 @@ async function queueOutboxChannel(
       recipient: args.recipient,
       payload: args.payload,
       status: 'pending',
-      next_attempt_at: now,
+      next_attempt_at: args.nextAttemptAt,
       updated_at: now,
     })
     .select('id,status')
@@ -129,6 +155,20 @@ Deno.serve(async (req: Request) => {
       .maybeSingle()
     if (customerError) throw customerError
     if (!customer) throw new Error('Customer directory record was not found')
+    const errors: string[] = []
+    let preferences: Record<string, unknown> | null = null
+    if (customer.auth_user_id) {
+      const result = await admin.from('customer_notification_preferences')
+        .select('email_enabled,whatsapp_enabled,in_app_enabled,quiet_hours_start,quiet_hours_end')
+        .eq('customer_user_id', customer.auth_user_id)
+        .maybeSingle()
+      if (result.error) errors.push(`preferences: ${result.error.message}`)
+      else preferences = result.data
+    }
+    const inAppAllowed = Boolean(customer.auth_user_id) && preferences?.in_app_enabled !== false
+    const whatsappOptedIn = preferences?.whatsapp_enabled === true
+    const emailOptedIn = preferences?.email_enabled === true
+    const nextAttemptAt = nextDeliveryTimeOutsideQuietHours(preferences?.quiet_hours_start, preferences?.quiet_hours_end)
     const gcCode = String(customer.gc_code || customer.normalized_gc_code || customer.code || receipt.gc_code_detected || receipt.gc_code || '').normalize('NFKC').trim().toUpperCase()
     const warehouse = String(receipt.location || receipt.source_warehouse || receipt.warehouse || 'warehouse')
     const metadata = receipt.label_metadata && typeof receipt.label_metadata === 'object' ? receipt.label_metadata as Record<string, unknown> : {}
@@ -158,9 +198,8 @@ Deno.serve(async (req: Request) => {
       template_name: Deno.env.get('WHATSAPP_TEMPLATE_NAME') || 'globall_warehouse_received',
       template_language: String(customer.preferred_language || 'ckb'),
     }
-    const errors: string[] = []
     let inAppQueued = false
-    if (customer.auth_user_id) {
+    if (inAppAllowed) {
       const { data: existing, error: lookupError } = await admin.from('customer_notifications')
         .select('id,read_at')
         .eq('customer_user_id', customer.auth_user_id)
@@ -185,26 +224,32 @@ Deno.serve(async (req: Request) => {
     }
     const whatsappRecipient = String(customer.whatsapp_phone || customer.phone || customer.phone2 || '').trim()
     let whatsapp: {queued:boolean;status:string;retried:boolean} | null = null
-    if (whatsappRecipient) {
+    if (whatsappRecipient && whatsappOptedIn) {
       try {
-        whatsapp = await queueOutboxChannel(admin, { channel: 'whatsapp', eventKey, recipient: whatsappRecipient, customerUserId: customer.auth_user_id || null, shipmentId: receipt.shipment_id ? String(receipt.shipment_id) : null, payload })
+        whatsapp = await queueOutboxChannel(admin, { channel: 'whatsapp', eventKey, recipient: whatsappRecipient, customerUserId: customer.auth_user_id || null, shipmentId: receipt.shipment_id ? String(receipt.shipment_id) : null, payload, nextAttemptAt })
       } catch (error) {
         errors.push(`whatsapp: ${error instanceof Error ? error.message : String(error)}`)
       }
+    } else {
+      try { await cancelQueuedChannel(admin, eventKey, 'whatsapp', 'Customer has not opted in to WhatsApp notifications.') }
+      catch (error) { errors.push(`whatsapp_cancel: ${error instanceof Error ? error.message : String(error)}`) }
     }
     const emailRecipient = String(customer.email || '').trim()
     let email: {queued:boolean;status:string;retried:boolean} | null = null
-    if (emailRecipient) {
+    if (emailRecipient && emailOptedIn) {
       try {
-        email = await queueOutboxChannel(admin, { channel: 'email', eventKey, recipient: emailRecipient, customerUserId: customer.auth_user_id || null, shipmentId: receipt.shipment_id ? String(receipt.shipment_id) : null, payload })
+        email = await queueOutboxChannel(admin, { channel: 'email', eventKey, recipient: emailRecipient, customerUserId: customer.auth_user_id || null, shipmentId: receipt.shipment_id ? String(receipt.shipment_id) : null, payload, nextAttemptAt })
       } catch (error) {
         errors.push(`email: ${error instanceof Error ? error.message : String(error)}`)
       }
+    } else {
+      try { await cancelQueuedChannel(admin, eventKey, 'email', 'Customer has not opted in to email notifications.') }
+      catch (error) { errors.push(`email_cancel: ${error instanceof Error ? error.message : String(error)}`) }
     }
     const audit = await admin.from('staff_activity_log').insert({
       staff_id: staff.id, staff_name: staff.full_name, action: 'warehouse.notification_queued',
       target_id: String(receipt.id),
-      details: JSON.stringify({ gc_code: gcCode, warehouse, cartons, photos: photoUrls.length, in_app: inAppQueued, whatsapp: whatsapp?.status || null, email: email?.status || null }),
+      details: JSON.stringify({ gc_code: gcCode, warehouse, cartons, photos: photoUrls.length, in_app: inAppQueued, whatsapp_opted_in: whatsappOptedIn, email_opted_in: emailOptedIn, whatsapp: whatsapp?.status || null, email: email?.status || null }),
     })
     if (audit.error) errors.push(`audit: ${audit.error.message}`)
     return json(req, {
@@ -212,8 +257,12 @@ Deno.serve(async (req: Request) => {
       photo_count: photoUrls.length,
       notification: {
         in_app: inAppQueued, in_app_queued: inAppQueued, whatsapp_queued: Boolean(whatsapp?.queued),
-        email_queued: Boolean(email?.queued), whatsapp_status: whatsapp?.status || (whatsappRecipient ? 'error' : 'no_recipient'),
-        email_status: email?.status || (emailRecipient ? 'error' : 'no_recipient'),
+        email_queued: Boolean(email?.queued), whatsapp_status: whatsapp?.status || (!whatsappRecipient ? 'no_recipient' : whatsappOptedIn ? 'error' : 'disabled_by_preference'),
+        email_status: email?.status || (!emailRecipient ? 'no_recipient' : emailOptedIn ? 'error' : 'disabled_by_preference'),
+        whatsapp_opted_in: whatsappOptedIn,
+        email_opted_in: emailOptedIn,
+        external_opt_in: whatsappOptedIn || emailOptedIn,
+        next_external_attempt_at: nextAttemptAt,
         errors,
       },
     }, errors.length ? 207 : 200)
