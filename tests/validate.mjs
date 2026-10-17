@@ -51,7 +51,7 @@ if (ts) {
 
 console.log('Required production files')
 const required = [
-  'index.html','gc-customer-warehouse-evidence-20261017.css','gc-customer-experience-signature-20261017.css','gc-ui-integrity-mobile-20261017.css','gc-dashboard-preferences-20261003.js','gc-public-customer-style-loader-20261014.js','staff-os-v5-enhancement-loader-20261017.js','login.html','register.html','customer-access.html','supabase/functions/customer-gc-register/index.ts','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','gc-unified-customer-experience-20261016.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
+  'index.html','gc-customer-carton-manifest-20261017.js','gc-customer-carton-manifest-20261017.css','gc-staff-carton-tools-20261017.js','gc-staff-command-system-20261017.css','gc-customer-warehouse-evidence-20261017.css','gc-customer-experience-signature-20261017.css','gc-ui-integrity-mobile-20261017.css','gc-dashboard-preferences-20261003.js','gc-public-customer-style-loader-20261014.js','staff-os-v5-enhancement-loader-20261017.js','login.html','register.html','customer-access.html','supabase/functions/customer-gc-register/index.ts','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','gc-unified-customer-experience-20261016.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
   'public-route-bootstrap.js','public-runtime-guarantee.js','public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js',
   'tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html',
   'staff-os-v5.html','staff-os-v5.css','staff-os-v5.js','gc-shipment-detail-20261016.css','staff-os-v5-rescue.js','staff-logistics-intelligence.js','staff-logistics-intelligence.css',
@@ -62,6 +62,7 @@ const required = [
   'supabase/migrations/20261017181111_fix_warehouse_receipt_customer_notifications.sql',
   'supabase/migrations/20261017181944_fix_warehouse_receipt_portal_route.sql',
   'supabase/migrations/20261017182723_warehouse_receipt_respect_in_app_preferences.sql',
+  'supabase/migrations/20261017185000_warehouse_receipt_cartons.sql',
   'supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
   'supabase/functions/notification-dispatch/index.ts','supabase/functions/warehouse-receiving/index.ts','supabase/functions/warehouse-notify/index.ts',
   'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/invoice-ai/index.ts',
@@ -299,8 +300,8 @@ const unifiedContracts = [
   ['main Staff OS filters inactive unlinked customers', staffConsoleScript.includes("filter==='inactive-unlinked'?x.is_active===false&&!x.auth_user_id:true") && staffConsoleScript.includes('value="inactive-unlinked"')],
   ['customer binding stays Super Admin only', staffConsoleScript.includes("state.staff?.role !== 'super_admin'") && accountAdminSource.includes('Only Super Admin can bind customer accounts')],
   ['customer account binding instructs GC-code login without exposing the internal auth email', staffConsoleScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleScript.includes('Login: ${result.login_email}') && staffConsoleScript.includes('پێویست نییە ئیمەیل بنووسێت')],
-  ['staff console uses a versioned filename and the GC-code login instructions', staffConsoleHtml.includes('/staff-os-v5-20261017.js?v=20261017-10') && staffConsoleVersionedScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleVersionedScript.includes('Login: ${result.login_email}')],
-  ['main Staff OS loads current customer filter assets', staffConsoleHtml.includes('staff-os-v5.css?v=20261016-4') && staffConsoleHtml.includes('staff-os-v5-20261017.js?v=20261017-10') && staffConsoleStyles.includes('.customer-link-guidance')],
+  ['staff console uses a versioned filename and the GC-code login instructions', staffConsoleHtml.includes('/staff-os-v5-20261017.js?v=20261017-11') && staffConsoleVersionedScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleVersionedScript.includes('Login: ${result.login_email}')],
+  ['main Staff OS loads current customer filter assets', staffConsoleHtml.includes('staff-os-v5.css?v=20261016-4') && staffConsoleHtml.includes('staff-os-v5-20261017.js?v=20261017-11') && staffConsoleStyles.includes('.customer-link-guidance')],
 ]
 for (const [label, passed] of unifiedContracts) {
   if (passed) ok(label)
@@ -340,13 +341,20 @@ const mobileUiContracts = [
   ['real-time bridge subscribes after sign-in and cleans up after sign-out', read('gc-realtime-notifications-20261003.js').includes('client.auth.onAuthStateChange') && read('gc-realtime-notifications-20261003.js').includes("event === 'SIGNED_OUT'")],
   ['staff warehouse table uses schema-backed warehouse and timestamp fields', staffShipmentScript.includes('x.location||x.source_warehouse||x.warehouse') && staffShipmentScript.includes('x.received_at||x.scanned_at||x.updated_at')],
   ['customer receipt renderer falls back to source warehouse and receipt photo time', customerPortalVersionedScript.includes('item.location || item.source_warehouse || item.warehouse') && customerPortalVersionedScript.includes('item.received_at || item.photo_taken_at')],
+  ['warehouse receipt API persists a unique record per carton before shipment linking', warehouseReceivingSource.includes('ensureReceiptCartons') && warehouseReceivingSource.includes('cartonManifest=await ensureReceiptCartons') && warehouseReceivingSource.includes('p_package_code:String(carton.carton_code)')],
+  ['carton manifest table keeps direct public/authenticated reads revoked', read('supabase/migrations/20261017185000_warehouse_receipt_cartons.sql').includes('REVOKE ALL ON TABLE public.warehouse_receipt_cartons FROM PUBLIC, anon, authenticated') && read('supabase/migrations/20261017185000_warehouse_receipt_cartons.sql').includes('ENABLE ROW LEVEL SECURITY')],
+  ['customer self API filters carton manifest by the owning directory record', read('supabase/functions/customer-self/index.ts').includes(".eq('customer_directory_id', customer.id)") && read('supabase/functions/customer-self/index.ts').includes('cartonsByReceipt.get(String(receipt.id))')],
+  ['customer notification includes carton codes only for its receipt owner', warehouseNotifySource.includes('.eq(\'customer_directory_id\', customer.id)') && warehouseNotifySource.includes('carton_codes: cartonCodes') && warehouseReceivingSource.includes('carton_codes:cartonCodes')],
+  ['customer receipt UI adds a per-carton manifest from the authenticated dashboard event', read('gc-customer-carton-manifest-20261017.js').includes("window.addEventListener('gc:customer-loaded'") && read('gc-customer-carton-manifest-20261017.js').includes('warehouse-carton-manifest')],
+  ['staff receipt detail can print Code 128 labels for each GC carton', staffShipmentScript.includes('warehouse-carton-manifest-card') && read('gc-staff-carton-tools-20261017.js').includes('CODE128') && staffOsHtml.includes('gc-staff-carton-tools-20261017.js?v=1')],
+
 
 
   ['Staff OS loads the scoped command-system design layer', staffOsHtml.includes('gc-staff-command-system-20261017.css?v=1') && staffOsHtml.includes('<body class="gc-staff-os-shell">')],
   ['Staff auth persistence is isolated from customer portal sessions', staffShipmentScript.includes("storageKey: 'gc-staff-os-auth-v5-ahslifnthiwfkmaswjno'")],
   ['Staff overview connects to the shared customer workspace', staffShipmentScript.includes('const customerBridgePanel =') && staffShipmentScript.includes('${customerBridgePanel}') && staffShipmentScript.includes('CUSTOMER WORKSPACE · SHARED DATA')],
   ['Staff and customer consoles expose a direct safe portal handoff', staffOsHtml.includes('href="/#auth"') && staffShipmentScript.includes('gc-customer-console-link')],
-  ['Mobile staff drawer reuses the core navigation SVG icons', staffEnhancementLoader.includes("'/gc-staff-mobile-dock-20261016.js?v=3'") && staffEnhancementLoader.includes("loadStyle('/gc-staff-command-system-20261017.css?v=1')')],
+  ['Mobile staff drawer reuses the core navigation SVG icons', staffEnhancementLoader.includes("'/gc-staff-mobile-dock-20261016.js?v=3'") && staffEnhancementLoader.includes("loadStyle('/gc-staff-command-system-20261017.css?v=1')")],
 
   ['staff enhancement loader loads integrity CSS after the mobile dock', staffEnhancementLoader.indexOf("loadStyle('/gc-ui-integrity-mobile-20261017.css?v=6')") > staffEnhancementLoader.indexOf("loadStyle('/gc-staff-mobile-dock-20261016.css?v=4')")],
   ['customer view selector includes the toolbar and isolated section views', customerViewScript.includes("const allSections = () => [...main.querySelectorAll(':scope > section, :scope > .workspace-toolbar')]") && customerViewScript.includes("settings: ['gcAccountSettings']") && customerViewScript.includes("shipments: ['shipmentsSection']") && customerViewScript.includes("requests: ['quotesPanel', 'newRequest']") && customerViewScript.includes("'#commercial': ['commercial']") && customerViewScript.includes("'#records': ['records']")],
