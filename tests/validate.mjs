@@ -63,6 +63,8 @@ const required = [
   'supabase/migrations/20261017181944_fix_warehouse_receipt_portal_route.sql',
   'supabase/migrations/20261017182723_warehouse_receipt_respect_in_app_preferences.sql',
   'supabase/migrations/20261017185000_warehouse_receipt_cartons.sql',
+  'supabase/migrations/20261017203300_fix_customer_notification_uuid_text_join.sql',
+  'supabase/functions/public-config/index.ts',
   'supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
   'supabase/functions/notification-dispatch/index.ts','supabase/functions/warehouse-receiving/index.ts','supabase/functions/warehouse-notify/index.ts',
   'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/invoice-ai/index.ts',
@@ -207,6 +209,7 @@ const customerSignatureStyles = read('gc-customer-experience-signature-20261017.
 const customerPortalAuth = read('gc-csp-scripts/customer-portal-inline-20261017.js')
 const customerSettingsHub = read('gc-settings-hub.js')
 const customerSelfSource = read('supabase/functions/customer-self/index.ts')
+const publicConfigSource = read('supabase/functions/public-config/index.ts')
 const staffShipmentSource = read('supabase/functions/staff-shipment-v5/index.ts')
 const staffShipmentControlSource = read('supabase/functions/staff-shipment-control/index.ts')
 const shipmentCustomerLinksMigration = read('supabase/migrations/20261017120000_staff_customer_unified_shipment_links.sql')
@@ -321,6 +324,7 @@ const warehouseNotifySource = read('supabase/functions/warehouse-notify/index.ts
 const warehouseReceiptNotificationMigration = read('supabase/migrations/20261017181111_fix_warehouse_receipt_customer_notifications.sql')
 const warehouseReceiptPortalRouteMigration = read('supabase/migrations/20261017181944_fix_warehouse_receipt_portal_route.sql')
 const warehouseReceiptPreferenceMigration = read('supabase/migrations/20261017182723_warehouse_receipt_respect_in_app_preferences.sql')
+const customerNotificationFanoutMigration = read('supabase/migrations/20261017203300_fix_customer_notification_uuid_text_join.sql')
 const customerWarehouseEvidenceCss = read('gc-customer-warehouse-evidence-20261017.css')
 
 const mobileUiContracts = [
@@ -386,6 +390,8 @@ const mobileUiContracts = [
   ['Customer workspace renders the receipt list target used by the evidence renderer', publicShell.includes('id="receipts"') && customerPortalVersionedScript.includes("setHtml('receipts'")],
   ['warehouse receipt alerts lead to the supported customer records route', warehouseReceivingSource.includes("const actionUrl='/#records'") && warehouseNotifySource.includes("const actionUrl = '/#records'")],
   ['warehouse receipt trigger uses the valid composite idempotency conflict target', warehouseReceiptNotificationMigration.includes('ON CONFLICT (customer_user_id, event_key) DO NOTHING') && warehouseReceiptNotificationMigration.includes("'/#records'")],
+  ['customer notification fan-out safely matches UUID shipments to legacy text notification ids', customerNotificationFanoutMigration.includes("s.id::text = NULLIF(BTRIM(NEW.shipment_id), '')") && customerNotificationFanoutMigration.includes('CREATE OR REPLACE FUNCTION public.fanout_customer_notification()')],
+  ['public-config preflight returns an empty 204 response body', publicConfigSource.includes("new Response(null, { status: 204, headers: headers(origin) })") && !publicConfigSource.includes("new Response('ok', { status: 204")],
   ['customer warehouse evidence styles include responsive photo proof cards', customerWarehouseEvidenceCss.includes('.warehouse-receipt-evidence') && customerWarehouseEvidenceCss.includes('.photo-grid')],
   ['owner-account warehouse notifications carry only that owner’s freshly signed receipt photos', customerSelfSource.includes("body,action_url,event_key,read_at,created_at") && customerSelfSource.includes("receiptsById.get(eventKey.slice(prefix.length))") && customerSelfSource.includes('receipt_photos: Array.isArray(receipt.photos)') && customerPortalVersionedScript.includes('notification-receipt-photo-grid') && customerWarehouseEvidenceCss.includes('notification-receipt-photo-grid')],
   ['final receipt notification route matches the unified customer portal router', warehouseReceiptPortalRouteMigration.includes("'/#records'") && warehouseReceiptPortalRouteMigration.includes('ON CONFLICT (customer_user_id, event_key) DO NOTHING')],
