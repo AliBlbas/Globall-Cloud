@@ -362,6 +362,14 @@
         ${STATUS.map(s=>`<option value="${s}">${statusLabel(s)}</option>`).join('')}
       </select>
     </div>
+    <section class="shipment-summary" aria-label="پوختەی فلتەری بارەکان">
+      <div class="shipment-summary-header">
+        <div><b>پوختەی بارەکان</b><small>ژمارەکان بە پێی گەڕان و فلتەری چالاک نوێ دەبنەوە</small></div>
+        <span class="shipment-summary-live">LIVE FILTER</span>
+      </div>
+      <div class="shipment-summary-grid" id="shipmentSummaryGrid"></div>
+      <p class="shipment-summary-note" id="shipmentSummaryNote" aria-live="polite"></p>
+    </section>
     <div class="shipment-grid" id="shipmentCards"></div>
     <div class="actions" id="shipmentPager" style="justify-content:center;align-items:center;margin:16px 0;gap:10px;flex-wrap:wrap" aria-live="polite"></div>`;
 
@@ -376,6 +384,41 @@
           (st === 'dispatched' ? dispatchedStatuses.has(currentStatus) : (st === 'all' || currentStatus === st)) &&
           (!q || JSON.stringify(x).toLowerCase().includes(q));
       });
+
+
+      // Live operational summary mirrors the active search, transport-mode and status filters.
+      // Counts are limited to shipments currently fetched from the API; paging status is stated below.
+      const summaryMetrics = { total: rows.length, air: 0, land: 0, sea: 0, customers: 0, pieces: 0, cartons: 0 };
+      rows.forEach((shipment) => {
+        const mode = String(shipment.transport_mode || shipment.type || shipment.mode || '').toLowerCase();
+        if (Object.prototype.hasOwnProperty.call(summaryMetrics, mode) && mode !== 'total') summaryMetrics[mode] += 1;
+        summaryMetrics.customers += Number(shipment.customer_goods_count || shipment.customer_count || shipment.customers_count || (shipment.customer_gc_code ? 1 : 0));
+        const structuredCargo = Number(shipment.cargo_item_count || 0) > 0;
+        summaryMetrics.pieces += structuredCargo
+          ? Number(shipment.cargo_piece_count ?? shipment.items_count ?? 0)
+          : Number(shipment.items_count ?? shipment.pc_count ?? 0);
+        summaryMetrics.cartons += structuredCargo
+          ? Number(shipment.cargo_carton_count ?? 0)
+          : Number(shipment.carton_count ?? shipment.box_count ?? shipment.items_count ?? 0);
+      });
+      const summaryValues = [
+        { key: 'total', label: 'ئەنجامی گونجاو', value: summaryMetrics.total },
+        { key: 'air', label: 'Air · ئاسمانی', value: summaryMetrics.air },
+        { key: 'land', label: 'Land · وشکانی', value: summaryMetrics.land },
+        { key: 'sea', label: 'Sea · دەریایی', value: summaryMetrics.sea },
+        { key: 'customers', label: 'کڕیار لە بارەکان', value: summaryMetrics.customers },
+        { key: 'pieces', label: 'دانەی کاڵا', value: summaryMetrics.pieces },
+        { key: 'cartons', label: 'کارتۆن', value: summaryMetrics.cartons },
+      ];
+      const summaryGrid = document.getElementById('shipmentSummaryGrid');
+      if (summaryGrid) summaryGrid.innerHTML = summaryValues.map((item) =>
+        '<article class="shipment-summary-card shipment-summary-' + item.key + '"><span>' + item.label + '</span><strong>' + number(item.value) + '</strong></article>'
+      ).join('');
+      const summaryNote = document.getElementById('shipmentSummaryNote');
+      if (summaryNote) {
+        summaryNote.textContent = number(rows.length) + ' ئەنجام لە ' + number(state.data.shipments.length) +
+          ' باری بارکراو. ' + (hasMore ? 'بۆ بارەکانی تر «بارکردنی زیاتر» بکە.' : 'هەموو بارەکانی سێرڤەر بارکراون.');
+      }
 
       document.getElementById('shipmentCards').innerHTML = rows.length ? rows.map(x => {
         const currentStatus = String(x.status || x.operational_status || '').toLowerCase();
