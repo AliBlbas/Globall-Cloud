@@ -7,6 +7,7 @@
     account: `${SUPABASE_URL}/functions/v1/account-admin`,
     operations: `${SUPABASE_URL}/functions/v1/operations-v4`,
     warehouse: `${SUPABASE_URL}/functions/v1/warehouse-receiving`,
+    warehouseNotify: `${SUPABASE_URL}/functions/v1/warehouse-notify`,
     hub: `${SUPABASE_URL}/functions/v1/staff-ops-hub`,
     shipmentCreate: `${SUPABASE_URL}/functions/v1/staff-shipment-v5`,
     shipmentControl: `${SUPABASE_URL}/functions/v1/staff-shipment-control`,
@@ -880,8 +881,108 @@
   function newFxModal(){openModal('گۆڕینی USD/IQD',`<form id="fxForm" class="form-grid"><div class="form-field"><label>USD → IQD</label><input class="field" name="usd_to_iqd" type="number" step="0.01" required placeholder="1550"></div><div class="form-field"><label>Source</label><input class="field" name="source" value="manual"></div></form>`,'<button class="btn" data-close>هەڵوەشاندنەوە</button><button class="btn primary" id="saveFx">پاشەکەوت</button>');document.getElementById('saveFx').onclick=async()=>{const d=Object.fromEntries(new FormData(document.getElementById('fxForm')).entries());try{await opsPost('fx_update',d);closeModal();toast('FX نوێکرایەوە');await renderPricing()}catch(e){toast(e.message,'bad')}};}
 
   async function renderWarehouses(){const r=await request(FN.warehouse,'/');state.data.receipts=r.items||[];document.getElementById('view').innerHTML=`<div class="section-head"><div><div class="eyebrow">WAREHOUSE CHAIN OF CUSTODY</div><h1>کۆگاكان</h1><p>چین · دوبەی · هەولێر · ئەمریکا، وەرگرتنی carton و بەڵگەی وێنە.</p></div><div class="actions"><button class="btn primary" id="newReceipt">+ وەرگرتن</button><button class="btn" id="scanReceipt">⌁ Scan GC</button></div></div><div class="grid-kpi"><div class="kpi"><span>Receipts</span><strong>${number(state.data.receipts.length)}</strong></div><div class="kpi"><span>Verified</span><strong>${number(state.data.receipts.filter(x=>x.verification_status==='verified').length)}</strong></div><div class="kpi"><span>Today</span><strong>${number(state.data.receipts.filter(x=>shortDate(x.received_at)===shortDate(new Date())).length)}</strong></div><div class="kpi"><span>Photos</span><strong>${number(state.data.receipts.reduce((s,x)=>s+(Array.isArray(x.photos)?x.photos.length:0),0))}</strong></div></div><div class="toolbar"><input class="field" id="warehouseSearch" placeholder="گەڕان بە GC / batch / tracking / کۆگا"></div><div class="table-wrap"><table class="table"><thead><tr><th>GC</th><th>کۆگا</th><th>Batch</th><th>Cartons</th><th>Tracking</th><th>وەرگر</th><th>وێنە</th><th>بەروار</th><th></th></tr></thead><tbody id="warehouseRows"></tbody></table></div>`;const draw=()=>{const q=text(document.getElementById('warehouseSearch').value).toLowerCase();const rows=state.data.receipts.filter(x=>!q||JSON.stringify(x).toLowerCase().includes(q));document.getElementById('warehouseRows').innerHTML=rows.map(x=>{const md=x.label_metadata||{};return `<tr><td class="mono"><b>${esc(x.gc_code_detected||x.gc_code||'—')}</b></td><td>${esc(x.location||'—')}</td><td class="mono">${esc(x.batch_code||'—')}</td><td>${number(x.carton_count||md.total_packages||1)}</td><td class="mono">${esc(x.scan_code||md.tracking_number||'—')}</td><td>${esc(x.created_by_name||'—')}</td><td>${number(Array.isArray(x.photos)?x.photos.length:0)}</td><td>${esc(date(x.received_at||x.created_at))}</td><td><button class="btn" data-receipt="${esc(x.id)}">بینین</button></td></tr>`}).join('')||`<tr><td colspan="9"><div class="empty">هیچ receipt نییە.</div></td></tr>`;document.querySelectorAll('[data-receipt]').forEach(b=>b.onclick=()=>receiptDetail(b.dataset.receipt));};document.getElementById('warehouseSearch').oninput=draw;draw();document.getElementById('newReceipt').onclick=newReceiptModal;document.getElementById('scanReceipt').onclick=()=>scannerModal('warehouse');}
-  function receiptDetail(id){const r=state.data.receipts.find(x=>String(x.id)===String(id));if(!r)return;const photos=(r.photos||[]).map(u=>`<a class="photo" href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="evidence"></a>`).join('');openModal(`Receipt · ${r.gc_code_detected||r.gc_code||''}`,`<div class="two-col"><section class="card"><h3>وەرگرتن</h3><p>کۆگا: <b>${esc(r.location)}</b></p><p>Batch: <span class="mono">${esc(r.batch_code)}</span></p><p>Cartons: <b>${esc(r.carton_count||1)}</b></p><p>Tracking: <span class="mono">${esc(r.scan_code||'—')}</span></p><p>کەسی وەرگر: ${esc(r.created_by_name||'—')}</p><p>${esc(date(r.received_at||r.created_at))}</p></section><section class="card"><h3>AI / Scan</h3><p>Verification: <span class="pill mint">${esc(r.verification_status||'—')}</span></p><p>OCR: ${esc(r.ocr_confidence??'—')}</p><p class="muted">${esc(r.ocr_text||'OCR بەردەست نییە')}</p></section><section class="card" style="grid-column:1/-1"><h3>Photos</h3><div class="photo-grid">${photos||'<div class="empty">وێنە نییە.</div>'}</div></section></div>`,'<button class="btn" data-close>داخستن</button>');}
-  function newReceiptModal(prefill={}){openModal('وەرگرتنی کاڵا لە کۆگا',`<form id="receiptForm" class="form-grid" enctype="multipart/form-data"><div class="form-field"><label>GC code</label><input class="field" name="customer_code" required value="${esc(prefill.code||'')}" placeholder="GC-1005"></div><div class="form-field"><label>کۆگا</label><select class="field" name="location"><option>China</option><option>Dubai</option><option>Erbil</option><option>USA</option></select></div><div class="form-field"><label>Batch</label><input class="field" name="batch_code" value="${esc(prefill.batch||'')}"></div><div class="form-field"><label>Tracking</label><input class="field" name="tracking_number"></div><div class="form-field"><label>Cartons</label><input class="field" name="total_packages" type="number" min="1" value="1"></div><div class="form-field"><label>Gross kg</label><input class="field" name="gross_weight_kg" type="number" step="0.01"></div><div class="form-field"><label>Declared value</label><input class="field" name="declared_value" type="number" step="0.01"></div><div class="form-field"><label>Currency</label><select class="field" name="declared_currency"><option>USD</option><option>IQD</option></select></div><div class="form-field full"><label>کالاکان</label><textarea class="field" name="item_summary" placeholder="2 laptop, 5 cover"></textarea></div><div class="form-field full"><label>وێنەکان (تا 8)</label><input class="field" name="photos" type="file" accept="image/*" multiple capture="environment"></div><div class="form-field"><label>Latitude (optional)</label><input class="field" name="latitude" type="number" step="any"></div><div class="form-field"><label>Longitude (optional)</label><input class="field" name="longitude" type="number" step="any"></div></form>`,'<button class="btn" data-close>هەڵوەشاندنەوە</button><button class="btn primary" id="saveReceipt">تۆمارکردن</button>');document.querySelector('#receiptForm select[name=location]').value=prefill.location||'Dubai';document.getElementById('saveReceipt').onclick=async()=>{const form=document.getElementById('receiptForm');const fd=new FormData(form);fd.append('idempotency_key',crypto.randomUUID());fd.append('scan_type','qr');try{const r=await request(FN.warehouse,'/',{method:'POST',body:fd});closeModal();toast(`وەرگرتنی ${r.customer?.code||''} سەرکەوتوو بوو`);if(r.whatsapp_message)toast('پەیامی WhatsApp بۆ queue دانرا');await renderWarehouses()}catch(e){toast(e.message,'bad')}};}
+  function receiptDetail(id){
+    const r=state.data.receipts.find(x=>String(x.id)===String(id));
+    if(!r)return;
+    const photos=(r.photos||[]).map((u,i)=>`<a class="photo" href="${esc(u)}" target="_blank" rel="noopener noreferrer"><img src="${esc(u)}" alt="GC receipt evidence ${i+1}" loading="lazy"></a>`).join('');
+    const md=r.label_metadata||{};
+    openModal(`Receipt · ${r.gc_code_detected||r.gc_code||''}`,`<div class="two-col">
+      <section class="card"><h3>زانیاریی وەرگرتن</h3>
+        <p>کڕیار: <b class="mono">${esc(r.gc_code_detected||r.gc_code||'—')}</b></p>
+        <p>کۆگا: <b>${esc(r.location||'—')}</b></p>
+        <p>Batch: <span class="mono">${esc(r.batch_code||'—')}</span></p>
+        <p>ژمارەی کارتۆن: <b>${esc(r.carton_count||md.total_packages||1)}</b></p>
+        <p>کێش: <b>${esc(r.weight_actual??md.gross_weight_kg??'—')} kg</b></p>
+        <p>Tracking / Scan: <span class="mono">${esc(r.scan_code||r.barcode||md.tracking_number||'—')}</span></p>
+        <p>وەرگیرا لەلایەن: ${esc(r.created_by_name||'—')}</p>
+        <p>کاتی وەرگرتن: ${esc(date(r.received_at||r.created_at))}</p>
+        <p>کاتی وێنەگرتن: ${esc(date(r.photo_taken_at||r.received_at))}</p>
+        <p>هەژماری کڕیار: <span class="pill ${r.directory_customer_id?'mint':'warn'}">${r.directory_customer_id?'پەیوەستکراوە':'پێویستی بە پشکنینە'}</span></p>
+      </section>
+      <section class="card"><h3>بەڵگە / Scan</h3>
+        <p>Verification: <span class="pill ${r.verification_status==='verified'?'mint':'warn'}">${esc(r.verification_status||'—')}</span></p>
+        <p>OCR confidence: ${esc(r.ocr_confidence??'—')}</p>
+        <p class="muted">${esc(r.ocr_text||'OCR بەردەست نییە')}</p>
+        <p class="muted">${esc(r.notes||r.description||'')}</p>
+      </section>
+      <section class="card" style="grid-column:1/-1"><h3>وێنەکانی وەرگرتن · ${(r.photos||[]).length}</h3><div class="photo-grid">${photos||'<div class="empty">وێنە نییە.</div>'}</div></section>
+    </div>`,'<button class="btn" id="notifyReceiptBtn">ناردن / دووبارەکردنەوەی ئاگادارکردنەوە</button><button class="btn" data-close>داخستن</button>');
+    document.getElementById('notifyReceiptBtn').onclick=async()=>{
+      const button=document.getElementById('notifyReceiptBtn');
+      if(!button||button.disabled)return;
+      button.disabled=true;button.setAttribute('aria-busy','true');button.textContent='لە queue دانان…';
+      try{
+        const result=await request(FN.warehouseNotify,'/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({receipt_id:r.id})});
+        const channels=[];
+        if(result.notification?.in_app)channels.push('ئەکاونتی کڕیار');
+        if(result.notification?.whatsapp_queued)channels.push('WhatsApp queue');
+        if(result.notification?.email_queued)channels.push('Email queue');
+        if(Array.isArray(result.notification?.errors)&&result.notification.errors.length)throw new Error(result.notification.errors.join(' · '));
+        toast(channels.length?`ئاگادارکردنەوە ڕێکخرا: ${channels.join(' · ')}`:'هیچ ڕێگای پەیوەندییەکی بەردەست نییە','ok');
+      }catch(error){toast('بار تۆمارکرا؛ ئاگادارکردنەوە: '+errorText(error,'شکستی هێنا'),'bad')}
+      finally{button.disabled=false;button.removeAttribute('aria-busy');button.textContent='ناردن / دووبارەکردنەوەی ئاگادارکردنەوە'}
+    };
+  }
+  function newReceiptModal(prefill={}){
+    const idempotencyKey=crypto.randomUUID();
+    const roleLocation={warehouse_china:'China',warehouse_uae:'Dubai',warehouse_erbil:'Erbil'};
+    const branchLocation={china:'China',dubai:'Dubai',uae:'Dubai',erbil:'Erbil'};
+    const defaultLocation=prefill.location||roleLocation[state.staff?.role]||branchLocation[String(state.staff?.branch||'').toLowerCase()]||'Dubai';
+    openModal('وەرگرتنی کاڵا لە کۆگا · GC Evidence',`<form id="receiptForm" class="form-grid" enctype="multipart/form-data">
+      <div class="form-field"><label>کۆدی کڕیار لەسەر کارتۆن (GC Code)</label><input class="field" name="customer_code" required value="${esc(prefill.code||'')}" placeholder="GC-1005" autocomplete="off" autocapitalize="characters"></div>
+      <div class="form-field"><label>کۆگای وەرگرتن</label><select class="field" name="location" required><option>China</option><option>Dubai</option><option>Erbil</option><option>USA</option></select></div>
+      <div class="form-field"><label>Batch code</label><input class="field" name="batch_code" value="${esc(prefill.batch||'')}" placeholder="بەتاڵ بهێڵەوە بۆ کۆدی تایبەتی خۆکار"></div>
+      <div class="form-field"><label>Tracking / Barcode</label><input class="field" name="tracking_number" value="${esc(prefill.tracking||'')}" placeholder="Tracking ـی کۆمپانیا"></div>
+      <div class="form-field"><label>ژمارەی کارتۆن</label><input class="field" name="total_packages" type="number" min="1" max="999" step="1" value="${esc(prefill.carton_count||1)}" required></div>
+      <div class="form-field"><label>کێشی ڕاستەقینە (kg)</label><input class="field" name="gross_weight_kg" type="number" min="0" step="0.01"></div>
+      <div class="form-field"><label>بەهای ڕاگەیەنراو</label><input class="field" name="declared_value" type="number" min="0" step="0.01"></div>
+      <div class="form-field"><label>دراو</label><select class="field" name="declared_currency"><option>USD</option><option>IQD</option><option>CNY</option><option>AED</option></select></div>
+      <div class="form-field full"><label>ناوەڕۆکی کارتۆن / کاڵاکان</label><textarea class="field" name="item_summary" placeholder="جۆری کاڵا، ژمارەی PC و وردەکاریی گرنگ"></textarea></div>
+      <div class="form-field full"><label>وێنەی کارتۆن و لیبێڵی GC (پێویستە)</label><input class="field" name="photos" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple capture="environment" required><small>تا ٨ وێنە؛ وێنەکە دەبێت بە بەڵگەی هەژماری ئەم GC ـەوە ببەسترێتەوە.</small></div>
+      <div class="form-field"><label>Latitude (هەڵبژاردەیی)</label><input class="field" name="latitude" type="number" step="any"></div>
+      <div class="form-field"><label>Longitude (هەڵبژاردەیی)</label><input class="field" name="longitude" type="number" step="any"></div>
+      <div class="form-field full"><label>تێبینیی وەرگرتن</label><textarea class="field" name="notes" placeholder="بارودۆخی کارتۆن، کێشە، ژمارەی پەکەج یان زانیاریی زیاتری کۆگا"></textarea></div>
+    </form>`,'<button class="btn" data-close>هەڵوەشاندنەوە</button><button class="btn primary" id="saveReceipt">تۆمارکردن و ئاگادارکردنەوەی کڕیار</button>');
+    const locationField=document.querySelector('#receiptForm select[name="location"]');
+    if(locationField)locationField.value=defaultLocation;
+    document.getElementById('saveReceipt').onclick=async()=>{
+      const form=document.getElementById('receiptForm');
+      const button=document.getElementById('saveReceipt');
+      if(!form||!button||button.disabled)return;
+      if(!form.reportValidity())return;
+      const files=form.querySelector('input[name="photos"]')?.files;
+      if(!files?.length){toast('لانیکەم یەک وێنەی بەڵگە باربکە','bad');return}
+      if(files.length>8){toast('زۆرترین ژمارەی وێنە ٨ دانەیە','bad');return}
+      const fd=new FormData(form);
+      fd.set('idempotency_key',idempotencyKey);
+      fd.set('scan_type',prefill.scanType||'qr');
+      button.disabled=true;button.setAttribute('aria-busy','true');button.textContent='لە تۆمارکردن و ناردنی ئاگادارکردنەوەدایە…';
+      try{
+        const result=await request(FN.warehouse,'/',{method:'POST',body:fd});
+        closeModal();
+        const code=result.customer?.code||result.receipt?.gc_code_detected||result.receipt?.gc_code||prefill.code||'GC';
+        const batch=result.receipt?.batch_code||'';
+        const channels=[];
+        if(result.notification?.in_app_queued)channels.push('ئەکاونتی کڕیار');
+        if(result.notification?.whatsapp_queued)channels.push('WhatsApp queue');
+        if(result.notification?.email_queued)channels.push('Email queue');
+        const summary=`GC ${code} لە ${result.receipt?.location||defaultLocation} تۆمار کرا${batch?' · Batch '+batch:''}`;
+        if(Array.isArray(result.notification?.errors)&&result.notification.errors.length){
+          toast(summary+'؛ ئاگادارکردنەوە پێویستی بە پشکنینە','bad');
+        }else if(channels.length){
+          toast(summary+' · '+channels.join(' / '),'ok');
+        }else{
+          toast(summary+'؛ هەژماری login یان ژمارەی پەیوەندی نەدۆزرایەوە','bad');
+        }
+        await renderWarehouses();
+      }catch(error){
+        toast('تۆمارکردن: '+errorText(error,'هەڵەی نەناسراو'),'bad');
+      }finally{
+        const currentButton=document.getElementById('saveReceipt');
+        if(currentButton){currentButton.disabled=false;currentButton.removeAttribute('aria-busy');currentButton.textContent='دووبارە هەوڵبدە'}
+      }
+    };
+  }
 
   async function renderFinance(){let r;try{r=await hub('finance')}catch(primaryError){try{r=await ops('finance');toast('Finance بە backup service بارکرا','ok')}catch(backupError){throw new Error(`Finance service: ${errorText(primaryError,'hub failed')} · backup: ${errorText(backupError,'operations failed')}`)}}state.data.finance=r;const tx=r.transactions||[];const income=tx.filter(x=>['income','customer_payment','payment'].includes(String(x.type))).reduce((s,x)=>s+Number(x.amount_usd||0),0),expense=tx.filter(x=>['expense','cost'].includes(String(x.type))).reduce((s,x)=>s+Number(x.amount_usd||0),0),charges=tx.filter(x=>['charge','customer_charge'].includes(String(x.type))).reduce((s,x)=>s+Number(x.amount_usd||0),0);document.getElementById('view').innerHTML=`<div class="section-head"><div><div class="eyebrow">FINANCE CONTROL</div><h1>دارایی</h1><p>داهات، خەرجی، قەرز و payment ـەکان لە یەک ledger.</p></div><div class="actions"><button class="btn" id="monthlyReportBtn">ڕاپۆرتی مانگانە</button><button class="btn primary" id="newFinance">+ تۆمارکردنی پارە</button></div></div><div class="grid-kpi"><div class="kpi"><span>داهات</span><strong>${money(income)}</strong></div><div class="kpi"><span>خەرجی</span><strong>${money(expense)}</strong></div><div class="kpi"><span>قازانج</span><strong>${money(income-expense)}</strong></div><div class="kpi"><span>Charge</span><strong>${money(charges)}</strong></div><div class="kpi"><span>Transactions</span><strong>${number(tx.length)}</strong></div><div class="kpi"><span>قازانجی ڕێگا</span><strong>${money((state.data.shipments||[]).reduce((s,x)=>s+Number(x.total_amount||0),0))}</strong></div></div><div class="toolbar"><input class="field" id="financeSearch" placeholder="گەڕان بە GC / جۆر / reference"></div><div class="table-wrap"><table class="table"><thead><tr><th>بەروار</th><th>جۆر</th><th>GC</th><th>بڕ</th><th>Reference</th><th>Note</th><th></th></tr></thead><tbody id="financeRows"></tbody></table></div>`;const draw=()=>{const q=text(document.getElementById('financeSearch').value).toLowerCase();const rows=tx.filter(x=>!q||JSON.stringify(x).toLowerCase().includes(q));document.getElementById('financeRows').innerHTML=rows.slice(0,300).map(x=>`<tr><td>${esc(date(x.created_at||x.occurred_at))}</td><td><span class="pill ${String(x.type).includes('expense')?'red':'mint'}">${esc(x.type||'—')}</span></td><td class="mono">${esc(x.gc_code||'—')}</td><td class="mono"><b>${money(x.amount_usd||0)}</b></td><td>${esc(x.reference||x.provider_reference||'—')}</td><td>${esc(x.note||'')}</td><td><button class="btn" data-fin-edit="${esc(x.id)}">Edit</button></td></tr>`).join('')||`<tr><td colspan="7"><div class="empty">هیچ transaction ـێک نییە.</div></td></tr>`;document.querySelectorAll('[data-fin-edit]').forEach(b=>b.onclick=()=>editFinance(b.dataset.finEdit));};document.getElementById('financeSearch').oninput=draw;draw();document.getElementById('newFinance').onclick=newFinanceModal;document.getElementById('monthlyReportBtn').onclick=()=>renderMonthlyReport();}
   async function renderMonthlyReport(){
