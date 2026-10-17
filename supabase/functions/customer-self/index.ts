@@ -232,23 +232,45 @@ Deno.serve(async (req) => {
       created_at:item.created_at || null
     }))
     let membershipRows:any[] = []
+    let cargoOwnershipRows:any[] = []
     if (shipmentIds.length) {
-      const membershipResult = await service.from('shipment_customer_links').select('shipment_id,customer_directory_id').in('shipment_id', shipmentIds).limit(5000)
+      const [membershipResult, cargoMembershipResult] = await Promise.all([
+        service.from('shipment_customer_links').select('shipment_id,customer_directory_id').in('shipment_id', shipmentIds).limit(5000),
+        service.from('shipment_cargo_items').select('shipment_id,customer_directory_id').in('shipment_id', shipmentIds).limit(5000),
+      ])
       if (membershipResult.error) throw membershipResult.error
+      if (cargoMembershipResult.error) throw cargoMembershipResult.error
       membershipRows = membershipResult.data || []
+      cargoOwnershipRows = cargoMembershipResult.data || []
     }
+    // Build a distinct owner set from membership links, the primary directory
+    // owner, and actual cargo. This remains conservative if a link row is stale
+    // or temporarily missing, preventing consolidated-shipment data leaks.
+    const ownersByShipment = new Map<string, Set<string>>()
+    const addOwner = (shipmentId:any, directoryId:any) => {
+      if (!shipmentId || !directoryId) return
+      const key = String(shipmentId)
+      if (!ownersByShipment.has(key)) ownersByShipment.set(key, new Set<string>())
+      ownersByShipment.get(key)!.add(String(directoryId))
+    }
+    for (const link of membershipRows) addOwner(link.shipment_id, link.customer_directory_id)
+    for (const item of shipmentRows) addOwner(item.id, item.directory_customer_id)
+    for (const item of cargoOwnershipRows) addOwner(item.shipment_id, item.customer_directory_id)
     const membershipCount = new Map<string, number>()
-    for (const link of membershipRows) {
-      const key=String(link.shipment_id)
-      membershipCount.set(key,(membershipCount.get(key)||0)+1)
-    }
+    for (const [key, owners] of ownersByShipment) membershipCount.set(key, owners.size)
+    const directOwnedShipmentIds = new Set((userShipmentsResult.data || [])
+      .filter((item:any) => !item.directory_customer_id || String(item.directory_customer_id) === String(customer.id))
+      .map((item:any) => String(item.id)))
     const ownCargoByShipment=new Map<string,any[]>()
     for(const item of ownCargoRows){
       const key=String(item.shipment_id)
       if(!ownCargoByShipment.has(key))ownCargoByShipment.set(key,[])
       ownCargoByShipment.get(key)!.push(item)
     }
-    const soloShipmentIds=shipmentRows.filter((item:any)=>(membershipCount.get(String(item.id))||0)<=1).map((item:any)=>String(item.id))
+    const soloShipmentIds=shipmentRows.filter((item:any)=>{
+      const owners=membershipCount.get(String(item.id))||0
+      return owners===1||(owners===0&&directOwnedShipmentIds.has(String(item.id)))
+    }).map((item:any)=>String(item.id))
     const safeShipments=shipmentRows.map((item:any)=>{
       const key=String(item.id)
       const mine=ownCargoByShipment.get(key)||[]
@@ -274,7 +296,7 @@ Deno.serve(async (req) => {
       }
     })
     const financeCode=String(customer.gc_code||customer.code||'').normalize('NFKC').trim().toUpperCase()
-    const [notifications,preferences,quotes,documents,invoices,events,receipts,chatThreads,customerTransactions]=await Promise.all([
+    const [notifications,preferences,quotes,documentsByUser,invoicesByUser,events,receipts,chatThreads,customerTransactions]=await Promise.all([
       service.from('customer_notifications').select('id,shipment_id,kind,title,body,action_url,read_at,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(30),
       service.from('customer_notification_preferences').select('email_enabled,whatsapp_enabled,sms_enabled,in_app_enabled,quiet_hours_start,quiet_hours_end,updated_at').eq('customer_user_id',user.id).maybeSingle(),
       service.from('quote_requests').select('id,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,status,quoted_amount,currency,valid_until,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(30),
@@ -285,10 +307,27 @@ Deno.serve(async (req) => {
       service.from('customer_chat_threads').select('id,subject,status,priority,last_message_at,created_at').eq('customer_user_id',user.id).neq('status','closed').order('last_message_at',{ascending:false}).limit(30),
       financeCode ? service.from('finance_transactions').select('id,type,gc_code,amount_usd,reference,created_at').eq('gc_code',financeCode).in('type',['customer_charge','customer_payment','refund','adjustment']).order('created_at',{ascending:false}).limit(100) : Promise.resolve({data:[],error:null}),
     ])
-    const firstResults=[notifications,preferences,quotes,documents,invoices,events,receipts,chatThreads,customerTransactions]
+    const firstResults=[notifications,preferences,quotes,documentsByUser,invoicesByUser,events,receipts,chatThreads,customerTransactions]
     const firstFailure=firstResults.find((result:any)=>result?.error)
     if(firstFailure?.error)throw firstFailure.error
-    const invoiceIds=(invoices.data||[]).map((item:any)=>item.id).filter(Boolean)
+    // Include public documents and legacy invoices attached to single-owner
+    // shipments even when older staff records predate customer_user_id linking.
+    // Never attach an unowned invoice/document from a consolidated shipment.
+    const [soloDocumentsResult, soloInvoicesResult] = await Promise.all([
+      soloShipmentIds.length ? service.from('shipment_documents').select('id,shipment_id,document_type,title,file_url,is_public,document_status,created_at').in('shipment_id',soloShipmentIds).is('customer_user_id',null).eq('is_public',true).order('created_at',{ascending:false}).limit(100) : Promise.resolve({data:[],error:null}),
+      soloShipmentIds.length ? service.from('shipment_invoices').select('id,invoice_number,shipment_id,total,paid_total,currency,status,due_at,created_at').in('shipment_id',soloShipmentIds).is('customer_user_id',null).order('created_at',{ascending:false}).limit(100) : Promise.resolve({data:[],error:null}),
+    ])
+    if(soloDocumentsResult.error)throw soloDocumentsResult.error
+    if(soloInvoicesResult.error)throw soloInvoicesResult.error
+    const documentMap=new Map<string,any>()
+    for(const row of documentsByUser.data||[])documentMap.set(String(row.id),row)
+    for(const row of soloDocumentsResult.data||[])documentMap.set(String(row.id),row)
+    const documents=[...documentMap.values()].sort((a:any,b:any)=>new Date(b.created_at||0).getTime()-new Date(a.created_at||0).getTime()).slice(0,100)
+    const invoiceMap=new Map<string,any>()
+    for(const row of invoicesByUser.data||[])invoiceMap.set(String(row.id),row)
+    for(const row of soloInvoicesResult.data||[])invoiceMap.set(String(row.id),row)
+    const invoices=[...invoiceMap.values()].sort((a:any,b:any)=>new Date(b.created_at||0).getTime()-new Date(a.created_at||0).getTime()).slice(0,100)
+    const invoiceIds=invoices.map((item:any)=>item.id).filter(Boolean)
     const [payments,pods,ledger,packages]=await Promise.all([
       invoiceIds.length?service.from('payment_transactions').select('id,invoice_id,shipment_id,provider,status,amount,currency,method,paid_at,created_at').in('invoice_id',invoiceIds).order('created_at',{ascending:false}).limit(100):Promise.resolve({data:[],error:null}),
       soloShipmentIds.length?service.from('delivery_proofs').select('shipment_id,delivered_at,receiver_name,note,photo_urls,latitude,longitude,created_at').in('shipment_id',soloShipmentIds).order('created_at',{ascending:false}).limit(30):Promise.resolve({data:[],error:null}),
@@ -312,7 +351,7 @@ Deno.serve(async (req) => {
         avatar_url:user.user_metadata?.avatar_url||null
       },
       shipments:safeShipments,cargo_items:ownCargoRows,notifications:notifications.data||[],
-      quotes:quotes.data||[],documents:documents.data||[],pods:pods.data||[],invoices:invoices.data||[],
+      quotes:quotes.data||[],documents,pods:pods.data||[],invoices,
       payments:payments.data||[],customer_transactions:customerTransactions.data||[],events:events.data||[],ledger:ledger.data||[],receipts:receipts.data||[],
       packages:packages.data||[],chat_threads:chatThreads.data||[],
       notification_preferences:preferences.data||{email_enabled:false,whatsapp_enabled:false,sms_enabled:false,in_app_enabled:true}
