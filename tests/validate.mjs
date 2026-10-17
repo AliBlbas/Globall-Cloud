@@ -51,7 +51,7 @@ if (ts) {
 
 console.log('Required production files')
 const required = [
-  'index.html','login.html','register.html','customer-access.html','supabase/functions/customer-gc-register/index.ts','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','gc-unified-customer-experience-20261016.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
+  'index.html','gc-customer-experience-signature-20261017.css','login.html','register.html','customer-access.html','supabase/functions/customer-gc-register/index.ts','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','gc-unified-customer-experience-20261016.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
   'public-route-bootstrap.js','public-runtime-guarantee.js','public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js',
   'tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html',
   'staff-os-v5.html','staff-os-v5.css','staff-os-v5.js','gc-shipment-detail-20261016.css','staff-os-v5-rescue.js','staff-logistics-intelligence.js','staff-logistics-intelligence.css',
@@ -198,6 +198,7 @@ const customerNavigation = read('gc-dashboard-preferences-20261003.js')
 const customerStyleLoader = read('gc-public-customer-style-loader-20261014.js')
 const customerDockStyles = read('gc-customer-mobile-dock-20261016.css')
 const customerWorkspaceStyles = read('gc-customer-workspace-elite-20261014.css')
+const customerSignatureStyles = read('gc-customer-experience-signature-20261017.css')
 const customerPortalAuth = read('gc-csp-scripts/customer-portal-inline-1.js')
 const customerSelfSource = read('supabase/functions/customer-self/index.ts')
 const customerAccountEntry = read('gc-account-entry.js')
@@ -218,7 +219,7 @@ const unifiedContracts = [
   ['premium hero uses existing logistics imagery', read('gc-homepage-signature-20261016.css').includes("url('/assets/gc-air-freight-hero-1440.webp')")],
   ['customer transport cards use real air sea and land images', ['gc-air-freight-hero-640.webp','gc-sea-freight-hero-640.webp','gc-land-freight-hero-640.webp'].every(image => customerWorkspaceStyles.includes(image))],
   ['customer content clears the five-tab mobile navigation', customerWorkspaceStyles.includes('padding-bottom:calc(132px + env(safe-area-inset-bottom))') && customerDockStyles.includes('padding-bottom:calc(136px + env(safe-area-inset-bottom))')],
-  ['current premium styles are cache-busted in the index', unifiedShell.includes('gc-homepage-signature-20261016.css?v=8') && unifiedShell.includes('gc-live-mobile-v3.css?v=20261017-1') && unifiedShell.includes('gc-customer-mobile-dock-20261016.css?v=4') && unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=19')],
+  ['current premium styles are cache-busted in the index', unifiedShell.includes('gc-homepage-signature-20261016.css?v=8') && unifiedShell.includes('gc-live-mobile-v3.css?v=20261017-1') && unifiedShell.includes('gc-customer-mobile-dock-20261016.css?v=4') && unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=20')],
   ['tracking URL redirects to the customer shipment view', authRedirects.includes('/track /#shipmentsSection 302') && authRedirects.includes('/track/ /#shipmentsSection 302')],
   ['registration hash stays in customer mode', unifiedController.includes("'#auth':'home'") && unifiedController.includes("'#register':'home'")],
   ['private views require customer authentication', unifiedController.includes('const privateHashes = new Set([') && unifiedController.includes('verifyExistingSession(hash === \'#auth\' || hash === \'#register\' || privateHashes.has(hash))')],
@@ -230,7 +231,10 @@ const unifiedContracts = [
   ['customer dock uses five responsive columns', customerDockStyles.includes('repeat(5,minmax(0,1fr))') && !customerDockStyles.includes('repeat(6,minmax(0,1fr))') && !customerWorkspaceStyles.includes('repeat(6,minmax(0,1fr))')],
   ['integrated services have responsive polished styles', customerWorkspaceStyles.includes('.gc-customer-route-overview') && customerWorkspaceStyles.includes('@media (max-width: 900px)')],
   ['style loader references current cache versions', customerStyleLoader.includes('gc-customer-workspace-elite-20261014.css?v=22') && customerStyleLoader.includes('gc-customer-mobile-dock-20261016.css?v=4')],
-  ['style loader script is cache-busted in index', unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=19')],
+  ['style loader script is cache-busted in index', unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=20')],
+  ['signature customer layer is loaded after the mobile dock', unifiedShell.includes('gc-customer-experience-signature-20261017.css?v=1') && customerStyleLoader.includes('gc-customer-experience-signature-20261017.css?v=1')],
+  ['customer home has three direct paths to shipments, billing, and support', (unifiedShell.match(/class="gc-quick-action"/g)||[]).length === 3 && unifiedShell.includes('href="#shipmentsSection"') && unifiedShell.includes('href="#records"') && unifiedShell.includes('href="#support"')],
+  ['customer home uses real air freight artwork and responsive hero styling', customerSignatureStyles.includes("url('/assets/gc-air-freight-hero-960.webp')") && customerSignatureStyles.includes("url('/assets/gc-air-freight-hero-640.webp')") && customerSignatureStyles.includes('@media(max-width:900px)')],
   ['support remains reachable from account settings', read('gc-settings-hub.js').includes("gcSelectCustomerView('support')")],
   ['legacy GC sign-in explains secure staff linking', unifiedShell.includes('gc-auth-support-note') && unifiedShell.includes('wa.me/9647507577137')],
   ['signed-out claim prompt offers support without self-linking', customerPortalAuth.includes('gc-account-help-action') && customerSelfSource.includes('self-service linking is disabled')],
