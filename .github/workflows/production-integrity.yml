@@ -63,7 +63,7 @@ jobs:
           grep -q '/gc-production-ui-20260927.css?v=1' index.html
           grep -q '/gc-production-ui-20260927.css?v=1' staff-os-v5.html
           grep -Fq "window.location.replace('/#auth')" customer-portal.html
-          grep -q 'staff-os-v5-20261017.js?v=20261017-15' staff-os-v5.html
+          grep -q 'staff-os-v5-20261017.js?v=20261017-16' staff-os-v5.html
           grep -q 'staff-os-v5.css?v=20261016-4' staff-os-v5.html
           grep -q 'gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-8' index.html
           grep -q 'gc-customer-carton-manifest-20261017.js?v=1' index.html
@@ -119,7 +119,7 @@ jobs:
           grep -q 'gc-realtime-notifications-20261003.js?v=3' staff-os-v5.html
           grep -Fq 'lockCommandStylesLast' staff-os-v5-enhancement-loader-20261017.js
           grep -Fq 'if (isStaff) client = window.gcSupabase;' gc-realtime-notifications-20261003.js
-          grep -q 'gc-staff-command-system-20261017.css?v=1' staff-os-v5.html
+          grep -q 'gc-staff-command-system-20261017.css?v=2' staff-os-v5.html
           grep -q 'id="receipts"' index.html
           grep -q 'gc-customer-warehouse-evidence-20261017.css?v=1' index.html
           grep -Fq "const actionUrl='/#records'" supabase/functions/warehouse-receiving/index.ts
@@ -134,7 +134,7 @@ jobs:
           grep -Fq 'const customerBridgePanel =' staff-os-v5-20261017.js
           grep -Fq 'CUSTOMER WORKSPACE · SHARED DATA' staff-os-v5-20261017.js
           grep -Fq "original.querySelector('.nav-icon svg')" gc-staff-mobile-dock-20261016.js
-          grep -Fq "loadStyle('/gc-staff-command-system-20261017.css?v=1')" staff-os-v5-enhancement-loader-20261017.js
+          grep -Fq "loadStyle('/gc-staff-command-system-20261017.css?v=2')" staff-os-v5-enhancement-loader-20261017.js
           grep -q 'gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-8' index.html
           grep -Fq "window.location.replace('/#auth')" customer-portal.html
           grep -Fq 'authForm' gc-csp-scripts/customer-portal-inline-20261017.js
