@@ -487,6 +487,126 @@ async function upsertCustomer(client: ReturnType<typeof createClient>, payload: 
   return { customer: canonicalCustomerIdentity(saved), auth_user_id: authResult.userId, warning: authResult.warning, status: authResult.userId ? 'linked' : 'saved_without_auth' }
 }
 
+
+async function queueExistingWarehouseReceiptNotifications(
+  client: ReturnType<typeof createClient>,
+  customerDirectoryId: string,
+  customerUserId: string,
+  gcCode: string
+): Promise<{ checked: number; queued: number; skippedGcMismatch: number; disabled: boolean; warning: string | null }> {
+  let checked = 0
+  let queued = 0
+  let eligible = 0
+  let skippedGcMismatch = 0
+  const pageSize = 100
+
+  try {
+    const { data: preferences, error: preferenceError } = await client
+      .from('customer_notification_preferences')
+      .select('in_app_enabled')
+      .eq('customer_user_id', customerUserId)
+      .maybeSingle()
+    if (preferenceError) throw preferenceError
+    if (preferences?.in_app_enabled === false) {
+      return { checked: 0, queued: 0, skippedGcMismatch: 0, disabled: true, warning: null }
+    }
+
+    for (let offset = 0; ; offset += pageSize) {
+      const { data: receipts, error: receiptError } = await client
+        .from('warehouse_receipts')
+        .select('id,batch_code,location,source_warehouse,warehouse,received_at,carton_count,weight_actual,photos,shipment_id,gc_code,gc_code_detected')
+        .eq('directory_customer_id', customerDirectoryId)
+        .order('received_at', { ascending: false })
+        .range(offset, offset + pageSize - 1)
+      if (receiptError) throw receiptError
+      const rows = receipts || []
+      if (!rows.length) break
+      checked += rows.length
+
+      const receiptIds = rows.map((receipt: JsonRecord) => txt(receipt.id)).filter((id): id is string => Boolean(id))
+      const cartonByReceipt = new Map<string, Array<JsonRecord>>()
+      if (receiptIds.length) {
+        const { data: cartons, error: cartonError } = await client
+          .from('warehouse_receipt_cartons')
+          .select('receipt_id,gc_code,carton_code,carton_index,carton_total')
+          .eq('customer_directory_id', customerDirectoryId)
+          .in('receipt_id', receiptIds)
+          .order('carton_index', { ascending: true })
+        if (cartonError) throw cartonError
+        for (const carton of cartons || []) {
+          const receiptId = String(carton.receipt_id || '')
+          if (!receiptId) continue
+          const list = cartonByReceipt.get(receiptId) || []
+          list.push(carton)
+          cartonByReceipt.set(receiptId, list)
+        }
+      }
+
+      const notifications: JsonRecord[] = []
+      for (const receipt of rows as JsonRecord[]) {
+        const receiptId = txt(receipt.id)
+        if (!receiptId) continue
+        const receiptCode = normalizeGcCode(receipt.gc_code_detected || receipt.gc_code || gcCode)
+        // Never route old evidence to this login if its GC identity disagrees with the canonical directory account.
+        if (!receiptCode || receiptCode !== gcCode) {
+          skippedGcMismatch += 1
+          continue
+        }
+
+        const cartonRows = (cartonByReceipt.get(receiptId) || []).filter((carton) => {
+          const cartonCode = txt(carton.gc_code)
+          return !cartonCode || normalizeGcCode(cartonCode) === gcCode
+        })
+        const cartonCodes = cartonRows.map((carton) => txt(carton.carton_code)).filter((value): value is string => Boolean(value))
+        const metadataCount = Number(receipt.carton_count || 0)
+        const cartonCount = Math.max(1, Number.isFinite(metadataCount) && metadataCount > 0 ? metadataCount : (cartonRows.length || 1))
+        const weight = Number(receipt.weight_actual || 0) || 0
+        const photoCount = Array.isArray(receipt.photos) ? receipt.photos.length : 0
+        const receivedAtValue = receipt.received_at ? new Date(String(receipt.received_at)) : new Date()
+        const receivedAt = Number.isFinite(receivedAtValue.getTime()) ? receivedAtValue : new Date()
+        const localTime = new Intl.DateTimeFormat('ku-IQ', {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+          timeZone: 'Asia/Baghdad',
+        }).format(receivedAt)
+        const warehouse = String(receipt.location || receipt.source_warehouse || receipt.warehouse || 'warehouse')
+        const cartonLine = cartonCodes.length
+          ? `کۆدی کارتۆنەکان: ${cartonCodes.slice(0, 15).join(', ')}${cartonCodes.length > 15 ? ` و ${cartonCodes.length - 15} دانەی تر` : ''}`
+          : 'کۆدی تاکەکارتۆن: لە تۆماری وەرگرتندا بەردەست نییە'
+        const bodyText = `GC: ${gcCode}\nکۆگا: ${warehouse}\nکارتۆن: ${cartonCount}\n${cartonLine}\nکێش: ${weight > 0 ? `${weight} kg` : 'تۆمارنەکراوە'}\nبەروار و کات (هەولێر): ${localTime}\nژمارەی وێنەکان: ${photoCount}\nBatch: ${String(receipt.batch_code || '—')}`
+
+        notifications.push({
+          customer_user_id: customerUserId,
+          shipment_id: receipt.shipment_id ? String(receipt.shipment_id) : null,
+          kind: 'warehouse_received',
+          event_key: `warehouse_received:${receiptId}`,
+          title: 'کاڵاکەت لە کۆگا وەرگیرا',
+          body: bodyText,
+          action_url: '/#records',
+          read_at: null,
+        })
+      }
+
+      eligible += notifications.length
+      for (let start = 0; start < notifications.length; start += pageSize) {
+        const batch = notifications.slice(start, start + pageSize)
+        const { data: inserted, error: insertError } = await client
+          .from('customer_notifications')
+          .upsert(batch, { onConflict: 'customer_user_id,event_key', ignoreDuplicates: true })
+          .select('id')
+        if (insertError) throw insertError
+        queued += inserted?.length || 0
+      }
+      if (rows.length < pageSize) break
+    }
+    return { checked, queued, skippedGcMismatch, disabled: false, warning: null }
+  } catch (error) {
+    const warning = error instanceof Error ? error.message : String(error)
+    console.error('[account-admin] existing warehouse notification backfill failed:', warning)
+    return { checked, queued, skippedGcMismatch, disabled: false, warning }
+  }
+}
+
 async function bindCustomerAuth(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, isSuperAdmin: boolean }) {
   if (!actor.isSuperAdmin) throw responseError('Only Super Admin can bind customer accounts', 403)
   const id = txt(payload.id)
@@ -518,8 +638,36 @@ async function bindCustomerAuth(client: ReturnType<typeof createClient>, payload
   const linkedRows = await client.from('shipment_customer_links').update({customer_user_id:userId,customer_gc_code:code,updated_at:new Date().toISOString()}).eq('customer_directory_id',id).select('shipment_id')
   const linkSyncWarning = linkedRows.error ? linkedRows.error.message : null
   if (linkSyncWarning) console.error('Customer account linked, but shipment memberships need repair:', linkSyncWarning)
-  await logActivity(client, actor.id, actor.name, 'bind_customer_auth_account', id, { gc_code: code, auth_user_id: userId, synthetic_email: email.endsWith('@customers.globall-cloud.internal'), shipment_links_updated: linkedRows.data?.length || 0, shipment_link_sync_warning: linkSyncWarning })
-  return { ok: true, status: 'linked', customer_id: id, gc_code: code, auth_user_id: userId, login_email: email, temporary_password: password, shipment_links_updated: linkedRows.data?.length || 0, warning: linkSyncWarning, note: 'Deliver this password securely; it is not shown again.' }
+  const receiptNotifications = await queueExistingWarehouseReceiptNotifications(client, id, userId, code)
+  await logActivity(client, actor.id, actor.name, 'bind_customer_auth_account', id, {
+    gc_code: code,
+    auth_user_id: userId,
+    synthetic_email: email.endsWith('@customers.globall-cloud.internal'),
+    shipment_links_updated: linkedRows.data?.length || 0,
+    shipment_link_sync_warning: linkSyncWarning,
+    existing_receipts_checked: receiptNotifications.checked,
+    existing_receipt_notifications_queued: receiptNotifications.queued,
+    existing_receipts_gc_mismatch_skipped: receiptNotifications.skippedGcMismatch,
+    existing_receipt_notification_warning: receiptNotifications.warning,
+    existing_receipt_notifications_disabled_by_preference: receiptNotifications.disabled,
+  })
+  return {
+    ok: true,
+    status: 'linked',
+    customer_id: id,
+    gc_code: code,
+    auth_user_id: userId,
+    login_email: email,
+    temporary_password: password,
+    shipment_links_updated: linkedRows.data?.length || 0,
+    receipt_notifications_checked: receiptNotifications.checked,
+    receipt_notifications_queued: receiptNotifications.queued,
+    receipt_notifications_skipped_gc_mismatch: receiptNotifications.skippedGcMismatch,
+    receipt_notifications_disabled: receiptNotifications.disabled,
+    receipt_notification_warning: receiptNotifications.warning,
+    warning: linkSyncWarning,
+    note: 'Deliver this password securely; it is not shown again.',
+  }
 }
 
 async function updateCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, isSuperAdmin: boolean }) {
