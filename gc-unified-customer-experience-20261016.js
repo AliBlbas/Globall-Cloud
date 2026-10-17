@@ -77,13 +77,14 @@
     }
   };
   const customerRouteRequested = () => customerHashes.has(window.location.hash);
+  const explicitAuthRoute = () => ['#auth', '#register'].includes(window.location.hash);
   const handleRoute = () => {
     if (window.location.hash === '#public') {
       setPublicMode({keepHash:true, forcePublic:true});
       return;
     }
     if (customerRouteRequested()) {
-      enterCustomerMode({showAuth:true});
+      enterCustomerMode({showAuth:explicitAuthRoute()});
       selectCustomerView(window.location.hash);
       verifyExistingSession(true).catch(() => {});
       return;
@@ -153,7 +154,7 @@
     // Public sections must remain public after refresh, even when the customer has a session.
     setPublicMode({keepHash:true, forcePublic:true});
   } else if (customerRouteRequested()) {
-    enterCustomerMode({showAuth:true});
+    enterCustomerMode({showAuth:explicitAuthRoute()});
     selectCustomerView(window.location.hash);
     verifyExistingSession(true).catch(() => {});
   } else {
