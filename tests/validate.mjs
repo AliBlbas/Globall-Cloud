@@ -205,6 +205,7 @@ const customerSelfSource = read('supabase/functions/customer-self/index.ts')
 const staffShipmentSource = read('supabase/functions/staff-shipment-v5/index.ts')
 const staffShipmentControlSource = read('supabase/functions/staff-shipment-control/index.ts')
 const shipmentCustomerLinksMigration = read('supabase/migrations/20261017120000_staff_customer_unified_shipment_links.sql')
+const notificationIndexMigration = read('supabase/migrations/20261017130000_customer_notification_idempotency_unique_index.sql')
 const customerPortalSource = read('gc-csp-scripts/customer-portal-inline-1.js')
 const customerAccountEntry = read('gc-account-entry.js')
 const accountAdminSource = read('supabase/functions/account-admin/index.ts')
@@ -231,9 +232,10 @@ const unifiedContracts = [
   ['customer payments are scoped to invoices owned by the authenticated customer', customerSelfSource.includes(".in('invoice_id',invoiceIds)") && customerSelfSource.includes("shipment_customer_links")],
   ['shared shipments hide global totals and return only owned cargo rows', customerSelfSource.includes('is_consolidated:shared') && customerSelfSource.includes('cargo_items:ownCargoRows') && customerSelfSource.includes('total_amount:shared?null')],
   ['Super Admin account binding refreshes shipment memberships', accountAdminSource.includes("from('shipment_customer_links').update({customer_user_id:userId")],
-  ['customer console displays tracking IDs and the customer's cargo', customerPortalSource.includes('item.tracking_id||item.tracking_number||item.customer_gc_code||item.id') && customerPortalSource.includes('renderShipments(rows, dashboard.cargo_items || [])')],
+  ['customer console displays tracking IDs and the customer's cargo', customerPortalSource.includes('item.tracking_id || item.tracking_number || item.customer_gc_code || item.id') && customerPortalSource.includes('renderShipments(rows, dashboard.cargo_items || [])')],
   ['modified customer portal script is cache-busted in the active homepage', unifiedShell.includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261017-1')],
   ['shipment membership migration is locked to service role and backfills cargo owners', shipmentCustomerLinksMigration.includes('shipment_customer_links_shipment_customer_key') && shipmentCustomerLinksMigration.includes('revoke all on table public.shipment_customer_links from anon, authenticated') && shipmentCustomerLinksMigration.includes('from public.shipment_cargo_items ci')],
+  ['customer notification upsert conflict target has a matching full unique index', notificationIndexMigration.includes('CREATE UNIQUE INDEX IF NOT EXISTS customer_notifications_event_key_full_uidx') && notificationIndexMigration.includes('rename to customer_notifications_event_key_uidx')],
   ['customer navigation initializes all declared icons without runtime reference errors', customerNavigation.includes('const mountIcons = (root = document) =>') && customerNavigation.includes('node.innerHTML = icons[key]') && ['user','wallet','documents','moving','warehouse','route','send','lock','logout'].every(icon => customerNavigation.includes(icon + ':'))],
   ['customer view controller includes dynamically-mounted account settings', customerNavigation.includes("const allSections = () => [...main.querySelectorAll(':scope > section')]") && customerNavigation.includes('allSections().forEach(section =>')],
   ['staff console is visible only after backend role verification', customerSettingsHub.includes("/functions/v1/account-self-profile") && customerSettingsHub.includes("profile?.kind === 'staff'") && customerSettingsHub.includes("STAFF_ROLES.has(profile.role)") && customerSettingsHub.includes("if (staffAccessVerified) window.location.assign('/staff')")],
