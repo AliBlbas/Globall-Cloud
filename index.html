@@ -53,6 +53,7 @@
 <link rel="stylesheet" href="/gc-customer-portal-rates.css?v=20261003-3" data-gc-customer-rates-css="1">
 <link rel="stylesheet" href="/gc-customer-workspace-elite-20261014.css?v=22" data-gc-customer-elite="1">
 <link rel="stylesheet" href="/gc-customer-mobile-dock-20261016.css?v=4" data-gc-customer-mobile-dock="1">
+<link rel="stylesheet" href="/gc-customer-experience-signature-20261017.css?v=1" data-gc-customer-signature="1">
 <script src="/gc-settings-hub.js?v=20261016-10" defer data-gc-settings-hub="1"></script>
 </head>
 <body class="gc-customer-app" data-gc-unified-experience="customer" data-gc-customer-view="home">
@@ -330,9 +331,37 @@
 
       <div id="portalStatus" class="portal-status" role="status" aria-live="polite"></div>
 
-      <section class="command-card" id="overview">
-        <div class="command-copy"><span class="eyebrow accent">LIVE OPERATIONS</span><h2>هەنگاوی دواترت لێرەیە</h2><p>بارەکان ببینە، نرخێکی نوێ داوا بکە یان پەیوەندی بە تیمی پشتیوانییەوە بکە.</p><div class="command-actions"><a class="app-primary-action" href="#shipments"><span data-dash-icon="shipments"></span>بینینی بارەکان</a><a class="app-secondary-action" href="#newRequest"><span data-dash-icon="plus"></span>داواکاری نوێ</a></div></div>
-        <div class="command-visual"><div class="route-orbit"><span class="orbit-node node-a"></span><span class="orbit-node node-b"></span><span class="orbit-node node-c"></span><div class="orbit-center" data-dash-icon="route"></div></div><div><span class="eyebrow">NETWORK STATUS</span><strong>China · Dubai · Erbil</strong><small>Live shipment visibility</small></div></div>
+      <section class="command-card gc-signature-command" id="overview" aria-labelledby="gcHomeCommandTitle">
+        <div class="command-copy">
+          <span class="eyebrow accent">GLOBALL CLOUD · CUSTOMER DESK</span>
+          <h2 id="gcHomeCommandTitle">هەموو بار و حسابەکەت، <span>لە یەک شوێن</span></h2>
+          <p>بارەکانت بەدواداچوون بکە، نرخی نوێ داوا بکە و بەڵگە و پارەدانەکانت بە ئاسانی ببینە.</p>
+          <div class="command-actions">
+            <a class="app-primary-action" href="#shipmentsSection"><span data-dash-icon="track"></span>شوێنکەوتنی بار</a>
+            <a class="app-secondary-action" href="#newRequest"><span data-dash-icon="plus"></span>داواکاری نرخ</a>
+          </div>
+        </div>
+        <div class="command-visual gc-command-network">
+          <div class="route-orbit"><span class="orbit-node node-a"></span><span class="orbit-node node-b"></span><span class="orbit-node node-c"></span><div class="orbit-center" data-dash-icon="route"></div></div>
+          <div><span class="eyebrow">ڕێگاکانی گواستنەوە</span><strong>چین · دوبەی · ئەمریکا</strong><small><span class="gc-command-live-dot"></span> بۆ هەولێر · عێراق</small></div>
+        </div>
+        <nav class="gc-customer-quick-actions" aria-label="بەشە گرنگەکانی هەژمار">
+          <a class="gc-quick-action" href="#shipmentsSection">
+            <span class="gc-quick-action-icon" data-dash-icon="shipments"></span>
+            <span class="gc-quick-action-copy"><strong>بارەکانم</strong><small>دۆخ و شوێنکەوتن</small></span>
+            <span class="gc-quick-action-arrow" aria-hidden="true">↗</span>
+          </a>
+          <a class="gc-quick-action" href="#records">
+            <span class="gc-quick-action-icon" data-dash-icon="records"></span>
+            <span class="gc-quick-action-copy"><strong>پارە و بەڵگە</strong><small>فاکتور و باڵانس</small></span>
+            <span class="gc-quick-action-arrow" aria-hidden="true">↗</span>
+          </a>
+          <a class="gc-quick-action" href="#support">
+            <span class="gc-quick-action-icon" data-dash-icon="support"></span>
+            <span class="gc-quick-action-copy"><strong>پشتیوانی</strong><small>پرسیار و یارمەتی</small></span>
+            <span class="gc-quick-action-arrow" aria-hidden="true">↗</span>
+          </a>
+        </nav>
       </section>
 
       <section id="homeMetrics" class="metric-grid" aria-label="پوختەی هەژمار">
@@ -420,6 +449,6 @@
 <script src="/gc-dashboard-preferences-20261003.js?v=20261016-13" defer data-gc-customer-preferences="1"></script>
 <script src="/gc-customer-request-20261003.js?v=20261016-2" defer data-gc-customer-requests="1"></script>
 <script src="/gc-unified-customer-experience-20261016.js?v=9" defer data-gc-unified-customer-experience="1"></script>
-<script src="/gc-public-customer-style-loader-20261014.js?v=19" defer data-gc-public-customer-style-loader="1"></script>
+<script src="/gc-public-customer-style-loader-20261014.js?v=20" defer data-gc-public-customer-style-loader="1"></script>
 </body>
 </html>
