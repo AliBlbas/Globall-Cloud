@@ -159,7 +159,7 @@ const renderReceipts = (items) => {
   setHtml('receipts', html || emptyState(EMPTY.file, 'هێشتا warehouse evidence نییە', 'کاتێک بار لە کۆگا وەردەگیرێت، بەڵگە و وێنەکان لێرە دەردەکەون.'));
 };
 
-const renderPayments = (invoices, payments) => {
+const renderPayments = (invoices, payments, customerTransactions = []) => {
   const invoiceRows = invoices.map((item) => {
     const due = Math.max(0, Number(item.total || 0) - Number(item.paid_total || 0));
     const paymentAction = due > 0 && item.status !== 'paid'
@@ -177,7 +177,12 @@ const renderPayments = (invoices, payments) => {
     <div class="muted">${esc(item.provider)} · ${esc(item.method || '—')}</div>
     <small>${esc(date(item.paid_at || item.created_at))}</small>
   </div>`);
-  setHtml('payments', invoiceRows.concat(paymentRows).join('') || emptyState(EMPTY.money, 'هیچ مامەڵەیەکی دارایی نییە', 'لە کاتی دروستبوونی invoice یان payment، مێژووی مامەڵەکان لێرە دەردەکەوێت.'));
+  const labels = {customer_charge:'قەرزی کڕیار',customer_payment:'پارەدانی کڕیار',refund:'گەڕاندنەوەی پارە',adjustment:'ڕێکخستنی باڵانس'};
+  const customerRows = (customerTransactions || []).map((item) => {
+    const sign = item.type === 'customer_charge' ? '+' : (item.type === 'customer_payment' || item.type === 'refund' ? '−' : '');
+    return `<div class="item"><div class="row"><strong>${sign}${money(item.amount_usd, 'USD')}</strong><span class="pill">${esc(labels[item.type] || 'مامەڵە')}</span></div><div class="muted">${esc(item.reference || 'GC ' + (item.gc_code || ''))}</div><small>${esc(date(item.created_at))}</small></div>`;
+  });
+  setHtml('payments', invoiceRows.concat(paymentRows, customerRows).join('') || emptyState(EMPTY.money, 'هیچ مامەڵەیەکی دارایی نییە', 'لە کاتی دروستبوونی invoice یان payment، مێژووی مامەڵەکان لێرە دەردەکەوێت.'));
 };
 
 const totalsByCurrency = (items, amountKey) => items.reduce((out, item) => {
@@ -277,7 +282,7 @@ const load = async () => {
   }, {});
   $('dueKpi').textContent = Object.entries(dueByCurrency).map(([cur,v]) => `${Number(v).toLocaleString('en-US',{maximumFractionDigits:2})} ${cur}`).join(' · ') || '0 USD';
   $('notifKpi').textContent = (dashboard.notifications || []).filter((item) => !item.read_at).length;
-  renderCustomerIdentity(dashboard.profile); renderWarehouseAddresses(dashboard.warehouse_addresses || []); renderShipments(rows, dashboard.cargo_items || []); renderNotifications(dashboard.notifications || []); renderCustomerChat(dashboard.chat_threads || []); renderQuotes(dashboard.quotes || []); renderDocuments(dashboard.documents || []); renderPods(dashboard.pods || []); renderReceipts(dashboard.receipts || []); renderPayments(invoicesRows, dashboard.payments || []); renderFinance(invoicesRows, dashboard.payments || [], dashboard.ledger || []);
+  renderCustomerIdentity(dashboard.profile); renderWarehouseAddresses(dashboard.warehouse_addresses || []); renderShipments(rows, dashboard.cargo_items || []); renderNotifications(dashboard.notifications || []); renderCustomerChat(dashboard.chat_threads || []); renderQuotes(dashboard.quotes || []); renderDocuments(dashboard.documents || []); renderPods(dashboard.pods || []); renderReceipts(dashboard.receipts || []); renderPayments(invoicesRows, dashboard.payments || [], dashboard.customer_transactions || []); renderFinance(invoicesRows, dashboard.payments || [], dashboard.ledger || []);
   window.__customerShipments = rows; window.__customerQuotes = dashboard.quotes || []; window.__customerNotifications = dashboard.notifications || []; window.__customerEvents = dashboard.events || []; window.__customerPods = dashboard.pods || []; window.__customerRelated = { packages: dashboard.packages || [], documents: dashboard.documents || [], invoices: dashboard.invoices || [], payments: dashboard.payments || [], receipts: dashboard.receipts || [], pods: dashboard.pods || [] }; window.dispatchEvent(new CustomEvent('gc:customer-loaded', { detail: dashboard }));
   window.gcCustomerReload = () => load().catch((error) => console.warn('[gc-realtime] customer reload', error));
 };
