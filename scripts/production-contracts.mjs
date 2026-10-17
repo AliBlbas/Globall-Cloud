@@ -174,6 +174,15 @@ const customerPreferencesRuntime = read('gc-dashboard-preferences-20261003.js')
 const mobileDockTabs = (unifiedShell.match(/data-dock-tab="(home|shipments|requests|notifications|settings)"/g) || [])
 if (mobileDockTabs.length !== 5 || !unifiedShell.includes('gc-dashboard-preferences-20261003.js?v=20261017-3') || !customerPreferencesRuntime.includes("'#support':'requests'") || !customerPreferencesRuntime.includes("requestedKey === 'support' ? 'requests'") || !customerPreferencesRuntime.includes("new Set(nextHash === '#support' ? ['support'] : viewGroups[key])") || customerPreferencesRuntime.includes("support: ['support']")) fail('Customer navigation must keep exactly five tabs and open support as a Requests subview')
 else ok('Customer navigation keeps five primary tabs with a focused Support subview')
+const customerRequestUi = read('gc-customer-request-20261003.js')
+const customerQuoteController = read('gc-csp-scripts/customer-portal-inline-1.js')
+const requestFormStart = unifiedShell.indexOf('id="newRequest"')
+const requestFieldsHtml = requestFormStart >= 0 ? unifiedShell.slice(requestFormStart, unifiedShell.indexOf('</form>', requestFormStart)) : ''
+if (!unifiedShell.includes('gc-customer-request-20261003.js?v=20261017-3') || !requestFieldsHtml.includes('id="requestVolumeWrap"') || !requestFieldsHtml.includes('id="requestVolume"') || !customerRequestUi.includes('volumeInput.required = isSea') || !customerRequestUi.includes('volume_cbm: volume') || !customerRequestUi.includes("const volumeValid = mode === 'sea'")) fail('Customer shipment requests must collect CBM for sea freight and submit valid measurement units')
+else ok('Customer shipment requests handle sea CBM and air/land kilograms')
+if (!unifiedShell.includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261017-3') || !customerQuoteController.includes('const syncQuoteMeasurements = () =>') || !customerQuoteController.includes('volume.required = isSea') || !customerQuoteController.includes('volume_cbm: volume') || !customerQuoteController.includes("const quantityValid = transportMode === 'sea'")) fail('Customer quotes must enforce the server quantity rule and submit null-safe weight/volume values')
+else ok('Customer quotes enforce sea CBM versus air/land weight before submission')
+
 
 
 if (!unifiedController.includes("'#public':'#overview'") || !unifiedController.includes("'#services':'#gcCustomerRouteOverview'") || !unifiedController.includes("'#request':'#newRequest'") || !unifiedController.includes("'#contact':'#support'")) fail('Legacy marketing routes must map into customer console views')
