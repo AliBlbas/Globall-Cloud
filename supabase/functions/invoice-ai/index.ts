@@ -29,7 +29,7 @@ Deno.serve(async req=>{
     const api=key();if(!api)return out(req,{error:'OPENAI_API_KEY is not configured'},503)
     const bytes=new Uint8Array(await file.arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));const dataUrl=`data:${file.type||'image/jpeg'};base64,${btoa(binary)}`
     const prompt=`Read this Chinese commercial invoice/photo. Return JSON only with this shape: {"items":[{"name":"","quantity":0,"unit":"","sku":"","confidence":0}],"kurdish_summary":""}. Translate item names and the final concise summary into Central Kurdish (Sorani). Do not invent quantities. Use null/empty when unreadable.`
-    const r=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${api}`,'Content-Type':'application/json'},body:JSON.stringify({model:Deno.env.get('INVOICE_AI_MODEL')||'gpt-5.6-luna',input:[{role:'user',content:[{type:'input_text',text:prompt},{type:'input_image',image_url:dataUrl}]}]})})
+    const r=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${api}`,'Content-Type':'application/json'},body:JSON.stringify({model:Deno.env.get('INVOICE_AI_MODEL')||'gpt-4.1-mini',input:[{role:'user',content:[{type:'input_text',text:prompt},{type:'input_image',image_url:dataUrl}]}]})})
     const body=await r.json().catch(()=>({}));if(!r.ok)return out(req,{error:`AI provider returned ${r.status}`,detail:body},502)
     const text=String(body.output_text||body.output?.flatMap((x:any)=>x.content||[]).map((x:any)=>x.text||'').join(' ')||'')
     const parsed=parseJsonText(text)
