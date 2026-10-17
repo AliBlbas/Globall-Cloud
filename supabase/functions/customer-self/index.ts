@@ -194,7 +194,7 @@ Deno.serve(async (req) => {
         if (requestedCargoImagePath) {
           const pathParts = requestedCargoImagePath.split('/')
           const photoName = pathParts.length === 2 ? pathParts[1] : ''
-          const photoMatch = photoName.match(/^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|jpeg|png|webp|avif|gif|heic|heif)$/i)
+          const photoMatch = photoName.match(/^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.(jpg|jpeg|png|webp|avif|gif|heic|heif)$/i)
           const extension = photoMatch?.[2]?.toLowerCase() || ''
           const allowedMimes = CARGO_PHOTO_MIMES_BY_EXTENSION[extension]
           if (pathParts.length !== 2 || pathParts[0] !== user.id || !photoMatch || !allowedMimes) return json(req, {error: 'Invalid cargo image attachment.'}, 400)
