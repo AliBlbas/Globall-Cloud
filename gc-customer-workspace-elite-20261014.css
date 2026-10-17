@@ -1376,3 +1376,172 @@ body.gc-customer-app #gcCustomerWorkspace .mobile-dock button:focus-visible{
     animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important;
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   GLOBALL CLOUD — CUSTOMER EXPERIENCE REFINEMENT / 2026-10-17
+   A calmer, clearer information hierarchy; mobile-first; no asset changes.
+   ═══════════════════════════════════════════════════════════════════════ */
+body.gc-customer-app #gcCustomerWorkspace{
+  --gc-cx-bg:#061321;
+  --gc-cx-panel:rgba(12,31,49,.88);
+  --gc-cx-panel-strong:#0c2237;
+  --gc-cx-border:rgba(101,220,232,.20);
+  --gc-cx-accent:#55d9e7;
+  --gc-cx-text:#f1f8fc;
+  --gc-cx-muted:#a8bfce;
+  color:var(--gc-cx-text);
+  background:
+    radial-gradient(ellipse at 86% 0%,rgba(34,157,200,.16),transparent 36%),
+    radial-gradient(ellipse at 4% 28%,rgba(37,99,190,.12),transparent 30%),
+    linear-gradient(160deg,#061321 0%,#071a2b 48%,#04101c 100%);
+}
+body.gc-customer-app #gcCustomerWorkspace .app-header{
+  position:sticky;top:0;z-index:60;
+  background:rgba(5,18,31,.90);
+  border-bottom:1px solid var(--gc-cx-border);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+}
+body.gc-customer-app #gcCustomerWorkspace .app-header-inner{
+  width:min(1240px,100% - 36px);min-height:76px;margin-inline:auto;gap:18px;
+}
+body.gc-customer-app #gcCustomerWorkspace .app-brand{gap:12px;text-decoration:none}
+body.gc-customer-app #gcCustomerWorkspace .app-brand img{
+  width:44px;height:44px;object-fit:contain;border-radius:14px;
+  filter:drop-shadow(0 0 16px rgba(54,176,255,.18));
+}
+body.gc-customer-app #gcCustomerWorkspace .app-brand strong{font-size:17px;letter-spacing:-.025em}
+body.gc-customer-app #gcCustomerWorkspace .app-brand small{color:#82a9bd;letter-spacing:.14em;font-size:9px}
+body.gc-customer-app #gcCustomerWorkspace .app-header-link,
+body.gc-customer-app #gcCustomerWorkspace .app-header-button{
+  min-height:42px;border-radius:14px;border:1px solid var(--gc-cx-border);
+  background:rgba(13,39,60,.72);color:#eaf8ff;transition:transform .18s,border-color .18s,background .18s;
+}
+body.gc-customer-app #gcCustomerWorkspace .app-header-link:hover,
+body.gc-customer-app #gcCustomerWorkspace .app-header-button:hover{transform:translateY(-1px);border-color:rgba(85,217,231,.55)}
+body.gc-customer-app #gcCustomerWorkspace .app-layout{
+  width:min(1240px,100% - 36px);margin:22px auto 112px;gap:22px;
+}
+body.gc-customer-app #gcCustomerWorkspace .app-sidebar{
+  top:96px;align-self:start;border:1px solid var(--gc-cx-border);
+  border-radius:24px;background:linear-gradient(160deg,rgba(13,37,57,.96),rgba(5,20,34,.94));
+  box-shadow:0 22px 70px rgba(0,0,0,.18);padding:16px;
+}
+body.gc-customer-app #gcCustomerWorkspace .workspace-profile{
+  border:1px solid rgba(101,220,232,.15);border-radius:18px;
+  background:linear-gradient(135deg,rgba(34,116,166,.18),rgba(7,25,42,.5));
+  padding:14px;margin-bottom:14px;
+}
+body.gc-customer-app #gcCustomerWorkspace .app-side-nav{gap:6px}
+body.gc-customer-app #gcCustomerWorkspace .app-side-nav a{
+  min-height:48px;border-radius:14px;padding:11px 13px;gap:11px;
+  border:1px solid transparent;color:#b9cbd7;transition:background .18s,border-color .18s,color .18s;
+}
+body.gc-customer-app #gcCustomerWorkspace .app-side-nav a:hover{
+  background:rgba(85,217,231,.07);border-color:rgba(85,217,231,.14);color:#fff;
+}
+body.gc-customer-app #gcCustomerWorkspace .app-side-nav a.active{
+  color:#fff;background:linear-gradient(100deg,rgba(40,147,212,.22),rgba(85,217,231,.09));
+  border-color:rgba(85,217,231,.30);box-shadow:inset -3px 0 #55d9e7;
+}
+body.gc-customer-app #gcCustomerWorkspace .app-main{min-width:0;gap:20px}
+body.gc-customer-app #gcCustomerWorkspace .surface-card,
+body.gc-customer-app #gcCustomerWorkspace .command-card,
+body.gc-customer-app #gcCustomerWorkspace .metric-card,
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-card,
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-route-overview,
+body.gc-customer-app #gcCustomerWorkspace .rate-engine-card,
+body.gc-customer-app #gcCustomerWorkspace .quote-engine-card,
+body.gc-customer-app #gcCustomerWorkspace .chat-card,
+body.gc-customer-app #gcCustomerWorkspace .warehouse-card{
+  border:1px solid var(--gc-cx-border);
+  background:linear-gradient(145deg,rgba(13,36,57,.94),rgba(6,22,37,.92));
+  box-shadow:0 14px 42px rgba(0,0,0,.13);
+  border-radius:22px;
+}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-quick-actions{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;
+}
+body.gc-customer-app #gcCustomerWorkspace .command-card{
+  min-height:132px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;
+  transition:transform .2s,border-color .2s,box-shadow .2s;
+}
+body.gc-customer-app #gcCustomerWorkspace .command-card:hover,
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-card:hover{
+  transform:translateY(-2px);border-color:rgba(85,217,231,.42);
+  box-shadow:0 18px 46px rgba(0,0,0,.22),0 0 24px rgba(48,176,220,.06);
+}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;
+}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-card{
+  min-width:0;min-height:176px;padding:17px;display:flex;flex-direction:column;gap:12px;
+  transition:transform .2s,border-color .2s;
+}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-card h3{font-size:15px;line-height:1.5}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-card p{font-size:12px;line-height:1.8;color:var(--gc-cx-muted)}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-route-overview{padding:22px;overflow:hidden}
+body.gc-customer-app #gcCustomerWorkspace .gc-route-overview-heading{gap:12px;margin-bottom:16px}
+body.gc-customer-app #gcCustomerWorkspace .gc-route-status-dot{
+  width:8px;height:8px;border-radius:50%;background:#63e2c0;
+  box-shadow:0 0 0 5px rgba(99,226,192,.10),0 0 18px rgba(99,226,192,.55);
+}
+body.gc-customer-app #gcCustomerWorkspace .field,
+body.gc-customer-app #gcCustomerWorkspace input,
+body.gc-customer-app #gcCustomerWorkspace select,
+body.gc-customer-app #gcCustomerWorkspace textarea{
+  border-radius:14px;border-color:rgba(145,190,211,.25);
+  background:rgba(3,17,30,.72);color:#f1f8fc;
+}
+body.gc-customer-app #gcCustomerWorkspace .field:focus,
+body.gc-customer-app #gcCustomerWorkspace input:focus,
+body.gc-customer-app #gcCustomerWorkspace select:focus,
+body.gc-customer-app #gcCustomerWorkspace textarea:focus{
+  outline:2px solid rgba(85,217,231,.28);outline-offset:1px;border-color:#55d9e7;
+}
+body.gc-customer-app #gcCustomerWorkspace button,
+body.gc-customer-app #gcCustomerWorkspace [role="button"],
+body.gc-customer-app #gcCustomerWorkspace a{ -webkit-tap-highlight-color:transparent; }
+body.gc-customer-app #gcCustomerWorkspace button:focus-visible,
+body.gc-customer-app #gcCustomerWorkspace a:focus-visible{
+  outline:2px solid #67e4ee;outline-offset:3px;
+}
+body.gc-customer-app #gcCustomerWorkspace .mobile-dock{
+  background:rgba(4,17,30,.94);border:1px solid rgba(85,217,231,.22);
+  box-shadow:0 14px 48px rgba(0,0,0,.42),0 0 28px rgba(30,133,181,.10);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+}
+body.gc-customer-app #gcCustomerWorkspace .mobile-dock a,
+body.gc-customer-app #gcCustomerWorkspace .mobile-dock button{color:#a9c2d2;transition:background .18s,color .18s}
+body.gc-customer-app #gcCustomerWorkspace .mobile-dock a.active,
+body.gc-customer-app #gcCustomerWorkspace .mobile-dock button.active{
+  color:#fff;background:linear-gradient(145deg,rgba(35,150,211,.25),rgba(85,217,231,.10));
+  box-shadow:inset 0 0 0 1px rgba(85,217,231,.20);
+}
+body.gc-customer-app #gcCustomerWorkspace .mobile-dock a.active svg,
+body.gc-customer-app #gcCustomerWorkspace .mobile-dock button.active svg{filter:drop-shadow(0 0 8px rgba(85,217,231,.38))}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-view-hidden{display:none!important}
+@media(max-width:900px){
+  body.gc-customer-app #gcCustomerWorkspace .app-header-inner{width:calc(100% - 24px);min-height:66px}
+  body.gc-customer-app #gcCustomerWorkspace .app-layout{width:calc(100% - 20px);margin:12px auto 100px;gap:0}
+  body.gc-customer-app #gcCustomerWorkspace .app-sidebar{display:none!important}
+  body.gc-customer-app #gcCustomerWorkspace .app-main{gap:13px}
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-quick-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  body.gc-customer-app #gcCustomerWorkspace .command-card{min-height:116px;padding:14px;border-radius:17px}
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-card{min-height:145px;padding:13px;border-radius:17px;gap:8px}
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-route-overview{padding:15px;border-radius:19px}
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock{bottom:calc(8px + env(safe-area-inset-bottom))!important}
+  body.gc-customer-app #gcCustomerWorkspace .app-header-actions{gap:6px}
+  body.gc-customer-app #gcCustomerWorkspace .app-header-link{display:none}
+}
+@media(max-width:390px){
+  body.gc-customer-app #gcCustomerWorkspace .app-brand small{display:none}
+  body.gc-customer-app #gcCustomerWorkspace .app-brand img{width:38px;height:38px}
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-quick-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-grid{grid-template-columns:1fr}
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-card{min-height:unset}
+}
+@media(prefers-reduced-motion:reduce){
+  body.gc-customer-app #gcCustomerWorkspace *,body.gc-customer-app #gcCustomerWorkspace *::before,body.gc-customer-app #gcCustomerWorkspace *::after{transition:none!important;animation:none!important}
+}
