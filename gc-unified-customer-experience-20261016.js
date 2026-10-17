@@ -11,11 +11,11 @@
   if (!body || !home || !workspace) return;
   const publicMain = document.getElementById('gcMain');
   const publicPageTargets = {
-    '#about':'page-about','#page-about':'page-about',
-    '#services':'page-services','#page-services':'page-services',
-    '#track':'page-track','#page-track':'page-track',
-    '#request':'page-request','#quote':'page-request','#page-request':'page-request',
-    '#contact':'page-contact','#page-contact':'page-contact'
+    '#about':'page-about',
+    '#services':'page-services',
+    '#track':'page-track',
+    '#request':'page-request','#quote':'page-request',
+    '#contact':'page-contact'
   };
   const publicScrollTargets = {
     '#pricing':'gcRateExplorer',
@@ -54,7 +54,7 @@
     '#commercial','#quotesPanel','#newRequest','#quoteForm','#activity',
     '#notifications','#records','#payments','#gcAccountSettings','#settings','#support'
   ]);
-  const publicHashes = new Set(['#public','#home','#services','#request','#contact','#about','#track','#pricing','#countries','#warehouses','#quote','#page-about','#page-services','#page-track','#page-request','#page-contact']);
+  const publicHashes = new Set(['#public','#services','#request','#contact','#about','#track','#pricing','#countries','#warehouses','#quote']);
   const hashToView = {
     '#overview':'home','#homeMetrics':'home','#gcCustomerRouteOverview':'home','#auth':'home','#register':'home',
     '#shipments':'shipments','#shipmentsSection':'shipments',
