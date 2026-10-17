@@ -34,6 +34,30 @@ const setHtml = (id, html) => { const element = $(id); if (element) element.inne
 const money = (amount, currency = 'USD') => `${Number(amount || 0).toLocaleString('en-US')} ${esc(currency)}`;
 const date = (value) => value ? new Date(value).toLocaleString() : '—';
 const showMessage = (message, kind = 'muted') => { $('quoteMessage').textContent = message; $('quoteMessage').className = kind; };
+const syncQuoteMeasurements = () => {
+  const isSea = $('quoteMode')?.value === 'sea';
+  const weight = $('quoteWeight');
+  const volume = $('quoteVolume');
+  if (weight) weight.required = !isSea;
+  if (volume) {
+    volume.required = isSea;
+    volume.min = isSea ? '0.001' : '0';
+    volume.setAttribute('aria-required', String(isSea));
+  }
+  const volumeWrap = volume?.closest('.field-wrap');
+  if (volumeWrap) {
+    let note = volumeWrap.querySelector('[data-gc-volume-help]');
+    if (isSea && !note) {
+      note = document.createElement('small');
+      note.dataset.gcVolumeHelp = '1';
+      note.className = 'muted';
+      note.textContent = 'بۆ بارە دەریاییەکان قەبارە بە CBM پێویستە.';
+      volumeWrap.appendChild(note);
+    } else if (!isSea) {
+      note?.remove();
+    }
+  }
+};
 
 const renderClaimPrompt = () => {
   const status = $('portalStatus');
@@ -295,7 +319,25 @@ const submitQuote = async (event) => {
   const { data: userResult } = await sb.auth.getUser();
   const user = userResult.user;
   if (!user) { showMessage('تکایە سەرەتا login بکە', 'error'); return; }
+  syncQuoteMeasurements();
   if (!form.reportValidity()) return;
+  const transportMode = $('quoteMode').value;
+  const readOptionalNumber = (id) => {
+    const raw = String($(id)?.value ?? '').trim();
+    if (!raw) return null;
+    const value = Number(raw);
+    return Number.isFinite(value) ? value : Number.NaN;
+  };
+  const weight = readOptionalNumber('quoteWeight');
+  const volume = readOptionalNumber('quoteVolume');
+  const quantityValid = transportMode === 'sea'
+    ? Number.isFinite(volume) && volume > 0
+    : Number.isFinite(weight) && weight > 0;
+  if (!quantityValid) {
+    showMessage(transportMode === 'sea' ? 'بۆ بارە دەریاییەکان قەبارەی CBM پڕبکەرەوە.' : 'کێشی بار دەبێت لە سفر زیاتر بێت.', 'error');
+    (transportMode === 'sea' ? $('quoteVolume') : $('quoteWeight'))?.focus();
+    return;
+  }
   if (submitButton) { submitButton.disabled = true; submitButton.setAttribute('aria-busy', 'true'); submitButton.dataset.originalLabel = submitButton.textContent; submitButton.textContent = 'لە ناردندایە…'; }
   showMessage('داواکاری نێردراوە…');
   const payload = {
@@ -304,9 +346,9 @@ const submitQuote = async (event) => {
     customer_phone: user.phone || null,
     origin_key: $('quoteOrigin').value.trim(),
     dest_key: $('quoteDestination').value.trim(),
-    transport_mode: $('quoteMode').value,
-    weight_kg: Number($('quoteWeight').value || 0),
-    volume_cbm: Number($('quoteVolume').value || 0),
+    transport_mode: transportMode,
+    weight_kg: weight,
+    volume_cbm: volume,
     items_count: Number($('quoteItems').value || 0) || null,
     service_level: $('quoteService').value,
     incoterm: $('quoteIncoterm').value,
@@ -322,6 +364,7 @@ const submitQuote = async (event) => {
     return;
   }
   form.reset();
+  syncQuoteMeasurements();
   if (submitButton) { submitButton.disabled = false; submitButton.removeAttribute('aria-busy'); submitButton.textContent = submitButton.dataset.originalLabel || 'ناردنی داواکاری نرخ'; }
   await load();
 };
@@ -413,6 +456,8 @@ document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && 
 $('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); location.replace('/#auth'); });
 $('trackBtn').addEventListener('click', () => { location.href = '/#shipmentsSection'; });
 $('quoteBtn').addEventListener('click', () => { $('quoteForm').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('quoteOrigin').focus(); });
+$('quoteMode')?.addEventListener('change', syncQuoteMeasurements);
+syncQuoteMeasurements();
 $('quoteForm').addEventListener('submit', (event) => submitQuote(event).catch((error) => showMessage(error.message, 'error')));
 $('customerChatForm')?.addEventListener('submit', sendCustomerChat);
 $('closeShipmentDetail')?.addEventListener('click', () => $('shipmentDetail')?.classList.add('hidden'));
