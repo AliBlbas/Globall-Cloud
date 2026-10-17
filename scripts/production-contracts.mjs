@@ -165,7 +165,7 @@ if (!customerSelfWarehouseSource.includes('secureWarehouseReceiptPhotos') || !cu
 else ok('Customer receipt evidence is owner-scoped and uses signed image URLs')
 if (!customerReceiptUiSource.includes('warehouse-receipt-evidence') || !customerReceiptUiSource.includes('notification-open-action') || !customerReceiptUiSource.includes('item.photo_taken_at')) fail('Customer portal must show receipt evidence details and the notification action')
 else ok('Customer portal displays warehouse location, timestamp, image evidence, and action links')
-if (!read('index.html').includes('gc-realtime-notifications-20261003.js?v=3') || !realtimeSource.includes("page === '/' && Boolean(document.querySelector('#gcCustomerWorkspace'))")) fail('Root customer workspace must load the real-time notification bridge')
+if (!read('index.html').includes('gc-realtime-notifications-20261003.js?v=4') || !realtimeSource.includes("page === '/' && Boolean(document.querySelector('#gcCustomerWorkspace'))")) fail('Root customer workspace must load the real-time notification bridge')
 else ok('Root customer workspace subscribes to real-time account notifications')
 if (!/^\[functions\.warehouse-receiving\]\s*verify_jwt\s*=\s*true$/m.test(read('supabase/config.toml')) || !/^\[functions\.warehouse-notify\]\s*verify_jwt\s*=\s*true$/m.test(read('supabase/config.toml'))) fail('Warehouse endpoints must continue requiring authenticated JWTs')
 else ok('Warehouse receipt and notification endpoints keep JWT verification enabled')
