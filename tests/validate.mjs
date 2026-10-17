@@ -318,7 +318,7 @@ const mobileUiContracts = [
   ['staff enhancement loader loads integrity CSS after the mobile dock', staffEnhancementLoader.indexOf("loadStyle('/gc-ui-integrity-mobile-20261017.css?v=4')") > staffEnhancementLoader.indexOf("loadStyle('/gc-staff-mobile-dock-20261016.css?v=4')")],
   ['customer view selector includes the toolbar and isolated section views', customerViewScript.includes("const allSections = () => [...main.querySelectorAll(':scope > section, :scope > .workspace-toolbar')]") && customerViewScript.includes("settings: ['gcAccountSettings']")],
   ['customer dock declares five separate destinations', ['home','shipments','requests','notifications','settings'].every(key => publicShell.includes('data-dock-tab="' + key + '"'))],
-  ['Staff Intelligence chat has a dedicated flexible message row', mobileUiCss.includes('grid-template-rows: auto auto auto minmax(0, 1fr) auto !important') && mobileUiCss.includes('#gcStaffAiPanel .gc-ai-messages'),
+  ['Staff Intelligence chat has a dedicated flexible message row', mobileUiCss.includes('grid-template-rows: auto auto auto minmax(0, 1fr) auto !important') && mobileUiCss.includes('#gcStaffAiPanel .gc-ai-messages')],
   ['only the active customer dock destination receives the bright active treatment', mobileUiCss.includes('.dock-primary:not(.active)') && mobileUiCss.includes('button[aria-current="page"]')],
 ]
 for (const [label, passed] of mobileUiContracts) {
