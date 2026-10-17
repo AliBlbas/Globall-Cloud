@@ -117,7 +117,7 @@ Deno.serve(async (req: Request) => {
     const receiptId = txt(input.receipt_id)
     if (!receiptId) throw new Error('receipt_id is required')
     const { data: receipt, error: receiptError } = await admin.from('warehouse_receipts')
-      .select('id,gc_code,gc_code_detected,batch_code,location,carton_count,weight_actual,received_at,photo_taken_at,photos,shipment_id,directory_customer_id,label_metadata,notes,created_by_name')
+      .select('id,gc_code,gc_code_detected,batch_code,warehouse,source_warehouse,location,carton_count,weight_actual,received_at,photo_taken_at,photos,shipment_id,directory_customer_id,label_metadata,notes,created_by_name')
       .eq('id', receiptId)
       .maybeSingle()
     if (receiptError) throw receiptError
@@ -130,7 +130,7 @@ Deno.serve(async (req: Request) => {
     if (customerError) throw customerError
     if (!customer) throw new Error('Customer directory record was not found')
     const gcCode = String(customer.gc_code || customer.normalized_gc_code || customer.code || receipt.gc_code_detected || receipt.gc_code || '').normalize('NFKC').trim().toUpperCase()
-    const warehouse = String(receipt.location || 'warehouse')
+    const warehouse = String(receipt.location || receipt.source_warehouse || receipt.warehouse || 'warehouse')
     const metadata = receipt.label_metadata && typeof receipt.label_metadata === 'object' ? receipt.label_metadata as Record<string, unknown> : {}
     const cartons = Math.max(1, Number(receipt.carton_count ?? metadata.total_packages ?? 1) || 1)
     const weight = Number(receipt.weight_actual ?? metadata.gross_weight_kg ?? 0) || 0
