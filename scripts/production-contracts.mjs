@@ -128,7 +128,7 @@ if (!customerPortalLogin.includes('/functions/v1/customer-gc-login') || !custome
 else ok('GC-code sign-in uses the dedicated Edge Function and stores the Supabase session')
 if (!customerAccountEntry.includes("email.setAttribute('type', 'text')")) fail('Customer login identifier must accept GC codes without email-type validation')
 else ok('Customer login input accepts GC codes')
-if (!read('customer-portal.html').includes('/gc-csp-scripts/customer-portal-inline-1.js?v=20261014-1')) fail('Customer portal login cache-buster is stale')
+if (!read('customer-portal.html').includes('/gc-csp-scripts/customer-portal-inline-1.js?v=20261016-9')) fail('Customer portal login cache-buster is stale')
 if (!read('functions/_middleware.js').includes('gc-account-entry.js?v=20261014-1')) fail('Customer GC login helper cache-buster is stale')
 const customerGcLogin = read('supabase/functions/customer-gc-login/index.ts')
 if (!customerGcLogin.includes('consume_public_message_rate_limit') || !customerGcLogin.includes('MAX_LOGIN_REQUESTS_PER_IP = 40') || !customerGcLogin.includes('MAX_LOGIN_REQUESTS_PER_IP_CODE = 8') || !customerGcLogin.includes('MAX_LOGIN_REQUESTS_PER_GC_CODE = 12') || !customerGcLogin.includes('originAllowed(req)')) fail('GC-code login must apply network/code rate limits and origin validation')
