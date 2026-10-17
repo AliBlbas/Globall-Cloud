@@ -37,7 +37,7 @@ if (sw.includes("fetch(request, { cache: 'no-store' })") && sw.includes('self.sk
 else fail('Service Worker network-first/lifecycle contract is incomplete')
 
 const required = [
-  'index.html','login.html','register.html','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js','public-route-bootstrap.js','public-runtime-guarantee.js',
+  'index.html','login.html','register.html','customer-access.html','sw.js,'gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js','public-route-bootstrap.js','public-runtime-guarantee.js',
   'public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js','tracking-integration.html','tracking-intelligence.js',
   'tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os-v5.html','staff-os-v5.css','staff-os-v5.js',
   'staff-os-v5-rescue.js','staff-logistics-intelligence.css','staff-logistics-intelligence.js','staff-mobile-command-dock.css','staff-mobile-command-dock.js',
@@ -143,6 +143,8 @@ const customerGcRegister = read('supabase/functions/customer-gc-register/index.t
 const supabaseConfig = read('supabase/config.toml')
 const legacyLoginPage = read('login.html')
 const legacyRegisterPage = read('register.html')
+const legacyAccessPage = read('customer-access.html')
+const legacyPortalPage = read('customer-portal.html')
 const legacyAuthRedirects = read('_redirects')
 if (customerGcRegister.includes('SUPABASE_SERVICE_ROLE_KEY') || customerGcRegister.includes('createUser(') || customerGcRegister.includes('register_customer_with_gc') || !customerGcRegister.includes('CUSTOMER_REGISTRATION_DISABLED')) fail('Public customer registration must be disabled and must not create Auth users')
 else ok('Public customer registration endpoint is retired without service-role account creation')
@@ -150,11 +152,11 @@ if (!supabaseConfig.includes('[functions.customer-gc-register]\nverify_jwt = tru
 else ok('Retired customer registration requires JWT verification')
 if (!supabaseConfig.includes('[functions.customer-gc-login]\nverify_jwt = false') || !read('supabase/functions/customer-gc-login/index.ts').includes('signInWithPassword')) fail('GC-code customer login must remain available through its rate-limited credential flow')
 else ok('GC-code login remains available through the dedicated credential flow')
-for (const [label, page] of [['login.html', legacyLoginPage], ['register.html', legacyRegisterPage]]) {
+for (const [label, page] of [['login.html', legacyLoginPage], ['register.html', legacyRegisterPage], ['customer-access.html', legacyAccessPage], ['customer-portal.html', legacyPortalPage]]) {
   if (!page.includes("window.location.replace('/#auth')") || page.includes('customer-gc-register')) fail(`Legacy ${label} must route to the unified customer entry without a separate auth flow`)
   else ok(`Legacy ${label} routes to the unified customer entry`)
 }
-for (const route of ['/login /#auth 302','/login/ /#auth 302','/login.html /#auth 302','/register /#auth 302','/register/ /#auth 302','/register.html /#auth 302']) {
+for (const route of ['/login /#auth 302','/login/ /#auth 302','/login.html /#auth 302','/register /#auth 302','/register/ /#auth 302','/register.html /#auth 302','/customer-access /#auth 302','/customer-access/ /#auth 302','/customer-access.html /#auth 302']) {
   if (!legacyAuthRedirects.includes(route)) fail(`Legacy auth redirect missing: ${route}`)
 }
 if (!failures) ok('Legacy auth routes converge on the single customer page')
