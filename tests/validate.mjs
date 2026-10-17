@@ -283,6 +283,8 @@ const unifiedContracts = [
   ['main Staff OS shows customer identity-linking guidance', staffConsoleScript.includes('customer-link-guidance') && staffConsoleScript.includes('پێش Bind، ناسنامەی کڕیار پشتڕاست بکەرەوە')],
   ['main Staff OS filters inactive unlinked customers', staffConsoleScript.includes("filter==='inactive-unlinked'?x.is_active===false&&!x.auth_user_id:true") && staffConsoleScript.includes('value="inactive-unlinked"')],
   ['customer binding stays Super Admin only', staffConsoleScript.includes("state.staff?.role !== 'super_admin'") && accountAdminSource.includes('Only Super Admin can bind customer accounts')],
+  ['customer account binding instructs GC-code login without exposing the internal auth email', staffConsoleScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleScript.includes('Login: ${result.login_email}') && staffConsoleScript.includes('پێویست نییە ئیمەیل بنووسێت')],
+  ['staff script cache is refreshed after GC login instruction change', staffConsoleHtml.includes('staff-os-v5.js?v=20261017-1')],
   ['main Staff OS loads current customer filter assets', staffConsoleHtml.includes('staff-os-v5.css?v=20261016-4') && staffConsoleHtml.includes('staff-os-v5.js?v=20261016-19') && staffConsoleStyles.includes('.customer-link-guidance')],
 ]
 for (const [label, passed] of unifiedContracts) {
