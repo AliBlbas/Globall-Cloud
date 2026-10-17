@@ -170,6 +170,11 @@ const customerShellToolbar = customerShellToolbarStart >= 0 && customerShellTool
 const customerSettingsHub = read('gc-settings-hub.js')
 if (!customerShellToolbar || customerShellToolbar.includes('data-dashboard-theme') || customerShellToolbar.includes('data-dashboard-language') || !customerSettingsHub.includes('id="gcSettingsTheme"') || !customerSettingsHub.includes('id="gcSettingsLanguage"')) fail('Language and appearance preferences must live only inside the dedicated Settings section')
 else ok('Personal language and appearance preferences are available only inside Settings')
+const customerPreferencesRuntime = read('gc-dashboard-preferences-20261003.js')
+const mobileDockTabs = (unifiedShell.match(/data-dock-tab="(home|shipments|requests|notifications|settings)"/g) || [])
+if (mobileDockTabs.length !== 5 || !unifiedShell.includes('gc-dashboard-preferences-20261003.js?v=20261017-3') || !customerPreferencesRuntime.includes("'#support':'requests'") || !customerPreferencesRuntime.includes("requestedKey === 'support' ? 'requests'") || !customerPreferencesRuntime.includes("new Set(nextHash === '#support' ? ['support'] : viewGroups[key])") || customerPreferencesRuntime.includes("support: ['support']")) fail('Customer navigation must keep exactly five tabs and open support as a Requests subview')
+else ok('Customer navigation keeps five primary tabs with a focused Support subview')
+
 
 if (!unifiedController.includes("'#public':'#overview'") || !unifiedController.includes("'#services':'#gcCustomerRouteOverview'") || !unifiedController.includes("'#request':'#newRequest'") || !unifiedController.includes("'#contact':'#support'")) fail('Legacy marketing routes must map into customer console views')
 if (!customerStyleLoader.includes('function ensureHomeDock() { return; }') || customerStyleLoader.includes('dock.innerHTML')) fail('Legacy public dock injector must remain disabled')
