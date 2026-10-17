@@ -63,7 +63,7 @@ jobs:
           grep -q '/gc-production-ui-20260927.css?v=1' index.html
           grep -q '/gc-production-ui-20260927.css?v=1' staff-os-v5.html
           grep -Fq "window.location.replace('/#auth')" customer-portal.html
-          grep -q 'staff-os-v5-20261017.js?v=20261017-9' staff-os-v5.html
+          grep -q 'staff-os-v5-20261017.js?v=20261017-10' staff-os-v5.html
           grep -q 'staff-os-v5.css?v=20261016-4' staff-os-v5.html
           grep -q 'gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-8' index.html
           grep -q 'gc-realtime-notifications-20261003.js?v=4' index.html
@@ -104,6 +104,9 @@ jobs:
           grep -Fq 'ON CONFLICT (customer_user_id, event_key) DO NOTHING' supabase/migrations/20261017181111_fix_warehouse_receipt_customer_notifications.sql
           grep -Fq "'/#records'" supabase/migrations/20261017181944_fix_warehouse_receipt_portal_route.sql
           grep -Fq 'ON CONFLICT (customer_user_id, event_key) DO NOTHING' supabase/migrations/20261017181944_fix_warehouse_receipt_portal_route.sql
+          grep -Fq 'COALESCE(p.in_app_enabled, TRUE)' supabase/migrations/20261017182723_warehouse_receipt_respect_in_app_preferences.sql
+          grep -Fq 'v_in_app_enabled IS FALSE' supabase/migrations/20261017182723_warehouse_receipt_respect_in_app_preferences.sql
+          grep -Fq "const availableLocations=roleLocation[state.staff?.role]?[roleLocation[state.staff.role]]:['China','Dubai','Erbil','USA'];" staff-os-v5-20261017.js
           grep -Fq "storageKey: 'gc-staff-os-auth-v5-ahslifnthiwfkmaswjno'" staff-os-v5-20261017.js
           grep -Fq 'const customerBridgePanel =' staff-os-v5-20261017.js
           grep -Fq 'CUSTOMER WORKSPACE · SHARED DATA' staff-os-v5-20261017.js

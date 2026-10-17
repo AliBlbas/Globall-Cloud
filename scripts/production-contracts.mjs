@@ -270,7 +270,7 @@ else ok('Repository validation guards the retired public registration endpoint')
 
 
 
-if (!staff.includes('staff-os-v5-20261017.js?v=20261017-9')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
+if (!staff.includes('staff-os-v5-20261017.js?v=20261017-10')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
 
 const mobileLoader = read('staff-os-v5-enhancement-loader.js')
 if (!staff.includes('staff-os-v5-enhancement-loader.js?v=20261016-7')) fail('Staff enhancement loader cache-buster is stale')
@@ -318,6 +318,7 @@ const customerWarehouseReceiving = read('supabase/functions/warehouse-receiving/
 const customerWarehouseNotify = read('supabase/functions/warehouse-notify/index.ts')
 const customerWarehouseMigration = read('supabase/migrations/20261017181111_fix_warehouse_receipt_customer_notifications.sql')
 const customerWarehouseRouteMigration = read('supabase/migrations/20261017181944_fix_warehouse_receipt_portal_route.sql')
+const customerWarehousePreferenceMigration = read('supabase/migrations/20261017182723_warehouse_receipt_respect_in_app_preferences.sql')
 const customerSelfSourceForReceiptEvidence = read('supabase/functions/customer-self/index.ts')
 if (!customerWarehouseHtml.includes('id="receipts"') || !customerWarehouseHtml.includes('gc-customer-warehouse-evidence-20261017.css?v=1')) fail('Customer portal must render a dedicated warehouse receipt evidence panel')
 else ok('Customer portal has a styled warehouse receipt evidence destination')
@@ -328,6 +329,10 @@ if (!customerWarehouseMigration.includes('ON CONFLICT (customer_user_id, event_k
 else ok('Warehouse receipt notification trigger is idempotent and opens customer records')
 if (!customerWarehouseRouteMigration.includes("'/#records'") || !customerWarehouseRouteMigration.includes('ON CONFLICT (customer_user_id, event_key) DO NOTHING')) fail('Final receipt notification route migration is missing or inconsistent')
 else ok('Final database trigger route matches the customer portal router')
+if (!customerWarehousePreferenceMigration.includes('COALESCE(p.in_app_enabled, TRUE)') || !customerWarehousePreferenceMigration.includes('v_in_app_enabled IS FALSE')) fail('Warehouse receipt trigger must respect customer in-app notification preferences')
+else ok('Warehouse receipt trigger respects customer in-app notification preferences')
+if (!privateCargoPhotoStaff.includes("const availableLocations=roleLocation[state.staff?.role]?[roleLocation[state.staff.role]]:['China','Dubai','Erbil','USA'];")) fail('Staff receipt form must limit branch-scoped warehouse staff to their authorized location')
+else ok('Warehouse receipt location options respect branch-scoped staff roles')
 
 console.log('')
 if (failures) { console.error(`${failures} production contract check(s) failed.`); process.exit(1) }

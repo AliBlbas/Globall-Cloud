@@ -61,6 +61,7 @@ const required = [
   'supabase/config.toml','package.json','scripts/production-contracts.mjs','tests/e2e/run.mjs','supabase/migrations/20261017130000_restrict_customer_request_photo_uploads.sql',
   'supabase/migrations/20261017181111_fix_warehouse_receipt_customer_notifications.sql',
   'supabase/migrations/20261017181944_fix_warehouse_receipt_portal_route.sql',
+  'supabase/migrations/20261017182723_warehouse_receipt_respect_in_app_preferences.sql',
   'supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
   'supabase/functions/notification-dispatch/index.ts','supabase/functions/warehouse-receiving/index.ts','supabase/functions/warehouse-notify/index.ts',
   'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/invoice-ai/index.ts',
@@ -298,8 +299,8 @@ const unifiedContracts = [
   ['main Staff OS filters inactive unlinked customers', staffConsoleScript.includes("filter==='inactive-unlinked'?x.is_active===false&&!x.auth_user_id:true") && staffConsoleScript.includes('value="inactive-unlinked"')],
   ['customer binding stays Super Admin only', staffConsoleScript.includes("state.staff?.role !== 'super_admin'") && accountAdminSource.includes('Only Super Admin can bind customer accounts')],
   ['customer account binding instructs GC-code login without exposing the internal auth email', staffConsoleScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleScript.includes('Login: ${result.login_email}') && staffConsoleScript.includes('پێویست نییە ئیمەیل بنووسێت')],
-  ['staff console uses a versioned filename and the GC-code login instructions', staffConsoleHtml.includes('/staff-os-v5-20261017.js?v=20261017-9') && staffConsoleVersionedScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleVersionedScript.includes('Login: ${result.login_email}')],
-  ['main Staff OS loads current customer filter assets', staffConsoleHtml.includes('staff-os-v5.css?v=20261016-4') && staffConsoleHtml.includes('staff-os-v5-20261017.js?v=20261017-9') && staffConsoleStyles.includes('.customer-link-guidance')],
+  ['staff console uses a versioned filename and the GC-code login instructions', staffConsoleHtml.includes('/staff-os-v5-20261017.js?v=20261017-10') && staffConsoleVersionedScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleVersionedScript.includes('Login: ${result.login_email}')],
+  ['main Staff OS loads current customer filter assets', staffConsoleHtml.includes('staff-os-v5.css?v=20261016-4') && staffConsoleHtml.includes('staff-os-v5-20261017.js?v=20261017-10') && staffConsoleStyles.includes('.customer-link-guidance')],
 ]
 for (const [label, passed] of unifiedContracts) {
   if (passed) ok(label)
@@ -318,6 +319,7 @@ const warehouseReceivingSource = read('supabase/functions/warehouse-receiving/in
 const warehouseNotifySource = read('supabase/functions/warehouse-notify/index.ts')
 const warehouseReceiptNotificationMigration = read('supabase/migrations/20261017181111_fix_warehouse_receipt_customer_notifications.sql')
 const warehouseReceiptPortalRouteMigration = read('supabase/migrations/20261017181944_fix_warehouse_receipt_portal_route.sql')
+const warehouseReceiptPreferenceMigration = read('supabase/migrations/20261017182723_warehouse_receipt_respect_in_app_preferences.sql')
 const customerWarehouseEvidenceCss = read('gc-customer-warehouse-evidence-20261017.css')
 
 const mobileUiContracts = [
@@ -360,6 +362,8 @@ const mobileUiContracts = [
   ['warehouse receipt trigger uses the valid composite idempotency conflict target', warehouseReceiptNotificationMigration.includes('ON CONFLICT (customer_user_id, event_key) DO NOTHING') && warehouseReceiptNotificationMigration.includes("'/#records'")],
   ['customer warehouse evidence styles include responsive photo proof cards', customerWarehouseEvidenceCss.includes('.warehouse-receipt-evidence') && customerWarehouseEvidenceCss.includes('.photo-grid')],
   ['final receipt notification route matches the unified customer portal router', warehouseReceiptPortalRouteMigration.includes("'/#records'") && warehouseReceiptPortalRouteMigration.includes('ON CONFLICT (customer_user_id, event_key) DO NOTHING')],
+  ['warehouse receipt trigger respects in-app opt-out and defaults missing preferences to enabled', warehouseReceiptPreferenceMigration.includes('COALESCE(p.in_app_enabled, TRUE)') && warehouseReceiptPreferenceMigration.includes('v_in_app_enabled IS FALSE')],
+  ['branch-scoped warehouse staff are offered only the authorized warehouse location', staffShipmentScript.includes("const availableLocations=roleLocation[state.staff?.role]?[roleLocation[state.staff.role]]:['China','Dubai','Erbil','USA'];") && staffShipmentScript.includes('${availableLocations.map(location =>')],
 ]
 for (const [label, passed] of mobileUiContracts) {
   if (passed) ok(label)
