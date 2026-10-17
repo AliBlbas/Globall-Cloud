@@ -979,16 +979,24 @@
         if(result.notification?.whatsapp_queued)channels.push('WhatsApp queue');
         if(result.notification?.email_queued)channels.push('Email queue');
         const summary=`GC ${code} لە ${result.receipt?.location||defaultLocation} تۆمار کرا${batch?' · Batch '+batch:''}`;
-        if(result.notification?.account_linked===false){
-          toast(summary+'؛ ئاگادارکردنەوەی ناو ئەکاونت ناتوانرێت بگاتەوە چونکە ئەکاونتی ئەم GC ـە پەیوەست نییە. سوپەر ئەدمین لە بەشی کڕیاران Bind بکات.','bad');
-        }else if(Array.isArray(result.notification?.errors)&&result.notification.errors.length){
-          toast(summary+'؛ ئاگادارکردنەوە پێویستی بە پشکنینە','bad');
+        const actionIssues=[];
+        const chainIssue={
+          multiple_matching_shipments:'زیاتر لە shipment ـێکی چالاک بۆ ئەم GC ـە هەیە؛ بەستنەوەی یەکێکیان بە شێوەی دستی پێویستە',
+          no_shipment_id:'هیچ shipment ـێکی گونجاو نەدۆزرایەوە؛ وەرگرتن و مانیفێستی کارتۆن هەڵگیراون',
+          chain_link_failed:'بەستنەوەی کارتۆنەکان بە shipment سەرکەوتوو نەبوو؛ وەرگرتن هەڵگیراوە و پێویستی بە پشکنینە',
+          carton_manifest_empty:'مانیفێستی کارتۆن بەردەست نەبوو؛ پێویستە وەرگرتن بپشکنرێت'
+        }[result.chain?.reason];
+        if(chainIssue)actionIssues.push(chainIssue);
+        if(result.notification?.account_linked===false)actionIssues.push('هەژماری چوونەژوورەوەی ئەم GC ـە پەیوەست نییە؛ سوپەر ئەدمین دەبێت لە بەشی کڕیاران Bind بکات');
+        if(Array.isArray(result.notification?.errors)&&result.notification.errors.length)actionIssues.push('ئاگادارکردنەوە پێویستی بە پشکنینە');
+        if(actionIssues.length){
+          toast(summary+'؛ '+actionIssues.join(' · ')+(channels.length?' · ئاگادارکردنەوە: '+channels.join(' / '):''),'bad');
         }else if(channels.length){
           toast(summary+' · '+channels.join(' / '),'ok');
         }else if(result.notification?.external_opt_in===false){
           toast(summary+'؛ WhatsApp/Email بێ ڕەزامەندیی کڕیار نەنێردران','ok');
         }else{
-          toast(summary+'؛ هەژماری login یان ژمارەی پەیوەندی نەدۆزرایەوە','bad');
+          toast(summary+'؛ تۆمار کرا، بەڵام ئاگادارکردنەوەی ناو ئەکاونت پشتڕاست نەکراوەتەوە','bad');
         }
         await renderWarehouses();
       }catch(error){
