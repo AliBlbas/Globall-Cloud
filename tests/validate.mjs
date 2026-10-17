@@ -67,6 +67,7 @@ const required = [
   'supabase/migrations/20261017204122_add_missing_fk_covering_indexes.sql',
   'supabase/migrations/20261017204218_optimize_customer_order_rls_policies.sql',
   'supabase/functions/public-config/index.ts',
+  'supabase/functions/public-track/index.ts','supabase/functions/system-health/index.ts','supabase/functions/staff-auth-verify/index.ts',
   'supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
   'supabase/functions/notification-dispatch/index.ts','supabase/functions/warehouse-receiving/index.ts','supabase/functions/warehouse-notify/index.ts',
   'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/invoice-ai/index.ts','supabase/functions/operations-v4/index.ts',
@@ -214,6 +215,9 @@ const customerSelfSource = read('supabase/functions/customer-self/index.ts')
 const operationsV4Source = read('supabase/functions/operations-v4/index.ts')
 const invoiceAiSource = read('supabase/functions/invoice-ai/index.ts')
 const publicConfigSource = read('supabase/functions/public-config/index.ts')
+const publicTrackSource = read('supabase/functions/public-track/index.ts')
+const systemHealthSource = read('supabase/functions/system-health/index.ts')
+const staffAuthVerifySource = read('supabase/functions/staff-auth-verify/index.ts')
 const staffShipmentSource = read('supabase/functions/staff-shipment-v5/index.ts')
 const staffShipmentControlSource = read('supabase/functions/staff-shipment-control/index.ts')
 const shipmentCustomerLinksMigration = read('supabase/migrations/20261017120000_staff_customer_unified_shipment_links.sql')
@@ -404,6 +408,7 @@ const mobileUiContracts = [
   ['invoice OCR uses an image-capable documented model with the Responses API', invoiceAiSource.includes("Deno.env.get('INVOICE_AI_MODEL')||'gpt-4.1-mini'") && invoiceAiSource.includes("type:'input_image'") && invoiceAiSource.includes('https://api.openai.com/v1/responses')],
   ['invoice OCR requires a server-side OpenAI key and an active staff role', invoiceAiSource.includes("Deno.env.get('OPENAI_API_KEY')") && invoiceAiSource.includes("Deno.env.get('OPENAI_SECRET_KEY')") && invoiceAiSource.includes('Staff role required')],
   ['public-config preflight returns an empty 204 response body', publicConfigSource.includes("new Response(null, { status: 204, headers: headers(origin) })") && !publicConfigSource.includes("new Response('ok', { status: 204")],
+  ['all live 204 preflight handlers return null bodies', [publicConfigSource,publicTrackSource,systemHealthSource,staffAuthVerifySource].every(source => /new Response\(null,\s*\{\s*status:\s*204/.test(source))],
   ['customer warehouse evidence styles include responsive photo proof cards', customerWarehouseEvidenceCss.includes('.warehouse-receipt-evidence') && customerWarehouseEvidenceCss.includes('.photo-grid')],
   ['owner-account warehouse notifications carry only that owner’s freshly signed receipt photos', customerSelfSource.includes("body,action_url,event_key,read_at,created_at") && customerSelfSource.includes("receiptsById.get(eventKey.slice(prefix.length))") && customerSelfSource.includes('receipt_photos: Array.isArray(receipt.photos)') && customerPortalVersionedScript.includes('notification-receipt-photo-grid') && customerWarehouseEvidenceCss.includes('notification-receipt-photo-grid')],
   ['final receipt notification route matches the unified customer portal router', warehouseReceiptPortalRouteMigration.includes("'/#records'") && warehouseReceiptPortalRouteMigration.includes('ON CONFLICT (customer_user_id, event_key) DO NOTHING')],
