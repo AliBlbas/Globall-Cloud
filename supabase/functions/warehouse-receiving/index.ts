@@ -99,7 +99,7 @@ async function queueReceiptNotifications(admin:ReturnType<typeof createClient>,r
  let cartonRows:Array<Record<string,any>>=Array.isArray(receipt.cartons)?receipt.cartons:[];
  if(!cartonRows.length&&receipt.id&&receipt.directory_customer_id){
   const cartonResult=await admin.from('warehouse_receipt_cartons')
-   .select('carton_index,carton_total,carton_code,warehouse_location,received_at,status,package_id')
+   .select('carton_index,carton_total,carton_code,warehouse_location,received_at,status')
    .eq('receipt_id',receipt.id).eq('customer_directory_id',receipt.directory_customer_id)
    .order('carton_index',{ascending:true});
   if(cartonResult.error)errors.push('cartons: '+cartonResult.error.message);
