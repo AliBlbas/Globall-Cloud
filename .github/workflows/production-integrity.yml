@@ -63,14 +63,24 @@ jobs:
           grep -q '/gc-production-ui-20260927.css?v=1' index.html
           grep -q '/gc-production-ui-20260927.css?v=1' staff-os-v5.html
           grep -Fq "window.location.replace('/#auth')" customer-portal.html
-          grep -q 'staff-os-v5-20261017.js?v=20261017-13' staff-os-v5.html
+          grep -q 'staff-os-v5-20261017.js?v=20261017-14' staff-os-v5.html
           grep -q 'staff-os-v5.css?v=20261016-4' staff-os-v5.html
           grep -q 'gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-8' index.html
           grep -q 'gc-customer-carton-manifest-20261017.js?v=1' index.html
           grep -q 'gc-customer-carton-manifest-20261017.css?v=1' index.html
-          grep -q 'gc-staff-carton-tools-20261017.js?v=1' staff-os-v5.html
+          grep -q 'gc-staff-carton-tools-20261017.js?v=2' staff-os-v5.html
           grep -q 'warehouse_receipt_cartons' supabase/migrations/20261017185000_warehouse_receipt_cartons.sql
           grep -Fq 'ensureReceiptCartons' supabase/functions/warehouse-receiving/index.ts
+          grep -Fq 'Unsupported photo type. Use JPEG, PNG, WebP or HEIC/HEIF images.' supabase/functions/warehouse-receiving/index.ts
+          grep -Fq 'partial photo cleanup failed' supabase/functions/warehouse-receiving/index.ts
+          grep -Fq 'saved receipt photo signing failed' supabase/functions/warehouse-receiving/index.ts
+          grep -Fq 'location_captured_at:timestampIso' supabase/functions/warehouse-receiving/index.ts
+          grep -Fq 'account_linked:customerLinks.get' supabase/functions/warehouse-receiving/index.ts
+          grep -Fq 'receiptGpsBtn' staff-os-v5-20261017.js
+          grep -Fq 'navigator.geolocation.getCurrentPosition' staff-os-v5-20261017.js
+          grep -Fq 'name="photo_taken_at"' staff-os-v5-20261017.js
+          grep -Fq 'name="location_captured_at"' staff-os-v5-20261017.js
+          grep -Fq 'row.code.replace(/-[A-F0-9]{12}-C\d+$/i' gc-staff-carton-tools-20261017.js
           grep -Fq 'carton_codes:cartonCodes' supabase/functions/warehouse-receiving/index.ts
           grep -Fq 'carton_codes: cartonCodes' supabase/functions/warehouse-notify/index.ts
           grep -Fq "cartonsByReceipt.get(String(receipt.id))" supabase/functions/customer-self/index.ts
