@@ -169,6 +169,12 @@ if (!read('index.html').includes('gc-realtime-notifications-20261003.js?v=4') ||
 else ok('Root customer workspace subscribes to real-time account notifications')
 if (!/^\[functions\.warehouse-receiving\]\s*verify_jwt\s*=\s*true$/m.test(read('supabase/config.toml')) || !/^\[functions\.warehouse-notify\]\s*verify_jwt\s*=\s*true$/m.test(read('supabase/config.toml'))) fail('Warehouse endpoints must continue requiring authenticated JWTs')
 else ok('Warehouse receipt and notification endpoints keep JWT verification enabled')
+if (warehouseReceivingSource.includes('created_at:receivedAt') || warehouseReceivingSource.includes('receipt.received_at||receipt.created_at')) fail('Warehouse receipt intake must only write schema-backed receipt timestamp fields')
+else ok('Warehouse receipt intake uses only schema-backed receipt timestamps')
+if (warehouseNotifySource.includes('received_at,created_at')) fail('Warehouse notification query must not select non-existent warehouse receipt created_at')
+else ok('Warehouse notification query matches the live receipt schema')
+if (!realtimeSource.includes('client.auth.onAuthStateChange') || !realtimeSource.includes("event === 'SIGNED_OUT'")) fail('Realtime subscriptions must follow login and clean up after logout')
+else ok('Realtime subscriptions follow authentication state changes')
 if (!staffV5EnhancementLoader.includes("'/gc-staff-mobile-dock-20261016.js?v=3'") || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-command-system-20261017.css?v=1')")) fail('Staff mobile icon script or final command layer is stale')
 else ok('Staff enhancement loader applies the refreshed mobile navigation and final visual layer')
 if (!staffMobileDock.includes("original.querySelector('.nav-icon svg')") || !staffMobileDock.includes('gc-staff-mobile-module-icon')) fail('Mobile staff module drawer must reuse the same SVG icons as the main navigation')
@@ -187,7 +193,7 @@ if (!unifiedCustomerController.includes("const legacyRoutes = {") || !unifiedCus
 else ok('Legacy homepage actions map into the customer console')
 if (unifiedCustomerController.includes('const syncPublicPageRoute =') || unifiedCustomerController.includes('setPublicMode')) fail('Obsolete public homepage route controller must be removed')
 else ok('Legacy public home mode is not rendered by the unified shell')
-if (!read('index.html').includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-7')) fail('Unified customer login cache-buster is stale')
+if (!read('index.html').includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-8')) fail('Unified customer login cache-buster is stale')
 if (!customerPortalLogin.includes("if (billedKpi) billedKpi.textContent = formatBuckets(billed);") || !customerPortalLogin.includes("$('trackBtn')?.addEventListener") || !customerPortalLogin.includes("$('quoteBtn')?.addEventListener")) fail('Customer dashboard loading must tolerate optional finance and home-action elements')
 else ok('Customer dashboard loading tolerates optional finance and home-action elements')
 const customerSubmitHandlers = unifiedCustomerAuth.match(/\$\('authForm'\)\??\.addEventListener\('submit'/g) || []
@@ -214,7 +220,7 @@ const requestFormStart = unifiedShell.indexOf('id="newRequest"')
 const requestFieldsHtml = requestFormStart >= 0 ? unifiedShell.slice(requestFormStart, unifiedShell.indexOf('</form>', requestFormStart)) : ''
 if (!unifiedShell.includes('gc-customer-request-20261003.js?v=20261017-3') || !requestFieldsHtml.includes('id="requestVolumeWrap"') || !requestFieldsHtml.includes('id="requestVolume"') || !customerRequestUi.includes('volumeInput.required = isSea') || !customerRequestUi.includes('volume_cbm: volume') || !customerRequestUi.includes("const volumeValid = mode === 'sea'")) fail('Customer shipment requests must collect CBM for sea freight and submit valid measurement units')
 else ok('Customer shipment requests handle sea CBM and air/land kilograms')
-if (!unifiedShell.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-7') || !customerQuoteController.includes('const syncQuoteMeasurements = () =>') || !customerQuoteController.includes('volume.required = isSea') || !customerQuoteController.includes('volume_cbm: volume') || !customerQuoteController.includes("const quantityValid = transportMode === 'sea'")) fail('Customer quotes must enforce the server quantity rule and submit null-safe weight/volume values')
+if (!unifiedShell.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-8') || !customerQuoteController.includes('const syncQuoteMeasurements = () =>') || !customerQuoteController.includes('volume.required = isSea') || !customerQuoteController.includes('volume_cbm: volume') || !customerQuoteController.includes("const quantityValid = transportMode === 'sea'")) fail('Customer quotes must enforce the server quantity rule and submit null-safe weight/volume values')
 else ok('Customer quotes enforce sea CBM versus air/land weight before submission')
 
 const privateCargoPhotoRequest = read('gc-customer-request-20261003.js')
@@ -236,7 +242,7 @@ else ok('Private customer-photo bucket enforces size and image MIME limits')
 if (!unifiedController.includes("'#public':'#overview'") || !unifiedController.includes("'#services':'#gcCustomerRouteOverview'") || !unifiedController.includes("'#request':'#newRequest'") || !unifiedController.includes("'#contact':'#support'")) fail('Legacy marketing routes must map into customer console views')
 if (!customerStyleLoader.includes('function ensureHomeDock() { return; }') || customerStyleLoader.includes('dock.innerHTML')) fail('Legacy public dock injector must remain disabled')
 if (!read('gc-customer-workspace-elite-20261014.css').includes('body.gc-customer-app #gcWhatsAppFloat') || !read('gc-customer-workspace-elite-20261014.css').includes('body.gc-customer-app .gc-whatsapp-float')) fail('Floating marketing WhatsApp bubble must not overlap customer app navigation')
-if (!unifiedShell.includes('gc-unified-customer-experience-20261016.js?v=20261017-1') || !unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=23') || !unifiedShell.includes('gc-customer-experience-signature-20261017.css?v=2') || !unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=24') || !unifiedShell.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-7')) fail('Customer-first app shell cache references are stale')
+if (!unifiedShell.includes('gc-unified-customer-experience-20261016.js?v=20261017-1') || !unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=23') || !unifiedShell.includes('gc-customer-experience-signature-20261017.css?v=2') || !unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=24') || !unifiedShell.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-8')) fail('Customer-first app shell cache references are stale')
 else ok('Customer-first app shell loads current assets')
 const customerGcRegister = read('supabase/functions/customer-gc-register/index.ts')
 const supabaseConfig = read('supabase/config.toml')
@@ -264,7 +270,7 @@ else ok('Repository validation guards the retired public registration endpoint')
 
 
 
-if (!staff.includes('staff-os-v5-20261017.js?v=20261017-7')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
+if (!staff.includes('staff-os-v5-20261017.js?v=20261017-8')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
 
 const mobileLoader = read('staff-os-v5-enhancement-loader.js')
 if (!staff.includes('staff-os-v5-enhancement-loader.js?v=20261016-7')) fail('Staff enhancement loader cache-buster is stale')
