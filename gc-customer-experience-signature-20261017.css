@@ -1,0 +1,146 @@
+/* Globall Cloud — Signature Customer Experience · 2026-10-17
+   Final customer-only visual layer. Preserves existing routes and Supabase logic. */
+body.gc-customer-app{
+  --gc-signature-cyan:#70e4ed;
+  background:radial-gradient(780px 450px at 87% -8%,rgba(36,145,190,.18),transparent 66%),radial-gradient(650px 450px at 2% 25%,rgba(49,94,176,.10),transparent 65%),#04121f!important;
+  color:#eef9fd;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+body.gc-customer-app #gcCustomerWorkspace{overflow:clip;min-height:100dvh;padding-bottom:env(safe-area-inset-bottom,0px)}
+body.gc-customer-app #gcCustomerWorkspace .app-header{z-index:700!important;border-bottom:1px solid rgba(104,198,222,.2)!important;background:rgba(4,16,28,.93)!important;box-shadow:0 8px 34px rgba(0,0,0,.18)!important}
+body.gc-customer-app #gcCustomerWorkspace .app-header-inner{min-height:70px;width:min(1480px,100%);padding-inline:clamp(13px,2.4vw,30px)}
+body.gc-customer-app #gcCustomerWorkspace .app-brand img{box-shadow:0 0 0 1px rgba(116,225,239,.25),0 5px 24px rgba(42,164,221,.16)}
+body.gc-customer-app #gcCustomerWorkspace .app-layout{width:min(1480px,100%);gap:clamp(13px,2vw,24px);padding-top:clamp(14px,2.1vw,28px)}
+body.gc-customer-app #gcCustomerWorkspace .app-main{min-width:0;max-width:100%;padding-bottom:calc(42px + env(safe-area-inset-bottom,0px))}
+body.gc-customer-app #gcCustomerWorkspace .workspace-toolbar{margin-bottom:17px;padding-bottom:18px;border-bottom:1px solid rgba(127,187,210,.12)}
+body.gc-customer-app #gcCustomerWorkspace .workspace-toolbar .eyebrow{color:#75dfe9!important;letter-spacing:.13em}
+body.gc-customer-app #gcCustomerWorkspace .workspace-toolbar h1{margin-block:4px 3px;color:#f4fbff;font-size:clamp(25px,3vw,35px);font-weight:950;letter-spacing:-.035em;line-height:1.42}
+body.gc-customer-app #gcCustomerWorkspace .workspace-toolbar p{color:#a6bfce;line-height:1.9}
+body.gc-customer-app #gcCustomerWorkspace .command-card.gc-signature-command{
+  position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) minmax(170px,.72fr);gap:20px 26px;
+  min-width:0;margin:0 0 15px;padding:clamp(20px,2.6vw,31px);overflow:hidden;
+  border:1px solid rgba(102,213,231,.29);border-radius:26px;background-color:#071b2c!important;
+  background-image:linear-gradient(270deg,rgba(4,18,31,.99) 0%,rgba(4,18,31,.93) 35%,rgba(4,18,31,.50) 72%,rgba(4,18,31,.24) 100%),url('/assets/gc-air-freight-hero-960.webp')!important;
+  background-size:cover!important;background-position:center,58% center!important;
+  box-shadow:0 22px 62px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.055)!important;
+}
+body.gc-customer-app #gcCustomerWorkspace .command-card.gc-signature-command:before{content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(370px 220px at 7% 5%,rgba(0,144,255,.18),transparent 72%),linear-gradient(0deg,rgba(3,16,27,.4),transparent 60%);pointer-events:none}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-copy,
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-visual{position:relative;z-index:1;min-width:0}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-copy .eyebrow{display:inline-flex;align-items:center;gap:8px;color:#8ce9f0!important;font-size:9px;font-weight:900;letter-spacing:.13em}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-copy .eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:#67e3d0;box-shadow:0 0 0 5px rgba(103,227,208,.09),0 0 15px rgba(103,227,208,.38)}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-copy h2{max-width:19ch;margin:9px 0 10px;color:#f5fbff;font-size:clamp(23px,2.75vw,37px);font-weight:950;line-height:1.5;letter-spacing:-.04em;text-wrap:balance}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-copy h2 span{color:#76e3ed;text-shadow:0 5px 28px rgba(44,180,222,.17)}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-copy p{max-width:54ch;margin:0;color:#c0d2de;font-size:12px;line-height:1.95}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:17px}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .app-primary-action,
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .app-secondary-action{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:47px;padding:11px 16px;border-radius:13px;font-size:11px;font-weight:900;text-decoration:none;transition:transform .18s,border-color .18s,box-shadow .18s}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .app-primary-action{border:1px solid rgba(124,225,255,.34);background:linear-gradient(110deg,#1577ed,#17bce3);color:#fff;box-shadow:0 9px 27px rgba(11,133,227,.23)}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .app-secondary-action{border:1px solid rgba(168,214,231,.26);background:rgba(6,23,39,.74);color:#d9f5fb;backdrop-filter:blur(10px)}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .app-primary-action:hover,
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .app-secondary-action:hover{transform:translateY(-2px)}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-visual{align-self:center;justify-self:stretch;display:flex;align-items:center;gap:13px;min-height:94px;padding:16px;border:1px solid rgba(150,221,237,.24);border-radius:20px;background:linear-gradient(145deg,rgba(4,23,40,.78),rgba(7,29,48,.58));box-shadow:inset 0 1px rgba(255,255,255,.06),0 18px 34px rgba(0,0,0,.15);backdrop-filter:blur(11px)}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-visual .route-orbit{flex:0 0 78px;width:78px;height:78px}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-visual>div:last-child{min-width:0;display:grid;gap:5px}
+body.gc-customer-app #gcCustomerWorkspace .gc-command-network .eyebrow{color:#82c9da!important;font-size:8px;letter-spacing:.11em}
+body.gc-customer-app #gcCustomerWorkspace .gc-command-network strong{color:#f0fbff!important;font-size:12px;line-height:1.7;overflow-wrap:anywhere}
+body.gc-customer-app #gcCustomerWorkspace .gc-command-network small{display:flex;align-items:center;gap:7px;color:#afc6d2;font-size:10px}
+body.gc-customer-app #gcCustomerWorkspace .gc-command-live-dot{width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:#59dfbc;box-shadow:0 0 0 4px rgba(89,223,188,.1)}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-quick-actions{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;min-width:0;padding-top:15px;border-top:1px solid rgba(144,199,220,.15)}
+body.gc-customer-app #gcCustomerWorkspace .gc-quick-action{position:relative;display:flex;align-items:center;gap:11px;min-width:0;min-height:70px;padding:12px 13px;border:1px solid rgba(132,194,218,.17);border-radius:16px;background:linear-gradient(145deg,rgba(15,43,65,.88),rgba(4,20,35,.88));color:#edfaff;text-decoration:none;transition:transform .18s,border-color .18s,background .18s,box-shadow .18s;-webkit-tap-highlight-color:transparent}
+body.gc-customer-app #gcCustomerWorkspace .gc-quick-action:hover{transform:translateY(-2px);border-color:rgba(105,221,235,.44);background:linear-gradient(145deg,rgba(19,65,91,.92),rgba(4,23,38,.96));box-shadow:0 12px 26px rgba(0,0,0,.16)}
+body.gc-customer-app #gcCustomerWorkspace .gc-quick-action:active{transform:scale(.985)}
+body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-icon{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border:1px solid rgba(99,214,234,.23);border-radius:14px;background:linear-gradient(145deg,rgba(25,136,226,.2),rgba(56,210,218,.08));color:#77e5ed}
+body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-icon svg{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-copy{display:grid;gap:4px;min-width:0;flex:1 1 auto}
+body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-copy strong{color:#f0fbff;font-size:11px;font-weight:900;line-height:1.6;overflow-wrap:anywhere}
+body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-copy small{color:#9eb8c8;font-size:9px;line-height:1.6;overflow-wrap:anywhere}
+body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-arrow{display:grid;place-items:center;flex:0 0 23px;width:23px;height:23px;border:1px solid rgba(103,214,232,.17);border-radius:8px;color:#70dbe9;font-size:14px;font-weight:900}
+body.gc-customer-app #gcCustomerWorkspace .metric-grid{gap:11px!important;margin-bottom:24px!important}
+body.gc-customer-app #gcCustomerWorkspace .metric-card{min-height:112px!important;display:flex!important;align-items:center!important;padding:15px!important;border:1px solid rgba(115,189,216,.19)!important;border-radius:19px!important;background:radial-gradient(180px 105px at 100% 0%,rgba(64,162,220,.09),transparent 75%),linear-gradient(150deg,rgba(15,44,67,.96),rgba(5,22,37,.98))!important;box-shadow:0 12px 30px rgba(0,0,0,.12),inset 0 1px rgba(255,255,255,.035)!important}
+body.gc-customer-app #gcCustomerWorkspace .metric-card small{color:#89adbf!important;font-size:8px!important;font-weight:900!important;letter-spacing:.08em!important}
+body.gc-customer-app #gcCustomerWorkspace .metric-card strong{color:#f2fbff!important;font-weight:950!important;letter-spacing:-.02em}
+body.gc-customer-app #gcCustomerWorkspace .metric-card>div>span{color:#a5bfce!important;font-size:10px!important;line-height:1.75!important}
+body.gc-customer-app #gcCustomerWorkspace .section-block{scroll-margin-top:90px}
+body.gc-customer-app #gcCustomerWorkspace .section-heading{align-items:flex-start;margin-bottom:15px}
+body.gc-customer-app #gcCustomerWorkspace .section-heading h2{color:#effaff;font-size:clamp(19px,2.2vw,26px);line-height:1.55;letter-spacing:-.025em}
+body.gc-customer-app #gcCustomerWorkspace .section-heading p{color:#9fb9c9;font-size:11px;line-height:1.9}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-route-overview{border-color:rgba(117,209,230,.22)!important;background:radial-gradient(440px 180px at 4% 0%,rgba(27,126,196,.11),transparent 72%),radial-gradient(350px 180px at 100% 100%,rgba(32,193,193,.08),transparent 75%),linear-gradient(150deg,rgba(8,29,46,.95),rgba(4,19,32,.98))!important;box-shadow:0 18px 48px rgba(0,0,0,.13),inset 0 1px rgba(255,255,255,.035)!important}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-grid{gap:12px!important}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-card{min-height:195px!important;border-radius:20px!important}
+body.gc-customer-app #gcCustomerWorkspace :where(input,select,textarea,.field){min-height:46px;border-radius:12px}
+body.gc-customer-app #gcCustomerWorkspace textarea.field{min-height:112px}
+body.gc-customer-app #gcCustomerWorkspace :where(a,button,input,select,textarea):focus-visible{outline:3px solid rgba(112,228,237,.72)!important;outline-offset:3px!important}
+body.gc-customer-app #gcCustomerWorkspace .mobile-dock{z-index:820!important;box-shadow:0 14px 38px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.06)!important}
+body.gc-customer-app #gcCustomerWorkspace .app-modal,body.gc-customer-app #gcCustomerWorkspace .gc-settings-panel{z-index:1400!important}
+body.gc-customer-app #gcCustomerWorkspace .app-modal .auth-sheet,body.gc-customer-app #gcCustomerWorkspace .app-modal .detail-sheet{border-color:rgba(108,214,233,.28)!important;box-shadow:0 30px 90px rgba(0,0,0,.56),0 0 0 1px rgba(255,255,255,.025)!important}
+body.gc-customer-app #gcCustomerWorkspace .gc-settings-trigger{z-index:830!important}
+@media(max-width:900px){
+  body.gc-customer-app #gcCustomerWorkspace .app-layout{display:block!important;padding:12px 12px 0!important}
+  body.gc-customer-app #gcCustomerWorkspace .app-main{padding:11px 0 calc(155px + env(safe-area-inset-bottom,0px))!important}
+  body.gc-customer-app #gcCustomerWorkspace .workspace-toolbar{gap:7px!important;margin-bottom:13px!important;padding:3px 2px 13px!important}
+  body.gc-customer-app #gcCustomerWorkspace .workspace-toolbar h1{font-size:clamp(25px,6vw,32px)!important;line-height:1.5!important}
+  body.gc-customer-app #gcCustomerWorkspace .workspace-toolbar p{max-width:42ch;font-size:12px!important}
+  body.gc-customer-app #gcCustomerWorkspace .command-card.gc-signature-command{grid-template-columns:minmax(0,1fr)!important;gap:15px!important;padding:21px 17px 14px!important;border-radius:22px!important;background-image:linear-gradient(270deg,rgba(4,18,31,.97) 0%,rgba(4,18,31,.88) 42%,rgba(4,18,31,.63) 100%),url('/assets/gc-air-freight-hero-640.webp')!important;background-position:center,57% center!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-copy h2{max-width:22ch!important;font-size:clamp(23px,6.3vw,31px)!important;line-height:1.55!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-copy p{max-width:40ch;font-size:11px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin-top:15px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-actions>*{min-width:0;min-height:48px!important;padding-inline:8px!important;font-size:10px!important;text-align:center}
+  body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-visual{min-height:80px!important;justify-content:flex-start!important;padding:10px 12px!important;gap:11px!important;border-radius:16px!important;background:rgba(3,20,35,.72)!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-visual .route-orbit{flex-basis:60px!important;width:60px!important;height:60px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-command-network strong{font-size:11px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-quick-actions{gap:7px!important;padding-top:12px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-quick-action{min-height:79px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:7px!important;padding:10px 4px!important;border-radius:15px!important;text-align:center!important;background:linear-gradient(150deg,rgba(14,42,64,.95),rgba(4,19,32,.96))!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-icon{flex:0 0 34px!important;width:34px!important;height:34px!important;border-radius:11px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-icon svg{width:19px!important;height:19px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-copy{width:100%;gap:2px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-copy strong{font-size:9px!important;line-height:1.55!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-copy small,body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-arrow{display:none!important}
+  body.gc-customer-app #gcCustomerWorkspace .metric-grid{gap:8px!important;margin-bottom:20px!important}
+  body.gc-customer-app #gcCustomerWorkspace .metric-card{min-height:96px!important;gap:8px!important;padding:11px!important;border-radius:16px!important}
+  body.gc-customer-app #gcCustomerWorkspace .metric-icon{flex-basis:32px!important;width:32px!important;height:32px!important;border-radius:11px!important}
+  body.gc-customer-app #gcCustomerWorkspace .metric-card strong{font-size:clamp(16px,4.8vw,20px)!important}
+  body.gc-customer-app #gcCustomerWorkspace .metric-card>div>span{font-size:9px!important}
+  body.gc-customer-app #gcCustomerWorkspace .section-block{margin-block:20px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-route-overview{padding:15px!important;border-radius:20px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-route-overview-heading{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-route-overview-heading h2{font-size:20px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-route-overview-heading p{font-size:11px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-route-track-link{width:100%;justify-content:center;min-height:43px}
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-grid{grid-template-columns:minmax(0,1fr)!important;gap:9px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-card{min-height:170px!important;padding:14px!important;border-radius:17px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-card p{max-width:44ch;font-size:10px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-route-footer{gap:7px!important;padding:11px!important;font-size:9px!important}
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock{left:8px!important;right:8px!important;bottom:calc(7px + env(safe-area-inset-bottom,0px))!important;height:70px!important;min-height:70px!important;padding:5px!important;gap:3px!important;border-radius:21px!important;border-color:rgba(111,214,232,.24)!important;background:rgba(3,15,26,.97)!important;z-index:820!important}
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock>a,body.gc-customer-app #gcCustomerWorkspace .mobile-dock>button{min-height:58px!important;min-width:0!important;padding:5px 2px!important;gap:4px!important;border-radius:14px!important;font-size:9px!important}
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock svg{width:21px!important;height:21px!important}
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock small{font-size:8px!important;line-height:1.35!important}
+  body.gc-customer-app #gcCustomerWorkspace .app-modal{z-index:1400!important}
+  body.gc-customer-app #gcCustomerWorkspace :where(input,select,textarea,.field){min-height:48px!important;font-size:14px!important}
+}
+@media(max-width:390px){
+  body.gc-customer-app #gcCustomerWorkspace .app-header-inner{padding-inline:10px!important;gap:6px!important}
+  body.gc-customer-app #gcCustomerWorkspace .app-brand strong{font-size:13px!important}
+  body.gc-customer-app #gcCustomerWorkspace .app-brand small{font-size:7px!important;letter-spacing:.08em!important}
+  body.gc-customer-app #gcCustomerWorkspace .app-main{padding-inline:0!important;padding-bottom:calc(160px + env(safe-area-inset-bottom,0px))!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-signature-command{padding:18px 13px 12px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-actions{grid-template-columns:minmax(0,1fr)!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-quick-action{min-height:73px!important}
+  body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-copy strong{font-size:8px!important}
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock{left:5px!important;right:5px!important;gap:2px!important;padding:4px!important}
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock small{font-size:7px!important}
+}
+html[data-gc-theme="light"] body.gc-customer-app #gcCustomerWorkspace .gc-signature-command{border-color:#c1dce7!important;background-color:#f5fbff!important;background-image:linear-gradient(270deg,rgba(247,252,255,.97) 0%,rgba(247,252,255,.91) 42%,rgba(247,252,255,.56) 100%),url('/assets/gc-air-freight-hero-960.webp')!important;box-shadow:0 20px 48px rgba(20,71,105,.12)!important}
+html[data-gc-theme="light"] body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-copy h2{color:#0c2841!important}
+html[data-gc-theme="light"] body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-copy p{color:#426176!important}
+html[data-gc-theme="light"] body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-visual{background:rgba(243,250,255,.86)!important;border-color:#c7dfe8!important}
+html[data-gc-theme="light"] body.gc-customer-app #gcCustomerWorkspace .gc-command-network strong{color:#15344e!important}
+html[data-gc-theme="light"] body.gc-customer-app #gcCustomerWorkspace .gc-command-network small{color:#557789!important}
+html[data-gc-theme="light"] body.gc-customer-app #gcCustomerWorkspace .gc-quick-action{background:linear-gradient(145deg,#fff,#f1f8fc)!important;border-color:#d3e4ed!important;box-shadow:0 8px 22px rgba(21,69,99,.06)!important}
+html[data-gc-theme="light"] body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-copy strong{color:#15344e!important}
+html[data-gc-theme="light"] body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-copy small{color:#5c798d!important}
+html[data-gc-theme="light"] body.gc-customer-app #gcCustomerWorkspace .metric-card{background:linear-gradient(150deg,#fff,#f0f7fb)!important;border-color:#d3e5ed!important;box-shadow:0 8px 22px rgba(22,74,105,.065)!important}
+html[data-gc-theme="light"] body.gc-customer-app #gcCustomerWorkspace .metric-card small{color:#57798e!important}
+html[data-gc-theme="light"] body.gc-customer-app #gcCustomerWorkspace .metric-card strong{color:#102c46!important}
+html[data-gc-theme="light"] body.gc-customer-app #gcCustomerWorkspace .metric-card>div>span{color:#5b778b!important}
+html[data-gc-theme="light"] body.gc-customer-app #gcCustomerWorkspace .gc-customer-route-overview{background:linear-gradient(145deg,#fff,#f3f9fc)!important;border-color:#d1e5ed!important}
+@media(prefers-reduced-motion:reduce){body.gc-customer-app #gcCustomerWorkspace *,body.gc-customer-app #gcCustomerWorkspace *::before,body.gc-customer-app #gcCustomerWorkspace *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
