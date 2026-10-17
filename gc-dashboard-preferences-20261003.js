@@ -16,7 +16,20 @@
     records: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M9 12h6M9 16h6"/></svg>',
     sun: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
     moon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.4A8.5 8.5 0 0 1 8.6 4 8.5 8.5 0 1 0 20 15.4Z"/></svg>',
-    language: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.2 2.4 3.3 5.4 3.3 9s-1.1 6.6-3.3 9c-2.2-2.4-3.3-5.4-3.3-9S9.8 5.4 12 3Z"/></svg>'
+    language: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.2 2.4 3.3 5.4 3.3 9s-1.1 6.6-3.3 9c-2.2-2.4-3.3-5.4-3.3-9S9.8 5.4 12 3Z"/></svg>',
+    documents: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M9 12h6M9 16h6"/></svg>',
+    bell: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>',
+    check: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16.5 9"/></svg>',
+    lock: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+    logout: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5v16h5M14 8l4 4-4 4M8 12h10"/></svg>',
+    moving: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h12v10H3zM15 10h4l3 4v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10"/></svg>',
+    route: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h3a3 3 0 0 0 3-3v-3a3 3 0 0 1 3-3"/></svg>',
+    send: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 18-8-7 18-3-7-8-3Z"/><path d="m11 14 5-5"/></svg>',
+    track: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+    user: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+    wallet: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 9h18M15 14h3"/></svg>',
+    warehouse: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-6 9 6v10H3V10Z"/><path d="M7 20v-6h10v6M7 10h10"/></svg>'
   };
   const copy = {
     ckb: { dir: 'rtl', labels: { home: 'سەرەکی', shipments: 'بارەکان', quote: 'داواکاری', request: 'داواکاری', notifications: 'ئاگاداری', records: 'بەڵگە', settings: 'ڕێکخستن', rates: 'نرخەکان', support: 'پشتیوانی', sales: 'فرۆشتن و نرخ', theme: 'دۆخی ڕووناکی', language: 'زمان', dark: 'تاریک', light: 'ڕووناک' } },
@@ -72,13 +85,22 @@
     });
     applyTheme(currentTheme());
   };
+  const mountIcons = (root = document) => {
+    root.querySelectorAll('[data-dash-icon]').forEach((node) => {
+      const key = node.dataset.dashIcon;
+      if (!icons[key] || node.dataset.gcDashIconReady === key) return;
+      node.innerHTML = icons[key];
+      node.dataset.gcDashIconReady = key;
+    });
+  };
+
   const initMobileDock = () => {
     const dock = document.querySelector('#gcCustomerWorkspace .mobile-dock, body.gc-customer-app .mobile-dock');
     const main = document.querySelector('#gcCustomerWorkspace .app-main, body.gc-customer-app .app-main');
     if (!dock || !main || dock.dataset.gcDockReady === '1') return;
     dock.dataset.gcDockReady = '1';
     const items = [...dock.querySelectorAll('[data-dock-tab]')];
-    const allSections = [...main.querySelectorAll(':scope > section')];
+    const allSections = () => [...main.querySelectorAll(':scope > section')];
     const viewGroups = {
       home: ['workspace-toolbar', 'overview', 'homeMetrics', 'gcCustomerRouteOverview'],
       shipments: ['shipmentsSection', 'records'],
@@ -106,7 +128,7 @@
         window.gcEnterCustomerMode({view:key, hash:options.hash || viewHash[key] || '#overview'});
       }
       const visible = new Set(viewGroups[key]);
-      allSections.forEach(section => {
+      allSections().forEach(section => {
         const show = visible.has(section.id) || visible.has(section.classList.contains('workspace-toolbar') ? 'workspace-toolbar' : '');
         section.classList.toggle('gc-customer-view-hidden', !show);
         section.setAttribute('aria-hidden', String(!show));

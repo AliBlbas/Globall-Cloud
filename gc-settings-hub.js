@@ -21,6 +21,7 @@
       confirmPass:'دووبارە وشەی نهێنیی نوێ', changePass:'گۆڕینی وشەی نهێنی', changingPass:'گۆڕینی وشەی نهێنی…',
       passwordHint:'وشەی نهێنیی نوێ دەبێت لانیکەم 12 پیت بێت. وشەی نهێنیی ئێستا بۆ پشتڕاستکردنەوە پێویستە.',
       logout:'چوونەدەرەوە', documents:'بینینی بەڵگە و پارەدان', support:'چوون بۆ پشتیوانی',
+      staffConsole:'چوونەژوورەوە بۆ کونسۆلی ستاف', staffAccess:'هەژماری ستاف پشتڕاست کراوەتەوە؛ لەوێوە دەتوانیت بڕۆیتە کونسۆلی ستاف.',
       saved:'زانیاریی پڕۆفایل پاشەکەوت کرا.', photoTooLarge:'قەبارەی وێنە دەبێت لە 4MB کەمتر بێت.',
       photoInvalid:'تکایە فایلێکی وێنە هەڵبژێرە.', passMismatch:'دوو وشەی نهێنی نوێکە یەکسان نین.',
       passShort:'وشەی نهێنیی نوێ دەبێت لانیکەم 12 پیت بێت.', currentPassWrong:'وشەی نهێنیی ئێستا دروست نییە.',
@@ -39,6 +40,7 @@
       confirmPass:'تأكيد كلمة المرور الجديدة', changePass:'تغيير كلمة المرور', changingPass:'جارٍ تغيير كلمة المرور…',
       passwordHint:'يجب أن تتكون كلمة المرور الجديدة من 12 حرفاً على الأقل. يلزم إدخال كلمة المرور الحالية.',
       logout:'تسجيل الخروج', documents:'عرض المستندات والمدفوعات', support:'الانتقال إلى الدعم',
+      staffConsole:'فتح لوحة الموظفين', staffAccess:'تم التحقق من حساب الموظف. يمكنك فتح لوحة الموظفين.',
       saved:'تم حفظ الملف الشخصي.', photoTooLarge:'يجب أن يكون حجم الصورة أقل من 4MB.',
       photoInvalid:'يرجى اختيار ملف صورة.', passMismatch:'كلمتا المرور الجديدتان غير متطابقتين.',
       passShort:'يجب أن تتكون كلمة المرور الجديدة من 12 حرفاً على الأقل.', currentPassWrong:'كلمة المرور الحالية غير صحيحة.',
@@ -57,6 +59,7 @@
       confirmPass:'Confirm new password', changePass:'Change password', changingPass:'Changing password…',
       passwordHint:'Your new password must be at least 12 characters. Enter your current password to verify.',
       logout:'Sign out', documents:'View documents and payments', support:'Open support',
+      staffConsole:'Open staff console', staffAccess:'Staff account verified. You can open the staff console.',
       saved:'Profile saved.', photoTooLarge:'Image must be smaller than 4MB.',
       photoInvalid:'Please choose an image file.', passMismatch:'The new passwords do not match.',
       passShort:'The new password must be at least 12 characters.', currentPassWrong:'Current password is incorrect.',
@@ -72,6 +75,8 @@
   let selectedAvatarFile = null;
   let profileCache = null;
   let previewUrl = '';
+  let staffAccessVerified = false;
+  const STAFF_ROLES = new Set(['admin','super_admin','accountant','finance','warehouse','warehouse_china','warehouse_uae','warehouse_erbil','operations','driver','delivery']);
 
   const message = (id, text, kind = 'muted') => {
     const el = $(id);
@@ -117,11 +122,42 @@
   const syncAuthState = () => {
     const loggedOut = $('gcSettingsLoggedOut');
     const loggedIn = $('gcSettingsLoggedIn');
+    const staffAccess = $('gcSettingsStaffAccess');
     const isLoggedIn = Boolean(profileCache);
-    if (loggedOut) loggedOut.hidden = isLoggedIn;
+    if (loggedOut) loggedOut.hidden = isLoggedIn || staffAccessVerified;
     if (loggedIn) loggedIn.hidden = !isLoggedIn;
+    if (staffAccess) staffAccess.hidden = !staffAccessVerified;
     const logoutButton = $('gcSettingsLogout');
     if (logoutButton) logoutButton.textContent = t('logout');
+  };
+
+  const refreshStaffConsoleAccess = async () => {
+    const client = window.sb;
+    if (!client) {
+      staffAccessVerified = false;
+      syncAuthState();
+      return;
+    }
+    try {
+      const {data:sessionData, error:sessionError} = await client.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      if (sessionError || !token) {
+        staffAccessVerified = false;
+        syncAuthState();
+        return;
+      }
+      const response = await fetch(SUPABASE_URL + '/functions/v1/account-self-profile', {
+        method:'GET',
+        headers:{Authorization:'Bearer ' + token, apikey:SUPABASE_KEY, 'Content-Type':'application/json'},
+        cache:'no-store'
+      });
+      const payload = await response.json().catch(() => ({}));
+      const profile = payload?.profile;
+      staffAccessVerified = Boolean(response.ok && profile?.kind === 'staff' && STAFF_ROLES.has(profile.role));
+    } catch (_) {
+      staffAccessVerified = false;
+    }
+    syncAuthState();
   };
   const syncProfile = profile => {
     if (!profile || typeof profile !== 'object') return;
@@ -152,6 +188,11 @@
       <div class="section-heading gc-account-settings-heading">
         <div><span class="eyebrow">MY ACCOUNT · PRIVATE</span><h2 id="gcSettingsMainTitle" data-gc-profile-i18n="title">ڕێکخستنی هەژمار</h2><p data-gc-profile-i18n="intro">زانیاریی پڕۆفایل، وێنە، وشەی نهێنی و ڕێکخستنە کەسییەکانت تەنها لێرە بەڕێوەببە.</p></div>
       </div>
+      <article id="gcSettingsStaffAccess" class="surface-card gc-settings-logged-out gc-settings-staff-access" hidden>
+        <div class="gc-settings-lock" aria-hidden="true">✓</div>
+        <div><strong data-gc-profile-i18n="staffAccess">هەژماری ستاف پشتڕاست کراوەتەوە؛ لەوێوە دەتوانیت بڕۆیتە کونسۆلی ستاف.</strong><p class="muted">Globall Cloud · Staff Workspace</p></div>
+        <button type="button" id="gcSettingsStaffConsole" class="app-primary-action" data-gc-profile-i18n="staffConsole">چوونەژوورەوە بۆ کونسۆلی ستاف</button>
+      </article>
       <article id="gcSettingsLoggedOut" class="surface-card gc-settings-logged-out">
         <div class="gc-settings-lock" aria-hidden="true">↗</div><div><strong data-gc-profile-i18n="signedOut">بۆ بینینی پڕۆفایل و گۆڕینی زانیارییەکانت سەرەتا بچۆ ژوورەوە.</strong><p class="muted">Globall Cloud · Customer Workspace</p></div>
         <button type="button" id="gcSettingsSignIn" class="app-primary-action" data-gc-profile-i18n="login">چوونەژوورەوە</button>
@@ -209,6 +250,7 @@
     main.appendChild(section);
 
     $('gcSettingsSignIn')?.addEventListener('click', () => document.getElementById('loginBtn')?.click());
+    $('gcSettingsStaffConsole')?.addEventListener('click', () => { if (staffAccessVerified) window.location.assign('/staff'); });
     $('gcSettingsLogout')?.addEventListener('click', () => document.getElementById('logoutBtn')?.click());
     $('gcSettingsRecords')?.addEventListener('click', () => window.gcSelectCustomerView ? window.gcSelectCustomerView('shipments') : (location.hash = '#shipmentsSection'));
     $('gcSettingsSupport')?.addEventListener('click', () => window.gcSelectCustomerView ? window.gcSelectCustomerView('support') : (location.hash = '#support'));
@@ -347,6 +389,15 @@
     // The customer portal publishes the authenticated profile after its API load.
     window.addEventListener('gc:customer-loaded', event => {
       if (event.detail?.profile) syncProfile(event.detail.profile);
+      void refreshStaffConsoleAccess();
+    });
+    // Never grant staff navigation based on client-editable profile metadata.
+    void refreshStaffConsoleAccess();
+    const authApi = window.sb?.auth;
+    authApi?.onAuthStateChange?.((event) => {
+      if (['SIGNED_IN','SIGNED_OUT','TOKEN_REFRESHED','USER_UPDATED'].includes(event)) {
+        window.setTimeout(() => { void refreshStaffConsoleAccess(); }, 0);
+      }
     });
     const loginButton = document.getElementById('loginBtn');
     if (loginButton && 'MutationObserver' in window) {
