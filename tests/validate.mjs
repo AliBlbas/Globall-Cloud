@@ -259,7 +259,7 @@ const unifiedContracts = [
   ['mobile homepage is compact and does not float over form inputs', read('gc-homepage-signature-20261016.css').includes('#gcApp .gc-announcement { display:none!important; }') && read('gc-homepage-signature-20261016.css').includes('body .gc-whatsapp-float {display:none!important;}') && read('gc-homepage-signature-20261016.css').includes('#gcApp {padding-bottom:0!important;}')],
   ['customer transport cards use real air sea and land images', ['gc-air-freight-hero-640.webp','gc-sea-freight-hero-640.webp','gc-land-freight-hero-640.webp'].every(image => customerWorkspaceStyles.includes(image))],
   ['customer content clears the five-tab mobile navigation', customerWorkspaceStyles.includes('padding-bottom:calc(132px + env(safe-area-inset-bottom))') && customerDockStyles.includes('padding-bottom:calc(136px + env(safe-area-inset-bottom))')],
-  ['current premium styles are cache-busted in the index', unifiedShell.includes('gc-homepage-signature-20261016.css?v=10') && unifiedShell.includes('gc-live-mobile-v3.css?v=20261017-2') && unifiedShell.includes('gc-customer-mobile-dock-20261016.css?v=5') && unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=21')],
+  ['current premium styles are cache-busted in the index', unifiedShell.includes('gc-homepage-signature-20261016.css?v=10') && unifiedShell.includes('gc-live-mobile-v3.css?v=20261017-2') && unifiedShell.includes('gc-customer-mobile-dock-20261016.css?v=5') && unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=24')],
   ['customer route scripts are cache-busted after navigation fixes', unifiedShell.includes('gc-settings-hub.js?v=20261017-13') && unifiedShell.includes('gc-dashboard-preferences-20261003.js?v=20261017-3') && unifiedShell.includes('gc-unified-customer-experience-20261016.js?v=20261017-1')],
   ['middleware refreshes the versioned settings and injected assets', productionMiddleware.includes("const VERSION = '20261017-13';") && productionMiddleware.includes('/gc-settings-hub.js?v=${VERSION}') && productionMiddleware.includes('/gc-settings-hub.css?v=${VERSION}')],
   ['tracking URL redirects to the customer shipment view', authRedirects.includes('/track /#shipmentsSection 302') && authRedirects.includes('/track/ /#shipmentsSection 302')],
@@ -273,7 +273,7 @@ const unifiedContracts = [
   ['customer dock uses five responsive columns', customerDockStyles.includes('repeat(5,minmax(0,1fr))') && !customerDockStyles.includes('repeat(6,minmax(0,1fr))') && !customerWorkspaceStyles.includes('repeat(6,minmax(0,1fr))')],
   ['integrated services have responsive polished styles', customerWorkspaceStyles.includes('.gc-customer-route-overview') && customerWorkspaceStyles.includes('@media (max-width: 900px)')],
   ['style loader references current cache versions', customerStyleLoader.includes('gc-customer-workspace-elite-20261014.css?v=23') && customerStyleLoader.includes('gc-customer-mobile-dock-20261016.css?v=5')],
-  ['style loader script is cache-busted in index', unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=21')],
+  ['style loader script is cache-busted in index', unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=24')],
   ['signature customer layer is loaded after the mobile dock', unifiedShell.includes('gc-customer-experience-signature-20261017.css?v=2') && customerStyleLoader.includes('gc-customer-experience-signature-20261017.css?v=2')],
   ['customer home has three direct paths to shipments, billing, and support', (unifiedShell.match(/class="gc-quick-action"/g)||[]).length === 3 && unifiedShell.includes('href="#shipmentsSection"') && unifiedShell.includes('href="#records"') && unifiedShell.includes('href="#support"')],
   ['customer home uses real air freight artwork and responsive hero styling', customerSignatureStyles.includes("url('/assets/gc-air-freight-hero-960.webp')") && customerSignatureStyles.includes("url('/assets/gc-air-freight-hero-640.webp')") && customerSignatureStyles.includes('@media(max-width:900px)')],
@@ -296,8 +296,8 @@ const unifiedContracts = [
   ['main Staff OS filters inactive unlinked customers', staffConsoleScript.includes("filter==='inactive-unlinked'?x.is_active===false&&!x.auth_user_id:true") && staffConsoleScript.includes('value="inactive-unlinked"')],
   ['customer binding stays Super Admin only', staffConsoleScript.includes("state.staff?.role !== 'super_admin'") && accountAdminSource.includes('Only Super Admin can bind customer accounts')],
   ['customer account binding instructs GC-code login without exposing the internal auth email', staffConsoleScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleScript.includes('Login: ${result.login_email}') && staffConsoleScript.includes('پێویست نییە ئیمەیل بنووسێت')],
-  ['staff console uses a versioned filename and the GC-code login instructions', staffConsoleHtml.includes('/staff-os-v5-20261017.js?v=20261017-3') && staffConsoleVersionedScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleVersionedScript.includes('Login: ${result.login_email}')],
-  ['main Staff OS loads current customer filter assets', staffConsoleHtml.includes('staff-os-v5.css?v=20261016-4') && staffConsoleHtml.includes('staff-os-v5-20261017.js?v=20261017-3') && staffConsoleStyles.includes('.customer-link-guidance')],
+  ['staff console uses a versioned filename and the GC-code login instructions', staffConsoleHtml.includes('/staff-os-v5-20261017.js?v=20261017-4') && staffConsoleVersionedScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleVersionedScript.includes('Login: ${result.login_email}')],
+  ['main Staff OS loads current customer filter assets', staffConsoleHtml.includes('staff-os-v5.css?v=20261016-4') && staffConsoleHtml.includes('staff-os-v5-20261017.js?v=20261017-4') && staffConsoleStyles.includes('.customer-link-guidance')],
 ]
 for (const [label, passed] of unifiedContracts) {
   if (passed) ok(label)
@@ -310,15 +310,19 @@ const customerViewScript = read('gc-dashboard-preferences-20261003.js')
 const customerStyleLoader = read('gc-public-customer-style-loader-20261014.js')
 const staffEnhancementLoader = read('staff-os-v5-enhancement-loader-20261017.js')
 const staffOsHtml = read('staff-os-v5.html')
+const staffShipmentScript = read('staff-os-v5-20261017.js')
 
 const mobileUiContracts = [
-  ['customer workspace references the final mobile integrity CSS', publicShell.includes('gc-ui-integrity-mobile-20261017.css?v=5')],
-  ['customer style loader puts integrity CSS after signature styles', customerStyleLoader.indexOf('gc-ui-integrity-mobile-20261017.css?v=5') > customerStyleLoader.indexOf('gc-customer-experience-signature-20261017.css?v=2')],
-  ['Staff OS references the current integrity CSS and cache-busted loader', staffOsHtml.includes('gc-ui-integrity-mobile-20261017.css?v=5') && staffOsHtml.includes('staff-os-v5-enhancement-loader-20261017.js?v=3')],
-  ['staff enhancement loader loads integrity CSS after the mobile dock', staffEnhancementLoader.indexOf("loadStyle('/gc-ui-integrity-mobile-20261017.css?v=5')") > staffEnhancementLoader.indexOf("loadStyle('/gc-staff-mobile-dock-20261016.css?v=4')")],
+  ['customer workspace references the final mobile integrity CSS', publicShell.includes('gc-ui-integrity-mobile-20261017.css?v=6')],
+  ['customer style loader puts integrity CSS after signature styles', customerStyleLoader.indexOf('gc-ui-integrity-mobile-20261017.css?v=6') > customerStyleLoader.indexOf('gc-customer-experience-signature-20261017.css?v=2')],
+  ['Staff OS references the current integrity CSS and cache-busted loader', staffOsHtml.includes('gc-ui-integrity-mobile-20261017.css?v=6') && staffOsHtml.includes('staff-os-v5-enhancement-loader-20261017.js?v=4')],
+  ['staff enhancement loader loads integrity CSS after the mobile dock', staffEnhancementLoader.indexOf("loadStyle('/gc-ui-integrity-mobile-20261017.css?v=6')") > staffEnhancementLoader.indexOf("loadStyle('/gc-staff-mobile-dock-20261016.css?v=4')")],
   ['customer view selector includes the toolbar and isolated section views', customerViewScript.includes("const allSections = () => [...main.querySelectorAll(':scope > section, :scope > .workspace-toolbar')]") && customerViewScript.includes("settings: ['gcAccountSettings']") && customerViewScript.includes("shipments: ['shipmentsSection']") && customerViewScript.includes("requests: ['quotesPanel', 'newRequest']") && customerViewScript.includes("'#commercial': ['commercial']") && customerViewScript.includes("'#records': ['records']")],
   ['customer dock declares five separate destinations', ['home','shipments','requests','notifications','settings'].every(key => publicShell.includes('data-dock-tab="' + key + '"'))],
   ['orders and requests expose distinct secondary screens', publicShell.includes('href="#records">بەڵگە و پارەدان') && publicShell.includes('href="#commercial">حیسابکردنی نرخ')],
+  ['Staff shipment summary updates from the active filtered rows', staffShipmentScript.includes('const summaryMetrics = { total: rows.length, air: 0, land: 0, sea: 0, customers: 0, pieces: 0, cartons: 0 }') && staffShipmentScript.includes('rows.forEach((shipment) =>') && staffShipmentScript.includes('id="shipmentSummaryGrid"')],
+  ['Staff shipment summary includes Air, Land, Sea, customer and cargo totals', ['Air · ئاسمانی','Land · وشکانی','Sea · دەریایی','دانەی کاڵا','کارتۆن'].every(label => staffShipmentScript.includes(label))],
+  ['Staff shipment summary has two-column mobile styles', mobileUiCss.includes('.shipment-summary-grid') && mobileUiCss.includes('grid-template-columns: repeat(2, minmax(0, 1fr))') && mobileUiCss.includes('.shipment-summary-note')],
   ['Staff Intelligence chat has a dedicated flexible message row', mobileUiCss.includes('grid-template-rows: auto auto auto minmax(0, 1fr) auto !important') && mobileUiCss.includes('#gcStaffAiPanel .gc-ai-messages')],
   ['only the active customer dock destination receives the bright active treatment', mobileUiCss.includes('.dock-primary:not(.active)') && mobileUiCss.includes('button[aria-current="page"]')],
 ]

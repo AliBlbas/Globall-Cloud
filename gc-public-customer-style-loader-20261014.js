@@ -15,7 +15,7 @@
     '/gc-customer-workspace-elite-20261014.css?v=23',
     '/gc-customer-mobile-dock-20261016.css?v=5',
     '/gc-customer-experience-signature-20261017.css?v=2',
-    '//gc-ui-integrity-mobile-20261017.css?v=5'
+    '//gc-ui-integrity-mobile-20261017.css?v=6'
   ];
 
   const desiredStyles = () => {

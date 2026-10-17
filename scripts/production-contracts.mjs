@@ -111,7 +111,7 @@ if (!read('index.html').includes('gc-homepage-signature-20261016.css?v=10') || !
 const homeMobileRefinement = read('gc-homepage-signature-20261016.css')
 if (!homeMobileRefinement.includes('#gcApp .gc-announcement { display:none!important; }') || !homeMobileRefinement.includes('body .gc-whatsapp-float {display:none!important;}') || !homeMobileRefinement.includes('#gcApp {padding-bottom:0!important;}')) fail('Public mobile UX must compact the header and avoid fixed controls covering content')
 else ok('Public mobile UX keeps the header compact and prevents WhatsApp/dock overlap')
-if (!read('index.html').includes('gc-customer-mobile-dock-20261016.css?v=5') || !read('index.html').includes('gc-public-customer-style-loader-20261014.js?v=21')) fail('Customer mobile navigation stylesheet cache-busters are stale')
+if (!read('index.html').includes('gc-customer-mobile-dock-20261016.css?v=5') || !read('index.html').includes('gc-public-customer-style-loader-20261014.js?v=24')) fail('Customer mobile navigation stylesheet cache-busters are stale')
 const premiumHomeStyles = read('gc-homepage-signature-20261016.css')
 const premiumCustomerStyles = read('gc-customer-workspace-elite-20261014.css')
 const premiumDockStyles = read('gc-customer-mobile-dock-20261016.css')
@@ -202,7 +202,7 @@ else ok('Private customer-photo bucket enforces size and image MIME limits')
 if (!unifiedController.includes("'#public':'#overview'") || !unifiedController.includes("'#services':'#gcCustomerRouteOverview'") || !unifiedController.includes("'#request':'#newRequest'") || !unifiedController.includes("'#contact':'#support'")) fail('Legacy marketing routes must map into customer console views')
 if (!customerStyleLoader.includes('function ensureHomeDock() { return; }') || customerStyleLoader.includes('dock.innerHTML')) fail('Legacy public dock injector must remain disabled')
 if (!read('gc-customer-workspace-elite-20261014.css').includes('body.gc-customer-app #gcWhatsAppFloat') || !read('gc-customer-workspace-elite-20261014.css').includes('body.gc-customer-app .gc-whatsapp-float')) fail('Floating marketing WhatsApp bubble must not overlap customer app navigation')
-if (!unifiedShell.includes('gc-unified-customer-experience-20261016.js?v=20261017-1') || !unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=23') || !unifiedShell.includes('gc-customer-experience-signature-20261017.css?v=2') || !unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=21') || !unifiedShell.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-3')) fail('Customer-first app shell cache references are stale')
+if (!unifiedShell.includes('gc-unified-customer-experience-20261016.js?v=20261017-1') || !unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=23') || !unifiedShell.includes('gc-customer-experience-signature-20261017.css?v=2') || !unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=24') || !unifiedShell.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-3')) fail('Customer-first app shell cache references are stale')
 else ok('Customer-first app shell loads current assets')
 const customerGcRegister = read('supabase/functions/customer-gc-register/index.ts')
 const supabaseConfig = read('supabase/config.toml')
@@ -230,7 +230,7 @@ else ok('Repository validation guards the retired public registration endpoint')
 
 
 
-if (!staff.includes('staff-os-v5-20261017.js?v=20261017-3')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
+if (!staff.includes('staff-os-v5-20261017.js?v=20261017-4')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
 
 const mobileLoader = read('staff-os-v5-enhancement-loader.js')
 if (!staff.includes('staff-os-v5-enhancement-loader.js?v=20261016-7')) fail('Staff enhancement loader cache-buster is stale')
