@@ -128,7 +128,7 @@ const renderNotifications = (items) => setHtml('notifications',
   items.length
     ? items.map((item) => {
       const isRead = Boolean(item.read_at);
-      const action = typeof item.action_url === 'string' && (/^\\//.test(item.action_url) || /^#/.test(item.action_url)) && !item.action_url.startsWith('//')
+      const action = typeof item.action_url === 'string' && (/^\//.test(item.action_url) || /^#/.test(item.action_url)) && !item.action_url.startsWith('//')
         ? item.action_url
         : '';
       const actionLabel = item.kind === 'warehouse_received' ? 'بینینی وێنە و بەڵگەی کۆگا' : 'بینینی بەشە پەیوەندیدارەکە';
@@ -176,7 +176,7 @@ const renderPods = (items) => {
 
 const renderReceipts = (items) => {
   const html = items.map((item) => {
-    const photos = Array.isArray(item.photos) ? item.photos.filter((url) => typeof url === 'string' && /^https?:\\/\\//i.test(url)) : [];
+    const photos = Array.isArray(item.photos) ? item.photos.filter((url) => typeof url === 'string' && /^https?:\/\//i.test(url)) : [];
     const gc = item.gc_code_detected || item.gc_code || '—';
     const cartons = Math.max(1, Number(item.carton_count || 1));
     const weight = Number(item.weight_actual || 0);
