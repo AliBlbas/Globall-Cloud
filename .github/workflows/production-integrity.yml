@@ -66,6 +66,8 @@ jobs:
           grep -q 'staff-os-v5-20261017.js?v=20261017-17' staff-os-v5.html
           grep -q 'gc-staff-command-system-20261017.css?v=2' staff-os-v5.html
           grep -Fq 'receipt-owner-routing-hint' staff-os-v5-20261017.js
+          grep -Fq "(['super_admin','admin'].includes(staffRole)?'':'Dubai')" staff-os-v5-20261017.js
+          grep -Fq 'یەکەم کۆگای وەرگرتن هەڵبژێرە' staff-os-v5-20261017.js
           grep -Fq 'fullCode.slice(0,suffix.index)' staff-os-v5-20261017.js
           grep -Fq 'receipt.cartons||[]' staff-os-v5-20261017.js
           grep -Fq 'receipt-owner-routing-hint' gc-staff-command-system-20261017.css
