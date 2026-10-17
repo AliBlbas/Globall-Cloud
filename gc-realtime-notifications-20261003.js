@@ -59,7 +59,12 @@
   };
   const boot = async () => {
     if (!window.supabase?.createClient) { setTimeout(boot, 120); return; }
-    client = window.gcSupabase || window.supabase.createClient(URL, KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+    // Staff OS creates its own namespaced Supabase client before this bridge runs.
+    // Reuse that exact client rather than creating a second client on the default
+    // customer auth storage key; this avoids staff/customer session collisions.
+    if (isStaff && !window.gcSupabase?.auth) { setTimeout(boot, 120); return; }
+    if (isStaff) client = window.gcSupabase;
+    else client = window.gcSupabase || window.supabase.createClient(URL, KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
     if (isCustomer) await setupCustomer();
     else if (isStaff) await setupStaff();
   };
