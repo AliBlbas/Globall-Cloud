@@ -317,6 +317,7 @@ const customerWarehouseCss = read('gc-customer-warehouse-evidence-20261017.css')
 const customerWarehouseReceiving = read('supabase/functions/warehouse-receiving/index.ts')
 const customerWarehouseNotify = read('supabase/functions/warehouse-notify/index.ts')
 const customerWarehouseMigration = read('supabase/migrations/20261017181111_fix_warehouse_receipt_customer_notifications.sql')
+const customerWarehouseRouteMigration = read('supabase/migrations/20261017181944_fix_warehouse_receipt_portal_route.sql')
 const customerSelfSourceForReceiptEvidence = read('supabase/functions/customer-self/index.ts')
 if (!customerWarehouseHtml.includes('id="receipts"') || !customerWarehouseHtml.includes('gc-customer-warehouse-evidence-20261017.css?v=1')) fail('Customer portal must render a dedicated warehouse receipt evidence panel')
 else ok('Customer portal has a styled warehouse receipt evidence destination')
@@ -325,6 +326,8 @@ if (!customerSelfSourceForReceiptEvidence.includes(".from('warehouse_receipts')"
 if (!customerWarehouseReceiving.includes("const actionUrl='/#records'") || !customerWarehouseNotify.includes("const actionUrl = '/#records'")) fail('Warehouse alerts must link directly to the customer records/evidence section')
 if (!customerWarehouseMigration.includes('ON CONFLICT (customer_user_id, event_key) DO NOTHING') || !customerWarehouseMigration.includes("'/#records'")) fail('Warehouse notification trigger must use the valid per-customer idempotency key and portal route')
 else ok('Warehouse receipt notification trigger is idempotent and opens customer records')
+if (!customerWarehouseRouteMigration.includes("'/#records'") || !customerWarehouseRouteMigration.includes('ON CONFLICT (customer_user_id, event_key) DO NOTHING')) fail('Final receipt notification route migration is missing or inconsistent')
+else ok('Final database trigger route matches the customer portal router')
 
 console.log('')
 if (failures) { console.error(`${failures} production contract check(s) failed.`); process.exit(1) }

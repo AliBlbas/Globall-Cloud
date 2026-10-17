@@ -60,6 +60,7 @@ const required = [
   'warehouse-offline-sync.js','gc-platform-vnext.js','gc-platform-vnext-plus.js','gc-runtime-safety-v2026.js','production-brand-repair.js',
   'supabase/config.toml','package.json','scripts/production-contracts.mjs','tests/e2e/run.mjs','supabase/migrations/20261017130000_restrict_customer_request_photo_uploads.sql',
   'supabase/migrations/20261017181111_fix_warehouse_receipt_customer_notifications.sql',
+  'supabase/migrations/20261017181944_fix_warehouse_receipt_portal_route.sql',
   'supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
   'supabase/functions/notification-dispatch/index.ts','supabase/functions/warehouse-receiving/index.ts','supabase/functions/warehouse-notify/index.ts',
   'supabase/functions/staff-ops-hub/index.ts','supabase/functions/staff-analytics/index.ts','supabase/functions/invoice-ai/index.ts',
@@ -316,6 +317,7 @@ const staffShipmentScript = read('staff-os-v5-20261017.js')
 const warehouseReceivingSource = read('supabase/functions/warehouse-receiving/index.ts')
 const warehouseNotifySource = read('supabase/functions/warehouse-notify/index.ts')
 const warehouseReceiptNotificationMigration = read('supabase/migrations/20261017181111_fix_warehouse_receipt_customer_notifications.sql')
+const warehouseReceiptPortalRouteMigration = read('supabase/migrations/20261017181944_fix_warehouse_receipt_portal_route.sql')
 const customerWarehouseEvidenceCss = read('gc-customer-warehouse-evidence-20261017.css')
 
 const mobileUiContracts = [
@@ -357,6 +359,7 @@ const mobileUiContracts = [
   ['warehouse receipt alerts lead to the supported customer records route', warehouseReceivingSource.includes("const actionUrl='/#records'") && warehouseNotifySource.includes("const actionUrl = '/#records'")],
   ['warehouse receipt trigger uses the valid composite idempotency conflict target', warehouseReceiptNotificationMigration.includes('ON CONFLICT (customer_user_id, event_key) DO NOTHING') && warehouseReceiptNotificationMigration.includes("'/#records'")],
   ['customer warehouse evidence styles include responsive photo proof cards', customerWarehouseEvidenceCss.includes('.warehouse-receipt-evidence') && customerWarehouseEvidenceCss.includes('.photo-grid')],
+  ['final receipt notification route matches the unified customer portal router', warehouseReceiptPortalRouteMigration.includes("'/#records'") && warehouseReceiptPortalRouteMigration.includes('ON CONFLICT (customer_user_id, event_key) DO NOTHING')],
 ]
 for (const [label, passed] of mobileUiContracts) {
   if (passed) ok(label)
