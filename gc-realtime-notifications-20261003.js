@@ -30,10 +30,25 @@
     if (typeof window.gcCustomerReload === 'function') window.gcCustomerReload();
     if (isStaff) document.getElementById('refreshBtn')?.click();
   };
+  let activeChannelKey = '';
+
+  const clearChannel = async () => {
+    const old = channel;
+    channel = null;
+    activeChannelKey = '';
+    if (old && client) {
+      try { await client.removeChannel(old); } catch (error) { console.warn('[gc-realtime] channel cleanup', error); }
+    }
+  };
+
   const setupCustomer = async () => {
     const { data } = await client.auth.getSession();
     const uid = data.session?.user?.id;
-    if (!uid) return;
+    if (!uid) { await clearChannel(); return; }
+    const key = `customer:${uid}`;
+    if (channel && activeChannelKey === key) return;
+    await clearChannel();
+    activeChannelKey = key;
     channel = client.channel(`gc-customer-live-${uid}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'customer_notifications', filter: `customer_user_id=eq.${uid}` }, payload => {
         const n = payload.new || {};
@@ -48,8 +63,16 @@
       })
       .subscribe();
   };
+
   const setupStaff = async () => {
-    channel = client.channel('gc-staff-live-alerts')
+    const { data } = await client.auth.getSession();
+    const uid = data.session?.user?.id;
+    if (!uid) { await clearChannel(); return; }
+    const key = `staff:${uid}`;
+    if (channel && activeChannelKey === key) return;
+    await clearChannel();
+    activeChannelKey = key;
+    channel = client.channel(`gc-staff-live-alerts-${uid}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'staff_alerts' }, payload => {
         const a = payload.new || {};
         showToast(a.title || 'Staff alert', a.body || 'ئاگادارییەکی نوێ بۆ تیم هەیە.');
@@ -57,17 +80,33 @@
       })
       .subscribe();
   };
+
   const boot = async () => {
     if (!window.supabase?.createClient) { setTimeout(boot, 120); return; }
     // Staff OS creates its own namespaced Supabase client before this bridge runs.
-    // Reuse that exact client rather than creating a second client on the default
-    // customer auth storage key; this avoids staff/customer session collisions.
+    // Reuse that client instead of creating another client on the shared customer key.
     if (isStaff && !window.gcSupabase?.auth) { setTimeout(boot, 120); return; }
     if (isStaff) client = window.gcSupabase;
     else client = window.gcSupabase || window.supabase.createClient(URL, KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+
+    if (isCustomer || isStaff) {
+      client.auth.onAuthStateChange((event, session) => {
+        // Defer Supabase calls until the auth callback has completed.
+        if (!session?.user?.id) {
+          if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
+            setTimeout(() => { void clearChannel(); }, 0);
+          }
+          return;
+        }
+        setTimeout(() => {
+          const task = isCustomer ? setupCustomer : setupStaff;
+          void task().catch(error => console.warn('[gc-realtime] auth resubscribe', error));
+        }, 0);
+      });
+    }
     if (isCustomer) await setupCustomer();
     else if (isStaff) await setupStaff();
   };
-  window.addEventListener('beforeunload', () => { if (channel && client) client.removeChannel(channel); });
+  window.addEventListener('beforeunload', () => { if (channel && client) void clearChannel(); });
   boot().catch(error => console.warn('[gc-realtime]', error));
 })();
