@@ -273,7 +273,8 @@ Deno.serve(async (req) => {
         is_consolidated:shared
       }
     })
-    const [notifications,preferences,quotes,documents,invoices,events,receipts,chatThreads]=await Promise.all([
+    const financeCode=String(customer.gc_code||customer.code||'').normalize('NFKC').trim().toUpperCase()
+    const [notifications,preferences,quotes,documents,invoices,events,receipts,chatThreads,customerTransactions]=await Promise.all([
       service.from('customer_notifications').select('id,shipment_id,kind,title,body,action_url,read_at,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(30),
       service.from('customer_notification_preferences').select('email_enabled,whatsapp_enabled,sms_enabled,in_app_enabled,quiet_hours_start,quiet_hours_end,updated_at').eq('customer_user_id',user.id).maybeSingle(),
       service.from('quote_requests').select('id,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,status,quoted_amount,currency,valid_until,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(30),
@@ -282,8 +283,9 @@ Deno.serve(async (req) => {
       shipmentIds.length?service.from('shipment_tracking_events').select('id,shipment_id,status_key,title,note,location_label,lat,lng,occurred_at,photos').in('shipment_id',shipmentIds).eq('is_public',true).order('occurred_at',{ascending:false}).limit(200):Promise.resolve({data:[],error:null}),
       service.from('warehouse_receipts').select('id,batch_code,location,stage,photo_taken_at,gc_code_detected,verification_status,photos,shipment_id,received_at').eq('directory_customer_id',customer.id).order('received_at',{ascending:false}).limit(50),
       service.from('customer_chat_threads').select('id,subject,status,priority,last_message_at,created_at').eq('customer_user_id',user.id).neq('status','closed').order('last_message_at',{ascending:false}).limit(30),
+      financeCode ? service.from('finance_transactions').select('id,type,gc_code,amount_usd,reference,created_at').eq('gc_code',financeCode).in('type',['customer_charge','customer_payment','refund','adjustment']).order('created_at',{ascending:false}).limit(100) : Promise.resolve({data:[],error:null}),
     ])
-    const firstResults=[notifications,preferences,quotes,documents,invoices,events,receipts,chatThreads]
+    const firstResults=[notifications,preferences,quotes,documents,invoices,events,receipts,chatThreads,customerTransactions]
     const firstFailure=firstResults.find((result:any)=>result?.error)
     if(firstFailure?.error)throw firstFailure.error
     const invoiceIds=(invoices.data||[]).map((item:any)=>item.id).filter(Boolean)
@@ -311,7 +313,7 @@ Deno.serve(async (req) => {
       },
       shipments:safeShipments,cargo_items:ownCargoRows,notifications:notifications.data||[],
       quotes:quotes.data||[],documents:documents.data||[],pods:pods.data||[],invoices:invoices.data||[],
-      payments:payments.data||[],events:events.data||[],ledger:ledger.data||[],receipts:receipts.data||[],
+      payments:payments.data||[],customer_transactions:customerTransactions.data||[],events:events.data||[],ledger:ledger.data||[],receipts:receipts.data||[],
       packages:packages.data||[],chat_threads:chatThreads.data||[],
       notification_preferences:preferences.data||{email_enabled:false,whatsapp_enabled:false,sms_enabled:false,in_app_enabled:true}
     })
