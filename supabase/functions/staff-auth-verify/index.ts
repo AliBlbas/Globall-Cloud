@@ -63,7 +63,7 @@ async function getUser(req: Request) {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { status: 204, headers: headers(req) })
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: headers(req) })
   if (req.method !== 'GET') return json(req, { error: 'Method not allowed' }, 405)
 
   try {
