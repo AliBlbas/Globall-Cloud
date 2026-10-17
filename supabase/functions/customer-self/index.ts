@@ -23,6 +23,18 @@ const numberOrNull = (value: unknown, max: number) => {
   const number = Number(value)
   return Number.isFinite(number) && number >= 0 && number <= max ? number : null
 }
+const CARGO_PHOTO_BUCKET = 'customer-request-photos'
+const CARGO_PHOTO_MAX_BYTES = 10 * 1024 * 1024
+const CARGO_PHOTO_MIMES_BY_EXTENSION: Record<string, string[]> = {
+  jpg: ['image/jpeg', 'image/jpg', 'image/pjpeg'],
+  jpeg: ['image/jpeg', 'image/jpg', 'image/pjpeg'],
+  png: ['image/png'],
+  webp: ['image/webp'],
+  avif: ['image/avif'],
+  gif: ['image/gif'],
+  heic: ['image/heic', 'image/heif'],
+  heif: ['image/heif', 'image/heic'],
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', {headers: cors(req)})
@@ -171,8 +183,31 @@ Deno.serve(async (req) => {
         const serviceLevel = text(data.service_level, 30) || 'standard'
         const incoterm = text(data.incoterm, 12) || 'EXW'
         const notes = text(data.notes, 2000)
+        const requestType = text(data.request_type, 24) || 'quote'
+        const cargoCountry = text(data.cargo_country, 100)
+        const cargoDescription = text(data.cargo_description, 2000)
+        const requestedCargoImagePath = text(data.cargo_image_path, 240)
         const quantityValid = transportMode === 'sea' ? volume !== null && volume > 0 : weight !== null && weight > 0
-        if (originKey.length < 2 || destKey.length < 2 || !['air', 'sea', 'land', 'multimodal'].includes(transportMode) || !['standard', 'express', 'priority'].includes(serviceLevel) || !['EXW', 'FOB', 'CIF', 'DDP'].includes(incoterm) || !quantityValid) return json(req, {error: 'Please check the required quote fields.'}, 400)
+        if (originKey.length < 2 || destKey.length < 2 || !['air', 'sea', 'land', 'multimodal'].includes(transportMode) || !['standard', 'express', 'priority'].includes(serviceLevel) || !['EXW', 'FOB', 'CIF', 'DDP'].includes(incoterm) || !['quote', 'shipment'].includes(requestType) || !quantityValid) return json(req, {error: 'Please check the required quote fields.'}, 400)
+
+        let cargoImagePath: string | null = null
+        if (requestedCargoImagePath) {
+          const pathParts = requestedCargoImagePath.split('/')
+          const photoName = pathParts.length === 2 ? pathParts[1] : ''
+          const photoMatch = photoName.match(/^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|jpeg|png|webp|avif|gif|heic|heif)$/i)
+          const extension = photoMatch?.[2]?.toLowerCase() || ''
+          const allowedMimes = CARGO_PHOTO_MIMES_BY_EXTENSION[extension]
+          if (pathParts.length !== 2 || pathParts[0] !== user.id || !photoMatch || !allowedMimes) return json(req, {error: 'Invalid cargo image attachment.'}, 400)
+          const {data:storedPhotos, error:photoListError} = await service.storage.from(CARGO_PHOTO_BUCKET).list(user.id, {limit: 100, search: photoName})
+          if (photoListError) throw photoListError
+          const storedPhoto = (storedPhotos || []).find((photo) => photo.name === photoName)
+          const metadata = storedPhoto?.metadata as Record<string, unknown> | null | undefined
+          const size = Number(metadata?.size ?? metadata?.contentLength ?? Number.NaN)
+          const storedMime = text(metadata?.mimetype ?? metadata?.content_type, 100).toLowerCase()
+          if (!storedPhoto || !Number.isFinite(size) || size < 1 || size > CARGO_PHOTO_MAX_BYTES || (storedMime && !allowedMimes.includes(storedMime))) return json(req, {error: 'Invalid cargo image attachment.'}, 400)
+          cargoImagePath = requestedCargoImagePath
+        }
+
         const {data: rows, error} = await service.from('quote_requests').insert({
           customer_user_id: user.id,
           customer_name: customer.name || user.user_metadata?.full_name || user.email || 'Customer',
@@ -185,6 +220,10 @@ Deno.serve(async (req) => {
           items_count: items,
           service_level: serviceLevel,
           incoterm,
+          request_type: requestType,
+          cargo_country: cargoCountry || null,
+          cargo_description: cargoDescription || null,
+          cargo_image_path: cargoImagePath,
           notes: notes || null,
           status: 'pending',
         }).select('id').single()
