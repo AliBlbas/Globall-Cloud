@@ -65,6 +65,7 @@ const required = [
   'supabase/migrations/20261017185000_warehouse_receipt_cartons.sql',
   'supabase/migrations/20261017203455_fix_customer_notification_uuid_text_join.sql',
   'supabase/migrations/20261017204122_add_missing_fk_covering_indexes.sql',
+  'supabase/migrations/20261017204218_optimize_customer_order_rls_policies.sql',
   'supabase/functions/public-config/index.ts',
   'supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
   'supabase/functions/notification-dispatch/index.ts','supabase/functions/warehouse-receiving/index.ts','supabase/functions/warehouse-notify/index.ts',
@@ -328,6 +329,7 @@ const warehouseReceiptPortalRouteMigration = read('supabase/migrations/202610171
 const warehouseReceiptPreferenceMigration = read('supabase/migrations/20261017182723_warehouse_receipt_respect_in_app_preferences.sql')
 const customerNotificationFanoutMigration = read('supabase/migrations/20261017203455_fix_customer_notification_uuid_text_join.sql')
 const fkIndexMigration = read('supabase/migrations/20261017204122_add_missing_fk_covering_indexes.sql')
+const rlsOptimizationMigration = read('supabase/migrations/20261017204218_optimize_customer_order_rls_policies.sql')
 const customerWarehouseEvidenceCss = read('gc-customer-warehouse-evidence-20261017.css')
 
 const mobileUiContracts = [
@@ -397,6 +399,7 @@ const mobileUiContracts = [
   ['staff quote calculator handles numeric/volumetric weights server-side and requires staff access', operationsV4Source.includes("if(action==='quote_calculate')") && operationsV4Source.includes('length*width*height/6000') && operationsV4Source.includes('Invalid quote calculation input') && operationsV4Source.includes('Staff permission required')],
   ['unsupported operations actions return a client error instead of 500', operationsV4Source.includes('Invalid|Unsupported action/i.test(m)')],
   ['production advisor foreign-key indexes are covered idempotently', ['customer_legacy_code_review_reviewed_by_idx','financial_records_gc_code_idx','shop_order_items_product_id_idx','warehouse_items_gc_code_idx','warehouse_receipt_cartons_created_by_idx'].every(name => fkIndexMigration.includes('CREATE INDEX IF NOT EXISTS ' + name))],
+  ['customer/staff order RLS policies evaluate auth.uid through a scalar subquery', ['gc_customer_shipments_select','shop_orders_customer_read','shop_order_items_customer_read'].every(name => rlsOptimizationMigration.includes('ALTER POLICY ' + name)) && (rlsOptimizationMigration.match(/\(SELECT auth\.uid\(\)\)/g)||[]).length >= 5],
   ['public-config preflight returns an empty 204 response body', publicConfigSource.includes("new Response(null, { status: 204, headers: headers(origin) })") && !publicConfigSource.includes("new Response('ok', { status: 204")],
   ['customer warehouse evidence styles include responsive photo proof cards', customerWarehouseEvidenceCss.includes('.warehouse-receipt-evidence') && customerWarehouseEvidenceCss.includes('.photo-grid')],
   ['owner-account warehouse notifications carry only that owner’s freshly signed receipt photos', customerSelfSource.includes("body,action_url,event_key,read_at,created_at") && customerSelfSource.includes("receiptsById.get(eventKey.slice(prefix.length))") && customerSelfSource.includes('receipt_photos: Array.isArray(receipt.photos)') && customerPortalVersionedScript.includes('notification-receipt-photo-grid') && customerWarehouseEvidenceCss.includes('notification-receipt-photo-grid')],
