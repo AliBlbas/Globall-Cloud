@@ -164,6 +164,13 @@ const unifiedController = read('gc-unified-customer-experience-20261016.js')
 const customerStyleLoader = read('gc-public-customer-style-loader-20261014.js')
 if (!unifiedShell.includes('<body class="gc-customer-app"') || !unifiedShell.includes('<div class="gc-app" id="gcApp" hidden>') || !unifiedShell.includes('<div id="gcCustomerWorkspace" data-gc-unified-customer="1">') || !unifiedShell.includes('<div id="auth" class="app-modal">') || unifiedShell.includes('<nav class="gc-mobile-dock-v3"')) fail('Root must open the integrated customer workspace without rendering the obsolete public homepage or dock')
 else ok('Root opens the single customer workspace and no public mobile dock')
+const customerShellToolbarStart = unifiedShell.indexOf('<section class="workspace-toolbar"')
+const customerShellToolbarEnd = unifiedShell.indexOf('</section>', customerShellToolbarStart)
+const customerShellToolbar = customerShellToolbarStart >= 0 && customerShellToolbarEnd >= 0 ? unifiedShell.slice(customerShellToolbarStart, customerShellToolbarEnd) : ''
+const customerSettingsHub = read('gc-settings-hub.js')
+if (!customerShellToolbar || customerShellToolbar.includes('data-dashboard-theme') || customerShellToolbar.includes('data-dashboard-language') || !customerSettingsHub.includes('id="gcSettingsTheme"') || !customerSettingsHub.includes('id="gcSettingsLanguage"')) fail('Language and appearance preferences must live only inside the dedicated Settings section')
+else ok('Personal language and appearance preferences are available only inside Settings')
+
 if (!unifiedController.includes("'#public':'#overview'") || !unifiedController.includes("'#services':'#gcCustomerRouteOverview'") || !unifiedController.includes("'#request':'#newRequest'") || !unifiedController.includes("'#contact':'#support'")) fail('Legacy marketing routes must map into customer console views')
 if (!customerStyleLoader.includes('function ensureHomeDock() { return; }') || customerStyleLoader.includes('dock.innerHTML')) fail('Legacy public dock injector must remain disabled')
 if (!read('gc-customer-workspace-elite-20261014.css').includes('body.gc-customer-app #gcWhatsAppFloat') || !read('gc-customer-workspace-elite-20261014.css').includes('body.gc-customer-app .gc-whatsapp-float')) fail('Floating marketing WhatsApp bubble must not overlap customer app navigation')
