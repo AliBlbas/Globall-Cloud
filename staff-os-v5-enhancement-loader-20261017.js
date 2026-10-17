@@ -70,6 +70,33 @@
     // Keep the known mobile integrity guard, then restore the dedicated staff command layer as the final cascade.
     loadStyle('/gc-ui-integrity-mobile-20261017.css?v=6');
     loadStyle('/gc-staff-command-system-20261017.css?v=1');
+    lockCommandStylesLast();
+  };
+
+  // Several legacy helpers append their style sheets after the app shell mounts.
+  // Keep the scoped Staff OS layer last in <head>, without duplicating any CSS.
+  const lockCommandStylesLast = () => {
+    const href = '/gc-staff-command-system-20261017.css?v=1';
+    const ensureLast = () => {
+      const link = document.querySelector('link[data-gc-enhancement-style="' + href + '"]')
+        || document.querySelector('link[href="' + href + '"]');
+      if (link && link.parentNode === document.head && document.head.lastElementChild !== link) {
+        document.head.appendChild(link);
+      }
+    };
+    ensureLast();
+    if (window.__gcStaffCommandCascadeObserver) return;
+    const observer = new MutationObserver((records) => {
+      const addedStyles = records.some((record) => [...record.addedNodes].some((node) =>
+        node.nodeType === 1 && (
+          node.matches?.('link[rel="stylesheet"],style')
+          || node.querySelector?.('link[rel="stylesheet"],style')
+        )
+      ));
+      if (addedStyles) ensureLast();
+    });
+    observer.observe(document.head, { childList: true, subtree: true });
+    window.__gcStaffCommandCascadeObserver = observer;
   };
 
   const waitForShell = () => {
