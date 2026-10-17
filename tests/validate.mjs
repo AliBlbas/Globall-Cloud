@@ -51,7 +51,7 @@ if (ts) {
 
 console.log('Required production files')
 const required = [
-  'index.html','gc-customer-experience-signature-20261017.css','login.html','register.html','customer-access.html','supabase/functions/customer-gc-register/index.ts','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','gc-unified-customer-experience-20261016.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
+  'index.html','gc-customer-experience-signature-20261017.css','gc-ui-integrity-mobile-20261017.css','gc-dashboard-preferences-20261003.js','gc-public-customer-style-loader-20261014.js','staff-os-v5-enhancement-loader-20261017.js','login.html','register.html','customer-access.html','supabase/functions/customer-gc-register/index.ts','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','gc-unified-customer-experience-20261016.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
   'public-route-bootstrap.js','public-runtime-guarantee.js','public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js',
   'tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html',
   'staff-os-v5.html','staff-os-v5.css','staff-os-v5.js','gc-shipment-detail-20261016.css','staff-os-v5-rescue.js','staff-logistics-intelligence.js','staff-logistics-intelligence.css',
@@ -300,6 +300,28 @@ const unifiedContracts = [
   ['main Staff OS loads current customer filter assets', staffConsoleHtml.includes('staff-os-v5.css?v=20261016-4') && staffConsoleHtml.includes('staff-os-v5-20261017.js?v=20261017-3') && staffConsoleStyles.includes('.customer-link-guidance')],
 ]
 for (const [label, passed] of unifiedContracts) {
+  if (passed) ok(label)
+  else fail(label)
+}
+
+console.log('Mobile UI integrity contracts')
+const mobileUiCss = read('gc-ui-integrity-mobile-20261017.css')
+const customerViewScript = read('gc-dashboard-preferences-20261003.js')
+const customerStyleLoader = read('gc-public-customer-style-loader-20261014.js')
+const staffEnhancementLoader = read('staff-os-v5-enhancement-loader-20261017.js')
+const staffOsHtml = read('staff-os-v5.html')
+
+const mobileUiContracts = [
+  ['customer workspace references the final mobile integrity CSS', publicShell.includes('gc-ui-integrity-mobile-20261017.css?v=4')],
+  ['customer style loader puts integrity CSS after signature styles', customerStyleLoader.indexOf('gc-ui-integrity-mobile-20261017.css?v=4') > customerStyleLoader.indexOf('gc-customer-experience-signature-20261017.css?v=2')],
+  ['Staff OS references the current integrity CSS and cache-busted loader', staffOsHtml.includes('gc-ui-integrity-mobile-20261017.css?v=4') && staffOsHtml.includes('staff-os-v5-enhancement-loader-20261017.js?v=2')],
+  ['staff enhancement loader loads integrity CSS after the mobile dock', staffEnhancementLoader.indexOf("loadStyle('/gc-ui-integrity-mobile-20261017.css?v=4')") > staffEnhancementLoader.indexOf("loadStyle('/gc-staff-mobile-dock-20261016.css?v=4')")],
+  ['customer view selector includes the toolbar and isolated section views', customerViewScript.includes("const allSections = () => [...main.querySelectorAll(':scope > section, :scope > .workspace-toolbar')]") && customerViewScript.includes("settings: ['gcAccountSettings']")),
+  ['customer dock declares five separate destinations', ['home','shipments','requests','notifications','settings'].every(key => publicShell.includes('data-dock-tab="' + key + '"'))],
+  ['Staff Intelligence chat has a dedicated flexible message row', mobileUiCss.includes('grid-template-rows: auto auto auto minmax(0, 1fr) auto !important') && mobileUiCss.includes('#gcStaffAiPanel .gc-ai-messages')),
+  ['only the active customer dock destination receives the bright active treatment', mobileUiCss.includes('.dock-primary:not(.active)') && mobileUiCss.includes('button[aria-current="page"]')],
+]
+for (const [label, passed] of mobileUiContracts) {
   if (passed) ok(label)
   else fail(label)
 }
