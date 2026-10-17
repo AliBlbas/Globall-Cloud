@@ -41,7 +41,9 @@
     event.preventDefault();
     const button = form.querySelector('button[type="submit"]');
     const sessionResult = await window.sb?.auth?.getSession?.();
-    const token = sessionResult?.data?.session?.access_token;
+    const session = sessionResult?.data?.session;
+    const token = session?.access_token;
+    const userId = session?.user?.id;
     if (!token) { setStatus('تکایە سەرەتا login بکە بۆ ناردنی داواکاری.', 'error'); $('loginBtn')?.click(); return; }
     const mode = modeSelect?.value || 'air';
     const readOptionalNumber = (id) => {
@@ -67,17 +69,72 @@
         : 'وەسفی کاڵا و کێشی زیاتر لە سفر پڕبکەرەوە؛ ژمارەی کاڵاش دەبێت ژمارەیەکی تەواو بێت.', 'error');
       return;
     }
+    const imageFile = $('requestImage')?.files?.[0] || null;
+    const maxImageBytes = 10 * 1024 * 1024;
+    const extensionByMime = {
+      'image/jpeg':'jpg', 'image/jpg':'jpg', 'image/pjpeg':'jpg',
+      'image/png':'png', 'image/webp':'webp', 'image/avif':'avif',
+      'image/gif':'gif', 'image/heic':'heic', 'image/heif':'heif'
+    };
+    const mimeByExtension = {
+      jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp',
+      avif:'image/avif', gif:'image/gif', heic:'image/heic', heif:'image/heif'
+    };
+    const detectedMime = String(imageFile?.type || '').toLowerCase();
+    const detectedExtension = String(imageFile?.name || '').toLowerCase().match(/\.([a-z0-9]+)$/)?.[1] || '';
+    const imageExtension = detectedMime ? extensionByMime[detectedMime] : detectedExtension;
+    if (imageFile && imageFile.size > maxImageBytes) {
+      setStatus('قەبارەی وێنە نابێت لە 10MB زیاتر بێت.', 'error');
+      return;
+    }
+    if (imageFile && (!imageExtension || !mimeByExtension[imageExtension] || imageFile.size <= 0)) {
+      setStatus('تەنها وێنەی JPEG، PNG، WebP، AVIF، GIF، HEIC یان HEIF وەردەگیرێت.', 'error');
+      return;
+    }
+    if (imageFile && !userId) {
+      setStatus('هەژماری کڕیار پشتڕاست نەکراوەتەوە؛ تکایە دووبارە login بکە.', 'error');
+      return;
+    }
     if (button) { button.disabled = true; button.textContent = 'داواکاری دەنێردرێت…'; }
     setStatus('داواکارییەکەت بە شێوەی پارێزراو دەنێردرێت…');
+    let uploadedPath = null;
+    let responseStatus = null;
+    const country = $('requestCountry')?.value || 'china';
     try {
-      const response = await fetch('https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/customer-self', { method: 'POST', headers: { Authorization: `Bearer ${token}`, apikey: 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda', 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'request_quote', data: { origin_key: $('requestCountry')?.value || 'china', dest_key: 'Erbil', transport_mode: mode, weight_kg: weight, volume_cbm: volume, items_count: items, service_level: 'standard', incoterm: 'EXW', notes: description } }), cache: 'no-store' });
+      if (imageFile) {
+        setStatus('وێنەی کاڵا بە شێوەی تایبەت بار دەکرێت…');
+        const storage = window.sb?.storage?.from?.('customer-request-photos');
+        if (!storage) throw new Error('خزمەتی بارکردنی وێنە بەردەست نییە.');
+        const randomId = window.crypto?.randomUUID?.() || 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
+          const random = Math.floor(Math.random() * 16);
+          return (char === 'x' ? random : ((random & 3) | 8)).toString(16);
+        });
+        const desiredPath = `${userId}/${randomId}.${imageExtension}`;
+        const upload = await storage.upload(desiredPath, imageFile, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: detectedMime || mimeByExtension[imageExtension]
+        });
+        if (upload.error) throw new Error('بارکردنی وێنە سەرکەوتوو نەبوو. تکایە وێنەیەکی تر هەڵبژێرە.');
+        uploadedPath = upload.data?.path || desiredPath;
+      }
+      const response = await fetch('https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/customer-self', { method: 'POST', headers: { Authorization: `Bearer ${token}`, apikey: 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda', 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'request_quote', data: { request_type: 'shipment', origin_key: country, cargo_country: country, cargo_description: description, cargo_image_path: uploadedPath, dest_key: 'Erbil', transport_mode: mode, weight_kg: weight, volume_cbm: volume, items_count: items, service_level: 'standard', incoterm: 'EXW', notes: description } }), cache: 'no-store' });
+      responseStatus = response.status;
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.error || 'ناردنی داواکاری سەرکەوتوو نەبوو.');
       setStatus('داواکارییەکەت نێردرا؛ تیمەکەمان پاش پشکنین وەڵامت دەداتەوە.', 'success');
-      renderHistory([{ origin_key: $('requestCountry')?.value || 'china', dest_key: 'Erbil', transport_mode: mode, weight_kg: weight, volume_cbm: volume, status: 'pending', created_at: new Date().toISOString() }, ...((window.__customerQuotes || []).filter((x) => x?.id))]);
+      renderHistory([{ origin_key: country, dest_key: 'Erbil', transport_mode: mode, weight_kg: weight, volume_cbm: volume, status: 'pending', created_at: new Date().toISOString() }, ...((window.__customerQuotes || []).filter((x) => x?.id))]);
       form.reset();
       syncModeFields();
-    } catch (error) { setStatus(error.message || 'هەڵەیەک ڕوویدا.', 'error'); }
+    } catch (error) {
+      if (uploadedPath && responseStatus !== null && responseStatus >= 400 && responseStatus < 500) {
+        try {
+          const cleanup = await window.sb?.storage?.from?.('customer-request-photos')?.remove?.([uploadedPath]);
+          if (cleanup?.error) console.warn('Could not remove rejected customer photo upload.', cleanup.error);
+        } catch (cleanupError) { console.warn('Could not remove rejected customer photo upload.', cleanupError); }
+      }
+      setStatus(error.message || 'هەڵەیەک ڕوویدا.', 'error');
+    }
     finally { if (button) { button.disabled = false; button.innerHTML = '<span data-dash-icon="send"></span>ناردنی داواکاری'; } }
   };
   form.addEventListener('submit', submit);
