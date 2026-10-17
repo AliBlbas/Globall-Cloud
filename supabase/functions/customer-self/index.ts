@@ -367,7 +367,7 @@ Deno.serve(async (req) => {
     })
     const financeCode=String(customer.gc_code||customer.code||'').normalize('NFKC').trim().toUpperCase()
     const [notifications,preferences,quotes,documentsByUser,invoicesByUser,events,receipts,chatThreads,customerTransactions]=await Promise.all([
-      service.from('customer_notifications').select('id,shipment_id,kind,title,body,action_url,read_at,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(30),
+      service.from('customer_notifications').select('id,shipment_id,kind,title,body,action_url,event_key,read_at,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(30),
       service.from('customer_notification_preferences').select('email_enabled,whatsapp_enabled,sms_enabled,in_app_enabled,quiet_hours_start,quiet_hours_end,updated_at').eq('customer_user_id',user.id).maybeSingle(),
       service.from('quote_requests').select('id,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,status,quoted_amount,currency,valid_until,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(30),
       service.from('shipment_documents').select('id,shipment_id,document_type,title,file_url,is_public,document_status,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(30),
@@ -408,6 +408,30 @@ Deno.serve(async (req) => {
         cartons: cartonsByReceipt.get(String(receipt.id)) || [],
       })
     ))
+    // Join each warehouse-received notification to the authenticated owner's receipt evidence.
+    // Photos are signed on this request and remain private in Storage; raw bucket paths are never returned.
+    const receiptsById = new Map<string, Record<string, any>>()
+    for (const receipt of customerReceipts) receiptsById.set(String(receipt.id), receipt)
+    const customerNotifications = (notifications.data || []).map((notification: Record<string, any>) => {
+      const eventKey = String(notification.event_key || '')
+      const prefix = 'warehouse_received:'
+      if (!eventKey.startsWith(prefix)) return notification
+      const receipt = receiptsById.get(eventKey.slice(prefix.length))
+      if (!receipt) return notification
+      return {
+        ...notification,
+        receipt_id: receipt.id,
+        receipt_photos: Array.isArray(receipt.photos) ? receipt.photos.slice(0, 8) : [],
+        receipt_gc_code: receipt.gc_code_detected || receipt.gc_code || null,
+        receipt_location: receipt.location || receipt.source_warehouse || receipt.warehouse || null,
+        receipt_received_at: receipt.received_at || null,
+        receipt_cartons: Array.isArray(receipt.cartons) ? receipt.cartons.map((carton: Record<string, any>) => ({
+          code: carton.carton_code || null,
+          index: carton.carton_index || null,
+          total: carton.carton_total || null,
+        })) : [],
+      }
+    })
     // Include public documents and legacy invoices attached to single-owner
     // shipments even when older staff records predate customer_user_id linking.
     // Never attach an unowned invoice/document from a consolidated shipment.
@@ -448,7 +472,7 @@ Deno.serve(async (req) => {
         preferred_language:customer.preferred_language||user.user_metadata?.preferred_language||'ckb',
         avatar_url:user.user_metadata?.avatar_url||null
       },
-      shipments:safeShipments,cargo_items:ownCargoRows,notifications:notifications.data||[],
+      shipments:safeShipments,cargo_items:ownCargoRows,notifications:customerNotifications,
       quotes:quotes.data||[],documents,pods:pods.data||[],invoices,
       payments:payments.data||[],customer_transactions:customerTransactions.data||[],events:events.data||[],ledger:ledger.data||[],receipts:customerReceipts,
       packages:packages.data||[],chat_threads:chatThreads.data||[],
