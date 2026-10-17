@@ -5,6 +5,7 @@ const BUCKET='warehouse-receipts'
 const SIGNED_URL_TTL=60*60*24
 const MAX_RECEIPT_PHOTOS=8
 const MAX_RECEIPT_PHOTO_BYTES=12*1024*1024
+const MAX_RECEIPT_TOTAL_PHOTO_BYTES=48*1024*1024
 const PHOTO_MIME_BY_EXTENSION:Record<string,string[]> = {
  jpg:['image/jpeg','image/jpg','image/pjpeg'],jpeg:['image/jpeg','image/jpg','image/pjpeg'],
  png:['image/png'],webp:['image/webp'],heic:['image/heic','image/heif'],heif:['image/heif','image/heic']
@@ -357,6 +358,7 @@ if(files.length>MAX_RECEIPT_PHOTOS)throw new Error(`A receipt may contain at mos
 const photoTypes=files.map(photoMimeType);
 if(photoTypes.some(type=>!type))throw new Error('Unsupported photo type. Use JPEG, PNG, WebP or HEIC/HEIF images.');
 if(files.some(file=>file.size>MAX_RECEIPT_PHOTO_BYTES))throw new Error('Each photo must be 12 MB or smaller');
+if(files.reduce((sum,file)=>sum+file.size,0)>MAX_RECEIPT_TOTAL_PHOTO_BYTES)throw new Error('All receipt photos together must be 48 MB or smaller');
 const photoPaths:string[]=[];
 const receiptKey=`${code}/${new Date().toISOString().slice(0,10)}/${crypto.randomUUID()}`;
 try{
