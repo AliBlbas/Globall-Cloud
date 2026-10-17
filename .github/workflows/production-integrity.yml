@@ -59,16 +59,18 @@ jobs:
           set -euo pipefail
           grep -q 'gc-staff-final-20260922.js?v=' staff-os-v5.html
           grep -q '/gc-final-ui-20260927.css' staff-os-v5.html
-          grep -q '/gc-final-ui-20260927.css' customer-portal.html
+          grep -Fq "window.location.replace('/#auth')" customer-portal.html
           grep -q '/gc-production-ui-20260927.css?v=1' index.html
           grep -q '/gc-production-ui-20260927.css?v=1' staff-os-v5.html
-          grep -q '/gc-production-ui-20260927.css?v=1' customer-portal.html
-          grep -q 'staff-os-v5.js?v=20261016-19' staff-os-v5.html
+          grep -Fq "window.location.replace('/#auth')" customer-portal.html
+          grep -q 'staff-os-v5-20261017.js?v=20261017-3' staff-os-v5.html
           grep -q 'staff-os-v5.css?v=20261016-4' staff-os-v5.html
-          grep -q 'gc-csp-scripts/customer-portal-inline-1.js?v=20261016-9' index.html
-          grep -q 'gc-csp-scripts/customer-portal-inline-1.js?v=20261016-9' customer-portal.html
-          grep -Fq 'authForm' gc-csp-scripts/customer-portal-inline-1.js
-          grep -Fq 'event.preventDefault();' gc-csp-scripts/customer-portal-inline-1.js
+          grep -q 'gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-3' index.html
+          grep -Fq "window.location.replace('/#auth')" customer-portal.html
+          grep -Fq 'authForm' gc-csp-scripts/customer-portal-inline-20261017.js
+          grep -Fq 'event.preventDefault();' gc-csp-scripts/customer-portal-inline-20261017.js
+          grep -Fq 'dashboard.customer_transactions || []' gc-csp-scripts/customer-portal-inline-20261017.js
+          grep -Fq 'renderShipments(rows, dashboard.cargo_items || [])' gc-csp-scripts/customer-portal-inline-20261017.js
           grep -Fq 'CUSTOMER_REGISTRATION_DISABLED' supabase/functions/customer-gc-register/index.ts
           ! grep -Fq 'SUPABASE_SERVICE_ROLE_KEY' supabase/functions/customer-gc-register/index.ts
           ! grep -Fq 'createUser(' supabase/functions/customer-gc-register/index.ts
