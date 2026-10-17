@@ -445,11 +445,21 @@ $('authForm').addEventListener('submit', async (event) => {
     } catch (loadError) {
       console.error('[gc-customer] signed in but dashboard data failed to load', loadError);
       const status = $('portalStatus');
+      const accountLinkRequired = Number(loadError?.status) === 403;
+      const supportLink = 'https://wa.me/9647507577137';
       if (status) {
         status.classList.remove('hidden');
-        status.textContent = 'چوونەژوورەوە سەرکەوتوو بوو، بەڵام بارکردنی داتای کونسۆڵ سەرکەوتوو نەبوو. تکایە refresh بکە یان پەیوەندی بە پشتیوانی بکە.';
+        if (accountLinkRequired) {
+          status.innerHTML = '<strong>هەژماری کڕیار پێویستی بە پشتڕاستکردنەوە هەیە</strong><span>چوونەژوورەوە سەرکەوتوو بوو، بەڵام ئەم هەژمارە بە هەژماری کڕیار/کۆدی GC پەیوەست نەکراوە یان چالاک نییە. بۆ پاراستنی زانیارییەکانت، تا پشتڕاستکردنەوەی ستاف بارەکان و داتاکانی هەژمار نیشان نادرێن.</span><a class="app-secondary-action gc-account-help-action" href="' + supportLink + '" target="_blank" rel="noopener noreferrer">پەیوەندی بە پشتیوانی Globall Cloud لە WhatsApp ↗</a>';
+        } else {
+          status.textContent = 'چوونەژوورەوە سەرکەوتوو بوو، بەڵام بارکردنی داتای کونسۆڵ سەرکەوتوو نەبوو. تکایە refresh بکە یان پەیوەندی بە پشتیوانی بکە.';
+        }
       }
-      setHtml('notifications', '<div class="alert">هەژمارەکەت چووەتە ژوورەوە؛ بەڵام داتاکانی کونسۆڵ نەهاتن. تکایە جارێکی تر refresh بکەرەوە.</div>');
+      if (accountLinkRequired) {
+        setHtml('notifications', '<div class="alert"><strong>پێویستە هەژمارەکەت پشتڕاست بکرێتەوە.</strong><p>تکایە GC Code ـەکەت بە تیمی پشتیوانی بدە تا بەستەری هەژمار و چالاکبوونی کڕیار بپشکنن.</p><a href="' + supportLink + '" target="_blank" rel="noopener noreferrer">پەیوەندی بە پشتیوانی لە WhatsApp ↗</a></div>');
+      } else {
+        setHtml('notifications', '<div class="alert">هەژمارەکەت چووەتە ژوورەوە؛ بەڵام داتاکانی کونسۆڵ نەهاتن. تکایە جارێکی تر refresh بکەرەوە.</div>');
+      }
     }
   } catch (error) {
     const raw = String(error?.message || error || '');
