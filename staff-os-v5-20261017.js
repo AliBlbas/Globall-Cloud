@@ -918,7 +918,7 @@
         if(result.notification?.whatsapp_queued)channels.push('WhatsApp queue');
         if(result.notification?.email_queued)channels.push('Email queue');
         if(Array.isArray(result.notification?.errors)&&result.notification.errors.length)throw new Error(result.notification.errors.join(' · '));
-        toast(channels.length?`ئاگادارکردنەوە ڕێکخرا: ${channels.join(' · ')}`:'هیچ ڕێگای پەیوەندییەکی بەردەست نییە','ok');
+        if(channels.length)toast(`ئاگادارکردنەوە ڕێکخرا: ${channels.join(' · ')}`,'ok');else if(result.notification?.external_opt_in===false)toast('WhatsApp/Email queue نەکرا؛ ڕەزامەندی کڕیار پێویستە.','ok');else toast('هیچ ڕێگای پەیوەندییەکی بەردەست نییە','ok');
       }catch(error){toast('بار تۆمارکرا؛ ئاگادارکردنەوە: '+errorText(error,'شکستی هێنا'),'bad')}
       finally{button.disabled=false;button.removeAttribute('aria-busy');button.textContent='ناردن / دووبارەکردنەوەی ئاگادارکردنەوە'}
     };
