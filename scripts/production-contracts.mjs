@@ -153,7 +153,7 @@ if (!staffV5Script.includes('const customerBridgePanel =') || !staffV5Script.inc
 else ok('Staff overview exposes customer account linkage and portal access')
 
 const warehouseReceivingSource = read('supabase/functions/warehouse-receiving/index.ts')
-const warehouseNotifySource = read('supabase/functions/warehouse-notify/index.ts')
+const warehouseNotifySource = read('supabase/functions/warehouse-notify/index.ts','supabase/migrations/20261017185000_warehouse_receipt_cartons.sql','gc-customer-carton-manifest-20261017.js','gc-customer-carton-manifest-20261017.css','gc-staff-carton-tools-20261017.js','gc-staff-command-system-20261017.css',
 const customerSelfWarehouseSource = read('supabase/functions/customer-self/index.ts')
 const customerReceiptUiSource = read('gc-csp-scripts/customer-portal-inline-20261017.js')
 const realtimeSource = read('gc-realtime-notifications-20261003.js')
@@ -270,7 +270,7 @@ else ok('Repository validation guards the retired public registration endpoint')
 
 
 
-if (!staff.includes('staff-os-v5-20261017.js?v=20261017-10')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
+if (!staff.includes('staff-os-v5-20261017.js?v=20261017-11')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
 
 const mobileLoader = read('staff-os-v5-enhancement-loader.js')
 if (!staff.includes('staff-os-v5-enhancement-loader.js?v=20261016-7')) fail('Staff enhancement loader cache-buster is stale')
@@ -331,6 +331,28 @@ if (!customerWarehouseRouteMigration.includes("'/#records'") || !customerWarehou
 else ok('Final database trigger route matches the customer portal router')
 if (!customerWarehousePreferenceMigration.includes('COALESCE(p.in_app_enabled, TRUE)') || !customerWarehousePreferenceMigration.includes('v_in_app_enabled IS FALSE')) fail('Warehouse receipt trigger must respect customer in-app notification preferences')
 else ok('Warehouse receipt trigger respects customer in-app notification preferences')
+
+const cartonManifestMigration = read('supabase/migrations/20261017185000_warehouse_receipt_cartons.sql')
+const cartonManifestReceiving = read('supabase/functions/warehouse-receiving/index.ts')
+const cartonManifestNotify = read('supabase/functions/warehouse-notify/index.ts')
+const cartonManifestCustomerSelf = read('supabase/functions/customer-self/index.ts')
+const cartonManifestStaff = read('staff-os-v5-20261017.js')
+const cartonManifestCustomerUi = read('gc-customer-carton-manifest-20261017.js')
+const cartonManifestStaffTools = read('gc-staff-carton-tools-20261017.js')
+if (!cartonManifestMigration.includes('CREATE TABLE IF NOT EXISTS public.warehouse_receipt_cartons') || !cartonManifestMigration.includes('ENABLE ROW LEVEL SECURITY') || !cartonManifestMigration.includes('REVOKE ALL ON TABLE public.warehouse_receipt_cartons FROM PUBLIC, anon, authenticated')) fail('Individual carton manifest must be RLS-protected from direct public/authenticated table access')
+else ok('Individual carton manifest schema and direct access restrictions are present')
+if (!cartonManifestReceiving.includes('ensureReceiptCartons') || !cartonManifestReceiving.includes('carton_code') || !cartonManifestReceiving.includes('Shipment') || !cartonManifestReceiving.includes('cartons_linked')) fail('Warehouse intake must record per-carton codes and guard shipment ownership')
+else ok('Warehouse intake records each carton and returns explicit shipment-link status')
+if (!cartonManifestCustomerSelf.includes("from('warehouse_receipt_cartons')") || !cartonManifestCustomerSelf.includes(".eq('customer_directory_id', customer.id)") || !cartonManifestCustomerSelf.includes('cartonsByReceipt.get(String(receipt.id))')) fail('Customer self API must scope carton rows to the signed-in GC owner')
+else ok('Customer self API scopes carton manifests to the owning customer directory')
+if (!cartonManifestNotify.includes('carton_codes: cartonCodes') || !cartonManifestNotify.includes('cartonSummary') || !cartonManifestReceiving.includes('carton_codes:cartonCodes')) fail('Warehouse notification payload must include unique carton labels')
+else ok('In-app and external notification payloads include individual carton codes')
+if (!cartonManifestCustomerUi.includes('gc:customer-loaded') || !cartonManifestCustomerUi.includes('warehouse-carton-manifest') || !cartonManifestCustomerUi.includes('textContent')) fail('Customer portal must render the per-carton manifest safely')
+else ok('Customer portal renders individual carton codes from its customer-scoped payload')
+if (!cartonManifestStaff.includes('warehouse-carton-manifest-card') || !cartonManifestStaffTools.includes('CODE128') || !staff.includes('gc-staff-carton-tools-20261017.js?v=1')) fail('Staff carton detail and printable barcode tools are missing')
+else ok('Staff console exposes carton details and Code 128 label printing')
+if (!publicShell.includes('gc-customer-carton-manifest-20261017.css?v=1') || !publicShell.includes('gc-customer-carton-manifest-20261017.js?v=1')) fail('Public customer page must load the individual carton manifest UI and styles')
+else ok('Customer portal loads the carton manifest UI and responsive styles')
 if (!privateCargoPhotoStaff.includes("const availableLocations=roleLocation[state.staff?.role]?[roleLocation[state.staff.role]]:['China','Dubai','Erbil','USA'];")) fail('Staff receipt form must limit branch-scoped warehouse staff to their authorized location')
 else ok('Warehouse receipt location options respect branch-scoped staff roles')
 
