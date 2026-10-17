@@ -672,3 +672,56 @@ body.gc-staff-os-shell #app .gc-rescue-shell .staff-command-matrix { display: no
     scroll-behavior: auto !important;
   }
 }
+/* Per-carton warehouse manifest, receipt evidence and printable barcode action. */
+body.gc-staff-os-shell #app .warehouse-carton-manifest-card {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  background: linear-gradient(145deg, rgba(8,33,51,.95), rgba(4,18,30,.98));
+  border-color: rgba(101,224,236,.2);
+}
+body.gc-staff-os-shell #app .warehouse-carton-list {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+body.gc-staff-os-shell #app .warehouse-carton-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(126,195,232,.14);
+  border-radius: 12px;
+  background: rgba(1,12,21,.32);
+}
+body.gc-staff-os-shell #app .warehouse-carton-row > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+body.gc-staff-os-shell #app .warehouse-carton-row .mono {
+  color: #dcfbff;
+  font: 850 11px/1.65 "JetBrains Mono", monospace;
+  overflow-wrap: anywhere;
+}
+body.gc-staff-os-shell #app .warehouse-carton-row small {
+  color: #94afc2;
+  font-size: 10px;
+  line-height: 1.65;
+}
+body.gc-staff-os-shell #app .warehouse-carton-manifest-card .card-head {
+  align-items: center;
+  flex-wrap: wrap;
+}
+@media (max-width: 760px) {
+  body.gc-staff-os-shell #app .warehouse-carton-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: 9px;
+  }
+  body.gc-staff-os-shell #app .warehouse-carton-row .pill {
+    max-width: 100%;
+  }
+}
