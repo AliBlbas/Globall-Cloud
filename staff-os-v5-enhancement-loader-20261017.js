@@ -69,14 +69,14 @@
     loadStyle('/gc-staff-mobile-dock-20261016.css?v=4');
     // Keep the known mobile integrity guard, then restore the dedicated staff command layer as the final cascade.
     loadStyle('/gc-ui-integrity-mobile-20261017.css?v=6');
-    loadStyle('/gc-staff-command-system-20261017.css?v=1');
+    loadStyle('/gc-staff-command-system-20261017.css?v=2');
     lockCommandStylesLast();
   };
 
   // Several legacy helpers append their style sheets after the app shell mounts.
   // Keep the scoped Staff OS layer last in <head>, without duplicating any CSS.
   const lockCommandStylesLast = () => {
-    const href = '/gc-staff-command-system-20261017.css?v=1';
+    const href = '/gc-staff-command-system-20261017.css?v=2';
     const ensureLast = () => {
       const link = document.querySelector('link[data-gc-enhancement-style="' + href + '"]')
         || document.querySelector('link[href="' + href + '"]');
