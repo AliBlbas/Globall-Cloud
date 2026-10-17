@@ -137,7 +137,7 @@ if (!customerGcLogin.includes('consume_public_message_rate_limit') || !customerG
 else ok('GC-code login applies server-side attempt limits and origin validation')
 const unifiedCustomerAuth = read('gc-csp-scripts/customer-portal-inline-1.js')
 if (!read('index.html').includes('gc-csp-scripts/customer-portal-inline-1.js?v=20261016-9')) fail('Unified customer login cache-buster is stale')
-if (!unifiedCustomerAuth.includes("	$('authForm').addEventListener('submit', async (event) => {".trim()) || !unifiedCustomerAuth.includes('event.preventDefault();') || unifiedCustomerAuth.includes("$('signIn').addEventListener('click'")) fail('Customer login must prevent native form navigation and support form submission')
+if (!unifiedCustomerAuth.includes("$('authForm').addEventListener('submit', async (event) => {") || !unifiedCustomerAuth.includes('event.preventDefault();') || unifiedCustomerAuth.includes("$('signIn').addEventListener('click'")) fail('Customer login must prevent native form navigation and support form submission')
 else ok('Customer login is handled as a prevented form submission')
 const customerGcRegister = read('supabase/functions/customer-gc-register/index.ts')
 const supabaseConfig = read('supabase/config.toml')
