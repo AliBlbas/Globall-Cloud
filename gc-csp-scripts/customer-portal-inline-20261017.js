@@ -182,7 +182,7 @@ const renderReceipts = (items) => {
     const weight = Number(item.weight_actual || 0);
     return `<article class="item warehouse-receipt-evidence" data-receipt-id="${esc(item.id)}">
       <div class="row"><strong>${esc(gc)} · ${esc(item.batch_code || 'Receipt')}</strong><span class="pill">${esc(item.verification_status || 'pending')}</span></div>
-      <div class="muted">کۆگا: <b>${esc(item.location || '—')}</b> · ${esc(item.stage || 'received')} · وەرگیرا: ${esc(date(item.received_at))}</div>
+      <div class="muted">کۆگا: <b>${esc(item.location || item.source_warehouse || item.warehouse || '—')}</b> · ${esc(item.stage || 'received')} · وەرگیرا: ${esc(date(item.received_at || item.photo_taken_at))}</div>
       <div class="row"><small>کارتۆن: ${esc(cartons)} · کێش: ${weight > 0 ? esc(num(weight)) + ' kg' : '—'}</small><small>${esc(item.created_by_name || '')}</small></div>
       ${item.scan_code ? `<small>کۆدی سکەن: ${esc(item.scan_code)}</small>` : ''}
       ${item.notes ? `<small class="muted">${esc(item.notes)}</small>` : ''}
