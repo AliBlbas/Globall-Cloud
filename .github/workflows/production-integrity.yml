@@ -66,6 +66,19 @@ jobs:
           grep -q 'project_id = "ahslifnthiwfkmaswjno"' supabase/config.toml
           grep -q '\[functions.account-admin\]' supabase/config.toml
           grep -q 'verify_jwt = true' supabase/config.toml
+          grep -Fq '[functions.fleet-hr-admin]' supabase/config.toml
+          grep -q "fleet-hr-admin" enterprise-os.js
+          grep -q 'assign_vehicle_to_delivery' supabase/functions/fleet-hr-admin/index.ts
+          grep -q 'setPayrollPeriodStatus' supabase/functions/fleet-hr-admin/index.ts
+          grep -q 'data-panel="vehicle_events"' enterprise-os.html
+          grep -Fq '[functions.finance-erp-admin]' supabase/config.toml
+          grep -q 'gc_finance_create_journal' supabase/migrations/20261015194000_finance_erp_foundation.sql
+          grep -q 'gc_finance_report' supabase/migrations/20261015194000_finance_erp_foundation.sql
+          grep -q 'gc_finance_create_journal' supabase/functions/finance-erp-admin/index.ts
+          grep -q 'FINANCE_API_URL' enterprise-os.js
+          grep -q 'data-panel="finance"' enterprise-os.html
+          grep -q 'gc_finance_guard_journal_entry' supabase/migrations/20261015194000_finance_erp_foundation.sql
+          grep -q 'gc_finance_guard_journal_line' supabase/migrations/20261015194000_finance_erp_foundation.sql
           # Flags an actual hardcoded secret VALUE assigned to a service-role-shaped
           # name (e.g. SUPABASE_SERVICE_ROLE_KEY = "eyJ..." or "sb_secret_...").
           # Deliberately does NOT flag Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
@@ -147,7 +160,11 @@ jobs:
             supabase/migrations/20260818130000_logistics_notifications_contract_hardening.sql \
             supabase/migrations/20260816120000_qicard_fib_payment_sessions.sql \
             supabase/migrations/20261008190000_harden_server_only_function_execute.sql \
-            release.json
+            release.json enterprise-os.html enterprise-os.css enterprise-os.js \
+            supabase/functions/fleet-hr-admin/index.ts \
+            supabase/functions/finance-erp-admin/index.ts \
+            supabase/migrations/20261015190000_enterprise_fleet_hr_foundation.sql \
+            supabase/migrations/20261015194000_finance_erp_foundation.sql \
           do
             test -f "$file"
           done

@@ -80,6 +80,11 @@ const required = [
   'supabase/functions/notification-dispatch/index.ts',
   'supabase/functions/logistics-control-plane/index.ts',
   'supabase/functions/_shared/payment-providers.ts',
+  'enterprise-os.html', 'enterprise-os.css', 'enterprise-os.js',
+  'supabase/functions/fleet-hr-admin/index.ts',
+  'supabase/functions/finance-erp-admin/index.ts',
+  'supabase/migrations/20261015194000_finance_erp_foundation.sql',
+  'supabase/migrations/20261015190000_enterprise_fleet_hr_foundation.sql',
 ];
 const beforeReq = failures;
 for (const rel of required) {
@@ -99,6 +104,35 @@ if (existsSync(migDir)) {
   if (failures === beforeMig) ok(`${migFiles.length} migrations OK`);
 }
 
+// 5. Prevent malformed PL/pgSQL dollar delimiters in the new enterprise migrations.
+// This lightweight check does not replace applying and testing migrations on staging.
+console.log('Enterprise SQL function delimiters');
+const sqlMigrationChecks = [
+  { path: 'supabase/migrations/20261015190000_enterprise_fleet_hr_foundation.sql', label: 'Fleet/HR' },
+  { path: 'supabase/migrations/20261015194000_finance_erp_foundation.sql', label: 'Finance ERP' },
+];
+for (const migration of sqlMigrationChecks) {
+  const sqlPath = join(ROOT, migration.path);
+  if (!existsSync(sqlPath)) {
+    fail('missing ' + migration.label + ' migration');
+    continue;
+  }
+  const sql = readFileSync(sqlPath, 'utf8');
+  const hasBareFunctionDelimiter = /^\s*as \$(?=\s*declare)/m.test(sql);
+  const hasBareFunctionEnd = /^\$;\s*$/m.test(sql);
+  const functionCount = (sql.match(/create or replace function/gi) || []).length;
+  const delimiterStarts = (sql.match(/\bas \$\$\s*\n/g) || []).length;
+  const delimiterEnds = (sql.match(/^\$\$;\s*$/gm) || []).length;
+  if (hasBareFunctionDelimiter || hasBareFunctionEnd) {
+    fail('malformed bare dollar delimiter in ' + migration.label + ' migration');
+  }
+  if (functionCount === 0 || delimiterStarts !== functionCount || delimiterEnds !== functionCount) {
+    fail(migration.label + ' PL/pgSQL delimiter count mismatch: functions=' + functionCount +
+      ', starts=' + delimiterStarts + ', ends=' + delimiterEnds);
+  } else if (!hasBareFunctionDelimiter && !hasBareFunctionEnd) {
+    ok(migration.label + ': ' + functionCount + ' PL/pgSQL function bodies have balanced dollar delimiters');
+  }
+}
 console.log('');
 if (failures > 0) {
   console.error(`${failures} check(s) failed.`);

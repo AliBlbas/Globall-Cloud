@@ -64,3 +64,9 @@ verify_jwt = false
 
 [functions.payment-reconcile]
 verify_jwt = false
+
+[functions.fleet-hr-admin]
+verify_jwt = true
+
+[functions.finance-erp-admin]
+verify_jwt = true
