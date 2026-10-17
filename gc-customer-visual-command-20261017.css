@@ -1,0 +1,449 @@
+/* Globall Cloud — Customer Workspace Command Layer · 2026-10-17
+   Mobile-first visual refinement for the existing customer workspace.
+   Scoped to the authenticated customer app; keeps routes and business logic intact. */
+
+body.gc-customer-app {
+  --gc-ink: #f1faff;
+  --gc-muted: #a6bdcc;
+  --gc-cyan: #68e0e9;
+  --gc-surface: rgba(7, 28, 45, .94);
+  --gc-line: rgba(105, 210, 232, .19);
+  background:
+    radial-gradient(520px 310px at 92% 4%, rgba(20, 159, 192, .13), transparent 68%),
+    radial-gradient(500px 400px at -8% 42%, rgba(36, 87, 179, .11), transparent 68%),
+    #04121f !important;
+  color: var(--gc-ink);
+}
+body.gc-customer-app #gcCustomerWorkspace {
+  min-height: 100dvh;
+  padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  overflow: clip;
+}
+body.gc-customer-app #gcCustomerWorkspace * { box-sizing: border-box; }
+body.gc-customer-app #gcCustomerWorkspace :where(.app-header, .app-layout, .app-main, .section-block, .surface-card) { min-width: 0; }
+body.gc-customer-app #gcCustomerWorkspace :where(h1,h2,h3,p,strong,small,label,a,button,span) { overflow-wrap: break-word; }
+body.gc-customer-app #gcCustomerWorkspace .app-header {
+  border-bottom: 1px solid rgba(105, 215, 235, .19) !important;
+  background: rgba(3, 16, 28, .91) !important;
+  box-shadow: 0 8px 26px rgba(0,0,0,.15) !important;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+body.gc-customer-app #gcCustomerWorkspace .app-header-inner {
+  min-height: 65px;
+  padding-inline: clamp(13px, 3vw, 28px);
+}
+body.gc-customer-app #gcCustomerWorkspace .app-brand img {
+  border: 1px solid rgba(111, 229, 239, .28);
+  box-shadow: 0 0 0 4px rgba(93, 213, 232, .06), 0 8px 20px rgba(0,0,0,.2);
+}
+body.gc-customer-app #gcCustomerWorkspace .workspace-toolbar {
+  display: grid;
+  gap: 5px;
+  margin: 0 0 16px;
+  padding: 2px 1px 15px;
+  border-bottom: 1px solid rgba(127, 194, 216, .14);
+}
+body.gc-customer-app #gcCustomerWorkspace .workspace-toolbar .eyebrow {
+  color: #70e2eb !important;
+  font: 800 10px/1.6 "JetBrains Mono", monospace;
+  letter-spacing: .12em;
+}
+body.gc-customer-app #gcCustomerWorkspace .workspace-toolbar h1 {
+  max-width: 24ch;
+  margin: 0;
+  color: #f4fbff !important;
+  font-size: clamp(24px, 3.1vw, 34px) !important;
+  font-weight: 950 !important;
+  line-height: 1.48 !important;
+  letter-spacing: -.035em;
+  text-wrap: balance;
+}
+body.gc-customer-app #gcCustomerWorkspace .workspace-toolbar p {
+  max-width: 62ch;
+  margin: 2px 0 0;
+  color: #a9c1cf !important;
+  font-size: 12px;
+  line-height: 1.9;
+}
+body.gc-customer-app #gcCustomerWorkspace #customerWelcome {
+  color: #a9c3d2;
+  font-size: 13px;
+  line-height: 1.65;
+}
+body.gc-customer-app #gcCustomerWorkspace #portalStatus {
+  position: relative;
+  margin: 0 0 16px;
+  padding: 13px 15px 13px 42px;
+  border: 1px solid rgba(255, 187, 105, .31);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(105, 61, 19, .27), rgba(14, 31, 44, .92));
+  color: #ffe2bd;
+  font-size: 12px;
+  line-height: 1.9;
+  box-shadow: inset 0 1px rgba(255,255,255,.025);
+}
+body.gc-customer-app #gcCustomerWorkspace #portalStatus:before {
+  content: "!";
+  position: absolute;
+  inset-inline-start: 13px;
+  top: 13px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgba(255, 204, 138, .42);
+  border-radius: 50%;
+  color: #ffd29a;
+  font-size: 13px;
+  font-weight: 950;
+}
+body.gc-customer-app #gcCustomerWorkspace #portalStatus.hidden,
+body.gc-customer-app #gcCustomerWorkspace #portalStatus[hidden] { display: none !important; }
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command {
+  border: 1px solid rgba(103, 211, 234, .31) !important;
+  border-radius: 25px !important;
+  box-shadow: 0 20px 50px rgba(0,0,0,.19), inset 0 1px rgba(255,255,255,.055) !important;
+}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(132deg, rgba(76,202,236,.055), transparent 39%, rgba(0,0,0,.07));
+}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command > * { min-width: 0; }
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-copy h2 {
+  max-width: 20ch;
+  font-size: clamp(25px, 3vw, 38px) !important;
+  line-height: 1.48 !important;
+  text-wrap: balance;
+}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-copy p {
+  max-width: 60ch;
+  color: #c0d2df !important;
+  font-size: 13px !important;
+  line-height: 1.95 !important;
+}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-actions > * {
+  min-height: 48px;
+  border-radius: 13px;
+}
+body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-visual {
+  border-color: rgba(120, 220, 236, .26) !important;
+  background: linear-gradient(145deg, rgba(4,25,42,.88), rgba(5,22,37,.73)) !important;
+}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-quick-actions { margin-top: 2px; }
+body.gc-customer-app #gcCustomerWorkspace .gc-quick-action {
+  border-color: rgba(127, 203, 225, .21) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.035);
+}
+body.gc-customer-app #gcCustomerWorkspace .metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px !important;
+  margin-block: 14px 25px !important;
+}
+body.gc-customer-app #gcCustomerWorkspace .metric-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(120, 202, 226, .18) !important;
+  border-radius: 17px !important;
+  background:
+    radial-gradient(180px 100px at 100% 0%, rgba(64, 174, 220, .10), transparent 73%),
+    linear-gradient(150deg, rgba(12, 39, 60, .96), rgba(4, 20, 35, .98)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.035), 0 10px 25px rgba(0,0,0,.1) !important;
+}
+body.gc-customer-app #gcCustomerWorkspace .section-block { margin-block: 24px; scroll-margin-top: 82px; }
+body.gc-customer-app #gcCustomerWorkspace .section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+body.gc-customer-app #gcCustomerWorkspace .section-heading h2 {
+  margin: 0;
+  color: #f0faff !important;
+  font-size: clamp(20px, 2.2vw, 27px) !important;
+  line-height: 1.5 !important;
+  letter-spacing: -.025em;
+}
+body.gc-customer-app #gcCustomerWorkspace .section-heading p {
+  max-width: 60ch;
+  margin: 4px 0 0;
+  color: #9eb8c8 !important;
+  font-size: 11px;
+  line-height: 1.9;
+}
+body.gc-customer-app #gcCustomerWorkspace .surface-card,
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-route-overview {
+  border-color: var(--gc-line) !important;
+  border-radius: 19px !important;
+  background: linear-gradient(145deg, rgba(8,30,48,.95), rgba(4,18,31,.98)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.03), 0 14px 34px rgba(0,0,0,.10) !important;
+}
+body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-card {
+  border-radius: 17px !important;
+  border-color: rgba(116, 209, 231, .18) !important;
+  background: linear-gradient(150deg, rgba(11,37,58,.96), rgba(5,21,36,.98)) !important;
+}
+body.gc-customer-app #gcCustomerWorkspace .shipment-list,
+body.gc-customer-app #gcCustomerWorkspace .record-list { min-width: 0; }
+body.gc-customer-app #gcCustomerWorkspace .shipment-list > *,
+body.gc-customer-app #gcCustomerWorkspace .record-list > .item,
+body.gc-customer-app #gcCustomerWorkspace .record-list > .record-item {
+  min-width: 0;
+  border-color: rgba(125, 199, 220, .17);
+}
+body.gc-customer-app #gcCustomerWorkspace .gc-data-empty,
+body.gc-customer-app #gcCustomerWorkspace .empty-panel {
+  border: 1px dashed rgba(117, 206, 227, .22);
+  border-radius: 16px;
+  background: rgba(9, 34, 52, .52);
+}
+body.gc-customer-app #gcCustomerWorkspace :where(input,select,textarea,.field) {
+  min-width: 0;
+  border-radius: 12px !important;
+}
+body.gc-customer-app #gcCustomerWorkspace :where(a,button,input,select,textarea):focus-visible {
+  outline: 3px solid rgba(104,224,233,.75) !important;
+  outline-offset: 3px !important;
+}
+body.gc-customer-app #gcCustomerWorkspace :where(button,a,.gc-quick-action,.app-primary-action,.app-secondary-action) {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+body.gc-customer-app #gcCustomerWorkspace :where(button,.gc-quick-action,.app-primary-action,.app-secondary-action) {
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+body.gc-customer-app #gcCustomerWorkspace :where(button,.gc-quick-action,.app-primary-action,.app-secondary-action):active {
+  transform: scale(.985);
+}
+body.gc-customer-app #gcCustomerWorkspace .mobile-dock {
+  z-index: 1000 !important;
+  border: 1px solid rgba(103, 212, 232, .28) !important;
+  background: rgba(3, 15, 26, .97) !important;
+  box-shadow: 0 16px 40px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.06) !important;
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+}
+body.gc-customer-app #gcCustomerWorkspace .app-modal,
+body.gc-customer-app #gcCustomerWorkspace .gc-settings-panel { z-index: 1500 !important; }
+
+@media (max-width: 900px) {
+  body.gc-customer-app #gcCustomerWorkspace .app-layout {
+    display: block !important;
+    width: 100% !important;
+    padding: 10px 12px 0 !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .app-main {
+    width: 100%;
+    padding: 8px 0 calc(175px + env(safe-area-inset-bottom,0px)) !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .workspace-toolbar { margin-bottom: 13px; padding-bottom: 12px; }
+  body.gc-customer-app #gcCustomerWorkspace .workspace-toolbar h1 {
+    max-width: 22ch;
+    font-size: clamp(23px, 6.2vw, 30px) !important;
+    line-height: 1.52 !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .workspace-toolbar p { font-size: 11px; line-height: 1.8; }
+  body.gc-customer-app #gcCustomerWorkspace .gc-signature-command {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px !important;
+    margin-bottom: 15px !important;
+    padding: 19px 15px 13px !important;
+    border-radius: 22px !important;
+    background-image:
+      linear-gradient(270deg, rgba(4,18,31,.97) 0%, rgba(4,18,31,.89) 47%, rgba(4,18,31,.68) 100%),
+      url('/assets/gc-air-freight-hero-640.webp') !important;
+    background-position: center, 57% center !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-copy h2 {
+    max-width: 19ch !important;
+    margin: 8px 0 9px !important;
+    font-size: clamp(23px, 6.4vw, 30px) !important;
+    line-height: 1.55 !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-copy p {
+    font-size: 11px !important;
+    line-height: 1.85 !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+    gap: 8px !important;
+    margin-top: 13px !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-actions > * {
+    min-width: 0;
+    min-height: 47px !important;
+    padding: 9px 8px !important;
+    font-size: 10px !important;
+    line-height: 1.55;
+    text-align: center;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-visual {
+    min-height: 74px !important;
+    justify-content: flex-start !important;
+    padding: 10px 11px !important;
+    border-radius: 15px !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-visual .route-orbit {
+    flex-basis: 56px !important;
+    width: 56px !important;
+    height: 56px !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-quick-actions { gap: 8px !important; padding-top: 12px !important; }
+  body.gc-customer-app #gcCustomerWorkspace .gc-quick-action {
+    min-height: 76px !important;
+    padding: 9px 5px !important;
+    border-radius: 14px !important;
+    gap: 6px !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-icon {
+    width: 33px !important; height: 33px !important; flex-basis: 33px !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-copy strong { font-size: 9px !important; line-height: 1.5 !important; }
+  body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-copy small,
+  body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-arrow { display: none !important; }
+  body.gc-customer-app #gcCustomerWorkspace .metric-grid {
+    grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+    gap: 8px !important;
+    margin-block: 12px 21px !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .metric-card {
+    min-height: 86px !important;
+    padding: 11px !important;
+    border-radius: 15px !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .metric-card strong { font-size: clamp(18px, 5vw, 23px) !important; }
+  body.gc-customer-app #gcCustomerWorkspace .metric-card small { font-size: 8px !important; line-height: 1.5; }
+  body.gc-customer-app #gcCustomerWorkspace .section-block { margin-block: 20px !important; }
+  body.gc-customer-app #gcCustomerWorkspace .section-heading { gap: 9px; margin-bottom: 12px; }
+  body.gc-customer-app #gcCustomerWorkspace .section-heading h2 { font-size: 20px !important; }
+  body.gc-customer-app #gcCustomerWorkspace .section-heading p { font-size: 10px; }
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-route-overview { padding: 14px !important; }
+  body.gc-customer-app #gcCustomerWorkspace .gc-route-overview-heading {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 9px !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .gc-route-overview-heading h2 { font-size: 19px !important; line-height: 1.55; }
+  body.gc-customer-app #gcCustomerWorkspace .gc-route-overview-heading p { font-size: 10px !important; }
+  body.gc-customer-app #gcCustomerWorkspace .gc-route-track-link {
+    display: inline-flex;
+    justify-content: center;
+    width: 100%;
+    min-height: 43px;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-grid { grid-template-columns: minmax(0,1fr) !important; gap: 9px !important; }
+  body.gc-customer-app #gcCustomerWorkspace .gc-customer-service-card { min-height: 0 !important; padding: 14px !important; }
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock {
+    left: 9px !important;
+    right: 9px !important;
+    bottom: calc(7px + env(safe-area-inset-bottom,0px)) !important;
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0,1fr)) !important;
+    align-items: stretch !important;
+    gap: 3px !important;
+    height: 71px !important;
+    min-height: 71px !important;
+    padding: 5px !important;
+    border-radius: 20px !important;
+    overflow: hidden;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock > a,
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock > button {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 58px !important;
+    padding: 4px 2px !important;
+    border: 1px solid transparent !important;
+    border-radius: 13px !important;
+    background: transparent !important;
+    color: #9bb4c4 !important;
+    text-decoration: none !important;
+    touch-action: manipulation;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock > :where(a,button).active,
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock > :where(a,button)[aria-current="page"] {
+    border-color: rgba(113,224,235,.29) !important;
+    background: linear-gradient(145deg, rgba(43,192,215,.20), rgba(14,82,108,.19)) !important;
+    color: #7deaf0 !important;
+    box-shadow: inset 0 1px rgba(255,255,255,.045);
+  }
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock > .dock-primary:not(.active) {
+    border-color: transparent !important;
+    background: transparent !important;
+    color: #9bb4c4 !important;
+    box-shadow: none !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock [data-dash-icon] {
+    display: grid !important;
+    place-items: center !important;
+    flex: 0 0 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock svg {
+    display: block !important;
+    width: 21px !important;
+    height: 21px !important;
+    max-width: 21px !important;
+    max-height: 21px !important;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock small {
+    display: block !important;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 !important;
+    color: inherit !important;
+    font-size: clamp(7px, 2.1vw, 9px) !important;
+    font-weight: 850 !important;
+    line-height: 1.35 !important;
+    text-align: center !important;
+    white-space: normal !important;
+  }
+  body.gc-customer-app #gcCustomerWorkspace .app-modal { z-index: 1500 !important; }
+  body.gc-customer-app #gcCustomerWorkspace :where(input,select,textarea,.field) { min-height: 47px !important; font-size: 14px !important; }
+}
+@media (max-width: 390px) {
+  body.gc-customer-app #gcCustomerWorkspace .app-layout { padding-inline: 9px !important; }
+  body.gc-customer-app #gcCustomerWorkspace .workspace-toolbar h1 { font-size: 23px !important; }
+  body.gc-customer-app #gcCustomerWorkspace .gc-signature-command { padding: 17px 12px 12px !important; }
+  body.gc-customer-app #gcCustomerWorkspace .gc-signature-command .command-actions { grid-template-columns: minmax(0,1fr) !important; }
+  body.gc-customer-app #gcCustomerWorkspace .gc-quick-action { min-height: 71px !important; }
+  body.gc-customer-app #gcCustomerWorkspace .gc-quick-action-copy strong { font-size: 8px !important; }
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock { left: 5px !important; right: 5px !important; gap: 2px !important; padding: 4px !important; }
+  body.gc-customer-app #gcCustomerWorkspace .mobile-dock small { font-size: 7px !important; }
+}
+html[data-gc-theme="light"] body.gc-customer-app #gcCustomerWorkspace #portalStatus {
+  border-color: rgba(184, 116, 42, .28);
+  background: linear-gradient(135deg, #fff6e9, #fffdf9);
+  color: #70431d;
+}
+html[data-gc-theme="light"] body.gc-customer-app #gcCustomerWorkspace .surface-card,
+html[data-gc-theme="light"] body.gc-customer-app #gcCustomerWorkspace .gc-customer-route-overview {
+  background: linear-gradient(145deg, #f9fcff, #eef6fb) !important;
+  border-color: #d5e6ee !important;
+  box-shadow: 0 12px 28px rgba(30,74,103,.07) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.gc-customer-app #gcCustomerWorkspace * { animation: none !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
