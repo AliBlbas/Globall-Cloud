@@ -111,7 +111,7 @@ if (!read('index.html').includes('gc-homepage-signature-20261016.css?v=10') || !
 const homeMobileRefinement = read('gc-homepage-signature-20261016.css')
 if (!homeMobileRefinement.includes('#gcApp .gc-announcement { display:none!important; }') || !homeMobileRefinement.includes('body .gc-whatsapp-float {display:none!important;}') || !homeMobileRefinement.includes('#gcApp {padding-bottom:0!important;}')) fail('Public mobile UX must compact the header and avoid fixed controls covering content')
 else ok('Public mobile UX keeps the header compact and prevents WhatsApp/dock overlap')
-if (!read('index.html').includes('gc-customer-mobile-dock-20261016.css?v=4') || !read('index.html').includes('gc-public-customer-style-loader-20261014.js?v=21')) fail('Customer mobile navigation stylesheet cache-busters are stale')
+if (!read('index.html').includes('gc-customer-mobile-dock-20261016.css?v=5') || !read('index.html').includes('gc-public-customer-style-loader-20261014.js?v=21')) fail('Customer mobile navigation stylesheet cache-busters are stale')
 const premiumHomeStyles = read('gc-homepage-signature-20261016.css')
 const premiumCustomerStyles = read('gc-customer-workspace-elite-20261014.css')
 const premiumDockStyles = read('gc-customer-mobile-dock-20261016.css')
