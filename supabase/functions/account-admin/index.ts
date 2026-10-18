@@ -573,16 +573,19 @@ async function queueExistingWarehouseReceiptNotifications(
         const cartonLine = cartonCodes.length
           ? `کۆدی کارتۆنەکان: ${cartonCodes.slice(0, 15).join(', ')}${cartonCodes.length > 15 ? ` و ${cartonCodes.length - 15} دانەی تر` : ''}`
           : 'کۆدی تاکەکارتۆن: لە تۆماری وەرگرتندا بەردەست نییە'
-        const bodyText = `GC: ${gcCode}\nکۆگا: ${warehouse}\nکارتۆن: ${cartonCount}\n${cartonLine}\nکێش: ${weight > 0 ? `${weight} kg` : 'تۆمارنەکراوە'}\nبەروار و کات (هەولێر): ${localTime}\nژمارەی وێنەکان: ${photoCount}\nBatch: ${String(receipt.batch_code || '—')}`
+        const isDubaiWarehouse = /^(dubai|uae|united arab emirates|دوبەی|دوبی)$/i.test(warehouse.trim())
+        const notificationBody = isDubaiWarehouse
+          ? 'وردەکاری، وێنە و ژمارەی کارتۆن لە بەشی بارەکان ببینە.'
+          : 'وردەکاری و بەڵگەی کاڵاکەت لە بەشی بارەکان ببینە.'
 
         notifications.push({
           customer_user_id: customerUserId,
           shipment_id: receipt.shipment_id ? String(receipt.shipment_id) : null,
           kind: 'warehouse_received',
           event_key: `warehouse_received:${receiptId}`,
-          title: 'کاڵاکەت لە کۆگا وەرگیرا',
-          body: bodyText,
-          action_url: '/#records',
+          title: isDubaiWarehouse ? 'کاڵاکەت لە کۆگای دوبەی وەرگیرا' : 'کاڵاکەت لە کۆگا وەرگیرا',
+          body: notificationBody,
+          action_url: '/#shipmentsSection',
           read_at: null,
         })
       }
