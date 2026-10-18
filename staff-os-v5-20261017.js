@@ -843,7 +843,13 @@
       return;
     }
     const code = customer.gc_code || customer.code || 'GC';
-    if (!window.confirm(`هەژماری چوونەژوورەوە بۆ ${code} · ${customer.name || ''} دروست بکرێت؟ پێش بەستنەوە، ناسنامەی کڕیار پشتڕاست بکەرەوە و دڵنیابە لە ڕێگایەکی پارێزراوی گەیاندنی وشەی نهێنی. هیچ زانیارییەکی کۆن ناگۆڕدرێت.`)) return;
+    if (!window.confirm('هەژماری چوونەژوورەوە بۆ ' + code + ' · ' + (customer.name || '') + ' دروست بکرێت؟ تەنها دوای پشتڕاستکردنەوەی ناسنامەی کڕیار بەردەوام بە.')) return;
+    const confirmedCode = window.prompt('بۆ پشکنینی دووبارە، کۆدی GC ـی ئەم کڕیارە بە تەواوی بنووسە: ' + code, '');
+    const normalizeGc = (value) => String(value || '').normalize('NFKC').toUpperCase().replace(/[–—−]/g, '-').replace(/\s+/g, '');
+    if (confirmedCode === null || normalizeGc(confirmedCode) !== normalizeGc(code)) {
+      toast('کۆدی GC یەکسان نییە؛ هیچ هەژمارێک نەبەسترا.', 'bad');
+      return;
+    }
     const supplied = window.prompt('وشەی نهێنیی ئارەزوومەندانە (لانیکەم 12 پیت). بۆ دروستکردنی وشەی نهێنیی کاتی بەتاڵی بهێڵەوە.', '');
     if (supplied === null) return;
     const password = supplied.trim();
@@ -852,7 +858,7 @@
       return;
     }
     try {
-      const result = await account('customer', 'bind', { id, ...(password ? { password } : {}) });
+      const result = await account('customer', 'bind', { id, identity_verified: true, confirmed_gc_code: confirmedCode, ...(password ? { password } : {}) });
       if (!result?.ok || !result?.temporary_password || !result?.login_email) {
         throw new Error(result?.error || 'دروستکردنی هەژمار پشتڕاست نەکرایەوە.');
       }
