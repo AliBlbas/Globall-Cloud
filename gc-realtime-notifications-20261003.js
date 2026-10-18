@@ -25,10 +25,10 @@
     return node;
   };
   const fetchReceiptPhotoPreview = async (eventKey) => {
-    if (!eventKey || !eventKey.startsWith('warehouse_received:') || !client) return null;
+    if (!eventKey || !eventKey.startsWith('warehouse_received:') || !client) return [];
     const { data: sessionData } = await client.auth.getSession();
     const token = sessionData.session?.access_token;
-    if (!token) return null;
+    if (!token) return [];
     const response = await fetch(`${URL}/functions/v1/customer-self`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${token}`, apikey: KEY, Accept: 'application/json' },
@@ -38,30 +38,40 @@
     if (!response.ok) throw new Error(payload.error || 'Receipt photo preview could not be loaded');
     const item = (Array.isArray(payload.notifications) ? payload.notifications : [])
       .find((notification) => String(notification.event_key || '') === eventKey);
-    const photo = Array.isArray(item?.receipt_photos) ? item.receipt_photos[0] : null;
+    const photos = Array.isArray(item?.receipt_photos) ? item.receipt_photos : [];
     // The owner-scoped API signs this private bucket URL. Reject any other host/path.
-    if (typeof photo !== 'string' || !photo.startsWith(`${URL}/storage/v1/object/sign/warehouse-receipts/`)) return null;
-    return photo;
+    return [...new Set(photos.filter((photo) =>
+      typeof photo === 'string' &&
+      photo.startsWith(`${URL}/storage/v1/object/sign/warehouse-receipts/`)
+    ))].slice(0, 4);
   };
 
-  const attachReceiptPhotoPreview = (toastNode, eventKey, photoUrl) => {
-    if (!toastNode?.isConnected || toastNode.dataset.eventKey !== eventKey || !photoUrl) return;
-    if (toastNode.querySelector('[data-gc-receipt-toast-photo]')) return;
-    const link = document.createElement('a');
-    link.href = photoUrl;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.dataset.gcReceiptToastPhoto = '1';
-    link.setAttribute('aria-label', 'بینینی وێنەی وەرگرتنی کاڵا');
-    link.style.cssText = 'display:block;margin-top:10px;overflow:hidden;border:1px solid rgba(88,229,239,.28);border-radius:11px;max-height:150px;background:#07192a;';
-    const img = document.createElement('img');
-    img.src = photoUrl;
-    img.alt = 'وێنەی بەڵگەی وەرگرتنی کاڵا';
-    img.loading = 'eager';
-    img.decoding = 'async';
-    img.style.cssText = 'display:block;width:100%;max-height:150px;object-fit:cover;';
-    link.appendChild(img);
-    toastNode.appendChild(link);
+  const attachReceiptPhotoPreview = (toastNode, eventKey, photoUrls) => {
+    if (!toastNode?.isConnected || toastNode.dataset.eventKey !== eventKey || !Array.isArray(photoUrls) || !photoUrls.length) return;
+    if (toastNode.querySelector('[data-gc-receipt-toast-photo-grid]')) return;
+    const grid = document.createElement('div');
+    grid.dataset.gcReceiptToastPhotoGrid = '1';
+    grid.setAttribute('role', 'group');
+    grid.setAttribute('aria-label', 'وێنەکانی وەرگرتنی کاڵا');
+    grid.style.cssText = `display:grid;grid-template-columns:repeat(${photoUrls.length > 1 ? 2 : 1},minmax(0,1fr));gap:6px;margin-top:10px;`;
+    photoUrls.forEach((photoUrl, index) => {
+      const link = document.createElement('a');
+      link.href = photoUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.dataset.gcReceiptToastPhoto = String(index + 1);
+      link.setAttribute('aria-label', `بینینی وێنەی ${index + 1}ی وەرگرتنی کاڵا`);
+      link.style.cssText = 'display:block;overflow:hidden;border:1px solid rgba(88,229,239,.28);border-radius:9px;max-height:120px;background:#07192a;';
+      const img = document.createElement('img');
+      img.src = photoUrl;
+      img.alt = `وێنەی بەڵگەی وەرگرتنی کاڵا ${index + 1}`;
+      img.loading = 'eager';
+      img.decoding = 'async';
+      img.style.cssText = 'display:block;width:100%;height:110px;object-fit:cover;';
+      link.appendChild(img);
+      grid.appendChild(link);
+    });
+    toastNode.appendChild(grid);
   };
 
   const refresh = () => {
@@ -98,7 +108,7 @@
         const toastNode = showToast(n.title || 'ئاگادارییەکی نوێ', n.body || 'دۆخی بار نوێکرایەوە.', eventKey);
         if (n.kind === 'warehouse_received' && eventKey) {
           void fetchReceiptPhotoPreview(eventKey)
-            .then((photoUrl) => attachReceiptPhotoPreview(toastNode, eventKey, photoUrl))
+            .then((photoUrls) => attachReceiptPhotoPreview(toastNode, eventKey, photoUrls))
             .catch((error) => console.warn('[gc-realtime] receipt photo preview', error));
         }
         refresh();
