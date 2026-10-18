@@ -135,12 +135,14 @@ async function queueReceiptNotifications(admin:ReturnType<typeof createClient>,r
   ? `کۆدی کارتۆنەکان: ${cartonCodes.slice(0,15).join(', ')}${cartonCodes.length>15?` و ${cartonCodes.length-15} دانەی تر`:''}`
   : 'کۆدی تاکەکارتۆن: لە تۆماری وەرگرتندا بەردەست نییە';
  const eventKey=`warehouse_received:${String(receipt.id)}`;
- const actionUrl='/#records';
+ const actionUrl='/#shipmentsSection';
  const receivedAt=receipt.received_at||new Date().toISOString();
  const localTime=new Intl.DateTimeFormat('ku-IQ',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Baghdad'}).format(new Date(receivedAt));
- const title='کاڵاکەت لە کۆگا وەرگیرا';
- const bodyText=`GC: ${gc}\nکۆگا: ${warehouse}\nکارتۆن: ${cartons}\n${cartonLine}\nکێش: ${weight>0?`${weight} kg`:'تۆمارنەکراوە'}\nبەروار و کات (هەولێر): ${localTime}\nژمارەی وێنەکان: ${photos.length}\nBatch: ${String(receipt.batch_code||'—')}`;
- const payloadBase={title,body:bodyText,action_url:actionUrl,gc_code:gc,warehouse,carton_count:cartons,carton_codes:cartonCodes,weight_kg:weight||null,receipt_id:String(receipt.id),batch_code:String(receipt.batch_code||''),received_at:String(receivedAt),photo_count:photos.length,media_url:photos[0]||null};
+ const isDubaiWarehouse=/^(dubai|uae|united arab emirates|دوبەی|دوبی)$/i.test(warehouse.trim());
+ const title=isDubaiWarehouse?'کاڵاکەت لە کۆگای دوبەی وەرگیرا':'کاڵاکەت لە کۆگا وەرگیرا';
+ const bodyText=isDubaiWarehouse?'وردەکاری، وێنە و ژمارەی کارتۆن لە بەشی بارەکان ببینە.':'وردەکاری و بەڵگەی کاڵاکەت لە بەشی بارەکان ببینە.';
+ const detailedBodyText=`GC: ${gc}\\nکۆگا: ${warehouse}\\nکارتۆن: ${cartons}\\n${cartonLine}\\nکێش: ${weight>0?`${weight} kg`:'تۆمارنەکراوە'}\\nبەروار و کات (هەولێر): ${localTime}\\nژمارەی وێنەکان: ${photos.length}\\nBatch: ${String(receipt.batch_code||'—')}`;
+ const payloadBase={title,body:detailedBodyText,action_url:actionUrl,gc_code:gc,warehouse,carton_count:cartons,carton_codes:cartonCodes,weight_kg:weight||null,receipt_id:String(receipt.id),batch_code:String(receipt.batch_code||''),received_at:String(receivedAt),photo_count:photos.length,media_url:photos[0]||null};
  let preferences:Record<string,any>|null=null;
  if(customer.auth_user_id){
   const result=await admin.from('customer_notification_preferences').select('email_enabled,whatsapp_enabled,in_app_enabled,quiet_hours_start,quiet_hours_end').eq('customer_user_id',customer.auth_user_id).maybeSingle();
