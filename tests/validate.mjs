@@ -316,7 +316,7 @@ const unifiedContracts = [
   ['staff console exposes customer linkage filters', accountsConsoleHtml.includes('id="customerLinkFilter"') && accountsConsoleHtml.includes('value="unlinked"') && accountsConsoleHtml.includes('value="linked"') && accountsConsoleHtml.includes('value="inactive-unlinked"')],
   ['customer linkage filter is functional', accountsConsoleScript.includes("customerLinkFilter')?.addEventListener('change', renderList)") && accountsConsoleScript.includes("linkFilter === 'unlinked' ? (!linked && active)") && accountsConsoleScript.includes("linkFilter === 'inactive-unlinked' ? (!linked && !active)")],
   ['customer linkage summary warns Super Admin to verify identity', accountsConsoleScript.includes('دوای پشتڕاستکردنەوەی ناسنامە') && accountAdminSource.includes('Only Super Admin can bind customer accounts')],
-  ['staff console script cache is refreshed', accountsConsoleHtml.includes('gc-csp-scripts/accounts-console-inline-1.js?v=20261016-4')],
+  ['staff console script cache is refreshed', accountsConsoleHtml.includes('gc-csp-scripts/accounts-console-inline-1.js?v=20261016-5')],
   ['main Staff OS shows customer identity-linking guidance', staffConsoleScript.includes('customer-link-guidance') && staffConsoleScript.includes('پێش Bind، ناسنامەی کڕیار پشتڕاست بکەرەوە')],
   ['main Staff OS filters inactive unlinked customers', staffConsoleScript.includes("filter==='inactive-unlinked'?x.is_active===false&&!x.auth_user_id:true") && staffConsoleScript.includes('value="inactive-unlinked"')],
   ['customer binding stays Super Admin only', staffConsoleScript.includes("state.staff?.role !== 'super_admin'") && accountAdminSource.includes('Only Super Admin can bind customer accounts')],
