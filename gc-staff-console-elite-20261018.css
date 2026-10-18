@@ -646,3 +646,39 @@ body.gc-staff-os-shell #app .gc-rescue-actions button{min-height:43px;padding:10
 body.gc-staff-os-shell #app .gc-rescue-actions button.secondary{border-color:#d4e2e9!important;background:#ffffff!important;color:#24475b!important}
 body.gc-staff-os-shell #app .gc-rescue-links a{border-color:#dce7ed!important;background:#f5fafb!important;color:#35566a!important}
 body.gc-staff-os-shell #app .gc-rescue-hint{color:#6c8392!important}
+
+
+/* The entry HTML includes a small no-JS fallback. Style that exact card too. */
+body.gc-staff-os-shell #app .gc-rescue-shell .staff-command-matrix{display:none!important}
+body.gc-staff-os-shell #app .gc-rescue-shell>section:not(.staff-command-matrix){
+  width:min(560px,100%)!important;
+  padding:clamp(22px,4vw,34px)!important;
+  border:1px solid #dce7ed!important;
+  border-radius:22px!important;
+  background:#ffffff!important;
+  color:#17384d!important;
+  box-shadow:0 24px 70px rgba(16,54,76,.12)!important;
+  text-align:center!important;
+}
+body.gc-staff-os-shell #app .gc-rescue-shell>section:not(.staff-command-matrix)>div:first-child{
+  border:1px solid rgba(8,127,140,.15)!important;
+  background:linear-gradient(145deg,#f4ffff,#8fe4e8 55%,#30b6c5)!important;
+  color:#0b3342!important;
+  box-shadow:0 0 0 4px rgba(37,184,198,.07)!important;
+}
+body.gc-staff-os-shell #app .gc-rescue-shell>section:not(.staff-command-matrix)>div:nth-of-type(2){
+  color:#087f8c!important;
+  font:850 10px/1.5 Vazirmatn,system-ui,sans-serif!important;
+  letter-spacing:.6px!important;
+}
+body.gc-staff-os-shell #app .gc-rescue-shell>section:not(.staff-command-matrix)>h1{
+  margin:0 0 10px!important;
+  color:#17384d!important;
+  font-size:clamp(22px,4vw,29px)!important;
+  line-height:1.6!important;
+}
+body.gc-staff-os-shell #app .gc-rescue-shell>section:not(.staff-command-matrix)>p{
+  color:#647d8e!important;
+  font-size:12px!important;
+  line-height:2!important;
+}
