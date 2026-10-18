@@ -97,8 +97,9 @@ async function requireStaff(req: Request) {
   const global = GLOBAL_ROLES.has(role)
   const dubaiScope = global || role === 'warehouse_uae' || (role === 'warehouse' && ['all','dubai','uae'].includes(branch))
   const erbilScope = global || role === 'warehouse_erbil' || (role === 'warehouse' && ['all','erbil'].includes(branch)) || (role === 'delivery' && branch === 'erbil')
+  const canRead = global || ['accountant','finance'].includes(role) || dubaiScope || erbilScope
   const canWrite = WRITE_ROLES.has(role)
-  return {admin, staff, role, branch, global, dubaiScope, erbilScope, canWrite}
+  return {admin, staff, role, branch, global, dubaiScope, erbilScope, canRead, canWrite}
 }
 function lineView(row: Record<string, any>) {
   return {
@@ -137,6 +138,7 @@ Deno.serve(async (req: Request) => {
     const ctx = await requireStaff(req)
     const url = new URL(req.url)
     if (req.method === 'GET') {
+      if (!ctx.canRead) throw new HttpError('This branch cannot access the Dubai land manifest', 403)
       const kind = clean(url.searchParams.get('kind') || 'list', 40)
       if (kind === 'detail') {
         const id = clean(url.searchParams.get('id'), 80)
