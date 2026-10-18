@@ -6,7 +6,7 @@
   const primary = [
     ['overview', 'داشبۆرد', 'home'],
     ['shipments', 'بارەکان', 'package'],
-    ['customers', 'کڕیاران', 'users'],
+    ['land-manifests', 'مانيفێست', 'package'],
     ['warehouses', 'کۆگا', 'warehouse'],
     ['alerts', 'ئاگاداری', 'bell']
   ];
