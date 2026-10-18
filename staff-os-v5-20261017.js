@@ -970,7 +970,7 @@
       <div class="form-field"><label>بەهای ڕاگەیەنراو</label><input class="field" name="declared_value" type="number" min="0" step="0.01"></div>
       <div class="form-field"><label>دراو</label><select class="field" name="declared_currency"><option>USD</option><option>IQD</option><option>CNY</option><option>AED</option></select></div>
       <div class="form-field full"><label>ناوەڕۆکی کارتۆن / کاڵاکان</label><textarea class="field" name="item_summary" placeholder="جۆری کاڵا، ژمارەی PC و وردەکاریی گرنگ"></textarea></div>
-      <div class="form-field full"><label>وێنەی کارتۆن و لیبێڵی GC (پێویستە)</label><input class="field" name="photos" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple capture="environment" required><small>تا ٨ وێنە؛ وێنەکە دەبێت بە بەڵگەی هەژماری ئەم GC ـەوە ببەسترێتەوە.</small></div>
+      <div class="form-field full"><label>وێنەی کارتۆن و لیبێڵی GC (پێویستە)</label><input class="field" name="photos" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple capture="environment" required><small>تا ٨ وێنە؛ هەر وێنەیەک تا ١٢ MB و کۆی وێنەکان تا ٤٨ MB. پێش پاشەکەوتکردن پێشبینینی وێنەکان لێرە دەردەکەوێت.</small><div id="receiptPhotoPreview" class="receipt-photo-preview-grid" aria-live="polite" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-top:10px"></div></div>
       <div class="form-field"><label>Latitude (GPS)</label><input class="field" name="latitude" type="number" step="any" inputmode="decimal" placeholder="35.56"></div>
       <div class="form-field"><label>Longitude (GPS)</label><input class="field" name="longitude" type="number" step="any" inputmode="decimal" placeholder="44.00"></div>
       <div class="form-field full"><button class="btn" id="receiptGpsBtn" type="button">⌖ گرتنی شوێنی ئێستا بە GPS</button><small id="receiptGpsStatus" aria-live="polite">بە ڕەزامەندیی تۆ شوێن لە مۆبایلەکەوە تۆمار دەکرێت؛ دەتوانیت بە دەستیش بنووسیت.</small></div>
@@ -983,9 +983,35 @@
     if(locationField)locationField.value=defaultLocation;
     const photoInput=receiptForm?.querySelector('input[name="photos"]');
     const photoTakenAt=receiptForm?.querySelector('input[name="photo_taken_at"]');
-    photoInput?.addEventListener('change',()=>{
-      if(photoTakenAt)photoTakenAt.value=photoInput.files?.length?new Date().toISOString():'';
-    });
+    const photoPreview=document.getElementById('receiptPhotoPreview');
+    const renderReceiptPhotoPreview=()=>{
+      if(!photoInput||!photoPreview)return;
+      const previous=photoPreview.querySelectorAll('img[data-receipt-preview-url]');
+      previous.forEach(image=>{try{URL.revokeObjectURL(image.dataset.receiptPreviewUrl||image.src)}catch{}});
+      const files=Array.from(photoInput.files||[]);
+      const totalBytes=files.reduce((sum,file)=>sum+file.size,0);
+      const unsafe=files.find(file=>file.size>12*1024*1024);
+      const tooMany=files.length>8;
+      const tooLargeTotal=totalBytes>48*1024*1024;
+      if(tooMany||unsafe||tooLargeTotal){
+        photoInput.value='';
+        if(photoTakenAt)photoTakenAt.value='';
+        photoPreview.innerHTML='';
+        const reason=tooMany?'زۆرترین ژمارەی وێنە ٨ دانەیە.':unsafe?'هەر وێنەیەک دەبێت ١٢ MB یان کەمتر بێت.':'کۆی قەبارەی وێنەکان دەبێت ٤٨ MB یان کەمتر بێت.';
+        toast(reason,'bad');
+        return;
+      }
+      if(photoTakenAt)photoTakenAt.value=files.length?new Date().toISOString():'';
+      photoPreview.innerHTML=files.map((file,index)=>{
+        const url=URL.createObjectURL(file);
+        const sizeMb=(file.size/1024/1024).toFixed(1);
+        return `<figure style="margin:0;min-width:0;overflow:hidden;border:1px solid rgba(107,139,159,.25);border-radius:12px;background:rgba(7,25,42,.04)">
+          <img data-receipt-preview-url="${esc(url)}" src="${esc(url)}" alt="Receipt photo ${index+1}" loading="lazy" style="display:block;width:100%;height:105px;object-fit:cover;background:#eef3f6">
+          <figcaption style="padding:7px;font-size:11px;line-height:1.5;overflow-wrap:anywhere"><strong>${esc(file.name)}</strong><small style="display:block;opacity:.72">${sizeMb} MB</small></figcaption>
+        </figure>`;
+      }).join('');
+    };
+    photoInput?.addEventListener('change',renderReceiptPhotoPreview);
     const gpsButton=document.getElementById('receiptGpsBtn');
     gpsButton?.addEventListener('click',()=>{
       const status=document.getElementById('receiptGpsStatus');
@@ -1139,7 +1165,7 @@
   function updateBadges(){const set=(id,n)=>{const x=document.getElementById(id);if(!x)return;x.textContent=String(n||0);x.classList.toggle('hidden',!n)};const alerts=(state.data.alerts||[]).filter(x=>!Array.isArray(x.read_by)||!x.read_by.includes(state.staff?.id)).length;const requests=(state.data.quoteRequests||[]).filter(x=>!['closed','replied','accepted','rejected'].includes(x.status)).length;const staffChat=(state.data.chatRooms||[]).reduce((s,x)=>s+Number(x.unread_count||0),0);set('alertsBadge',alerts);set('requestBadge',requests);set('staffChatBadge',staffChat);set('customerChatBadge',(state.data.customerChat?.threads||[]).filter(x=>x.status==='open').length);}
 
   function openModal(title, body, footer='') { closeModal(); const back=document.createElement('div'); back.className='modal-backdrop'; back.id='gcModal'; back.innerHTML=`<div class="modal"><div class="modal-head"><div><div class="eyebrow">GLOBAL CLOUD · CONTROL</div><h2>${esc(title)}</h2></div><button class="btn" data-close>×</button></div><div>${body}</div>${footer?`<div class="modal-foot">${footer}</div>`:''}</div>`;document.body.appendChild(back);back.addEventListener('click',e=>{if(e.target===back||e.target.closest('[data-close]'))closeModal()});return back; }
-  function closeModal(){document.getElementById('gcModal')?.remove();stopScanner();}
+  function closeModal(){const modal=document.getElementById('gcModal');modal?.querySelectorAll('img[data-receipt-preview-url]').forEach(image=>{try{URL.revokeObjectURL(image.dataset.receiptPreviewUrl||image.src)}catch{}});modal?.remove();stopScanner();}
 
   async function scannerModal(kind){
     openModal(kind==='customer'?'Scan GC Customer':'Scan GC for Warehouse',`<div class="scanner"><video id="scanVideo" autoplay playsinline muted></video><div class="scanline"></div></div><div id="scanStatus" class="muted" style="margin-top:9px">Camera دەستپێدەکات…</div>`,'<button class="btn" id="manualScan">دابینکردنی دستی</button><button class="btn" data-close>داخستن</button>');
