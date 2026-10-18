@@ -174,11 +174,7 @@
     currency:state.currency,
     notes:String(r.notes||'').trim()
   });
-  const numCell=(v)=>{
-    if(v==null||String(v).trim()==='')return 0;
-    const n=Number(String(v).replace(/,/g,'').replace(/[^\d.-]/g,''));
-    return Number.isFinite(n)&&n>=0?n:0;
-  };
+  
   const setMessage=(message,kind='info')=>{
     const el=$('#gc-land-import-message');
     if(el){el.textContent=message;el.dataset.kind=kind}
