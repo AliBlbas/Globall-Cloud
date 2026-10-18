@@ -108,7 +108,7 @@
   };
 
   window.addEventListener('error', (event) => {
-    if (String(event?.filename || '').includes('staff-os-v5.js')) {
+    if (String(event?.filename || '').includes('staff-os-v5.js') || String(event?.filename || '').includes('staff-os-v5-20261017.js')) {
       showFailure(event.message || 'هەڵەی JavaScript لە Staff OS.');
     }
   });
@@ -123,7 +123,7 @@
       clearInterval(timer);
       return;
     }
-    if (Date.now() - startedAt >= 7000) {
+    if (Date.now() - startedAt >= 18000) {
       clearInterval(timer);
       showFailure('Staff OS لە کاتی داناندا وەستاوە. deployment، cache یان script loading پشکنین بکە.');
     }
