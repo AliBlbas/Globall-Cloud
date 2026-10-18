@@ -135,12 +135,24 @@ const renderNotifications = (items) => setHtml('notifications',
       const receiptPhotos = Array.isArray(item.receipt_photos)
         ? item.receipt_photos.filter((url) => typeof url === 'string' && /^https?:\/\//i.test(url)).slice(0, 4)
         : [];
+      const receiptMetaItems = item.kind === 'warehouse_received' ? [
+        ['GC Code', item.receipt_gc_code],
+        ['کۆگا', item.receipt_location],
+        ['کاتی وەرگرتن', item.receipt_received_at ? date(item.receipt_received_at) : date(item.created_at)],
+        ['کارتۆن', Number(item.receipt_carton_count || (Array.isArray(item.receipt_cartons) ? item.receipt_cartons.length : 0)) || null],
+        ['کێش', item.receipt_weight_kg !== null && item.receipt_weight_kg !== undefined && Number.isFinite(Number(item.receipt_weight_kg)) ? String(Number(item.receipt_weight_kg).toLocaleString('en-US', {maximumFractionDigits: 2})) + ' kg' : null],
+        ['دۆخی بەڵگە', item.receipt_verification_status === 'verified' ? 'پشتڕاستکراوە' : item.receipt_verification_status],
+      ].filter(([, value]) => value !== null && value !== undefined && String(value).trim() !== '') : [];
+      const receiptMeta = receiptMetaItems.length
+        ? '<div class="notification-receipt-meta" aria-label="وردەکاریی وەرگرتنی کاڵا">' + receiptMetaItems.map(([label, value]) => '<div class="notification-receipt-meta-item"><small>' + esc(label) + '</small><strong>' + esc(value) + '</strong></div>').join('') + '</div>'
+        : '';
       const receiptPhotoPreview = item.kind === 'warehouse_received' && receiptPhotos.length
         ? `<div class="photo-grid notification-receipt-photo-grid" role="group" aria-label="وێنەکانی وەرگرتنی ${esc(item.receipt_gc_code || 'GC')}">${receiptPhotos.map((url, index) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img class="receipt-photo" src="${esc(url)}" alt="${esc(item.receipt_gc_code || 'GC')} · وێنەی ${index + 1}" loading="lazy"></a>`).join('')}</div>`
         : '';
       return `<article class="item notification-item ${isRead ? 'is-read' : 'is-unread'}" data-notification-state="${isRead ? 'read' : 'unread'}">
         <div class="row notification-item-head"><strong>${esc(item.title)}</strong>${isRead ? '<span class="pill">خوێندراوە</span>' : `<button class="btn notification-action" type="button" data-read-notification="${esc(item.id)}">خوێندراوە بکە</button>`}</div>
         <div class="muted notification-body">${esc(item.body)}</div>
+        ${receiptMeta}
         ${receiptPhotoPreview}
         <div class="row notification-item-foot"><small class="notification-time">${esc(date(item.created_at))}</small>${action ? `<a class="btn notification-open-action" href="${esc(action)}">${esc(actionLabel)} ↗</a>` : ''}</div>
       </article>`;
