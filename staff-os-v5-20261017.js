@@ -911,7 +911,41 @@ async function renderCustomers() {
         : result.receipt_notifications_disabled
           ? 'ئاگادارکردنەوەی ناو ئەکاونت بەپێی هەڵبژاردەی کڕیار داخراوە.'
           : 'ئاگادارکردنەوەی وەرگرتنی پێشوو کە نوێ دروست کران: ' + Number(result.receipt_notifications_queued || 0) + ' · تۆمارەکانی پێشوو پشکنراون: ' + Number(result.receipt_notifications_checked || 0) + (Number(result.receipt_notifications_skipped_gc_mismatch || 0) ? ' · تۆماری ناتەبای GC پشتگوێ خرا: ' + Number(result.receipt_notifications_skipped_gc_mismatch || 0) : '');
-      window.alert('هەژماری کڕیار ئامادەیە\nGC Code / Login ID: ' + (result.gc_code || code) + '\nTemporary password: ' + result.temporary_password + '\n' + shipmentLinkStatus + '\n' + receiptNoticeStatus + '\n\nکڕیار بە کۆدی GC و ئەم وشەی نهێنییە دەچێتە ژوورەوە؛ پێویست نییە ئیمەیل بنووسێت. وشەی نهێنی بە شێوەی پارێزراو بگەیەنە و داوای گۆڕینی بکە.');
+      openModal('هەژماری کڕیار ئامادەیە',
+        '<div class="customer-access-result" dir="rtl" style="display:grid;gap:12px">' +
+          '<section class="card" style="display:grid;gap:8px"><small>GC Code / Login ID</small><code id="customerAccessGc" dir="ltr" style="font:900 19px/1.5 JetBrains Mono,monospace;overflow-wrap:anywhere"></code><button type="button" class="btn" id="copyCustomerGc">کۆپی GC Code</button></section>' +
+          '<section class="card" style="display:grid;gap:8px"><small>Temporary password · وشەی نهێنیی کاتی</small><code id="customerAccessPassword" dir="ltr" style="font:800 15px/1.7 JetBrains Mono,monospace;overflow-wrap:anywhere;user-select:all"></code><button type="button" class="btn" id="copyCustomerPassword">کۆپی وشەی نهێنی</button></section>' +
+          '<section class="card"><b>دۆخی پەیوەندی</b><p id="customerAccessShipmentStatus" style="margin:7px 0 0"></p><p id="customerAccessReceiptStatus" style="margin:7px 0 0"></p></section>' +
+          '<p class="muted" style="font-size:11px;line-height:1.9">کڕیار بە کۆدی GC و وشەی نهێنیی کاتی دەچێتە ژوورەوە؛ پێویست نییە ئیمەیل بنووسێت. زانیاریی چوونەژوورەوە بە شێوەی پارێزراو بگەیەنە و داوای گۆڕینی وشەی نهێنی بکە.</p>' +
+        '</div>',
+        '<button class="btn primary" id="copyCustomerAccess">کۆپی GC و وشەی نهێنی</button><button class="btn" data-close>داخستن</button>');
+      document.getElementById('customerAccessGc').textContent = result.gc_code || code;
+      document.getElementById('customerAccessPassword').textContent = result.temporary_password;
+      document.getElementById('customerAccessShipmentStatus').textContent = shipmentLinkStatus;
+      document.getElementById('customerAccessReceiptStatus').textContent = receiptNoticeStatus;
+      const copyAccessText = async (textToCopy, label) => {
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(textToCopy);
+          } else {
+            const textarea = document.createElement('textarea');
+            textarea.value = textToCopy;
+            textarea.setAttribute('readonly', '');
+            textarea.style.cssText = 'position:fixed;inset-inline-start:-9999px;top:0;opacity:0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            const ok = document.execCommand('copy');
+            textarea.remove();
+            if (!ok) throw new Error('Copy not available');
+          }
+          toast(label + ' کۆپی کرا.');
+        } catch {
+          toast('کۆپی خۆکار کار نەکرد؛ زانیارییەکە لە خانەکەدا هەڵبژێرە و کۆپی بکە.', 'bad');
+        }
+      };
+      document.getElementById('copyCustomerGc').onclick = () => copyAccessText(String(result.gc_code || code), 'GC Code');
+      document.getElementById('copyCustomerPassword').onclick = () => copyAccessText(result.temporary_password, 'وشەی نهێنی');
+      document.getElementById('copyCustomerAccess').onclick = () => copyAccessText('GC Code / Login ID: ' + (result.gc_code || code) + '\nTemporary password: ' + result.temporary_password, 'زانیاریی چوونەژوورەوە');
       await renderCustomers();
     } catch (error) {
       toast(error?.message || 'دروستکردنی هەژمار سەرکەوتوو نەبوو.', 'bad');
