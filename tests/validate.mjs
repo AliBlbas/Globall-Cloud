@@ -51,7 +51,7 @@ if (ts) {
 
 console.log('Required production files')
 const required = [
-  'index.html','gc-customer-carton-manifest-20261017.js','gc-customer-carton-manifest-20261017.css','gc-staff-carton-tools-20261017.js','gc-staff-command-system-20261017.css','gc-staff-console-elite-20261018.css','gc-customer-warehouse-evidence-20261017.css','gc-customer-experience-signature-20261017.css','gc-ui-integrity-mobile-20261017.css','gc-dashboard-preferences-20261003.js','gc-public-customer-style-loader-20261014.js','staff-os-v5-enhancement-loader-20261017.js','login.html','register.html','customer-access.html','supabase/functions/customer-gc-register/index.ts','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','gc-unified-customer-experience-20261016.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
+  'index.html','gc-customer-carton-manifest-20261017.js','gc-customer-carton-manifest-20261017.css','gc-staff-carton-tools-20261017.js','gc-staff-command-system-20261017.css','gc-staff-console-elite-20261018.css','gc-staff-land-manifest-20261018.css','gc-staff-land-manifest-20261018.js','gc-customer-warehouse-evidence-20261017.css','gc-customer-experience-signature-20261017.css','gc-ui-integrity-mobile-20261017.css','gc-dashboard-preferences-20261003.js','gc-public-customer-style-loader-20261014.js','staff-os-v5-enhancement-loader-20261017.js','login.html','register.html','customer-access.html','supabase/functions/customer-gc-register/index.ts','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','gc-unified-customer-experience-20261016.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
   'public-route-bootstrap.js','public-runtime-guarantee.js','public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js',
   'tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html',
   'staff-os-v5.html','staff-os-v5.css','staff-os-v5.js','gc-shipment-detail-20261016.css','staff-os-v5-rescue.js','staff-logistics-intelligence.js','staff-logistics-intelligence.css',
@@ -66,6 +66,8 @@ const required = [
   'supabase/migrations/20261017203455_fix_customer_notification_uuid_text_join.sql',
   'supabase/migrations/20261017204122_add_missing_fk_covering_indexes.sql',
   'supabase/migrations/20261017204218_optimize_customer_order_rls_policies.sql',
+  'supabase/migrations/20261018173608_dubai_land_manifest_workflow.sql','supabase/migrations/20261018174100_fix_tracking_notification_uuid_cast.sql',
+  'supabase/functions/land-manifests/index.ts','supabase/functions/land-manifests/deno.json',
   'supabase/functions/public-config/index.ts',
   'supabase/functions/public-track/index.ts','supabase/functions/system-health/index.ts','supabase/functions/staff-auth-verify/index.ts',
   'supabase/functions/_shared/service-key.ts','supabase/functions/logistics-control-plane/index.ts',
@@ -97,6 +99,7 @@ const publicRuntime = read('public-runtime-guarantee.js')
 const configContracts = [
   ['customer-self requires JWT verification', /^\[functions\.customer-self\]\s*verify_jwt\s*=\s*true$/m.test(config)],
   ['public-health is public', /^\[functions\.public-health\]\s*verify_jwt\s*=\s*false$/m.test(config)],
+  ['land-manifests API requires JWT verification', /^\[functions\.land-manifests\]\s*verify_jwt\s*=\s*true$/m.test(config)],
 ]
 for (const [label, passed] of configContracts) if (!passed) fail(label)
 if (configContracts.every(([, passed]) => passed)) ok('Auth function JWT contracts aligned')
@@ -228,6 +231,11 @@ const customerRequestController = read('gc-customer-request-20261003.js')
 const customerPhotoBucketMigration = read('supabase/migrations/20261017130000_restrict_customer_request_photo_uploads.sql')
 const staffConsoleVersionedScript = read('staff-os-v5-20261017.js')
 const staffOpsHubSource = read('supabase/functions/staff-ops-hub/index.ts')
+const landManifestSource = read('supabase/functions/land-manifests/index.ts')
+const landManifestMigration = read('supabase/migrations/20261018173608_dubai_land_manifest_workflow.sql')
+const trackingNotificationCastMigration = read('supabase/migrations/20261018174100_fix_tracking_notification_uuid_cast.sql')
+const staffLandManifestUI = read('gc-staff-land-manifest-20261018.js')
+const staffLandManifestCss = read('gc-staff-land-manifest-20261018.css')
 const customerAccountEntry = read('gc-account-entry.js')
 const accountAdminSource = read('supabase/functions/account-admin/index.ts')
 const customerDockStart = unifiedShell.indexOf('<nav class="mobile-dock"')
@@ -343,6 +351,12 @@ const mobileUiContracts = [
   ['customer workspace references the final mobile integrity CSS', publicShell.includes('gc-ui-integrity-mobile-20261017.css?v=6')],
   ['customer style loader puts integrity CSS after signature styles', customerStyleLoader.indexOf('gc-ui-integrity-mobile-20261017.css?v=6') > customerStyleLoader.indexOf('gc-customer-experience-signature-20261017.css?v=2')],
   ['Staff OS references the current integrity CSS and cache-busted loader', staffOsHtml.includes('gc-ui-integrity-mobile-20261017.css?v=6') && staffOsHtml.includes('staff-os-v5-enhancement-loader-20261017.js?v=7')],
+  ['Dubai-to-Erbil land manifest is loaded into Staff OS with Excel support', staffOsHtml.includes('gc-staff-land-manifest-20261018.css?v=1') && staffOsHtml.includes('gc-staff-land-manifest-20261018.js?v=1') && staffOsHtml.includes('xlsx@0.18.5/dist/xlsx.full.min.js') && staffOsHtml.indexOf('staff-os-v5-20261017.js') < staffOsHtml.indexOf('xlsx@0.18.5') && staffOsHtml.indexOf('xlsx@0.18.5') < staffOsHtml.indexOf('gc-staff-land-manifest-20261018.js?v=1')],
+  ['Dubai-to-Erbil land manifest imports Excel with exact manifest columns', ['customer_name:', 'shipment_date:', 'cargo_type:', 'box_count:', 'quantity_pc:', 'weight_kg:', 'sell_price:'].every(key => staffLandManifestUI.includes(key)) && ['name','date','type','box','pcs','kg','sell price'].every(header => staffLandManifestUI.toLowerCase().includes(header)) && staffLandManifestUI.includes('XLSX.read(data,{type:\'array\',cellDates:true})')],
+  ['Land manifest saves each line transactionally through a staff-only database RPC', landManifestSource.includes("SUPABASE_SERVICE_ROLE_KEY") && landManifestSource.includes("admin.rpc('create_dubai_land_manifest'") && landManifestSource.includes("admin.rpc('set_dubai_land_manifest_status'") && landManifestSource.includes("admin.rpc('update_dubai_land_manifest_row'") && landManifestSource.includes("admin.rpc('archive_dubai_land_manifest_row'") && landManifestMigration.includes('SECURITY DEFINER') && landManifestMigration.includes('GRANT EXECUTE ON FUNCTION public.create_dubai_land_manifest')],
+  ['Land manifest validates GC codes and counts unresolved rows for manual review', landManifestSource.includes("/^GC-[A-Z0-9-]{2,30}$/") && landManifestMigration.includes("'linked_rows',v_linked") && landManifestMigration.includes("'unlinked_rows',v_count-v_linked") && staffLandManifestUI.includes('normalizeGC') && staffLandManifestUI.includes('پێویستی بە پشکنینی GC')],
+  ['Land manifest transitions create tracking events and customer notifications without UUID/text casts', landManifestMigration.includes("INSERT INTO public.shipment_tracking_events") && trackingNotificationCastMigration.includes("WHERE id::text = NULLIF(BTRIM(NEW.shipment_id), '')") && trackingNotificationCastMigration.includes('s.id,')],
+  ['Land manifest UI has responsive mobile cards and line editors', staffLandManifestCss.includes('@media(max-width:760px)') && staffLandManifestCss.includes('.gc-land-line-fields{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}') && staffLandManifestCss.includes('.gc-land-manifest-card'))],
   ['Staff Console uses the new premium theme link and pins it as the final CSS cascade', staffOsHtml.includes('gc-staff-console-elite-20261018.css?v=3') && staffOsHtml.includes('staff-os-v5-enhancement-loader-20261017.js?v=7') && staffEnhancementLoader.indexOf("loadStyle('/gc-staff-console-elite-20261018.css?v=3')") > staffEnhancementLoader.indexOf("loadStyle('/gc-staff-command-system-20261017.css?v=2')") && staffEnhancementLoader.includes("const href = '/gc-staff-console-elite-20261018.css?v=3'")],
   ['Premium Staff Console has a distinct light work surface with dark rail and a mobile five-action dock', staffConsoleEliteCss.includes('background:rgba(255,255,255,.97) !important') && staffConsoleEliteCss.includes('linear-gradient(165deg,#17384f 0%,#102a3d 55%,#0b2031 100%)') && staffConsoleEliteCss.includes('grid-template-columns:repeat(5,minmax(0,1fr))!important') && staffConsoleEliteCss.includes('@media(max-width:760px)')],
   ['Staff recovery handles errors from the versioned bundle and waits beyond Supabase startup', staffRescueScript.includes("includes('staff-os-v5-20261017.js')") && staffRescueScript.includes('>= 18000') && staffOsHtml.includes('staff-os-v5-rescue.js?v=20261018-1')],
