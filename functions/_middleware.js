@@ -211,6 +211,13 @@ export async function onRequest(context) {
     );
   }
 
+  // Staff UI styles are injected by compatibility layers above.
+  // Re-append the unified theme after them so legacy CSS cannot override the final console design.
+  if (STAFF_V5.test(path)) {
+    const eliteThemeLink = '<link rel="stylesheet" href="/gc-staff-console-elite-20261018.css?v=2" data-gc-staff-console-elite="1">';
+    html = html.replace(/<link[^>]*data-gc-staff-console-elite[^>]*>\s*/gi, '');
+    html = html.replace(/<\/head>/i, eliteThemeLink + '</head>');
+  }
   const headers=applySecurityHeaders(new Headers(response.headers)); headers.delete('content-encoding'); headers.delete('content-length'); headers.delete('etag'); headers.set('content-type','text/html; charset=UTF-8'); if(STAFF_V5.test(path)) headers.set('cache-control','no-store, max-age=0, must-revalidate');
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
