@@ -417,23 +417,16 @@ Deno.serve(async (req) => {
       const prefix = 'warehouse_received:'
       if (!eventKey.startsWith(prefix)) return notification
       const receipt = receiptsById.get(eventKey.slice(prefix.length))
-      if (!receipt) return notification
+      const location = String(receipt?.location || receipt?.source_warehouse || receipt?.warehouse || '')
+      const legacyText = String(notification.title || '') + ' ' + String(notification.body || '')
+      const isDubai = /dubai|uae|united arab emirates|دوبەی|دوبی/i.test(location + ' ' + legacyText)
       return {
         ...notification,
-        receipt_id: receipt.id,
-        receipt_photos: Array.isArray(receipt.photos) ? receipt.photos.slice(0, 8) : [],
-        receipt_gc_code: receipt.gc_code_detected || receipt.gc_code || null,
-        receipt_location: receipt.location || receipt.source_warehouse || receipt.warehouse || null,
-        receipt_received_at: receipt.received_at || null,
-        receipt_carton_count: Number(receipt.carton_count || (Array.isArray(receipt.cartons) ? receipt.cartons.length : 0)) || 0,
-        receipt_weight_kg: receipt.weight_actual === null || receipt.weight_actual === undefined ? null : Number(receipt.weight_actual),
-        receipt_photo_taken_at: receipt.photo_taken_at || null,
-        receipt_verification_status: receipt.verification_status || null,
-        receipt_cartons: Array.isArray(receipt.cartons) ? receipt.cartons.map((carton: Record<string, any>) => ({
-          code: carton.carton_code || null,
-          index: carton.carton_index || null,
-          total: carton.carton_total || null,
-        })) : [],
+        title: isDubai ? 'کاڵاکەت لە کۆگای دوبەی وەرگیرا' : 'کاڵاکەت لە کۆگا وەرگیرا',
+        body: isDubai
+          ? 'وردەکاری، وێنە و ژمارەی کارتۆن لە بەشی بارەکان ببینە.'
+          : 'وردەکاری و بەڵگەی کاڵاکەت لە بەشی بارەکان ببینە.',
+        action_url: '/#shipmentsSection',
       }
     })
     // Include public documents and legacy invoices attached to single-owner
