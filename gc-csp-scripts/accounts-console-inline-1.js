@@ -368,13 +368,19 @@ window.editStaff = (row) => {
 };
 window.bindCustomerAccount = async (id) => {
   if (state.role !== 'super_admin') { alert('Only Super Admin can provision customer logins.'); return; }
+  const row = state.customers.find((item) => String(item.id) === String(id)) || {};
+  const code = String(row.gc_code || row.code || '').trim();
+  if (!code) { alert('GC code is missing; this account cannot be linked safely.'); return; }
+  if (!confirm('تەنها دوای پشتڕاستکردنەوەی ناسنامەی کڕیار، هەژمارەکە ببەستەوە: ' + code)) return;
+  const confirmedCode = prompt('بۆ پشکنینی دووبارە، کۆدی GC ـی ئەم کڕیارە بە تەواوی بنووسە: ' + code, '');
+  const normalizeGc = (value) => String(value || '').normalize('NFKC').toUpperCase().replace(/[–—−]/g, '-').replace(/\s+/g, '');
+  if (!confirmedCode || normalizeGc(confirmedCode) !== normalizeGc(code)) { alert('GC code mismatch. No account was linked.'); return; }
   const supplied = prompt('Optional password (minimum 12 characters). Leave empty to generate a temporary password:');
   if (supplied === null) return;
   const password = supplied.trim();
   if (password && password.length < 12) { alert('Password must be at least 12 characters.'); return; }
   try {
-    const row = state.customers.find((item) => String(item.id) === String(id)) || {};
-    const res = await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'customer', action: 'bind', data: { id, password: password || undefined } }) });
+    const res = await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'customer', action: 'bind', data: { id, identity_verified: true, confirmed_gc_code: confirmedCode, password: password || undefined } }) });
     alert(`GC: ${res.gc_code || row.gc_code || row.code || ''}\nLogin: ${res.login_email || row.email || ''}\nTemporary password: ${res.temporary_password || ''}\n\nوشەی نهێنی تەنها ئێستا پیشان دەدرێت؛ بە شێوەی پارێزراو بۆ کڕیار بگەیەنە و داوای گۆڕینی بکە.`);
     await refreshAll();
   } catch (err) { alert(err.message || 'Unable to bind customer login'); }
