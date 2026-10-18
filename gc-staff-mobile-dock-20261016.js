@@ -190,18 +190,53 @@
       }
     });
 
-    const observer = new MutationObserver(() => renderDrawer());
-    const nav = side.querySelector('.nav');
-    if (nav) observer.observe(nav, {childList:true,subtree:true,attributes:true,attributeFilter:['class']});
-    sync();
+    let observedNav = null;
+    const navObserver = new MutationObserver(() => renderDrawer());
+    const syncShell = () => {
+      const shellExists = Boolean(document.querySelector('.gc-shell'));
+      document.body.classList.toggle('gc-staff-mobile-dock-active', shellExists);
+      dock.hidden = !shellExists;
+      menu.hidden = !shellExists;
+      if (!shellExists) {
+        close(false);
+        navObserver.disconnect();
+        observedNav = null;
+        return;
+      }
+
+      const currentActions = document.querySelector('.gc-main .top-actions');
+      if (currentActions && menu.parentNode !== currentActions) currentActions.prepend(menu);
+
+      const currentNav = document.querySelector('.gc-side .nav');
+      if (currentNav !== observedNav) {
+        navObserver.disconnect();
+        observedNav = currentNav;
+        if (currentNav) navObserver.observe(currentNav, {childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+      }
+      renderDrawer();
+      sync();
+    };
+
+    // Login/logout replaces the whole app shell; rebind the dock to the new nav
+    // instead of keeping stale references to detached sidebar nodes.
+    const appRoot = document.getElementById('app') || document.body;
+    const shellObserver = new MutationObserver(() => syncShell());
+    shellObserver.observe(appRoot, {childList:true,subtree:true});
+    syncShell();
+    window.addEventListener('beforeunload', () => {
+      shellObserver.disconnect();
+      navObserver.disconnect();
+    }, {once:true});
     return true;
   }
 
   if (!boot()) {
+    // The shell and the manifest navigation may be inserted only after login.
+    // Keep observing until all primary destinations exist; never time out silently.
     const observer = new MutationObserver(() => {
       if (boot()) observer.disconnect();
     });
     observer.observe(document.documentElement, {childList:true,subtree:true});
-    window.setTimeout(() => observer.disconnect(), 15000);
+    window.addEventListener('beforeunload', () => observer.disconnect(), {once:true});
   }
 })();
