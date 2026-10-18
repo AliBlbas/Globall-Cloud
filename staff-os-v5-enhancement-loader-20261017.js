@@ -102,16 +102,44 @@
   };
 
   const waitForShell = () => {
-    let tries = 0;
-    const timer = setInterval(async () => {
-      tries += 1;
-      if (document.querySelector('.gc-shell')) {
-        clearInterval(timer);
-        setTimeout(loadEnhancements, 250);
-      } else if (tries >= 120) {
-        clearInterval(timer);
+    const stopObserver = () => {
+      const observer = window.__gcStaffShellWaitObserver;
+      if (observer) {
+        observer.disconnect();
+        window.__gcStaffShellWaitObserver = null;
       }
-    }, 100);
+    };
+
+    let loadScheduled = false;
+    const attemptLoad = () => {
+      if (window.__gcStaffEnhancementsLoaded) {
+        stopObserver();
+        return true;
+      }
+      if (!document.querySelector('.gc-shell') || loadScheduled) return false;
+
+      loadScheduled = true;
+      setTimeout(async () => {
+        loadScheduled = false;
+        try {
+          await loadEnhancements();
+        } catch (error) {
+          console.error('[gc-staff-loader] enhancement load failed', error);
+        }
+        if (window.__gcStaffEnhancementsLoaded) stopObserver();
+        else attemptLoad();
+      }, 250);
+      return true;
+    };
+
+    // The staff shell is created only after successful authentication. Observe
+    // the app instead of stopping after 12 seconds while the login screen is open.
+    const target = document.getElementById('app') || document.body || document.documentElement;
+    if (!target) return;
+    const observer = new MutationObserver(() => { attemptLoad(); });
+    window.__gcStaffShellWaitObserver = observer;
+    observer.observe(target, { childList: true, subtree: true });
+    attemptLoad();
   };
 
   if (document.readyState === 'loading') {
