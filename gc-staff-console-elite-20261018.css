@@ -682,3 +682,300 @@ body.gc-staff-os-shell #app .gc-rescue-shell>section:not(.staff-command-matrix)>
   font-size:12px!important;
   line-height:2!important;
 }
+
+
+/* Final mobile shipment layout.
+   This intentionally overrides legacy shell rules that used to let labels,
+   filters, and LTR tracking IDs collide in the narrow phone viewport. */
+body.gc-staff-os-shell #app .shipment-grid {
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:stretch;
+  gap:14px!important;
+  min-width:0;
+}
+body.gc-staff-os-shell #app .shipment-card {
+  display:flex!important;
+  flex-direction:column!important;
+  gap:10px!important;
+  width:100%;
+  min-width:0!important;
+  padding:15px!important;
+  border:1px solid #dce6ed!important;
+  border-radius:17px!important;
+  background:linear-gradient(150deg,#ffffff,#f7fafc)!important;
+  color:#19384c!important;
+  text-align:start!important;
+  direction:rtl!important;
+  box-shadow:0 7px 22px rgba(21,55,76,.06)!important;
+  overflow:hidden;
+}
+body.gc-staff-os-shell #app .shipment-card :where(b,strong) {
+  color:#183b50!important;
+  line-height:1.65;
+  overflow-wrap:anywhere;
+}
+body.gc-staff-os-shell #app .shipment-card :where(span,small) {
+  min-width:0;
+  line-height:1.7;
+  overflow-wrap:anywhere;
+}
+body.gc-staff-os-shell #app .shipment-card .mono {
+  display:block;
+  max-width:100%;
+  direction:ltr!important;
+  unicode-bidi:plaintext;
+  text-align:left;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  word-break:break-word;
+  font-size:10px;
+}
+body.gc-staff-os-shell #app .shipment-card-head {
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:start!important;
+  gap:9px!important;
+  min-width:0;
+}
+body.gc-staff-os-shell #app .shipment-card-head>div {
+  display:grid;
+  gap:5px;
+  min-width:0;
+}
+body.gc-staff-os-shell #app .shipment-card-head .pill {
+  justify-self:start;
+  max-width:100%;
+  white-space:normal;
+  text-align:center;
+}
+body.gc-staff-os-shell #app .shipment-track {
+  color:#6d8493!important;
+  font-size:9px!important;
+}
+body.gc-staff-os-shell #app .shipment-customer {
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:3px!important;
+  min-width:0;
+  padding-top:9px;
+  border-top:1px solid #e5edf1!important;
+}
+body.gc-staff-os-shell #app .shipment-customer>span,
+body.gc-staff-os-shell #app .shipment-content>span,
+body.gc-staff-os-shell #app .shipment-facts span {
+  display:block;
+  color:#718795!important;
+  font-size:10px!important;
+}
+body.gc-staff-os-shell #app .shipment-route {
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 18px minmax(0,1fr)!important;
+  align-items:stretch!important;
+  gap:6px!important;
+  min-width:0;
+}
+body.gc-staff-os-shell #app .shipment-route span {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:0!important;
+  min-height:37px;
+  padding:7px!important;
+  border:1px solid #e4edf1!important;
+  border-radius:10px!important;
+  background:#f3f8fa!important;
+  color:#36586c!important;
+  font-size:10px!important;
+  text-align:center;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  word-break:break-word;
+}
+body.gc-staff-os-shell #app .shipment-route>b {
+  display:grid;
+  place-items:center;
+  color:#087f8c!important;
+}
+body.gc-staff-os-shell #app .shipment-tags {
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:center;
+  gap:6px!important;
+  min-width:0;
+  margin-top:0!important;
+}
+body.gc-staff-os-shell #app .shipment-tags .pill {
+  max-width:100%;
+  padding:5px 8px;
+  background:#eef7f8!important;
+  border:1px solid #d8eaed!important;
+  color:#286172!important;
+  white-space:normal;
+  line-height:1.55;
+  overflow-wrap:anywhere;
+}
+body.gc-staff-os-shell #app .shipment-content {
+  display:flex!important;
+  flex-direction:column!important;
+  gap:4px!important;
+  min-width:0;
+  margin:0!important;
+  padding:11px!important;
+  border:1px solid #e3ebef!important;
+  border-radius:12px!important;
+  background:#f6fafb!important;
+  color:#26495e!important;
+}
+body.gc-staff-os-shell #app .shipment-content>b {
+  display:block;
+  margin:0!important;
+  font-size:11px!important;
+  line-height:1.85!important;
+  overflow-wrap:anywhere!important;
+  word-break:break-word;
+}
+body.gc-staff-os-shell #app .shipment-facts {
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;
+  min-width:0;
+  margin-top:0!important;
+}
+body.gc-staff-os-shell #app .shipment-facts>div {
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  min-width:0;
+  padding:10px!important;
+  border:1px solid #e2ebef!important;
+  border-radius:11px!important;
+  background:#f7fafb!important;
+}
+body.gc-staff-os-shell #app .shipment-facts b {
+  display:block;
+  margin:0!important;
+  color:#203f53!important;
+  font-size:11px!important;
+  line-height:1.7!important;
+  overflow-wrap:anywhere;
+}
+body.gc-staff-os-shell #app .shipment-actions {
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;
+  width:100%;
+  margin-top:1px!important;
+}
+body.gc-staff-os-shell #app .shipment-actions .btn {
+  width:100%!important;
+  min-width:0!important;
+  min-height:42px!important;
+  margin:0!important;
+  padding:9px 8px!important;
+  white-space:normal;
+}
+body.gc-staff-os-shell #app .shipment-summary {
+  direction:rtl;
+  text-align:start;
+}
+body.gc-staff-os-shell #app .shipment-summary-header {
+  min-width:0;
+}
+body.gc-staff-os-shell #app .shipment-summary-note {
+  overflow-wrap:anywhere;
+}
+@media(max-width:760px) {
+  body.gc-staff-os-shell #app .toolbar {
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    align-items:stretch!important;
+    gap:8px!important;
+    min-width:0;
+    width:100%;
+    margin-bottom:12px!important;
+  }
+  body.gc-staff-os-shell #app .toolbar>*,
+  body.gc-staff-os-shell #app .toolbar .field {
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    margin:0!important;
+  }
+  body.gc-staff-os-shell #app .toolbar .field {
+    min-height:44px!important;
+    padding:10px 12px!important;
+    font-size:12px!important;
+    white-space:normal;
+  }
+  body.gc-staff-os-shell #app .shipment-grid {
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:11px!important;
+  }
+  body.gc-staff-os-shell #app .shipment-card {
+    gap:10px!important;
+    padding:13px!important;
+    border-radius:15px!important;
+  }
+  body.gc-staff-os-shell #app .shipment-summary {
+    padding:11px!important;
+    overflow:hidden;
+  }
+  body.gc-staff-os-shell #app .shipment-summary-header {
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:7px!important;
+    align-items:start!important;
+  }
+  body.gc-staff-os-shell #app .shipment-summary-live {
+    justify-self:start;
+  }
+  body.gc-staff-os-shell #app .shipment-summary-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important;
+  }
+  body.gc-staff-os-shell #app .shipment-summary-card {
+    min-width:0!important;
+    padding:9px!important;
+    gap:8px!important;
+  }
+  body.gc-staff-os-shell #app .shipment-summary-card>span {
+    font-size:10px!important;
+    line-height:1.75!important;
+  }
+  body.gc-staff-os-shell #app .shipment-summary-card>strong {
+    font-size:20px!important;
+    line-height:1.25!important;
+  }
+  body.gc-staff-os-shell #app .shipment-card-head {
+    grid-template-columns:minmax(0,1fr) auto!important;
+  }
+  body.gc-staff-os-shell #app .shipment-route span {
+    min-height:40px;
+    font-size:10px!important;
+  }
+  body.gc-staff-os-shell #app .shipment-facts {
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  body.gc-staff-os-shell #app .section-head h1 {
+    overflow-wrap:anywhere;
+  }
+}
+@media(max-width:390px) {
+  body.gc-staff-os-shell #app .shipment-card {
+    padding:11px!important;
+  }
+  body.gc-staff-os-shell #app .shipment-card-head {
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  body.gc-staff-os-shell #app .shipment-card-head .pill {
+    justify-self:start;
+  }
+  body.gc-staff-os-shell #app .shipment-summary-card>strong {
+    font-size:18px!important;
+  }
+  body.gc-staff-os-shell #app .shipment-route span {
+    padding:6px!important;
+    font-size:9px!important;
+  }
+}
