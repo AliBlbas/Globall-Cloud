@@ -814,7 +814,48 @@
 
   async function renderAlerts() { const r=await ops('alerts'); state.data.alerts=r.items||[]; const unread=state.data.alerts.filter(x=>!Array.isArray(x.read_by)||!x.read_by.includes(state.staff.id)).length; document.getElementById('view').innerHTML=`<div class="section-head"><div><div class="eyebrow">ALERT CENTER</div><h1>Alerts</h1><p>${number(unread)} ئاگادارییەکی ناخوێندراوە.</p></div></div><div class="list" id="alertList">${state.data.alerts.length?state.data.alerts.map(a=>`<article class="notice ${Array.isArray(a.read_by)&&a.read_by.includes(state.staff.id)?'':'unread'}"><div><b>${esc(a.title||a.kind||'Alert')}</b><p>${esc(a.body||a.message||'')}</p><small>${esc(date(a.created_at))}</small></div><button class="btn" data-alert-read="${esc(a.id)}">${Array.isArray(a.read_by)&&a.read_by.includes(state.staff.id)?'خوێندراوە':'خوێندنەوە'}</button></article>`).join(''):'<div class="empty">هیچ ئاگادارییەک نییە.</div>'}</div><section class="card" style="margin-top:10px"><div class="card-head"><h3>دروستکردنی Alert</h3></div><form id="alertForm" class="form-grid"><div class="form-field"><label>جۆر</label><input class="field" name="kind" value="operations"></div><div class="form-field"><label>Severity</label><select class="field" name="severity"><option>normal</option><option>high</option><option>critical</option></select></div><div class="form-field full"><label>ناونیشان</label><input class="field" name="title" required></div><div class="form-field full"><label>پەیام</label><textarea class="field" name="body"></textarea></div></form><button class="btn primary" id="createAlert" style="margin-top:9px">دروستکردنی Alert</button></section>`; document.querySelectorAll('[data-alert-read]').forEach(b=>b.onclick=async()=>{try{await opsPost('alert_read',{id:b.dataset.alertRead});await renderAlerts()}catch(e){toast(e.message,'bad')}});document.getElementById('createAlert').onclick=async()=>{const d=Object.fromEntries(new FormData(document.getElementById('alertForm')).entries());try{await opsPost('alert_create',d);toast('Alert دروست کرا');await renderAlerts()}catch(e){toast(e.message,'bad')}}; }
 
-  async function renderCustomers() {
+  function downloadUnlinkedCustomerReport() {
+    if (state.staff?.role !== 'super_admin') {
+      toast('ئەم ڕاپۆرتە تەنها بۆ Super Admin ـە.', 'bad');
+      return;
+    }
+    const rows = (state.data.customers || [])
+      .filter((customer) => customer.is_active !== false && !customer.auth_user_id)
+      .sort((a, b) => String(a.gc_code || a.code || '').localeCompare(String(b.gc_code || b.code || '')));
+    if (!rows.length) {
+      toast('هیچ کڕیاری چالاکی بێ هەژمار نییە.');
+      return;
+    }
+    const safeCell = (value) => {
+      let textValue = String(value ?? '').replace(/[\r\n]+/g, ' ').trim();
+      if (/^[=+@\t]/.test(textValue) || /^-/.test(textValue)) textValue = "'" + textValue;
+      return '"' + textValue.replace(/"/g, '""') + '"';
+    };
+    const header = ['GC Code', 'Customer name', 'Phone', 'Alternative phone', 'City', 'Account status'];
+    const body = rows.map((customer) => [
+      customer.gc_code || customer.code || '',
+      customer.name || '',
+      customer.phone || '',
+      customer.phone2 || '',
+      customer.city || '',
+      'Needs identity verification'
+    ]);
+    const csv = '\uFEFF' + [header, ...body].map((row) => row.map(safeCell).join(',')).join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    const today = new Date().toISOString().slice(0, 10);
+    anchor.href = url;
+    anchor.download = 'globall-cloud-unlinked-customers-' + today + '.csv';
+    anchor.style.display = 'none';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    toast('ڕاپۆرتی ' + rows.length + ' کڕیاری بێ هەژمار ئامادە کرا. پێش Bind ناسنامە پشتڕاست بکەرەوە.');
+  }
+
+async function renderCustomers() {
     const r=await ops('customers'); state.data.customers=r.items||[];
     const active=state.data.customers.filter(x=>x.is_active!==false).length;
     const inactive=state.data.customers.length-active;
@@ -822,7 +863,7 @@
     const unlinked=state.data.customers.filter(x=>x.is_active!==false&&!x.auth_user_id).length;
     const inactiveUnlinked=state.data.customers.filter(x=>x.is_active===false&&!x.auth_user_id).length;
     const outstanding=state.data.customers.reduce((sum,x)=>sum+Number(x.outstanding_amount||0),0);
-    document.getElementById('view').innerHTML=`<div class="customer-control-hero"><div><div class="eyebrow">CUSTOMER 360 · ACCOUNT CONTROL</div><h1>کۆنترۆڵی هەژمارەکانی کڕیار</h1><p>لە یەک شوێنەوە GC identity، پەیوەندی، shipment، balance، activation و login account ـەکان بە شێوەی audit ـکراو بەڕێوە ببە.</p></div><div class="actions"><button class="btn primary" id="newCustomer">+ کڕیاری نوێ</button><button class="btn" id="customerScanner">⌁ Scan GC</button></div></div><div class="customer-control-kpis"><div class="customer-control-kpi is-blue"><span>هەموو کڕیار</span><strong>${number(state.data.customers.length)}</strong></div><div class="customer-control-kpi is-green"><span>چالاک</span><strong>${number(active)}</strong></div><div class="customer-control-kpi is-red"><span>ناچالاک</span><strong>${number(inactive)}</strong></div><div class="customer-control-kpi"><span>هەژماری بەستراو / بێ هەژمار</span><strong>${number(linked)} / ${number(unlinked)}</strong><small>ناچالاک و بێ هەژمار: ${number(inactiveUnlinked)} · Outstanding: ${money(outstanding)}</small></div></div><div class="customer-link-guidance" role="status"><strong>پەیوەستکردنی هەژماری چوونەژوورەوە</strong><span>${number(unlinked)} کڕیاری چالاک هێشتا هەژماری پەیوەستکراویان نییە. پێش Bind، ناسنامەی کڕیار پشتڕاست بکەرەوە؛ تەنها Super Admin دەتوانێت هەژمار بەستێتەوە.</span><span>${number(inactiveUnlinked)} کڕیاری ناچالاک هێشتا هەژماریان نییە؛ پێش هەر کردارێک سەرەتا دۆخیان بپشکنە.</span></div><div class="customer-control-toolbar"><input class="field" id="customerSearch" placeholder="گەڕان بە GC / ناو / ژمارە / شار" aria-label="گەڕان بە کڕیار"><select class="field" id="customerStatusFilter" aria-label="فلتەری دۆخی کڕیار"><option value="all">هەموو دۆخەکان</option><option value="active">تەنها چالاک</option><option value="inactive">تەنها ناچالاک</option><option value="linked">Auth linked</option><option value="unlinked">بێ هەژمار (چالاک)</option><option value="inactive-unlinked">ناچالاک و بێ هەژمار</option></select><select class="field" id="customerSort" aria-label="ڕیزکردنی کڕیار"><option value="recent">نوێترین</option><option value="name">ناو</option><option value="balance">ماوەی زۆرتر</option></select><span class="toolbar-note" id="customerResultCount"></span></div><div class="table-wrap"><table class="table customer-control-table"><thead><tr><th>GC</th><th>ناو</th><th>پەیوەندی</th><th>shipment</th><th>ماوە</th><th>manager</th><th>حالت</th><th>کۆنترۆڵ</th></tr></thead><tbody id="customerRows"></tbody></table></div>`;
+    document.getElementById('view').innerHTML=`<div class="customer-control-hero"><div><div class="eyebrow">CUSTOMER 360 · ACCOUNT CONTROL</div><h1>کۆنترۆڵی هەژمارەکانی کڕیار</h1><p>لە یەک شوێنەوە GC identity، پەیوەندی، shipment، balance، activation و login account ـەکان بە شێوەی audit ـکراو بەڕێوە ببە.</p></div><div class="actions"><button class="btn primary" id="newCustomer">+ کڕیاری نوێ</button><button class="btn" id="customerScanner">⌁ Scan GC</button>\${state.staff?.role==='super_admin' ? '<button class="btn" id="exportUnlinkedCustomers">دابەزاندنی لیستی بێ هەژمار</button>' : ''}</div></div><div class="customer-control-kpis"><div class="customer-control-kpi is-blue"><span>هەموو کڕیار</span><strong>${number(state.data.customers.length)}</strong></div><div class="customer-control-kpi is-green"><span>چالاک</span><strong>${number(active)}</strong></div><div class="customer-control-kpi is-red"><span>ناچالاک</span><strong>${number(inactive)}</strong></div><div class="customer-control-kpi"><span>هەژماری بەستراو / بێ هەژمار</span><strong>${number(linked)} / ${number(unlinked)}</strong><small>ناچالاک و بێ هەژمار: ${number(inactiveUnlinked)} · Outstanding: ${money(outstanding)}</small></div></div><div class="customer-link-guidance" role="status"><strong>پەیوەستکردنی هەژماری چوونەژوورەوە</strong><span>${number(unlinked)} کڕیاری چالاک هێشتا هەژماری پەیوەستکراویان نییە. پێش Bind، ناسنامەی کڕیار پشتڕاست بکەرەوە؛ تەنها Super Admin دەتوانێت هەژمار بەستێتەوە.</span><span>${number(inactiveUnlinked)} کڕیاری ناچالاک هێشتا هەژماریان نییە؛ پێش هەر کردارێک سەرەتا دۆخیان بپشکنە.</span></div><div class="customer-control-toolbar"><input class="field" id="customerSearch" placeholder="گەڕان بە GC / ناو / ژمارە / شار" aria-label="گەڕان بە کڕیار"><select class="field" id="customerStatusFilter" aria-label="فلتەری دۆخی کڕیار"><option value="all">هەموو دۆخەکان</option><option value="active">تەنها چالاک</option><option value="inactive">تەنها ناچالاک</option><option value="linked">Auth linked</option><option value="unlinked">بێ هەژمار (چالاک)</option><option value="inactive-unlinked">ناچالاک و بێ هەژمار</option></select><select class="field" id="customerSort" aria-label="ڕیزکردنی کڕیار"><option value="recent">نوێترین</option><option value="name">ناو</option><option value="balance">ماوەی زۆرتر</option></select><span class="toolbar-note" id="customerResultCount"></span></div><div class="table-wrap"><table class="table customer-control-table"><thead><tr><th>GC</th><th>ناو</th><th>پەیوەندی</th><th>shipment</th><th>ماوە</th><th>manager</th><th>حالت</th><th>کۆنترۆڵ</th></tr></thead><tbody id="customerRows"></tbody></table></div>`;
     const draw=()=>{
       const q=text(document.getElementById('customerSearch').value).toLowerCase();
       const filter=document.getElementById('customerStatusFilter').value;
@@ -833,7 +874,7 @@
       document.querySelectorAll('[data-customer]').forEach(b=>b.onclick=()=>customerDetail(b.dataset.customer)); document.querySelectorAll('[data-customer-edit]').forEach(b=>b.onclick=()=>editCustomer(b.dataset.customer)); document.querySelectorAll('[data-customer-code]').forEach(b=>b.onclick=()=>customerCode(b.dataset.customer)); document.querySelectorAll('[data-customer-bind]').forEach(b=>b.onclick=()=>bindCustomerLogin(b.dataset.customerBind));
     };
     ['customerSearch','customerStatusFilter','customerSort'].forEach(id=>document.getElementById(id).addEventListener(id==='customerSearch'?'input':'change',draw)); draw();
-    document.getElementById('newCustomer').onclick=newCustomerModal; document.getElementById('customerScanner').onclick=()=>scannerModal('customer');
+    document.getElementById('newCustomer').onclick=newCustomerModal; document.getElementById('customerScanner').onclick=()=>scannerModal('customer'); document.getElementById('exportUnlinkedCustomers')?.addEventListener('click',downloadUnlinkedCustomerReport);
   }
   async function bindCustomerLogin(id) {
     const customer = state.data.customers.find((item) => String(item.id) === String(id));
