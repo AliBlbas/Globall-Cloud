@@ -617,6 +617,10 @@ async function bindCustomerAuth(client: ReturnType<typeof createClient>, payload
   if (customer.is_active !== true) throw responseError('Inactive customers cannot be bound', 400)
   const code = normalizeGcCode(customer.gc_code ?? customer.code)
   if (!code) throw responseError('Customer has no valid GC code', 400)
+  const confirmedCode = normalizeGcCode(payload.confirmed_gc_code)
+  if (payload.identity_verified !== true || confirmedCode !== code) {
+    throw responseError('Verify the customer identity and re-enter the exact GC code before binding this account', 400)
+  }
   const password = txt(payload.password) || randomPassword(16)
   if (password.length < 12) throw responseError('Password must be at least 12 characters', 400)
   const email = txt(customer.email) || `${code.toLowerCase()}@customers.globall-cloud.internal`
@@ -642,6 +646,9 @@ async function bindCustomerAuth(client: ReturnType<typeof createClient>, payload
   await logActivity(client, actor.id, actor.name, 'bind_customer_auth_account', id, {
     gc_code: code,
     auth_user_id: userId,
+    identity_verified: true,
+    identity_verified_by: actor.id,
+    identity_verified_at: new Date().toISOString(),
     synthetic_email: email.endsWith('@customers.globall-cloud.internal'),
     shipment_links_updated: linkedRows.data?.length || 0,
     shipment_link_sync_warning: linkSyncWarning,
@@ -654,6 +661,7 @@ async function bindCustomerAuth(client: ReturnType<typeof createClient>, payload
   return {
     ok: true,
     status: 'linked',
+    identity_verified: true,
     customer_id: id,
     gc_code: code,
     auth_user_id: userId,
