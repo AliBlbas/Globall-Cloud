@@ -898,6 +898,7 @@
     const linkedCustomer=(state.data.customers||[]).find(customer=>String(customer.id)===String(r.directory_customer_id));
     const accountLinkKnown=typeof r.account_linked==='boolean'||Boolean(linkedCustomer);
     const customerAccountLinked=typeof r.account_linked==='boolean'?r.account_linked:Boolean(linkedCustomer?.auth_user_id);
+    const bindCustomerAction=accountLinkKnown&&!customerAccountLinked&&state.staff?.role==='super_admin'?'<button class="btn primary" id="bindReceiptCustomer">بەستنەوەی هەژمار و ئاگادارکردنەوە</button>':'';
     const cartonRowsHTML=cartons.map((carton)=>`<article class="warehouse-carton-row">
       <div><strong class="mono">${esc(carton.carton_code||'—')}</strong><small>${esc(carton.carton_index||'—')} / ${esc(carton.carton_total||cartons.length)} · ${esc(carton.warehouse_location||r.location||'—')}</small></div>
       <span class="pill ${carton.status==='received'||carton.status==='stored'?'mint':'warn'}">${esc(({received:'وەرگیراوە',stored:'هەڵگیراوە',in_transit:'لە ڕێگایە',delivered:'گەیشتووە',damaged:'زیانی پێگەیشتووە',lost:'ون بووە',on_hold:'وەستێنراوە',cancelled:'هەڵوەشێنراوە'})[carton.status]||carton.status||'—')}</span>
@@ -926,13 +927,28 @@
       </section>
       <section class="card warehouse-carton-manifest-card" style="grid-column:1/-1"><div class="card-head"><h3>کۆدی هەر کارتۆن · ${cartons.length}</h3><span class="pill">${cartons.length?'MANIFEST READY':'بەردەست نییە'}</span></div><div class="list warehouse-carton-list">${cartonRowsHTML||'<div class="empty">مانیفێستی تاکەکارتۆن لە تۆماری کۆندا نییە؛ تۆمارە نوێکان لە کاتی وەرگرتن دروست دەکرێن.</div>'}</div></section>
       <section class="card" style="grid-column:1/-1"><h3>وێنەکانی وەرگرتن · ${(r.photos||[]).length}</h3>${r.photo_signing_warning?'<p class="muted" role="status">وێنەکان لە کۆگای تایبەت هەڵگیراون، بەڵام دروستکردنی لینک سەرکەوتوو نەبوو. نوێکردنەوە یان دووبارە ناردنی ئاگادارکردنەوە تاقی بکەرەوە.</p>':''}<div class="photo-grid">${photos||'<div class="empty">وێنە نییە.</div>'}</div></section>
-    </div>`,'<button class="btn" id="openReceiptCustomer">بەڕێوەبردنی هەژماری کڕیار</button><button class="btn" id="notifyReceiptBtn">ناردن / دووبارەکردنەوەی ئاگادارکردنەوە</button><button class="btn" data-close>داخستن</button>');
+    </div>`,'<button class="btn" id="openReceiptCustomer">بەڕێوەبردنی هەژماری کڕیار</button>'+bindCustomerAction+'<button class="btn" id="notifyReceiptBtn">ناردن / دووبارەکردنەوەی ئاگادارکردنەوە</button><button class="btn" data-close>داخستن</button>');
     document.getElementById('openReceiptCustomer').onclick=async()=>{
       const gc=text(r.gc_code_detected||r.gc_code||'');
       closeModal();
       await loadTab('customers');
       const search=document.getElementById('customerSearch');
       if(search&&gc){search.value=gc;search.dispatchEvent(new Event('input'));}
+    };
+    const bindReceiptCustomerButton=document.getElementById('bindReceiptCustomer');
+    if(bindReceiptCustomerButton)bindReceiptCustomerButton.onclick=async()=>{
+      const code=text(r.gc_code_detected||r.gc_code||'').normalize('NFKC').toUpperCase().replace(/[–—−]/g,'-').replace(/\\s+/g,'');
+      const directoryId=String(r.directory_customer_id||'').trim();
+      closeModal();
+      try{
+        await loadTab('customers');
+        const normalized=(value)=>String(value??'').normalize('NFKC').toUpperCase().replace(/[–—−]/g,'-').replace(/\\s+/g,'');
+        let matches=directoryId?(state.data.customers||[]).filter(customer=>String(customer.id)===directoryId):[];
+        if(matches.length!==1&&code)matches=(state.data.customers||[]).filter(customer=>normalized(customer.gc_code||customer.code)===code);
+        if(matches.length!==1){toast(matches.length?'زیاتر لە یەک کڕیار بەم GC ـە هاوتایە؛ لە لیستی کڕیارانەوە بە دەست هەڵیبژێرە.':'تۆماری کڕیاری ئەم receipt ـە نەدۆزرایەوە.','bad');return;}
+        if(matches[0].auth_user_id){toast('هەژماری ئەم کڕیارە پێشتر پەیوەست کراوە.','ok');return;}
+        await bindCustomerLogin(String(matches[0].id));
+      }catch(error){toast(error?.message||'بەستنەوەی هەژماری کڕیار سەرکەوتوو نەبوو.','bad');}
     };
     document.getElementById('notifyReceiptBtn').onclick=async()=>{
       const button=document.getElementById('notifyReceiptBtn');
