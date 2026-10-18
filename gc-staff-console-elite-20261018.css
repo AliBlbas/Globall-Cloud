@@ -606,3 +606,43 @@ body.gc-staff-os-shell #app .login-card .brand-logo{color:#0b3342!important}
   body.gc-staff-os-shell .gc-staff-mobile-dock *,
   body.gc-staff-os-shell .gc-staff-mobile-drawer{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 }
+
+
+/* Recovery shell: if a script/CDN fails, show a useful, branded screen in the new theme. */
+body.gc-staff-os-shell #app .gc-rescue-shell{
+  min-height:calc(100dvh - 24px)!important;
+  padding:clamp(14px,4vw,38px)!important;
+  display:grid!important;
+  place-items:center!important;
+  background:
+    radial-gradient(ellipse at 78% 0%,rgba(37,184,198,.10),transparent 40%),
+    var(--gc-elite-canvas)!important;
+  color:var(--gc-elite-text)!important;
+  font-family:Vazirmatn,system-ui,sans-serif!important;
+}
+body.gc-staff-os-shell #app .gc-rescue-card{
+  width:min(620px,100%)!important;
+  padding:clamp(22px,4vw,34px)!important;
+  border:1px solid var(--gc-elite-line)!important;
+  border-radius:22px!important;
+  background:#ffffff!important;
+  color:#17384d!important;
+  box-shadow:0 22px 65px rgba(17,54,75,.12)!important;
+  text-align:center;
+}
+body.gc-staff-os-shell #app .gc-rescue-mark{
+  width:62px!important;height:62px!important;
+  margin:0 auto 15px!important;
+  border-radius:17px!important;
+  background:linear-gradient(145deg,#f4ffff,#8fe4e8 55%,#30b6c5)!important;
+  color:#0b3342!important;
+  box-shadow:0 0 0 5px rgba(37,184,198,.07)!important;
+}
+body.gc-staff-os-shell #app .gc-rescue-eyebrow{color:#087f8c!important;font-family:Vazirmatn,system-ui,sans-serif!important;letter-spacing:.8px!important}
+body.gc-staff-os-shell #app .gc-rescue-card h1{color:#17384d!important;font-size:clamp(22px,4vw,29px)!important;line-height:1.6!important}
+body.gc-staff-os-shell #app .gc-rescue-card p{color:#647d8e!important;font-size:12px!important;line-height:2!important}
+body.gc-staff-os-shell #app .gc-rescue-loader span{background:#0b8994!important}
+body.gc-staff-os-shell #app .gc-rescue-actions button{min-height:43px;padding:10px 15px!important;border:1px solid #087f8c!important;border-radius:11px!important;background:#087f8c!important;color:#ffffff!important;font:800 12px Vazirmatn,system-ui,sans-serif!important}
+body.gc-staff-os-shell #app .gc-rescue-actions button.secondary{border-color:#d4e2e9!important;background:#ffffff!important;color:#24475b!important}
+body.gc-staff-os-shell #app .gc-rescue-links a{border-color:#dce7ed!important;background:#f5fafb!important;color:#35566a!important}
+body.gc-staff-os-shell #app .gc-rescue-hint{color:#6c8392!important}
