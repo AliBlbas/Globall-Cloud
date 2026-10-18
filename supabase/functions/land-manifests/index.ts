@@ -91,6 +91,8 @@ async function requireStaff(req: Request) {
   if (error) throw error
   if (!staff?.is_active || !STAFF_ROLES.has(String(staff.role))) throw new HttpError('Active staff permission required', 403)
   const role = String(staff.role)
+  const allowedLandRoles = new Set(['super_admin','admin','accountant','finance','warehouse','warehouse_uae','warehouse_erbil','operations','delivery'])
+  if (!allowedLandRoles.has(role)) throw new HttpError('This staff role cannot access the Dubai land manifest', 403)
   const branch = String(staff.branch || 'all').toLowerCase()
   const global = GLOBAL_ROLES.has(role)
   const dubaiScope = global || role === 'warehouse_uae' || (role === 'warehouse' && ['all','dubai','uae'].includes(branch))
