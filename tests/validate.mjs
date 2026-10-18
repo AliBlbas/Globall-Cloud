@@ -327,7 +327,6 @@ const staffEnhancementLoader = read('staff-os-v5-enhancement-loader-20261017.js'
 const staffRescueScript = read('staff-os-v5-rescue.js')
 const staffConsoleEliteCss = read('gc-staff-console-elite-20261018.css')
 const staffOsHtml = read('staff-os-v5.html')
-const staffConsoleEliteCss = read('gc-staff-console-elite-20261018.css')
 const staffShipmentScript = read('staff-os-v5-20261017.js')
 
 const warehouseReceivingSource = read('supabase/functions/warehouse-receiving/index.ts')
