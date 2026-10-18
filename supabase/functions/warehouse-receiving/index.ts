@@ -425,10 +425,46 @@ async function listReceipts(req:Request){
  }
  const customerIds=[...new Set(visible.map(item=>String(item.directory_customer_id||'')).filter(Boolean))];
  const customerLinks=new Map<string,boolean>();
+ const customerAuthIds=new Map<string,string>();
  if(customerIds.length){
   const customers=await admin.from('customer_directory').select('id,auth_user_id,is_active').in('id',customerIds);
   if(customers.error)throw customers.error;
-  for(const customer of customers.data||[])customerLinks.set(String(customer.id),Boolean(customer.auth_user_id&&customer.is_active));
+  for(const customer of customers.data||[]){
+   const directoryId=String(customer.id);
+   const authId=String(customer.auth_user_id||'');
+   const linked=Boolean(authId&&customer.is_active);
+   customerLinks.set(directoryId,linked);
+   if(linked)customerAuthIds.set(directoryId,authId);
+  }
+ }
+ // Report notification delivery only when the receipt event belongs to this exact owner's Auth user.
+ // Return a status, never an Auth user ID, to the warehouse UI.
+ const receiptEventKeys=visible.map(item=>'warehouse_received:'+String(item.id));
+ const authIds=[...new Set(customerAuthIds.values())];
+ const notificationOwners=new Map<string,Set<string>>();
+ if(receiptEventKeys.length){
+  const {data:alerts,error:alertsError}=await admin.from('customer_notifications')
+   .select('event_key,customer_user_id')
+   .eq('kind','warehouse_received')
+   .in('event_key',receiptEventKeys)
+   .limit(500);
+  if(alertsError)throw alertsError;
+  for(const alert of alerts||[]){
+   const key=String(alert.event_key||'');
+   const owners=notificationOwners.get(key)||new Set<string>();
+   owners.add(String(alert.customer_user_id||''));
+   notificationOwners.set(key,owners);
+  }
+ }
+ const inAppDisabledUsers=new Set<string>();
+ if(authIds.length){
+  const {data:preferences,error:preferencesError}=await admin.from('customer_notification_preferences')
+   .select('customer_user_id,in_app_enabled')
+   .in('customer_user_id',authIds);
+  if(preferencesError)throw preferencesError;
+  for(const preference of preferences||[]){
+   if(preference.in_app_enabled===false)inAppDisabledUsers.add(String(preference.customer_user_id));
+  }
  }
  const items=await Promise.all(visible.map(async item=>{
   let photos:string[]=[];
@@ -437,9 +473,19 @@ async function listReceipts(req:Request){
    photoSigningWarning=true;
    console.error('[warehouse-receiving] list photo signing failed',{receipt_id:String(item.id),error:error instanceof Error?error.message:'unknown'});
   }
+  const directoryId=String(item.directory_customer_id||'');
+  const linked=customerLinks.get(directoryId)===true;
+  const authId=customerAuthIds.get(directoryId)||'';
+  const eventKey='warehouse_received:'+String(item.id);
+  const delivered=Boolean(authId&&notificationOwners.get(eventKey)?.has(authId));
+  const notificationStatus=!linked?'account_unlinked'
+   :inAppDisabledUsers.has(authId)?'in_app_disabled'
+   :delivered?'notified'
+   :'pending';
   return{
    ...item,
-   account_linked:customerLinks.get(String(item.directory_customer_id||''))===true,
+   account_linked:linked,
+   notification_status:notificationStatus,
    photos,photo_signing_warning:photoSigningWarning,
    cartons:(byReceipt.get(String(item.id))||[]).filter(carton=>String(carton.customer_directory_id)===String(item.directory_customer_id))
   };
