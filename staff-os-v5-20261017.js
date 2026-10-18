@@ -937,12 +937,12 @@
     };
     const bindReceiptCustomerButton=document.getElementById('bindReceiptCustomer');
     if(bindReceiptCustomerButton)bindReceiptCustomerButton.onclick=async()=>{
-      const code=text(r.gc_code_detected||r.gc_code||'').normalize('NFKC').toUpperCase().replace(/[–—−]/g,'-').replace(/\\s+/g,'');
+      const code=text(r.gc_code_detected||r.gc_code||'').normalize('NFKC').toUpperCase().replace(/[–—−]/g,'-').replace(/\s+/g,'');
       const directoryId=String(r.directory_customer_id||'').trim();
       closeModal();
       try{
         await loadTab('customers');
-        const normalized=(value)=>String(value??'').normalize('NFKC').toUpperCase().replace(/[–—−]/g,'-').replace(/\\s+/g,'');
+        const normalized=(value)=>String(value??'').normalize('NFKC').toUpperCase().replace(/[–—−]/g,'-').replace(/\s+/g,'');
         let matches=directoryId?(state.data.customers||[]).filter(customer=>String(customer.id)===directoryId):[];
         if(matches.length!==1&&code)matches=(state.data.customers||[]).filter(customer=>normalized(customer.gc_code||customer.code)===code);
         if(matches.length!==1){toast(matches.length?'زیاتر لە یەک کڕیار بەم GC ـە هاوتایە؛ لە لیستی کڕیارانەوە بە دەست هەڵیبژێرە.':'تۆماری کڕیاری ئەم receipt ـە نەدۆزرایەوە.','bad');return;}
