@@ -190,11 +190,21 @@ const renderReceipts = (items) => {
     const photos = Array.isArray(item.photos) ? item.photos.filter((url) => typeof url === 'string' && /^https?:\/\//i.test(url)) : [];
     const gc = item.gc_code_detected || item.gc_code || '—';
     const cartons = Math.max(1, Number(item.carton_count || 1));
+    const cartonItems = Array.isArray(item.cartons) ? item.cartons.slice(0, 999) : [];
+    const cartonManifest = cartonItems.length ? '<div class="carton-manifest-list" role="list" aria-label="کارتۆنەکانی ئەم بارە">' +
+      cartonItems.map((carton, index) => {
+        const cartonIndex = Number(carton.index || index + 1);
+        const cartonTotal = Number(carton.total || cartons);
+        return '<div class="carton-manifest-row" role="listitem">' +
+          '<div class="carton-manifest-ident"><small>کارتۆن ' + esc(cartonIndex) + ' / ' + esc(cartonTotal) + '</small><strong>' + esc(carton.code || 'کۆدی کارتۆن بەردەست نییە') + '</strong></div>' +
+          '<span class="pill">' + esc(carton.status || 'تۆمارکراوە') + '</span></div>';
+      }).join('') + '</div>' : '';
     const weight = Number(item.weight_actual || 0);
     return `<article class="item warehouse-receipt-evidence" data-receipt-id="${esc(item.id)}">
       <div class="row"><strong>${esc(gc)} · ${esc(item.batch_code || 'Receipt')}</strong><span class="pill">${esc(item.verification_status || 'pending')}</span></div>
       <div class="muted">کۆگا: <b>${esc(item.location || item.source_warehouse || item.warehouse || '—')}</b> · ${esc(item.stage || 'received')} · وەرگیرا: ${esc(date(item.received_at || item.photo_taken_at))}</div>
-      <div class="row"><small>کارتۆن: ${esc(cartons)} · کێش: ${weight > 0 ? esc(num(weight)) + ' kg' : '—'}</small><small>${esc(item.created_by_name || '')}</small></div>
+      <div class="row"><small>کۆی کارتۆن: ${esc(cartons)} · کێش: ${weight > 0 ? esc(num(weight)) + ' kg' : '—'}</small><small>${esc(item.created_by_name || '')}</small></div>
+      ${cartonManifest}
       ${item.scan_code ? `<small>کۆدی سکەن: ${esc(item.scan_code)}</small>` : ''}
       ${item.notes ? `<small class="muted">${esc(item.notes)}</small>` : ''}
       <small>بەڵگەی وێنە: ${photos.length} دانە${item.photo_taken_at ? ' · وێنەگیراو: ' + esc(date(item.photo_taken_at)) : ''}</small>
