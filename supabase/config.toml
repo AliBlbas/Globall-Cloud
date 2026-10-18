@@ -117,3 +117,6 @@ verify_jwt = true
 
 [functions.public-health]
 verify_jwt = false
+
+[functions.land-manifests]
+verify_jwt = true
