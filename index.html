@@ -403,6 +403,7 @@
       <section class="section-block" id="shipmentsSection">
         <div class="section-heading"><div><span class="eyebrow">TRACKING CENTER</span><h2>بارەکانت</h2><p>دۆخ و شوێنی هەر بارێک بە ڕاستەوخۆ ببینە.</p></div><div class="customer-section-actions"><a class="text-action" href="#records">بەڵگە و پارەدان ←</a><a class="text-action" href="/track">شوێنکەوتنی public ←</a></div></div>
         <div id="shipments" class="shipment-list"><div class="empty-panel"><span data-dash-icon="shipments"></span><strong>Login بکە بۆ بینینی بارەکانت</strong><button class="app-primary-action" id="loginPromptBtn" type="button">چوونەژوورەوە</button></div></div>
+        <article class="surface-card gc-customer-warehouse-evidence-panel" aria-labelledby="gcWarehouseEvidenceTitle"><div class="card-title-row"><div><h3 id="gcWarehouseEvidenceTitle">وێنە، کارتۆن و بەڵگەی بارەکان</h3><p>کۆدی GC، شوێنی وەرگرتن، ژمارەی کارتۆن، کێش، کات و وێنەکانی باری خۆت.</p></div><span data-dash-icon="warehouse"></span></div><div id="receipts" class="record-list" aria-live="polite"><div class="empty-line">دوای login، بەڵگەکانی تایبەت بە کۆدی GC ـی خۆت لێرە دەردەکەون.</div></div></article>
       </section>
 
       <section class="section-block" id="activity">
@@ -423,7 +424,7 @@
         </div>
       </section>
 
-      <section class="section-block" id="records"><div class="section-heading"><div><span class="eyebrow">DOCUMENTS & FINANCE</span><h2>تۆمارەکانت</h2><p>بەڵگە، پارەدان، بەڵگەی گەیاندن و وێنەکانی وەرگرتنی کاڵا لە کۆگا.</p></div></div><div class="records-grid"><article class="surface-card"><div class="card-title-row"><h3>بەڵگەکان</h3><span data-dash-icon="documents"></span></div><div id="docs" class="record-list"><div class="empty-line">هێشتا بەڵگەیەک نییە.</div></div></article><article class="surface-card"><div class="card-title-row"><h3>Proof of Delivery</h3><span data-dash-icon="check"></span></div><div id="pods" class="record-list"><div class="empty-line">هێشتا POD ـێک نییە.</div></div></article><article class="surface-card"><div class="card-title-row"><h3>پارەدان و invoice</h3><span data-dash-icon="wallet"></span></div><div id="payments" class="record-list"><div class="empty-line">هێشتا مامەڵەیەک نییە.</div></div><div id="invoices" class="record-list hidden"></div><div id="expenses" class="record-list hidden"></div></article></div><article class="surface-card gc-customer-warehouse-evidence-panel" aria-labelledby="gcWarehouseEvidenceTitle"><div class="card-title-row"><div><h3 id="gcWarehouseEvidenceTitle">وێنە و بەڵگەی وەرگرتنی کاڵا لە کۆگا</h3><p>کۆدی GC، شوێنی کۆگا، ژمارەی کارتۆن، کێش، کاتی وەرگرتن و وێنەکانی هەر receipt.</p></div><span data-dash-icon="warehouse"></span></div><div id="receipts" class="record-list" aria-live="polite"><div class="empty-line">دوای login، بەڵگەکانی تایبەت بە کۆدی GC ـی خۆت لێرە دەردەکەون.</div></div></article></section>
+      <section class="section-block" id="records"><div class="section-heading"><div><span class="eyebrow">DOCUMENTS & FINANCE</span><h2>تۆمارەکانت</h2><p>بەڵگە، پارەدان، فاکتوور و بەڵگەی گەیاندن.</p></div></div><div class="records-grid"><article class="surface-card"><div class="card-title-row"><h3>بەڵگەکان</h3><span data-dash-icon="documents"></span></div><div id="docs" class="record-list"><div class="empty-line">هێشتا بەڵگەیەک نییە.</div></div></article><article class="surface-card"><div class="card-title-row"><h3>Proof of Delivery</h3><span data-dash-icon="check"></span></div><div id="pods" class="record-list"><div class="empty-line">هێشتا POD ـێک نییە.</div></div></article><article class="surface-card"><div class="card-title-row"><h3>پارەدان و invoice</h3><span data-dash-icon="wallet"></span></div><div id="payments" class="record-list"><div class="empty-line">هێشتا مامەڵەیەک نییە.</div></div><div id="invoices" class="record-list hidden"></div><div id="expenses" class="record-list hidden"></div></article></div></section>
 
       <section class="section-block support-section" id="support"><div class="section-heading"><div><span class="eyebrow">CUSTOMER CARE</span><h2>پشتیوانی</h2><p>پەیوەندی ڕاستەوخۆ لەگەڵ تیمی Globall Cloud.</p></div><span class="section-mark" data-dash-icon="support"></span></div><div class="support-grid"><article class="surface-card chat-card"><div id="customerChatThreads" class="record-list"><div class="empty-line">پەیامێک بنووسە بۆ دەستپێکردن.</div></div><form id="customerChatForm" class="chat-form"><input id="customerChatInput" class="field" maxlength="4000" placeholder="پەیامەکەت بنووسە..." required><button class="app-primary-action" type="submit"><span data-dash-icon="send"></span>ناردن</button><div id="customerChatStatus" class="form-message"></div></form></article><article class="surface-card warehouse-card"><div class="card-title-row"><h3>کۆگا و ناونیشانەکان</h3><span data-dash-icon="warehouse"></span></div><div id="warehouseAddresses" class="record-list"><div class="empty-line">دوای login نیشان دەدرێت.</div></div><div id="warehouseDirectory" class="hidden"></div></article></div></section>
 
@@ -448,7 +449,7 @@
 <script src="/gc-homepage-intelligence-20261001.js?v=2" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script src="/gc-csp-bridge.js?v=20260817-1" defer data-gc-csp-bridge="1"></script>
-<script src="/gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-12" defer data-gc-customer-portal="1"></script>
+<script src="/gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-13" defer data-gc-customer-portal="1"></script>
 <script src="/gc-customer-carton-manifest-20261017.js?v=1" defer data-gc-customer-carton-manifest="1"></script>
 <script src="/gc-customer-portal-rates.js?v=20261003-3" defer data-gc-customer-rates="1"></script>
 <script src="/gc-dashboard-preferences-20261003.js?v=20261017-5" defer data-gc-customer-preferences="1"></script>
@@ -456,6 +457,6 @@
 <script src="/gc-unified-customer-experience-20261016.js?v=20261017-1" defer data-gc-unified-customer-experience="1"></script>
 <script src="/gc-public-customer-style-loader-20261014.js?v=24" defer data-gc-public-customer-style-loader="1"></script>
 
-<script src="/gc-realtime-notifications-20261003.js?v=6" defer data-gc-customer-realtime="1"></script>
+<script src="/gc-realtime-notifications-20261003.js?v=7" defer data-gc-customer-realtime="1"></script>
 </body>
 </html>
