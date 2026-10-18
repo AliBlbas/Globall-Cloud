@@ -188,7 +188,11 @@ Deno.serve(async (req: Request) => {
       ? `کۆدی کارتۆنەکان: ${cartonCodes.slice(0, 15).join(', ')}${cartonCodes.length > 15 ? ` و ${cartonCodes.length - 15} دانەی تر` : ''}`
       : 'کۆدی تاکەکارتۆن: بەردەست نییە'
     const localTime = new Intl.DateTimeFormat('ku-IQ', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Baghdad' }).format(new Date(receivedAt))
-    const title = 'کاڵاکەت لە کۆگا وەرگیرا'
+    const isDubaiWarehouse = /^(dubai|uae|united arab emirates|دوبەی|دوبی)$/i.test(warehouse.trim())
+    const title = isDubaiWarehouse ? 'کاڵاکەت لە کۆگای دوبەی وەرگیرا' : 'کاڵاکەت لە کۆگا وەرگیرا'
+    const notificationBody = isDubaiWarehouse
+      ? 'وردەکاری، وێنە و ژمارەی کارتۆن لە بەشی بارەکان ببینە.'
+      : 'وردەکاری و بەڵگەی کاڵاکەت لە بەشی بارەکان ببینە.'
     const bodyText = [
       `GC: ${gcCode}`,
       `کۆگا: ${warehouse}`,
@@ -198,9 +202,9 @@ Deno.serve(async (req: Request) => {
       `بەروار و کات (هەولێر): ${localTime}`,
       `ژمارەی وێنەکان: ${photoUrls.length}`,
       `Batch: ${String(receipt.batch_code || '—')}`,
-    ].join('\n')
+    ].join('\\n')
     const eventKey = `warehouse_received:${String(receipt.id)}`
-    const actionUrl = '/#records'
+    const actionUrl = '/#shipmentsSection'
     const payload: Json = {
       title, subject: title, body: bodyText, action_url: actionUrl, gc_code: gcCode, warehouse,
       carton_count: cartons, weight_kg: weight || null, receipt_id: String(receipt.id),
@@ -224,13 +228,13 @@ Deno.serve(async (req: Request) => {
         const { error } = await admin.from('customer_notifications').insert({
           customer_user_id: customer.auth_user_id,
           shipment_id: receipt.shipment_id ? String(receipt.shipment_id) : null,
-          kind: 'warehouse_received', event_key: eventKey, title, body: bodyText, action_url: actionUrl,
+          kind: 'warehouse_received', event_key: eventKey, title, body: notificationBody, action_url: actionUrl,
         })
         if (error?.code === '23505') inAppQueued = true
         else if (error) errors.push(`in_app: ${error.message}`)
         else inAppQueued = true
       } else if (existing.read_at) {
-        const { error } = await admin.from('customer_notifications').update({ read_at: null, title, body: bodyText, action_url: actionUrl, created_at: new Date().toISOString() })
+        const { error } = await admin.from('customer_notifications').update({ read_at: null, title, body: notificationBody, action_url: actionUrl, created_at: new Date().toISOString() })
           .eq('id', existing.id)
         if (error) errors.push(`in_app_retry: ${error.message}`)
         else inAppQueued = true
