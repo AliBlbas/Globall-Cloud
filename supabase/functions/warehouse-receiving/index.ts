@@ -479,8 +479,8 @@ async function listReceipts(req:Request){
   const eventKey='warehouse_received:'+String(item.id);
   const delivered=Boolean(authId&&notificationOwners.get(eventKey)?.has(authId));
   const notificationStatus=!linked?'account_unlinked'
-   :inAppDisabledUsers.has(authId)?'in_app_disabled'
    :delivered?'notified'
+   :inAppDisabledUsers.has(authId)?'in_app_disabled'
    :'pending';
   return{
    ...item,
