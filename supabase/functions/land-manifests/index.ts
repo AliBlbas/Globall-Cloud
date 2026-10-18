@@ -101,11 +101,23 @@ async function requireStaff(req: Request) {
   const canWrite = WRITE_ROLES.has(role)
   return {admin, staff, role, branch, global, dubaiScope, erbilScope, canRead, canWrite}
 }
+const dateOnlyBaghdad = (value: unknown) => {
+  if (value == null || value === '') return ''
+  const raw = String(value)
+  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(raw)) return raw
+  const date = new Date(raw)
+  if (!Number.isFinite(date.getTime())) return raw.slice(0,10)
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Baghdad', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(date)
+  const part = (type: string) => parts.find(item => item.type === type)?.value || ''
+  return part('year') + '-' + part('month') + '-' + part('day')
+}
 function lineView(row: Record<string, any>) {
   return {
     id: row.id, tracking_id: row.tracking_id, customer_name: row.customer_name || '',
     gc_code: row.customer_gc_code || '', gc_linked: Boolean(row.directory_customer_id),
-    shipment_date: String(row.dispatched_at || row.created_at || '').slice(0, 10),
+    shipment_date: dateOnlyBaghdad(row.dispatched_at || row.created_at || ''),
     cargo_type: row.cargo_type || row.cargo_description || '',
     box_count: Number(row.box_count ?? row.carton_count ?? 0),
     quantity_pc: Number(row.pc_count ?? row.items_count ?? 0),
