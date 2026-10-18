@@ -427,7 +427,7 @@
         customer_name:name,
         gc_code:normalizeGC({gc_code:value('gc_code'),customer_name:name}),
         shipment_date:toDate(value('shipment_date')||dateFallback),
-        cargo_type:type || 'OTHER — پێویستی بە پشکنین',
+        cargo_type:type,
         box_count:numCell(value('box_count')),
         quantity_pc:numCell(value('quantity_pc')),
         weight_kg:numCell(value('weight_kg')),
@@ -480,10 +480,10 @@
     if(action==='reload-detail'&&state.current){openDetail(state.current.id);return}
     if(action==='template'){downloadTemplate();return}
     if(action==='import'){$('#gc-land-import-file')?.click();return}
-    if(action==='add-draft-row'){state.draftRows.push(lineDefaults());renderCreate();mountCreateRows();return}
+    if(action==='add-draft-row'){state.draftRows.push(lineDefaults());renderCreate();return}
     if(action==='remove-draft-row'){
       const row=buttonEl.closest('[data-row-index]');const index=Number(row?.dataset.rowIndex);
-      if(Number.isInteger(index)){state.draftRows.splice(index,1);if(!state.draftRows.length)state.draftRows.push(lineDefaults());renderCreate();mountCreateRows()}return
+      if(Number.isInteger(index)){state.draftRows.splice(index,1);if(!state.draftRows.length)state.draftRows.push(lineDefaults());renderCreate()}return
     }
     if(action==='save-create'){await saveDraft();return}
     if(action==='open-detail'){openDetail(buttonEl.dataset.id);return}
