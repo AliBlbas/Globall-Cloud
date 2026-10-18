@@ -71,14 +71,14 @@
     loadStyle('/gc-ui-integrity-mobile-20261017.css?v=6');
     loadStyle('/gc-staff-command-system-20261017.css?v=2');
     // The new unified staff theme must be the last style after every legacy bridge loads.
-    loadStyle('/gc-staff-console-elite-20261018.css?v=1');
+    loadStyle('/gc-staff-console-elite-20261018.css?v=2');
     lockEliteStylesLast();
   };
 
   // Several legacy helpers append their style sheets after the app shell mounts.
   // Keep the scoped Staff OS layer last in <head>, without duplicating any CSS.
   const lockEliteStylesLast = () => {
-    const href = '/gc-staff-console-elite-20261018.css?v=1';
+    const href = '/gc-staff-console-elite-20261018.css?v=2';
     const ensureLast = () => {
       const link = document.querySelector('link[data-gc-enhancement-style="' + href + '"]')
         || document.querySelector('link[href="' + href + '"]');
