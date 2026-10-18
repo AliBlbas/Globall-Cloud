@@ -148,6 +148,7 @@
     const form=$('#gc-land-create-form');
     form?.addEventListener('submit',async(e)=>{e.preventDefault();await saveDraft()});
     $('#gc-land-currency')?.addEventListener('change',e=>{state.currency=e.target.value;state.draftRows.forEach(r=>r.currency=state.currency);updateLiveTotals()});
+    mountCreateRows();
   };
   const draftLineToPayload=(r) => ({
     customer_name:String(r.customer_name||'').trim(),
