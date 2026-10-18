@@ -9,7 +9,7 @@
   const isStaff = /staff-os-v5|staff-os|operations-command|accounts-console/i.test(page);
   const isCustomer = /customer-portal|dashboard/i.test(page) || (page === '/' && Boolean(document.querySelector('#gcCustomerWorkspace')));
   const escapeHtml = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const showToast = (title, body) => {
+  const showToast = (title, body, eventKey = '') => {
     let node = document.getElementById('gcRealtimeToast');
     if (!node) {
       node = document.createElement('div');
@@ -18,10 +18,52 @@
       node.style.cssText = 'position:fixed;z-index:2147483000;inset:auto 18px 86px auto;max-width:min(360px,calc(100vw - 36px));padding:14px 16px;border:1px solid rgba(88,229,239,.45);border-radius:16px;background:rgba(3,18,35,.96);color:#f4fbff;box-shadow:0 16px 44px rgba(0,0,0,.34);font:600 13px/1.6 Vazirmatn,system-ui,sans-serif;direction:rtl;backdrop-filter:blur(14px)';
       document.body.appendChild(node);
     }
+    node.dataset.eventKey = eventKey || '';
     node.innerHTML = `<strong style="display:block;color:#64e6ef">${escapeHtml(title)}</strong><span>${escapeHtml(body || 'نوێکردنەوەی ڕاستەوخۆ')}</span>`;
     clearTimeout(node._timer);
-    node._timer = setTimeout(() => node.remove(), 5200);
+    node._timer = setTimeout(() => node.remove(), 9000);
+    return node;
   };
+  const fetchReceiptPhotoPreview = async (eventKey) => {
+    if (!eventKey || !eventKey.startsWith('warehouse_received:') || !client) return null;
+    const { data: sessionData } = await client.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (!token) return null;
+    const response = await fetch(`${URL}/functions/v1/customer-self`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}`, apikey: KEY, Accept: 'application/json' },
+      cache: 'no-store',
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error || 'Receipt photo preview could not be loaded');
+    const item = (Array.isArray(payload.notifications) ? payload.notifications : [])
+      .find((notification) => String(notification.event_key || '') === eventKey);
+    const photo = Array.isArray(item?.receipt_photos) ? item.receipt_photos[0] : null;
+    // The owner-scoped API signs this private bucket URL. Reject any other host/path.
+    if (typeof photo !== 'string' || !photo.startsWith(`${URL}/storage/v1/object/sign/warehouse-receipts/`)) return null;
+    return photo;
+  };
+
+  const attachReceiptPhotoPreview = (toastNode, eventKey, photoUrl) => {
+    if (!toastNode?.isConnected || toastNode.dataset.eventKey !== eventKey || !photoUrl) return;
+    if (toastNode.querySelector('[data-gc-receipt-toast-photo]')) return;
+    const link = document.createElement('a');
+    link.href = photoUrl;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.dataset.gcReceiptToastPhoto = '1';
+    link.setAttribute('aria-label', 'بینینی وێنەی وەرگرتنی کاڵا');
+    link.style.cssText = 'display:block;margin-top:10px;overflow:hidden;border:1px solid rgba(88,229,239,.28);border-radius:11px;max-height:150px;background:#07192a;';
+    const img = document.createElement('img');
+    img.src = photoUrl;
+    img.alt = 'وێنەی بەڵگەی وەرگرتنی کاڵا';
+    img.loading = 'eager';
+    img.decoding = 'async';
+    img.style.cssText = 'display:block;width:100%;max-height:150px;object-fit:cover;';
+    link.appendChild(img);
+    toastNode.appendChild(link);
+  };
+
   const refresh = () => {
     const now = Date.now();
     if (now - lastRefresh < 2500) return;
@@ -52,7 +94,13 @@
     channel = client.channel(`gc-customer-live-${uid}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'customer_notifications', filter: `customer_user_id=eq.${uid}` }, payload => {
         const n = payload.new || {};
-        showToast(n.title || 'ئاگادارییەکی نوێ', n.body || 'دۆخی بار نوێکرایەوە.');
+        const eventKey = String(n.event_key || '');
+        const toastNode = showToast(n.title || 'ئاگادارییەکی نوێ', n.body || 'دۆخی بار نوێکرایەوە.', eventKey);
+        if (n.kind === 'warehouse_received' && eventKey) {
+          void fetchReceiptPhotoPreview(eventKey)
+            .then((photoUrl) => attachReceiptPhotoPreview(toastNode, eventKey, photoUrl))
+            .catch((error) => console.warn('[gc-realtime] receipt photo preview', error));
+        }
         refresh();
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'customer_chat_messages' }, payload => {
