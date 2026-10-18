@@ -425,6 +425,10 @@ Deno.serve(async (req) => {
         receipt_gc_code: receipt.gc_code_detected || receipt.gc_code || null,
         receipt_location: receipt.location || receipt.source_warehouse || receipt.warehouse || null,
         receipt_received_at: receipt.received_at || null,
+        receipt_carton_count: Number(receipt.carton_count || (Array.isArray(receipt.cartons) ? receipt.cartons.length : 0)) || 0,
+        receipt_weight_kg: receipt.weight_actual === null || receipt.weight_actual === undefined ? null : Number(receipt.weight_actual),
+        receipt_photo_taken_at: receipt.photo_taken_at || null,
+        receipt_verification_status: receipt.verification_status || null,
         receipt_cartons: Array.isArray(receipt.cartons) ? receipt.cartons.map((carton: Record<string, any>) => ({
           code: carton.carton_code || null,
           index: carton.carton_index || null,
