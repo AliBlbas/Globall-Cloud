@@ -35,6 +35,18 @@
     if (Number.isFinite(parsed.getTime())) return parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0');
     return today();
   };
+  const dateOnly = (v) => {
+    if (v == null || v === '') return '';
+    const raw = String(v);
+    if (/^\\d{4}-\\d{2}-\\d{2}$/.test(raw)) return raw;
+    const d = new Date(raw);
+    if (!Number.isFinite(d.getTime())) return raw.slice(0,10);
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Baghdad', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(d);
+    const part = (type) => parts.find(item => item.type === type)?.value || '';
+    return part('year') + '-' + part('month') + '-' + part('day');
+  };
   const numCell=(v) => {
     if (v == null || String(v).trim()==='') return 0;
     const n=Number(String(v).replace(/,/g,'').replace(/[^\d.-]/g,''));
@@ -208,7 +220,7 @@
       }),{rows:0,boxes:0,pcs:0,kg:0,price:0,linked:0});
       const currency=state.manifests[0]?.currency||'USD';
       const cards=state.manifests.length?state.manifests.map(m=>{
-        const date=String(m.actual_departure||m.planned_departure||m.created_at||'').slice(0,10);
+        const date=dateOnly(m.actual_departure||m.planned_departure||m.created_at||'');
         return '<article class="gc-land-manifest-card">'+
           '<div class="gc-land-manifest-card-top"><div><span class="gc-land-eyebrow">SHIPMENT NO</span><h3>'+esc(m.manifest_number)+'</h3><small>'+esc(date)+' · Dubai → Erbil · Land</small></div>'+
           '<span class="gc-land-status '+statusClass(m.status)+'">'+esc(statusLabel(m.status))+'</span></div>'+
@@ -283,7 +295,7 @@
     state.active=true;
     const t=totals(state.lines);
     const editable=m.status==='draft';
-    const date=String(m.actual_departure||m.planned_departure||m.created_at||'').slice(0,10);
+    const date=dateOnly(m.actual_departure||m.planned_departure||m.created_at||'');
     const lines=state.lines.length?state.lines.map((r,i)=>renderSavedLine(r,i,editable)).join(''):'<div class="gc-land-empty"><h3>هیچ ڕیزێک بۆ ئەم مانيفێستە نییە</h3></div>';
     const body='<div class="gc-land-detail-actions">'+button('← هەموو مانيفێستەکان','back','')+
       '<div class="gc-land-form-actions">'+button('داگرتنی Excel','export-detail','')+button('نوێکردنەوە','reload-detail','')+'</div></div>'+
