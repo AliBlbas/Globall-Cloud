@@ -324,6 +324,8 @@ console.log('Mobile UI integrity contracts')
 const mobileUiCss = read('gc-ui-integrity-mobile-20261017.css')
 const customerViewScript = read('gc-dashboard-preferences-20261003.js')
 const staffEnhancementLoader = read('staff-os-v5-enhancement-loader-20261017.js')
+const staffRescueScript = read('staff-os-v5-rescue.js')
+const staffConsoleEliteCss = read('gc-staff-console-elite-20261018.css')
 const staffOsHtml = read('staff-os-v5.html')
 const staffConsoleEliteCss = read('gc-staff-console-elite-20261018.css')
 const staffShipmentScript = read('staff-os-v5-20261017.js')
@@ -344,6 +346,8 @@ const mobileUiContracts = [
   ['Staff OS references the current integrity CSS and cache-busted loader', staffOsHtml.includes('gc-ui-integrity-mobile-20261017.css?v=6') && staffOsHtml.includes('staff-os-v5-enhancement-loader-20261017.js?v=7')],
   ['Staff Console uses the new premium theme link and pins it as the final CSS cascade', staffOsHtml.includes('gc-staff-console-elite-20261018.css?v=2') && staffOsHtml.includes('staff-os-v5-enhancement-loader-20261017.js?v=7') && staffEnhancementLoader.indexOf("loadStyle('/gc-staff-console-elite-20261018.css?v=2')") > staffEnhancementLoader.indexOf("loadStyle('/gc-staff-command-system-20261017.css?v=2')") && staffEnhancementLoader.includes("const href = '/gc-staff-console-elite-20261018.css?v=2'")],
   ['Premium Staff Console has a distinct light work surface with dark rail and a mobile five-action dock', staffConsoleEliteCss.includes('background:rgba(255,255,255,.97) !important') && staffConsoleEliteCss.includes('linear-gradient(165deg,#17384f 0%,#102a3d 55%,#0b2031 100%)') && staffConsoleEliteCss.includes('grid-template-columns:repeat(5,minmax(0,1fr))!important') && staffConsoleEliteCss.includes('@media(max-width:760px)')],
+  ['Staff recovery handles errors from the versioned bundle and waits beyond Supabase startup', staffRescueScript.includes("includes('staff-os-v5-20261017.js')") && staffRescueScript.includes('>= 18000') && staffOsHtml.includes('staff-os-v5-rescue.js?v=20261018-1')],
+  ['Recovery and loading screens are styled by the final premium staff theme', staffConsoleEliteCss.includes('.gc-rescue-shell') && staffConsoleEliteCss.includes('.gc-rescue-card') && staffConsoleEliteCss.includes('background:#ffffff!important')],
   ['Staff intake records photo time and captures GPS only after a user action', staffShipmentScript.includes('receiptGpsBtn') && staffShipmentScript.includes('navigator.geolocation.getCurrentPosition') && staffShipmentScript.includes('name="photo_taken_at"') && staffShipmentScript.includes('name="location_captured_at"') && staffShipmentScript.includes('new Date(position.timestamp||Date.now()).toISOString()')],
   ['Staff receipt detail displays GPS evidence and actual customer login-link state', staffShipmentScript.includes('r.account_linked') && staffShipmentScript.includes('md.location_captured_at') && staffShipmentScript.includes('customerAccountLinked')],
   ['Warehouse receipt table shows each customer portal-link state and opens the owner record', staffShipmentScript.includes('هەژماری Portal') && staffShipmentScript.includes('openReceiptCustomer') && staffShipmentScript.includes("await loadTab('customers')")],
