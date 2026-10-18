@@ -332,6 +332,7 @@ console.log('Mobile UI integrity contracts')
 const mobileUiCss = read('gc-ui-integrity-mobile-20261017.css')
 const customerViewScript = read('gc-dashboard-preferences-20261003.js')
 const staffEnhancementLoader = read('staff-os-v5-enhancement-loader-20261017.js')
+const staffMobileDockSource = read('gc-staff-mobile-dock-20261016.js')
 const staffRescueScript = read('staff-os-v5-rescue.js')
 const staffConsoleEliteCss = read('gc-staff-console-elite-20261018.css')
 const staffOsHtml = read('staff-os-v5.html')
@@ -351,6 +352,7 @@ const mobileUiContracts = [
   ['customer workspace references the final mobile integrity CSS', publicShell.includes('gc-ui-integrity-mobile-20261017.css?v=6')],
   ['customer style loader puts integrity CSS after signature styles', customerStyleLoader.indexOf('gc-ui-integrity-mobile-20261017.css?v=6') > customerStyleLoader.indexOf('gc-customer-experience-signature-20261017.css?v=2')],
   ['Staff OS references the current integrity CSS and cache-busted loader', staffOsHtml.includes('gc-ui-integrity-mobile-20261017.css?v=6') && staffOsHtml.includes('staff-os-v5-enhancement-loader-20261017.js?v=7')],
+  ['Staff mobile dock prioritizes the Dubai manifest while keeping Customers in the full module drawer', staffMobileDockSource.includes("['land-manifests', 'مانيفێست', 'package']") && !staffMobileDockSource.includes("['customers', 'کڕیاران', 'users']") && staffConsoleVersionedScript.includes("['customers','کڕیاران','']") && staffEnhancementLoader.includes('/gc-staff-mobile-dock-20261016.js?v=4')],
   ['Dubai-to-Erbil land manifest is loaded into Staff OS with Excel support', staffOsHtml.includes('gc-staff-land-manifest-20261018.css?v=1') && staffOsHtml.includes('gc-staff-land-manifest-20261018.js?v=2') && staffOsHtml.includes('xlsx@0.18.5/dist/xlsx.full.min.js') && staffOsHtml.indexOf('staff-os-v5-20261017.js') < staffOsHtml.indexOf('xlsx@0.18.5') && staffOsHtml.indexOf('xlsx@0.18.5') < staffOsHtml.indexOf('gc-staff-land-manifest-20261018.js?v=1')],
   ['Dubai-to-Erbil land manifest imports Excel with exact manifest columns', ['customer_name:', 'shipment_date:', 'cargo_type:', 'box_count:', 'quantity_pc:', 'weight_kg:', 'sell_price:'].every(key => staffLandManifestUI.includes(key)) && ['name','date','type','box','pcs','kg','sell price'].every(header => staffLandManifestUI.toLowerCase().includes(header)) && staffLandManifestUI.includes('XLSX.read(data,{type:\'array\',cellDates:true})')],
   ['Land manifest numeric cell parser is declared exactly once', (staffLandManifestUI.match(/const numCell\s*=/g)||[]).length === 1],
