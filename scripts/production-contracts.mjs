@@ -147,7 +147,7 @@ const staffCustomerBridgeScript = read('gc-staff-customer-bridge-20261019.js')
 const staffUnifiedStyles = read('gc-staff-ui-refinement-20261019-v4.css')
 const staffV5EnhancementLoader = read('staff-os-v5-enhancement-loader-20261017.js')
 const staffMobileDock = read('gc-staff-mobile-dock-20261016.js')
-if (!staff.includes('gc-staff-command-system-20261017.css?v=2') || !staff.includes('gc-staff-polish-mobile-20261019.css?v=6') || !staff.includes('gc-staff-ui-refinement-20261019-v4.css?v=4') || !staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=17') || !staff.includes('<body class="gc-staff-os-shell">') || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-polish-mobile-20261019.css?v=6')") || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-ui-refinement-20261019-v4.css?v=4')") || !staffV5EnhancementLoader.includes("const href = '/gc-staff-live-workspace-20261019.css?v=1'")) fail('Staff OS final responsive design layer, cache-busted mobile dock, or scoped shell is missing')
+if (!staff.includes('gc-staff-command-system-20261017.css?v=2') || !staff.includes('gc-staff-polish-mobile-20261019.css?v=6') || !staff.includes('gc-staff-ui-refinement-20261019-v4.css?v=4') || !staff.includes('gc-staff-live-workspace-20261019.css?v=1') || !staff.includes('staff-os-v5-20261017.js?v=20261019-6') || !staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=17') || !staff.includes('<body class="gc-staff-os-shell">') || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-polish-mobile-20261019.css?v=6')") || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-ui-refinement-20261019-v4.css?v=4')") || !staffV5EnhancementLoader.includes("const href = '/gc-staff-live-workspace-20261019.css?v=1'")) fail('Staff OS final responsive design layer, cache-busted mobile dock, or scoped shell is missing')
 else ok('Staff OS loads the scoped command-system design layer')
 if (!staffV5Script.includes("storageKey: 'gc-staff-os-auth-v5-ahslifnthiwfkmaswjno'")) fail('Staff authentication storage must be isolated from customer portal sessions')
 else ok('Staff and customer auth sessions use separate browser storage keys')
@@ -299,7 +299,7 @@ else ok('Repository validation guards the retired public registration endpoint')
 
 
 
-if (!staff.includes('staff-os-v5-20261017.js?v=20261019-5')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
+if (!staff.includes('staff-os-v5-20261017.js?v=20261019-6')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
 
 const mobileLoader = read('staff-os-v5-enhancement-loader-20261017.js')
 if (!staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=17')) fail('Staff enhancement loader cache-buster is stale')
