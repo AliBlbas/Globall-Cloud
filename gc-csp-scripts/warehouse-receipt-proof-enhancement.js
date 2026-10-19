@@ -22,6 +22,15 @@
       <h3>ULTRA — زانیاریی لیبڵی بار</h3>
       <p class="proof-note">لەسەر ستیکەرەکەی J&amp;T / carrier ـەکە، زانیاریی invoice، وزن، بەهای ڕاگەیەنراو، ژمارەی پاکێج و tracking تۆمار بکە. کۆدی GC ـی کڕیار هەمیشە بە ID ـی کڕیار پەیوەست دەبێت.</p>
       <div id="proofGrid" class="proof-grid"></div>
+      <div class="proof-compliance full" style="display:grid;gap:8px;padding:12px;border:1px solid rgba(115,174,201,.24);border-radius:12px;margin:10px 0">
+        <strong>یاسای کاڵا / Cargo compliance</strong>
+        <label><input id="proofHasBattery" type="checkbox"> Battery / Power Bank هەیە</label>
+        <label><input id="proofHasLiquid" type="checkbox"> Liquid / Perfume هەیە</label>
+        <label><input id="proofMedicalDevice" type="checkbox"> Medical equipment (prohibited)</label>
+        <label for="proofMsdsDocument">MSDS document (PDF/JPG/PNG/WebP · max 10MB)</label>
+        <input id="proofMsdsDocument" class="field" type="file" accept="application/pdf,image/jpeg,image/png,image/webp">
+        <small id="proofComplianceMessage" role="status" aria-live="polite">Battery or liquid requires an actual MSDS file. Medical equipment is not accepted.</small>
+      </div>
       <div class="proof-actions">
         <button id="proofSave" class="btn primary" type="button">تۆمارکردنی وەرگرتن + وێنە</button>
         <button id="proofCopy" class="btn" type="button" disabled>کۆپی بۆ WhatsApp</button>
@@ -120,6 +129,18 @@
     if (!batch) return void (result.textContent = 'Batch code پێویستە.')
     if (!photos.length) return void (result.textContent = 'بەلایەنی کەم یەک وێنەی ستیکەر/زەرف هەڵبژێرە.')
     if (photos.length > 8) return void (result.textContent = 'زۆرترین ٨ وێنەی بەڵگەی وەرگرتنە.')
+    const meta = buildLabelMetadata()
+    const cargoText = [meta.item_summary, meta.label_text, read('notes')].filter(Boolean).join(' ')
+    const hasBattery = Boolean($('proofHasBattery')?.checked) || /(battery|batteries|lithium|power\\s?bank|باتری|پاتری)/i.test(cargoText)
+    const hasLiquid = Boolean($('proofHasLiquid')?.checked) || /(liquid|perfume|fragrance|shampoo|\\bgel\\b|\\boil\\b|شلە|شلەمەنی|عەتری|پەرفیوم)/i.test(cargoText)
+    const medicalDevice = Boolean($('proofMedicalDevice')?.checked) || /(medical|medicine|medication|surgical|clinic|hospital|پزیشک|دەرمان|نەشتەرگەری)/i.test(cargoText)
+    const msdsFile = $('proofMsdsDocument')?.files?.[0] || null
+    const needsMsds = hasBattery || hasLiquid
+    if (medicalDevice) { result.classList.add('error'); result.textContent = 'ئامێر و کەلوپەلی پزیشکی بە هیچ شێوەیەک وەرناگیرێت.'; return }
+    if (needsMsds && !msdsFile) { result.classList.add('error'); result.textContent = 'بۆ کاڵای باتری‌دار یان شلەمەنی، فایلێکی MSDS پێویستە.'; return }
+    const msdsMime = String(msdsFile?.type || '').split(';')[0].trim().toLowerCase()
+    const msdsExt = String(msdsFile?.name || '').toLowerCase().match(/\\.([a-z0-9]+)$/)?.[1] || ''
+    if (msdsFile && (msdsFile.size <= 0 || msdsFile.size > 10 * 1024 * 1024 || !(msdsMime === 'application/pdf' && msdsExt === 'pdf' || msdsMime === 'image/jpeg' && ['jpg','jpeg'].includes(msdsExt) || msdsMime === 'image/png' && msdsExt === 'png' || msdsMime === 'image/webp' && msdsExt === 'webp'))) { result.classList.add('error'); result.textContent = 'MSDS دەبێت PDF/JPG/PNG/WebP و کەمتر لە 10MB بێت.'; return }
 
     button.disabled = true
     result.classList.remove('error')
@@ -138,7 +159,13 @@
     form.append('photo_taken_at', new Date().toISOString())
     form.append('gc_code_detected', code)
     form.append('auto_assigned', 'true')
-    form.append('label_metadata', JSON.stringify(buildLabelMetadata()))
+    form.append('item_summary', String(meta.item_summary || ''))
+    form.append('has_battery', String(hasBattery))
+    form.append('has_liquid', String(hasLiquid))
+    form.append('medical_device', String(medicalDevice))
+    form.append('msds_provided', String(Boolean(msdsFile)))
+    if (msdsFile) form.append('msds_document', msdsFile, msdsFile.name)
+    form.append('label_metadata', JSON.stringify({...meta, has_battery:hasBattery, has_liquid:hasLiquid, medical_device:medicalDevice, msds_provided:Boolean(msdsFile)}))
     const barcode = read('recognitionResult')
     if (barcode && !/هیچ کۆدێک/.test(barcode)) form.append('scan_code', code)
     photos.forEach((file) => form.append('photos', file, file.name))
