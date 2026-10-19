@@ -1,0 +1,801 @@
+/* Globall Cloud Staff OS — mobile-first repair & visual consistency layer.
+   Final cascade guard for authenticated Staff OS V5. Visual-only: preserves
+   existing auth, role checks, service calls, and shipment workflows. */
+
+html:has(body.gc-staff-os-shell) {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip !important;
+  -webkit-text-size-adjust: 100%;
+}
+body.gc-staff-os-shell {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip !important;
+  font-family: Vazirmatn, system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body.gc-staff-os-shell #app,
+body.gc-staff-os-shell #app .gc-shell,
+body.gc-staff-os-shell #app .gc-main,
+body.gc-staff-os-shell #app .view,
+body.gc-staff-os-shell #app .card,
+body.gc-staff-os-shell #app .kpi {
+  min-width: 0 !important;
+  max-width: 100%;
+}
+body.gc-staff-os-shell #app,
+body.gc-staff-os-shell #app * {
+  box-sizing: border-box;
+}
+body.gc-staff-os-shell #app :where(h1,h2,h3,h4,p,small,b,strong,span,label,a,button,td,th) {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+body.gc-staff-os-shell #app :where(button,input,select,textarea) {
+  font-family: Vazirmatn, system-ui, -apple-system, "Segoe UI", sans-serif !important;
+}
+body.gc-staff-os-shell #app button {
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: manipulation;
+}
+body.gc-staff-os-shell #app :where(a,button,input,select,textarea):focus-visible {
+  outline: 3px solid rgba(8,127,140,.42) !important;
+  outline-offset: 2px !important;
+}
+body.gc-staff-os-shell #app .hidden { display: none !important; }
+
+/* Keep the desktop shell compact, balanced and legible. */
+@media (min-width: 761px) {
+  body.gc-staff-os-shell #app .gc-shell {
+    width: min(1680px, 100%);
+    margin-inline: auto;
+    grid-template-columns: minmax(220px, 248px) minmax(0, 1fr) !important;
+    gap: 16px !important;
+  }
+  body.gc-staff-os-shell #app .gc-side { min-width: 0; }
+  body.gc-staff-os-shell #app .view {
+    padding: clamp(16px, 1.5vw, 24px) !important;
+  }
+  body.gc-staff-os-shell #app .tower-hero {
+    grid-template-columns: minmax(0, 1.4fr) minmax(220px, .7fr) !important;
+    gap: 20px;
+  }
+  body.gc-staff-os-shell #app .tower-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+}
+
+/* Desktop/mobile typography and the shared component system. */
+body.gc-staff-os-shell #app .topbar {
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+body.gc-staff-os-shell #app .top-title { min-width: 0; }
+body.gc-staff-os-shell #app .top-title strong {
+  font-size: clamp(15px, 1.2vw, 18px) !important;
+  line-height: 1.5 !important;
+}
+body.gc-staff-os-shell #app .top-title span {
+  font-size: 11px !important;
+  line-height: 1.7 !important;
+}
+body.gc-staff-os-shell #app .top-actions {
+  min-width: 0;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+body.gc-staff-os-shell #app .btn {
+  min-width: 0;
+  min-height: 40px;
+  padding: 9px 12px !important;
+  border-radius: 11px !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1.45 !important;
+  white-space: normal;
+}
+body.gc-staff-os-shell #app .status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  min-height: 34px;
+  padding: 7px 10px;
+  border-radius: 10px !important;
+  font-size: 10px !important;
+  line-height: 1.4;
+  white-space: normal;
+}
+body.gc-staff-os-shell #app .section-head {
+  align-items: flex-start;
+  min-width: 0;
+  gap: 12px;
+}
+body.gc-staff-os-shell #app .section-head h1 {
+  font-size: clamp(20px, 2vw, 27px) !important;
+  line-height: 1.5 !important;
+  overflow-wrap: anywhere;
+}
+body.gc-staff-os-shell #app .section-head p {
+  font-size: 12px !important;
+  line-height: 1.85 !important;
+  max-width: 78ch;
+}
+body.gc-staff-os-shell #app .eyebrow {
+  font-family: "JetBrains Mono", Vazirmatn, system-ui, sans-serif !important;
+  font-size: 10px !important;
+  line-height: 1.5;
+  letter-spacing: .7px;
+}
+body.gc-staff-os-shell #app .view {
+  overflow-wrap: anywhere;
+}
+body.gc-staff-os-shell #app .card {
+  padding: 16px !important;
+  border-radius: 16px !important;
+}
+body.gc-staff-os-shell #app .card-head {
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: 10px;
+}
+body.gc-staff-os-shell #app .card-head h3 {
+  font-size: 14px !important;
+  line-height: 1.6;
+}
+body.gc-staff-os-shell #app .grid-kpi {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px !important;
+}
+body.gc-staff-os-shell #app .kpi {
+  min-width: 0;
+  min-height: 102px;
+  padding: 13px !important;
+  border-radius: 15px !important;
+}
+body.gc-staff-os-shell #app .kpi span {
+  font-size: 11px !important;
+  line-height: 1.7;
+}
+body.gc-staff-os-shell #app .kpi strong {
+  font-size: clamp(17px, 1.5vw, 22px) !important;
+  line-height: 1.4 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+}
+body.gc-staff-os-shell #app .kpi small {
+  font-size: 10px !important;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+body.gc-staff-os-shell #app .two-col,
+body.gc-staff-os-shell #app .three-col {
+  min-width: 0;
+  gap: 12px !important;
+}
+body.gc-staff-os-shell #app .toolbar {
+  min-width: 0;
+  gap: 8px;
+}
+body.gc-staff-os-shell #app .toolbar .field {
+  min-width: 0;
+  flex: 1 1 190px;
+}
+body.gc-staff-os-shell #app .field {
+  min-width: 0 !important;
+  max-width: 100%;
+  min-height: 42px;
+  border-radius: 11px !important;
+  font-size: 13px !important;
+  line-height: 1.6;
+}
+body.gc-staff-os-shell #app .form-grid {
+  min-width: 0;
+  gap: 12px !important;
+}
+body.gc-staff-os-shell #app .form-field label {
+  font-size: 11px !important;
+  line-height: 1.6;
+}
+body.gc-staff-os-shell #app .table-wrap {
+  width: 100%;
+  max-width: 100% !important;
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-inline: contain;
+}
+body.gc-staff-os-shell #app .table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+body.gc-staff-os-shell #app .table th,
+body.gc-staff-os-shell #app .table td {
+  font-size: 11px !important;
+  line-height: 1.65;
+  vertical-align: middle;
+}
+body.gc-staff-os-shell #app .pill {
+  max-width: 100%;
+  font-size: 10px !important;
+  line-height: 1.5;
+  white-space: normal;
+}
+body.gc-staff-os-shell #app .empty {
+  padding: 24px 14px;
+  font-size: 12px !important;
+  line-height: 1.9;
+}
+body.gc-staff-os-shell #app .tower-hero {
+  min-width: 0;
+}
+body.gc-staff-os-shell #app .tower-hero h1 {
+  font-size: clamp(22px, 2.2vw, 28px) !important;
+  line-height: 1.55 !important;
+  overflow-wrap: anywhere;
+}
+body.gc-staff-os-shell #app .tower-hero p {
+  font-size: 13px !important;
+  line-height: 1.9 !important;
+}
+body.gc-staff-os-shell #app .tower-hero-actions .btn {
+  min-height: 44px;
+  font-size: 12px !important;
+}
+body.gc-staff-os-shell #app .tower-flow-step {
+  min-width: 0;
+  min-height: 96px;
+  padding: 12px !important;
+}
+body.gc-staff-os-shell #app .tower-flow-step > b {
+  font-size: 20px !important;
+  line-height: 1.35;
+}
+body.gc-staff-os-shell #app .tower-flow-step small,
+body.gc-staff-os-shell #app .tower-mode-strip b {
+  font-size: 10px !important;
+  line-height: 1.6;
+}
+body.gc-staff-os-shell #app .tower-route,
+body.gc-staff-os-shell #app .tower-stream-row {
+  min-width: 0;
+}
+body.gc-staff-os-shell #app .tower-route b,
+body.gc-staff-os-shell #app .tower-stream-row b {
+  font-size: 12px !important;
+  line-height: 1.6;
+}
+body.gc-staff-os-shell #app .tower-route small,
+body.gc-staff-os-shell #app .tower-stream-row small {
+  font-size: 10px !important;
+  line-height: 1.7;
+}
+body.gc-staff-os-shell #app .tower-exception b {
+  font-size: 12px !important;
+  line-height: 1.6;
+}
+body.gc-staff-os-shell #app .tower-exception small {
+  font-size: 10px !important;
+  line-height: 1.7;
+}
+body.gc-staff-os-shell #app .tower-stream-row .mono {
+  max-width: 150px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+/* Mobile: replace the long side-rail layout with one compact application shell. */
+@media (max-width: 760px) {
+  body.gc-staff-os-shell {
+    padding: 0 !important;
+    padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px)) !important;
+    background: #edf3f6 !important;
+    font-size: 14px;
+  }
+  body.gc-staff-os-shell #app {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 100dvh !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  body.gc-staff-os-shell #app .gc-shell {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 10px 14px !important;
+  }
+  body.gc-staff-os-shell #app .gc-side {
+    display: none !important;
+  }
+  body.gc-staff-os-shell #app .gc-main {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  body.gc-staff-os-shell #app .topbar {
+    position: relative !important;
+    top: auto !important;
+    z-index: 10;
+    display: flex !important;
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin: 8px 0 10px !important;
+    padding: 13px !important;
+    border: 1px solid #d8e5eb !important;
+    border-radius: 16px !important;
+    background: rgba(255,255,255,.97) !important;
+    box-shadow: 0 6px 20px rgba(20,52,72,.055) !important;
+  }
+  body.gc-staff-os-shell #app .top-title {
+    width: 100%;
+  }
+  body.gc-staff-os-shell #app .top-title strong {
+    color: #17374c !important;
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+  }
+  body.gc-staff-os-shell #app .top-title span {
+    color: #667e8f !important;
+    font-size: 11px !important;
+    line-height: 1.65 !important;
+  }
+  body.gc-staff-os-shell #app .top-actions {
+    display: flex !important;
+    align-items: center;
+    width: 100% !important;
+    gap: 6px !important;
+    margin: 0 !important;
+  }
+  body.gc-staff-os-shell #app .top-actions > * {
+    flex: 0 1 auto;
+    min-width: 0;
+    min-height: 38px;
+  }
+  body.gc-staff-os-shell #app .top-actions .btn {
+    padding: 7px 9px !important;
+    font-size: 10px !important;
+  }
+  body.gc-staff-os-shell #app .top-actions .status {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+    min-height: 32px;
+    font-size: 9px !important;
+  }
+  body.gc-staff-os-shell #app .view {
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 12px !important;
+    border: 1px solid #dbe6eb !important;
+    border-radius: 17px !important;
+    background: #fff !important;
+    box-shadow: 0 8px 24px rgba(20,52,72,.05) !important;
+  }
+  body.gc-staff-os-shell #app .section-head {
+    display: flex;
+    flex-direction: column;
+    gap: 9px !important;
+    margin-bottom: 13px !important;
+  }
+  body.gc-staff-os-shell #app .section-head h1 {
+    margin: 3px 0 5px !important;
+    color: #17384c !important;
+    font-size: 22px !important;
+    line-height: 1.5 !important;
+  }
+  body.gc-staff-os-shell #app .section-head p {
+    color: #6a8191 !important;
+    font-size: 12px !important;
+    line-height: 1.85 !important;
+  }
+  body.gc-staff-os-shell #app .eyebrow {
+    font-size: 9px !important;
+    letter-spacing: .55px;
+  }
+  body.gc-staff-os-shell #app .actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100%;
+    gap: 7px !important;
+  }
+  body.gc-staff-os-shell #app .actions > * {
+    width: 100% !important;
+    min-width: 0 !important;
+    white-space: normal;
+  }
+  body.gc-staff-os-shell #app .btn {
+    min-height: 43px !important;
+    padding: 9px 10px !important;
+    border-radius: 11px !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+  }
+  body.gc-staff-os-shell #app .card {
+    padding: 13px !important;
+    border-radius: 15px !important;
+    box-shadow: 0 3px 12px rgba(20,54,76,.035) !important;
+  }
+  body.gc-staff-os-shell #app .card-head {
+    align-items: flex-start !important;
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+  }
+  body.gc-staff-os-shell #app .card-head h3 {
+    font-size: 13px !important;
+    line-height: 1.6 !important;
+  }
+  body.gc-staff-os-shell #app .grid-kpi,
+  body.gc-staff-os-shell #app .tower-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin-bottom: 11px !important;
+  }
+  body.gc-staff-os-shell #app .kpi {
+    min-height: 91px !important;
+    padding: 11px !important;
+    border-radius: 13px !important;
+  }
+  body.gc-staff-os-shell #app .kpi span {
+    font-size: 10px !important;
+    line-height: 1.6 !important;
+  }
+  body.gc-staff-os-shell #app .kpi strong {
+    margin-top: 5px !important;
+    font-size: clamp(16px, 4vw, 19px) !important;
+    line-height: 1.35 !important;
+  }
+  body.gc-staff-os-shell #app .kpi small {
+    font-size: 9px !important;
+    line-height: 1.6 !important;
+  }
+  body.gc-staff-os-shell #app .tower-hero {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+    margin-bottom: 11px !important;
+    padding: 16px !important;
+    border-radius: 16px !important;
+  }
+  body.gc-staff-os-shell #app .tower-hero .eyebrow {
+    font-size: 9px !important;
+    line-height: 1.6 !important;
+  }
+  body.gc-staff-os-shell #app .tower-hero h1 {
+    margin: 5px 0 7px !important;
+    font-size: clamp(21px, 5.6vw, 26px) !important;
+    line-height: 1.55 !important;
+  }
+  body.gc-staff-os-shell #app .tower-hero p {
+    margin: 0;
+    font-size: 12px !important;
+    line-height: 1.9 !important;
+  }
+  body.gc-staff-os-shell #app .tower-hero-meta {
+    gap: 6px !important;
+    margin-top: 11px !important;
+  }
+  body.gc-staff-os-shell #app .tower-hero-meta span {
+    max-width: 100%;
+    padding: 6px 8px !important;
+    font-size: 9px !important;
+    line-height: 1.5 !important;
+  }
+  body.gc-staff-os-shell #app .tower-hero-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+    width: 100%;
+  }
+  body.gc-staff-os-shell #app .tower-hero-actions .btn {
+    width: 100% !important;
+    min-height: 43px !important;
+    padding: 8px !important;
+    font-size: 11px !important;
+  }
+  body.gc-staff-os-shell #app .tower-hero-actions .btn:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+  body.gc-staff-os-shell #app .tower-grid,
+  body.gc-staff-os-shell #app .two-col,
+  body.gc-staff-os-shell #app .three-col {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+  body.gc-staff-os-shell #app .tower-flow {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+  }
+  body.gc-staff-os-shell #app .tower-flow-step {
+    min-height: 91px !important;
+    padding: 10px !important;
+    border-radius: 11px !important;
+  }
+  body.gc-staff-os-shell #app .tower-flow-step > b {
+    font-size: 20px !important;
+  }
+  body.gc-staff-os-shell #app .tower-flow-step small {
+    font-size: 10px !important;
+    line-height: 1.6 !important;
+  }
+  body.gc-staff-os-shell #app .tower-mode-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+  body.gc-staff-os-shell #app .tower-mode-strip > div {
+    grid-template-columns: 7px minmax(0, 1fr) auto !important;
+    gap: 5px !important;
+    padding: 7px 5px !important;
+  }
+  body.gc-staff-os-shell #app .tower-mode-strip b {
+    font-size: 8px !important;
+  }
+  body.gc-staff-os-shell #app .tower-mode-strip strong {
+    font-size: 11px !important;
+  }
+  body.gc-staff-os-shell #app .tower-route {
+    grid-template-columns: 28px minmax(0, 1fr) !important;
+    gap: 8px !important;
+    padding: 11px 0 !important;
+  }
+  body.gc-staff-os-shell #app .tower-route > strong {
+    grid-column: 2;
+    justify-self: start;
+    font-size: 12px !important;
+  }
+  body.gc-staff-os-shell #app .tower-route b,
+  body.gc-staff-os-shell #app .tower-stream-row b,
+  body.gc-staff-os-shell #app .tower-exception b {
+    font-size: 12px !important;
+    line-height: 1.65 !important;
+  }
+  body.gc-staff-os-shell #app .tower-route small,
+  body.gc-staff-os-shell #app .tower-stream-row small,
+  body.gc-staff-os-shell #app .tower-exception small {
+    font-size: 10px !important;
+    line-height: 1.75 !important;
+  }
+  body.gc-staff-os-shell #app .tower-stream-row {
+    grid-template-columns: 8px minmax(0, 1fr) !important;
+    gap: 8px !important;
+    align-items: start !important;
+    padding: 11px 0 !important;
+  }
+  body.gc-staff-os-shell #app .tower-stream-row .mono {
+    grid-column: 2;
+    max-width: 100%;
+    font-size: 9px !important;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  body.gc-staff-os-shell #app .tower-exception {
+    grid-template-columns: 7px minmax(0, 1fr) 16px !important;
+    gap: 8px !important;
+    padding: 11px !important;
+  }
+  body.gc-staff-os-shell #app .toolbar {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 7px !important;
+  }
+  body.gc-staff-os-shell #app .toolbar > *,
+  body.gc-staff-os-shell #app .toolbar .field {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  body.gc-staff-os-shell #app .form-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+  body.gc-staff-os-shell #app .form-field.full {
+    grid-column: auto !important;
+  }
+  body.gc-staff-os-shell #app .chat-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+  body.gc-staff-os-shell #app .photo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  body.gc-staff-os-shell #app .timeline-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 5px !important;
+  }
+  body.gc-staff-os-shell #app .modal-backdrop {
+    padding: 7px 7px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+    place-items: end stretch !important;
+  }
+  body.gc-staff-os-shell #app .modal {
+    width: 100% !important;
+    max-height: 88dvh !important;
+    padding: 14px !important;
+    border-radius: 19px 19px 13px 13px !important;
+  }
+  body.gc-staff-os-shell #app .modal-head h2 {
+    font-size: 18px !important;
+    line-height: 1.5;
+  }
+  body.gc-staff-os-shell #app .modal-foot {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+  }
+  body.gc-staff-os-shell #app .modal-foot .btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    white-space: normal !important;
+    font-size: 11px !important;
+  }
+  body.gc-staff-os-shell #app .table-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    border-radius: 12px !important;
+  }
+  body.gc-staff-os-shell #app .table {
+    min-width: 680px;
+  }
+
+  /* Five-action dock: fixed, thumb-friendly and inside iPhone safe areas. */
+  body.gc-staff-os-shell .gc-staff-mobile-dock {
+    display: grid !important;
+    position: fixed !important;
+    z-index: 800 !important;
+    inset-inline: 8px !important;
+    bottom: calc(6px + env(safe-area-inset-bottom, 0px)) !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 3px !important;
+    width: auto !important;
+    max-width: 620px;
+    margin-inline: auto !important;
+    padding: 6px !important;
+    border: 1px solid rgba(185,208,221,.9) !important;
+    border-radius: 17px !important;
+    background: rgba(255,255,255,.97) !important;
+    box-shadow: 0 10px 35px rgba(8,35,53,.18) !important;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+  body.gc-staff-os-shell .gc-staff-mobile-dock button {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    min-width: 0 !important;
+    min-height: 56px !important;
+    padding: 5px 1px !important;
+    border: 1px solid transparent !important;
+    border-radius: 11px !important;
+    background: transparent !important;
+    color: #607b8c !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    line-height: 1.35 !important;
+    white-space: normal !important;
+    box-shadow: none !important;
+  }
+  body.gc-staff-os-shell .gc-staff-mobile-dock button.active {
+    border-color: #c7e9eb !important;
+    background: #eaf8f8 !important;
+    color: #087f8c !important;
+  }
+  body.gc-staff-os-shell .gc-staff-mobile-dock .gc-staff-mobile-icon {
+    display: grid !important;
+    place-items: center !important;
+    width: 24px !important;
+    height: 24px !important;
+    color: currentColor !important;
+  }
+  body.gc-staff-os-shell .gc-staff-mobile-dock .gc-staff-mobile-icon svg {
+    display: block !important;
+    width: 20px !important;
+    height: 20px !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.8 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+  }
+  body.gc-staff-os-shell .gc-staff-mobile-drawer {
+    position: fixed !important;
+    z-index: 820 !important;
+    inset-inline: 8px !important;
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+    max-height: min(65dvh, 580px) !important;
+    overflow: auto !important;
+    border: 1px solid #d6e4eb !important;
+    border-radius: 18px !important;
+    padding: 13px !important;
+    background: #fff !important;
+    color: #19384c !important;
+    box-shadow: 0 18px 55px rgba(8,35,53,.22) !important;
+  }
+  body.gc-staff-os-shell .gc-staff-mobile-drawer[hidden] { display: none !important; }
+  body.gc-staff-os-shell .gc-staff-mobile-drawer.open { display: block !important; }
+  body.gc-staff-os-shell .gc-staff-mobile-module-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+  }
+  body.gc-staff-os-shell .gc-staff-mobile-module-grid button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    min-height: 48px;
+    padding: 9px !important;
+    border: 1px solid #dce7ed !important;
+    border-radius: 11px !important;
+    background: #f7fafc !important;
+    color: #25465a !important;
+    text-align: start;
+    font-size: 11px !important;
+    line-height: 1.5;
+  }
+  body.gc-staff-os-shell .gc-staff-mobile-module-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    border-radius: 9px;
+    background: #e3f5f6;
+    color: #087f8c;
+  }
+  body.gc-staff-os-shell .gc-staff-mobile-module-icon svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+  }
+  body.gc-staff-os-shell .gc-staff-mobile-backdrop.open {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 810 !important;
+    background: rgba(6,24,38,.42) !important;
+    backdrop-filter: blur(3px);
+  }
+  body.gc-staff-os-shell #gcStaffMobileMenuButton {
+    min-height: 38px !important;
+    min-width: 38px !important;
+    padding: 5px 9px !important;
+    border: 1px solid #cbdde6 !important;
+    border-radius: 10px !important;
+    background: #f7fbfc !important;
+    color: #23495c !important;
+    font-size: 16px !important;
+  }
+}
+@media (max-width: 390px) {
+  body.gc-staff-os-shell #app .gc-shell { padding-inline: 7px !important; }
+  body.gc-staff-os-shell #app .view { padding: 10px !important; }
+  body.gc-staff-os-shell #app .tower-hero { padding: 13px !important; }
+  body.gc-staff-os-shell #app .tower-hero-actions .btn { font-size: 10px !important; }
+  body.gc-staff-os-shell #app .tower-mode-strip b { font-size: 7px !important; }
+  body.gc-staff-os-shell .gc-staff-mobile-dock { inset-inline: 5px !important; padding: 4px !important; }
+  body.gc-staff-os-shell .gc-staff-mobile-dock button { min-height: 54px !important; font-size: 8px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.gc-staff-os-shell #app *,
+  body.gc-staff-os-shell .gc-staff-mobile-dock *,
+  body.gc-staff-os-shell .gc-staff-mobile-drawer * {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
