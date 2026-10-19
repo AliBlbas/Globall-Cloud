@@ -512,7 +512,15 @@
       btn.type='button';btn.className='nav-btn';btn.dataset.tab='land-manifests';
       btn.innerHTML='<span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v13H3zM7 7V4h10v3M7 12h10M7 16h6"/></svg></span><span>مانيفێستی دوبەی</span><em class="nav-badge hidden">0</em>';
       const before=nav.querySelector('[data-tab="warehouses"]');
-      if(before)nav.insertBefore(btn,before);else nav.appendChild(btn);
+      const group=before?.closest('.nav-group');
+      // The Staff navigation can be grouped after authentication. Insert into
+      // the same group as Warehouses instead of using a non-child reference.
+      if(before&&group)group.insertBefore(btn,before);
+      else if(before&&before.parentElement===nav)nav.insertBefore(btn,before);
+      else{
+        const primaryGroup=nav.querySelector('.nav-group[aria-label="سەرەکی و بار"]');
+        (primaryGroup||nav).appendChild(btn);
+      }
     }
   };
   document.addEventListener('click',(event)=>{
