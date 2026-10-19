@@ -799,3 +799,404 @@ body.gc-staff-os-shell #app .tower-stream-row .mono {
     transition-duration: .01ms !important;
   }
 }
+
+
+/* V2: final mobile-first app layout and styled safe loading fallback.
+   This is intentionally scoped to Staff OS and never changes data workflows. */
+body.gc-staff-os-shell {
+  --gc-v2-canvas: #edf3f7;
+  --gc-v2-paper: #ffffff;
+  --gc-v2-ink: #17384c;
+  --gc-v2-muted: #657f90;
+  --gc-v2-line: #d9e5eb;
+  --gc-v2-teal: #087f8c;
+  --gc-v2-cyan: #25b8c6;
+  background: var(--gc-v2-canvas) !important;
+  color: var(--gc-v2-ink) !important;
+}
+body.gc-staff-os-shell #app .gc-shell {
+  width: min(1720px, 100%) !important;
+  gap: 16px !important;
+  margin-inline: auto !important;
+  align-items: start !important;
+}
+body.gc-staff-os-shell #app .gc-side {
+  border: 1px solid rgba(255,255,255,.08) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 16px 42px rgba(13,42,62,.15) !important;
+}
+body.gc-staff-os-shell #app .gc-main {
+  min-width: 0 !important;
+}
+body.gc-staff-os-shell #app .topbar {
+  background: rgba(255,255,255,.96) !important;
+  border: 1px solid var(--gc-v2-line) !important;
+  border-radius: 17px !important;
+  box-shadow: 0 7px 22px rgba(16,52,74,.05) !important;
+}
+body.gc-staff-os-shell #app .view {
+  background: var(--gc-v2-paper) !important;
+  color: var(--gc-v2-ink) !important;
+  border: 1px solid var(--gc-v2-line) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 10px 28px rgba(16,52,74,.045) !important;
+}
+body.gc-staff-os-shell #app .tower-hero {
+  border: 1px solid #1b5368 !important;
+  border-radius: 20px !important;
+  background:
+    radial-gradient(ellipse at 7% 0%, rgba(65,220,223,.18), transparent 55%),
+    linear-gradient(135deg,#173f55 0%,#103146 58%,#0d293c 100%) !important;
+  box-shadow: 0 14px 32px rgba(12,48,68,.13) !important;
+}
+body.gc-staff-os-shell #app .tower-hero h1 {
+  font-size: clamp(21px, 2.1vw, 28px) !important;
+  line-height: 1.55 !important;
+}
+body.gc-staff-os-shell #app .tower-hero p {
+  max-width: 65ch;
+  line-height: 1.9 !important;
+}
+body.gc-staff-os-shell #app .tower-hero-meta span {
+  border-radius: 10px !important;
+}
+body.gc-staff-os-shell #app .tower-kpis .kpi {
+  background: linear-gradient(145deg,#ffffff,#f7fbfc) !important;
+  border: 1px solid #dce7ed !important;
+  box-shadow: 0 4px 14px rgba(18,53,75,.035) !important;
+}
+body.gc-staff-os-shell #app .tower-kpis .kpi.tower-kpi-accent {
+  background: linear-gradient(145deg,#e9f9fa,#ffffff) !important;
+  border-color: #bfe5e7 !important;
+}
+body.gc-staff-os-shell #app .tower-kpis .kpi strong {
+  font-size: clamp(17px,1.5vw,22px) !important;
+  overflow-wrap: anywhere !important;
+}
+body.gc-staff-os-shell #app .gc-customer-bridge-panel {
+  border: 1px solid #d7e6ec !important;
+  border-radius: 17px !important;
+  background: #fff !important;
+}
+body.gc-staff-os-shell #app .gc-customer-bridge-heading h3 {
+  color: #17384c !important;
+}
+body.gc-staff-os-shell #app .gc-customer-bridge-heading p {
+  color: #657f90 !important;
+  line-height: 1.85 !important;
+}
+body.gc-staff-os-shell #app .gc-customer-bridge-metrics > div {
+  min-width: 0 !important;
+  border: 1px solid #e0eaef !important;
+  border-radius: 12px !important;
+  background: #f7fbfc !important;
+}
+body.gc-staff-os-shell #app .gc-customer-bridge-metrics strong {
+  overflow-wrap: anywhere !important;
+}
+body.gc-staff-os-shell #app .tower-flow-step,
+body.gc-staff-os-shell #app .tower-exception {
+  touch-action: manipulation;
+}
+body.gc-staff-os-shell #app .tower-exception {
+  border-radius: 12px !important;
+  padding: 12px !important;
+}
+body.gc-staff-os-shell #app .tower-exception b {
+  line-height: 1.65 !important;
+}
+body.gc-staff-os-shell #app .tower-exception small {
+  line-height: 1.8 !important;
+  overflow-wrap: anywhere !important;
+}
+body.gc-staff-os-shell #app .table-wrap {
+  border: 1px solid var(--gc-v2-line) !important;
+  border-radius: 13px !important;
+}
+body.gc-staff-os-shell #app :where(button,a) {
+  -webkit-tap-highlight-color: transparent;
+}
+body.gc-staff-os-shell #app :where(input,select,textarea) {
+  scroll-margin-block: 90px;
+}
+body.gc-staff-os-shell #app .empty {
+  border-radius: 13px !important;
+  line-height: 1.9 !important;
+}
+
+/* Apply a matching visual system to the static rescue/loading shell as well. */
+body.gc-staff-os-shell #app .gc-rescue-shell {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) !important;
+  place-items: center !important;
+  gap: 16px !important;
+  width: min(760px,100%) !important;
+  min-height: calc(100dvh - 32px) !important;
+  margin-inline: auto !important;
+  padding: clamp(12px,3vw,28px) !important;
+  border-radius: 22px !important;
+  background: var(--gc-v2-canvas) !important;
+  color: var(--gc-v2-ink) !important;
+}
+body.gc-staff-os-shell #app .staff-command-matrix {
+  display: grid !important;
+  grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: 620px !important;
+  margin: 0 auto !important;
+}
+body.gc-staff-os-shell #app .staff-command-matrix .cmd {
+  display: grid !important;
+  grid-template-columns: 36px minmax(0,1fr) !important;
+  align-items: center !important;
+  gap: 4px 10px !important;
+  min-width: 0 !important;
+  min-height: 76px !important;
+  padding: 13px !important;
+  border: 1px solid #d8e6ed !important;
+  border-radius: 15px !important;
+  background: #fff !important;
+  color: var(--gc-v2-ink) !important;
+  box-shadow: 0 5px 18px rgba(17,54,75,.055) !important;
+  text-decoration: none !important;
+}
+body.gc-staff-os-shell #app .staff-command-matrix .cmd svg {
+  grid-row: 1 / span 2 !important;
+  width: 27px !important;
+  height: 27px !important;
+  padding: 5px !important;
+  border-radius: 9px !important;
+  background: #e7f7f8 !important;
+  stroke: var(--gc-v2-teal) !important;
+}
+body.gc-staff-os-shell #app .staff-command-matrix .cmd b {
+  min-width: 0 !important;
+  color: var(--gc-v2-ink) !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+body.gc-staff-os-shell #app .staff-command-matrix .cmd small {
+  min-width: 0 !important;
+  color: var(--gc-v2-muted) !important;
+  font-size: 10px !important;
+  line-height: 1.5 !important;
+}
+body.gc-staff-os-shell #app .gc-rescue-shell > section:not(.staff-command-matrix) {
+  width: min(560px,100%) !important;
+  padding: clamp(18px,4vw,30px) !important;
+  border: 1px solid #dce7ed !important;
+  border-radius: 22px !important;
+  background: #fff !important;
+  color: var(--gc-v2-ink) !important;
+  box-shadow: 0 18px 55px rgba(15,49,70,.09) !important;
+}
+body.gc-staff-os-shell #app .gc-rescue-shell > section:not(.staff-command-matrix) h1 {
+  color: var(--gc-v2-ink) !important;
+  font-size: clamp(21px,5vw,27px) !important;
+  line-height: 1.6 !important;
+}
+body.gc-staff-os-shell #app .gc-rescue-shell > section:not(.staff-command-matrix) p {
+  color: var(--gc-v2-muted) !important;
+  line-height: 1.9 !important;
+}
+
+@media (max-width: 760px) {
+  body.gc-staff-os-shell {
+    padding: 0 0 calc(91px + env(safe-area-inset-bottom,0px)) !important;
+    background: #edf3f7 !important;
+  }
+  body.gc-staff-os-shell #app .gc-shell {
+    padding: 0 8px 12px !important;
+  }
+  body.gc-staff-os-shell #app .topbar {
+    gap: 9px !important;
+    margin: 7px 0 9px !important;
+    padding: 12px !important;
+  }
+  body.gc-staff-os-shell #app .top-title strong {
+    font-size: 16px !important;
+  }
+  body.gc-staff-os-shell #app .top-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+    gap: 7px !important;
+  }
+  body.gc-staff-os-shell #app .top-actions .status {
+    grid-column: 1 / -1 !important;
+    justify-content: flex-start !important;
+  }
+  body.gc-staff-os-shell #app .top-actions .gc-customer-console-link {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  body.gc-staff-os-shell #app .view {
+    padding: 11px !important;
+    border-radius: 16px !important;
+  }
+  body.gc-staff-os-shell #app .tower-hero {
+    grid-template-columns: minmax(0,1fr) !important;
+    gap: 12px !important;
+    padding: 15px !important;
+    margin-bottom: 10px !important;
+    border-radius: 16px !important;
+  }
+  body.gc-staff-os-shell #app .tower-hero h1 {
+    font-size: clamp(21px,5.5vw,25px) !important;
+    line-height: 1.55 !important;
+  }
+  body.gc-staff-os-shell #app .tower-hero p {
+    font-size: 12px !important;
+    line-height: 1.9 !important;
+  }
+  body.gc-staff-os-shell #app .tower-hero-actions {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+    gap: 7px !important;
+  }
+  body.gc-staff-os-shell #app .tower-hero-actions .btn {
+    min-height: 44px !important;
+    font-size: 11px !important;
+    border-radius: 11px !important;
+  }
+  body.gc-staff-os-shell #app .tower-hero-actions .btn:nth-child(3) {
+    grid-column: 1 / -1 !important;
+  }
+  body.gc-staff-os-shell #app .tower-kpis {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+    gap: 8px !important;
+  }
+  body.gc-staff-os-shell #app .tower-kpis .kpi {
+    min-height: 96px !important;
+    padding: 10px !important;
+    border-radius: 13px !important;
+  }
+  body.gc-staff-os-shell #app .tower-kpis .kpi span {
+    font-size: 10px !important;
+    line-height: 1.6 !important;
+  }
+  body.gc-staff-os-shell #app .tower-kpis .kpi strong {
+    font-size: clamp(16px,4.5vw,19px) !important;
+    line-height: 1.35 !important;
+  }
+  body.gc-staff-os-shell #app .tower-kpis .kpi small {
+    font-size: 9px !important;
+    line-height: 1.7 !important;
+  }
+  body.gc-staff-os-shell #app .gc-customer-bridge-metrics {
+    display: grid !important;
+    grid-template-columns: repeat(3,minmax(0,1fr)) !important;
+    gap: 6px !important;
+  }
+  body.gc-staff-os-shell #app .gc-customer-bridge-metrics > div {
+    padding: 8px 6px !important;
+    border-radius: 10px !important;
+  }
+  body.gc-staff-os-shell #app .gc-customer-bridge-metrics span {
+    font-size: 9px !important;
+    line-height: 1.55 !important;
+  }
+  body.gc-staff-os-shell #app .gc-customer-bridge-metrics strong {
+    font-size: 16px !important;
+  }
+  body.gc-staff-os-shell #app .gc-customer-bridge-actions {
+    display: grid !important;
+    grid-template-columns: minmax(0,1fr) !important;
+    gap: 7px !important;
+  }
+  body.gc-staff-os-shell #app .gc-customer-bridge-actions .btn {
+    width: 100% !important;
+  }
+  body.gc-staff-os-shell #app .tower-grid {
+    grid-template-columns: minmax(0,1fr) !important;
+    gap: 9px !important;
+  }
+  body.gc-staff-os-shell #app .tower-flow {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+    gap: 7px !important;
+  }
+  body.gc-staff-os-shell #app .tower-mode-strip {
+    grid-template-columns: repeat(3,minmax(0,1fr)) !important;
+    gap: 5px !important;
+  }
+  body.gc-staff-os-shell #app .tower-mode-strip > div {
+    grid-template-columns: 7px minmax(0,1fr) auto !important;
+    padding: 7px 5px !important;
+  }
+  body.gc-staff-os-shell #app .tower-mode-strip b {
+    font-size: 8px !important;
+    overflow-wrap: anywhere !important;
+  }
+  body.gc-staff-os-shell #app .tower-route {
+    grid-template-columns: 26px minmax(0,1fr) !important;
+    gap: 8px !important;
+  }
+  body.gc-staff-os-shell #app .tower-route > strong {
+    grid-column: 2 !important;
+    justify-self: start !important;
+  }
+  body.gc-staff-os-shell #app .tower-stream-row {
+    grid-template-columns: 7px minmax(0,1fr) !important;
+    align-items: start !important;
+  }
+  body.gc-staff-os-shell #app .tower-stream-row .mono {
+    grid-column: 2 !important;
+    max-width: 100% !important;
+    font-size: 9px !important;
+    overflow-wrap: anywhere !important;
+  }
+  body.gc-staff-os-shell .gc-staff-mobile-dock {
+    grid-template-columns: repeat(5,minmax(0,1fr)) !important;
+    inset-inline: 7px !important;
+    bottom: calc(5px + env(safe-area-inset-bottom,0px)) !important;
+    padding: 5px !important;
+    border-radius: 17px !important;
+    background: rgba(16,42,61,.98) !important;
+    border-color: rgba(120,190,203,.35) !important;
+    box-shadow: 0 12px 35px rgba(10,36,55,.24) !important;
+  }
+  body.gc-staff-os-shell .gc-staff-mobile-dock button {
+    min-height: 55px !important;
+    font-size: 9px !important;
+  }
+  body.gc-staff-os-shell .gc-staff-mobile-dock button.active {
+    color: #ffffff !important;
+    background: rgba(37,184,198,.22) !important;
+    border-color: rgba(100,222,228,.22) !important;
+  }
+  body.gc-staff-os-shell #app .gc-rescue-shell {
+    min-height: calc(100dvh - 90px) !important;
+    padding: 10px !important;
+    gap: 12px !important;
+  }
+  body.gc-staff-os-shell #app .staff-command-matrix {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+    gap: 7px !important;
+  }
+  body.gc-staff-os-shell #app .staff-command-matrix .cmd {
+    grid-template-columns: minmax(0,1fr) !important;
+    gap: 7px !important;
+    min-height: 104px !important;
+    padding: 10px !important;
+    align-content: start !important;
+  }
+  body.gc-staff-os-shell #app .staff-command-matrix .cmd svg {
+    grid-row: auto !important;
+    width: 29px !important;
+    height: 29px !important;
+  }
+  body.gc-staff-os-shell #app .staff-command-matrix .cmd b {
+    font-size: 11px !important;
+  }
+  body.gc-staff-os-shell #app .staff-command-matrix .cmd small {
+    font-size: 9px !important;
+  }
+}
+@media (max-width: 390px) {
+  body.gc-staff-os-shell #app .gc-shell { padding-inline: 6px !important; }
+  body.gc-staff-os-shell #app .view { padding: 9px !important; }
+  body.gc-staff-os-shell #app .tower-kpis { gap: 6px !important; }
+  body.gc-staff-os-shell #app .tower-kpis .kpi { padding: 9px !important; }
+  body.gc-staff-os-shell #app .gc-customer-bridge-metrics { gap: 4px !important; }
+  body.gc-staff-os-shell #app .gc-customer-bridge-metrics span { font-size: 8px !important; }
+  body.gc-staff-os-shell .gc-staff-mobile-dock { inset-inline: 4px !important; }
+}
