@@ -1971,3 +1971,108 @@
     opacity: 1 !important;
   }
 }
+
+
+/* Globall Cloud — live pricing and office-pickup controls 2026-10-19 */
+#gcApp .gc-rate-route > label,
+#gcApp .gc-rate-product,
+#gcApp .gc-rate-volume {
+  display: grid !important;
+  gap: 7px !important;
+  min-width: 0 !important;
+}
+#gcApp .gc-rate-route > label { flex: 1 1 0 !important; }
+#gcApp .gc-rate-route select,
+#gcApp .gc-rate-product select,
+#gcApp .gc-rate-volume input,
+#gcApp .gc-rate-dimension-grid input {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 44px !important;
+  padding: 10px 11px !important;
+  border: 1px solid rgba(142,190,213,.2) !important;
+  border-radius: 12px !important;
+  background: rgba(3,17,29,.9) !important;
+  color: #f0f8fc !important;
+  font: 700 12px/1.6 Vazirmatn,system-ui,sans-serif !important;
+}
+#gcApp .gc-rate-route select:focus-visible,
+#gcApp .gc-rate-product select:focus-visible,
+#gcApp .gc-rate-volume input:focus-visible,
+#gcApp .gc-rate-dimension-grid input:focus-visible {
+  outline: 2px solid #5edce8 !important;
+  outline-offset: 2px !important;
+}
+#gcApp .gc-rate-product { margin-top: 13px !important; }
+#gcApp .gc-rate-product > span,
+#gcApp .gc-rate-volume > span,
+#gcApp .gc-rate-dimension-grid label > span,
+#gcApp .gc-rate-route > label > span {
+  color: #a9c2d0 !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+}
+#gcApp .gc-rate-volume:not([hidden]) { margin-top: 12px !important; }
+#gcApp .gc-rate-volume small { color: #9db6c6 !important; font-size: 10px !important; line-height: 1.8 !important; }
+#gcApp .gc-rate-dimensions {
+  margin-top: 12px !important;
+  padding: 11px 12px !important;
+  border: 1px solid rgba(142,190,213,.14) !important;
+  border-radius: 13px !important;
+  background: rgba(255,255,255,.025) !important;
+}
+#gcApp .gc-rate-dimensions summary {
+  color: #b8d2df !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  cursor: pointer !important;
+}
+#gcApp .gc-rate-dimension-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+}
+#gcApp .gc-rate-dimension-grid label { display: grid !important; gap: 6px !important; min-width: 0 !important; }
+#gcApp .gc-rate-chargeable-summary {
+  margin: 10px 0 0 !important;
+  color: #b6dce5 !important;
+  font-size: 10px !important;
+  line-height: 1.9 !important;
+}
+#gcApp .gc-rate-minimum {
+  margin: 12px 0 0 !important;
+  color: #95b2c3 !important;
+  font-size: 10px !important;
+  line-height: 1.8 !important;
+}
+#gcApp .gc-rate-live[data-state="ready"] { color: #8ce6c4 !important; }
+#gcApp .gc-rate-live[data-state="error"] { color: #f2bf7a !important; }
+#gcApp .gc-office-pickup-note {
+  margin: 15px 0 0 !important;
+  padding: 12px 14px !important;
+  border: 1px solid rgba(104,219,231,.2) !important;
+  border-radius: 14px !important;
+  background: rgba(61,163,184,.06) !important;
+  color: #bfd5e0 !important;
+  font-size: 11px !important;
+  line-height: 1.9 !important;
+}
+#gcApp .gc-office-pickup-note strong { color: #88e4ed !important; }
+@media (max-width: 760px) {
+  #gcApp .gc-rate-route {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr) !important;
+    gap: 7px !important;
+    align-items: end !important;
+  }
+  #gcApp .gc-rate-route > label,
+  #gcApp .gc-rate-route > div { min-width: 0 !important; }
+  #gcApp .gc-rate-route select { min-height: 46px !important; padding-inline: 7px !important; font-size: 12px !important; }
+  #gcApp .gc-rate-dimension-grid { gap: 6px !important; }
+  #gcApp .gc-rate-dimension-grid input { padding-inline: 7px !important; font-size: 16px !important; }
+  #gcApp .gc-rate-product select,
+  #gcApp .gc-rate-volume input { font-size: 16px !important; }
+  #gcApp .gc-office-pickup-note { font-size: 12px !important; }
+}
