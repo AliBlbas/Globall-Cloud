@@ -506,7 +506,7 @@ const superAdminContracts = [
     superAdminHtml.includes('super-admin-live-control-v2.js?v=20261019-1') &&
     superAdminHtml.includes('super-admin-command-center.js?v=20261019-1') &&
     superAdminHtml.includes('id="gcAddCustomerHeader"') &&
-    !superAdminHtml.includes('id="gcAddCustomer"')],
+    !/\bid="gcAddCustomer"/.test(superAdminHtml)],
 ]
 for (const [label, passed] of superAdminContracts) {
   if (passed) ok(label)
