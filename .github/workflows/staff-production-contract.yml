@@ -33,9 +33,11 @@ jobs:
           grep -q 'warehouse-receiving' staff-os-v5.js
           grep -q 'staff-ops-hub' staff-os-v5.js
           grep -q 'gc-staff-ui-refinement-20261019-v4.css?v=4' staff-os-v5.html
+          grep -q 'gc-staff-live-workspace-20261019.css?v=1' staff-os-v5.html
+          grep -q 'gc-live-wh-list' staff-os-v5-20261017.js
           grep -q 'staff-os-v5-enhancement-loader-20261017.js?v=17' staff-os-v5.html
           grep -q 'gc-staff-mobile-dock-20261016.css?v=5' staff-os-v5.html
-          grep -q 'staff-os-v5-20261017.js?v=20261019-5' staff-os-v5.html
+          grep -q 'staff-os-v5-20261017.js?v=20261019-6' staff-os-v5.html
           grep -Fq "const href = '/gc-staff-live-workspace-20261019.css?v=1'" staff-os-v5-enhancement-loader-20261017.js
           ! grep -q 'YOUR_PROJECT_ID' staff-os-v5.html
           ! grep -q 'YOUR_ANON_KEY' staff-os-v5.html
