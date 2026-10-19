@@ -114,36 +114,65 @@
     document.body.classList.add('gc-staff-mobile-dock-active');
 
     let drawerSignature = '';
+
+    function drawerGroups() {
+      const nav = document.querySelector('.gc-side .nav');
+      const sections = [...(nav?.querySelectorAll(':scope > .nav-group') || [])];
+      const groups = sections.map((section) => ({
+        title: (section.querySelector(':scope > .nav-group-title')?.textContent
+          || section.getAttribute('aria-label') || 'بەشەکان').trim(),
+        buttons: [...section.querySelectorAll(':scope > .nav-btn[data-tab]')],
+      })).filter((group) => group.buttons.length);
+      return groups.length ? groups : [{ title: 'هەموو بەشەکان', buttons: navButtons() }];
+    }
+
     function renderDrawer() {
-      const all = navButtons();
-      const signature = all.map((button) => button.dataset.tab + ':' + labelOf(button)).join('|');
+      const groups = drawerGroups();
+      const all = groups.flatMap((group) => group.buttons);
+      const signature = groups.map((group) => (
+        group.title + ':' + group.buttons.map((button) => button.dataset.tab + ':' + labelOf(button)).join('|')
+      )).join('||');
       if (signature !== drawerSignature) {
         drawerSignature = signature;
         moduleGrid.replaceChildren();
-        all.forEach((original, index) => {
-          const tab = original.dataset.tab;
-          const button = document.createElement('button');
-          button.type = 'button';
-          button.dataset.mobileTab = tab;
-          const graphic = document.createElement('span');
-          graphic.className = 'gc-staff-mobile-module-icon';
-          graphic.setAttribute('aria-hidden', 'true');
-          const sourceIcon = original.querySelector('.nav-icon svg');
-          if (sourceIcon) {
-            graphic.appendChild(sourceIcon.cloneNode(true));
-          } else {
-            graphic.textContent = String(index + 1).padStart(2, '0');
-          }
-          const caption = document.createElement('span');
-          caption.className = 'gc-staff-mobile-module-label';
-          caption.textContent = labelOf(original);
-          button.append(graphic, caption);
-          button.addEventListener('click', () => {
-            findNav(tab)?.click();
-            close(false);
-            sync();
+        groups.forEach((group) => {
+          const section = document.createElement('section');
+          section.className = 'gc-staff-mobile-module-group';
+
+          const title = document.createElement('div');
+          title.className = 'gc-staff-mobile-module-group-title';
+          title.textContent = group.title;
+          section.appendChild(title);
+
+          const items = document.createElement('div');
+          items.className = 'gc-staff-mobile-module-group-items';
+          group.buttons.forEach((original, index) => {
+            const tab = original.dataset.tab;
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.dataset.mobileTab = tab;
+            const graphic = document.createElement('span');
+            graphic.className = 'gc-staff-mobile-module-icon';
+            graphic.setAttribute('aria-hidden', 'true');
+            const sourceIcon = original.querySelector('.nav-icon svg');
+            if (sourceIcon) {
+              graphic.appendChild(sourceIcon.cloneNode(true));
+            } else {
+              graphic.textContent = String(index + 1).padStart(2, '0');
+            }
+            const caption = document.createElement('span');
+            caption.className = 'gc-staff-mobile-module-label';
+            caption.textContent = labelOf(original);
+            button.append(graphic, caption);
+            button.addEventListener('click', () => {
+              findNav(tab)?.click();
+              close(false);
+              sync();
+            });
+            items.appendChild(button);
           });
-          moduleGrid.appendChild(button);
+          section.appendChild(items);
+          moduleGrid.appendChild(section);
         });
       }
       sync();
