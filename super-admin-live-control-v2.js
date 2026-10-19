@@ -15,7 +15,7 @@ function customerForm(existing={}){const form=modal(existing.id?'دەستکار�
 async function customerAction(id,active){try{await api('customer','update',{id,is_active:!active});await loadCustomers()}catch(e){alert(e.message)}}
 function editStaff(id){const row=state.staff.find(x=>x.id===id);if(row)staffForm(row)}
 function editCustomer(id){const row=state.customers.find(x=>x.id===id);if(row)customerForm(row)}
-async function loadPricing(){try{const out=await api('pricing','list');state.pricing=out.rates||[];state.fx=out.exchange_rates||[];const usd=state.fx.find(x=>x.base_currency==='USD'&&x.quote_currency==='IQD');if(usd&&$('rate'))$('rate').value=usd.rate;renderPricing()}catch(e){if($('rateMsg'))$('rateMsg').textContent=e.message}}
+async function loadPricing(){try{const out=await api('pricing','list');state.pricing=out.rates||[];state.fx=out.exchange_rates||[];const usd=state.fx.find(x=>x.base_currency==='USD'&&x.quote_currency==='IQD'&&x.is_active!==false)||state.fx.find(x=>x.base_currency==='USD'&&x.quote_currency==='IQD');if($('rate'))$('rate').value=usd?.rate??usd?.usd_to_iqd??out.settings_rate??$('rate').value;renderPricing()}catch(e){if($('rateMsg'))$('rateMsg').textContent=e.message}}
 function renderPricing(){
  const finance=$('finance'); if(!finance)return;
  $('gcPricingPanel')?.remove();
