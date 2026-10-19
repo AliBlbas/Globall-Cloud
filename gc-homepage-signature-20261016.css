@@ -1892,3 +1892,82 @@
 @media(prefers-reduced-motion:reduce) {
   #gcApp *,#gcApp *::before,#gcApp *::after,.gc-mobile-dock-v3,.gc-mobile-dock-v3 a {scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important;}
 }
+
+
+/* Globall Cloud — mobile corridor label visibility fix 2026-10-19 */
+/* Keep the Air/Sea/Land choices readable on narrow screens. The legacy
+   7–8px labels were effectively invisible on iPhone-sized viewports. */
+@media (max-width: 760px) {
+  #gcApp .gc-transport-studio .gc-studio-head {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  #gcApp .gc-transport-studio .gc-studio-tabs {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 12px !important;
+  }
+  #gcApp .gc-transport-studio .gc-studio-tab {
+    display: grid !important;
+    grid-template-columns: auto 34px minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 10px !important;
+    min-height: 72px !important;
+    padding: 12px 14px !important;
+    text-align: start !important;
+    direction: inherit !important;
+  }
+  #gcApp .gc-transport-studio .gc-studio-tab-no {
+    display: block !important;
+    color: #a8cad8 !important;
+    font-size: 10px !important;
+    line-height: 1.5 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  #gcApp .gc-transport-studio .gc-studio-tab-icon {
+    display: grid !important;
+    place-items: center !important;
+    width: 34px !important;
+    height: 34px !important;
+    flex-basis: 34px !important;
+    font-size: 16px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  #gcApp .gc-transport-studio .gc-studio-tab > span:nth-of-type(3) {
+    display: grid !important;
+    gap: 3px !important;
+    min-width: 0 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  #gcApp .gc-transport-studio .gc-studio-tab b {
+    display: block !important;
+    color: #f0f8fc !important;
+    font-size: 13px !important;
+    font-weight: 850 !important;
+    line-height: 1.6 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  #gcApp .gc-transport-studio .gc-studio-tab small {
+    display: block !important;
+    color: #b6ccd8 !important;
+    font-size: 11px !important;
+    line-height: 1.65 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  #gcApp .gc-transport-studio .gc-studio-tab > strong {
+    display: inline-grid !important;
+    place-items: center !important;
+    margin-inline-start: 0 !important;
+    color: #7be2ed !important;
+    font-size: 15px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
