@@ -191,7 +191,14 @@
     const minNote = document.getElementById('gcRateMinimumNote');
     if (minNote) minNote.textContent = chargeableWeight < 1
       ? 'یاسای Minimum Charge چالاکە: ' + fmtCurrency(5000, 'IQD') + ' بۆ بارێکی کەمتر لە 1kg.'
-      : 'ئەگەر کێشی حسابکراو لە 1kg کەمتر بێت، کەمترین تێچوو ' + fmtCurrency(5000, 'IQD') + ـە.';
+      : 'ئەگەر کێشی حسابکراو لە 1kg کەمتر بێت، کەمترین تێچوو ' + fmtCurrency(5000, 'IQD') + ' ـە.';
+
+    if (chargeableWeight < 1) {
+      if (priceEl) priceEl.textContent = fmtCurrency(5000, 'IQD');
+      if (subEl) subEl.textContent = 'کەمترین تێچوو بۆ بارێکی کەمتر لە 1kg.';
+      if (etaEl) etaEl.textContent = 'پشتڕاست دەکرێتەوە';
+      return;
+    }
 
     if (!rate) {
       if (priceEl) priceEl.textContent = '—';
@@ -212,13 +219,6 @@
       etaEl.textContent = mode === 'air' && origin === 'china' ? '7–10 ڕۆژ'
         : mode === 'air' && origin === 'usa' ? '10–15 ڕۆژ'
         : 'لە ستاف پشتڕاست دەکرێتەوە';
-    }
-
-    if (chargeableWeight < 1) {
-      if (priceEl) priceEl.textContent = fmtCurrency(5000, 'IQD');
-      if (subEl) subEl.textContent = 'کەمترین تێچوو بۆ بارێکی کەمتر لە 1kg؛ نرخی بنەڕەتی لە ' +
-        fmtCurrency(amount, currency) + '/' + unit + ' ـە.';
-      return;
     }
 
     if (unit === 'cbm') {
