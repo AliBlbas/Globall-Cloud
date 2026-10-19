@@ -373,3 +373,146 @@ body.gc-staff-os-shell #app .gc-notification-outbox-actions small{max-width:760p
 body.gc-staff-os-shell #app .gc-notification-outbox-actions .btn{min-height:42px;border-radius:12px!important}
 body.gc-staff-os-shell #app .gc-notification-outbox-actions .btn:disabled{opacity:.55;cursor:not-allowed}
 @media(max-width:760px){body.gc-staff-os-shell #app .gc-notification-outbox-panel{padding:13px;border-radius:16px}body.gc-staff-os-shell #app .gc-notification-outbox-head{flex-direction:column;gap:9px}body.gc-staff-os-shell #app .gc-notification-outbox-actions{align-items:stretch;flex-direction:column}body.gc-staff-os-shell #app .gc-notification-outbox-actions .btn{width:100%}}
+
+
+/* GC-STAFF-MOBILE-KPI-CASCADE-HOTFIX-20261019
+   Final, cache-busted Staff OS surface rules for compact mobile operational KPIs. */
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis {
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  align-items:stretch!important;
+  gap:10px!important;
+  min-width:0!important;
+}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis > .kpi {
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-items:stretch!important;
+  gap:5px!important;
+  min-width:0!important;
+  min-height:108px!important;
+  height:auto!important;
+  padding:14px!important;
+  overflow:hidden!important;
+  border-radius:17px!important;
+}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis > .kpi > span {
+  display:block!important;
+  font-size:11px!important;
+  line-height:1.55!important;
+  overflow-wrap:anywhere!important;
+}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis > .kpi > strong {
+  display:block!important;
+  direction:ltr!important;
+  unicode-bidi:isolate!important;
+  text-align:right!important;
+  font-size:clamp(18px,2vw,25px)!important;
+  line-height:1.28!important;
+  letter-spacing:-.025em!important;
+  margin:0!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  font-variant-numeric:tabular-nums!important;
+}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis > .kpi > small {
+  display:block!important;
+  min-height:0!important;
+  font-size:10px!important;
+  line-height:1.55!important;
+  overflow-wrap:anywhere!important;
+}
+body.gc-staff-os-shell #app .tower-hero { overflow:hidden!important; }
+body.gc-staff-os-shell #app .tower-hero-actions {
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:stretch!important;
+  gap:8px!important;
+  width:100%!important;
+}
+body.gc-staff-os-shell #app .tower-hero-actions > .btn:first-child { grid-column:1/-1!important; }
+body.gc-staff-os-shell #app .tower-hero-actions > .btn {
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-width:0!important;
+  min-height:43px!important;
+  padding:9px 11px!important;
+  white-space:normal!important;
+  text-align:center!important;
+  line-height:1.45!important;
+  overflow-wrap:anywhere!important;
+}
+body.gc-staff-os-shell #app .tower-hero-meta {
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:center!important;
+  gap:7px!important;
+  line-height:1.6!important;
+}
+body.gc-staff-os-shell #app .tower-grid {
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:12px!important;
+}
+@media(max-width:1100px) {
+  body.gc-staff-os-shell #app .grid-kpi.tower-kpis {
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:9px!important;
+  }
+}
+@media(max-width:760px) {
+  body.gc-staff-os-shell {
+    padding:7px 7px calc(124px + env(safe-area-inset-bottom,0px))!important;
+    overflow-x:clip!important;
+  }
+  body.gc-staff-os-shell #app .grid-kpi.tower-kpis {
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    align-items:stretch!important;
+    gap:8px!important;
+  }
+  body.gc-staff-os-shell #app .grid-kpi.tower-kpis > .kpi {
+    min-height:88px!important;
+    padding:11px!important;
+    gap:4px!important;
+    border-radius:14px!important;
+    box-shadow:0 7px 20px rgba(0,0,0,.10)!important;
+  }
+  body.gc-staff-os-shell #app .grid-kpi.tower-kpis > .kpi > span {
+    font-size:10px!important;
+    line-height:1.45!important;
+  }
+  body.gc-staff-os-shell #app .grid-kpi.tower-kpis > .kpi > strong {
+    font-size:clamp(16px,4.8vw,22px)!important;
+    line-height:1.24!important;
+  }
+  body.gc-staff-os-shell #app .grid-kpi.tower-kpis > .kpi > small {
+    font-size:9px!important;
+  }
+  body.gc-staff-os-shell #app .tower-hero {
+    padding:16px 13px!important;
+    border-radius:19px!important;
+  }
+  body.gc-staff-os-shell #app .tower-hero h1 {
+    font-size:clamp(21px,5.8vw,26px)!important;
+    line-height:1.48!important;
+    text-wrap:balance!important;
+  }
+  body.gc-staff-os-shell #app .tower-hero-actions { gap:7px!important; }
+  body.gc-staff-os-shell #app .tower-hero-actions > .btn {
+    min-height:42px!important;
+    padding:8px!important;
+    font-size:12px!important;
+  }
+}
+@media(max-width:360px) {
+  body.gc-staff-os-shell #app .grid-kpi.tower-kpis {
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  body.gc-staff-os-shell #app .grid-kpi.tower-kpis > .kpi {
+    min-height:76px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  body.gc-staff-os-shell #app .tower-hero-actions > .btn { transition:none!important; }
+}
