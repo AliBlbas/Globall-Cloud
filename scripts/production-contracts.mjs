@@ -147,7 +147,7 @@ const staffCustomerBridgeScript = read('gc-staff-customer-bridge-20261019.js')
 const staffUnifiedStyles = read('gc-staff-ui-refinement-20261019-v4.css')
 const staffV5EnhancementLoader = read('staff-os-v5-enhancement-loader-20261017.js')
 const staffMobileDock = read('gc-staff-mobile-dock-20261016.js')
-if (!staff.includes('gc-staff-command-system-20261017.css?v=2') || !staff.includes('gc-staff-polish-mobile-20261019.css?v=6') || !staff.includes('gc-staff-ui-refinement-20261019-v4.css?v=4') || !staff.includes('gc-staff-live-workspace-20261019.css?v=4') || !staff.includes('staff-os-v5-20261017.js?v=20261019-8') || !staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=18') || !staff.includes('<body class="gc-staff-os-shell">') || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-polish-mobile-20261019.css?v=6')") || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-ui-refinement-20261019-v4.css?v=4')") || !staffV5EnhancementLoader.includes("const href = '/gc-staff-live-workspace-20261019.css?v=4'")) fail('Staff OS final responsive design layer, cache-busted mobile dock, or scoped shell is missing')
+if (!staff.includes('gc-staff-command-system-20261017.css?v=2') || !staff.includes('gc-staff-polish-mobile-20261019.css?v=6') || !staff.includes('gc-staff-ui-refinement-20261019-v4.css?v=4') || !staff.includes('gc-staff-live-workspace-20261019.css?v=4') || !staff.includes('staff-os-v5-20261017.js?v=20261019-9') || !staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=18') || !staff.includes('<body class="gc-staff-os-shell">') || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-polish-mobile-20261019.css?v=6')") || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-ui-refinement-20261019-v4.css?v=4')") || !staffV5EnhancementLoader.includes("const href = '/gc-staff-live-workspace-20261019.css?v=4'")) fail('Staff OS final responsive design layer, cache-busted mobile dock, or scoped shell is missing')
 else ok('Staff OS loads the scoped command-system design layer')
 if (!read('gc-staff-live-workspace-20261019.css').includes('Locale-safe operations data and consistent dark/light workspace surfaces (v3).') || !read('gc-staff-live-workspace-20261019.css').includes('unicode-bidi: isolate') || !read('gc-staff-live-workspace-20261019.css').includes('html[data-gc-theme="dark"] body.gc-staff-os-shell #app .table-wrap') || !read('gc-staff-live-workspace-20261019.css').includes('html[data-gc-theme="dark"] body.gc-staff-os-shell .modal')) fail('Staff workspace must support dark tables/dialogs and RTL/LTR data');
 else ok('Staff workspace supports dark table/dialog surfaces and RTL/LTR data')
@@ -301,7 +301,7 @@ else ok('Repository validation guards the retired public registration endpoint')
 
 
 
-if (!staff.includes('staff-os-v5-20261017.js?v=20261019-8')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
+if (!staff.includes('staff-os-v5-20261017.js?v=20261019-9')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
 
 const mobileLoader = read('staff-os-v5-enhancement-loader-20261017.js')
 if (!staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=18')) fail('Staff enhancement loader cache-buster is stale')
@@ -412,7 +412,7 @@ if (!dubaiReceiptCustomerUi.includes('item.receipt_photos') || !dubaiReceiptCust
 else ok('Customer notification cards display receipt photo thumbnails')
 if (!dubaiReceiptCustomerStyles.includes('.gc-notification-photo-strip') || !dubaiReceiptCustomerStyles.includes('.gc-notification-photo-thumb') || !dubaiReceiptCustomerStyles.includes('.gc-notification-photo-more')) fail('Customer notification receipt-photo strip requires responsive accessible styles')
 else ok('Customer notification photo strip has responsive styling and a high-contrast keyboard focus state')
-if (!staffV5Script.includes('data-process-in-app-outbox') || !staffV5Script.includes("action:'process_outbox'") || !staffV5Script.includes("item.channel === 'in_app'")) fail('Staff notification queue must provide a role-protected in-app-only manual processor')
+if (!staffV5Script.includes('data-process-in-app-outbox') || !staffV5Script.includes("action:'process_outbox'") || !staffV5Script.includes("item.channel === 'in_app'") || !staffV5Script.includes("action:'cancel_outbox'") || !staffV5Script.includes('ageHours(item) >= 24') || !staffV5Script.includes('gcOutboxConfirmProcess') || !read('supabase/functions/logistics-control-plane/index.ts').includes("action === 'cancel_outbox'")) fail('Staff notification queue must provide a role-protected in-app-only manual processor')
 if (!staffV5Script.includes('data-customer-status-filter="unlinked"') || !staffV5Script.includes("await loadTab(x.dataset.jump)") || !staffV5Script.includes("status.dispatchEvent(new Event('change',{bubbles:true}))")) fail('Staff customer bridge must open the unlinked-account filter from the command center')
 if (!staffV5Script.includes('const severityLabel =') || !staffV5Script.includes('id="alertSearch"') || !staffV5Script.includes('id="alertReadFilter"') || !staffV5Script.includes('id="alertSeverityFilter"')) fail('Staff Alert Center must expose search, read-state, and severity filters')
 else ok('Staff Alert Center has searchable read-state and severity filters')
@@ -422,7 +422,7 @@ if (!staffV5Script.includes("ROLES.filter((role) => role !== 'driver')")) fail('
 else ok('Staff alert audience choices exclude unsupported driver-only roles')
 if (!staffV5Script.includes('button.disabled = true') || !staffV5Script.includes('current.read_by = existing') || !staffV5Script.includes('renderList();')) fail('Staff alert read action must prevent duplicate submissions and update the local read state')
 else ok('Staff alert read action updates local state and prevents duplicate submissions')
-if (!publicShell.includes('staff-os-v5-20261017.js?v=20261019-8') || !publicShell.includes('gc-staff-console-elite-20261018.css?v=6')) fail('Staff Alert Center release must use new immutable-cache asset URLs')
+if (!publicShell.includes('staff-os-v5-20261017.js?v=20261019-9') || !publicShell.includes('gc-staff-console-elite-20261018.css?v=6')) fail('Staff Alert Center release must use new immutable-cache asset URLs')
 else ok('Staff Alert Center assets use cache-busted URLs')
 console.log('')
 if (failures) { console.error(`${failures} production contract check(s) failed.`); process.exit(1) }
