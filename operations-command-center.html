@@ -13,6 +13,74 @@
 @media(max-width:1050px){.hero{grid-template-columns:1fr}.grid4{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:1fr 1fr}.rowitem{grid-template-columns:1fr 1fr}}@media(max-width:680px){.wrap{padding:0 12px}.topin{min-height:64px}.tools .ghost{display:none}.grid4,.grid3,.authgrid{grid-template-columns:1fr}.hero-card,.identity,.card{padding:16px}.rowitem{grid-template-columns:1fr}.mini{max-width:none}.field{font-size:16px!important}.modalbox{max-height:calc(100dvh - 24px)}}
 @supports not (height:100dvh){.modalbox{max-height:calc(100vh - 24px)}}
 @supports (-webkit-touch-callout:none){body{background-attachment:scroll}.top{position:-webkit-sticky;position:sticky}.modal{padding-bottom:max(16px,env(safe-area-inset-bottom))}}
+
+/* Globall Cloud Operations Command Center — responsive visual refinement.
+   Scoped to this page: presentation only; auth, data and actions remain unchanged. */
+:root{--r:19px;--shadow:0 18px 48px rgba(0,0,0,.25)}
+body{background-color:var(--bg);background-image:radial-gradient(900px 420px at 100% 0%,rgba(0,194,217,.10),transparent 64%),linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:auto,58px 58px,58px 58px}
+.top{background:rgba(5,18,35,.93);border-bottom-color:rgba(100,167,202,.18)}
+.topin{gap:12px}.brand{min-width:0}.brand b{letter-spacing:-.02em}.brand small{letter-spacing:.08em}
+.tools{flex-wrap:wrap;justify-content:flex-end}
+.hero-card,.identity,.card{border-color:rgba(93,155,195,.23);box-shadow:0 12px 32px rgba(0,0,0,.19)}
+.hero-card{position:relative;overflow:hidden;background:linear-gradient(145deg,rgba(16,45,74,.98),rgba(8,27,48,.98))}
+.identity{background:linear-gradient(155deg,rgba(16,42,69,.98),rgba(8,25,44,.98));border-radius:var(--r)}
+.hero h1{letter-spacing:-.035em;text-wrap:balance}.lead{line-height:1.85}
+.grid4,.grid3{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.insight-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.card{min-width:0;background:linear-gradient(155deg,rgba(15,39,65,.97),rgba(8,27,47,.98));padding:17px;border-radius:17px}
+.kpi{min-height:122px;padding:17px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.kpi b{font-size:clamp(24px,2.1vw,31px);line-height:1.25;letter-spacing:-.04em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;position:relative;z-index:1}
+.kpi .muted{font-size:11px;line-height:1.6;position:relative;z-index:1}
+.feature{min-height:155px;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.feature:hover{transform:translateY(-2px);border-color:rgba(88,229,239,.42);box-shadow:0 16px 36px rgba(0,0,0,.23)}
+.feature h3{font-size:16px;letter-spacing:-.02em}.feature p{line-height:1.8}.icon{width:40px;height:40px;border-radius:12px}
+.section-head{align-items:center}.section-head h2{letter-spacing:-.025em}.toolbar{align-items:center}
+.btn{transition:transform .15s ease,border-color .15s ease,filter .15s ease}.btn:active{transform:translateY(1px)}
+.btn:focus-visible,.field:focus-visible,.close:focus-visible{outline:3px solid rgba(88,229,239,.45);outline-offset:2px}
+.field{min-width:0}.rowitem{min-width:0;overflow-wrap:anywhere;border-color:rgba(93,155,195,.21);background:rgba(255,255,255,.025)}
+.empty{line-height:1.8;background:rgba(255,255,255,.018)}
+.modalbox{border-color:rgba(93,155,195,.32);box-shadow:0 28px 90px rgba(0,0,0,.42)}
+@media(max-width:1050px){
+ .grid4{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .insight-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .insight-grid>.card:last-child{grid-column:1/-1}
+}
+@media(max-width:680px){
+ body{font-size:14px}.wrap{width:100%;padding-inline:14px}
+ .topin{min-height:66px;padding-block:9px;align-items:center;gap:8px}
+ .brand{gap:8px}.brand img{width:34px;height:34px;flex:0 0 34px}.brand b{font-size:15px}.brand small{font-size:9px;letter-spacing:.045em}
+ .tools{gap:6px}.tools .pill{font-size:10px;padding:5px 8px}.tools .btn{min-height:40px;padding:8px 11px;font-size:12px}
+ .shell{padding:13px 0 34px}.hero{grid-template-columns:minmax(0,1fr);gap:10px;margin-bottom:10px}
+ .hero-card{padding:20px 17px;border-radius:20px}.identity{padding:15px;border-radius:18px}
+ .eyebrow{font-size:9px;letter-spacing:1.25px}h1{font-size:clamp(27px,7.3vw,36px);line-height:1.22;margin:9px 0 10px}
+ .lead{font-size:13px;line-height:1.85}.hero-card .toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .hero-card .toolbar .btn{width:100%;min-width:0;padding:10px 9px;font-size:12px;white-space:normal;border-radius:12px}
+ .hero-card .toolbar [data-open="alert"]{grid-column:1/-1}.identity .big{font-size:22px}
+ .section{margin-top:11px}.section-head{align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:9px}.section-head h2{font-size:18px}
+ .section-head>.toolbar{width:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(110px,.7fr)}
+ .section-head>.toolbar .field{max-width:none!important;width:100%}
+ .grid4{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.kpi-grid .kpi{min-height:105px;padding:13px 12px;border-radius:15px}
+ .kpi-grid .kpi b{font-size:clamp(22px,5.8vw,28px);margin:4px 0}.kpi-grid .kpi .muted{font-size:10px}
+ .feature-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.feature-grid .feature{min-height:0;padding:13px;border-radius:15px}
+ .feature-grid .icon{width:35px;height:35px;border-radius:11px;font-size:17px}.feature-grid .feature h3{font-size:14px;margin:8px 0 4px}
+ .feature-grid .feature p{font-size:11px;line-height:1.75}.insight-grid{grid-template-columns:minmax(0,1fr);gap:9px}
+ .insight-grid>.card:last-child{grid-column:auto}.card{padding:14px;border-radius:16px}.rowitem{grid-template-columns:minmax(0,1fr);gap:7px;padding:12px}
+ .mini{max-width:none;width:100%}.field{font-size:16px!important;min-height:44px}
+ .modal{padding:10px;padding-bottom:max(10px,env(safe-area-inset-bottom))}.modalbox{padding:16px;border-radius:19px;max-height:calc(100dvh - 20px)}
+ .authgrid{grid-template-columns:minmax(0,1fr);gap:9px}.footer{padding:22px 0;font-size:11px}
+ .toast{left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));max-width:none}
+}
+@media(max-width:390px){
+ .wrap{padding-inline:10px}.topin{flex-wrap:wrap;justify-content:space-between}.brand b{font-size:14px}
+ .tools{gap:5px}.tools .pill{font-size:9px}.tools .btn{font-size:11px;padding:7px 9px;min-height:38px}
+ .hero-card{padding:17px 14px}.hero-card .toolbar{grid-template-columns:minmax(0,1fr)}
+ .hero-card .toolbar [data-open="alert"]{grid-column:auto}.kpi-grid{gap:7px}.kpi-grid .kpi{min-height:94px;padding:11px 9px}
+ .kpi-grid .kpi b{font-size:22px}.feature-grid{grid-template-columns:minmax(0,1fr)}.feature-grid .feature{padding:14px}
+ .section-head>.toolbar{grid-template-columns:minmax(0,1fr)}
+}
+@supports not (height:100dvh){.modalbox{max-height:calc(100vh - 20px)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
 </style>
 <script src="/gc-csp-bridge.js?v=20260816-1" defer data-gc-csp-bridge="1"></script>  <link rel="stylesheet" href="/gc-operations-visual-system-20260922.css?v=20260922-1">
 </head>
@@ -20,11 +88,11 @@
 <header class="top"><div class="wrap topin"><a class="brand" href="/"><img src="logo-icon.png" alt="Globall Cloud"><span><b>Globall Cloud</b><small>OPERATIONS COMMAND CENTER</small></span></a><div class="tools"><span id="rolePill" class="pill">Guest</span><button id="refresh" class="btn ghost">↻ نوێکردنەوە</button><button id="authOpen" class="btn primary">چوونەژوورەوە</button></div></div></header>
 <main class="wrap shell">
 <section class="hero"><div class="hero-card"><span class="eyebrow">LIVE LOGISTICS CONTROL PLANE</span><h1>کۆنترۆڵی یەکگرتووی Global Cloud</h1><p class="lead">کۆنترۆڵی shipment، ETA، exception، document، proof-of-delivery و customer communication لە یەک cockpit ـی production.</p><div class="section" style="margin-top:16px"><div class="toolbar"><button class="btn primary" data-open="quote">+ داواکاری نرخ</button><button class="btn ghost" data-open="track">شوێنکەوتنی بار</button><button class="btn ghost" data-open="alert">دروستکردنی Exception</button></div></div></div><div class="identity"><span class="eyebrow">SESSION</span><div id="who" class="big">Guest</div><div id="sessionText" class="muted">بۆ داتای تایبەتی چوونەژوورەوە بکە.</div><div class="sep"></div><span id="dataState" class="pill warn">Waiting</span></div></section>
-<section class="section"><div class="grid4"><div class="card kpi"><span class="muted">کۆی shipment</span><b id="kShip">—</b><span class="muted">accessible records</span></div><div class="card kpi"><span class="muted">لە گواستنەوە</span><b id="kMoving">—</b><span class="muted">active flow</span></div><div class="card kpi"><span class="muted">پارەی ماوە</span><b id="kDue">—</b><span class="muted">USD</span></div><div class="card kpi"><span class="muted">Exception</span><b id="kExc">—</b><span class="muted">requires attention</span></div></div></section>
-<section class="section"><div class="section-head"><div><span class="eyebrow">OPERATIONS</span><h2>کردارە خێراکان</h2></div></div><div class="grid4"><article class="card feature"><div class="icon">⌁</div><h3>Smart Quote</h3><p>داواکاری نرخ بە origin/destination/mode/weight و priority.</p></article><article class="card feature"><div class="icon">⚠</div><h3>Exception Center</h3><p>دۆزینەوەی shipment ـە کەم‌داتا، overdue، unpaid و ETA-risk.</p></article><article class="card feature"><div class="icon">▣</div><h3>Document Vault</h3><p>Invoice، packing list، customs، AWB/BL و document status.</p></article><article class="card feature"><div class="icon">✓</div><h3>POD</h3><p>واژۆ/وێنە/وەرگر/شوێن و کاتی گەیاندن بۆ داخستنی shipment.</p></article></div></section>
+<section class="section"><div class="grid4 kpi-grid"><div class="card kpi"><span class="muted">کۆی shipment</span><b id="kShip">—</b><span class="muted">accessible records</span></div><div class="card kpi"><span class="muted">لە گواستنەوە</span><b id="kMoving">—</b><span class="muted">active flow</span></div><div class="card kpi"><span class="muted">پارەی ماوە</span><b id="kDue">—</b><span class="muted">USD</span></div><div class="card kpi"><span class="muted">Exception</span><b id="kExc">—</b><span class="muted">requires attention</span></div></div></section>
+<section class="section"><div class="section-head"><div><span class="eyebrow">OPERATIONS</span><h2>کردارە خێراکان</h2></div></div><div class="grid4 feature-grid"><article class="card feature"><div class="icon">⌁</div><h3>Smart Quote</h3><p>داواکاری نرخ بە origin/destination/mode/weight و priority.</p></article><article class="card feature"><div class="icon">⚠</div><h3>Exception Center</h3><p>دۆزینەوەی shipment ـە کەم‌داتا، overdue، unpaid و ETA-risk.</p></article><article class="card feature"><div class="icon">▣</div><h3>Document Vault</h3><p>Invoice، packing list، customs، AWB/BL و document status.</p></article><article class="card feature"><div class="icon">✓</div><h3>POD</h3><p>واژۆ/وێنە/وەرگر/شوێن و کاتی گەیاندن بۆ داخستنی shipment.</p></article></div></section>
 <section class="section"><div class="section-head"><div><span class="eyebrow">EXCEPTIONS</span><h2>ئەو کارانەی پێویستیان بە سەرنجە</h2></div><button class="btn ghost" data-open="alert">+ Exception</button></div><div id="exceptions" class="list"><div class="empty">هێشتا داتا نەهاتووە.</div></div></section>
 <section class="section"><div class="section-head"><div><span class="eyebrow">SHIPMENTS</span><h2>بارەکانی بەردەست</h2></div><div class="toolbar"><input id="search" class="field mini" placeholder="GC-... / کڕیار"><select id="filter" class="field" style="max-width:180px"><option value="all">هەموو</option><option value="moving">لە گواستنەوە</option><option value="due">پارەی ماوە</option></select></div></div><div id="shipments" class="list"><div class="empty">چوونەژوورەوە بکە بۆ بینینی shipment ـەکان.</div></div></section>
-<section class="section"><div class="grid3"><div class="card"><span class="eyebrow">NOTIFICATIONS</span><h2>ئاگادارکردنەوە</h2><div id="notifications" class="list" style="margin-top:12px"><div class="empty">—</div></div></div><div class="card"><span class="eyebrow">QUOTE PIPELINE</span><h2>داواکارییە نوێکان</h2><div id="quotes" class="list" style="margin-top:12px"><div class="empty">—</div></div></div><div class="card"><span class="eyebrow">DOCUMENT HEALTH</span><h2>دۆخی بەڵگەنامە</h2><div id="docs" class="list" style="margin-top:12px"><div class="empty">—</div></div></div></div></section>
+<section class="section"><div class="grid3 insight-grid"><div class="card"><span class="eyebrow">NOTIFICATIONS</span><h2>ئاگادارکردنەوە</h2><div id="notifications" class="list" style="margin-top:12px"><div class="empty">—</div></div></div><div class="card"><span class="eyebrow">QUOTE PIPELINE</span><h2>داواکارییە نوێکان</h2><div id="quotes" class="list" style="margin-top:12px"><div class="empty">—</div></div></div><div class="card"><span class="eyebrow">DOCUMENT HEALTH</span><h2>دۆخی بەڵگەنامە</h2><div id="docs" class="list" style="margin-top:12px"><div class="empty">—</div></div></div></div></section>
 <div class="footer">Globall Cloud • China · UAE · Iraq • Production Operations OS</div>
 </main>
 <div id="authModal" class="modal hidden"><div class="modalbox"><div class="modalhead"><h3>چوونەژوورەوە بۆ Global Cloud</h3><button class="close" data-close="authModal">×</button></div><div class="authgrid"><div><label>ئیمەیل</label><input id="email" class="field" type="email" autocomplete="email"></div><div><label>وشەی نهێنی</label><input id="password" class="field" type="password" autocomplete="current-password"></div></div><div class="toolbar" style="margin-top:12px"><button id="signIn" class="btn primary">چوونەژوورەوە</button><button id="signUp" class="btn ghost">دروستکردنی هەژمار</button></div><div id="authStatus" class="login-note"></div></div></div>
