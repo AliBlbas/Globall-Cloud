@@ -1,0 +1,171 @@
+/* Globall Cloud — a genuinely refreshed, mobile-first Staff Workspace. */
+html:has(body.gc-staff-os-shell){background:#edf4f7!important}
+body.gc-staff-os-shell{--gc-live-ink:#123448;--gc-live-muted:#648091;--gc-live-line:#d9e6eb;--gc-live-teal:#087f8c;background:radial-gradient(850px 500px at 100% 0%,rgba(28,177,185,.12),transparent 68%),#edf4f7!important;color:var(--gc-live-ink)!important}
+body.gc-staff-os-shell #app{max-width:1900px!important;padding:0!important}
+body.gc-staff-os-shell #app .gc-shell{display:grid!important;grid-template-columns:264px minmax(0,1fr)!important;gap:18px!important;align-items:start!important;width:100%!important}
+body.gc-staff-os-shell #app .gc-side{position:sticky!important;top:14px!important;height:calc(100dvh - 28px)!important;display:flex!important;flex-direction:column!important;overflow:auto!important;padding:18px 13px!important;border:1px solid rgba(143,203,216,.18)!important;border-radius:25px!important;background:linear-gradient(160deg,#08243a 0%,#0a344b 54%,#0c4755 100%)!important;color:#eafaff!important;box-shadow:0 20px 48px rgba(7,28,46,.16)!important}
+body.gc-staff-os-shell #app .gc-side .brand{border-color:rgba(206,241,246,.16)!important}
+body.gc-staff-os-shell #app .gc-side .brand b,body.gc-staff-os-shell #app .gc-side .brand small,body.gc-staff-os-shell #app .gc-side .side-foot,body.gc-staff-os-shell #app .gc-side .side-foot strong{color:#eafaff!important}
+body.gc-staff-os-shell #app .gc-side .brand small{opacity:.68}
+body.gc-staff-os-shell #app .gc-side .brand-logo{display:grid!important;place-items:center!important;border:1px solid rgba(129,238,239,.48)!important;border-radius:16px!important;background:linear-gradient(145deg,#e0ffff,#45cbd0)!important;color:#073341!important;box-shadow:0 8px 24px rgba(20,200,201,.16)!important}
+body.gc-staff-os-shell #app .gc-side .nav{gap:5px!important}
+body.gc-staff-os-shell #app .gc-side .nav-btn{display:flex!important;align-items:center!important;min-height:45px!important;gap:10px!important;padding:9px 10px!important;border:1px solid transparent!important;border-radius:14px!important;background:transparent!important;color:#c0d9e2!important;font-size:12px!important;font-weight:750!important;text-align:start!important;transition:background .18s ease,border-color .18s ease,transform .18s ease!important}
+body.gc-staff-os-shell #app .gc-side .nav-btn:hover{border-color:rgba(164,230,237,.18)!important;background:rgba(234,251,255,.075)!important}
+body.gc-staff-os-shell #app .gc-side .nav-btn.active{border-color:rgba(103,234,235,.42)!important;background:linear-gradient(110deg,rgba(25,183,188,.28),rgba(64,145,211,.17))!important;color:#fff!important;box-shadow:inset 3px 0 0 #53e2dc!important}
+body.gc-staff-os-shell #app .gc-side .nav-btn .nav-icon{display:grid!important;place-items:center!important;width:31px!important;height:31px!important;border:1px solid rgba(216,244,249,.13)!important;border-radius:11px!important;background:rgba(230,250,252,.07)!important;color:#9de9e8!important}
+body.gc-staff-os-shell #app .gc-side .nav-btn .nav-icon svg{width:18px!important;height:18px!important;stroke:currentColor!important;fill:none!important}
+body.gc-staff-os-shell #app .gc-side .side-foot{margin-top:auto!important;padding:14px 8px 4px!important;border-top:1px solid rgba(206,241,246,.16)!important;font-size:10px!important;line-height:1.9!important}
+body.gc-staff-os-shell #app .gc-side #logoutBtn{border-color:rgba(233,250,255,.18)!important;background:rgba(233,250,255,.07)!important;color:#effcff!important}
+body.gc-staff-os-shell #app .gc-main{min-width:0!important;padding:0!important}
+body.gc-staff-os-shell #app .topbar{position:sticky!important;top:10px!important;z-index:70!important;min-height:78px!important;display:flex!important;align-items:center!important;gap:14px!important;padding:15px 18px!important;margin-bottom:16px!important;border:1px solid #dce8ed!important;border-radius:21px!important;background:rgba(255,255,255,.94)!important;box-shadow:0 10px 30px rgba(18,52,72,.06)!important;backdrop-filter:blur(18px)!important}
+body.gc-staff-os-shell #app .top-title strong{color:#123448!important;font-size:18px!important;font-weight:900!important}
+body.gc-staff-os-shell #app .top-title span{color:#688596!important;font-size:11px!important}
+body.gc-staff-os-shell #app .top-actions{gap:8px!important}
+body.gc-staff-os-shell #app .top-actions .btn,body.gc-staff-os-shell #app .actions .btn{border-radius:12px!important}
+body.gc-staff-os-shell #app .top-actions .gc-customer-console-link{display:inline-flex!important;align-items:center!important;gap:7px!important;border-color:#b8e3e5!important;background:#eaf9fa!important;color:#086775!important}
+body.gc-staff-os-shell #app .top-actions .gc-customer-console-link svg{width:18px;height:18px;stroke:currentColor;fill:none}
+body.gc-staff-os-shell #app .view{min-width:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+body.gc-staff-os-shell #app .section-head{align-items:center!important;gap:14px!important}
+body.gc-staff-os-shell #app .section-head h1{color:#123448!important;font-weight:900!important;letter-spacing:-.25px}
+body.gc-staff-os-shell #app .grid-kpi,body.gc-staff-os-shell #app .customer-control-kpis{gap:10px!important}
+body.gc-staff-os-shell #app .kpi,body.gc-staff-os-shell #app .customer-control-kpi{border:1px solid #dce8ed!important;border-radius:18px!important;background:#fff!important;box-shadow:0 7px 22px rgba(18,52,72,.045)!important}
+body.gc-staff-os-shell #app .tower-hero{border:1px solid #145568!important;border-radius:24px!important;background:radial-gradient(480px 260px at 100% 0%,rgba(49,214,213,.26),transparent 67%),linear-gradient(125deg,#08283e 0%,#0c5263 58%,#096d78 100%)!important;box-shadow:0 18px 44px rgba(8,53,70,.17)!important}
+body.gc-staff-os-shell #app .tower-hero h1{font-size:clamp(25px,2.4vw,34px)!important;line-height:1.45!important}
+body.gc-staff-os-shell #app .tower-hero-actions .btn.primary{border:0!important;background:linear-gradient(130deg,#b3f6f1,#52d4d9)!important;color:#07363d!important}
+body.gc-staff-os-shell #app .card,body.gc-staff-os-shell #app .customer-control-hero,body.gc-staff-os-shell #app .customer-link-guidance{border-color:#dce8ed!important;border-radius:19px!important;box-shadow:0 9px 26px rgba(18,52,72,.045)!important}
+body.gc-staff-os-shell #app .gc-customer-bridge-panel{border:1px solid #bfe2e6!important;border-radius:22px!important;background:linear-gradient(125deg,#e9f9f9 0%,#fff 58%,#f0f5ff 100%)!important;box-shadow:0 10px 30px rgba(15,100,119,.08)!important}
+body.gc-staff-os-shell #app .gc-customer-bridge-metrics>div{border:1px solid #d6e8ec!important;border-radius:14px!important;background:rgba(255,255,255,.84)!important}
+body.gc-staff-os-shell #app .gc-customer-bridge-panel .gc-customer-bridge-heading h3{color:#123b50!important;font-size:16px!important}
+body.gc-staff-os-shell #app .customer-control-toolbar,body.gc-staff-os-shell #app .toolbar{gap:10px!important}
+body.gc-staff-os-shell #app .table-wrap{border:1px solid #dce8ed!important;border-radius:17px!important;background:#fff!important;box-shadow:0 8px 24px rgba(18,52,72,.035)!important}
+body.gc-staff-os-shell #app .table thead th{background:#f2f8fa!important;color:#4d6d7d!important;font-size:10px!important}
+body.gc-staff-os-shell #app .table tbody tr:hover{background:#f8fcfd!important}
+body.gc-staff-os-shell #app .customer-control-table{width:100%!important;min-width:0!important}
+body.gc-staff-os-shell #app .customer-control-table .customer-actions{display:flex!important;flex-wrap:wrap!important;gap:5px!important}
+body.gc-staff-os-shell #app .customer-control-table .customer-actions .btn{min-height:36px!important;padding:7px 9px!important}
+
+/* Warehouse receipt cards explicitly connect staff evidence to a customer portal account. */
+body.gc-staff-os-shell #app .gc-live-wh-workspace{display:grid;gap:15px;min-width:0}
+body.gc-staff-os-shell #app .gc-live-wh-hero{position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:22px;padding:25px;overflow:hidden;border:1px solid #125469;border-radius:24px;background:radial-gradient(500px 260px at 100% 0%,rgba(51,220,216,.25),transparent 68%),linear-gradient(125deg,#071f34,#0b4458 60%,#087582);color:#effdff;box-shadow:0 18px 42px rgba(8,52,69,.17)}
+body.gc-staff-os-shell #app .gc-live-wh-hero:after{content:"";position:absolute;width:260px;height:260px;inset-inline-end:-115px;bottom:-165px;border:1px solid rgba(209,255,255,.15);border-radius:50%;box-shadow:0 0 0 28px rgba(209,255,255,.025),0 0 0 62px rgba(209,255,255,.02);pointer-events:none}
+body.gc-staff-os-shell #app .gc-live-wh-hero-main{position:relative;z-index:1;max-width:780px}
+body.gc-staff-os-shell #app .gc-live-wh-eyebrow{color:#8de7e6;font-size:10px;font-weight:900;letter-spacing:.9px}
+body.gc-staff-os-shell #app .gc-live-wh-hero h1{margin:7px 0;color:#fff;font-size:clamp(22px,2.2vw,30px);line-height:1.55;font-weight:900}
+body.gc-staff-os-shell #app .gc-live-wh-hero p{margin:0;max-width:690px;color:#c9e4eb;font-size:12px;line-height:2}
+body.gc-staff-os-shell #app .gc-live-wh-flow{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:15px;color:#e4fbfd;font-size:10px;font-weight:800}
+body.gc-staff-os-shell #app .gc-live-wh-flow span{border:1px solid rgba(211,249,251,.2);border-radius:999px;background:rgba(255,255,255,.07);padding:6px 10px}
+body.gc-staff-os-shell #app .gc-live-wh-flow i{color:#83e7e6;font-style:normal}
+body.gc-staff-os-shell #app .gc-live-wh-hero-actions{position:relative;z-index:1;display:grid;min-width:194px;gap:8px}
+body.gc-staff-os-shell #app .gc-live-wh-hero-actions .btn{min-height:43px;white-space:nowrap}
+body.gc-staff-os-shell #app .gc-live-wh-hero-actions .btn:not(.primary){border-color:rgba(220,250,253,.24)!important;background:rgba(255,255,255,.08)!important;color:#effdff!important}
+body.gc-staff-os-shell #app .gc-live-wh-hero-actions .btn.primary{border:0!important;background:linear-gradient(135deg,#b5f5ef,#59d8d9)!important;color:#083944!important}
+body.gc-staff-os-shell #app .gc-live-wh-metrics{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px}
+body.gc-staff-os-shell #app .gc-live-wh-metric{display:grid;align-content:start;gap:6px;min-width:0;padding:14px;border:1px solid #dce8ed;border-radius:17px;background:#fff;box-shadow:0 8px 22px rgba(18,52,72,.04)}
+body.gc-staff-os-shell #app .gc-live-wh-metric span{color:#668394;font-size:10px;font-weight:800;line-height:1.6}
+body.gc-staff-os-shell #app .gc-live-wh-metric strong{color:#153a4f;font-size:clamp(19px,1.8vw,25px);font-weight:900;overflow-wrap:anywhere}
+body.gc-staff-os-shell #app .gc-live-wh-metric small{color:#8196a1;font-size:9px;line-height:1.6}
+body.gc-staff-os-shell #app .gc-live-wh-metric.teal{border-color:#b9e5e9;background:linear-gradient(145deg,#f0fdfd,#fff)}
+body.gc-staff-os-shell #app .gc-live-wh-metric.green{border-color:#c4e7d8;background:linear-gradient(145deg,#f0fbf5,#fff)}
+body.gc-staff-os-shell #app .gc-live-wh-metric.amber{border-color:#f0ddb6;background:linear-gradient(145deg,#fff9eb,#fff)}
+body.gc-staff-os-shell #app .gc-live-wh-metric.red{border-color:#efc7ce;background:linear-gradient(145deg,#fff2f4,#fff)}
+body.gc-staff-os-shell #app .gc-live-wh-toolbar{display:grid;grid-template-columns:minmax(220px,1.5fr) minmax(145px,.7fr) minmax(175px,.8fr) auto;align-items:end;gap:10px;padding:13px;border:1px solid #dce8ed;border-radius:18px;background:#fff}
+body.gc-staff-os-shell #app .gc-live-wh-toolbar>label:not(.gc-live-wh-search){display:grid;gap:5px;min-width:0;margin:0}
+body.gc-staff-os-shell #app .gc-live-wh-toolbar>label>span{color:#5b7989;font-size:10px;font-weight:800}
+body.gc-staff-os-shell #app .gc-live-wh-search{display:flex;align-items:center;gap:8px;min-width:0;padding-inline:11px;border:1px solid #d4e3e9;border-radius:12px;background:#f8fbfc}
+body.gc-staff-os-shell #app .gc-live-wh-search>span{color:#0b8290;font-size:24px}
+body.gc-staff-os-shell #app .gc-live-wh-search .field{border:0!important;background:transparent!important;box-shadow:none!important}
+body.gc-staff-os-shell #app .gc-live-wh-toolbar .field{width:100%;min-width:0;min-height:42px;border-radius:11px!important}
+body.gc-staff-os-shell #app .gc-live-wh-count{color:#5f7e8e;font-size:10px;font-weight:850;white-space:nowrap;padding:12px 4px}
+body.gc-staff-os-shell #app .gc-live-wh-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;min-width:0}
+body.gc-staff-os-shell #app .gc-live-wh-card{display:grid;align-content:start;gap:13px;min-width:0;padding:16px;border:1px solid #dce8ed;border-radius:19px;background:#fff;box-shadow:0 9px 25px rgba(18,52,72,.045)}
+body.gc-staff-os-shell #app .gc-live-wh-card.needs-attention{border-color:#e8d4a8;box-shadow:inset 3px 0 0 #e0a438,0 9px 25px rgba(18,52,72,.04)}
+body.gc-staff-os-shell #app .gc-live-wh-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+body.gc-staff-os-shell #app .gc-live-wh-id{display:grid;gap:3px;min-width:0}
+body.gc-staff-os-shell #app .gc-live-wh-id>span{color:#8198a4;font-size:9px;font-weight:900;letter-spacing:.8px}
+body.gc-staff-os-shell #app .gc-live-wh-id>strong{color:#087986;font:900 19px/1.45 "JetBrains Mono",monospace;overflow-wrap:anywhere}
+body.gc-staff-os-shell #app .gc-live-wh-id>small{color:#5e7b8b;font-size:10px;line-height:1.7;overflow-wrap:anywhere}
+body.gc-staff-os-shell #app .gc-live-wh-status{display:grid;justify-items:end;gap:5px}
+body.gc-staff-os-shell #app .gc-live-wh-badge,body.gc-staff-os-shell #app .gc-live-wh-link{display:inline-flex;align-items:center;justify-content:center;max-width:100%;padding:5px 8px;border:1px solid #dce7ec;border-radius:999px;background:#f4f8fa;color:#587485;font-size:9px;font-weight:850;line-height:1.5;text-align:center}
+body.gc-staff-os-shell #app .gc-live-wh-badge.green,body.gc-staff-os-shell #app .gc-live-wh-link.green{border-color:#c5e6d7;background:#eefaf4;color:#1c7053}
+body.gc-staff-os-shell #app .gc-live-wh-badge.amber,body.gc-staff-os-shell #app .gc-live-wh-link.amber{border-color:#f0ddb6;background:#fff8e9;color:#8b5d12}
+body.gc-staff-os-shell #app .gc-live-wh-badge.red{border-color:#ecc3cb;background:#fff1f3;color:#a03445}
+body.gc-staff-os-shell #app .gc-live-wh-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+body.gc-staff-os-shell #app .gc-live-wh-facts>div{display:grid;gap:5px;min-width:0;padding:9px;border:1px solid #e7eef2;border-radius:12px;background:#f8fbfc}
+body.gc-staff-os-shell #app .gc-live-wh-facts span{color:#78909c;font-size:9px;font-weight:800}
+body.gc-staff-os-shell #app .gc-live-wh-facts strong{color:#21485c;font-size:12px;font-weight:900;overflow-wrap:anywhere}
+body.gc-staff-os-shell #app .gc-live-wh-details{display:grid;gap:6px;padding-top:11px;border-top:1px solid #edf2f4;color:#6b8795;font-size:10px;line-height:1.7}
+body.gc-staff-os-shell #app .gc-live-wh-details span{display:flex;justify-content:space-between;gap:10px}
+body.gc-staff-os-shell #app .gc-live-wh-details b{max-width:70%;color:#31586b;font-weight:800;overflow-wrap:anywhere;text-align:end}
+body.gc-staff-os-shell #app .gc-live-wh-linkstate{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+body.gc-staff-os-shell #app .gc-live-wh-linkstate small{color:#8a6a33;font-size:10px}
+body.gc-staff-os-shell #app .gc-live-wh-actions{display:flex;flex-wrap:wrap;gap:7px;padding-top:3px}
+body.gc-staff-os-shell #app .gc-live-wh-actions .btn{min-height:39px!important;flex:1 1 auto;padding:8px 10px!important;border-radius:11px!important;font-size:10px!important}
+body.gc-staff-os-shell #app .gc-live-wh-actions .gc-live-wh-notify{border-color:#b9e2e5!important;background:#edfafa!important;color:#087381!important}
+body.gc-staff-os-shell #app .gc-live-wh-empty{grid-column:1/-1;padding:30px 18px;border:1px dashed #cddfe6;border-radius:19px;background:#fff;text-align:center}
+body.gc-staff-os-shell #app .gc-live-wh-empty>span{color:#0b8b96;font-size:10px;font-weight:900;letter-spacing:.7px}
+body.gc-staff-os-shell #app .gc-live-wh-empty h3{color:#143b50;font-size:17px}
+body.gc-staff-os-shell #app .gc-live-wh-empty p{color:#6f8997;font-size:11px;line-height:1.9}
+body.gc-staff-os-shell #gcModal .receipt-owner-routing-hint{display:block;border-inline-start:3px solid #11a6b1;border-radius:8px;padding:8px 10px;background:#effafb;color:#436c7b;line-height:1.9}
+@media(max-width:1180px){body.gc-staff-os-shell #app .gc-shell{grid-template-columns:230px minmax(0,1fr)!important;gap:12px!important}body.gc-staff-os-shell #app .gc-live-wh-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}body.gc-staff-os-shell #app .gc-live-wh-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){
+body.gc-staff-os-shell{padding:7px 7px calc(104px + env(safe-area-inset-bottom,0px))!important;overflow-x:clip!important}
+body.gc-staff-os-shell #app .gc-shell{display:flex!important;flex-direction:column!important;gap:0!important}
+body.gc-staff-os-shell #app .gc-side{display:none!important}
+body.gc-staff-os-shell #app .gc-main{width:100%!important}
+body.gc-staff-os-shell #app .topbar{top:5px!important;min-height:0!important;gap:8px!important;margin-bottom:10px!important;padding:10px!important;border-radius:17px!important}
+body.gc-staff-os-shell #app .top-title{flex:1 1 130px!important}
+body.gc-staff-os-shell #app .top-title strong{font-size:15px!important}
+body.gc-staff-os-shell #app .top-title span{font-size:9px!important}
+body.gc-staff-os-shell #app .top-actions{display:flex!important;flex-wrap:wrap!important;width:100%!important;margin:0!important;gap:6px!important}
+body.gc-staff-os-shell #app .top-actions .btn{min-height:37px!important;flex:1 1 auto!important;padding:7px 9px!important;font-size:10px!important}
+body.gc-staff-os-shell #app .view{padding:0!important}
+body.gc-staff-os-shell #app .tower-hero{border-radius:20px!important;padding:17px 14px!important}
+body.gc-staff-os-shell #app .tower-hero h1{font-size:22px!important}
+body.gc-staff-os-shell #app .grid-kpi{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+body.gc-staff-os-shell #app .kpi{min-height:92px!important;padding:11px!important;border-radius:15px!important}
+body.gc-staff-os-shell #app .tower-grid{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
+body.gc-staff-os-shell #app .gc-customer-bridge-panel{padding:14px!important}
+body.gc-staff-os-shell #app .gc-customer-bridge-metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+body.gc-staff-os-shell #app .gc-live-wh-hero{flex-direction:column;align-items:stretch;gap:15px;padding:17px 14px;border-radius:20px}
+body.gc-staff-os-shell #app .gc-live-wh-hero h1{font-size:22px}
+body.gc-staff-os-shell #app .gc-live-wh-hero p{font-size:11px}
+body.gc-staff-os-shell #app .gc-live-wh-flow{gap:5px;font-size:9px}
+body.gc-staff-os-shell #app .gc-live-wh-flow span{padding:5px 7px}
+body.gc-staff-os-shell #app .gc-live-wh-hero-actions{min-width:0;grid-template-columns:1fr 1fr}
+body.gc-staff-os-shell #app .gc-live-wh-hero-actions .btn{white-space:normal;padding:8px!important;font-size:10px!important}
+body.gc-staff-os-shell #app .gc-live-wh-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+body.gc-staff-os-shell #app .gc-live-wh-metric{gap:4px;padding:11px;border-radius:14px}
+body.gc-staff-os-shell #app .gc-live-wh-metric strong{font-size:21px}
+body.gc-staff-os-shell #app .gc-live-wh-toolbar{grid-template-columns:1fr 1fr;gap:8px;padding:10px;border-radius:15px}
+body.gc-staff-os-shell #app .gc-live-wh-search{grid-column:1/-1}
+body.gc-staff-os-shell #app .gc-live-wh-count{grid-column:1/-1;padding:2px 3px}
+body.gc-staff-os-shell #app .gc-live-wh-list{grid-template-columns:minmax(0,1fr);gap:9px}
+body.gc-staff-os-shell #app .gc-live-wh-card{gap:11px;padding:13px;border-radius:16px}
+body.gc-staff-os-shell #app .gc-live-wh-card-head{flex-direction:column}
+body.gc-staff-os-shell #app .gc-live-wh-status{display:flex;flex-wrap:wrap;justify-items:start}
+body.gc-staff-os-shell #app .gc-live-wh-id>strong{font-size:18px}
+body.gc-staff-os-shell #app .gc-live-wh-facts{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+body.gc-staff-os-shell #app .gc-live-wh-facts>div{padding:7px 5px;border-radius:10px}
+body.gc-staff-os-shell #app .gc-live-wh-facts span{font-size:8px}
+body.gc-staff-os-shell #app .gc-live-wh-facts strong{font-size:11px}
+body.gc-staff-os-shell #app .gc-live-wh-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+body.gc-staff-os-shell #app .gc-live-wh-actions .btn{min-height:40px!important;width:100%}
+body.gc-staff-os-shell #app .gc-live-wh-actions .btn.primary{grid-column:1/-1}
+body.gc-staff-os-shell #app .customer-control-toolbar{display:grid!important;grid-template-columns:1fr 1fr;gap:7px!important}
+body.gc-staff-os-shell #app .customer-control-toolbar .field{min-width:0!important;width:100%!important}
+body.gc-staff-os-shell #app .table-wrap:has(.customer-control-table){overflow:visible!important;border:0!important;background:transparent!important;box-shadow:none!important}
+body.gc-staff-os-shell #app .customer-control-table,body.gc-staff-os-shell #app .customer-control-table tbody{display:block!important;width:100%!important;min-width:0!important}
+body.gc-staff-os-shell #app .customer-control-table thead{display:none!important}
+body.gc-staff-os-shell #app .customer-control-table tbody{display:grid!important;gap:10px!important}
+body.gc-staff-os-shell #app .customer-control-table tbody tr{display:grid!important;grid-template-columns:1fr 1fr!important;gap:0!important;overflow:hidden;margin:0!important;border:1px solid #dce8ed!important;border-radius:16px!important;background:#fff!important;box-shadow:0 7px 19px rgba(18,52,72,.04)!important}
+body.gc-staff-os-shell #app .customer-control-table tbody td{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center;gap:3px!important;min-width:0!important;padding:10px!important;border:0!important;border-bottom:1px solid #edf2f4!important;font-size:11px!important;overflow-wrap:anywhere;white-space:normal!important}
+body.gc-staff-os-shell #app .customer-control-table tbody td:before{content:attr(data-label);color:#78919e;font-size:9px;font-weight:850;line-height:1.4}
+body.gc-staff-os-shell #app .customer-control-table tbody td:first-child,body.gc-staff-os-shell #app .customer-control-table tbody td:nth-child(2),body.gc-staff-os-shell #app .customer-control-table tbody td:last-child{grid-column:1/-1!important}
+body.gc-staff-os-shell #app .customer-control-table tbody td:last-child{border-bottom:0!important}
+body.gc-staff-os-shell #app .customer-control-table .customer-actions{width:100%}
+body.gc-staff-os-shell #app .customer-control-table .customer-actions .btn{flex:1 1 auto!important;min-height:39px!important}
+body.gc-staff-os-shell #app .table{min-width:0}
+body.gc-staff-os-shell #app .gc-staff-mobile-dock{bottom:calc(7px + env(safe-area-inset-bottom,0px))!important}
+}
+@media(max-width:390px){body.gc-staff-os-shell #app .gc-live-wh-facts{grid-template-columns:repeat(2,minmax(0,1fr))}body.gc-staff-os-shell #app .gc-live-wh-hero-actions{grid-template-columns:1fr}body.gc-staff-os-shell #app .customer-control-toolbar{grid-template-columns:1fr!important}}
+@media(prefers-reduced-motion:reduce){body.gc-staff-os-shell #app *,body.gc-staff-os-shell .gc-staff-mobile-dock *{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
