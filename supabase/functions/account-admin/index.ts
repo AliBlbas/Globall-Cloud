@@ -585,7 +585,7 @@ async function updateTask(client: ReturnType<typeof createClient>, payload: Json
 }
 
 async function listReceipts(client: ReturnType<typeof createClient>) {
-  const { data, error } = await client.from('warehouse_receipts').select('id,batch_code,location,stage,latitude,longitude,photo_taken_at,gc_code_detected,ocr_text,ocr_confidence,ai_detected_items,auto_assigned,notes,received_at,created_by_name,directory_customer_id,directory_phone,consolidated,photos,shipment_id,scan_code,scan_type,verification_status,created_at').order('received_at', { ascending: false }).limit(100)
+  const { data, error } = await client.from('warehouse_receipts').select('id,batch_code,location,stage,latitude,longitude,photo_taken_at,gc_code_detected,ocr_text,ocr_confidence,ai_detected_items,auto_assigned,notes,received_at,created_by_name,directory_customer_id,directory_phone,consolidated,photos,shipment_id,scan_code,scan_type,verification_status,created_at:received_at').order('received_at', { ascending: false }).limit(100)
   if (error) throw error
   return { items: data ?? [], kind: 'receipt' }
 }
