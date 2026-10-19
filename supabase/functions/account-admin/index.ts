@@ -227,7 +227,7 @@ async function listShipments(client: ReturnType<typeof createClient>) {
 }
 
 async function listStaff(client: ReturnType<typeof createClient>) {
-  const { data, error } = await client.from('staff').select('id,full_name,role,branch,is_active,created_at,updated_at').order('created_at', { ascending: false })
+  const { data, error } = await client.from('staff').select('id,full_name,email,role,branch,is_active,created_at,updated_at').order('created_at', { ascending: false })
   if (error) throw error
   return { items: data ?? [], kind: 'staff' }
 }
@@ -969,7 +969,7 @@ async function createStaff(client: ReturnType<typeof createClient>, payload: Jso
     }
   }
   if (!userId) throw new Error('Failed to create staff auth user')
-  const { data: row, error } = await client.from('staff').upsert({ id: userId, full_name: fullName, role, branch, is_active: true }, { onConflict: 'id' }).select('id,full_name,role,branch,is_active,created_at,updated_at').single()
+  const { data: row, error } = await client.from('staff').upsert({ id: userId, full_name: fullName, email, role, branch, is_active: true }, { onConflict: 'id' }).select('id,full_name,email,role,branch,is_active,created_at,updated_at').single()
   if (error) throw error
   await logActivity(client, actor.id, actor.name, 'create_staff_account', row.id, { email, role, branch })
   return { staff: row, auth_user_id: userId, status: invite ? 'invited' : 'created' }
@@ -981,7 +981,7 @@ async function updateStaff(client: ReturnType<typeof createClient>, payload: Jso
   if (!actor.isSuperAdmin && (txt(payload.email) !== null || txt(payload.password) !== null)) {
     throw responseError('Email and password are managed by Super Admin only', 403)
   }
-  const { data: current, error: currentErr } = await client.from('staff').select('id,full_name,role,branch,is_active').eq('id', id).maybeSingle()
+  const { data: current, error: currentErr } = await client.from('staff').select('id,full_name,email,role,branch,is_active').eq('id', id).maybeSingle()
   if (currentErr) throw currentErr
   if (!current) throw responseError('Staff member not found', 404)
   if (current.role === 'super_admin' && !actor.isSuperAdmin) throw responseError('Only Super Admin can modify a Super Admin', 403)
@@ -995,14 +995,23 @@ async function updateStaff(client: ReturnType<typeof createClient>, payload: Jso
   if (typeof payload.is_active === 'boolean') updates.is_active = payload.is_active
   const email = txt(payload.email)
   const password = txt(payload.password)
+  if (actor.isSuperAdmin && email) updates.email = email
   if (actor.isSuperAdmin && (email || password || txt(payload.full_name) || txt(payload.role) || txt(payload.branch))) {
-    const authUpdate: JsonRecord = { user_metadata: { full_name: txt(payload.full_name), role: txt(payload.role), branch: txt(payload.branch), account_kind: 'staff' } }
+    const authUpdate: JsonRecord = {}
+    const metadata: JsonRecord = { account_kind: 'staff' }
+    const nextName = txt(payload.full_name)
+    const nextRole = txt(payload.role)
+    const nextBranch = txt(payload.branch)
+    if (nextName) metadata.full_name = nextName
+    if (nextRole) metadata.role = nextRole
+    if (nextBranch) metadata.branch = nextBranch
+    if (Object.keys(metadata).length) authUpdate.user_metadata = metadata
     if (email) authUpdate.email = email
     if (password) authUpdate.password = password
     const { error } = await client.auth.admin.updateUserById(id, authUpdate as never)
     if (error) throw error
   }
-  const { data: row, error } = await client.from('staff').update(updates).eq('id', id).select('id,full_name,role,branch,is_active,created_at,updated_at').single()
+  const { data: row, error } = await client.from('staff').update(updates).eq('id', id).select('id,full_name,email,role,branch,is_active,created_at,updated_at').single()
   if (error) throw error
   await logActivity(client, actor.id, actor.name, 'update_staff_account', id, { old: { full_name: current.full_name, role: current.role, branch: current.branch, is_active: current.is_active }, new: row })
   return row
