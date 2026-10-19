@@ -67,18 +67,19 @@
     // This scoped layer loads last so it can replace the old scrollable mobile
     // sidebar dock without changing desktop navigation or shipment actions.
     loadStyle('/gc-staff-mobile-dock-20261016.css?v=4');
-    // Keep the known mobile integrity guard, then restore the dedicated staff command layer as the final cascade.
+    // Keep the known mobile integrity guard and command-system layer, then apply
+    // the dedicated final repair after all legacy helpers have finished loading.
     loadStyle('/gc-ui-integrity-mobile-20261017.css?v=6');
     loadStyle('/gc-staff-command-system-20261017.css?v=2');
-    // The new unified staff theme must be the last style after every legacy bridge loads.
     loadStyle('/gc-staff-console-elite-20261018.css?v=4');
-    lockEliteStylesLast();
+    loadStyle('/gc-staff-polish-mobile-20261019.css?v=1');
+    lockFinalStaffStylesLast();
   };
 
   // Several legacy helpers append their style sheets after the app shell mounts.
   // Keep the scoped Staff OS layer last in <head>, without duplicating any CSS.
-  const lockEliteStylesLast = () => {
-    const href = '/gc-staff-console-elite-20261018.css?v=4';
+  const lockFinalStaffStylesLast = () => {
+    const href = '/gc-staff-polish-mobile-20261019.css?v=1';
     const ensureLast = () => {
       const link = document.querySelector('link[data-gc-enhancement-style="' + href + '"]')
         || document.querySelector('link[href="' + href + '"]');
@@ -87,7 +88,7 @@
       }
     };
     ensureLast();
-    if (window.__gcStaffEliteCascadeObserver) return;
+    if (window.__gcStaffFinalCascadeObserver) return;
     const observer = new MutationObserver((records) => {
       const addedStyles = records.some((record) => [...record.addedNodes].some((node) =>
         node.nodeType === 1 && (
