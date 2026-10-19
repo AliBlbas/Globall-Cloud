@@ -136,7 +136,7 @@ const renderNotifications = (items) => setHtml('notifications',
         ? (isDubaiReceipt ? 'کاڵاکەت لە کۆگای دوبەی وەرگیرا' : 'کاڵاکەت لە کۆگا وەرگیرا')
         : item.title;
       const body = isReceiptNotice
-        ? (isDubaiReceipt ? 'وردەکاری، وێنە و ژمارەی کارتۆن لە بەشی بارەکان ببینە.' : 'وردەکاری و بەڵگەی کاڵاکەت لە بەشی بارەکان ببینە.')
+        ? (String(item.body || '').trim() || (isDubaiReceipt ? 'وردەکاری، وێنە و ژمارەی کارتۆن لە بەشی بارەکان ببینە.' : 'وردەکاری و بەڵگەی کاڵاکەت لە بەشی بارەکان ببینە.'))
         : item.body;
       const givenAction = typeof item.action_url === 'string' && (item.action_url.startsWith('/') || item.action_url.startsWith('#')) && !item.action_url.startsWith('//')
         ? item.action_url
@@ -145,7 +145,7 @@ const renderNotifications = (items) => setHtml('notifications',
       const actionLabel = isReceiptNotice ? 'بینینی بارەکان' : 'بینینی بەشی پەیوەندیدارەکە';
       return `<article class="item notification-item ${isRead ? 'is-read' : 'is-unread'}" data-notification-state="${isRead ? 'read' : 'unread'}">
         <div class="row notification-item-head"><strong>${esc(title)}</strong>${isRead ? '<span class="pill">خوێندراوە</span>' : `<button class="btn notification-action" type="button" data-read-notification="${esc(item.id)}">خوێندراوە بکە</button>`}</div>
-        <div class="muted notification-body">${esc(body)}</div>
+        <div class="muted notification-body" style="white-space:pre-line">${esc(body)}</div>
         <div class="row notification-item-foot"><small class="notification-time">${esc(date(item.created_at))}</small>${action ? `<a class="btn notification-open-action" href="${esc(action)}">${esc(actionLabel)} ↗</a>` : ''}</div>
       </article>`;
     }).join('')
