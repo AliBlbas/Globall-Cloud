@@ -358,3 +358,18 @@ html[data-gc-theme="dark"] body.gc-staff-os-shell .gc-staff-mobile-dock button.a
   body.gc-staff-os-shell #app .gc-live-wh-id>strong { font-size: 16px; }
   body.gc-staff-os-shell #app .gc-live-wh-facts strong { font-size: 11px; }
 }
+
+/* Admin-only in-app notification queue controls */
+body.gc-staff-os-shell #app .gc-notification-outbox-panel{display:grid;gap:13px;min-width:0;margin:0 0 16px;padding:17px;border:1px solid #dce8ed;border-radius:19px;background:linear-gradient(120deg,#fff 0%,#f2fbfc 100%);box-shadow:0 8px 24px rgba(18,52,72,.045)}
+body.gc-staff-os-shell #app .gc-notification-outbox-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+body.gc-staff-os-shell #app .gc-notification-outbox-head h3{margin:4px 0;color:#123b50;font-size:16px;font-weight:900}
+body.gc-staff-os-shell #app .gc-notification-outbox-head p{max-width:800px;margin:0;color:#617d8b;font-size:11px;line-height:1.9}
+body.gc-staff-os-shell #app .gc-notification-outbox-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+body.gc-staff-os-shell #app .gc-notification-outbox-metrics>div{display:grid;gap:5px;padding:11px;border:1px solid #dce8ed;border-radius:13px;background:#fff}
+body.gc-staff-os-shell #app .gc-notification-outbox-metrics span{color:#6a8795;font-size:10px;font-weight:800}
+body.gc-staff-os-shell #app .gc-notification-outbox-metrics strong{color:#123b50;font-size:22px;font-weight:900}
+body.gc-staff-os-shell #app .gc-notification-outbox-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+body.gc-staff-os-shell #app .gc-notification-outbox-actions small{max-width:760px;color:#698391;font-size:10px;line-height:1.8}
+body.gc-staff-os-shell #app .gc-notification-outbox-actions .btn{min-height:42px;border-radius:12px!important}
+body.gc-staff-os-shell #app .gc-notification-outbox-actions .btn:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:760px){body.gc-staff-os-shell #app .gc-notification-outbox-panel{padding:13px;border-radius:16px}body.gc-staff-os-shell #app .gc-notification-outbox-head{flex-direction:column;gap:9px}body.gc-staff-os-shell #app .gc-notification-outbox-actions{align-items:stretch;flex-direction:column}body.gc-staff-os-shell #app .gc-notification-outbox-actions .btn{width:100%}}
