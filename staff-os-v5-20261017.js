@@ -823,7 +823,165 @@
     };
   }
 
-  async function renderAlerts() { const r=await ops('alerts'); state.data.alerts=r.items||[]; const unread=state.data.alerts.filter(x=>!Array.isArray(x.read_by)||!x.read_by.includes(state.staff.id)).length; document.getElementById('view').innerHTML=`<div class="section-head"><div><div class="eyebrow">ALERT CENTER</div><h1>Alerts</h1><p>${number(unread)} ئاگادارییەکی ناخوێندراوە.</p></div></div><div class="list" id="alertList">${state.data.alerts.length?state.data.alerts.map(a=>`<article class="notice ${Array.isArray(a.read_by)&&a.read_by.includes(state.staff.id)?'':'unread'}"><div><b>${esc(a.title||a.kind||'Alert')}</b><p>${esc(a.body||a.message||'')}</p><small>${esc(date(a.created_at))}</small></div><button class="btn" data-alert-read="${esc(a.id)}">${Array.isArray(a.read_by)&&a.read_by.includes(state.staff.id)?'خوێندراوە':'خوێندنەوە'}</button></article>`).join(''):'<div class="empty">هیچ ئاگادارییەک نییە.</div>'}</div><section class="card" style="margin-top:10px"><div class="card-head"><h3>دروستکردنی Alert</h3></div><form id="alertForm" class="form-grid"><div class="form-field"><label>جۆر</label><input class="field" name="kind" value="operations"></div><div class="form-field"><label>Severity</label><select class="field" name="severity"><option>normal</option><option>high</option><option>critical</option></select></div><div class="form-field full"><label>ناونیشان</label><input class="field" name="title" required></div><div class="form-field full"><label>پەیام</label><textarea class="field" name="body"></textarea></div></form><button class="btn primary" id="createAlert" style="margin-top:9px">دروستکردنی Alert</button></section>`; document.querySelectorAll('[data-alert-read]').forEach(b=>b.onclick=async()=>{try{await opsPost('alert_read',{id:b.dataset.alertRead});await renderAlerts()}catch(e){toast(e.message,'bad')}});document.getElementById('createAlert').onclick=async()=>{const d=Object.fromEntries(new FormData(document.getElementById('alertForm')).entries());try{await opsPost('alert_create',d);toast('Alert دروست کرا');await renderAlerts()}catch(e){toast(e.message,'bad')}}; }
+  async function renderAlerts() {
+    const response = await ops('alerts');
+    state.data.alerts = Array.isArray(response.items) ? response.items : [];
+    const allAlerts = state.data.alerts;
+    const staffId = String(state.staff?.id || '');
+    const canCreate = ['super_admin', 'admin'].includes(String(state.staff?.role || ''));
+    const severityLabel = (value) => ({ normal: 'ئاسایی', high: 'گرنگ', critical: 'زۆر گرنگ' })[value] || 'ئاسایی';
+    const audienceLabel = (value) => value ? roleLabel(value) : 'هەموو ستاف';
+
+    const audienceOptions = '<option value="">هەموو ستاف</option>' +
+      ROLES.map((role) => '<option value="' + esc(role) + '">' + esc(roleLabel(role)) + '</option>').join('');
+    const creatorPanel = canCreate ? `
+      <section class="card gc-alert-create-panel" style="margin-top:12px">
+        <div class="card-head"><h3>دروستکردنی ئاگادارکردنەوەی ستاف</h3><span class="pill">ADMIN</span></div>
+        <form id="alertForm" class="form-grid">
+          <div class="form-field">
+            <label for="alertKind">جۆر</label>
+            <select class="field" id="alertKind" name="kind">
+              <option value="operations">کارگێڕی</option><option value="warehouse">کۆگا</option>
+              <option value="shipment">بار</option><option value="finance">دارایی</option>
+              <option value="security">پاراستن</option><option value="general">گشتی</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="alertSeverity">ئاستی گرنگی</label>
+            <select class="field" id="alertSeverity" name="severity">
+              <option value="normal">ئاسایی</option><option value="high">گرنگ</option><option value="critical">زۆر گرنگ</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="alertAudience">بۆ کێ؟</label>
+            <select class="field" id="alertAudience" name="audience_role">${audienceOptions}</select>
+            <small class="muted">ئەگەر «هەموو ستاف» هەڵبژێریت، ئاگادارکردنەوەکە بۆ هەموو ڕۆڵەکانی ستاف دەردەکەوێت.</small>
+          </div>
+          <div class="form-field full">
+            <label for="alertTitle">ناونیشان</label>
+            <input class="field" id="alertTitle" name="title" maxlength="140" required placeholder="ناونیشانی ڕوون بنووسە">
+          </div>
+          <div class="form-field full">
+            <label for="alertBody">پەیام</label>
+            <textarea class="field" id="alertBody" name="body" maxlength="3000" rows="4" required placeholder="وردەکاری و ئەو هەنگاوە بنووسە کە ستاف دەبێت ئەنجامی بدات."></textarea>
+          </div>
+        </form>
+        <button class="btn primary" id="createAlert" type="button">ناردنی ئاگادارکردنەوە</button>
+      </section>` : '';
+
+    document.getElementById('view').innerHTML = `
+      <div class="section-head">
+        <div><div class="eyebrow">STAFF ALERT CENTER</div><h1>ئاگادارکردنەوەکان</h1>
+        <p>ئاگادارییەکان بەپێی بڕۆڵ، ئاستی گرنگی و دۆخی خوێندنەوە ڕێک بخە.</p></div>
+        <div class="actions"><button class="btn" id="alertRefresh" type="button">↻ نوێکردنەوە</button></div>
+      </div>
+      <div class="grid-kpi gc-alert-kpis">
+        <article class="kpi"><span>کۆی ئاگاداری</span><strong id="alertTotal">${number(allAlerts.length)}</strong></article>
+        <article class="kpi"><span>نەخوێندراوە</span><strong id="alertUnread">${number(allAlerts.filter(a => !(Array.isArray(a.read_by) && a.read_by.map(String).includes(staffId))).length)}</strong></article>
+        <article class="kpi"><span>گرنگ / زۆر گرنگ</span><strong id="alertUrgent">${number(allAlerts.filter(a => ['high','critical'].includes(String(a.severity || 'normal'))).length)}</strong></article>
+      </div>
+      <div class="toolbar gc-alert-toolbar" aria-label="فلتەری ئاگادارکردنەوە">
+        <input class="field" id="alertSearch" type="search" autocomplete="off" placeholder="گەڕان بە ناونیشان، پەیام یان جۆر">
+        <select class="field" id="alertReadFilter" aria-label="فلتەری خوێندنەوە">
+          <option value="all">خوێندراوە و نەخوێندراوە</option><option value="unread">تەنها نەخوێندراوە</option><option value="read">تەنها خوێندراوە</option>
+        </select>
+        <select class="field" id="alertSeverityFilter" aria-label="فلتەری گرنگی">
+          <option value="all">هەموو ئاستەکان</option><option value="critical">زۆر گرنگ</option><option value="high">گرنگ</option><option value="normal">ئاسایی</option>
+        </select>
+      </div>
+      <div class="gc-alert-results"><span id="alertResultCount"></span><div class="list" id="alertList" aria-live="polite"></div></div>
+      ${creatorPanel}
+    `;
+
+    const list = document.getElementById('alertList');
+    const resultCount = document.getElementById('alertResultCount');
+    const renderList = () => {
+      const query = text(document.getElementById('alertSearch')?.value).toLocaleLowerCase();
+      const readFilter = document.getElementById('alertReadFilter')?.value || 'all';
+      const severityFilter = document.getElementById('alertSeverityFilter')?.value || 'all';
+      const rows = allAlerts.filter((alert) => {
+        const readBy = Array.isArray(alert.read_by) ? alert.read_by.map(String) : [];
+        const isRead = readBy.includes(staffId);
+        const severity = ['normal','high','critical'].includes(String(alert.severity || 'normal')) ? String(alert.severity || 'normal') : 'normal';
+        const searchable = [alert.title, alert.body, alert.message, alert.kind, alert.entity_type, audienceLabel(alert.audience_role)].map(x => String(x || '')).join(' ').toLocaleLowerCase();
+        return (!query || searchable.includes(query))
+          && (readFilter === 'all' || (readFilter === 'read' ? isRead : !isRead))
+          && (severityFilter === 'all' || severity === severityFilter);
+      });
+
+      resultCount.textContent = rows.length + ' / ' + allAlerts.length + ' ئاگادارکردنەوە';
+      list.innerHTML = rows.length ? rows.map((alert) => {
+        const readBy = Array.isArray(alert.read_by) ? alert.read_by.map(String) : [];
+        const isRead = readBy.includes(staffId);
+        const severity = ['normal','high','critical'].includes(String(alert.severity || 'normal')) ? String(alert.severity || 'normal') : 'normal';
+        const kind = text(alert.kind) || 'general';
+        const audience = audienceLabel(alert.audience_role);
+        return `<article class="notice gc-alert-card severity-${severity} ${isRead ? 'is-read' : 'unread'}">
+          <div class="gc-alert-card-head">
+            <div class="gc-alert-card-title"><strong>${esc(alert.title || kind || 'Alert')}</strong><small>${esc(date(alert.created_at))}</small></div>
+            <div class="gc-alert-badges"><span class="pill gc-alert-severity severity-${severity}">${esc(severityLabel(severity))}</span><span class="pill gc-alert-audience">${esc(audience)}</span></div>
+          </div>
+          <p class="gc-alert-body">${esc(alert.body || alert.message || 'پەیامێک بۆ ئەم ئاگادارکردنەوەیە تۆمار نەکراوە.')}</p>
+          <div class="gc-alert-card-foot"><small>${esc(kind)} ${alert.entity_type ? ' · ' + esc(alert.entity_type) : ''}</small>
+            ${isRead ? '<span class="pill">خوێندراوە</span>' : '<button class="btn" type="button" data-alert-read="' + esc(alert.id) + '">خوێندنەوە و داخستن</button>'}
+          </div>
+        </article>`;
+      }).join('') : '<div class="empty gc-alert-empty">هیچ ئاگادارکردنەوەیەک بەم فلتەرە نەدۆزرایەوە.</div>';
+
+      list.querySelectorAll('[data-alert-read]').forEach((button) => {
+        button.addEventListener('click', async () => {
+          if (button.disabled) return;
+          button.disabled = true;
+          button.setAttribute('aria-busy','true');
+          try {
+            await opsPost('alert_read', { id: button.dataset.alertRead });
+            const current = allAlerts.find((item) => String(item.id) === String(button.dataset.alertRead));
+            if (current) {
+              const existing = Array.isArray(current.read_by) ? current.read_by.map(String) : [];
+              if (!existing.includes(staffId)) existing.push(staffId);
+              current.read_by = existing;
+            }
+            toast('ئاگادارکردنەوەکە خوێندرایەوە');
+            renderList();
+            updateBadges();
+          } catch (error) {
+            toast(errorText(error, 'ناتوانرێت ئاگادارکردنەوەکە بخوێندرێتەوە'), 'bad');
+            button.disabled = false;
+            button.removeAttribute('aria-busy');
+          }
+        });
+      });
+    };
+
+    ['alertSearch','alertReadFilter','alertSeverityFilter'].forEach((id) => {
+      const control = document.getElementById(id);
+      control?.addEventListener(id === 'alertSearch' ? 'input' : 'change', renderList);
+    });
+    document.getElementById('alertRefresh')?.addEventListener('click', () => renderAlerts());
+
+    if (canCreate) {
+      document.getElementById('createAlert')?.addEventListener('click', async () => {
+        const form = document.getElementById('alertForm');
+        const button = document.getElementById('createAlert');
+        if (!form || !form.reportValidity() || button.disabled) return;
+        button.disabled = true;
+        button.setAttribute('aria-busy','true');
+        try {
+          const data = Object.fromEntries(new FormData(form).entries());
+          await opsPost('alert_create', { ...data, audience_role: text(data.audience_role) || null });
+          toast('ئاگادارکردنەوە بەپێی ڕۆڵ تۆمار کرا');
+          form.reset();
+          await renderAlerts();
+        } catch (error) {
+          toast(errorText(error, 'دروستکردنی ئاگادارکردنەوە سەرکەوتوو نەبوو'), 'bad');
+        } finally {
+          const current = document.getElementById('createAlert');
+          if (current) { current.disabled = false; current.removeAttribute('aria-busy'); }
+        }
+      });
+    }
+    renderList();
+  }
 
   function downloadUnlinkedCustomerReport() {
     if (state.staff?.role !== 'super_admin') {
