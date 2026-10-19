@@ -28,9 +28,11 @@
       { file: 'gc-final-ui-20260927.css', href: '/gc-final-ui-20260927.css?v=4', marker: 'data-gc-final-ui' },
       { file: 'gc-redesign-v2026.css', href: '/gc-redesign-v2026.css?v=20260927-3', marker: 'data-gc-redesign-v2026' },
       { file: 'gc-reference-app-20260927.css', href: '/gc-reference-app-20260927.css?v=1', marker: 'data-gc-reference-app' },
-      { file: 'gc-reference-inspired-20260928.css', href: '/gc-reference-inspired-20260928.css?v=20260928-2', marker: 'data-gc-reference-inspired' }
+      { file: 'gc-reference-inspired-20260928.css', href: '/gc-reference-inspired-20260928.css?v=20260928-2', marker: 'data-gc-reference-inspired' },
+      { file: 'gc-homepage-mobile-content-20261019.css', href: '/gc-homepage-mobile-content-20261019.css?v=1', marker: 'data-gc-mobile-content-visibility' }
     ];
 
+    const mountedStyles = [];
     for (const item of styles) {
       const links = [...document.querySelectorAll('link[rel="stylesheet"]')].filter((node) => {
         const path = String(node.getAttribute('href') || '').split('?')[0];
@@ -46,6 +48,18 @@
       }
       if (link.getAttribute('href') !== item.href) link.setAttribute('href', item.href);
       link.setAttribute(item.marker, '1');
+      mountedStyles.push(link);
+    }
+
+    // Reorder the existing overrides as one batch only when another loader added CSS after them.
+    const headChildren = [...document.head.children];
+    const alreadyLastInOrder = mountedStyles.every(
+      (link, index) => headChildren[headChildren.length - mountedStyles.length + index] === link
+    );
+    if (!alreadyLastInOrder) {
+      const fragment = document.createDocumentFragment();
+      mountedStyles.forEach((link) => fragment.appendChild(link));
+      document.head.appendChild(fragment);
     }
   };
 
@@ -378,5 +392,6 @@
   } else {
     mountFinalStyle(); bootRoute();
   }
+  window.setTimeout(mountFinalStyle, 1200);
   window.addEventListener('hashchange', bootRoute);
 })();
