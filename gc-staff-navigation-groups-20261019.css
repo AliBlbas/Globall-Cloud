@@ -1,0 +1,55 @@
+/* Staff OS navigation grouping — presentation only; preserves original tab buttons and handlers. */
+body.gc-staff-os-shell #app nav.nav {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch;
+  gap: 9px !important;
+  min-width: 0;
+}
+body.gc-staff-os-shell #app .nav-group,
+body.gc-staff-os-shell .gc-staff-mobile-drawer .nav-group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+}
+body.gc-staff-os-shell #app .nav-group + .nav-group,
+body.gc-staff-os-shell .gc-staff-mobile-drawer .nav-group + .nav-group {
+  padding-top: 8px;
+  border-top: 1px solid var(--gc-ui-line, rgba(119, 156, 174, .22));
+}
+body.gc-staff-os-shell #app .nav-group-title,
+body.gc-staff-os-shell .gc-staff-mobile-drawer .nav-group-title {
+  display: block;
+  min-width: 0;
+  padding: 1px 11px 3px;
+  color: inherit;
+  opacity: .62;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.45;
+}
+body.gc-staff-os-shell #app .nav-group > .nav-btn,
+body.gc-staff-os-shell .gc-staff-mobile-drawer .nav-group > .nav-btn {
+  width: 100%;
+  min-width: 0;
+}
+body.gc-staff-os-shell #app .nav-group .nav-btn > span:not(.nav-icon),
+body.gc-staff-os-shell .gc-staff-mobile-drawer .nav-group .nav-btn > span:not(.nav-icon) {
+  min-width: 0;
+}
+@media (max-width: 680px) {
+  body.gc-staff-os-shell #app nav.nav {
+    gap: 7px !important;
+  }
+  body.gc-staff-os-shell #app .nav-group + .nav-group,
+  body.gc-staff-os-shell .gc-staff-mobile-drawer .nav-group + .nav-group {
+    padding-top: 7px;
+  }
+  body.gc-staff-os-shell #app .nav-group-title,
+  body.gc-staff-os-shell .gc-staff-mobile-drawer .nav-group-title {
+    font-size: 10px;
+    padding-inline: 9px;
+  }
+}
