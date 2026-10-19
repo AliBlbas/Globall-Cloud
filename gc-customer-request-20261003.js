@@ -20,8 +20,8 @@
   };
   modeSelect?.addEventListener('change', syncModeFields);
   syncModeFields();
-  const cargoHasBattery = (value) => /battery|batteries|lithium|power\\s?bank|باتری|پاتری/i.test(String(value || ''));
-  const cargoHasLiquid = (value) => /liquid|perfume|fragrance|shampoo|\\bgel\\b|\\boil\\b|شلە|شلەمەنی|عەتری|پەرفیوم/i.test(String(value || ''));
+  const cargoHasBattery = (value) => /battery|batteries|lithium|power\s?bank|باتری|پاتری/i.test(String(value || ''));
+  const cargoHasLiquid = (value) => /liquid|perfume|fragrance|shampoo|\bgel\b|\boil\b|شلە|شلەمەنی|عەتری|پەرفیوم/i.test(String(value || ''));
   const cargoIsMedical = (value) => /medical|medicine|medication|surgical|clinic|hospital|پزیشک|دەرمان|نەشتەرگەری/i.test(String(value || ''));
   const readCompliance = () => {
     const product = $('requestProductType')?.value || '';
