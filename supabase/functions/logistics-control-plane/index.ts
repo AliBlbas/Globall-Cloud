@@ -557,6 +557,23 @@ const processOutbox = async (service: ReturnType<typeof serviceClient>, staff: S
   return { claimed: items.length, results }
 }
 
+  const cancelOutbox = async (service: ReturnType<typeof serviceClient>, staff: Staff, data: Json) => {
+    requireRole(staff, ['admin', 'super_admin'])
+    const id = text(data.id, 64)
+    const reason = text(data.reason, 300)
+    if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) throw new Error('A valid notification job id is required')
+    if (!reason || reason.length < 10) throw new Error('A cancellation reason of at least 10 characters is required')
+    const found = await service.from('notification_outbox').select('id,status,channel,event_key,created_at').eq('id', id).maybeSingle()
+    if (found.error) throw found.error
+    if (!found.data) throw new Error('Notification job was not found')
+    if (found.data.status !== 'pending') throw new Error('Only pending notification jobs can be cancelled')
+    const updated = await service.from('notification_outbox').update({ status: 'cancelled', last_error: ('Cancelled after staff review: ' + reason).slice(0, 500), updated_at: new Date().toISOString() }).eq('id', id).eq('status', 'pending').select('id').maybeSingle()
+    if (updated.error) throw updated.error
+    if (!updated.data) throw new Error('The notification job changed while this action was running; refresh the queue')
+    await audit(service, staff, 'cancel_notification_outbox', id, { channel: found.data.channel, event_key: found.data.event_key, status_before: 'pending', reason })
+    return { id, status: 'cancelled', channel: found.data.channel, event_key: found.data.event_key }
+  }
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors(req) })
   try {
@@ -583,6 +600,7 @@ Deno.serve(async (req) => {
     if (action === 'register_document' || action === 'upload_document') return json(req, { item: await documentRegister(service, staff, data) })
     if (action === 'get_report') return json(req, { item: await report(service, staff, new URL(req.url)) })
     if (action === 'process_outbox') return json(req, { item: await processOutbox(service, staff, Number(data.limit || 20)) })
+    if (action === 'cancel_outbox') return json(req, { item: await cancelOutbox(service, staff, data) })
     return json(req, { error: 'Unsupported action' }, 400)
   } catch (error) {
     if (error instanceof Response) return error
