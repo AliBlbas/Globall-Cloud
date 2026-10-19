@@ -74,14 +74,14 @@
     loadStyle('/gc-staff-console-elite-20261018.css?v=6');
     loadStyle('/gc-staff-polish-mobile-20261019.css?v=6');
     loadStyle('/gc-staff-ui-refinement-20261019-v4.css?v=4');
-    loadStyle('/gc-staff-live-workspace-20261019.css?v=4');
+    loadStyle('/gc-staff-live-workspace-20261019.css?v=5');
     lockFinalStaffStylesLast();
   };
 
   // Several legacy helpers append their style sheets after the app shell mounts.
   // Keep the scoped Staff OS layer last in <head>, without duplicating any CSS.
   const lockFinalStaffStylesLast = () => {
-    const href = '/gc-staff-live-workspace-20261019.css?v=4';
+    const href = '/gc-staff-live-workspace-20261019.css?v=5';
     const ensureLast = () => {
       const link = document.querySelector('link[data-gc-enhancement-style="' + href + '"]')
         || document.querySelector('link[href="' + href + '"]');
