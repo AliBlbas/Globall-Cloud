@@ -375,27 +375,76 @@
     document.getElementById('view').innerHTML = `<div class="tower-hero"><div><div class="eyebrow">GLOBAL CLOUD · OPERATIONS CONTROL TOWER</div><h1>کۆنترۆڵی ناوەندیی عملیات</h1><p>لە وەرگرتنی کۆگا تا گەیاندن؛ هەموو کێشە و هەنگاوێک لە یەک cockpit ـدا.</p><div class="tower-hero-meta"><span class="tower-live"><i></i> ژێر چاودێری ڕاستەوخۆ</span><span>${number(active.length)} بار لە ژێر چاودێری</span><span>${date(new Date())}</span></div></div><div class="tower-hero-actions"><button class="btn primary" data-jump="shipments">بینینی بارەکان</button><button class="btn" data-jump="warehouses">کۆگا / Scan</button><button class="btn" data-jump="requests">Inbox <b>${number(state.data.quoteRequests.length)}</b></button></div></div>${serviceHealthPanel}<div class="grid-kpi tower-kpis"><div class="kpi tower-kpi-accent"><span>کۆی بارەکان</span><strong>${number(shipments.length)}</strong><small>${number(active.length)} چالاک · ${number(delivered.length)} گەیەنراو</small></div><div class="kpi"><span>تەندروستیی عملیات</span><strong class="${failedFeeds.length?'tower-number-alert':''}">${health}%</strong><small>${exceptionCount?`${number(exceptionCount)} کێشە پێویستی بە کارە`:'هیچ کێشەیەکی فۆری نییە'}</small></div><div class="kpi"><span>داهات / قازانج</span><strong>${money(income-expense)}</strong><small>${money(income)} داهات · ${money(expense)} خەرجی</small></div><div class="kpi"><span>پارەی ماوە</span><strong>${money(Math.max(0,due-paid))}</strong><small>${number(paymentRisk.length)} بار پارەی ماوەی هەیە</small></div><div class="kpi"><span>کێشەکان</span><strong class="${exceptionCount?'tower-number-alert':''}">${number(exceptionCount)}</strong><small>${number(overdue.length)} دواخراو · ${number(stale.length)} بێ نوێکردنەوە</small></div><div class="kpi"><span>ڕیزی کار</span><strong>${number(tasksOpen+state.data.quoteRequests.length)}</strong><small>${number(tasksOpen)} کار · ${number(state.data.quoteRequests.length)} داواکاری</small></div></div>${customerBridgePanel}${notificationOutboxPanel}<div class="tower-grid"><section class="card tower-flow-card"><div class="card-head"><div><div class="eyebrow">SHIPMENT LIFECYCLE</div><h3>لە کوێیە هەر بارێک؟</h3></div><button class="btn" data-jump="shipments">وەردەکارێک</button></div><div class="tower-flow">${flow.map((x,i)=>`<button class="tower-flow-step ${x.count?'has-data':''}" data-flow-status="${x.key}" data-jump="shipments"><span class="tower-flow-icon">${i+1}</span><b>${number(x.count)}</b><small>${x.label}</small>${i<flow.length-1?'<i class="tower-flow-connector"></i>':''}</button>`).join('')}</div><div class="tower-mode-strip">${modes.map(x=>`<div><span class="mode-dot ${x.mode}"></span><b>${modeLabel(x.mode)}</b><strong>${number(x.count)}</strong></div>`).join('')}</div></section><section class="card tower-exception-card"><div class="card-head"><div><div class="eyebrow">EXCEPTION RADAR</div><h3>ئەو شتانەی پێویستیان بە کارە</h3></div><span class="pill ${exceptionCount?'red':'mint'}">${exceptionCount?'ACTION NEEDED':'ALL CLEAR'}</span></div><div class="tower-exceptions">${exceptionRows.length?exceptionRows.map(x=>`<button class="tower-exception ${x.tone}" data-jump="${x.action}"><span class="tower-exception-mark"></span><span><b>${esc(x.label)}</b><small>${esc(x.detail)}</small></span><span class="tower-arrow">←</span></button>`).join(''):'<div class="tower-clear"><b>✓</b><span>هەموو شتێک لە دۆخی جێگیرە.<small>هیچ exception ـێکی پێویستی بە دەستێوەردان نییە.</small></span></div>'}</div></section><section class="card"><div class="card-head"><div><div class="eyebrow">ROUTE INTELLIGENCE</div><h3>ڕێڕەوە چالاکەکان</h3></div><button class="btn" data-jump="pricing">نرخەکان</button></div><div class="tower-route-list">${topRoutes.length?topRoutes.map((x,i)=>`<div class="tower-route"><span class="tower-route-rank">0${i+1}</span><div><b>${esc(x.route)}</b><small>${number(x.count)} shipment · ${money(x.outstanding)} ماوە</small><i><em style="width:${Math.max(8,Math.min(100,(x.revenue/(topRoutes[0].revenue||1))*100))}%"></em></i></div><strong>${money(x.revenue)}</strong></div>`).join(''):'<div class="empty">هێشتا route data نییە.</div>'}</div></section><section class="card"><div class="card-head"><div><div class="eyebrow">COMMAND STREAM</div><h3>دواین ڕووداوەکان</h3></div><button class="btn" data-jump="activity">Audit log</button></div><div class="tower-stream">${state.data.logs.slice(0,6).map(l=>`<div class="tower-stream-row"><span class="tower-stream-dot"></span><div><b>${esc(l.action||'Activity')}</b><small>${esc(l.staff_name||'Staff')} · ${esc(shortDate(l.created_at))}</small></div><span class="mono">${esc(l.target_id||'—')}</span></div>`).join('')||'<div class="empty">هێشتا activity نییە.</div>'}</div></section></div>`;
     document.querySelectorAll('[data-jump]').forEach(x=>x.addEventListener('click',async()=>{await loadTab(x.dataset.jump);const filter=x.dataset.customerStatusFilter;if(filter&&x.dataset.jump==='customers'){const status=document.getElementById('customerStatusFilter');if(status){status.value=filter;status.dispatchEvent(new Event('change',{bubbles:true}));}}}));
     const processInAppButton = document.querySelector('[data-process-in-app-outbox]');
-    processInAppButton?.addEventListener('click', async () => {
-      if (processInAppButton.disabled) return;
-      processInAppButton.disabled = true;
-      const oldLabel = processInAppButton.textContent;
-      processInAppButton.textContent = 'لە بەڕێوەبردندایە…';
-      try {
-        const response = await request(FN.controlPlane, '/', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'process_outbox',data:{limit:20}}) });
-        const result = response.item || {};
-        const outcomes = Array.isArray(result.results) ? result.results : [];
-        const sent = outcomes.filter(row=>row.status==='sent').length;
-        const attention = outcomes.filter(row=>['retryable','failed'].includes(row.status)).length;
-        if (!Number(result.claimed || 0)) toast('هیچ ئاگادارکردنەوەیەکی ناوخۆیی بۆ ناردن نەبوو.','ok');
-        else if (attention) toast(number(sent)+' نێردرا؛ '+number(attention)+' دانە پێویستی بە پشکنینە.','bad');
-        else toast(number(sent)+' ئاگادارکردنەوەی ناوخۆیی بەڕێوەبرا.','ok');
-        await loadTab('overview', true);
-      } catch (error) {
-        toast('بەڕێوەبردنی ڕیزی ئاگادارکردنەوە سەرکەوتوو نەبوو: '+errorText(error,'هەڵەی نادیار'),'bad');
-        processInAppButton.disabled = false;
-        processInAppButton.textContent = oldLabel;
-      }
-    });
+    const openOutboxReview = () => {
+      if (processInAppButton?.disabled && outboxLoadFailed) return toast('ڕیزی ئاگادارکردنەوە بەردەست نییە؛ API و دەسەڵات بپشکنە.', 'bad');
+      const now = Date.now();
+      const inAppJobs = outboxItems.filter(item => item.channel === 'in_app' && ['pending','processing','failed'].includes(String(item.status || '')));
+      const pendingJobs = inAppJobs.filter(item => item.status === 'pending');
+      const isDue = item => !item.next_attempt_at || new Date(item.next_attempt_at).getTime() <= now;
+      const ageHours = item => item.created_at ? Math.max(0,(now-new Date(item.created_at).getTime())/3600000) : 0;
+      const staleJobs = pendingJobs.filter(item => ageHours(item) >= 24);
+      const dueJobs = pendingJobs.filter(isDue);
+      const truncated = outboxItems.length >= 200;
+      const eventLabel = item => String(item.event_key || 'notification').split(':')[0].slice(0,72);
+      const statusLabel = value => ({pending:'چاوەڕوان',processing:'لە کاردایە',failed:'شکست‌خواردوو'})[String(value||'')] || String(value||'—');
+      const rows = inAppJobs.slice(0,60).map(item => {
+        const stale = item.status === 'pending' && ageHours(item) >= 24;
+        const tone = stale ? 'warn' : item.status === 'failed' ? 'red' : '';
+        return '<article class="gc-outbox-review-item '+(stale?'is-stale':'')+'"><div class="gc-outbox-review-main"><strong>'+esc(eventLabel(item))+'</strong><small>'+esc(date(item.created_at))+' · '+esc(number(item.attempts||0))+' هەوڵ</small></div><div class="gc-outbox-review-status"><span class="pill '+tone+'">'+esc(statusLabel(item.status))+'</span>'+
+          (stale?'<button class="btn gc-outbox-review-cancel" type="button" data-outbox-cancel="'+esc(item.id)+'" data-outbox-event="'+esc(eventLabel(item))+'">هەڵوەشاندنەوەی کۆن</button>':'')+
+          '</div></article>';
+      }).join('');
+      const modal = openModal('پشکنینی ڕیزی ئاگادارکردنەوەی کڕیار',
+        '<div class="gc-outbox-review">'+
+          '<div class="gc-outbox-review-metrics"><div><span>چاوەڕوان</span><strong>'+number(pendingJobs.length)+'</strong></div><div><span>ئامادە بۆ کارپێکردن</span><strong>'+number(dueJobs.length)+'</strong></div><div><span>کۆنتر لە ٢٤ کاتژمێر</span><strong>'+number(staleJobs.length)+'</strong></div></div>'+
+          (staleJobs.length?'<div class="gc-outbox-review-warning" role="alert"><strong>ناردن وەستێنراوە تا پێداچوونەوە.</strong><p>'+number(staleJobs.length)+' تۆماری کۆن هەیە. هەر یەکێکی نابێت بنێردرێت لەگەڵ هۆکار هەڵوەشێنەوە؛ ئەوە audit دەکرێت و لە داتابەیس ناسڕدرێتەوە.</p></div>':'')+
+          (truncated?'<div class="gc-outbox-review-warning" role="alert"><strong>لیستی queue سنووردار کراوە.</strong><p>٢٠٠ تۆمار یان زیاتر هەیە؛ ناردنی batch داخراوە بۆ ئەوەی تۆماری کۆن نەگاتە کڕیار.</p></div>':'')+
+          '<div class="gc-outbox-review-list">'+(rows||'<div class="empty">هیچ تۆماری in-app ـی pending/processing/failed نییە.</div>')+'</div>'+
+          '<div class="gc-outbox-review-foot">تەنها ئاگادارکردنەوەی ناوخۆیی بۆ Portal کارپێدەکرێت؛ Email و WhatsApp نانێردرێن.</div>'+
+          '<button type="button" class="btn primary" id="gcOutboxReviewProcess" '+(!dueJobs.length||staleJobs.length||truncated?'disabled':'')+'>پشتڕاستکردنەوە و کارپێکردن ('+number(Math.min(20,dueJobs.length))+')</button>'+
+        '</div>',
+        '<button class="btn" data-close>داخستن</button>');
+      modal.querySelectorAll('[data-outbox-cancel]').forEach(button => button.addEventListener('click', () => {
+        const jobId = button.dataset.outboxCancel, eventName = button.dataset.outboxEvent || 'notification';
+        const confirmModal = openModal('هەڵوەشاندنەوەی ئاگادارکردنەوەی کۆن',
+          '<p>تۆماری <b>'+esc(eventName)+'</b> تەنها لە queue هەڵوەشێنرێتەوە؛ ناسڕدرێتەوە. هۆکارەکە بە audit پارێزراو دەبێت.</p>'+
+          '<form id="gcOutboxCancelForm" class="form-grid"><div class="form-field full"><label for="gcOutboxCancelReason">هۆکار (لانیکەم ١٠ پیت)</label><textarea id="gcOutboxCancelReason" class="field" name="reason" rows="3" minlength="10" maxlength="300" required placeholder="هۆکاری هەڵوەشاندنەوە بنووسە"></textarea></div></form>',
+          '<button class="btn" data-close>گەڕانەوە</button><button class="btn primary" id="gcOutboxConfirmCancel" type="button">هەڵوەشاندنەوە</button>');
+        confirmModal.querySelector('#gcOutboxConfirmCancel').addEventListener('click', async () => {
+          const form = confirmModal.querySelector('#gcOutboxCancelForm'); if (!form.reportValidity()) return;
+          const save = confirmModal.querySelector('#gcOutboxConfirmCancel'); save.disabled = true; save.setAttribute('aria-busy','true');
+          try {
+            const reason = new FormData(form).get('reason');
+            await request(FN.controlPlane,'/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'cancel_outbox',data:{id:jobId,reason}})});
+            toast('تۆماری کۆن هەڵوەشێنرایەوە و audit کرا.');
+            closeModal(); await loadTab('overview',true);
+          } catch (error) {
+            toast(errorText(error,'هەڵوەشاندنەوە سەرکەوتوو نەبوو'),'bad');
+            save.disabled = false; save.removeAttribute('aria-busy');
+          }
+        });
+      }));
+      modal.querySelector('#gcOutboxReviewProcess')?.addEventListener('click', () => {
+        const confirmModal = openModal('پشتڕاستکردنەوەی ناردن',
+          '<div class="gc-outbox-review-warning"><strong>هەنگاوی کۆتایی.</strong><p>'+number(Math.min(20,dueJobs.length))+' ئاگادارکردنەوەی ناوخۆیی بۆ هەژماری کڕیار تۆمار دەکرێت. پەیامی دەرەکی نانێردرێت. ئەگەر ناتەواو یان نادروستە، پاشگەز ببە.</p></div>',
+          '<button class="btn" data-close>پاشگەزبوونەوە</button><button class="btn primary" id="gcOutboxConfirmProcess" type="button">بەڕاستی کارپێکردن</button>');
+        confirmModal.querySelector('#gcOutboxConfirmProcess').addEventListener('click', async () => {
+          const save=confirmModal.querySelector('#gcOutboxConfirmProcess'); save.disabled=true;save.setAttribute('aria-busy','true');
+          try {
+            const response=await request(FN.controlPlane,'/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'process_outbox',data:{limit:20}})});
+            const result=response.item||{},outcomes=Array.isArray(result.results)?result.results:[];
+            const sent=outcomes.filter(item=>item.status==='sent').length;
+            const failed=outcomes.filter(item=>['retryable','failed'].includes(item.status)).length;
+            toast('Queue تەواو بوو · نێردراو: '+number(sent)+' · شکست: '+number(failed),failed?'bad':'ok');
+            closeModal(); await loadTab('overview',true);
+          } catch(error) {
+            toast(errorText(error,'کارپێکردنی queue سەرکەوتوو نەبوو'),'bad');
+            save.disabled=false;save.removeAttribute('aria-busy');
+          }
+        });
+      });
+    };
+    processInAppButton?.addEventListener('click', openOutboxReview);
     document.querySelector('[data-overview-retry]')?.addEventListener('click', () => loadTab('overview', true));
   }
 
