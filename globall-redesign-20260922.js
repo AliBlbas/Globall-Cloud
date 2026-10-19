@@ -20,24 +20,32 @@
   };
 
   const mountFinalStyle = () => {
-    const finalStyles = [
-      ensureStylesheet('/globall-redesign-20260922.css?v=2', 'data-gc-final-redesign'),
-      ensureStylesheet('/globall-premium-logistics-2026.css?v=1', 'data-gc-premium-logistics'),
-      ensureStylesheet('/gc-final-ui-20260927.css?v=4', 'data-gc-final-ui'),
-      ensureStylesheet('/gc-redesign-v2026.css?v=20260927-3', 'data-gc-redesign-v2026'),
-      ensureStylesheet('/gc-reference-app-20260927.css?v=1', 'data-gc-reference-app'),
-      ensureStylesheet('/gc-reference-inspired-20260928.css?v=20260928-2', 'data-gc-reference-inspired')
+    // Idempotent stylesheet mounting: the old implementation appended four
+    // styles on every retry, creating duplicate cascade layers and layout work.
+    const styles = [
+      { file: 'globall-redesign-20260922.css', href: '/globall-redesign-20260922.css?v=2', marker: 'data-gc-final-redesign' },
+      { file: 'globall-premium-logistics-2026.css', href: '/globall-premium-logistics-2026.css?v=1', marker: 'data-gc-premium-logistics' },
+      { file: 'gc-final-ui-20260927.css', href: '/gc-final-ui-20260927.css?v=4', marker: 'data-gc-final-ui' },
+      { file: 'gc-redesign-v2026.css', href: '/gc-redesign-v2026.css?v=20260927-3', marker: 'data-gc-redesign-v2026' },
+      { file: 'gc-reference-app-20260927.css', href: '/gc-reference-app-20260927.css?v=1', marker: 'data-gc-reference-app' },
+      { file: 'gc-reference-inspired-20260928.css', href: '/gc-reference-inspired-20260928.css?v=20260928-2', marker: 'data-gc-reference-inspired' }
     ];
 
-    // Preserve override precedence in one batched DOM operation, without duplicate links.
-    const children = [...document.head.children];
-    const alreadyLastInOrder = finalStyles.every(
-      (link, index) => children[children.length - finalStyles.length + index] === link
-    );
-    if (!alreadyLastInOrder) {
-      const fragment = document.createDocumentFragment();
-      finalStyles.forEach((link) => fragment.appendChild(link));
-      document.head.appendChild(fragment);
+    for (const item of styles) {
+      const links = [...document.querySelectorAll('link[rel="stylesheet"]')].filter((node) => {
+        const path = String(node.getAttribute('href') || '').split('?')[0];
+        return path === '/' + item.file || path.endsWith('/' + item.file);
+      });
+      let link = links.find((node) => node.getAttribute('href') === item.href) || links[0];
+      for (const duplicate of links) if (duplicate !== link) duplicate.remove();
+
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'stylesheet';
+        document.head.appendChild(link);
+      }
+      if (link.getAttribute('href') !== item.href) link.setAttribute('href', item.href);
+      link.setAttribute(item.marker, '1');
     }
   };
 
@@ -122,9 +130,9 @@
   };
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { mountFinalStyle(); bootRoute(); setTimeout(mountFinalStyle, 1200); }, {once:true});
+    document.addEventListener('DOMContentLoaded', () => { mountFinalStyle(); bootRoute(); }, {once:true});
   } else {
-    mountFinalStyle(); bootRoute(); setTimeout(mountFinalStyle, 1200);
+    mountFinalStyle(); bootRoute();
   }
   window.addEventListener('hashchange', bootRoute);
 })();
