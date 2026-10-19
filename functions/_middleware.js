@@ -215,11 +215,13 @@ export async function onRequest(context) {
   // Keep the unified visual theme first, then place the mobile/overflow repair
   // last so older compatibility CSS cannot override the final Staff OS layout.
   if (STAFF_V5.test(path)) {
-    const eliteThemeLink = '<link rel="stylesheet" href="/gc-staff-console-elite-20261018.css?v=4" data-gc-staff-console-elite="1">';
-    const finalRepairLink = '<link rel="stylesheet" href="/gc-staff-polish-mobile-20261019.css?v=5" data-gc-staff-polish-mobile="1">';
+    const eliteThemeLink = '<link rel="stylesheet" href="/gc-staff-console-elite-20261018.css?v=5" data-gc-staff-console-elite="1">';
+    const finalRepairLink = '<link rel="stylesheet" href="/gc-staff-polish-mobile-20261019.css?v=6" data-gc-staff-polish-mobile="1">';
+    const finalDesignLink = '<link rel="stylesheet" href="/gc-staff-ui-refinement-20261019.css?v=1" data-gc-staff-ui-refinement="1">';
     html = html.replace(/<link[^>]*data-gc-staff-console-elite[^>]*>\s*/gi, '');
     html = html.replace(/<link[^>]*data-gc-staff-polish-mobile[^>]*>\s*/gi, '');
-    html = html.replace(/<\/head>/i, eliteThemeLink + finalRepairLink + '</head>');
+    html = html.replace(/<link[^>]*data-gc-staff-ui-refinement[^>]*>\s*/gi, '');
+    html = html.replace(/<\/head>/i, eliteThemeLink + finalRepairLink + finalDesignLink + '</head>');
   }
   const headers=applySecurityHeaders(new Headers(response.headers)); headers.delete('content-encoding'); headers.delete('content-length'); headers.delete('etag'); headers.set('content-type','text/html; charset=UTF-8'); if(STAFF_V5.test(path)) headers.set('cache-control','no-store, max-age=0, must-revalidate');
   return new Response(html,{status:response.status,statusText:response.statusText,headers});

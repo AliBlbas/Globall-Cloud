@@ -92,7 +92,7 @@
   const registerFreshServiceWorker = async () => {
     if (!('serviceWorker' in navigator)) return;
     try {
-      const registration = await navigator.serviceWorker.register('/sw-v98.js?v=20260914-2', { scope: '/' });
+      const registration = await navigator.serviceWorker.register('/sw-v98.js?v=20261019-2', { scope: '/' });
       await registration.update();
     } catch (_) {}
   };

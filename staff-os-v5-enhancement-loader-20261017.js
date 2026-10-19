@@ -12,7 +12,7 @@
   ];
 
   const enhancementScripts = [
-    '/gc-staff-mobile-dock-20261016.js?v=5',
+    '/gc-staff-mobile-dock-20261016.js?v=6',
     '/staff-os-v5-shipment-create-fix.js?v=20260912-2',
     '/staff-os-v5-shipment-control-bridge.js?v=20260912-2',
     '/staff-os-data-health-panel.js?v=20260912-2',
@@ -66,20 +66,21 @@
     loadStyle('/gc-staff-elite-20261014.css?v=3');
     // This scoped layer loads last so it can replace the old scrollable mobile
     // sidebar dock without changing desktop navigation or shipment actions.
-    loadStyle('/gc-staff-mobile-dock-20261016.css?v=4');
+    loadStyle('/gc-staff-mobile-dock-20261016.css?v=5');
     // Keep the known mobile integrity guard and command-system layer, then apply
     // the dedicated final repair after all legacy helpers have finished loading.
     loadStyle('/gc-ui-integrity-mobile-20261017.css?v=6');
     loadStyle('/gc-staff-command-system-20261017.css?v=2');
-    loadStyle('/gc-staff-console-elite-20261018.css?v=4');
-    loadStyle('/gc-staff-polish-mobile-20261019.css?v=5');
+    loadStyle('/gc-staff-console-elite-20261018.css?v=5');
+    loadStyle('/gc-staff-polish-mobile-20261019.css?v=6');
+    loadStyle('/gc-staff-ui-refinement-20261019.css?v=1');
     lockFinalStaffStylesLast();
   };
 
   // Several legacy helpers append their style sheets after the app shell mounts.
   // Keep the scoped Staff OS layer last in <head>, without duplicating any CSS.
   const lockFinalStaffStylesLast = () => {
-    const href = '/gc-staff-polish-mobile-20261019.css?v=5';
+    const href = '/gc-staff-ui-refinement-20261019.css?v=1';
     const ensureLast = () => {
       const link = document.querySelector('link[data-gc-enhancement-style="' + href + '"]')
         || document.querySelector('link[href="' + href + '"]');
