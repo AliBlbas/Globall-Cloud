@@ -979,3 +979,55 @@ body.gc-staff-os-shell #app .shipment-summary-note {
     font-size:9px!important;
   }
 }
+
+
+/* Staff Alert Center: readable cards, filtering controls, and stable phone layout. */
+body.gc-staff-os-shell #app .gc-alert-kpis { grid-template-columns:repeat(3,minmax(0,1fr)); }
+body.gc-staff-os-shell #app .gc-alert-toolbar {
+  display:grid;
+  grid-template-columns:minmax(220px,1.7fr) repeat(2,minmax(150px,1fr));
+  gap:9px;
+  align-items:center;
+}
+body.gc-staff-os-shell #app .gc-alert-toolbar .field { min-width:0; width:100%; }
+body.gc-staff-os-shell #app .gc-alert-results { display:grid; gap:8px; margin-top:10px; }
+body.gc-staff-os-shell #app .gc-alert-results > span { color:var(--muted); font-size:11px; font-weight:800; }
+body.gc-staff-os-shell #app .gc-alert-card {
+  display:grid;
+  gap:11px;
+  padding:15px;
+  border:1px solid var(--line);
+  border-inline-start:4px solid #9ab1be;
+  border-radius:16px;
+  background:var(--panel);
+  box-shadow:0 5px 16px rgba(18,53,74,.035);
+}
+body.gc-staff-os-shell #app .gc-alert-card.unread { border-inline-start-color:var(--cyan); background:linear-gradient(135deg,rgba(37,184,198,.055),var(--panel) 45%); }
+body.gc-staff-os-shell #app .gc-alert-card.severity-high { border-inline-start-color:#d18a18; }
+body.gc-staff-os-shell #app .gc-alert-card.severity-critical { border-inline-start-color:#c44858; }
+body.gc-staff-os-shell #app .gc-alert-card-head,
+body.gc-staff-os-shell #app .gc-alert-card-foot { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; }
+body.gc-staff-os-shell #app .gc-alert-card-title { display:grid; gap:3px; min-width:0; }
+body.gc-staff-os-shell #app .gc-alert-card-title strong { font-size:13px; line-height:1.7; overflow-wrap:anywhere; }
+body.gc-staff-os-shell #app .gc-alert-card-title small,
+body.gc-staff-os-shell #app .gc-alert-card-foot small { color:var(--muted); font-size:10px; }
+body.gc-staff-os-shell #app .gc-alert-badges { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:5px; }
+body.gc-staff-os-shell #app .gc-alert-severity.severity-high { background:#fff4df; color:#8f5d06; }
+body.gc-staff-os-shell #app .gc-alert-severity.severity-critical { background:#fff0f1; color:#a52d3c; }
+body.gc-staff-os-shell #app .gc-alert-body { margin:0; white-space:pre-line; line-height:1.9; overflow-wrap:anywhere; }
+body.gc-staff-os-shell #app .gc-alert-card :where(button,input,select,textarea) { min-height:42px; }
+body.gc-staff-os-shell #app .gc-alert-create-panel { padding:15px; }
+body.gc-staff-os-shell #app .gc-alert-empty { text-align:center; padding:28px 12px; }
+@media(max-width:760px) {
+  body.gc-staff-os-shell #app .gc-alert-kpis { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+  body.gc-staff-os-shell #app .gc-alert-kpis .kpi { min-width:0; padding:10px 8px; }
+  body.gc-staff-os-shell #app .gc-alert-kpis .kpi span { font-size:9px; line-height:1.5; }
+  body.gc-staff-os-shell #app .gc-alert-kpis .kpi strong { font-size:19px; overflow-wrap:anywhere; }
+  body.gc-staff-os-shell #app .gc-alert-toolbar { grid-template-columns:minmax(0,1fr); gap:7px; }
+  body.gc-staff-os-shell #app .gc-alert-card { padding:12px; gap:9px; }
+  body.gc-staff-os-shell #app .gc-alert-card-head { display:grid; grid-template-columns:minmax(0,1fr); }
+  body.gc-staff-os-shell #app .gc-alert-badges { justify-content:flex-start; }
+  body.gc-staff-os-shell #app .gc-alert-card-foot { align-items:center; }
+  body.gc-staff-os-shell #app .gc-alert-card-foot .btn { width:100%; }
+  body.gc-staff-os-shell #app .gc-alert-create-panel { padding:12px; }
+}
