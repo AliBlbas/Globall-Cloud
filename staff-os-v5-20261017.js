@@ -911,163 +911,183 @@
   }
 
   async function renderAlerts() {
-    const response = await ops('alerts');
-    state.data.alerts = Array.isArray(response.items) ? response.items : [];
-    const allAlerts = state.data.alerts;
-    const staffId = String(state.staff?.id || '');
-    const canCreate = ['super_admin', 'admin'].includes(String(state.staff?.role || ''));
-    const severityLabel = (value) => ({ normal: 'ئاسایی', high: 'گرنگ', critical: 'زۆر گرنگ' })[value] || 'ئاسایی';
-    const audienceLabel = (value) => value ? roleLabel(value) : 'هەموو ستاف';
+    // Customer-facing alerts are driven by actual Dubai warehouse receipts.
+    // The receiving Edge Function enforces staff authentication and branch scope.
+    const response = await request(FN.warehouse, '/');
+    const receipts = Array.isArray(response.items) ? response.items : [];
+    state.data.receipts = receipts;
 
-    const audienceOptions = '<option value="">هەموو ستاف</option>' +
-      ROLES.filter((role) => role !== 'driver').map((role) => '<option value="' + esc(role) + '">' + esc(roleLabel(role)) + '</option>').join('');
-    const creatorPanel = canCreate ? `
-      <section class="card gc-alert-create-panel" style="margin-top:12px">
-        <div class="card-head"><h3>دروستکردنی ئاگادارکردنەوەی ستاف</h3><span class="pill">ADMIN</span></div>
-        <form id="alertForm" class="form-grid">
-          <div class="form-field">
-            <label for="alertKind">جۆر</label>
-            <select class="field" id="alertKind" name="kind">
-              <option value="operations">کارگێڕی</option><option value="warehouse">کۆگا</option>
-              <option value="shipment">بار</option><option value="finance">دارایی</option>
-              <option value="security">پاراستن</option><option value="general">گشتی</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label for="alertSeverity">ئاستی گرنگی</label>
-            <select class="field" id="alertSeverity" name="severity">
-              <option value="normal">ئاسایی</option><option value="high">گرنگ</option><option value="critical">زۆر گرنگ</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label for="alertAudience">بۆ کێ؟</label>
-            <select class="field" id="alertAudience" name="audience_role">${audienceOptions}</select>
-            <small class="muted">ئەگەر «هەموو ستاف» هەڵبژێریت، ئاگادارکردنەوەکە بۆ هەموو ڕۆڵەکانی ستاف دەردەکەوێت.</small>
-          </div>
-          <div class="form-field full">
-            <label for="alertTitle">ناونیشان</label>
-            <input class="field" id="alertTitle" name="title" maxlength="140" required placeholder="ناونیشانی ڕوون بنووسە">
-          </div>
-          <div class="form-field full">
-            <label for="alertBody">پەیام</label>
-            <textarea class="field" id="alertBody" name="body" maxlength="3000" rows="4" required placeholder="وردەکاری و ئەو هەنگاوە بنووسە کە ستاف دەبێت ئەنجامی بدات."></textarea>
-          </div>
-        </form>
-        <button class="btn primary" id="createAlert" type="button">ناردنی ئاگادارکردنەوە</button>
-      </section>` : '';
+    const alerts = receipts
+      .filter((item) => isDubaiLocation(item.location || item.source_warehouse || item.warehouse))
+      .sort((a, b) => new Date(b.received_at || b.scanned_at || b.created_at || 0).getTime()
+        - new Date(a.received_at || a.scanned_at || a.created_at || 0).getTime());
 
-    document.getElementById('view').innerHTML = `
-      <div class="section-head">
-        <div><div class="eyebrow">STAFF ALERT CENTER</div><h1>ئاگادارکردنەوەکان</h1>
-        <p>ئاگادارییەکان بەپێی بڕۆڵ، ئاستی گرنگی و دۆخی خوێندنەوە ڕێک بخە.</p></div>
-        <div class="actions"><button class="btn" id="alertRefresh" type="button">↻ نوێکردنەوە</button></div>
-      </div>
-      <div class="grid-kpi gc-alert-kpis">
-        <article class="kpi"><span>کۆی ئاگاداری</span><strong id="alertTotal">${number(allAlerts.length)}</strong></article>
-        <article class="kpi"><span>نەخوێندراوە</span><strong id="alertUnread">${number(allAlerts.filter(a => !(Array.isArray(a.read_by) && a.read_by.map(String).includes(staffId))).length)}</strong></article>
-        <article class="kpi"><span>گرنگ / زۆر گرنگ</span><strong id="alertUrgent">${number(allAlerts.filter(a => ['high','critical'].includes(String(a.severity || 'normal'))).length)}</strong></article>
-      </div>
-      <div class="toolbar gc-alert-toolbar" aria-label="فلتەری ئاگادارکردنەوە">
-        <input class="field" id="alertSearch" type="search" autocomplete="off" placeholder="گەڕان بە ناونیشان، پەیام یان جۆر">
-        <select class="field" id="alertReadFilter" aria-label="فلتەری خوێندنەوە">
-          <option value="all">خوێندراوە و نەخوێندراوە</option><option value="unread">تەنها نەخوێندراوە</option><option value="read">تەنها خوێندراوە</option>
-        </select>
-        <select class="field" id="alertSeverityFilter" aria-label="فلتەری گرنگی">
-          <option value="all">هەموو ئاستەکان</option><option value="critical">زۆر گرنگ</option><option value="high">گرنگ</option><option value="normal">ئاسایی</option>
-        </select>
-      </div>
-      <div class="gc-alert-results"><span id="alertResultCount"></span><div class="list" id="alertList" aria-live="polite"></div></div>
-      ${creatorPanel}
-    `;
+    const statusFor = (item) => {
+      const status = text(item.notification_status || 'unknown').toLowerCase();
+      if (status === 'notified') return {
+        key: 'registered', tone: 'green', label: 'لە هەژماری کڕیار تۆمارکراوە',
+        detail: 'تۆماری ئاگادارکردنەوە بۆ هەمان خاوەنی ئەم GC code ـە دۆزرایەوە.'
+      };
+      if (status === 'account_unlinked') return {
+        key: 'unlinked', tone: 'red', label: 'هەژماری کڕیار پەیوەست نییە',
+        detail: 'پێویستە خاوەندارێتیی هەژمار پشتڕاست بکرێتەوە و پاشان هەژمارەکە ببەسترێتەوە.'
+      };
+      if (status === 'in_app_disabled') return {
+        key: 'attention', tone: 'amber', label: 'ئاگادارکردنەوەی ناوخۆیی داخراوە',
+        detail: 'ڕێکخستنی ئاگادارکردنەوەی هەژماری کڕیار پشکنین بکە.'
+      };
+      if (status === 'failed' || status === 'retry') return {
+        key: 'attention', tone: 'red', label: 'ئاگادارکردنەوە پێویستی بە دووبارەکردنەوە هەیە',
+        detail: 'وردەکاریی تۆمارەکە بکەرەوە و ئاگادارکردنەوەکە دووبارە هەوڵ بدە.'
+      };
+      if (status === 'pending') return {
+        key: 'attention', tone: 'amber', label: 'ئاگادارکردنەوە چاوەڕوانە',
+        detail: 'تۆماری ئاگادارکردنەوەی کڕیار نەدۆزرایەوە؛ وردەکاریی تۆمارەکە بپشکنە.'
+      };
+      return {
+        key: 'attention', tone: 'amber', label: 'دۆخی ئاگادارکردنەوە پشکنین بکرێت',
+        detail: 'دۆخی ئاگادارکردنەوە لە خزمەتگوزاری وەرگرتنی کۆگا بە دڵنیایی دیاری نەکراوە.'
+      };
+    };
 
-    const list = document.getElementById('alertList');
-    const resultCount = document.getElementById('alertResultCount');
-    const renderList = () => {
-      const query = text(document.getElementById('alertSearch')?.value).toLocaleLowerCase();
-      const readFilter = document.getElementById('alertReadFilter')?.value || 'all';
-      const severityFilter = document.getElementById('alertSeverityFilter')?.value || 'all';
-      const rows = allAlerts.filter((alert) => {
-        const readBy = Array.isArray(alert.read_by) ? alert.read_by.map(String) : [];
-        const isRead = readBy.includes(staffId);
-        const severity = ['normal','high','critical'].includes(String(alert.severity || 'normal')) ? String(alert.severity || 'normal') : 'normal';
-        const searchable = [alert.title, alert.body, alert.message, alert.kind, alert.entity_type, audienceLabel(alert.audience_role)].map(x => String(x || '')).join(' ').toLocaleLowerCase();
-        return (!query || searchable.includes(query))
-          && (readFilter === 'all' || (readFilter === 'read' ? isRead : !isRead))
-          && (severityFilter === 'all' || severity === severityFilter);
+    const view = document.getElementById('view');
+    if (!view) return;
+    const registeredCount = alerts.filter((item) => statusFor(item).key === 'registered').length;
+    const unlinkedCount = alerts.filter((item) => statusFor(item).key === 'unlinked').length;
+    const attentionCount = alerts.length - registeredCount - unlinkedCount;
+    const metric = (label, value, detail, tone) =>
+      '<article class="gc-live-wh-metric ' + (tone || '') + '">' +
+        '<span>' + esc(label) + '</span><strong>' + esc(number(value)) + '</strong>' +
+        '<small>' + esc(detail || '') + '</small></article>';
+
+    view.innerHTML =
+      '<section class="gc-live-wh-workspace gc-staff-dubai-alert-center">' +
+        '<header class="gc-live-wh-hero">' +
+          '<div class="gc-live-wh-hero-main">' +
+            '<span class="gc-live-wh-eyebrow">DUBAI → ERBIL · CUSTOMER NOTIFICATION CENTER</span>' +
+            '<h1>ئاگادارکردنەوەی کڕیاران · کۆگای دوبەی</h1>' +
+            '<p>تەنها کاڵا وەرگیراوەکانی دوبەی لێرە دەردەکەون. کۆدی GC، وێنە، شوێن، بەرواری وەرگرتن و دۆخی ئاگادارکردنەوەی هەژماری کڕیار لە یەک شوێن پشکنین بکە.</p>' +
+            '<div class="gc-live-wh-flow"><span>١ · GC Code</span><i>→</i><span>٢ · وێنە و شوێن</span><i>→</i><span>٣ · دۆخی Portal</span></div>' +
+          '</div>' +
+          '<div class="gc-live-wh-hero-actions">' +
+            '<button class="btn primary" id="gcDubaiAlertOpenWarehouse" type="button">＋ تۆمارکردنی کاڵای نوێ</button>' +
+            '<button class="btn" id="gcDubaiAlertRefresh" type="button">↻ نوێکردنەوە</button>' +
+          '</div>' +
+        '</header>' +
+        '<div class="gc-live-wh-metrics">' +
+          metric('کۆی تۆمارەکانی دوبەی', alerts.length, 'تۆمارە گەڕاوەکان', '') +
+          metric('لە هەژماری کڕیار تۆمارکراوە', registeredCount, 'GC و هەژمار هاوتان', 'teal') +
+          metric('هەژمار پەیوەست نییە', unlinkedCount, 'پێویست بە پشتڕاستکردنەوە', unlinkedCount ? 'red' : '') +
+          metric('پێویست بە پشکنین', attentionCount, 'ئاگادارکردنەوە و ڕێکخستن', attentionCount ? 'amber' : 'green') +
+        '</div>' +
+        '<div class="gc-live-wh-toolbar">' +
+          '<label class="gc-live-wh-search"><span aria-hidden="true">⌕</span><input class="field" id="gcDubaiAlertSearch" type="search" autocomplete="off" placeholder="گەڕان بە GC، کڕیار، batch یان tracking" aria-label="گەڕان لە ئاگادارکردنەوەکانی دوبەی"></label>' +
+          '<label><span>دۆخی ئاگادارکردنەوە</span><select class="field" id="gcDubaiAlertFilter">' +
+            '<option value="all">هەموو دۆخەکان</option>' +
+            '<option value="action">پێویست بە پشکنین</option>' +
+            '<option value="unlinked">هەژمار پەیوەست نییە</option>' +
+            '<option value="registered">لە هەژماری کڕیار تۆمارکراوە</option>' +
+          '</select></label>' +
+        '</div>' +
+        '<div class="gc-live-wh-count" id="gcDubaiAlertCount" aria-live="polite"></div>' +
+        '<div class="gc-live-wh-list" id="gcDubaiAlertList" aria-live="polite"></div>' +
+        '<p class="muted" style="margin-top:12px;line-height:1.8">تێبینی: ئەم بەشە دۆخی تۆمارکردنی ئاگادارکردنەوە پیشان دەدات؛ پشتڕاستکردنەوەی گەیشتنی پەیامی دەرەکی/WhatsApp بە جیا پێویستی بە provider delivery status هەیە.</p>' +
+      '</section>';
+
+    const list = document.getElementById('gcDubaiAlertList');
+    const resultCount = document.getElementById('gcDubaiAlertCount');
+
+    const draw = () => {
+      const query = text(document.getElementById('gcDubaiAlertSearch')?.value).toLocaleLowerCase();
+      const filter = document.getElementById('gcDubaiAlertFilter')?.value || 'all';
+      const rows = alerts.filter((item) => {
+        const status = statusFor(item);
+        const searchText = [
+          item.gc_code, item.gc_code_detected, item.customer_name, item.batch_code,
+          item.barcode, item.scan_code, item.location, item.source_warehouse,
+          item.warehouse, item.product_type, item.description, item.notes
+        ].map((value) => String(value || '')).join(' ').toLocaleLowerCase();
+        return (!query || searchText.includes(query))
+          && (filter === 'all'
+            || (filter === 'registered' && status.key === 'registered')
+            || (filter === 'unlinked' && status.key === 'unlinked')
+            || (filter === 'action' && status.key !== 'registered'));
       });
 
-      resultCount.textContent = rows.length + ' / ' + allAlerts.length + ' ئاگادارکردنەوە';
-      list.innerHTML = rows.length ? rows.map((alert) => {
-        const readBy = Array.isArray(alert.read_by) ? alert.read_by.map(String) : [];
-        const isRead = readBy.includes(staffId);
-        const severity = ['normal','high','critical'].includes(String(alert.severity || 'normal')) ? String(alert.severity || 'normal') : 'normal';
-        const kind = text(alert.kind) || 'general';
-        const audience = audienceLabel(alert.audience_role);
-        return `<article class="notice gc-alert-card severity-${severity} ${isRead ? 'is-read' : 'unread'}">
-          <div class="gc-alert-card-head">
-            <div class="gc-alert-card-title"><strong>${esc(alert.title || kind || 'Alert')}</strong><small>${esc(date(alert.created_at))}</small></div>
-            <div class="gc-alert-badges"><span class="pill gc-alert-severity severity-${severity}">${esc(severityLabel(severity))}</span><span class="pill gc-alert-audience">${esc(audience)}</span></div>
-          </div>
-          <p class="gc-alert-body">${esc(alert.body || alert.message || 'پەیامێک بۆ ئەم ئاگادارکردنەوەیە تۆمار نەکراوە.')}</p>
-          <div class="gc-alert-card-foot"><small>${esc(kind)} ${alert.entity_type ? ' · ' + esc(alert.entity_type) : ''}</small>
-            ${isRead ? '<span class="pill">خوێندراوە</span>' : '<button class="btn" type="button" data-alert-read="' + esc(alert.id) + '">خوێندنەوە و داخستن</button>'}
-          </div>
-        </article>`;
-      }).join('') : '<div class="empty gc-alert-empty">هیچ ئاگادارکردنەوەیەک بەم فلتەرە نەدۆزرایەوە.</div>';
+      resultCount.textContent = number(rows.length) + ' / ' + number(alerts.length) + ' تۆماری دوبەی';
+      if (!rows.length) {
+        const message = alerts.length
+          ? 'هیچ تۆمارێک لەگەڵ ئەم گەڕان و فلتەرەدا نەدۆزرایەوە.'
+          : 'هێشتا هیچ کاڵایەکی دوبەی لەم داتابەیسەدا تۆمار نەکراوە.';
+        list.innerHTML =
+          '<div class="gc-live-wh-empty"><span>DUBAI WAREHOUSE ALERTS</span>' +
+            '<h3>' + esc(message) + '</h3>' +
+            '<p>کاتێک ستاف کاڵا بە GC code، شوێنی کۆگا، بەروار و وێنە تۆمار بکات، دۆخی ئاگادارکردنەوەی کڕیار لێرە دەردەکەوێت.</p>' +
+            '<button class="btn primary" type="button" data-dubai-alert-open-warehouse>کردنەوەی بەشی کۆگا</button>' +
+          '</div>';
+      } else {
+        list.innerHTML = rows.map((item) => {
+          const status = statusFor(item);
+          const code = item.gc_code_detected || item.gc_code || (item.cartons || []).map((carton) => carton.gc_code).find(Boolean) || 'GC ـی تۆمارکراو نییە';
+          const location = item.location || item.source_warehouse || item.warehouse || '—';
+          const received = item.received_at || item.scanned_at || item.created_at;
+          const batch = item.batch_code || '—';
+          const cartonCount = item.carton_count ?? item.cartons?.length ?? 0;
+          const photoUrls = (Array.isArray(item.photos) ? item.photos : [])
+            .filter((url) => String(url || '').startsWith('https://')).slice(0, 3);
+          const photosHTML = photoUrls.length
+            ? '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:7px">' +
+              photoUrls.map((url, index) =>
+                '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" aria-label="کردنەوەی وێنەی بەڵگە ' + (index + 1) + '" style="display:block;width:64px;height:64px;border:1px solid #dce8ed;border-radius:10px;overflow:hidden">' +
+                  '<img src="' + esc(url) + '" alt="وێنەی بەڵگە ' + (index + 1) + '" loading="lazy" style="width:100%;height:100%;object-fit:cover">' +
+                '</a>'
+              ).join('') +
+              (item.photos.length > 3 ? '<span class="gc-live-wh-badge">+' + number(item.photos.length - 3) + ' وێنەی تر</span>' : '') +
+              '</div>'
+            : '<p class="muted">وێنەی بەڵگە بەردەست نییە؛ وردەکاریی receipt بپشکنە.</p>';
+          const linkedMarkup = item.account_linked === true
+            ? '<span class="gc-live-wh-badge green">هەژماری GC پەیوەستە</span>'
+            : '<span class="gc-live-wh-badge red">هەژماری GC پەیوەست نییە</span>';
+          return '<article class="gc-live-wh-card ' + (status.key === 'registered' ? '' : 'needs-attention') + '">' +
+            '<div class="gc-live-wh-card-head">' +
+              '<div class="gc-live-wh-id"><span>DUBAI RECEIPT · CUSTOMER</span><strong>' + esc(code) + '</strong>' +
+                '<small>' + esc(item.customer_name || 'ناوی کڕیار لەم تۆمارەدا نییە') + '</small></div>' +
+              '<div class="gc-live-wh-status"><span class="gc-live-wh-badge ' + status.tone + '">' + esc(status.label) + '</span>' +
+                '<span class="gc-live-wh-badge">دوبەی</span></div>' +
+            '</div>' +
+            '<div class="gc-live-wh-facts">' +
+              '<div><span>بەرواری وەرگرتن</span><strong>' + esc(received ? date(received) : '—') + '</strong></div>' +
+              '<div><span>کارتۆن</span><strong>' + esc(number(cartonCount)) + '</strong></div>' +
+              '<div><span>وێنە</span><strong>' + esc(number(Array.isArray(item.photos) ? item.photos.length : 0)) + '</strong></div>' +
+              '<div><span>هەژماری کڕیار</span><strong>' + (item.account_linked === true ? 'پەیوەستە' : 'پشکنین') + '</strong></div>' +
+            '</div>' +
+            '<div class="gc-live-wh-details">' +
+              '<span><span>شوێنی کۆگا</span><b>' + esc(location) + '</b></span>' +
+              '<span><span>Batch</span><b>' + esc(batch) + '</b></span>' +
+              '<span><span>Tracking / Scan</span><b>' + esc(item.scan_code || item.barcode || item.label_metadata?.tracking_number || '—') + '</b></span>' +
+              '<span><span>ناوەڕۆکی کاڵا</span><b>' + esc(item.product_type || item.description || item.notes || '—') + '</b></span>' +
+            '</div>' +
+            '<div class="gc-live-wh-linkstate">' + linkedMarkup + '<small>' + esc(status.detail) + '</small></div>' +
+            photosHTML +
+            (item.photo_signing_warning ? '<p class="muted" role="status">لینکی وێنەکان ئامادە نەبوو؛ لە وردەکاریی receipt پشکنینی بکە.</p>' : '') +
+            '<div class="gc-live-wh-actions"><button class="btn primary" type="button" data-dubai-alert-receipt="' + esc(item.id) + '">وردەکاری، وێنە و دووبارە ناردن</button></div>' +
+          '</article>';
+        }).join('');
+      }
 
-      list.querySelectorAll('[data-alert-read]').forEach((button) => {
-        button.addEventListener('click', async () => {
-          if (button.disabled) return;
-          button.disabled = true;
-          button.setAttribute('aria-busy','true');
-          try {
-            await opsPost('alert_read', { id: button.dataset.alertRead });
-            const current = allAlerts.find((item) => String(item.id) === String(button.dataset.alertRead));
-            if (current) {
-              const existing = Array.isArray(current.read_by) ? current.read_by.map(String) : [];
-              if (!existing.includes(staffId)) existing.push(staffId);
-              current.read_by = existing;
-            }
-            toast('ئاگادارکردنەوەکە خوێندرایەوە');
-            renderList();
-            updateBadges();
-          } catch (error) {
-            toast(errorText(error, 'ناتوانرێت ئاگادارکردنەوەکە بخوێندرێتەوە'), 'bad');
-            button.disabled = false;
-            button.removeAttribute('aria-busy');
-          }
-        });
+      list.querySelectorAll('[data-dubai-alert-receipt]').forEach((button) => {
+        button.addEventListener('click', () => receiptDetail(button.dataset.dubaiAlertReceipt));
+      });
+      list.querySelectorAll('[data-dubai-alert-open-warehouse]').forEach((button) => {
+        button.addEventListener('click', () => loadTab('warehouses'));
       });
     };
 
-    ['alertSearch','alertReadFilter','alertSeverityFilter'].forEach((id) => {
-      const control = document.getElementById(id);
-      control?.addEventListener(id === 'alertSearch' ? 'input' : 'change', renderList);
-    });
-    document.getElementById('alertRefresh')?.addEventListener('click', () => renderAlerts());
-
-    if (canCreate) {
-      document.getElementById('createAlert')?.addEventListener('click', async () => {
-        const form = document.getElementById('alertForm');
-        const button = document.getElementById('createAlert');
-        if (!form || !form.reportValidity() || button.disabled) return;
-        button.disabled = true;
-        button.setAttribute('aria-busy','true');
-        try {
-          const data = Object.fromEntries(new FormData(form).entries());
-          await opsPost('alert_create', { ...data, audience_role: text(data.audience_role) || null });
-          toast('ئاگادارکردنەوە بەپێی ڕۆڵ تۆمار کرا');
-          form.reset();
-          await renderAlerts();
-        } catch (error) {
-          toast(errorText(error, 'دروستکردنی ئاگادارکردنەوە سەرکەوتوو نەبوو'), 'bad');
-        } finally {
-          const current = document.getElementById('createAlert');
-          if (current) { current.disabled = false; current.removeAttribute('aria-busy'); }
-        }
-      });
-    }
-    renderList();
+    document.getElementById('gcDubaiAlertSearch')?.addEventListener('input', draw);
+    document.getElementById('gcDubaiAlertFilter')?.addEventListener('change', draw);
+    document.getElementById('gcDubaiAlertRefresh')?.addEventListener('click', () => loadTab('alerts', true));
+    document.getElementById('gcDubaiAlertOpenWarehouse')?.addEventListener('click', () => loadTab('warehouses'));
+    draw();
   }
 
   function downloadUnlinkedCustomerReport() {
