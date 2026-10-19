@@ -978,12 +978,12 @@ async function createStaff(client: ReturnType<typeof createClient>, payload: Jso
 async function updateStaff(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, isSuperAdmin: boolean }) {
   const id = txt(payload.id)
   if (!id) throw responseError('Missing staff id', 400)
-  if (!actor.isSuperAdmin && (txt(payload.email) !== null || txt(payload.password) !== null)) {
-    throw responseError('Email and password are managed by Super Admin only', 403)
-  }
   const { data: current, error: currentErr } = await client.from('staff').select('id,full_name,email,role,branch,is_active').eq('id', id).maybeSingle()
   if (currentErr) throw currentErr
   if (!current) throw responseError('Staff member not found', 404)
+  if (!actor.isSuperAdmin && (txt(payload.password) !== null || (txt(payload.email) !== null && txt(payload.email) !== txt(current.email)))) {
+    throw responseError('Email and password are managed by Super Admin only', 403)
+  }
   if (current.role === 'super_admin' && !actor.isSuperAdmin) throw responseError('Only Super Admin can modify a Super Admin', 403)
   if (id === actor.id && payload.is_active === false) throw responseError('You cannot deactivate your own Super Admin session', 400)
   const nextRole = txt(payload.role)
