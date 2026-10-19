@@ -376,6 +376,8 @@ if (!cartonManifestStaff.includes('warehouse-carton-manifest-card') || !cartonMa
 else ok('Staff console exposes carton details and Code 128 label printing')
 if (!publicShell.includes('gc-customer-carton-manifest-20261017.css?v=1') || !publicShell.includes('gc-customer-carton-manifest-20261017.js?v=1')) fail('Public customer page must load the individual carton manifest UI and styles')
 else ok('Customer portal loads the carton manifest UI and responsive styles')
+if (!publicShell.includes('gc-customer-experience-signature-20261017.css?v=3') || !publicShell.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261019-1')) fail('Dubai receipt alert CSS/JS assets must use fresh immutable-cache URLs')
+else ok('Dubai receipt alert assets use cache-busted URLs')
 if (!privateCargoPhotoStaff.includes("const availableLocations=roleLocation[state.staff?.role]?[roleLocation[state.staff.role]]:['China','Dubai','Erbil','USA'];")) fail('Staff receipt form must limit branch-scoped warehouse staff to their authorized location')
 else ok('Warehouse receipt location options respect branch-scoped staff roles')
 
