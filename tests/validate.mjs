@@ -492,6 +492,15 @@ const superAdminContracts = [
     accountAdmin.includes('usd_to_iqd: rate') &&
     accountAdmin.includes("from('app_settings').upsert") &&
     accountAdmin.includes('synchronized_app_setting: true')],
+  ['pricing inserts and edits also populate the live database legacy NOT NULL columns',
+    accountAdmin.includes('origin: fields.origin') &&
+    accountAdmin.includes('transport_type: fields.transport') &&
+    accountAdmin.includes('item_category: fields.product, price_usd: fields.amount') &&
+    accountAdmin.includes('updates.price_usd = fields.amount')],
+  ['staff email edits are persisted and auth metadata is patched without clearing other fields',
+    accountAdmin.includes('full_name,email,role,branch,is_active') &&
+    accountAdmin.includes('updates.email = email') &&
+    accountAdmin.includes("const metadata: JsonRecord = { account_kind: 'staff' }")],
   ['Super Admin exposes add/edit/activate actions for pricing rows',
     superAdminUi.includes('function pricingForm(existing={})') &&
     superAdminUi.includes('data-edit-price=') &&
