@@ -977,7 +977,196 @@ async function renderCustomers() {
   function editRate(id){const x=(state.data.pricing.rates||[]).find(r=>String(r.id)===String(id));if(!x)return;openModal('دەستکاری نرخ',`<form id="editRate" class="form-grid"><input type="hidden" name="id" value="${esc(x.id)}"><div class="form-field"><label>Product</label><input class="field" value="${esc(x.product_type)}" disabled></div><div class="form-field"><label>Amount</label><input class="field" name="amount" type="number" step="0.01" value="${esc(x.amount??0)}"></div><div class="form-field"><label>Min days</label><input class="field" name="transit_min_days" type="number" value="${esc(x.transit_min_days??'')}"></div><div class="form-field"><label>Max days</label><input class="field" name="transit_max_days" type="number" value="${esc(x.transit_max_days??'')}"></div><div class="form-field"><label>حالت</label><select class="field" name="is_active"><option value="true" ${x.is_active!==false?'selected':''}>چالاک</option><option value="false" ${x.is_active===false?'selected':''}>ناچالاک</option></select></div><div class="form-field full"><label>Notes</label><textarea class="field" name="notes">${esc(x.notes||'')}</textarea></div></form>`,'<button class="btn" data-close>هەڵوەشاندنەوە</button><button class="btn primary" id="saveEditRate">پاشەکەوت</button>');document.getElementById('saveEditRate').onclick=async()=>{const d=Object.fromEntries(new FormData(document.getElementById('editRate')).entries());d.is_active=d.is_active==='true';d.transit_min_days=d.transit_min_days===''?null:Number(d.transit_min_days);d.transit_max_days=d.transit_max_days===''?null:Number(d.transit_max_days);try{await opsPost('pricing_update',{...d,amount:Number(d.amount)});closeModal();toast('نرخ نوێکرایەوە');await renderPricing()}catch(e){toast(e.message,'bad')}};}
   function newFxModal(){openModal('گۆڕینی USD/IQD',`<form id="fxForm" class="form-grid"><div class="form-field"><label>USD → IQD</label><input class="field" name="usd_to_iqd" type="number" step="0.01" required placeholder="1550"></div><div class="form-field"><label>Source</label><input class="field" name="source" value="manual"></div></form>`,'<button class="btn" data-close>هەڵوەشاندنەوە</button><button class="btn primary" id="saveFx">پاشەکەوت</button>');document.getElementById('saveFx').onclick=async()=>{const d=Object.fromEntries(new FormData(document.getElementById('fxForm')).entries());try{await opsPost('fx_update',d);closeModal();toast('FX نوێکرایەوە');await renderPricing()}catch(e){toast(e.message,'bad')}};}
 
-  async function renderWarehouses(){const r=await request(FN.warehouse,'/');state.data.receipts=r.items||[];document.getElementById('view').innerHTML=`<div class="section-head"><div><div class="eyebrow">WAREHOUSE CHAIN OF CUSTODY</div><h1>کۆگاكان</h1><p>چین · دوبەی · هەولێر · ئەمریکا، وەرگرتنی carton و بەڵگەی وێنە.</p></div><div class="actions"><button class="btn primary" id="newReceipt">+ وەرگرتن</button><button class="btn" id="scanReceipt">⌁ Scan GC</button></div></div><div class="grid-kpi"><div class="kpi"><span>Receipts</span><strong>${number(state.data.receipts.length)}</strong></div><div class="kpi"><span>Verified</span><strong>${number(state.data.receipts.filter(x=>x.verification_status==='verified').length)}</strong></div><div class="kpi"><span>Today</span><strong>${number(state.data.receipts.filter(x=>shortDate(x.received_at)===shortDate(new Date())).length)}</strong></div><div class="kpi"><span>Photos</span><strong>${number(state.data.receipts.reduce((s,x)=>s+(Array.isArray(x.photos)?x.photos.length:0),0))}</strong></div><div class="kpi"><span>ئاگاداری نێردراوە</span><strong>${number(state.data.receipts.filter(x=>isDubaiLocation(x.location||x.source_warehouse||x.warehouse)&&x.notification_status==='notified').length)}</strong></div><div class="kpi"><span>چاوەڕوانی ئاگاداری</span><strong>${number(state.data.receipts.filter(x=>isDubaiLocation(x.location||x.source_warehouse||x.warehouse)&&x.notification_status==='pending').length)}</strong></div><div class="kpi"><span>receipt بێ هەژمار</span><strong>${number(state.data.receipts.filter(x=>x.notification_status==='account_unlinked').length)}</strong></div></div><div class="toolbar"><input class="field" id="warehouseSearch" placeholder="گەڕان بە GC / batch / tracking / کۆگا"></div><div class="table-wrap"><table class="table"><thead><tr><th>GC</th><th>کۆگا</th><th>Batch</th><th>Cartons</th><th>Tracking</th><th>وەرگر</th><th>وێنە</th><th>هەژماری Portal</th><th>ئاگاداری</th><th>بەروار</th><th></th></tr></thead><tbody id="warehouseRows"></tbody></table></div>`;const draw=()=>{const q=text(document.getElementById('warehouseSearch').value).toLowerCase();const rows=state.data.receipts.filter(x=>!q||JSON.stringify(x).toLowerCase().includes(q));document.getElementById('warehouseRows').innerHTML=rows.map(x=>{const md=x.label_metadata||{};return `<tr><td class="mono"><b>${esc(x.gc_code_detected||x.gc_code||'—')}</b></td><td>${esc(x.location||x.source_warehouse||x.warehouse||'—')}</td><td class="mono">${esc(x.batch_code||'—')}</td><td>${number(x.carton_count||md.total_packages||1)}</td><td class="mono">${esc(x.scan_code||md.tracking_number||'—')}</td><td>${esc(x.created_by_name||'—')}</td><td>${number(Array.isArray(x.photos)?x.photos.length:0)}</td><td><span class="pill ${x.account_linked?'mint':'warn'}">${x.account_linked?'بەستراو':'بێ هەژمار'}</span>${x.photo_signing_warning?'<small class="muted">وێنە پێویستی بە پشکنینە</small>':''}</td><td><span class="pill ${x.notification_status==='notified'?'mint':x.notification_status==='pending'?'warn':''}" title="${esc(x.notification_status||'unknown')}">${x.notification_status==='notified'?'نێردراوە':x.notification_status==='pending'?'چاوەڕوانی ئاگاداری':x.notification_status==='in_app_disabled'?'ئاگاداری داخراوە':x.notification_status==='account_unlinked'?'بێ هەژمار':x.notification_status==='not_applicable'?'تەنها لە دوبەی':'دۆخ نادیار'}</span></td><td>${esc(date(x.received_at||x.scanned_at||x.updated_at))}</td><td><button class="btn" data-receipt="${esc(x.id)}">بینین</button></td></tr>`}).join('')||`<tr><td colspan="11"><div class="empty">هیچ receipt نییە.</div></td></tr>`;document.querySelectorAll('[data-receipt]').forEach(b=>b.onclick=()=>receiptDetail(b.dataset.receipt));};document.getElementById('warehouseSearch').oninput=draw;draw();document.getElementById('newReceipt').onclick=newReceiptModal;document.getElementById('scanReceipt').onclick=()=>scannerModal('warehouse');}
+  async function renderWarehouses() {
+    const response = await request(FN.warehouse, '/');
+    const receipts = Array.isArray(response.items) ? response.items : [];
+    state.data.receipts = receipts;
+    const view = document.getElementById('view');
+    if (!view) return;
+
+    const metric = (label, value, detail, tone) =>
+      '<article class="gc-live-wh-metric ' + (tone || '') + '">' +
+      '<span>' + esc(label) + '</span><strong>' + esc(value) + '</strong><small>' + esc(detail || '') + '</small></article>';
+    const todayCount = receipts.filter(x => shortDate(x.received_at || x.scanned_at) === shortDate(new Date())).length;
+    const photoCount = receipts.reduce((sum, x) => sum + (Array.isArray(x.photos) ? x.photos.length : 0), 0);
+    const dubaiRows = receipts.filter(x => isDubaiLocation(x.location || x.source_warehouse || x.warehouse));
+    const notifiedCount = dubaiRows.filter(x => x.notification_status === 'notified').length;
+    const pendingCount = dubaiRows.filter(x => ['pending', 'failed', 'retry'].includes(String(x.notification_status || '').toLowerCase())).length;
+    const unlinkedCount = receipts.filter(x => x.notification_status === 'account_unlinked' || x.account_linked === false).length;
+
+    view.innerHTML =
+      '<section class="gc-live-wh-workspace">' +
+        '<header class="gc-live-wh-hero">' +
+          '<div class="gc-live-wh-hero-main">' +
+            '<span class="gc-live-wh-eyebrow">DUBAI → ERBIL · WAREHOUSE CONTROL</span>' +
+            '<h1>وەرگرتنی کاڵا و بەڵگەی کڕیار</h1>' +
+            '<p>هەر تۆمارێک بە کۆدی GC، شوێنی کۆگا، بەروار و وێنەکانی بەڵگە پەیوەستە. ئەگەر هەژماری کڕیار بە دروستی پەیوەست بێت، ئاگادارکردنەوە لە هەمان ڕێڕەوی سیستەمەوە دەگاتە Portal.</p>' +
+            '<div class="gc-live-wh-flow"><span>١ · GC Code</span><i>→</i><span>٢ · وێنە و شوێن</span><i>→</i><span>٣ · Portal و ئاگاداری</span></div>' +
+          '</div>' +
+          '<div class="gc-live-wh-hero-actions"><button class="btn primary" id="newReceipt" type="button">＋ تۆمارکردنی وەرگرتنی نوێ</button><button class="btn" id="scanReceipt" type="button">⌁ سکانکردنی GC</button></div>' +
+        '</header>' +
+        '<div class="gc-live-wh-metrics">' +
+          metric('کۆی receipt', number(receipts.length), 'هەموو تۆمارەکان', '') +
+          metric('وەرگرتنی ئەمڕۆ', number(todayCount), 'بە کاتی تۆمارکراو', 'teal') +
+          metric('وێنەی بەڵگە', number(photoCount), 'لە کۆگای تایبەت', '') +
+          metric('ئاگاداری نێردراو', number(notifiedCount), 'تۆمارەکانی دوبەی', 'green') +
+          metric('چاوەڕوانی / شکست', number(pendingCount), 'پێویستی بە پشکنین', pendingCount ? 'amber' : '') +
+          metric('هەژمار پەیوەست نییە', number(unlinkedCount), 'GC و ناسنامە بپشکنە', unlinkedCount ? 'red' : '') +
+        '</div>' +
+        '<div class="gc-live-wh-toolbar">' +
+          '<label class="gc-live-wh-search"><span aria-hidden="true">⌕</span><input class="field" id="warehouseSearch" type="search" placeholder="گەڕان بە GC، ناو، batch، tracking یان کۆگا" aria-label="گەڕان لە تۆمارەکانی کۆگا"></label>' +
+          '<label><span>شوێنی کۆگا</span><select class="field" id="warehouseLocationFilter"><option value="all">هەموو کۆگاکان</option><option value="Dubai">دوبەی</option><option value="China">چین</option><option value="Erbil">هەولێر</option><option value="USA">ئەمریکا</option></select></label>' +
+          '<label><span>دۆخی پەیوەندی</span><select class="field" id="warehouseNoticeFilter"><option value="all">هەموو دۆخەکان</option><option value="pending">چاوەڕوانی / شکست</option><option value="notified">ئاگاداری نێردراو</option><option value="unlinked">هەژمار پەیوەست نییە</option><option value="attention">پێویستی بە پشکنین</option></select></label>' +
+          '<span class="gc-live-wh-count" id="warehouseResultCount"></span>' +
+        '</div>' +
+        '<div class="gc-live-wh-list" id="warehouseCards" aria-live="polite"></div>' +
+      '</section>';
+
+    const search = document.getElementById('warehouseSearch');
+    const locationFilter = document.getElementById('warehouseLocationFilter');
+    const noticeFilter = document.getElementById('warehouseNoticeFilter');
+    const list = document.getElementById('warehouseCards');
+    const resultCount = document.getElementById('warehouseResultCount');
+    const normalizeGC = value => String(value || '').normalize('NFKC').toUpperCase().replace(/[–—−]/g, '-').replace(/\s+/g, '');
+    const receiptCode = item => item.gc_code_detected || item.gc_code || item.label_metadata?.customer_gc_code || item.label_metadata?.gc_code || '';
+    const receiptLocation = item => item.location || item.source_warehouse || item.warehouse || 'شوێن تۆمارنەکراوە';
+    const locationKey = item => {
+      const raw = String(receiptLocation(item)).trim();
+      if (isDubaiLocation(raw)) return 'Dubai';
+      if (/china|چین/i.test(raw)) return 'China';
+      if (/erbil|hawler|هەولێر/i.test(raw)) return 'Erbil';
+      if (/usa|united states|ئەمریکا/i.test(raw)) return 'USA';
+      return raw;
+    };
+    const customerForReceipt = item => {
+      const customers = Array.isArray(state.data.customers) ? state.data.customers : [];
+      if (item.directory_customer_id) {
+        const exactOwner = customers.find(customer => String(customer.id) === String(item.directory_customer_id));
+        if (exactOwner) return exactOwner;
+      }
+      const code = normalizeGC(receiptCode(item));
+      if (!code) return null;
+      const matches = customers.filter(customer => normalizeGC(customer.gc_code || customer.code) === code);
+      return matches.length === 1 ? matches[0] : null;
+    };
+    const noticeLabel = value => ({
+      notified: 'ئاگاداری نێردراوە',
+      pending: 'چاوەڕوانی ئاگاداری',
+      failed: 'ئاگادارکردنەوە شکست هێنا',
+      retry: 'دووبارە هەوڵدان پێویستە',
+      account_unlinked: 'هەژماری Portal پەیوەست نییە',
+      in_app_disabled: 'ئاگاداریی ناوخۆیی داخراوە',
+      not_applicable: 'ئاگاداری بۆ ئەم شوێنە ناگونجێت',
+      unknown: 'دۆخی ئاگاداری نادیارە'
+    })[String(value || 'unknown').toLowerCase()] || String(value || 'دۆخی ئاگاداری نادیارە');
+    const needsAttention = item => {
+      const notice = String(item.notification_status || '').toLowerCase();
+      return Boolean(item.photo_signing_warning || item.account_linked === false ||
+        ['account_unlinked','pending','failed','retry'].includes(notice));
+    };
+    const renderReceiptCard = item => {
+      const md = item.label_metadata || {};
+      const owner = customerForReceipt(item);
+      const code = receiptCode(item) || 'GC code نییە';
+      const location = receiptLocation(item);
+      const notice = String(item.notification_status || 'unknown').toLowerCase();
+      const linked = typeof item.account_linked === 'boolean' ? item.account_linked : Boolean(owner && owner.auth_user_id);
+      const linkKnown = typeof item.account_linked === 'boolean' || Boolean(owner);
+      const photoCount = Array.isArray(item.photos) ? item.photos.length : 0;
+      const cartonCount = Number(item.carton_count || md.total_packages || 1);
+      const weight = item.weight_actual ?? md.gross_weight_kg;
+      const attention = needsAttention(item);
+      const canNotify = isDubaiLocation(location) && !['notified','account_unlinked','in_app_disabled','not_applicable'].includes(notice);
+      const tone = notice === 'notified' ? 'green' : (['pending','retry'].includes(notice) ? 'amber' : (['failed','account_unlinked'].includes(notice) ? 'red' : ''));
+      return '<article class="gc-live-wh-card ' + (attention ? 'needs-attention' : '') + '">' +
+        '<div class="gc-live-wh-card-head"><div class="gc-live-wh-id"><span>GC CODE · خاوەنی کاڵا</span><strong dir="ltr">' + esc(code) + '</strong><small>' + esc(owner?.name || item.customer_name || md.customer_name || 'ناوی خاوەن لە داتابەیسدا دیاری نەکراوە') + '</small></div>' +
+        '<div class="gc-live-wh-status"><span class="gc-live-wh-badge ' + (attention ? 'amber' : 'neutral') + '">' + (attention ? 'پشکنین پێویستە' : 'تۆمارکراو') + '</span><span class="gc-live-wh-badge ' + tone + '">' + esc(noticeLabel(notice)) + '</span></div></div>' +
+        '<div class="gc-live-wh-facts"><div><span>کۆگا</span><strong>' + esc(location) + '</strong></div><div><span>کارتۆن</span><strong>' + esc(number(cartonCount)) + '</strong></div><div><span>وێنە</span><strong>' + esc(number(photoCount)) + '</strong></div><div><span>کێش</span><strong>' + esc(weight == null || weight === '' ? '—' : String(weight) + ' kg') + '</strong></div></div>' +
+        '<div class="gc-live-wh-details"><span>Batch <b dir="ltr">' + esc(item.batch_code || '—') + '</b></span><span>Tracking <b dir="ltr">' + esc(item.scan_code || md.tracking_number || '—') + '</b></span><span>بەروار <b>' + esc(date(item.received_at || item.scanned_at || item.updated_at)) + '</b></span></div>' +
+        '<div class="gc-live-wh-linkstate"><span class="gc-live-wh-link ' + (linkKnown && linked ? 'green' : 'amber') + '">' + (linkKnown ? (linked ? 'هەژماری Portal پەیوەستە' : 'هەژماری Portal پەیوەست نییە') : 'پەیوەندی خاوەن پشکنین بکرێت') + '</span>' +
+        (item.photo_signing_warning ? '<small>لینکی وێنە تایبەتەکان پێویستی بە پشکنینە.</small>' : '') + '</div>' +
+        '<div class="gc-live-wh-actions"><button class="btn primary" type="button" data-receipt="' + esc(item.id) + '">وردەکاری و وێنەکان</button><button class="btn" type="button" data-receipt-owner="' + esc(item.id) + '">کونسۆڵی کڕیار</button>' +
+        (canNotify ? '<button class="btn gc-live-wh-notify" type="button" data-receipt-notify="' + esc(item.id) + '">ناردنی ئاگاداری</button>' : '') +
+        '</div></article>';
+    };
+
+    const draw = () => {
+      const query = String(search?.value || '').trim().toLowerCase();
+      const selectedLocation = String(locationFilter?.value || 'all');
+      const selectedNotice = String(noticeFilter?.value || 'all');
+      const filtered = receipts.filter(item => {
+        if (query && !JSON.stringify(item).toLowerCase().includes(query)) return false;
+        if (selectedLocation !== 'all' && locationKey(item) !== selectedLocation) return false;
+        const notice = String(item.notification_status || 'unknown').toLowerCase();
+        if (selectedNotice === 'pending' && !['pending','failed','retry'].includes(notice)) return false;
+        if (selectedNotice === 'notified' && notice !== 'notified') return false;
+        if (selectedNotice === 'unlinked' && notice !== 'account_unlinked' && item.account_linked !== false) return false;
+        if (selectedNotice === 'attention' && !needsAttention(item)) return false;
+        return true;
+      }).sort((a,b) => String(b.received_at || b.scanned_at || b.created_at || '').localeCompare(String(a.received_at || a.scanned_at || a.created_at || '')));
+      list.innerHTML = filtered.length ? filtered.map(renderReceiptCard).join('') :
+        '<div class="gc-live-wh-empty"><span>GC · WAREHOUSE</span><h3>هیچ تۆمارێک نەدۆزرایەوە</h3><p>فلتەر بگۆڕە یان وەرگرتنی کاڵای نوێ تۆمار بکە.</p><button class="btn primary" type="button" id="emptyNewReceipt">＋ وەرگرتنی نوێ</button></div>';
+      resultCount.textContent = number(filtered.length) + ' لە ' + number(receipts.length) + ' تۆمار';
+      list.querySelectorAll('[data-receipt]').forEach(button => button.addEventListener('click', () => receiptDetail(button.dataset.receipt)));
+      list.querySelectorAll('[data-receipt-owner]').forEach(button => button.addEventListener('click', async () => {
+        const item = receipts.find(row => String(row.id) === String(button.dataset.receiptOwner));
+        if (!item) return;
+        const owner = customerForReceipt(item);
+        const code = receiptCode(item);
+        await loadTab('customers');
+        if (owner) {
+          const freshOwner = (state.data.customers || []).find(customer => String(customer.id) === String(owner.id));
+          if (freshOwner) { customerDetail(String(freshOwner.id)); return; }
+        }
+        const customerSearch = document.getElementById('customerSearch');
+        if (customerSearch && code) {
+          customerSearch.value = code;
+          customerSearch.dispatchEvent(new Event('input', { bubbles:true }));
+          toast('لیستی کڕیاران بە GC Code فلتەر کرا؛ خاوەنی ڕاستەقینە هەڵبژێرە.');
+        } else toast('تۆماری خاوەنی ئەم GC Code ـە نەدۆزرایەوە؛ لە لیستی کڕیاران بگەڕێ.');
+      }));
+      list.querySelectorAll('[data-receipt-notify]').forEach(button => button.addEventListener('click', async () => {
+        if (button.disabled) return;
+        button.disabled = true;
+        button.setAttribute('aria-busy','true');
+        const oldText = button.textContent;
+        button.textContent = 'لە queue دانان…';
+        try {
+          const outcome = await request(FN.warehouseNotify, '/', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({receipt_id:button.dataset.receiptNotify})
+          });
+          if (outcome.notification?.not_applicable) {
+            toast('ئاگادارکردنەوە بۆ receipt ـی ئەم شوێنە ناگونجێت.','ok');
+          } else {
+            const channels = [];
+            if (outcome.notification?.in_app || outcome.notification?.in_app_queued) channels.push('ئەکاونتی کڕیار');
+            if (outcome.notification?.whatsapp_queued) channels.push('WhatsApp queue');
+            if (outcome.notification?.email_queued) channels.push('Email queue');
+            if (Array.isArray(outcome.notification?.errors) && outcome.notification.errors.length) throw new Error(outcome.notification.errors.join(' · '));
+            if (channels.length) toast('ئاگادارکردنەوە ڕێکخرا: ' + channels.join(' · '),'ok');
+            else if (outcome.notification?.account_linked === false) toast('سەرەتا هەژماری خاوەنی GC بە شێوەی پارێزراو پەیوەست بکە.','bad');
+            else if (outcome.notification?.external_opt_in === false) toast('WhatsApp/Email بێ ڕەزامەندیی کڕیار نەنێردران.','ok');
+            else toast('هیچ ڕێگای ئاگادارکردنەوە بەردەست نەبوو؛ وردەکاری پشکنە.','bad');
+          }
+          await loadTab('warehouses', true);
+        } catch (error) {
+          toast('ئاگادارکردنەوە سەرکەوتوو نەبوو: ' + errorText(error,'هەڵەی نادیار'),'bad');
+          button.disabled = false;
+          button.removeAttribute('aria-busy');
+          button.textContent = oldText;
+        }
+      }));
+      document.getElementById('emptyNewReceipt')?.addEventListener('click', () => newReceiptModal());
+    };
+    search?.addEventListener('input', draw);
+    locationFilter?.addEventListener('change', draw);
+    noticeFilter?.addEventListener('change', draw);
+    document.getElementById('newReceipt')?.addEventListener('click', () => newReceiptModal());
+    document.getElementById('scanReceipt')?.addEventListener('click', () => scannerModal('warehouse'));
+    draw();
+  }
   function receiptDetail(id){
     const r=state.data.receipts.find(x=>String(x.id)===String(id));
     if(!r)return;
