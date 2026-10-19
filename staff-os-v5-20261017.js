@@ -313,7 +313,8 @@
     const stale = active.filter(x => now - new Date(x.tracking_updated_at||x.updated_at||x.created_at||now).getTime() > 72*3600*1000);
     const overdue = active.filter(x => x.eta && new Date(x.eta).getTime() < now);
     const paymentRisk = shipments.filter(x => Number(x.total_amount||0) > Number(x.paid_amount||0) + 0.01);
-    const exceptionCount = openAlerts + stale.length + overdue.length + failedFeeds.length;
+    const customerLinkExceptions = results[1].status === 'fulfilled' ? state.data.customers.filter(x => x.is_active !== false && !x.auth_user_id).length : 0;
+    const exceptionCount = openAlerts + stale.length + overdue.length + failedFeeds.length + (customerLinkExceptions ? 1 : 0);
     const routes = new Map();
     for (const s of shipments) {
       const key=`${s.origin_key||s.origin||'—'} → ${s.dest_key||s.destination||'—'}`;
@@ -327,6 +328,7 @@
     ].map(([key,label])=>({key,label,count:shipments.filter(x=>String(x.status||x.operational_status||'').toLowerCase()===key).length}));
     const exceptionRows = [
       ...failedFeeds.slice(0,4).map((feed)=>({tone:'red',label:'داتای module بارنەبوو',detail:feed.label,action:'overview'})),
+      ...(customerLinkExceptions ? [{tone:'red',label:'پەیوەستکردنی هەژماری کڕیار',detail:`${number(customerLinkExceptions)} کڕیاری چالاک هەژماری چوونەژوورەوەیان پەیوەست نییە`,action:'customers'}] : []),
       ...overdue.slice(0,4).map(x=>({tone:'red',label:'ETA تێپەڕیوە',detail:x.tracking_id||x.customer_gc_code||'Shipment',action:'shipments'})),
       ...stale.slice(0,4).map(x=>({tone:'warn',label:'72 کاتژمێر بێ update',detail:x.tracking_id||x.customer_gc_code||'Shipment',action:'shipments'})),
       ...(openAlerts?state.data.alerts.filter(x=>Array.isArray(x.read_by)?!x.read_by.includes(state.staff.id):!x.read_at).slice(0,3).map(x=>({tone:'cyan',label:x.title||'Alert',detail:x.body||'',action:'alerts'})):[]),
@@ -343,7 +345,7 @@
     const customerBridgePanel = `<section class="card gc-customer-bridge-panel" aria-label="Customer Portal integration status">
       <div class="gc-customer-bridge-head">
         <div class="gc-customer-bridge-heading"><span class="gc-customer-bridge-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 11a3 3 0 1 0 0-6M17 14a5 5 0 0 1 4 6"/></svg></span><div><div class="eyebrow">CUSTOMER WORKSPACE · SHARED DATA</div><h3>پەیوەندی کونسۆڵی کڕیار</h3><p>داتای کڕیار و بارەکان لە backend ـی هاوبەشەوە بەڕێوەدەبرێن؛ هەر کڕیار تەنها داتای خۆی دەبینێت.</p></div></div>
-        <span class="pill ${customerFeedReady?'mint':'red'}">${customerFeedReady?'CUSTOMER FEED OK':'CUSTOMER FEED ISSUE'}</span>
+        <span class="pill ${!customerFeedReady?'red':activeUnlinkedCustomerAccounts===0?'mint':'red'}">${!customerFeedReady?'CUSTOMER FEED ISSUE':activeUnlinkedCustomerAccounts===0?'CUSTOMER LINKS HEALTHY':'ACCOUNT LINKING REQUIRED'}</span>
       </div>
       <div class="gc-customer-bridge-metrics">
         <div><span>هەموو کڕیار</span><strong>${number(customerRecords.length)}</strong></div>
