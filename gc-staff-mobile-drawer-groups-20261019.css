@@ -1,0 +1,53 @@
+/* Grouped drawer layout for the existing mobile Staff OS navigation. */
+@media (max-width: 760px) {
+  .gc-staff-mobile-module-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: start;
+    gap: 10px;
+  }
+
+  .gc-staff-mobile-module-group {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 7px;
+    min-width: 0;
+  }
+
+  .gc-staff-mobile-module-group + .gc-staff-mobile-module-group {
+    padding-top: 9px;
+    border-top: 1px solid rgba(143, 203, 224, .14);
+  }
+
+  .gc-staff-mobile-module-group-title {
+    min-width: 0;
+    padding-inline: 3px;
+    color: #8faec2;
+    font: 900 10px/1.6 Vazirmatn, system-ui, sans-serif;
+  }
+
+  .gc-staff-mobile-module-group-items {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    min-width: 0;
+  }
+
+  .gc-staff-mobile-module-group-items > button {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .gc-staff-mobile-module-group-items {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gc-staff-mobile-module-group,
+  .gc-staff-mobile-module-group-items > button {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
