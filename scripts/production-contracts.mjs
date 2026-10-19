@@ -414,6 +414,8 @@ if (!staffV5Script.includes('const severityLabel =') || !staffV5Script.includes(
 else ok('Staff Alert Center has searchable read-state and severity filters')
 if (!staffV5Script.includes('name="audience_role"') || !staffV5Script.includes('audience_role: text(data.audience_role) || null') || !staffV5Script.includes("const canCreate = ['super_admin', 'admin']")) fail('Staff alert creation must support role-targeting and restrict the composer to administrators')
 else ok('Staff alert creation supports role-targeting and hides write controls from non-admin roles')
+if (!staffV5Script.includes("ROLES.filter((role) => role !== 'driver')")) fail('Staff alert audience options must match the backend staff-role allowlist')
+else ok('Staff alert audience choices exclude unsupported driver-only roles')
 if (!staffV5Script.includes('button.disabled = true') || !staffV5Script.includes('current.read_by = existing') || !staffV5Script.includes('renderList();')) fail('Staff alert read action must prevent duplicate submissions and update the local read state')
 else ok('Staff alert read action updates local state and prevents duplicate submissions')
 if (!publicShell.includes('staff-os-v5-20261017.js?v=20261019-6') || !publicShell.includes('gc-staff-console-elite-20261018.css?v=6')) fail('Staff Alert Center release must use new immutable-cache asset URLs')
