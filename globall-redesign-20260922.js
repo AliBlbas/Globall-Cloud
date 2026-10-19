@@ -1,40 +1,44 @@
 (() => {
-  const mountFinalStyle = () => {
-    const href = '/globall-redesign-20260922.css?v=2';
-    const premiumHref = '/globall-premium-logistics-2026.css?v=1';
-    [...document.querySelectorAll('link[rel="stylesheet"]')].filter(l => l.href.includes('/globall-redesign-20260922.css')).forEach(l => l.remove());
-    [...document.querySelectorAll('link[rel="stylesheet"]')].filter(l => l.href.includes('/globall-premium-logistics-2026.css')).forEach(l => l.remove());
-    const link = document.createElement('link');
+  const ensureStylesheet = (href, marker) => {
+    const targetPath = new URL(href, document.baseURI).pathname;
+    const samePath = (node) => {
+      try { return new URL(node.href, document.baseURI).pathname === targetPath; }
+      catch (_) { return false; }
+    };
+    const pathMatches = [...document.querySelectorAll('link[rel="stylesheet"]')].filter(samePath);
+    const markerMatches = [...document.querySelectorAll(`link[${marker}]`)];
+    const link = markerMatches.find(samePath) || pathMatches[0] || markerMatches[0] || document.createElement('link');
+
+    // Keep exactly one DOM node per stylesheet path even when cache keys change.
+    pathMatches.forEach((node) => { if (node !== link) node.remove(); });
+    markerMatches.forEach((node) => { if (node !== link) node.remove(); });
+
     link.rel = 'stylesheet';
     link.href = href;
-    link.dataset.gcFinalRedesign = '1';
-    document.head.appendChild(link);
-    const premium = document.createElement('link');
-    premium.rel = 'stylesheet';
-    premium.href = premiumHref;
-    premium.dataset.gcPremiumLogistics = '1';
-    document.head.appendChild(premium);
-    const final = document.createElement('link');
-    final.rel = 'stylesheet';
-    final.href = '/gc-final-ui-20260927.css?v=4';
-    final.dataset.gcFinalUi = '1';
-    document.head.appendChild(final);
-    document.querySelectorAll('link[data-gc-redesign-v2026]').forEach((node) => node.remove());
-    const publicRedesign = document.createElement('link');
-    publicRedesign.rel = 'stylesheet';
-    publicRedesign.href = '/gc-redesign-v2026.css?v=20260927-3';
-    publicRedesign.dataset.gcRedesignV2026 = '1';
-    document.head.appendChild(publicRedesign);
-    const referenceApp = document.createElement('link');
-    referenceApp.rel = 'stylesheet';
-    referenceApp.href = '/gc-reference-app-20260927.css?v=1';
-    referenceApp.dataset.gcReferenceApp = '1';
-    document.head.appendChild(referenceApp);
-    const referenceInspired = document.createElement('link');
-    referenceInspired.rel = 'stylesheet';
-    referenceInspired.href = '/gc-reference-inspired-20260928.css?v=20260928-2';
-    referenceInspired.dataset.gcReferenceInspired = '1';
-    document.head.appendChild(referenceInspired);
+    link.setAttribute(marker, '1');
+    return link;
+  };
+
+  const mountFinalStyle = () => {
+    const finalStyles = [
+      ensureStylesheet('/globall-redesign-20260922.css?v=2', 'data-gc-final-redesign'),
+      ensureStylesheet('/globall-premium-logistics-2026.css?v=1', 'data-gc-premium-logistics'),
+      ensureStylesheet('/gc-final-ui-20260927.css?v=4', 'data-gc-final-ui'),
+      ensureStylesheet('/gc-redesign-v2026.css?v=20260927-3', 'data-gc-redesign-v2026'),
+      ensureStylesheet('/gc-reference-app-20260927.css?v=1', 'data-gc-reference-app'),
+      ensureStylesheet('/gc-reference-inspired-20260928.css?v=20260928-2', 'data-gc-reference-inspired')
+    ];
+
+    // Preserve override precedence in one batched DOM operation, without duplicate links.
+    const children = [...document.head.children];
+    const alreadyLastInOrder = finalStyles.every(
+      (link, index) => children[children.length - finalStyles.length + index] === link
+    );
+    if (!alreadyLastInOrder) {
+      const fragment = document.createDocumentFragment();
+      finalStyles.forEach((link) => fragment.appendChild(link));
+      document.head.appendChild(fragment);
+    }
   };
 
   const syncPages = (id) => {
