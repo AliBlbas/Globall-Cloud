@@ -24,6 +24,15 @@ const numberOrNull = (value: unknown, max: number) => {
   return Number.isFinite(number) && number >= 0 && number <= max ? number : null
 }
 const CARGO_PHOTO_BUCKET = 'customer-request-photos'
+const CARGO_MSDS_BUCKET = 'customer-msds-documents'
+const CARGO_MSDS_MAX_BYTES = 10 * 1024 * 1024
+const CARGO_MSDS_MIMES_BY_EXTENSION: Record<string, string[]> = {
+  pdf: ['application/pdf'],
+  jpg: ['image/jpeg', 'image/jpg', 'image/pjpeg'],
+  jpeg: ['image/jpeg', 'image/jpg', 'image/pjpeg'],
+  png: ['image/png'],
+  webp: ['image/webp'],
+}
 const WAREHOUSE_RECEIPT_BUCKET = 'warehouse-receipts'
 const WAREHOUSE_RECEIPT_SIGNED_URL_TTL = 24 * 60 * 60
 function warehouseReceiptStoragePath(value: unknown): string | null {
@@ -216,8 +225,46 @@ Deno.serve(async (req) => {
         const notes = text(data.notes, 2000)
         const requestType = text(data.request_type, 24) || 'quote'
         const cargoCountry = text(data.cargo_country, 100)
+        const productType = text(data.product_type, 160) || 'General Cargo (No Battery/Screen)'
         const cargoDescription = text(data.cargo_description, 2000)
         const requestedCargoImagePath = text(data.cargo_image_path, 240)
+        const requestedMsdsDocumentPath = text(data.msds_document_path, 240)
+        const cargoComplianceText = [productType, cargoDescription, notes].filter(Boolean).join(' ')
+        const inferredMedical = data.medical_device === true
+          || /(medical|medicine|medication|surgical|clinic|hospital|پزیشک|دەرمان|نەشتەرگەری)/i.test(cargoComplianceText)
+        const inferredBattery = data.has_battery === true
+          || /(battery|batteries|lithium|power\\s?bank|باتری|پاتری)/i.test(cargoComplianceText)
+        const inferredLiquid = data.has_liquid === true
+          || /(liquid|perfume|fragrance|shampoo|\\bgel\\b|\\boil\\b|شلە|شلەمەنی|عەتری|پەرفیوم)/i.test(cargoComplianceText)
+        if (inferredMedical) {
+          return json(req, {error:'ئامێر و کەلوپەلی پزیشکی بە هیچ شێوەیەک وەرناگیرێت.', code:'MEDICAL_EQUIPMENT_PROHIBITED'}, 422)
+        }
+        if ((inferredBattery || inferredLiquid) && !requestedMsdsDocumentPath) {
+          return json(req, {error:'بۆ کاڵای باتری‌دار یان شلەمەنی، فایلێکی MSDS پێویستە.', code:'MSDS_REQUIRED'}, 400)
+        }
+        let msdsDocumentPath: string | null = null
+        if (requestedMsdsDocumentPath) {
+          const pathParts = requestedMsdsDocumentPath.split('/')
+          const documentName = pathParts.length === 2 ? pathParts[1] : ''
+          const documentMatch = documentName.match(/^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\\.(pdf|jpg|jpeg|png|webp)$/i)
+          const extension = documentMatch?.[2]?.toLowerCase() || ''
+          const allowedMimes = CARGO_MSDS_MIMES_BY_EXTENSION[extension]
+          if (pathParts.length !== 2 || pathParts[0] !== user.id || !documentMatch || !allowedMimes) {
+            return json(req, {error:'Invalid MSDS attachment.', code:'INVALID_MSDS_ATTACHMENT'}, 400)
+          }
+          const {data: storedDocuments, error: documentListError} = await service.storage
+            .from(CARGO_MSDS_BUCKET).list(user.id, {limit:100, search:documentName})
+          if (documentListError) throw documentListError
+          const storedDocument = (storedDocuments || []).find((document) => document.name === documentName)
+          const metadata = storedDocument?.metadata as Record<string, unknown> | null | undefined
+          const size = Number(metadata?.size ?? metadata?.contentLength ?? Number.NaN)
+          const storedMime = text(metadata?.mimetype ?? metadata?.content_type, 100).toLowerCase()
+          if (!storedDocument || !Number.isFinite(size) || size < 1 || size > CARGO_MSDS_MAX_BYTES
+              || (storedMime && !allowedMimes.includes(storedMime))) {
+            return json(req, {error:'Invalid MSDS attachment.', code:'INVALID_MSDS_ATTACHMENT'}, 400)
+          }
+          msdsDocumentPath = requestedMsdsDocumentPath
+        }
         const quantityValid = transportMode === 'sea' ? volume !== null && volume > 0 : weight !== null && weight > 0
         if (originKey.length < 2 || destKey.length < 2 || !['air', 'sea', 'land', 'multimodal'].includes(transportMode) || !['standard', 'express', 'priority'].includes(serviceLevel) || !['EXW', 'FOB', 'CIF', 'DDP'].includes(incoterm) || !['quote', 'shipment'].includes(requestType) || !quantityValid) return json(req, {error: 'Please check the required quote fields.'}, 400)
 
@@ -253,8 +300,14 @@ Deno.serve(async (req) => {
           incoterm,
           request_type: requestType,
           cargo_country: cargoCountry || null,
+          product_type: productType,
           cargo_description: cargoDescription || null,
           cargo_image_path: cargoImagePath,
+          has_battery: inferredBattery,
+          has_liquid: inferredLiquid,
+          medical_device: inferredMedical,
+          msds_provided: Boolean(msdsDocumentPath),
+          msds_document_path: msdsDocumentPath,
           notes: notes || null,
           status: 'pending',
         }).select('id').single()
