@@ -319,7 +319,7 @@ async function listPricing(client: ReturnType<typeof createClient>) {
       .select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from,effective_to,is_active,notes,updated_at')
       .order('origin_key').order('transport_mode').order('product_type').order('effective_from', { ascending: false }),
     client.from('exchange_rates')
-      .select('id,base_currency,quote_currency,rate,usd_to_iqd,effective_from,effective_to,is_active,source_note,updated_at')
+      .select('id,base_currency,quote_currency,rate,usd_to_iqd,effective_from,effective_to,is_active,source,source_note,updated_at')
       .order('effective_from', { ascending: false }).order('updated_at', { ascending: false }),
     client.from('app_settings').select('value').eq('key', 'usd_iqd_rate').maybeSingle(),
   ]);
@@ -390,7 +390,15 @@ async function createPricing(client: ReturnType<typeof createClient>, data: Json
   if (duplicateError) throw duplicateError;
   if (duplicate) throw responseError('A rate with this key and effective-from date already exists. Edit the existing rate or choose another effective date.', 409);
   const now = new Date().toISOString();
+  const estimatedDays = fields.minDays !== null && fields.maxDays !== null
+    ? String(fields.minDays) + '-' + String(fields.maxDays) + ' days'
+    : fields.minDays !== null ? String(fields.minDays) + '+ days'
+    : fields.maxDays !== null ? 'up to ' + String(fields.maxDays) + ' days' : null;
   const row = {
+    // Legacy columns are still NOT NULL in the live database; keep both
+    // contracts populated so old clients and the canonical pricing engine agree.
+    origin: fields.origin, destination: fields.destination, transport_type: fields.transport,
+    item_category: fields.product, price_usd: fields.amount, estimated_days: estimatedDays,
     rate_key: rateKey, origin_key: fields.origin, destination_key: fields.destination,
     transport_mode: fields.transport, product_type: fields.product, unit: fields.unit,
     amount: fields.amount, currency: fields.currency, transit_min_days: fields.minDays,
@@ -420,16 +428,23 @@ async function updatePricing(client: ReturnType<typeof createClient>, data: Json
   const merged: JsonRecord = { ...current, ...data };
   const fields = validatePricingFields(merged);
   const updates: JsonRecord = {
-    amount: fields.amount, updated_by: actor.id, updated_at: new Date().toISOString(),
+    amount: fields.amount, price_usd: fields.amount,
+    updated_by: actor.id, updated_at: new Date().toISOString(),
   };
-  if (data.origin_key !== undefined) updates.origin_key = fields.origin;
-  if (data.destination_key !== undefined) updates.destination_key = fields.destination;
-  if (data.transport_mode !== undefined) updates.transport_mode = fields.transport;
-  if (data.product_type !== undefined) updates.product_type = fields.product;
+  if (data.origin_key !== undefined) { updates.origin_key = fields.origin; updates.origin = fields.origin; }
+  if (data.destination_key !== undefined) { updates.destination_key = fields.destination; updates.destination = fields.destination; }
+  if (data.transport_mode !== undefined) { updates.transport_mode = fields.transport; updates.transport_type = fields.transport; }
+  if (data.product_type !== undefined) { updates.product_type = fields.product; updates.item_category = fields.product; }
   if (data.unit !== undefined) updates.unit = fields.unit;
   if (data.currency !== undefined) updates.currency = fields.currency;
   if (data.transit_min_days !== undefined) updates.transit_min_days = fields.minDays;
   if (data.transit_max_days !== undefined) updates.transit_max_days = fields.maxDays;
+  if (data.transit_min_days !== undefined || data.transit_max_days !== undefined) {
+    updates.estimated_days = fields.minDays !== null && fields.maxDays !== null
+      ? String(fields.minDays) + '-' + String(fields.maxDays) + ' days'
+      : fields.minDays !== null ? String(fields.minDays) + '+ days'
+      : fields.maxDays !== null ? 'up to ' + String(fields.maxDays) + ' days' : null;
+  }
   if (data.effective_from !== undefined) updates.effective_from = fields.effectiveFrom;
   if (data.effective_to !== undefined) updates.effective_to = fields.effectiveTo;
   if (data.is_active !== undefined) updates.is_active = bool(data.is_active, current.is_active);
@@ -451,7 +466,7 @@ async function updateExchangeRate(client: ReturnType<typeof createClient>, data:
 
   if (requestedId) {
     const { data: selected, error } = await client.from('exchange_rates')
-      .select('id,base_currency,quote_currency,rate,usd_to_iqd,effective_from,effective_to,is_active,source_note')
+      .select('id,base_currency,quote_currency,rate,usd_to_iqd,effective_from,effective_to,is_active,source,source_note')
       .eq('id', requestedId).maybeSingle();
     if (error) throw error;
     current = selected;
@@ -467,21 +482,24 @@ async function updateExchangeRate(client: ReturnType<typeof createClient>, data:
 
   let exchangeRate: any;
   if (current) {
+    if (current.base_currency !== 'USD' || current.quote_currency !== 'IQD') {
+      throw responseError('Only the USD/IQD exchange-rate row can be edited here', 400);
+    }
+    const sourceNote = txt(data.source_note) || current.source_note || 'Super Admin updated USD/IQD';
     const { data: saved, error } = await client.from('exchange_rates').update({
       rate, usd_to_iqd: rate, is_active: true, effective_to: null,
-      source_note: txt(data.source_note) || current.source_note || 'Super Admin updated USD/IQD',
-      updated_by: actor.id, updated_at: now,
+      source_note: sourceNote, source: sourceNote, updated_at: now,
     }).eq('id', current.id)
       .select('id,base_currency,quote_currency,rate,usd_to_iqd,effective_from,effective_to,is_active,source_note,updated_at').single();
     if (error) throw error;
     exchangeRate = saved;
   } else {
+    const sourceNote = txt(data.source_note) || 'Super Admin created USD/IQD rate';
     const { data: saved, error } = await client.from('exchange_rates').insert({
       base_currency: 'USD', quote_currency: 'IQD', rate, usd_to_iqd: rate,
       effective_from: today, is_active: true, effective_to: null,
-      source_note: txt(data.source_note) || 'Super Admin created USD/IQD rate',
-      created_by: actor.id, updated_by: actor.id, updated_at: now,
-    }).select('id,base_currency,quote_currency,rate,usd_to_iqd,effective_from,effective_to,is_active,source_note,updated_at').single();
+      source_note: sourceNote, source: sourceNote, updated_at: now,
+    }).select('id,base_currency,quote_currency,rate,usd_to_iqd,effective_from,effective_to,is_active,source,source_note,updated_at').single();
     if (error) throw error;
     exchangeRate = saved;
   }
