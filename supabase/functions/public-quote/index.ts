@@ -96,21 +96,25 @@ Deno.serve(async (req) => {
     const level = text(body.service_level, 30).toLowerCase() || 'standard'
     const incoterm = text(body.incoterm, 12).toUpperCase() || 'EXW'
     const notes = text(body.notes, 2000)
+    const productType = text(body.product_type, 160) || 'General Cargo (No Battery/Screen)'
+    const cargoDescription = text(body.cargo_description, 2000)
+    const complianceText = [productType, cargoDescription, notes].filter(Boolean).join(' ')
+    const medicalDevice = body.medical_device === true
+      || /(medical|medicine|medication|surgical|clinic|hospital|پزیشک|دەرمان|نەشتەرگەری)/i.test(complianceText)
+    const hasBattery = body.has_battery === true
+      || /(battery|batteries|lithium|power\s?bank|باتری|پاتری)/i.test(complianceText)
+    const hasLiquid = body.has_liquid === true
+      || /(liquid|perfume|fragrance|shampoo|\bgel\b|\boil\b|شلە|شلەمەنی|عەتری|پەرفیوم)/i.test(complianceText)
     const weight = numberOrNull(body.weight_kg, 100000)
     const volume = numberOrNull(body.volume_cbm, 100000)
     const items = numberOrNull(body.items_count, 1000000)
+    if (medicalDevice) return reply(req, {error:'ئامێر و کەلوپەلی پزیشکی بە هیچ شێوەیەک وەرناگیرێت.', code:'MEDICAL_EQUIPMENT_PROHIBITED'}, 422)
+    if (hasBattery || hasLiquid) return reply(req, {error:'بۆ کاڵای باتری‌دار یان شلەمەنی، لە هەژماری کڕیار فایلێکی MSDS باربکە. فۆڕمی گشتی بێ بەڵگە وەرناگرێت.', code:'MSDS_REQUIRED'}, 400)
     const quantityValid = mode === 'sea' ? volume !== null && volume > 0 : weight !== null && weight > 0
 
-    if (
-      name.length < 2 ||
-      (email && !/^\S+@\S+\.\S+$/.test(email)) ||
-      !ALLOWED_ROUTE_ORIGINS.has(originKey) ||
-      !ALLOWED_ROUTE_DESTINATIONS.has(destKey) ||
-      !['air', 'sea', 'land', 'multimodal'].includes(mode) ||
-      !['standard', 'express', 'priority'].includes(level) ||
-      !['EXW', 'FOB', 'CIF', 'DDP'].includes(incoterm) ||
-      !quantityValid
-    ) return reply(req, { error: 'Please check the required quote fields.' }, 400)
+    if (name.length < 2 || (email && !/^\S+@\S+\.\S+$/.test(email)) || !ALLOWED_ROUTE_ORIGINS.has(originKey) || !ALLOWED_ROUTE_DESTINATIONS.has(destKey) || !['air', 'sea', 'land', 'multimodal'].includes(mode) || !['standard', 'express', 'priority'].includes(level) || !['EXW', 'FOB', 'CIF', 'DDP'].includes(incoterm) || !quantityValid) {
+      return reply(req, { error: 'Please check the required quote fields.' }, 400)
+    }
 
     const response = await fetch(`${env('SUPABASE_URL')}/rest/v1/quote_requests`, {
       method: 'POST',
@@ -120,21 +124,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
         Prefer: 'return=representation',
       },
-      body: JSON.stringify({
-        customer_name: name,
-        customer_email: email || null,
-        customer_phone: phone || null,
-        origin_key: originKey,
-        dest_key: destKey,
-        transport_mode: mode,
-        weight_kg: weight,
-        volume_cbm: volume,
-        items_count: items,
-        service_level: level,
-        incoterm,
-        notes: notes || null,
-        status: 'pending',
-      }),
+      body: JSON.stringify({ customer_name: name, customer_email: email || null, customer_phone: phone || null, origin_key: originKey, dest_key: destKey, transport_mode: mode, product_type: productType, cargo_description: cargoDescription || null, has_battery: hasBattery, has_liquid: hasLiquid, medical_device: medicalDevice, msds_provided: false, msds_document_path: null, weight_kg: weight, volume_cbm: volume, items_count: items, service_level: level, incoterm, notes: notes || null, status: 'pending' }),
     })
     if (!response.ok) return reply(req, { error: 'Unable to submit quote request right now.' }, 500)
     const rows = await response.json().catch(() => [])
