@@ -39,7 +39,7 @@ else fail('Service Worker network-first/lifecycle contract is incomplete')
 const required = [
   'index.html','gc-customer-experience-signature-20261017.css','login.html','register.html','customer-access.html','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js','public-route-bootstrap.js','public-runtime-guarantee.js',
   'public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js','tracking-integration.html','tracking-intelligence.js',
-  'tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os-v5.html','staff-os-v5.css','gc-staff-ui-refinement-20261019-v4.css','staff-os-v5.js','staff-os-v5-20261017.js',
+  'tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os-v5.html','staff-os-v5.css','gc-staff-ui-refinement-20261019-v4.css','gc-staff-customer-bridge-20261019.js','staff-os-v5.js','staff-os-v5-20261017.js',
   'staff-os-v5-rescue.js','staff-logistics-intelligence.css','staff-logistics-intelligence.js','staff-mobile-command-dock.css','staff-mobile-command-dock.js',
   'staff-os-pro-20260909.css','staff-os-pro-20260909.js','staff-shell-polish-20260909.css','staff-shell-polish-20260909.js',
   'staff-premium-mobile-20260909.css','staff-premium-mobile-20260909.js','warehouse-offline-sync.js','production-mobile-ux-v2026.css','gc-platform-vnext.js',
@@ -145,7 +145,7 @@ else ok('Customer login input accepts GC codes')
 const staffV5Script = read('staff-os-v5-20261017.js')
 const staffV5EnhancementLoader = read('staff-os-v5-enhancement-loader-20261017.js')
 const staffMobileDock = read('gc-staff-mobile-dock-20261016.js')
-if (!staff.includes('gc-staff-command-system-20261017.css?v=2') || !staff.includes('gc-staff-polish-mobile-20261019.css?v=6') || !staff.includes('gc-staff-ui-refinement-20261019-v4.css?v=4') || !staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=15') || !staff.includes('<body class="gc-staff-os-shell">') || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-polish-mobile-20261019.css?v=6')") || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-ui-refinement-20261019-v4.css?v=4')") || !staffV5EnhancementLoader.includes("const href = '/gc-staff-ui-refinement-20261019-v4.css?v=4'")) fail('Staff OS final responsive design layer, cache-busted mobile dock, or scoped shell is missing')
+if (!staff.includes('gc-staff-command-system-20261017.css?v=2') || !staff.includes('gc-staff-polish-mobile-20261019.css?v=6') || !staff.includes('gc-staff-ui-refinement-20261019-v4.css?v=4') || !staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=16') || !staff.includes('<body class="gc-staff-os-shell">') || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-polish-mobile-20261019.css?v=6')") || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-ui-refinement-20261019-v4.css?v=4')") || !staffV5EnhancementLoader.includes("const href = '/gc-staff-ui-refinement-20261019-v4.css?v=4'")) fail('Staff OS final responsive design layer, cache-busted mobile dock, or scoped shell is missing')
 else ok('Staff OS loads the scoped command-system design layer')
 if (!staffV5Script.includes("storageKey: 'gc-staff-os-auth-v5-ahslifnthiwfkmaswjno'")) fail('Staff authentication storage must be isolated from customer portal sessions')
 else ok('Staff and customer auth sessions use separate browser storage keys')
@@ -293,10 +293,10 @@ else ok('Repository validation guards the retired public registration endpoint')
 
 
 
-if (!staff.includes('staff-os-v5-20261017.js?v=20261019-2')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
+if (!staff.includes('staff-os-v5-20261017.js?v=20261019-4')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
 
 const mobileLoader = read('staff-os-v5-enhancement-loader-20261017.js')
-if (!staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=15')) fail('Staff enhancement loader cache-buster is stale')
+if (!staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=16')) fail('Staff enhancement loader cache-buster is stale')
 if (!staff.includes('data-gc-mobile-dock-preload="1"') || !staff.includes('/gc-staff-mobile-dock-20261016.css?v=5')) fail('Mobile dock CSS must be preloaded before the app initializes')
 if (mobileLoader.indexOf("'/gc-staff-mobile-dock-20261016.js?v=6'") > mobileLoader.indexOf("'/staff-os-v5-shipment-create-fix.js?v=20260912-2'")) fail('Mobile navigation must initialize before optional staff bridges')
 if (!mobileLoader.includes("loadStyle('/gc-staff-mobile-dock-20261016.css?v=5')") || !mobileLoader.includes("loadStyle('/gc-staff-command-system-20261017.css?v=2')") || !mobileLoader.includes("loadStyle('/gc-staff-polish-mobile-20261019.css?v=6')") || !mobileLoader.includes("const href = '/gc-staff-ui-refinement-20261019-v4.css?v=4'")) fail('Staff responsive dock and final refinement cascade are missing')
