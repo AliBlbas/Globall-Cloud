@@ -233,9 +233,9 @@ Deno.serve(async (req) => {
         const inferredMedical = data.medical_device === true
           || /(medical|medicine|medication|surgical|clinic|hospital|پزیشک|دەرمان|نەشتەرگەری)/i.test(cargoComplianceText)
         const inferredBattery = data.has_battery === true
-          || /(battery|batteries|lithium|power\\s?bank|باتری|پاتری)/i.test(cargoComplianceText)
+          || /(battery|batteries|lithium|power\s?bank|باتری|پاتری)/i.test(cargoComplianceText)
         const inferredLiquid = data.has_liquid === true
-          || /(liquid|perfume|fragrance|shampoo|\\bgel\\b|\\boil\\b|شلە|شلەمەنی|عەتری|پەرفیوم)/i.test(cargoComplianceText)
+          || /(liquid|perfume|fragrance|shampoo|\bgel\b|\boil\b|شلە|شلەمەنی|عەتری|پەرفیوم)/i.test(cargoComplianceText)
         if (inferredMedical) {
           return json(req, {error:'ئامێر و کەلوپەلی پزیشکی بە هیچ شێوەیەک وەرناگیرێت.', code:'MEDICAL_EQUIPMENT_PROHIBITED'}, 422)
         }
@@ -246,7 +246,7 @@ Deno.serve(async (req) => {
         if (requestedMsdsDocumentPath) {
           const pathParts = requestedMsdsDocumentPath.split('/')
           const documentName = pathParts.length === 2 ? pathParts[1] : ''
-          const documentMatch = documentName.match(/^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\\.(pdf|jpg|jpeg|png|webp)$/i)
+          const documentMatch = documentName.match(/^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.(pdf|jpg|jpeg|png|webp)$/i)
           const extension = documentMatch?.[2]?.toLowerCase() || ''
           const allowedMimes = CARGO_MSDS_MIMES_BY_EXTENSION[extension]
           if (pathParts.length !== 2 || pathParts[0] !== user.id || !documentMatch || !allowedMimes) {
