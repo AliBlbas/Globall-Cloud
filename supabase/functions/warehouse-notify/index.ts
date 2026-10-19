@@ -2,6 +2,10 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const ORIGINS = new Set(['https://globall-cloud.pages.dev', 'https://globall-cloud.netlify.app'])
 const BUCKET = 'warehouse-receipts'
+function isDubaiLocation(location: unknown) {
+  const value = String(location ?? '').normalize('NFKC').trim().toLowerCase().replace(/\s+/g, ' ')
+  return /^(dubai|uae|united arab emirates|دوبەی|دوبی)$/.test(value)
+}
 const SIGNED_URL_TTL = 24 * 60 * 60
 type Json = Record<string, unknown>
 type Channel = 'whatsapp' | 'email'
@@ -148,6 +152,13 @@ Deno.serve(async (req: Request) => {
       .maybeSingle()
     if (receiptError) throw receiptError
     if (!receipt) throw new Error('Receipt not found')
+    const receiptLocation = String(receipt.location || receipt.source_warehouse || receipt.warehouse || 'warehouse')
+    if (!isDubaiLocation(receiptLocation)) {
+      return json(req, {
+        ok: true, receipt_id: receipt.id, warehouse: receiptLocation, received_at: receipt.received_at || null,
+        notification: { not_applicable: true, in_app: false, in_app_queued: false, whatsapp_queued: false, email_queued: false, external_opt_in: false, errors: [] },
+      }, 200)
+    }
     if (!receipt.directory_customer_id) throw new Error('Receipt is not linked to a customer account record')
     const { data: customer, error: customerError } = await admin.from('customer_directory')
       .select('id,gc_code,normalized_gc_code,code,name,phone,phone2,whatsapp_phone,email,auth_user_id,is_active,preferred_language')
@@ -188,11 +199,8 @@ Deno.serve(async (req: Request) => {
       ? `کۆدی کارتۆنەکان: ${cartonCodes.slice(0, 15).join(', ')}${cartonCodes.length > 15 ? ` و ${cartonCodes.length - 15} دانەی تر` : ''}`
       : 'کۆدی تاکەکارتۆن: بەردەست نییە'
     const localTime = new Intl.DateTimeFormat('ku-IQ', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Baghdad' }).format(new Date(receivedAt))
-    const isDubaiWarehouse = /^(dubai|uae|united arab emirates|دوبەی|دوبی)$/i.test(warehouse.trim())
-    const title = isDubaiWarehouse ? 'کاڵاکەت لە کۆگای دوبەی وەرگیرا' : 'کاڵاکەت لە کۆگا وەرگیرا'
-    const notificationBody = isDubaiWarehouse
-      ? 'وردەکاری، وێنە و ژمارەی کارتۆن لە بەشی بارەکان ببینە.'
-      : 'وردەکاری و بەڵگەی کاڵاکەت لە بەشی بارەکان ببینە.'
+    const isDubaiWarehouse = isDubaiLocation(warehouse)
+    const title = 'کاڵاکەت لە کۆگای دوبەی وەرگیرا'
     const bodyText = [
       `GC: ${gcCode}`,
       `کۆگا: ${warehouse}`,
@@ -202,7 +210,7 @@ Deno.serve(async (req: Request) => {
       `بەروار و کات (هەولێر): ${localTime}`,
       `ژمارەی وێنەکان: ${photoUrls.length}`,
       `Batch: ${String(receipt.batch_code || '—')}`,
-    ].join('\\n')
+    ].join('\n')
     const eventKey = `warehouse_received:${String(receipt.id)}`
     const actionUrl = '/#shipmentsSection'
     const payload: Json = {
@@ -228,17 +236,18 @@ Deno.serve(async (req: Request) => {
         const { error } = await admin.from('customer_notifications').insert({
           customer_user_id: customer.auth_user_id,
           shipment_id: receipt.shipment_id ? String(receipt.shipment_id) : null,
-          kind: 'warehouse_received', event_key: eventKey, title, body: notificationBody, action_url: actionUrl,
+          kind: 'warehouse_received', event_key: eventKey, title, body: bodyText, action_url: actionUrl,
         })
         if (error?.code === '23505') inAppQueued = true
         else if (error) errors.push(`in_app: ${error.message}`)
         else inAppQueued = true
-      } else if (existing.read_at) {
-        const { error } = await admin.from('customer_notifications').update({ read_at: null, title, body: notificationBody, action_url: actionUrl, created_at: new Date().toISOString() })
-          .eq('id', existing.id)
+      } else {
+        const updatePayload: Record<string, unknown> = { title, body: bodyText, action_url: actionUrl }
+        if (existing.read_at) { updatePayload.read_at = null; updatePayload.created_at = new Date().toISOString() }
+        const { error } = await admin.from('customer_notifications').update(updatePayload).eq('id', existing.id)
         if (error) errors.push(`in_app_retry: ${error.message}`)
         else inAppQueued = true
-      } else inAppQueued = true
+      }
     }
     const whatsappRecipient = String(customer.whatsapp_phone || customer.phone || customer.phone2 || '').trim()
     let whatsapp: {queued:boolean;status:string;retried:boolean} | null = null
