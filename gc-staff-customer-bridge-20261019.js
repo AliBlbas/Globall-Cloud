@@ -172,7 +172,7 @@
         '<p class="gc-customer-bind-warning">گرنگ: وشەی نهێنی بۆ خاوەنە ڕاستەقینەکە بگەیەنە. بە تەنها زانینی GC Code بەڵگەی خاوەندارێتی نییە.</p>' +
         '<div class="gc-customer-bind-error" id="gcCustomerBindError" role="alert" hidden></div>' +
       '</form>',
-      '<button type="button" class="btn" data-gc-bind-close هەڵوەشاندنەوە>هەڵوەشاندنەوە</button><button type="submit" form="gcCustomerBindForm" class="btn primary" id="gcCustomerBindSubmit">پەیوەستکردنی هەژمار</button>');
+      '<button type="button" class="btn" data-gc-bind-close>هەڵوەشاندنەوە</button><button type="submit" form="gcCustomerBindForm" class="btn primary" id="gcCustomerBindSubmit">پەیوەستکردنی هەژمار</button>');
     const form = $('#gcCustomerBindForm', modal);
     const submit = $('#gcCustomerBindSubmit', modal);
     const errorBox = $('#gcCustomerBindError', modal);
