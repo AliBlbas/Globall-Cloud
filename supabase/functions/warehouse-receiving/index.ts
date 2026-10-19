@@ -34,6 +34,7 @@ function text(v:FormDataEntryValue|null){if(typeof v!=='string')return null;cons
 function num(v:FormDataEntryValue|null){const s=text(v);if(!s)return null;const n=Number(s);return Number.isFinite(n)&&n>=0?n:null}
 function gcCode(v:string|null){if(!v)return null;const n=v.normalize('NFKC').toUpperCase().replace(/[–—−]/g,'-').replace(/\s+/g,'');return/^GC-[A-Z0-9-]{2,30}$/.test(n)?n:null}
 function stageForLocation(location:string|null){const v=String(location||'').toLowerCase();if(v==='china')return'china_received';if(v==='dubai'||v==='uae')return'uae_arrived';if(v==='erbil')return'erbil_arrived';return'received'}
+function isDubaiLocation(location:unknown){const v=String(location??'').normalize('NFKC').trim().toLowerCase().replace(/\s+/g,' ');return /^(dubai|uae|united arab emirates|دوبەی|دوبی)$/.test(v)}
 function hubForLocation(location:string|null){const v=String(location||'').toLowerCase();if(v==='china')return'china';if(v==='dubai'||v==='uae')return'dubai';if(v==='erbil')return'erbil';return v||'warehouse'}
 function locationAllowed(staff:Record<string,any>,location:string){
  const role=String(staff.role||'');
@@ -118,6 +119,14 @@ async function queueReceiptNotifications(admin:ReturnType<typeof createClient>,r
  const metadata=receipt.label_metadata&&typeof receipt.label_metadata==='object'?receipt.label_metadata:{};
  const gc=String(customer.gc_code||customer.code||receipt.gc_code_detected||receipt.gc_code||'').normalize('NFKC').trim().toUpperCase();
  const warehouse=String(receipt.location||receipt.source_warehouse||receipt.warehouse||'warehouse');
+ const isDubaiWarehouse=isDubaiLocation(warehouse);
+ if(!isDubaiWarehouse){
+  const eventKey=`warehouse_received:${String(receipt.id)}`;
+  for(const channel of ['whatsapp','email'] as const){
+   try{await cancelQueuedReceiptChannel(admin,eventKey,channel,'Customer notifications are only sent for Dubai warehouse receipts.')}catch(error){errors.push(`${channel}_cancel: `+(error instanceof Error?error.message:String(error)))}
+  }
+  return{ok:errors.length===0,account_linked:Boolean(customer.auth_user_id),in_app_queued:false,whatsapp_queued:false,email_queued:false,whatsapp_opted_in:false,email_opted_in:false,external_opt_in:false,not_applicable:true,photo_count:Array.isArray(signedPhotoUrls)?signedPhotoUrls.length:Array.isArray(receipt.photos)?receipt.photos.length:0,errors};
+ }
  const cartons=Math.max(1,Number(receipt.carton_count??metadata.total_packages??1)||1);
  const weight=Number(receipt.weight_actual??metadata.gross_weight_kg??0)||0;
  const photos=Array.isArray(signedPhotoUrls)?signedPhotoUrls:await signedPhotos(admin,receipt.photos);
@@ -138,10 +147,17 @@ async function queueReceiptNotifications(admin:ReturnType<typeof createClient>,r
  const actionUrl='/#shipmentsSection';
  const receivedAt=receipt.received_at||new Date().toISOString();
  const localTime=new Intl.DateTimeFormat('ku-IQ',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Baghdad'}).format(new Date(receivedAt));
- const isDubaiWarehouse=/^(dubai|uae|united arab emirates|دوبەی|دوبی)$/i.test(warehouse.trim());
- const title=isDubaiWarehouse?'کاڵاکەت لە کۆگای دوبەی وەرگیرا':'کاڵاکەت لە کۆگا وەرگیرا';
- const bodyText=isDubaiWarehouse?'وردەکاری، وێنە و ژمارەی کارتۆن لە بەشی بارەکان ببینە.':'وردەکاری و بەڵگەی کاڵاکەت لە بەشی بارەکان ببینە.';
- const detailedBodyText=`GC: ${gc}\\nکۆگا: ${warehouse}\\nکارتۆن: ${cartons}\\n${cartonLine}\\nکێش: ${weight>0?`${weight} kg`:'تۆمارنەکراوە'}\\nبەروار و کات (هەولێر): ${localTime}\\nژمارەی وێنەکان: ${photos.length}\\nBatch: ${String(receipt.batch_code||'—')}`;
+ const title='کاڵاکەت لە کۆگای دوبەی وەرگیرا';
+ const detailedBodyText = [
+  `GC: ${gc}`,
+  `کۆگا: ${warehouse}`,
+  `کارتۆن: ${cartons}`,
+  cartonLine,
+  `کێش: ${weight>0?`${weight} kg`:'تۆمارنەکراوە'}`,
+  `بەروار و کات (هەولێر): ${localTime}`,
+  `ژمارەی وێنەکان: ${photos.length}`,
+  `Batch: ${String(receipt.batch_code||'—')}`,
+ ].join('\n');
  const payloadBase={title,body:detailedBodyText,action_url:actionUrl,gc_code:gc,warehouse,carton_count:cartons,carton_codes:cartonCodes,weight_kg:weight||null,receipt_id:String(receipt.id),batch_code:String(receipt.batch_code||''),received_at:String(receivedAt),photo_count:photos.length,media_url:photos[0]||null};
  let preferences:Record<string,any>|null=null;
  if(customer.auth_user_id){
@@ -157,7 +173,7 @@ async function queueReceiptNotifications(admin:ReturnType<typeof createClient>,r
  if(inAppAllowed){
   const r=await admin.from('customer_notifications').upsert({
    customer_user_id:customer.auth_user_id,shipment_id:receipt.shipment_id?String(receipt.shipment_id):null,
-   kind:'warehouse_received',event_key:eventKey,title,body:bodyText,action_url:actionUrl
+   kind:'warehouse_received',event_key:eventKey,title,body:detailedBodyText,action_url:actionUrl
   },{onConflict:'customer_user_id,event_key',ignoreDuplicates:true});
   if(r.error)errors.push('in_app: '+r.error.message);else inAppQueued=true;
  }
@@ -480,7 +496,9 @@ async function listReceipts(req:Request){
   const authId=customerAuthIds.get(directoryId)||'';
   const eventKey='warehouse_received:'+String(item.id);
   const delivered=Boolean(authId&&notificationOwners.get(eventKey)?.has(authId));
-  const notificationStatus=!linked?'account_unlinked'
+  const isDubaiReceipt=isDubaiLocation(item.location||item.source_warehouse||item.warehouse);
+  const notificationStatus=!isDubaiReceipt?'not_applicable'
+   :!linked?'account_unlinked'
    :delivered?'notified'
    :inAppDisabledUsers.has(authId)?'in_app_disabled'
    :'pending';
