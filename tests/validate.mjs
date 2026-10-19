@@ -231,6 +231,8 @@ const customerPortalVersionedScript = read('gc-csp-scripts/customer-portal-inlin
 const customerRequestController = read('gc-customer-request-20261003.js')
 const customerPhotoBucketMigration = read('supabase/migrations/20261017130000_restrict_customer_request_photo_uploads.sql')
 const staffConsoleVersionedScript = read('staff-os-v5-20261017.js')
+const staffCustomerBridgeScript = read('gc-staff-customer-bridge-20261019.js')
+const staffUnifiedStyles = read('gc-staff-ui-refinement-20261019-v4.css')
 const staffOpsHubSource = read('supabase/functions/staff-ops-hub/index.ts')
 const landManifestSource = read('supabase/functions/land-manifests/index.ts')
 const landManifestMigration = read('supabase/migrations/20261018173608_dubai_land_manifest_workflow.sql')
@@ -327,6 +329,8 @@ const unifiedContracts = [
   ['customer account binding instructs GC-code login without exposing the internal auth email', staffConsoleScript.includes('GC Code / Login ID: ${result.gc_code || code}') && !staffConsoleScript.includes('Login: ${result.login_email}') && staffConsoleScript.includes('پێویست نییە ئیمەیل بنووسێت')],
   ['staff console uses a versioned filename and the GC-code login instructions', staffConsoleHtml.includes('/staff-os-v5-20261017.js?v=20261019-4') && staffConsoleVersionedScript.includes('customerAccessGc') && staffConsoleVersionedScript.includes('customerAccessPassword') && staffConsoleVersionedScript.includes('copyCustomerAccess') && !staffConsoleVersionedScript.includes('Login: ${result.login_email}')],
   ['main Staff OS loads current customer filter assets', staffConsoleHtml.includes('staff-os-v5.css?v=20261019-4') && staffConsoleHtml.includes('staff-os-v5-20261017.js?v=20261019-4') && staffConsoleStyles.includes('.customer-link-guidance')],
+  ['main Staff OS loads the guided shared customer-account bridge', staffConsoleHtml.includes('/gc-staff-customer-bridge-20261019.js?v=1') && staffCustomerBridgeScript.includes("SUPABASE_URL + '/functions/v1/account-admin'") && staffCustomerBridgeScript.includes('identity_verified: true') && staffCustomerBridgeScript.includes('confirmed_gc_code: confirmedCode') && staffCustomerBridgeScript.includes('event.stopImmediatePropagation()')],
+  ['staff and customer account bridge share responsive visual components', staffUnifiedStyles.includes('.gc-customer-bridge-panel') && staffUnifiedStyles.includes('.gc-customer-bind-modal') && staffUnifiedStyles.includes('@media (max-width: 760px)')],
 ]
 for (const [label, passed] of unifiedContracts) {
   if (passed) ok(label)
