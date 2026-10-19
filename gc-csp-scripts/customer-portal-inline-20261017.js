@@ -135,30 +135,21 @@ const renderNotifications = (items) => setHtml('notifications',
       const title = isReceiptNotice
         ? (isDubaiReceipt ? 'کاڵاکەت لە کۆگای دوبەی وەرگیرا' : 'کاڵاکەت لە کۆگا وەرگیرا')
         : item.title;
+      // Receipt notifications intentionally stay concise. Photos, carton IDs,
+      // package counts, weights and timestamps are rendered under Shipments.
       const body = isReceiptNotice
-        ? (String(item.body || '').trim() || (isDubaiReceipt ? 'وردەکاری، وێنە و ژمارەی کارتۆن لە بەشی بارەکان ببینە.' : 'وردەکاری و بەڵگەی کاڵاکەت لە بەشی بارەکان ببینە.'))
+        ? (isDubaiReceipt
+          ? 'وردەکاری، وێنە و ژمارەی کارتۆن لە بەشی بارەکان ببینە.'
+          : 'وردەکاری و بەڵگەی کاڵاکەت لە بەشی بارەکان ببینە.')
         : item.body;
       const givenAction = typeof item.action_url === 'string' && (item.action_url.startsWith('/') || item.action_url.startsWith('#')) && !item.action_url.startsWith('//')
         ? item.action_url
         : '';
       const action = isReceiptNotice ? '#shipmentsSection' : givenAction;
       const actionLabel = isReceiptNotice ? 'بینینی بارەکان' : 'بینینی بەشی پەیوەندیدارەکە';
-      const receiptPhotos = isReceiptNotice && isDubaiReceipt && Array.isArray(item.receipt_photos)
-        ? item.receipt_photos.filter((url) => typeof url === 'string' && (url.startsWith('https://') || url.startsWith('http://')))
-        : [];
-      const visibleReceiptPhotos = receiptPhotos.slice(0, 3);
-      const extraPhotos = Math.max(0, Number(item.receipt_photo_count || receiptPhotos.length) - visibleReceiptPhotos.length);
-      const photoMarkup = visibleReceiptPhotos.length
-        ? `<div class="gc-notification-photo-strip" role="list" aria-label="وێنەی بەڵگەی باری ${esc(item.receipt_gc_code || 'GC')}">
-            ${visibleReceiptPhotos.map((url, index) => `<a class="gc-notification-photo-link" role="listitem" href="${esc(url)}" target="_blank" rel="noopener noreferrer" aria-label="کردنەوەی وێنەی ${index + 1}">
-              <img class="gc-notification-photo-thumb" src="${esc(url)}" alt="بەڵگەی وەرگرتنی ${esc(item.receipt_gc_code || 'GC')} · ${index + 1}" loading="lazy">
-            </a>`).join('')}
-            ${extraPhotos ? `<span class="gc-notification-photo-more">+${extraPhotos} وێنەی تر</span>` : ''}
-          </div>`
-        : '';
       return `<article class="item notification-item ${isRead ? 'is-read' : 'is-unread'}" data-notification-state="${isRead ? 'read' : 'unread'}">
         <div class="row notification-item-head"><strong>${esc(title)}</strong>${isRead ? '<span class="pill">خوێندراوە</span>' : `<button class="btn notification-action" type="button" data-read-notification="${esc(item.id)}">خوێندراوە بکە</button>`}</div>
-        <div class="muted notification-body" style="white-space:pre-line">${esc(body)}</div>${photoMarkup}
+        <div class="muted notification-body" style="white-space:pre-line">${esc(body)}</div>
         <div class="row notification-item-foot"><small class="notification-time">${esc(date(item.created_at))}</small>${action ? `<a class="btn notification-open-action" href="${esc(action)}">${esc(actionLabel)} ↗</a>` : ''}</div>
       </article>`;
     }).join('')
