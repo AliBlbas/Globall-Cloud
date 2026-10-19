@@ -30,7 +30,7 @@
 <script src="/public-route-bootstrap.js?v=20260922-1" defer></script>
 <script src="/gc-csp-scripts/index-inline-1.js?v=20260922-1" data-gc-externalized="1"></script>
 <script src="/public-core-recovery.js?v=20260922-1" defer data-gc-public-recovery="1"></script>
-<script src="/globall-redesign-20260922.js?v=20261019-1" defer></script>
+<script src="/globall-redesign-20260922.js?v=20261019-2" defer></script>
 	  <script src="/live-logistics-map.js?v=20260927-2" defer></script>
 <script src="/gc-whatsapp-float-20260929.js?v=1" defer></script>
 <link rel="stylesheet" href="/gc-icon-hierarchy-20260930.css?v=1">
@@ -193,7 +193,7 @@
     </section>
 
     <section class="gc-container gc-section">
-      <div class="gc-section-head"><span class="gc-eyebrow">LOGISTICS FLOW</span><h2>لە داواکاری تا Door-to-Door</h2><p>هەر shipment بە زنجیرەیەکی ڕوون لە source تا customer دەڕوات.</p></div>
+      <div class="gc-section-head"><span class="gc-eyebrow">LOGISTICS FLOW</span><h2>لە داواکاری تا وەرگرتن لە ئۆفیسی هەولێر</h2><p>هەر shipment بە زنجیرەیەکی ڕوون لە source تا customer دەڕوات.</p></div>
       <div class="gc-platform-grid">
         <article class="gc-platform-card"><span class="gc-icon-box"><svg viewBox="0 0 24 24"><path d="M3 16 14 5l3 3-11 11H3z"></path><path d="m13 6 5 5"></path></svg></span><h3>01 · Pickup & QC</h3><p>بار وەردەگیرێت، وێنە و QC تۆمار دەکرێت و packet chain بەردەوام دەبێت.</p><div class="mini"><span class="gc-mini-chip">SCAN</span><span class="gc-mini-chip">PHOTO</span><span class="gc-mini-chip">QC</span></div></article>
         <article class="gc-platform-card"><span class="gc-icon-box"><svg viewBox="0 0 24 24"><path d="M3 14h18l-2 4H5z"></path><path d="M8 14V6h8v8"></path></svg></span><h3>02 · Transit</h3><p>Air، Sea یان Land بە status و route leg ـەکان بەدواداچوون دەکرێت.</p><div class="mini"><span class="gc-mini-chip">AIR</span><span class="gc-mini-chip">SEA</span><span class="gc-mini-chip">LAND</span></div></article>
@@ -211,23 +211,56 @@
       </div>
     </section>
 
-    <section class="gc-container gc-rate-section" id="gcRateExplorer" aria-labelledby="gcRateTitle">
-      <div class="gc-rate-head"><div><span class="gc-eyebrow">RATE EXPLORER · LIVE ESTIMATE</span><h2 id="gcRateTitle">نرخی گواستنەوە بە خێرایی ببینە</h2><p>ڕێگاکە هەڵبژێرە و کێشی بارەکەت بنووسە؛ ئەمە نرخێکی سەرەتاییە بۆ ڕێنمایی، و نرخی کۆتایی لە دوای وردەکارییەکان پشتڕاست دەکرێتەوە.</p></div><span class="gc-rate-live"><i></i> نرخەکان نوێکراونەتەوە</span></div>
+        <section class="gc-container gc-rate-section" id="gcRateExplorer" aria-labelledby="gcRateTitle">
+      <div class="gc-rate-head">
+        <div>
+          <span class="gc-eyebrow">RATE EXPLORER · LIVE ESTIMATE</span>
+          <h2 id="gcRateTitle">نرخی گواستنەوە بە خێرایی ببینە</h2>
+          <p>وڵات، شێوازی گواستنەوە و جۆری کاڵا هەڵبژێرە. نرخەکان لە pricing engine ـی پلاتفۆرمەوە وەردەگیرێن؛ بۆ بارەکانی کەمتر لە 1kg کەمترین تێچوو 5,000 دینارە.</p>
+        </div>
+        <span class="gc-rate-live" id="gcRateCatalogStatus" data-state="loading" role="status" aria-live="polite"><i></i><span id="gcRateCatalogText">نرخەکان لە سیستەمەوە دەخوێندرێنەوە…</span></span>
+      </div>
       <div class="gc-rate-layout">
         <div class="gc-rate-panel">
           <div class="gc-rate-label">شێوازی گواستنەوە</div>
           <div class="gc-rate-modes" role="tablist" aria-label="جۆری گواستنەوە">
-            <button type="button" class="gc-rate-mode active" data-rate-mode="air" role="tab" aria-selected="true"><span>✈</span><b>Air</b><small>٢–٥ ڕۆژ</small></button>
-            <button type="button" class="gc-rate-mode" data-rate-mode="sea" role="tab" aria-selected="false"><span>◒</span><b>Sea</b><small>٢٠–٣٥ ڕۆژ</small></button>
-            <button type="button" class="gc-rate-mode" data-rate-mode="land" role="tab" aria-selected="false"><span>▣</span><b>Land</b><small>٣–٧ ڕۆژ</small></button>
+            <button type="button" class="gc-rate-mode active" data-rate-mode="air" role="tab" aria-selected="true"><span>✈</span><b>Air</b><small>نرخ بە kg</small></button>
+            <button type="button" class="gc-rate-mode" data-rate-mode="sea" role="tab" aria-selected="false"><span>◒</span><b>Sea</b><small>نرخ بە CBM</small></button>
+            <button type="button" class="gc-rate-mode" data-rate-mode="land" role="tab" aria-selected="false"><span>▣</span><b>Land</b><small>نرخ بە kg</small></button>
           </div>
-          <div class="gc-rate-route"><div><span>سەرچاوە</span><strong>چین / دوبەی / ئەمریکا</strong></div><span class="gc-rate-arrow">←</span><div><span>مەبەست</span><strong>هەولێر · عێراق</strong></div></div>
-          <label class="gc-rate-weight" for="gcRateWeight"><span><b>کێشی بار</b><small id="gcRateWeightValue">10 KG</small></span><input id="gcRateWeight" type="range" min="1" max="500" step="1" value="10"></label>
-          <div class="gc-rate-presets" aria-label="کێشی خێرا"><button type="button" data-rate-weight="5">5 KG</button><button type="button" data-rate-weight="10">10 KG</button><button type="button" data-rate-weight="25">25 KG</button><button type="button" data-rate-weight="100">100 KG</button></div>
+          <div class="gc-rate-route">
+            <label for="gcRateOrigin"><span>سەرچاوە</span><select id="gcRateOrigin" class="gc-rate-select" aria-label="وڵاتی سەرچاوە"><option value="china">چین</option><option value="dubai">دوبەی</option><option value="usa">ئەمریکا</option></select></label>
+            <span class="gc-rate-arrow" aria-hidden="true">←</span>
+            <div><span>مەبەست</span><strong>هەولێر · عێراق</strong></div>
+          </div>
+          <label class="gc-rate-product" for="gcRateProduct"><span>جۆری کاڵا</span><select id="gcRateProduct" class="gc-rate-select"><option value="">چاوەڕێی نرخەکان…</option></select></label>
+          <label class="gc-rate-weight" id="gcRateWeightWrap" for="gcRateWeight"><span><b>کێشی ڕاستەقینە</b><small id="gcRateWeightValue">10 KG</small></span><input id="gcRateWeight" type="range" min="0.1" max="500" step="0.1" value="10"></label>
+          <div class="gc-rate-presets" id="gcRatePresets" aria-label="کێشی خێرا"><button type="button" data-rate-weight="0.5">0.5 KG</button><button type="button" data-rate-weight="5">5 KG</button><button type="button" data-rate-weight="10">10 KG</button><button type="button" data-rate-weight="25">25 KG</button></div>
+          <details class="gc-rate-dimensions" id="gcRateDimensionsWrap">
+            <summary>قەبارای کارتۆن (ئارەزوومەندانە)</summary>
+            <div class="gc-rate-dimension-grid">
+              <label for="gcRateLength"><span>درێژی (cm)</span><input id="gcRateLength" type="number" min="0" step="0.1" inputmode="decimal" placeholder="0"></label>
+              <label for="gcRateWidth"><span>پانی (cm)</span><input id="gcRateWidth" type="number" min="0" step="0.1" inputmode="decimal" placeholder="0"></label>
+              <label for="gcRateHeight"><span>بەرزی (cm)</span><input id="gcRateHeight" type="number" min="0" step="0.1" inputmode="decimal" placeholder="0"></label>
+            </div>
+            <p id="gcRateChargeableSummary" class="gc-rate-chargeable-summary">کێشی حجمی: قەبارا داخڵ نەکراوە.</p>
+          </details>
+          <label class="gc-rate-volume" id="gcRateVolumeWrap" for="gcRateCbm" hidden><span>قەبارەی بار (CBM)</span><input id="gcRateCbm" type="number" min="0.001" step="0.001" inputmode="decimal" placeholder="0.5"><small>بۆ دەریایی، نرخ = CBM × نرخی هەر CBM.</small></label>
+          <p id="gcRateMinimumNote" class="gc-rate-minimum">کەمترین تێچوو بۆ بارێکی کەمتر لە 1kg: 5,000 دینار.</p>
         </div>
-        <div class="gc-rate-result" aria-live="polite"><div class="gc-rate-result-top"><span>نرخی سەرەتایی</span><span class="gc-rate-badge" id="gcRateModeLabel">AIR · EXPRESS</span></div><strong id="gcRatePrice">$70</strong><span id="gcRateSub">نرخی دەستپێک بۆ 10 KG</span><div class="gc-rate-meta"><span><i>⌁</i><b id="gcRateEta">٢–٥ ڕۆژ</b><small>کاتی گەیاندن</small></span><span><i>◈</i><b>Door-to-Door</b><small>خزمەتگوزاری</small></span></div><a class="gc-btn gc-btn-primary" href="/#request">نرخی وردتر داوا بکە <span aria-hidden="true">←</span></a></div>
+        <div class="gc-rate-result" aria-live="polite">
+          <div class="gc-rate-result-top"><span>نرخی پێشبینی</span><span class="gc-rate-badge" id="gcRateModeLabel">AIR · CHINA</span></div>
+          <strong id="gcRatePrice">—</strong>
+          <span id="gcRateSub">چاوەڕێی نرخی پشتڕاستکراوە…</span>
+          <div class="gc-rate-meta">
+            <span><i>⌁</i><b id="gcRateEta">—</b><small>کاتی گەیشتن</small></span>
+            <span><i>◈</i><b>Office pickup</b><small>وەرگرتن لە ئۆفیس</small></span>
+          </div>
+          <a class="gc-btn gc-btn-primary" href="/#request">نرخی وردتر داوا بکە <span aria-hidden="true">←</span></a>
+        </div>
       </div>
-      <div class="gc-service-inspector" id="gcServiceInspector" aria-live="polite"><div class="gc-inspector-icon">✦</div><div><span class="gc-eyebrow">SERVICE DETAILS</span><h3 id="gcServiceTitle">Air Freight · خێرایی بۆ بارە پەلەکان</h3><p id="gcServiceText">باشترین هەڵبژاردەیە بۆ بارە کەم‌قەبارە و پەلەدارەکان، بە ڕێگای ڕوون لە source تا Erbil.</p></div><a class="gc-btn gc-btn-soft" href="/#request">داواکاری بنێرە</a></div>
+      <p class="gc-office-pickup-note"><strong>یاسای وەرگرتن:</strong> کۆمپانیا خزمەتگوزاری گەیاندن نییە. کڕیار خۆی یان تاکسی دەنێرێت بۆ وەرگرتنەوەی بار لە ئۆفیسی هەولێر؛ کاتی کار 09:00–17:00.</p>
+      <div class="gc-service-inspector" id="gcServiceInspector" aria-live="polite"><div class="gc-inspector-icon">✦</div><div><span class="gc-eyebrow">SERVICE DETAILS</span><h3 id="gcServiceTitle">Air Freight · خێرایی بۆ بارە پەلەکان</h3><p id="gcServiceText">باشترین هەڵبژاردەیە بۆ کاڵای کەم‌قەبارە و پەلەدارەکان، بە ڕێگای ڕوون لە چین و دوبەی بۆ هەولێر.</p></div><a class="gc-btn gc-btn-soft" href="/#request">داواکاری بنێرە</a></div>
     </section>
 
     <section class="gc-container gc-page" id="page-about" hidden>
@@ -236,8 +269,8 @@
     </section>
 
     <section class="gc-container gc-page" id="page-services" hidden>
-      <span class="gc-eyebrow">SERVICES</span><h1>خزمەتگوزارییەکان</h1><p>Air، Sea، Land، Customs، Warehousing و Door-to-Door.</p>
-      <div class="gc-detail-grid"><article><b>Air Freight</b><p>بۆ بارە پەلەکان و time-sensitive.</p></article><article><b>Sea Freight</b><p>بۆ بارە قورس و کۆکراوەکان.</p></article><article><b>Land Freight</b><p>بۆ گواستنەوەی وشکانی بۆ عێراق.</p></article><article><b>Customs</b><p>ڕێکخستن و بەڕێوەبردنی بەڵگە.</p></article><article><b>Warehousing</b><p>وەرگرتن، QC و پاشکەوتنی بەڵگە.</p></article><article><b>Door-to-Door</b><p>گەیاندن تا دەرگای کڕیار.</p></article></div>
+      <span class="gc-eyebrow">SERVICES</span><h1>خزمەتگوزارییەکان</h1><p>Air، Sea، Land، Customs، Warehousing و Office Pickup.</p>
+      <div class="gc-detail-grid"><article><b>Air Freight</b><p>بۆ بارە پەلەکان و time-sensitive.</p></article><article><b>Sea Freight</b><p>بۆ بارە قورس و کۆکراوەکان.</p></article><article><b>Land Freight</b><p>بۆ گواستنەوەی وشکانی بۆ عێراق.</p></article><article><b>Customs</b><p>ڕێکخستن و بەڕێوەبردنی بەڵگە.</p></article><article><b>Warehousing</b><p>وەرگرتن، QC و پاشکەوتنی بەڵگە.</p></article><article><b>Office Pickup</b><p>کڕیار خۆی یان تاکسی بارەکە لە ئۆفیسی هەولێر وەردەگرێتەوە (09:00–17:00).</p></article></div>
       <a class="gc-btn gc-btn-primary" href="/#request">دەستپێکردنی داوا</a>
     </section>
 
