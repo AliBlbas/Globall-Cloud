@@ -13,7 +13,8 @@
   const hasRealStaffApp = () => Boolean(document.querySelector('.gc-shell, .login-card, .login'));
 
   const render = (mode = 'loading', message = '') => {
-    if (mode !== 'loading' && hasRealStaffApp()) return;
+    // A rescue script may run asynchronously after the real app has rendered; never overwrite a live login or shell.
+    if (hasRealStaffApp()) return;
     if (mode === 'loading' && app.dataset.gcRescueLoading === '1') return;
 
     app.dataset.gcRescueLoading = mode === 'loading' ? '1' : '0';
@@ -97,9 +98,44 @@
     } catch (_) {}
   };
 
+  const hasSupabaseClient = () => Boolean(window.supabase?.createClient);
+  const SUPABASE_FALLBACK_SOURCES = [
+    'https://unpkg.com/@supabase/supabase-js@2.118.0/dist/umd/supabase.js',
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js'
+  ];
+  let supabaseFallbackPromise = null;
+  const loadSupabaseFallback = (url) => new Promise((resolve) => {
+    if (hasSupabaseClient()) { resolve(true); return; }
+    const script = document.createElement('script');
+    script.src = url;
+    script.async = true;
+    script.dataset.gcSupabaseFallback = '1';
+    script.onload = () => resolve(hasSupabaseClient());
+    script.onerror = () => resolve(hasSupabaseClient());
+    document.head.appendChild(script);
+  });
+  const ensureSupabaseClient = () => {
+    if (hasSupabaseClient()) return Promise.resolve(true);
+    if (supabaseFallbackPromise) return supabaseFallbackPromise;
+    supabaseFallbackPromise = (async () => {
+      // Give the primary deferred/async CDN a short head start before fetching a second copy.
+      await new Promise((resolve) => setTimeout(resolve, 450));
+      if (hasSupabaseClient()) return true;
+      for (const url of SUPABASE_FALLBACK_SOURCES) {
+        const loaded = await loadSupabaseFallback(url);
+        if (loaded) return true;
+      }
+      return hasSupabaseClient();
+    })();
+    return supabaseFallbackPromise;
+  };
+
   registerFreshServiceWorker();
   addStyles();
   render('loading');
+  void ensureSupabaseClient().then((loaded) => {
+    if (!loaded) console.warn('[gc-staff-rescue] primary and fallback Supabase scripts are unavailable');
+  }).catch((error) => console.warn('[gc-staff-rescue] Supabase fallback failed', error));
 
   const startedAt = Date.now();
   const showFailure = (reason) => {
@@ -134,5 +170,6 @@
     reload: () => location.reload(),
     supabaseUrl: SUPABASE_URL,
     supabaseKey: SUPABASE_KEY,
+    retrySupabase: ensureSupabaseClient,
   };
 })();
