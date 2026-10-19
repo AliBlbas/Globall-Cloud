@@ -561,3 +561,24 @@ html[data-gc-theme="dark"] body.gc-staff-os-shell .gc-staff-mobile-drawer {borde
 html[data-gc-theme="dark"] body.gc-staff-os-shell .gc-staff-mobile-drawer-head,
 html[data-gc-theme="dark"] body.gc-staff-os-shell .gc-staff-mobile-user {border-color:#294454!important}
 html[data-gc-theme="dark"] body.gc-staff-os-shell .gc-staff-mobile-module-grid button {border-color:#294454!important;background:#102536!important;color:#d8e6ee!important}
+
+/* Queue review modal: stale in-app events require human review before processing. */
+body #gcModal .gc-outbox-review{display:grid;gap:11px;padding:2px;min-width:0}
+body #gcModal .gc-outbox-review-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+body #gcModal .gc-outbox-review-metrics>div{display:grid;gap:5px;padding:10px;border:1px solid #d9e7ec;border-radius:12px;background:#f7fbfc}
+body #gcModal .gc-outbox-review-metrics span{font-size:9px;color:#6b8796;line-height:1.7}
+body #gcModal .gc-outbox-review-metrics strong{font-size:20px;font-weight:900;color:#123b50}
+body #gcModal .gc-outbox-review-warning{padding:11px;border:1px solid #e8d2a5;border-radius:12px;background:#fff8e9;color:#77551c}
+body #gcModal .gc-outbox-review-warning strong{font-size:12px}
+body #gcModal .gc-outbox-review-warning p{font-size:11px;line-height:1.9;margin:5px 0 0}
+body #gcModal .gc-outbox-review-list{display:grid;gap:7px;max-height:44dvh;overflow:auto}
+body #gcModal .gc-outbox-review-item{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:10px;border:1px solid #dce8ed;border-radius:12px;background:#fff}
+body #gcModal .gc-outbox-review-item.is-stale{border-color:#e8c5c5;background:#fff8f8}
+body #gcModal .gc-outbox-review-main{display:grid;gap:4px;min-width:0}
+body #gcModal .gc-outbox-review-main strong{font-size:11px;color:#163e51;overflow-wrap:anywhere}
+body #gcModal .gc-outbox-review-main small{font-size:9px;color:#6c8795;line-height:1.7}
+body #gcModal .gc-outbox-review-status{display:grid;justify-items:end;gap:6px}
+body #gcModal .gc-outbox-review-cancel{font-size:10px;white-space:normal;border-color:#e7c8c8!important;background:#fff3f3!important;color:#923945!important}
+body #gcModal .gc-outbox-review-foot{font-size:10px;line-height:1.9;color:#6c8795;padding-top:8px;border-top:1px solid #e7eef1}
+body #gcModal #gcOutboxReviewProcess,body #gcModal #gcOutboxConfirmProcess{min-height:42px;width:100%}
+@media(max-width:600px){body #gcModal .gc-outbox-review-metrics>div{padding:8px}body #gcModal .gc-outbox-review-metrics strong{font-size:17px}body #gcModal .gc-outbox-review-item{align-items:stretch;flex-direction:column}body #gcModal .gc-outbox-review-status{display:flex;align-items:center;justify-items:start;flex-wrap:wrap}body #gcModal .gc-outbox-review-list{max-height:40dvh}}
