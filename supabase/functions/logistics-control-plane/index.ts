@@ -567,6 +567,7 @@ const processOutbox = async (service: ReturnType<typeof serviceClient>, staff: S
     if (found.error) throw found.error
     if (!found.data) throw new Error('Notification job was not found')
     if (found.data.status !== 'pending') throw new Error('Only pending notification jobs can be cancelled')
+    if (found.data.channel !== 'in_app') throw new Error('Only in-app notification jobs can be cancelled from Staff OS')
     const updated = await service.from('notification_outbox').update({ status: 'cancelled', last_error: ('Cancelled after staff review: ' + reason).slice(0, 500), updated_at: new Date().toISOString() }).eq('id', id).eq('status', 'pending').select('id').maybeSingle()
     if (updated.error) throw updated.error
     if (!updated.data) throw new Error('The notification job changed while this action was running; refresh the queue')
