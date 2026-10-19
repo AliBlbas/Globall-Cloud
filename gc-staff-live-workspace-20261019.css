@@ -516,3 +516,108 @@ body.gc-staff-os-shell #app .tower-grid {
 @media(prefers-reduced-motion:reduce) {
   body.gc-staff-os-shell #app .tower-hero-actions > .btn { transition:none!important; }
 }
+
+/* Final visual pass v4 — staff Operations Control Tower. */
+body.gc-staff-os-shell #app .tower-hero{
+  display:grid!important;grid-template-columns:minmax(0,1fr) minmax(230px,.46fr)!important;
+  align-items:center!important;gap:clamp(18px,2.6vw,32px)!important;
+  padding:clamp(20px,2.8vw,34px)!important;min-width:0;overflow:hidden
+}
+body.gc-staff-os-shell #app .tower-hero h1{
+  max-width:19ch;font-size:clamp(25px,2.4vw,35px)!important;line-height:1.42!important;
+  letter-spacing:-.025em!important;text-wrap:balance
+}
+body.gc-staff-os-shell #app .tower-hero p{max-width:65ch;font-size:13px;line-height:1.95;color:#d1e8ef}
+body.gc-staff-os-shell #app .tower-hero-meta{display:flex!important;flex-wrap:wrap;align-items:center;gap:8px;margin-top:16px}
+body.gc-staff-os-shell #app .tower-hero-meta>span{
+  display:inline-flex;align-items:center;gap:7px;max-width:100%;padding:7px 10px;
+  border:1px solid rgba(218,246,249,.17);border-radius:999px;background:rgba(2,25,38,.26);
+  color:#dbf4f6;font-size:10px;line-height:1.5
+}
+body.gc-staff-os-shell #app .tower-hero-actions{display:grid!important;grid-template-columns:minmax(0,1fr)!important;align-content:center;gap:9px!important;min-width:0}
+body.gc-staff-os-shell #app .tower-hero-actions .btn{width:100%;min-height:44px;display:flex;align-items:center;justify-content:center;gap:7px;border-radius:12px!important}
+body.gc-staff-os-shell #app .tower-hero-actions .btn.primary{background:linear-gradient(135deg,#9bf1f1,#3dc8d0)!important;color:#073b43!important;box-shadow:0 8px 20px rgba(23,151,164,.14)}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:11px!important}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis .kpi{
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:6px;
+  min-width:0;min-height:128px;padding:16px!important;border-radius:18px!important;overflow:hidden
+}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis .kpi span{font-size:11px;font-weight:800;line-height:1.6}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis .kpi strong{
+  max-width:100%;font-size:clamp(21px,2vw,28px)!important;line-height:1.25!important;
+  letter-spacing:-.035em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere
+}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis .kpi small{max-width:100%;font-size:10px;line-height:1.75;color:#6a8492;overflow-wrap:anywhere}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis .tower-kpi-accent{
+  background:linear-gradient(145deg,#ffffff,#f0fbfc)!important;border-color:#b9e4e8!important;
+  box-shadow:0 10px 25px rgba(14,104,119,.075)!important
+}
+body.gc-staff-os-shell #app .tower-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important}
+body.gc-staff-os-shell #app .tower-grid>.card{min-width:0;padding:clamp(14px,1.6vw,21px)!important;border-radius:19px!important}
+body.gc-staff-os-shell #app .tower-grid .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+body.gc-staff-os-shell #app .tower-grid .card-head h3{font-size:15px;font-weight:900;line-height:1.6;margin:3px 0}
+body.gc-staff-os-shell #app .tower-flow{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:9px!important}
+body.gc-staff-os-shell #app .tower-flow-step{min-width:0;padding:11px 7px!important;border:1px solid #dce8ed!important;border-radius:14px!important;background:#f9fcfd!important}
+body.gc-staff-os-shell #app .tower-flow-step b{font-size:18px;line-height:1.25}
+body.gc-staff-os-shell #app .tower-flow-step small{font-size:10px;line-height:1.6;overflow-wrap:anywhere}
+body.gc-staff-os-shell #app .tower-mode-strip{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;margin-top:12px}
+body.gc-staff-os-shell #app .tower-mode-strip>div{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px;min-width:0;padding:9px;border:1px solid #dce8ed;border-radius:12px;background:#fff}
+body.gc-staff-os-shell #app .tower-mode-strip b{font-size:10px;overflow-wrap:anywhere}
+body.gc-staff-os-shell #app .tower-mode-strip strong{font-size:13px;font-variant-numeric:tabular-nums}
+body.gc-staff-os-shell #app .tower-route-list,
+body.gc-staff-os-shell #app .tower-stream,
+body.gc-staff-os-shell #app .tower-exceptions{display:grid;gap:8px;min-width:0}
+body.gc-staff-os-shell #app .tower-route,
+body.gc-staff-os-shell #app .tower-stream-row,
+body.gc-staff-os-shell #app .tower-exception{
+  min-width:0;border:1px solid #dce8ed!important;border-radius:13px!important;background:#fff!important
+}
+body.gc-staff-os-shell #app .tower-route{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:9px;padding:11px}
+body.gc-staff-os-shell #app .tower-route>div{min-width:0}
+body.gc-staff-os-shell #app .tower-route b{display:block;font-size:11px;overflow-wrap:anywhere}
+body.gc-staff-os-shell #app .tower-route small{display:block;font-size:9px;line-height:1.7;color:#6a8492;overflow-wrap:anywhere}
+body.gc-staff-os-shell #app .tower-route>strong{font-size:11px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+body.gc-staff-os-shell #app .tower-stream-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:9px;padding:11px}
+body.gc-staff-os-shell #app .tower-stream-row>div{min-width:0}
+body.gc-staff-os-shell #app .tower-stream-row b{font-size:11px;overflow-wrap:anywhere}
+body.gc-staff-os-shell #app .tower-stream-row small{display:block;font-size:9px;line-height:1.7;color:#6a8492;overflow-wrap:anywhere}
+body.gc-staff-os-shell #app .tower-stream-row .mono{font-size:9px;overflow-wrap:anywhere}
+body.gc-staff-os-shell #app .tower-exception{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:12px;text-align:start}
+body.gc-staff-os-shell #app .tower-exception b{font-size:11px;line-height:1.6}
+body.gc-staff-os-shell #app .tower-exception small{display:block;font-size:10px;line-height:1.75;color:#6a8492;overflow-wrap:anywhere}
+body.gc-staff-os-shell #app #view .section-head{gap:12px;align-items:center}
+body.gc-staff-os-shell #app #view .section-head h1{font-size:clamp(23px,2.7vw,32px);line-height:1.35}
+@media(max-width:1120px){
+  body.gc-staff-os-shell #app .grid-kpi.tower-kpis{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  body.gc-staff-os-shell #app .tower-grid{grid-template-columns:minmax(0,1fr)!important}
+}
+@media(max-width:760px){
+  body.gc-staff-os-shell #app .tower-hero{grid-template-columns:minmax(0,1fr)!important;padding:18px!important;gap:16px!important}
+  body.gc-staff-os-shell #app .tower-hero h1{font-size:26px!important;line-height:1.45!important}
+  body.gc-staff-os-shell #app .tower-hero-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  body.gc-staff-os-shell #app .tower-hero-actions .btn{min-width:0;padding:10px 8px!important;font-size:11px!important}
+  body.gc-staff-os-shell #app .tower-hero-actions .btn:nth-child(3){grid-column:1/-1}
+  body.gc-staff-os-shell #app .grid-kpi.tower-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  body.gc-staff-os-shell #app .grid-kpi.tower-kpis .kpi{min-height:115px;padding:12px!important;border-radius:15px!important}
+  body.gc-staff-os-shell #app .grid-kpi.tower-kpis .kpi strong{font-size:clamp(19px,5.1vw,25px)!important}
+  body.gc-staff-os-shell #app .tower-grid{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
+  body.gc-staff-os-shell #app .tower-grid>.card{padding:13px!important}
+  body.gc-staff-os-shell #app .tower-flow{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
+  body.gc-staff-os-shell #app .tower-flow-step{padding:9px 5px!important}
+  body.gc-staff-os-shell #app .tower-flow-step small{font-size:9px!important}
+  body.gc-staff-os-shell #app .tower-mode-strip>div{grid-template-columns:auto minmax(0,1fr);row-gap:4px}
+  body.gc-staff-os-shell #app .tower-mode-strip strong{grid-column:2}
+  body.gc-staff-os-shell #app .tower-route{grid-template-columns:28px minmax(0,1fr);gap:8px}
+  body.gc-staff-os-shell #app .tower-route>strong{grid-column:2}
+  body.gc-staff-os-shell #app .tower-stream-row{grid-template-columns:auto minmax(0,1fr);gap:7px}
+  body.gc-staff-os-shell #app .tower-stream-row .mono{grid-column:2}
+  body.gc-staff-os-shell #app .gc-notification-outbox-panel{margin-bottom:10px}
+}
+@media(max-width:390px){
+  body.gc-staff-os-shell #app .tower-hero{padding:14px!important}
+  body.gc-staff-os-shell #app .grid-kpi.tower-kpis .kpi{min-height:106px;padding:10px!important}
+  body.gc-staff-os-shell #app .grid-kpi.tower-kpis .kpi span{font-size:10px}
+  body.gc-staff-os-shell #app .tower-flow-step b{font-size:16px}
+  body.gc-staff-os-shell #app .tower-mode-strip{gap:5px}
+  body.gc-staff-os-shell #app .tower-mode-strip>div{padding:7px}
+}
