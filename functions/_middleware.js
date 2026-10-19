@@ -216,7 +216,7 @@ export async function onRequest(context) {
   // last so older compatibility CSS cannot override the final Staff OS layout.
   if (STAFF_V5.test(path)) {
     const eliteThemeLink = '<link rel="stylesheet" href="/gc-staff-console-elite-20261018.css?v=4" data-gc-staff-console-elite="1">';
-    const finalRepairLink = '<link rel="stylesheet" href="/gc-staff-polish-mobile-20261019.css?v=3" data-gc-staff-polish-mobile="1">';
+    const finalRepairLink = '<link rel="stylesheet" href="/gc-staff-polish-mobile-20261019.css?v=4" data-gc-staff-polish-mobile="1">';
     html = html.replace(/<link[^>]*data-gc-staff-console-elite[^>]*>\s*/gi, '');
     html = html.replace(/<link[^>]*data-gc-staff-polish-mobile[^>]*>\s*/gi, '');
     html = html.replace(/<\/head>/i, eliteThemeLink + finalRepairLink + '</head>');

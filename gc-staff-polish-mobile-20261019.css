@@ -1,4 +1,4 @@
-/* Globall Cloud Staff OS — unified visual system v3
+/* Globall Cloud Staff OS — unified visual system v4
    One intentional cascade layer for desktop, mobile, rescue and navigation.
    Keeps existing authentication, role enforcement, data routes and actions unchanged. */
 
@@ -1078,7 +1078,7 @@ body.gc-staff-os-shell #app .gc-customer-bridge-foot.is-error {
 }
 
 /* Forms, dialogs, photos and activity remain usable on touch screens. */
-body.gc-staff-os-shell #app .modal-backdrop {
+body.gc-staff-os-shell .modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 1200;
@@ -1089,7 +1089,7 @@ body.gc-staff-os-shell #app .modal-backdrop {
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
 }
-body.gc-staff-os-shell #app .modal {
+body.gc-staff-os-shell .modal {
   width: min(920px, 100%);
   max-height: min(90dvh, 900px);
   overflow: auto;
@@ -1100,20 +1100,20 @@ body.gc-staff-os-shell #app .modal {
   color: var(--staff-text) !important;
   box-shadow: 0 24px 80px rgba(0, 0, 0, .25);
 }
-body.gc-staff-os-shell #app .modal-head {
+body.gc-staff-os-shell .modal-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 14px;
 }
-body.gc-staff-os-shell #app .modal-head h2 {
+body.gc-staff-os-shell .modal-head h2 {
   margin: 0;
   color: var(--staff-text) !important;
   font-size: 19px;
   line-height: 1.55;
 }
-body.gc-staff-os-shell #app .modal-foot {
+body.gc-staff-os-shell .modal-foot {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -1830,25 +1830,25 @@ body.gc-staff-os-shell #app .gc-rescue-shell > section:not(.staff-command-matrix
   body.gc-staff-os-shell #app .table {
     min-width: 680px !important;
   }
-  body.gc-staff-os-shell #app .modal-backdrop {
+  body.gc-staff-os-shell .modal-backdrop {
     place-items: end stretch !important;
     padding: 7px 7px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
   }
-  body.gc-staff-os-shell #app .modal {
+  body.gc-staff-os-shell .modal {
     width: 100% !important;
     max-height: 88dvh !important;
     padding: 14px !important;
     border-radius: 19px 19px 13px 13px !important;
   }
-  body.gc-staff-os-shell #app .modal-head h2 {
+  body.gc-staff-os-shell .modal-head h2 {
     font-size: 17px !important;
   }
-  body.gc-staff-os-shell #app .modal-foot {
+  body.gc-staff-os-shell .modal-foot {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 7px !important;
   }
-  body.gc-staff-os-shell #app .modal-foot .btn {
+  body.gc-staff-os-shell .modal-foot .btn {
     width: 100% !important;
     min-width: 0 !important;
     font-size: 10px !important;
@@ -1997,5 +1997,105 @@ body.gc-staff-os-shell #app .gc-rescue-shell > section:not(.staff-command-matrix
     animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
+  }
+}
+
+
+/* Portalled dialogs: openModal appends these to <body>, outside #app. */
+body.gc-staff-os-shell .modal :where(input,select,textarea,.field) {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 10px 11px;
+  border: 1px solid var(--staff-line) !important;
+  border-radius: 10px;
+  background: var(--staff-surface-raised) !important;
+  color: var(--staff-text) !important;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.55;
+}
+body.gc-staff-os-shell .modal :where(input[type="checkbox"],input[type="radio"]) {
+  width: auto;
+  min-height: 0;
+  accent-color: var(--staff-accent);
+}
+body.gc-staff-os-shell .modal label {
+  display: block;
+  margin: 0 0 6px;
+  color: var(--staff-muted) !important;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.6;
+}
+body.gc-staff-os-shell .modal .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+body.gc-staff-os-shell .modal .form-field { min-width: 0; }
+body.gc-staff-os-shell .modal .form-field.full { grid-column: 1 / -1; }
+body.gc-staff-os-shell .modal .table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow: auto;
+  border: 1px solid var(--staff-line);
+  border-radius: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+body.gc-staff-os-shell .modal .table {
+  width: 100%;
+  min-width: 680px;
+}
+body.gc-staff-os-shell .modal .photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+body.gc-staff-os-shell .modal .photo {
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid var(--staff-line);
+  border-radius: 11px;
+  background: var(--staff-surface-soft);
+}
+body.gc-staff-os-shell .modal .photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+body.gc-staff-os-shell .toast {
+  position: fixed;
+  inset-inline: auto 12px;
+  bottom: 12px;
+  z-index: 1450;
+  width: max-content;
+  max-width: min(420px, calc(100vw - 24px));
+  padding: 11px 14px;
+  border: 1px solid var(--staff-line);
+  border-radius: 13px;
+  background: var(--staff-surface) !important;
+  color: var(--staff-text) !important;
+  box-shadow: var(--staff-shadow);
+  font-size: 11px;
+  line-height: 1.7;
+}
+html[data-gc-theme="dark"] body.gc-staff-os-shell .toast {
+  background: #102438 !important;
+  color: #e7f0f6 !important;
+}
+@media (max-width: 760px) {
+  body.gc-staff-os-shell .modal .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  body.gc-staff-os-shell .modal .form-field.full {
+    grid-column: auto;
+  }
+  body.gc-staff-os-shell .modal .photo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  body.gc-staff-os-shell .toast {
+    bottom: calc(82px + env(safe-area-inset-bottom, 0px));
   }
 }
