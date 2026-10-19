@@ -1,0 +1,28 @@
+/* Globall Cloud mobile content visibility hotfix (2026-10-19). */
+@media (max-width:760px) {
+  #gcApp .gc-studio-tabs{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px!important;margin-bottom:12px!important}
+  #gcApp .gc-studio-tab{display:grid!important;grid-template-columns:34px 30px minmax(0,1fr) auto!important;align-items:center!important;gap:9px!important;width:100%!important;min-width:0!important;min-height:70px!important;padding:10px 12px!important;overflow:visible!important;color:#eef8fc!important;-webkit-text-fill-color:#eef8fc!important;text-align:start!important;background:linear-gradient(125deg,rgba(16,43,62,.96),rgba(5,22,37,.98))!important;border:1px solid rgba(124,207,220,.24)!important;border-radius:15px!important;opacity:1!important;visibility:visible!important}
+  #gcApp .gc-studio-tab>.gc-studio-tab-no{display:grid!important;place-items:center!important;width:32px!important;height:32px!important;min-width:32px!important;border:1px solid rgba(235,198,111,.5)!important;border-radius:50%!important;background:linear-gradient(145deg,rgba(235,198,111,.2),rgba(235,198,111,.08))!important;color:#f3d58e!important;-webkit-text-fill-color:#f3d58e!important;font:800 11px/1 'JetBrains Mono',monospace!important;opacity:1!important;visibility:visible!important}
+  #gcApp .gc-studio-tab>.gc-studio-tab-icon{display:grid!important;place-items:center!important;width:30px!important;height:30px!important;color:#74e0eb!important;-webkit-text-fill-color:#74e0eb!important;font-size:17px!important;opacity:1!important;visibility:visible!important}
+  #gcApp .gc-studio-tab>span:nth-of-type(3){display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;gap:2px!important;width:auto!important;min-width:0!important;height:auto!important;overflow:visible!important;clip:auto!important;clip-path:none!important;opacity:1!important;visibility:visible!important}
+  #gcApp .gc-studio-tab b{display:block!important;max-width:100%!important;color:#f3fbff!important;-webkit-text-fill-color:#f3fbff!important;font-size:12px!important;font-weight:900!important;line-height:1.55!important;overflow-wrap:anywhere!important;opacity:1!important;visibility:visible!important}
+  #gcApp .gc-studio-tab small{display:block!important;color:#a8c2d0!important;-webkit-text-fill-color:#a8c2d0!important;font-size:10px!important;line-height:1.65!important;opacity:1!important;visibility:visible!important}
+  #gcApp .gc-studio-tab>strong{display:block!important;color:#72e0eb!important;-webkit-text-fill-color:#72e0eb!important;font-size:14px!important;opacity:1!important;visibility:visible!important}
+  #gcApp .gc-launchpad-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  #gcApp .gc-launchpad-card{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:9px!important;min-width:0!important;min-height:88px!important;padding:11px!important;overflow:visible!important;color:#eef8fc!important;-webkit-text-fill-color:#eef8fc!important;background:linear-gradient(145deg,rgba(16,43,62,.94),rgba(6,24,40,.98))!important;border:1px solid rgba(124,207,220,.22)!important;border-radius:15px!important;opacity:1!important;visibility:visible!important}
+  #gcApp .gc-launchpad-card .gc-launchpad-arrow{display:none!important}
+  #gcApp .gc-launchpad-card .gc-launchpad-icon{display:grid!important;place-items:center!important;flex:0 0 34px!important;width:34px!important;height:34px!important;color:#74e0eb!important;opacity:1!important;visibility:visible!important}
+  #gcApp .gc-launchpad-card .gc-launchpad-icon svg{display:block!important;width:21px!important;height:21px!important;color:currentColor!important;stroke:currentColor!important;opacity:1!important;visibility:visible!important}
+  #gcApp .gc-launchpad-card-copy{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;align-items:flex-start!important;gap:3px!important;width:auto!important;min-width:0!important;max-width:100%!important;overflow:visible!important;clip:auto!important;clip-path:none!important;opacity:1!important;visibility:visible!important}
+  #gcApp .gc-launchpad-card-copy b{display:block!important;color:#f1fbff!important;-webkit-text-fill-color:#f1fbff!important;font-size:11px!important;font-weight:900!important;line-height:1.6!important;overflow-wrap:anywhere!important;opacity:1!important;visibility:visible!important}
+  #gcApp .gc-launchpad-card-copy small{display:block!important;color:#a9c3d1!important;-webkit-text-fill-color:#a9c3d1!important;font-size:9px!important;line-height:1.7!important;overflow-wrap:anywhere!important;opacity:1!important;visibility:visible!important}
+}
+@media(max-width:380px){
+  #gcApp .gc-launchpad-card{min-height:82px!important;gap:7px!important;padding:9px!important}
+  #gcApp .gc-launchpad-card .gc-launchpad-icon{flex-basis:30px!important;width:30px!important;height:30px!important}
+  #gcApp .gc-launchpad-card-copy b{font-size:10px!important}
+  #gcApp .gc-launchpad-card-copy small{font-size:8px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #gcApp .gc-studio-tab,#gcApp .gc-launchpad-card{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
