@@ -412,22 +412,60 @@ Deno.serve(async (req) => {
     // Photos are signed on this request and remain private in Storage; raw bucket paths are never returned.
     const receiptsById = new Map<string, Record<string, any>>()
     for (const receipt of customerReceipts) receiptsById.set(String(receipt.id), receipt)
-    const customerNotifications = (notifications.data || []).map((notification: Record<string, any>) => {
+    const customerNotifications = (notifications.data || []).flatMap((notification: Record<string, any>) => {
       const eventKey = String(notification.event_key || '')
       const prefix = 'warehouse_received:'
-      if (!eventKey.startsWith(prefix)) return notification
+      if (!eventKey.startsWith(prefix)) return [notification]
+
+      // Only surface receipt alerts when the authenticated customer's own receipt
+      // confirms that the goods were received at Dubai/UAE. Historical rows remain
+      // in the database; this is a customer-feed filter, not a destructive cleanup.
       const receipt = receiptsById.get(eventKey.slice(prefix.length))
-      const location = String(receipt?.location || receipt?.source_warehouse || receipt?.warehouse || '')
-      const legacyText = String(notification.title || '') + ' ' + String(notification.body || '')
-      const isDubai = /dubai|uae|united arab emirates|دوبەی|دوبی/i.test(location + ' ' + legacyText)
-      return {
+      if (!receipt) return []
+      const location = String(receipt.location || receipt.source_warehouse || receipt.warehouse || '')
+      const normalizedLocation = location.normalize('NFKC').trim().toLowerCase().replace(/\s+/g, ' ')
+      const isDubai = /^(dubai|uae|united arab emirates|دوبەی|دوبی)$/.test(normalizedLocation)
+      if (!isDubai) return []
+
+      const metadata = receipt.label_metadata && typeof receipt.label_metadata === 'object' ? receipt.label_metadata : {}
+      const cartons = Array.isArray(receipt.cartons) ? receipt.cartons : []
+      const cartonCount = Math.max(1, Number(receipt.carton_count ?? metadata.total_packages ?? cartons.length ?? 1) || 1)
+      const weight = Number(receipt.weight_actual ?? metadata.gross_weight_kg ?? 0) || 0
+      const photos = Array.isArray(receipt.photos) ? receipt.photos.filter((url: unknown) => typeof url === 'string' && /^https?:\/\//i.test(url)) : []
+      const gcCode = String(receipt.gc_code_detected || receipt.gc_code || 'GC-—').normalize('NFKC').trim().toUpperCase()
+      const cartonCodes = cartons.map((carton: Record<string, any>) => String(carton.carton_code || '')).filter(Boolean)
+      const cartonLine = cartonCodes.length
+        ? `کۆدی کارتۆنەکان: ${cartonCodes.slice(0, 15).join(', ')}${cartonCodes.length > 15 ? ` و ${cartonCodes.length - 15} دانەی تر` : ''}`
+        : 'کۆدی تاکەکارتۆن: بەردەست نییە'
+      const receivedAt = receipt.received_at || new Date().toISOString()
+      const localTime = new Intl.DateTimeFormat('ku-IQ', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Baghdad' }).format(new Date(receivedAt))
+      const batchCode = String(receipt.batch_code || '—')
+      const existingBody = String(notification.body || '').trim()
+      const hasDetailedBody = existingBody.includes(`GC: ${gcCode}`) && existingBody.includes('Batch:')
+      const detailedBody = [
+        `GC: ${gcCode}`,
+        `کۆگا: ${location}`,
+        `کارتۆن: ${cartonCount}`,
+        cartonLine,
+        `کێش: ${weight > 0 ? `${weight} kg` : 'تۆمارنەکراوە'}`,
+        `بەروار و کات (هەولێر): ${localTime}`,
+        `ژمارەی وێنەکان: ${photos.length}`,
+        `Batch: ${batchCode}`,
+      ].join('\\n')
+
+      return [{
         ...notification,
-        title: isDubai ? 'کاڵاکەت لە کۆگای دوبەی وەرگیرا' : 'کاڵاکەت لە کۆگا وەرگیرا',
-        body: isDubai
-          ? 'وردەکاری، وێنە و ژمارەی کارتۆن لە بەشی بارەکان ببینە.'
-          : 'وردەکاری و بەڵگەی کاڵاکەت لە بەشی بارەکان ببینە.',
+        title: 'کاڵاکەت لە کۆگای دوبەی وەرگیرا',
+        body: hasDetailedBody ? existingBody : detailedBody,
         action_url: '/#shipmentsSection',
-      }
+        receipt_id: String(receipt.id),
+        receipt_location: location,
+        receipt_gc_code: gcCode,
+        receipt_batch_code: batchCode,
+        receipt_received_at: String(receivedAt),
+        receipt_photos: photos,
+        receipt_photo_count: photos.length,
+      }]
     })
     // Include public documents and legacy invoices attached to single-owner
     // shipments even when older staff records predate customer_user_id linking.
