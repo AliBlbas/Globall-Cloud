@@ -16,18 +16,80 @@ async function customerAction(id,active){try{await api('customer','update',{id,i
 function editStaff(id){const row=state.staff.find(x=>x.id===id);if(row)staffForm(row)}
 function editCustomer(id){const row=state.customers.find(x=>x.id===id);if(row)customerForm(row)}
 async function loadPricing(){try{const out=await api('pricing','list');state.pricing=out.rates||[];state.fx=out.exchange_rates||[];const usd=state.fx.find(x=>x.base_currency==='USD'&&x.quote_currency==='IQD');if(usd&&$('rate'))$('rate').value=usd.rate;renderPricing()}catch(e){if($('rateMsg'))$('rateMsg').textContent=e.message}}
-function renderPricing(){const finance=$('finance');if(!finance)return;const old=$('gcPricingTable');if(old)old.remove();const panel=finance.querySelector('.panel');if(!panel)return;const p=document.createElement('div');p.id='gcPricingTable';p.className='table-wrap';p.style.marginTop='16px';p.innerHTML='<table><thead><tr><th>Route</th><th>Mode</th><th>Product</th><th>Unit</th><th>Amount</th><th>Currency</th><th>Transit</th><th>Action</th></tr></thead><tbody>'+state.pricing.map(r=>`<tr><td>${esc(r.origin_key)} → ${esc(r.destination_key)}</td><td>${esc(r.transport_mode)}</td><td>${esc(r.product_type)}</td><td>${esc(r.unit)}</td><td><input style="width:110px" data-price="${esc(r.id)}" value="${esc(r.amount)}" type="number" min="0" step="0.01"></td><td>${esc(r.currency)}</td><td>${esc(r.transit_min_days??'—')}–${esc(r.transit_max_days??'—')}</td><td><button class="btn gc-mini" data-save-price="${esc(r.id)}">نوێکردنەوە</button></td></tr>`).join('')+'</tbody></table>';panel.appendChild(p)}
-async function savePrice(id){const input=document.querySelector(`[data-price="${CSS.escape(id)}"]`);const amount=Number(input?.value);if(!Number.isFinite(amount)||amount<0)return alert('نرخی دروست داخڵ بکە');const row=state.pricing.find(x=>x.id===id);if(!row)return;try{await api('pricing','update',{id,amount,transit_min_days:row.transit_min_days,transit_max_days:row.transit_max_days,notes:row.notes});await loadPricing();window.alert('نرخ نوێکرایەوە ✓')}catch(e){alert(e.message)}}
-async function saveFx(){const value=Number($('rate')?.value);if(!Number.isFinite(value)||value<=0)return alert('نرخی USD/IQD دروست داخڵ بکە');const usd=state.fx.find(x=>x.base_currency==='USD'&&x.quote_currency==='IQD');try{if(usd)await api('pricing','update',{id:usd.id,rate:value,rate_type:'exchange',source_note:'Super Admin'});else{const {error}=await db.from('app_settings').upsert({key:'usd_iqd_rate',value,updated_by:state.me?.id||null,updated_at:new Date().toISOString()});if(error)throw error}if($('rateMsg'))$('rateMsg').textContent='نرخ پاشەکەوت کرا ✓';await loadPricing()}catch(e){if($('rateMsg'))$('rateMsg').textContent=e.message}}
+function renderPricing(){
+ const finance=$('finance'); if(!finance)return;
+ $('gcPricingPanel')?.remove();
+ const p=document.createElement('div');
+ p.id='gcPricingPanel'; p.className='panel'; p.style.marginTop='14px';
+ const rows=state.pricing.map(r=>{
+   const transit=(r.transit_min_days==null?'—':esc(r.transit_min_days))+'–'+(r.transit_max_days==null?'—':esc(r.transit_max_days));
+   return '<tr><td>'+esc(r.origin_key)+' → '+esc(r.destination_key)+'</td><td>'+esc(String(r.transport_mode||'').toUpperCase())+'</td><td>'+esc(r.product_type)+'</td><td>'+esc(r.unit)+'</td><td>'+esc(r.amount)+' '+esc(r.currency)+'</td><td>'+transit+'</td><td class="'+(r.is_active?'ok':'bad')+'">'+(r.is_active?'ACTIVE':'INACTIVE')+'</td><td><button class="btn gc-mini" data-edit-price="'+esc(r.id)+'">دەستکاری</button> <button class="btn gc-mini" data-toggle-price="'+esc(r.id)+'" data-active="'+String(Boolean(r.is_active))+'">'+(r.is_active?'ناچالاککردن':'چالاککردن')+'</button></td></tr>';
+ }).join('');
+ p.innerHTML='<div class="panel-head"><div><h3>ڕێکخستنی نرخی گواستنەوە</h3><p>China / USA / Dubai → Erbil · نرخە نوێکان بە effective date تۆمار دەکرێن.</p></div><div class="gc-controlbar"><button class="btn primary" id="gcAddRate">+ زیادکردنی نرخ</button><button class="btn" id="gcRefreshPricingList">نوێکردنەوە</button></div></div><div class="table-wrap"><table><thead><tr><th>Origin → Destination</th><th>Mode</th><th>Product</th><th>Unit</th><th>Rate</th><th>Transit days</th><th>Status</th><th>Action</th></tr></thead><tbody>'+ (rows||'<tr><td colspan="8">هیچ نرخێک نییە؛ نرخێکی نوێ زیاد بکە.</td></tr>') +'</tbody></table></div>';
+ finance.appendChild(p);
+ $('gcAddRate').onclick=()=>pricingForm();
+ $('gcRefreshPricingList').onclick=loadPricing;
+}
+function pricingForm(existing={}){
+ const today=new Date().toISOString().slice(0,10);
+ const form=modal(existing.id?'دەستکاری نرخی گواستنەوە':'زیادکردنی نرخی گواستنەوە',[
+  {name:'origin_key',label:'Origin',value:existing.origin_key||'China',required:true},
+  {name:'destination_key',label:'Destination',value:existing.destination_key||'Erbil',required:true},
+  {name:'transport_mode',label:'Transport mode',value:existing.transport_mode||'air',type:'select',options:['air','sea','land'].map(x=>({value:x,label:x.toUpperCase()}))},
+  {name:'product_type',label:'جۆری کاڵا',value:existing.product_type||'General goods',required:true},
+  {name:'unit',label:'یەکە',value:existing.unit||'kg',type:'select',options:[{value:'kg',label:'KG'},{value:'cbm',label:'CBM'}]},
+  {name:'amount',label:'نرخ',value:existing.amount??'',type:'number',required:true},
+  {name:'currency',label:'دراو',value:existing.currency||'USD',type:'select',options:['USD','IQD','AED','CNY'].map(x=>({value:x,label:x}))},
+  {name:'transit_min_days',label:'کەمترین ڕۆژ',value:existing.transit_min_days??'',type:'number'},
+  {name:'transit_max_days',label:'زۆرترین ڕۆژ',value:existing.transit_max_days??'',type:'number'},
+  {name:'effective_from',label:'دەستپێکردن',value:existing.effective_from||today,type:'date',required:true},
+  {name:'effective_to',label:'کۆتایی (ئارەزوومەندانە)',value:existing.effective_to||'',type:'date'},
+  {name:'is_active',label:'دۆخ',value:existing.is_active===false?'false':'true',type:'select',options:[{value:'true',label:'چالاک'},{value:'false',label:'ناچالاک'}]},
+  {name:'notes',label:'تێبینی',value:existing.notes||''}
+ ]);
+ form.onsubmit=async e=>{
+  e.preventDefault();
+  const error=$('gcAdminError');
+  const data=Object.fromEntries(new FormData(form));
+  data.amount=Number(data.amount);
+  data.transit_min_days=data.transit_min_days===''?null:Number(data.transit_min_days);
+  data.transit_max_days=data.transit_max_days===''?null:Number(data.transit_max_days);
+  data.effective_to=data.effective_to||null;
+  data.is_active=data.is_active==='true';
+  if(!Number.isFinite(data.amount)||data.amount<0){error.textContent='نرخ دەبێت ژمارەیەکی دروست و نا-نەرێنی بێت.';return}
+  if(data.transit_min_days!==null&&(!Number.isInteger(data.transit_min_days)||data.transit_min_days<0)){error.textContent='کەمترین ڕۆژ دەبێت ژمارەی تەواو بێت.';return}
+  if(data.transit_max_days!==null&&(!Number.isInteger(data.transit_max_days)||data.transit_max_days<0||(data.transit_min_days!==null&&data.transit_max_days<data.transit_min_days))){error.textContent='زۆرترین ڕۆژ دروست نییە.';return}
+  error.textContent='لە پاشەکەوتکردندایە…';
+  try{
+   await api('pricing',existing.id?'update':'create',existing.id?Object.assign({},data,{id:existing.id}):data);
+   form.closest('#gcAdminModal').remove();
+   await loadPricing();
+   window.alert(existing.id?'نرخ نوێکرایەوە ✓':'نرخی نوێ زیادکرا ✓');
+  }catch(err){error.textContent=err.message||'Pricing save failed'}
+ };
+}
+async function togglePricing(id,active){
+ const row=state.pricing.find(x=>x.id===id); if(!row)return;
+ if(!window.confirm(active?'دڵنیایت ئەم نرخە ناچالاک بکەیت؟':'دڵنیایت ئەم نرخە چالاک بکەیت؟'))return;
+ try{await api('pricing','update',{id,amount:Number(row.amount),is_active:!active});await loadPricing()}
+ catch(e){window.alert(e.message||'Pricing status update failed')}
+}
 function wire(){style();
-let b=addBar('staff','<button class="btn primary" id="gcAddStaff">+ زیادکردنی ستاف</button><button class="btn" id="gcRefreshStaff">نوێکردنەوە</button>');if(b){$('gcAddStaff').onclick=()=>staffForm();$('gcRefreshStaff').onclick=refreshStaff}
-$('staffRows')?.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.editStaff)editStaff(b.dataset.editStaff);if(b.dataset.toggleStaff)staffAction(b.dataset.toggleStaff,b.dataset.active==='true'?'deactivate':'activate');if(b.dataset.deleteStaff)staffAction(b.dataset.deleteStaff,'delete')});
-b=addBar('customers','<button class="btn primary" id="gcAddCustomer">+ زیادکردنی کڕیار</button><button class="btn" id="gcRefreshCustomer">نوێکردنەوە</button>');if(b){$('gcAddCustomer').onclick=()=>customerForm();$('gcRefreshCustomer').onclick=loadCustomers}
-$('customerRows')?.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.editCustomer)editCustomer(b.dataset.editCustomer);if(b.dataset.toggleCustomer)customerAction(b.dataset.toggleCustomer,b.dataset.active==='true')});
-$('customerSearch')?.addEventListener('input',renderCustomers);
-b=addBar('finance','<button class="btn" id="gcRefreshPricing">نوێکردنەوەی هەموو نرخەکان</button>');if(b)$('gcRefreshPricing').onclick=loadPricing;
-$('saveRate')?.addEventListener('click',saveFx);
-document.addEventListener('click',e=>{const b=e.target.closest('[data-save-price]');if(b)savePrice(b.dataset.savePrice)});
-Promise.resolve(db.auth.getSession()).then(({data})=>{state.me=data.session?.user||null;return Promise.all([loadPricing(),refreshStaff(),loadCustomers()])}).catch(e=>console.warn('super admin control boot',e));
+ let b=addBar('staff','<button class="btn primary" id="gcAddStaff">+ زیادکردنی ستاف</button><button class="btn" id="gcRefreshStaff">نوێکردنەوە</button>');
+ if(b){$('gcAddStaff').onclick=()=>staffForm();$('gcRefreshStaff').onclick=refreshStaff}
+ $('staffRows')?.addEventListener('click',e=>{const x=e.target.closest('button');if(!x)return;if(x.dataset.editStaff)editStaff(x.dataset.editStaff);if(x.dataset.toggleStaff)staffAction(x.dataset.toggleStaff,x.dataset.active==='true'?'deactivate':'activate');if(x.dataset.deleteStaff)staffAction(x.dataset.deleteStaff,'delete')});
+ b=addBar('customers','<button class="btn primary" id="gcAddCustomer">+ زیادکردنی کڕیار</button><button class="btn" id="gcRefreshCustomer">نوێکردنەوە</button>');
+ if(b){$('gcAddCustomer').onclick=()=>customerForm();$('gcRefreshCustomer').onclick=loadCustomers}
+ $('gcAddCustomerHeader')?.addEventListener('click',()=>customerForm());
+ $('customerRows')?.addEventListener('click',e=>{const x=e.target.closest('button');if(!x)return;if(x.dataset.editCustomer)editCustomer(x.dataset.editCustomer);if(x.dataset.toggleCustomer)customerAction(x.dataset.toggleCustomer,x.dataset.active==='true')});
+ $('customerSearch')?.addEventListener('input',renderCustomers);
+ b=addBar('finance','<button class="btn" id="gcRefreshPricing">نوێکردنەوەی هەموو نرخەکان</button>');
+ if(b)$('gcRefreshPricing').onclick=loadPricing;
+ document.addEventListener('click',e=>{
+  const x=e.target.closest('button');if(!x)return;
+  if(x.dataset.editPrice)pricingForm(state.pricing.find(r=>r.id===x.dataset.editPrice)||{});
+  if(x.dataset.togglePrice)togglePricing(x.dataset.togglePrice,x.dataset.active==='true');
+ });
+ Promise.resolve(db.auth.getSession()).then(({data})=>{state.me=data.session?.user||null;return Promise.all([loadPricing(),refreshStaff(),loadCustomers()])}).catch(e=>console.warn('super admin control boot',e));
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire,{once:true});else wire();};boot();})();
