@@ -469,6 +469,50 @@ for (const [label, passed] of mobileUiContracts) {
   else fail(label)
 }
 
+
+console.log('Super Admin write-path contracts')
+const superAdminUi = read('super-admin-live-control-v2.js')
+const superAdminMain = read('super-admin-command-center.js')
+const superAdminHtml = read('super-admin-command-center.html')
+const accountAdmin = read('supabase/functions/account-admin/index.ts')
+const superAdminContracts = [
+  ['protected account-admin supports POST list for staff, customers and pricing',
+    accountAdmin.includes("if (action === 'list')") &&
+    accountAdmin.includes("return json(await listStaff(serviceClient)") &&
+    accountAdmin.includes("return json(await listCustomers(serviceClient)") &&
+    accountAdmin.includes("return json(await listPricing(serviceClient)")],
+  ['protected account-admin supports creating and editing pricing rates',
+    accountAdmin.includes('async function createPricing') &&
+    accountAdmin.includes('async function updatePricing') &&
+    accountAdmin.includes("if (action === 'create') return json(await createPricing")],
+  ['USD/IQD update keeps exchange_rates and legacy app_settings synchronized server-side',
+    accountAdmin.includes('usd_to_iqd: rate') &&
+    accountAdmin.includes("from('app_settings').upsert") &&
+    accountAdmin.includes('synchronized_app_setting: true')],
+  ['Super Admin exposes add/edit/activate actions for pricing rows',
+    superAdminUi.includes('function pricingForm(existing={})') &&
+    superAdminUi.includes('data-edit-price=') &&
+    superAdminUi.includes('data-toggle-price=') &&
+    superAdminUi.includes("api('pricing',existing.id?'update':'create'")],
+  ['Super Admin staff/customer refresh uses the protected Edge Function list contract',
+    superAdminUi.includes("api('staff','list')") &&
+    superAdminUi.includes("api('customer','list')") &&
+    accountAdmin.includes("if (action === 'list')")],
+  ['USD/IQD is saved via account-admin, not a browser-side app_settings write',
+    superAdminMain.includes("functions.invoke('account-admin'") &&
+    !superAdminMain.includes("state.db.from('app_settings').upsert") &&
+    !superAdminUi.includes("db.from('app_settings').upsert")],
+  ['Super Admin script URLs are cache-busted and customer add button IDs are unique',
+    superAdminHtml.includes('super-admin-live-control-v2.js?v=20261019-1') &&
+    superAdminHtml.includes('super-admin-command-center.js?v=20261019-1') &&
+    superAdminHtml.includes('id="gcAddCustomerHeader"') &&
+    !superAdminHtml.includes('id="gcAddCustomer"')],
+]
+for (const [label, passed] of superAdminContracts) {
+  if (passed) ok(label)
+  else fail(label)
+}
+
 console.log('')
 if (failures) { console.error(`${failures} check(s) failed.`); process.exit(1) }
 console.log('All repository validation checks passed.')
