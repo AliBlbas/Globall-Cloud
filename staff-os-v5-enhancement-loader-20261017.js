@@ -99,7 +99,7 @@
       if (addedStyles) ensureLast();
     });
     observer.observe(document.head, { childList: true, subtree: true });
-    window.__gcStaffEliteCascadeObserver = observer;
+    window.__gcStaffFinalCascadeObserver = observer;
   };
 
   const waitForShell = () => {
