@@ -4,7 +4,7 @@
   // Organize existing Staff OS links without replacing their original buttons,
   // click handlers, permissions, or data routes.
   const GROUPS = [
-    { title: 'سەرەکی و بار', tabs: ['overview', 'shipments', 'warehouses'] },
+    { title: 'سەرەکی و بار', tabs: ['overview', 'shipments', 'land-manifests', 'warehouses'] },
     { title: 'کڕیار و داواکاری', tabs: ['customers', 'customer-chat', 'requests'] },
     { title: 'بازرگانی و دارایی', tabs: ['pricing', 'finance'] },
     { title: 'ئاگاداری و بەڕێوەبردن', tabs: ['alerts', 'staff-chat', 'activity', 'settings'] }
