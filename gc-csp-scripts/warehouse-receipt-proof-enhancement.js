@@ -131,15 +131,15 @@
     if (photos.length > 8) return void (result.textContent = 'زۆرترین ٨ وێنەی بەڵگەی وەرگرتنە.')
     const meta = buildLabelMetadata()
     const cargoText = [meta.item_summary, meta.label_text, read('notes')].filter(Boolean).join(' ')
-    const hasBattery = Boolean($('proofHasBattery')?.checked) || /(battery|batteries|lithium|power\\s?bank|باتری|پاتری)/i.test(cargoText)
-    const hasLiquid = Boolean($('proofHasLiquid')?.checked) || /(liquid|perfume|fragrance|shampoo|\\bgel\\b|\\boil\\b|شلە|شلەمەنی|عەتری|پەرفیوم)/i.test(cargoText)
+    const hasBattery = Boolean($('proofHasBattery')?.checked) || /(battery|batteries|lithium|power\s?bank|باتری|پاتری)/i.test(cargoText)
+    const hasLiquid = Boolean($('proofHasLiquid')?.checked) || /(liquid|perfume|fragrance|shampoo|\bgel\b|\boil\b|شلە|شلەمەنی|عەتری|پەرفیوم)/i.test(cargoText)
     const medicalDevice = Boolean($('proofMedicalDevice')?.checked) || /(medical|medicine|medication|surgical|clinic|hospital|پزیشک|دەرمان|نەشتەرگەری)/i.test(cargoText)
     const msdsFile = $('proofMsdsDocument')?.files?.[0] || null
     const needsMsds = hasBattery || hasLiquid
     if (medicalDevice) { result.classList.add('error'); result.textContent = 'ئامێر و کەلوپەلی پزیشکی بە هیچ شێوەیەک وەرناگیرێت.'; return }
     if (needsMsds && !msdsFile) { result.classList.add('error'); result.textContent = 'بۆ کاڵای باتری‌دار یان شلەمەنی، فایلێکی MSDS پێویستە.'; return }
     const msdsMime = String(msdsFile?.type || '').split(';')[0].trim().toLowerCase()
-    const msdsExt = String(msdsFile?.name || '').toLowerCase().match(/\\.([a-z0-9]+)$/)?.[1] || ''
+    const msdsExt = String(msdsFile?.name || '').toLowerCase().match(/\.([a-z0-9]+)$/)?.[1] || ''
     if (msdsFile && (msdsFile.size <= 0 || msdsFile.size > 10 * 1024 * 1024 || !(msdsMime === 'application/pdf' && msdsExt === 'pdf' || msdsMime === 'image/jpeg' && ['jpg','jpeg'].includes(msdsExt) || msdsMime === 'image/png' && msdsExt === 'png' || msdsMime === 'image/webp' && msdsExt === 'webp'))) { result.classList.add('error'); result.textContent = 'MSDS دەبێت PDF/JPG/PNG/WebP و کەمتر لە 10MB بێت.'; return }
 
     button.disabled = true
