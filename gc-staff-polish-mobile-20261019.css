@@ -1,4 +1,4 @@
-/* Globall Cloud Staff OS — unified visual system v4
+/* Globall Cloud Staff OS — unified visual system v5
    One intentional cascade layer for desktop, mobile, rescue and navigation.
    Keeps existing authentication, role enforcement, data routes and actions unchanged. */
 
@@ -2097,5 +2097,371 @@ html[data-gc-theme="dark"] body.gc-staff-os-shell .toast {
   }
   body.gc-staff-os-shell .toast {
     bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────
+   v5 visual finish: premium operations workspace, stronger hierarchy,
+   predictable components and touch-first interactions.
+   No business logic or data-flow selectors are changed by this layer.
+   ────────────────────────────────────────────────────────────────────── */
+body.gc-staff-os-shell {
+  background:
+    radial-gradient(820px 420px at 95% -5%, rgba(8, 127, 140, .075), transparent 65%),
+    radial-gradient(720px 500px at 0% 92%, rgba(30, 110, 150, .035), transparent 66%),
+    var(--staff-canvas) !important;
+}
+html[data-gc-theme="dark"] body.gc-staff-os-shell {
+  background:
+    radial-gradient(850px 420px at 95% -8%, rgba(53, 196, 207, .13), transparent 65%),
+    radial-gradient(650px 480px at 0% 95%, rgba(63, 109, 184, .08), transparent 70%),
+    var(--staff-canvas) !important;
+}
+body.gc-staff-os-shell #app .gc-shell {
+  gap: 17px !important;
+  align-items: stretch;
+}
+body.gc-staff-os-shell #app .gc-side {
+  border-color: rgba(153, 202, 221, .20);
+  box-shadow: 0 24px 60px rgba(9, 32, 49, .15);
+}
+body.gc-staff-os-shell #app .brand {
+  position: relative;
+}
+body.gc-staff-os-shell #app .brand::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 3px;
+  bottom: -1px;
+  width: 54px;
+  height: 2px;
+  border-radius: 9px;
+  background: linear-gradient(90deg, #55d5d9, transparent);
+}
+body.gc-staff-os-shell #app .nav-btn {
+  position: relative;
+  isolation: isolate;
+}
+body.gc-staff-os-shell #app .nav-btn.active::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: -1px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 9px;
+  background: #62dce0;
+  box-shadow: 0 0 14px rgba(98, 220, 224, .22);
+}
+body.gc-staff-os-shell #app .topbar {
+  border-color: color-mix(in srgb, var(--staff-line) 85%, var(--staff-accent)) !important;
+  box-shadow: 0 8px 28px rgba(21, 55, 75, .055);
+}
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app .topbar {
+  background: color-mix(in srgb, var(--staff-surface) 93%, #12384b) !important;
+}
+body.gc-staff-os-shell #app .view {
+  position: relative;
+  isolation: isolate;
+  border-color: color-mix(in srgb, var(--staff-line) 86%, var(--staff-accent)) !important;
+  box-shadow: 0 15px 38px rgba(17, 54, 73, .045);
+}
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app .view {
+  box-shadow: 0 18px 42px rgba(0, 0, 0, .17);
+}
+body.gc-staff-os-shell #app .section-head h1 {
+  letter-spacing: -.45px;
+}
+body.gc-staff-os-shell #app .section-head .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+body.gc-staff-os-shell #app .section-head .eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--staff-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--staff-accent) 12%, transparent);
+}
+body.gc-staff-os-shell #app .tower-hero {
+  position: relative;
+  isolation: isolate;
+  border-color: rgba(47, 144, 158, .45) !important;
+  background:
+    radial-gradient(430px 260px at 7% 0%, rgba(66, 199, 205, .22), transparent 68%),
+    radial-gradient(300px 200px at 100% 100%, rgba(36, 107, 147, .20), transparent 70%),
+    linear-gradient(125deg, #12374e 0%, #0c2539 54%, #0a1d2f 100%) !important;
+  box-shadow: 0 20px 42px rgba(9, 36, 54, .18);
+}
+body.gc-staff-os-shell #app .tower-hero::before {
+  content: "";
+  position: absolute;
+  inset-inline-end: 0;
+  top: 0;
+  width: 130px;
+  height: 3px;
+  border-radius: 0 0 0 4px;
+  background: linear-gradient(90deg, transparent, #74e0e1);
+}
+body.gc-staff-os-shell #app .tower-hero > * {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+body.gc-staff-os-shell #app .tower-hero .eyebrow {
+  letter-spacing: 1.1px;
+}
+body.gc-staff-os-shell #app .tower-hero h1 {
+  letter-spacing: -.45px;
+  text-wrap: balance;
+}
+body.gc-staff-os-shell #app .tower-hero-actions .btn {
+  min-height: 45px;
+  border-radius: 12px;
+  font-size: 11px;
+  transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+}
+body.gc-staff-os-shell #app .tower-hero-actions .btn.primary {
+  background: linear-gradient(135deg, #d8fbfa, #a4e6e9) !important;
+  box-shadow: 0 7px 18px rgba(65, 190, 199, .12);
+}
+body.gc-staff-os-shell #app .grid-kpi,
+body.gc-staff-os-shell #app .tower-kpis {
+  align-items: stretch;
+}
+body.gc-staff-os-shell #app .kpi {
+  position: relative;
+  overflow: hidden;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+body.gc-staff-os-shell #app .kpi::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: color-mix(in srgb, var(--staff-accent) 30%, var(--staff-line));
+}
+body.gc-staff-os-shell #app .kpi.tower-kpi-accent::before {
+  background: var(--staff-accent);
+}
+body.gc-staff-os-shell #app .kpi:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--staff-accent) 35%, var(--staff-line)) !important;
+  box-shadow: 0 10px 24px rgba(18, 59, 78, .075);
+}
+body.gc-staff-os-shell #app .kpi strong {
+  letter-spacing: -.35px;
+  font-variant-numeric: tabular-nums;
+}
+body.gc-staff-os-shell #app .card {
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+body.gc-staff-os-shell #app .card-head {
+  padding-bottom: 9px;
+  border-bottom: 1px solid color-mix(in srgb, var(--staff-line) 70%, transparent);
+}
+body.gc-staff-os-shell #app .card-head .eyebrow {
+  margin-bottom: 3px;
+}
+body.gc-staff-os-shell #app .gc-customer-bridge-panel {
+  border-inline-start: 3px solid var(--staff-accent) !important;
+}
+body.gc-staff-os-shell #app .gc-customer-bridge-head > .pill {
+  max-width: 210px;
+  min-height: 30px;
+  padding-inline: 10px;
+}
+body.gc-staff-os-shell #app .gc-customer-bridge-metrics > div {
+  transition: background .16s ease, border-color .16s ease;
+}
+body.gc-staff-os-shell #app .gc-customer-bridge-metrics > div:hover {
+  border-color: color-mix(in srgb, var(--staff-accent) 35%, var(--staff-line));
+  background: var(--staff-accent-soft);
+}
+body.gc-staff-os-shell #app .tower-flow-step,
+body.gc-staff-os-shell #app .tower-exception,
+body.gc-staff-os-shell #app .room,
+body.gc-staff-os-shell #app .notice {
+  transition: border-color .16s ease, background .16s ease, transform .16s ease;
+}
+body.gc-staff-os-shell #app .tower-flow-step:hover,
+body.gc-staff-os-shell #app .tower-exception:hover,
+body.gc-staff-os-shell #app .room:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--staff-accent) 35%, var(--staff-line)) !important;
+}
+body.gc-staff-os-shell #app .table-wrap {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4);
+}
+body.gc-staff-os-shell #app .table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  white-space: nowrap;
+}
+body.gc-staff-os-shell #app .table td {
+  line-height: 1.8;
+}
+body.gc-staff-os-shell #app .table td :where(button,a) {
+  min-height: 32px;
+}
+body.gc-staff-os-shell #app .field,
+body.gc-staff-os-shell .modal :where(input,select,textarea,.field) {
+  transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
+}
+body.gc-staff-os-shell #app .btn:active,
+body.gc-staff-os-shell #app .tower-flow-step:active,
+body.gc-staff-os-shell #app .tower-exception:active,
+body.gc-staff-os-shell .gc-staff-mobile-dock button:active {
+  transform: scale(.985);
+}
+body.gc-staff-os-shell #app .empty {
+  display: grid;
+  place-items: center;
+  min-height: 108px;
+  background:
+    radial-gradient(300px 100px at 50% 0%, color-mix(in srgb, var(--staff-accent) 5%, transparent), transparent 75%),
+    var(--staff-surface-raised);
+}
+body.gc-staff-os-shell .gc-staff-mobile-dock {
+  border-color: color-mix(in srgb, var(--staff-line) 85%, var(--staff-accent)) !important;
+}
+body.gc-staff-os-shell .gc-staff-mobile-dock button {
+  position: relative;
+  transition: background .15s ease, color .15s ease, transform .15s ease;
+}
+body.gc-staff-os-shell .gc-staff-mobile-dock button.active::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  inset-inline: 26%;
+  height: 2px;
+  border-radius: 20px;
+  background: var(--staff-accent);
+}
+body.gc-staff-os-shell .gc-staff-mobile-dock .gc-staff-mobile-icon svg {
+  transition: transform .15s ease;
+}
+body.gc-staff-os-shell .gc-staff-mobile-dock button.active .gc-staff-mobile-icon svg {
+  transform: translateY(-1px);
+}
+body.gc-staff-os-shell .gc-staff-mobile-drawer {
+  border-color: color-mix(in srgb, var(--staff-line) 82%, var(--staff-accent)) !important;
+}
+body.gc-staff-os-shell .gc-staff-mobile-module-grid button {
+  transition: background .15s ease, border-color .15s ease, transform .15s ease;
+}
+body.gc-staff-os-shell .gc-staff-mobile-module-grid button:hover {
+  border-color: var(--staff-accent) !important;
+  background: var(--staff-accent-soft) !important;
+}
+body.gc-staff-os-shell .gc-staff-mobile-user {
+  padding-bottom: 2px;
+}
+body.gc-staff-os-shell .gc-staff-mobile-user button:hover {
+  border-color: var(--staff-accent);
+}
+body.gc-staff-os-shell .modal-backdrop {
+  overscroll-behavior: contain;
+}
+body.gc-staff-os-shell .modal {
+  overscroll-behavior: contain;
+}
+body.gc-staff-os-shell .modal-head {
+  padding-bottom: 11px;
+  border-bottom: 1px solid var(--staff-line);
+}
+body.gc-staff-os-shell .modal-foot {
+  position: sticky;
+  bottom: -14px;
+  padding: 10px 0 2px;
+  background: var(--staff-surface);
+}
+body.gc-staff-os-shell .gc-staff-mobile-menu-button {
+  border-radius: 11px !important;
+}
+body.gc-staff-os-shell .gc-rescue-shell .staff-command-matrix .cmd {
+  align-content: center;
+}
+body.gc-staff-os-shell .gc-rescue-shell .staff-command-matrix .cmd:hover {
+  border-color: color-mix(in srgb, var(--staff-accent) 35%, var(--staff-line)) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--staff-shadow);
+}
+body.gc-staff-os-shell .toast {
+  animation: gcStaffToastIn .2s ease-out both;
+}
+@keyframes gcStaffToastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (min-width: 1181px) {
+  body.gc-staff-os-shell #app .gc-shell {
+    grid-template-columns: 252px minmax(0, 1fr) !important;
+  }
+  body.gc-staff-os-shell #app .view {
+    padding: 23px !important;
+  }
+  body.gc-staff-os-shell #app .tower-hero {
+    padding: 28px !important;
+  }
+}
+@media (max-width: 760px) {
+  body.gc-staff-os-shell {
+    background:
+      radial-gradient(380px 240px at 100% 0%, rgba(8, 127, 140, .06), transparent 72%),
+      var(--staff-canvas) !important;
+  }
+  html[data-gc-theme="dark"] body.gc-staff-os-shell {
+    background:
+      radial-gradient(380px 240px at 100% 0%, rgba(53, 196, 207, .11), transparent 72%),
+      var(--staff-canvas) !important;
+  }
+  body.gc-staff-os-shell #app .view {
+    border-radius: 16px !important;
+  }
+  body.gc-staff-os-shell #app .tower-hero {
+    box-shadow: 0 12px 28px rgba(9, 36, 54, .14);
+  }
+  body.gc-staff-os-shell #app .tower-kpis .kpi {
+    min-height: 92px !important;
+  }
+  body.gc-staff-os-shell #app .card-head {
+    padding-bottom: 8px;
+    margin-bottom: 9px !important;
+  }
+  body.gc-staff-os-shell #app .table th {
+    position: static;
+  }
+  body.gc-staff-os-shell #app .gc-customer-bridge-head > .pill {
+    max-width: 100%;
+  }
+  body.gc-staff-os-shell #app .tower-flow-step:hover,
+  body.gc-staff-os-shell #app .tower-exception:hover,
+  body.gc-staff-os-shell #app .room:hover {
+    transform: none;
+  }
+  body.gc-staff-os-shell .gc-staff-mobile-dock {
+    box-shadow: 0 15px 42px rgba(7, 29, 43, .22) !important;
+  }
+  body.gc-staff-os-shell .modal-foot {
+    bottom: calc(-14px - env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.gc-staff-os-shell #app *,
+  body.gc-staff-os-shell .gc-staff-mobile-dock *,
+  body.gc-staff-os-shell .gc-staff-mobile-drawer *,
+  body.gc-staff-os-shell .toast {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
   }
 }
