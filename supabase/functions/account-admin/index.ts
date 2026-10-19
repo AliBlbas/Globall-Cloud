@@ -313,9 +313,189 @@ async function markChatRead(client: ReturnType<typeof createClient>, staffId: st
   return { kind: 'chat', membership: row }
 }
 async function markStaffNotificationRead(client: ReturnType<typeof createClient>, staffId: string, data: JsonRecord) { const id = txt(data.id); if (!id) throw responseError('Notification id is required', 400); const { data: row, error } = await client.from('staff_notifications').update({ read_at: new Date().toISOString() }).eq('id', id).eq('staff_id', staffId).select('id,read_at').single(); if (error) throw error; return { notification: row } }
-async function listPricing(client: ReturnType<typeof createClient>) { const [rates, fx] = await Promise.all([client.from('pricing_rates').select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from,effective_to,is_active,notes,updated_at').eq('is_active', true).order('origin_key').order('transport_mode').order('product_type'), client.from('exchange_rates').select('id,base_currency,quote_currency,rate,effective_from,effective_to,is_active,source_note,updated_at').eq('is_active', true).order('base_currency').order('quote_currency')]); if (rates.error) throw rates.error; if (fx.error) throw fx.error; return { kind: 'pricing', rates: rates.data ?? [], exchange_rates: fx.data ?? [] } }
-async function updatePricing(client: ReturnType<typeof createClient>, data: JsonRecord, actor: { id: string, name: string | null }) { const id = txt(data.id); if (!id) throw responseError('Pricing rate id is required', 400); const amount = Number(data.amount); if (!Number.isFinite(amount) || amount < 0) throw responseError('Valid non-negative amount is required', 400); const transitMin = data.transit_min_days === '' || data.transit_min_days == null ? null : Number(data.transit_min_days); const transitMax = data.transit_max_days === '' || data.transit_max_days == null ? null : Number(data.transit_max_days); if ((transitMin != null && (!Number.isInteger(transitMin) || transitMin < 0)) || (transitMax != null && (!Number.isInteger(transitMax) || transitMax < (transitMin ?? 0)))) throw responseError('Invalid transit days', 400); const { data: row, error } = await client.from('pricing_rates').update({ amount, transit_min_days: transitMin, transit_max_days: transitMax, notes: txt(data.notes), updated_by: actor.id, updated_at: new Date().toISOString() }).eq('id', id).select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from,effective_to,is_active,notes,updated_at').single(); if (error) throw error; await logActivity(client, actor.id, actor.name, 'update_pricing_rate', id, { amount, transit_min_days: transitMin, transit_max_days: transitMax }); return { rate: row } }
-async function updateExchangeRate(client: ReturnType<typeof createClient>, data: JsonRecord, actor: { id: string, name: string | null }) { const id = txt(data.id); if (!id) throw responseError('Exchange rate id is required', 400); const rate = Number(data.rate); if (!Number.isFinite(rate) || rate <= 0) throw responseError('Valid positive exchange rate is required', 400); const { data: row, error } = await client.from('exchange_rates').update({ rate, source_note: txt(data.source_note), updated_by: actor.id, updated_at: new Date().toISOString() }).eq('id', id).select('id,base_currency,quote_currency,rate,effective_from,effective_to,is_active,source_note,updated_at').single(); if (error) throw error; await logActivity(client, actor.id, actor.name, 'update_exchange_rate', id, { rate }); return { exchange_rate: row } }
+async function listPricing(client: ReturnType<typeof createClient>) {
+  const [rates, fx, setting] = await Promise.all([
+    client.from('pricing_rates')
+      .select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from,effective_to,is_active,notes,updated_at')
+      .order('origin_key').order('transport_mode').order('product_type').order('effective_from', { ascending: false }),
+    client.from('exchange_rates')
+      .select('id,base_currency,quote_currency,rate,usd_to_iqd,effective_from,effective_to,is_active,source_note,updated_at')
+      .order('effective_from', { ascending: false }).order('updated_at', { ascending: false }),
+    client.from('app_settings').select('value').eq('key', 'usd_iqd_rate').maybeSingle(),
+  ]);
+  if (rates.error) throw rates.error;
+  if (fx.error) throw fx.error;
+  const activeFx = (fx.data ?? []).find((row: any) => row.base_currency === 'USD' && row.quote_currency === 'IQD' && row.is_active !== false);
+  const anyFx = (fx.data ?? []).find((row: any) => row.base_currency === 'USD' && row.quote_currency === 'IQD');
+  const settingsRate = Number(setting.data?.value ?? activeFx?.rate ?? activeFx?.usd_to_iqd ?? anyFx?.rate ?? anyFx?.usd_to_iqd ?? 0) || null;
+  return { kind: 'pricing', rates: rates.data ?? [], exchange_rates: fx.data ?? [], settings_rate: settingsRate };
+}
+
+function validDateOnly(value: unknown): string | null {
+  const valueText = txt(value);
+  if (!valueText) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(valueText)) throw responseError('Date must use YYYY-MM-DD', 400);
+  const parsed = new Date(valueText + 'T00:00:00.000Z');
+  if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== valueText) throw responseError('Invalid calendar date', 400);
+  return valueText;
+}
+
+function pricingNumber(value: unknown, field: string, fallback: number | null = null): number | null {
+  if (value === undefined) return fallback;
+  if (value === null || value === '') return null;
+  const number = Number(value);
+  if (!Number.isFinite(number)) throw responseError('Invalid ' + field, 400);
+  return number;
+}
+
+function validatePricingFields(row: JsonRecord) {
+  const origin = txt(row.origin_key);
+  const destination = txt(row.destination_key);
+  const transport = txt(row.transport_mode)?.toLowerCase() ?? '';
+  const product = txt(row.product_type);
+  const unit = txt(row.unit)?.toLowerCase() ?? '';
+  const currency = (txt(row.currency) || 'USD').toUpperCase();
+  const amount = Number(row.amount);
+  if (!origin || origin.length > 80) throw responseError('Origin is required (max 80 characters)', 400);
+  if (!destination || destination.length > 80) throw responseError('Destination is required (max 80 characters)', 400);
+  if (!['air', 'sea', 'land'].includes(transport)) throw responseError('Transport must be air, sea or land', 400);
+  if (!product || product.length > 120) throw responseError('Product type is required (max 120 characters)', 400);
+  if (!['kg', 'cbm'].includes(unit)) throw responseError('Unit must be kg or cbm', 400);
+  if (!['USD', 'IQD', 'AED', 'CNY'].includes(currency)) throw responseError('Unsupported pricing currency', 400);
+  if (!Number.isFinite(amount) || amount < 0 || amount > 1_000_000_000) throw responseError('Rate must be a valid non-negative amount', 400);
+  const minDays = pricingNumber(row.transit_min_days, 'minimum transit days');
+  const maxDays = pricingNumber(row.transit_max_days, 'maximum transit days');
+  if ((minDays !== null && (!Number.isInteger(minDays) || minDays < 0)) ||
+      (maxDays !== null && (!Number.isInteger(maxDays) || maxDays < 0)) ||
+      (minDays !== null && maxDays !== null && maxDays < minDays)) {
+    throw responseError('Transit days must be non-negative whole numbers and max must not be below min', 400);
+  }
+  const effectiveFrom = validDateOnly(row.effective_from) || new Date().toISOString().slice(0, 10);
+  const effectiveTo = row.effective_to === undefined ? null : validDateOnly(row.effective_to);
+  if (effectiveTo && effectiveTo < effectiveFrom) throw responseError('Effective-to date cannot precede effective-from date', 400);
+  return { origin, destination, transport, product, unit, currency, amount, minDays, maxDays, effectiveFrom, effectiveTo };
+}
+
+async function createPricing(client: ReturnType<typeof createClient>, data: JsonRecord, actor: { id: string, name: string | null }) {
+  const fields = validatePricingFields(data);
+  let rateKey = txt(data.rate_key);
+  if (!rateKey) {
+    rateKey = [fields.origin, fields.destination, fields.transport, fields.product]
+      .join('_').normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 120);
+  }
+  if (!rateKey || !/^[a-z0-9][a-z0-9_-]{1,119}$/.test(rateKey)) throw responseError('Rate key may contain lowercase letters, numbers, _ and - only', 400);
+  const { data: duplicate, error: duplicateError } = await client.from('pricing_rates')
+    .select('id').eq('rate_key', rateKey).eq('effective_from', fields.effectiveFrom).maybeSingle();
+  if (duplicateError) throw duplicateError;
+  if (duplicate) throw responseError('A rate with this key and effective-from date already exists. Edit the existing rate or choose another effective date.', 409);
+  const now = new Date().toISOString();
+  const row = {
+    rate_key: rateKey, origin_key: fields.origin, destination_key: fields.destination,
+    transport_mode: fields.transport, product_type: fields.product, unit: fields.unit,
+    amount: fields.amount, currency: fields.currency, transit_min_days: fields.minDays,
+    transit_max_days: fields.maxDays, effective_from: fields.effectiveFrom,
+    effective_to: fields.effectiveTo, is_active: typeof data.is_active === 'boolean' ? data.is_active : bool(data.is_active, true),
+    notes: txt(data.notes), created_by: actor.id, updated_by: actor.id, updated_at: now,
+  };
+  const { data: saved, error } = await client.from('pricing_rates').insert(row)
+    .select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from,effective_to,is_active,notes,updated_at').single();
+  if (error) {
+    if (String((error as any).code || '') === '23505') throw responseError('This pricing version already exists for the selected date', 409);
+    throw error;
+  }
+  await logActivity(client, actor.id, actor.name, 'create_pricing_rate', String(saved.id), row as unknown as JsonRecord);
+  return { rate: saved };
+}
+
+async function updatePricing(client: ReturnType<typeof createClient>, data: JsonRecord, actor: { id: string, name: string | null }) {
+  const id = txt(data.id);
+  if (!id) throw responseError('Pricing rate id is required', 400);
+  const { data: current, error: currentError } = await client.from('pricing_rates')
+    .select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from,effective_to,is_active,notes')
+    .eq('id', id).maybeSingle();
+  if (currentError) throw currentError;
+  if (!current) throw responseError('Pricing rate not found', 404);
+
+  const merged: JsonRecord = { ...current, ...data };
+  const fields = validatePricingFields(merged);
+  const updates: JsonRecord = {
+    amount: fields.amount, updated_by: actor.id, updated_at: new Date().toISOString(),
+  };
+  if (data.origin_key !== undefined) updates.origin_key = fields.origin;
+  if (data.destination_key !== undefined) updates.destination_key = fields.destination;
+  if (data.transport_mode !== undefined) updates.transport_mode = fields.transport;
+  if (data.product_type !== undefined) updates.product_type = fields.product;
+  if (data.unit !== undefined) updates.unit = fields.unit;
+  if (data.currency !== undefined) updates.currency = fields.currency;
+  if (data.transit_min_days !== undefined) updates.transit_min_days = fields.minDays;
+  if (data.transit_max_days !== undefined) updates.transit_max_days = fields.maxDays;
+  if (data.effective_from !== undefined) updates.effective_from = fields.effectiveFrom;
+  if (data.effective_to !== undefined) updates.effective_to = fields.effectiveTo;
+  if (data.is_active !== undefined) updates.is_active = bool(data.is_active, current.is_active);
+  if (data.notes !== undefined) updates.notes = txt(data.notes);
+  const { data: saved, error } = await client.from('pricing_rates').update(updates).eq('id', id)
+    .select('id,rate_key,origin_key,destination_key,transport_mode,product_type,unit,amount,currency,transit_min_days,transit_max_days,effective_from,effective_to,is_active,notes,updated_at').single();
+  if (error) throw error;
+  await logActivity(client, actor.id, actor.name, 'update_pricing_rate', id, { old: current, new: saved } as unknown as JsonRecord);
+  return { rate: saved };
+}
+
+async function updateExchangeRate(client: ReturnType<typeof createClient>, data: JsonRecord, actor: { id: string, name: string | null }) {
+  const rate = Number(data.rate);
+  if (!Number.isFinite(rate) || rate <= 0 || rate > 1_000_000_000) throw responseError('Valid positive exchange rate is required', 400);
+  const requestedId = txt(data.id);
+  const now = new Date().toISOString();
+  const today = now.slice(0, 10);
+  let current: any = null;
+
+  if (requestedId) {
+    const { data: selected, error } = await client.from('exchange_rates')
+      .select('id,base_currency,quote_currency,rate,usd_to_iqd,effective_from,effective_to,is_active,source_note')
+      .eq('id', requestedId).maybeSingle();
+    if (error) throw error;
+    current = selected;
+  }
+  if (!current) {
+    const { data: rows, error } = await client.from('exchange_rates')
+      .select('id,base_currency,quote_currency,rate,usd_to_iqd,effective_from,effective_to,is_active,source_note')
+      .eq('base_currency', 'USD').eq('quote_currency', 'IQD')
+      .order('effective_from', { ascending: false }).limit(1);
+    if (error) throw error;
+    current = rows?.[0] ?? null;
+  }
+
+  let exchangeRate: any;
+  if (current) {
+    const { data: saved, error } = await client.from('exchange_rates').update({
+      rate, usd_to_iqd: rate, is_active: true, effective_to: null,
+      source_note: txt(data.source_note) || current.source_note || 'Super Admin updated USD/IQD',
+      updated_by: actor.id, updated_at: now,
+    }).eq('id', current.id)
+      .select('id,base_currency,quote_currency,rate,usd_to_iqd,effective_from,effective_to,is_active,source_note,updated_at').single();
+    if (error) throw error;
+    exchangeRate = saved;
+  } else {
+    const { data: saved, error } = await client.from('exchange_rates').insert({
+      base_currency: 'USD', quote_currency: 'IQD', rate, usd_to_iqd: rate,
+      effective_from: today, is_active: true, effective_to: null,
+      source_note: txt(data.source_note) || 'Super Admin created USD/IQD rate',
+      created_by: actor.id, updated_by: actor.id, updated_at: now,
+    }).select('id,base_currency,quote_currency,rate,usd_to_iqd,effective_from,effective_to,is_active,source_note,updated_at').single();
+    if (error) throw error;
+    exchangeRate = saved;
+  }
+
+  // Keep the legacy public-config / quote fallback synchronized. This table is
+  // server-write-only in production, so all writes must stay in this function.
+  const { error: settingError } = await client.from('app_settings').upsert({
+    key: 'usd_iqd_rate', value: rate, updated_by: actor.id, updated_at: now,
+  }, { onConflict: 'key' });
+  if (settingError) throw settingError;
+
+  await logActivity(client, actor.id, actor.name, 'update_exchange_rate', String(exchangeRate.id), { rate, synchronized_app_setting: true });
+  return { exchange_rate: exchangeRate, settings_rate: rate };
+}
 
 async function listFinance(client: ReturnType<typeof createClient>) {
   const [invoiceResult, costResult] = await Promise.all([
@@ -937,7 +1117,32 @@ Deno.serve(async (req) => {
     }
     if (kind === 'quote' && action === 'calculate') { if (!canReadOperations) return json({ error: 'Operations access required' }, { status: 403 }, req); return json(await calculateQuote(serviceClient, data), {}, req) }
     if (kind === 'quote_requests' && (action === 'approve' || action === 'reject')) return json(await decideQuote(serviceClient, data, {id:staffRow.id, name:staffRow.full_name, role:String(staffRow.role||'')}, action === 'approve' ? 'approve' : 'reject'), {}, req)
-    if (kind === 'pricing') { const financeRole = ['admin','super_admin','accountant'].includes(String(staffRow.role || '')); if (!financeRole) return json({ error: 'Finance role required' }, { status: 403 }, req); const pricingActor = { id: staffRow.id, name: staffRow.full_name }; if (action === 'update') return json(data.rate_type === 'exchange' ? await updateExchangeRate(serviceClient, data, pricingActor) : await updatePricing(serviceClient, data, pricingActor), {}, req); return json({ error: 'Unsupported pricing action' }, { status: 400 }, req) }
+    // The admin frontend submits list requests as POST (kind/action/data), so
+    // support that contract explicitly instead of returning "Unsupported action"
+    // after a successful create/update when the UI refreshes.
+    if (action === 'list') {
+      if (kind === 'staff') {
+        if (!canRead) return json({ error: 'Forbidden' }, { status: 403 }, req);
+        return json(await listStaff(serviceClient), {}, req);
+      }
+      if (kind === 'customer') {
+        if (!canRead) return json({ error: 'Forbidden' }, { status: 403 }, req);
+        return json(await listCustomers(serviceClient), {}, req);
+      }
+      if (kind === 'pricing') {
+        if (!['admin', 'super_admin', 'accountant'].includes(String(staffRow.role || ''))) return json({ error: 'Finance role required' }, { status: 403 }, req);
+        return json(await listPricing(serviceClient), {}, req);
+      }
+    }
+    if (kind === 'pricing') {
+      const financeRole = ['admin', 'super_admin', 'accountant'].includes(String(staffRow.role || ''));
+      if (!financeRole) return json({ error: 'Finance role required' }, { status: 403 }, req);
+      const pricingActor = { id: staffRow.id, name: staffRow.full_name };
+      if (data.rate_type === 'exchange' && action === 'update') return json(await updateExchangeRate(serviceClient, data, pricingActor), {}, req);
+      if (action === 'create') return json(await createPricing(serviceClient, data, pricingActor), {}, req);
+      if (action === 'update') return json(await updatePricing(serviceClient, data, pricingActor), {}, req);
+      return json({ error: 'Unsupported pricing action' }, { status: 400 }, req);
+    }
     if (kind === 'notification' && action === 'update' && canReadOperations) return json(await markStaffNotificationRead(serviceClient, staffRow.id, data), {}, req)
     if (kind === 'chat' && canChat) {
       if (action === 'send') return json(await sendChatMessage(serviceClient, staffRow.id, staffRow.full_name, data, req), {}, req)
