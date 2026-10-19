@@ -833,7 +833,7 @@
     const audienceLabel = (value) => value ? roleLabel(value) : 'هەموو ستاف';
 
     const audienceOptions = '<option value="">هەموو ستاف</option>' +
-      ROLES.map((role) => '<option value="' + esc(role) + '">' + esc(roleLabel(role)) + '</option>').join('');
+      ROLES.filter((role) => role !== 'driver').map((role) => '<option value="' + esc(role) + '">' + esc(roleLabel(role)) + '</option>').join('');
     const creatorPanel = canCreate ? `
       <section class="card gc-alert-create-panel" style="margin-top:12px">
         <div class="card-head"><h3>دروستکردنی ئاگادارکردنەوەی ستاف</h3><span class="pill">ADMIN</span></div>
