@@ -183,7 +183,7 @@ if (receiptGuardMigration.includes('REVOKE EXECUTE ON FUNCTION public.enforce_lo
 }
 
 console.log('Warehouse receipt query/schema alignment')
-const receiptListSource = (read('supabase/functions/account-admin/index.ts').match(/async function listReceipts[\\s\\S]*?\\n}/) || [''])[0]
+const receiptListSource = (read('supabase/functions/account-admin/index.ts').match(/async function listReceipts[\s\S]*?\n}/) || [''])[0]
 if (receiptListSource.includes('created_at:received_at') && !/verification_status,created_at['"]/.test(receiptListSource)) {
   ok('Receipt list aliases created_at from the real received_at column')
 } else {
