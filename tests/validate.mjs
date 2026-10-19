@@ -54,7 +54,7 @@ const required = [
   'index.html','gc-customer-carton-manifest-20261017.js','gc-customer-carton-manifest-20261017.css','gc-staff-carton-tools-20261017.js','gc-staff-command-system-20261017.css','gc-staff-console-elite-20261018.css','gc-staff-land-manifest-20261018.css','gc-staff-land-manifest-20261018.js','gc-customer-warehouse-evidence-20261017.css','gc-customer-experience-signature-20261017.css','gc-ui-integrity-mobile-20261017.css','gc-dashboard-preferences-20261003.js','gc-public-customer-style-loader-20261014.js','staff-os-v5-enhancement-loader-20261017.js','login.html','register.html','customer-access.html','supabase/functions/customer-gc-register/index.ts','accounts-console.html','gc-csp-scripts/accounts-console-inline-1.js','gc-settings-hub.js','gc-unified-customer-experience-20261016.js','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js',
   'public-route-bootstrap.js','public-runtime-guarantee.js','public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js',
   'tracking-integration.html','tracking-intelligence.js','tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html',
-  'staff-os-v5.html','staff-os-v5.css','gc-staff-ui-refinement-20261019-v4.css','gc-staff-live-workspace-20261019.css','gc-staff-customer-bridge-20261019.js','staff-os-v5.js','gc-shipment-detail-20261016.css','staff-os-v5-rescue.js','staff-logistics-intelligence.js','staff-logistics-intelligence.css',
+  'staff-os-v5.html','staff-os-v5.css','gc-staff-ui-refinement-20261019-v4.css','gc-staff-live-workspace-20261019.css','gc-staff-navigation-groups-20261019.js','gc-staff-navigation-groups-20261019.css','gc-staff-customer-bridge-20261019.js','staff-os-v5.js','supabase/migrations/20261019102010_restrict_direct_execute_warehouse_receipt_guard_20261019.sql','gc-shipment-detail-20261016.css','staff-os-v5-rescue.js','staff-logistics-intelligence.js','staff-logistics-intelligence.css',
   'staff-mobile-command-dock.css','staff-mobile-command-dock.js','staff-os-pro-20260909.css','staff-os-pro-20260909.js',
   'staff-shell-polish-20260909.css','staff-shell-polish-20260909.js','staff-premium-mobile-20260909.css','staff-premium-mobile-20260909.js',
   'warehouse-offline-sync.js','gc-platform-vnext.js','gc-platform-vnext-plus.js','gc-runtime-safety-v2026.js','production-brand-repair.js',
@@ -114,6 +114,7 @@ const guards = [
   ['ready endpoint uses public-health', read('functions/api/ready.js').includes('/functions/v1/public-health')],
   ['health endpoint is present', existsSync(join(ROOT, 'functions/api/health.js'))],
   ['staff route is isolated', read('_redirects').includes('/staff /staff-os-v5.html 200')],
+  ['staff workflow navigation groups are loaded', read('staff-os-v5.html').includes('gc-staff-navigation-groups-20261019.js?v=1') && read('staff-os-v5.html').includes('gc-staff-navigation-groups-20261019.css?v=1')],
   ['staff entry has final mobile shell', /gc-staff-final-20260922\.js\?v=/.test(read('staff-os-v5.html'))],
   ['staff entry has no competing legacy mobile JS', !/staff-reference-mobile-20260922\.js\?v=|staff-premium-mobile-20260909\.js\?v=/.test(read('staff-os-v5.html'))],
   ['staff loader has no legacy mobile command dock', !/staff-mobile-command-dock\.js\?v=/.test(read('staff-os-v5-enhancement-loader.js'))],
@@ -172,6 +173,14 @@ const identityCases = [
 ]
 for (const [label, passed] of identityCases) if (!passed) { fail(`identity regression: ${label}`); identityPatternsPassed = false }
 if (identityPatternsPassed) ok('Customer GC-code and Iraq-phone normalization contracts OK')
+
+console.log('Warehouse receipt trigger privilege migration')
+const receiptGuardMigration = read('supabase/migrations/20261019102010_restrict_direct_execute_warehouse_receipt_guard_20261019.sql')
+if (receiptGuardMigration.includes('REVOKE EXECUTE ON FUNCTION public.enforce_logistics_warehouse_receipt_rules() FROM PUBLIC') && receiptGuardMigration.includes('FROM anon, authenticated')) {
+  ok('Warehouse compliance trigger is not granted as a direct public API')
+} else {
+  fail('warehouse receipt trigger EXECUTE grants are not restricted')
+}
 
 console.log('Migration naming and presence')
 const migDir = join(ROOT, 'supabase', 'migrations')
