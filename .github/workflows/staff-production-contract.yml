@@ -42,6 +42,7 @@ jobs:
           grep -q "action:'cancel_outbox'" staff-os-v5-20261017.js
           grep -q 'ageHours(item) >= 24' staff-os-v5-20261017.js
           grep -q 'cancel_outbox' supabase/functions/logistics-control-plane/index.ts
+          grep -q "found.data.channel !== 'in_app'" supabase/functions/logistics-control-plane/index.ts
           grep -q 'logistics-control-plane' staff-os-v5-20261017.js
           grep -q "await loadTab(x.dataset.jump)" staff-os-v5-20261017.js
           grep -q 'gc-live-wh-list' staff-os-v5-20261017.js
