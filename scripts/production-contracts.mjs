@@ -147,6 +147,22 @@ const staffCustomerBridgeScript = read('gc-staff-customer-bridge-20261019.js')
 const staffUnifiedStyles = read('gc-staff-ui-refinement-20261019-v4.css')
 const staffV5EnhancementLoader = read('staff-os-v5-enhancement-loader-20261017.js')
 const staffMobileDock = read('gc-staff-mobile-dock-20261016.js')
+const staffWorkspaceCss = read('gc-staff-live-workspace-20261019.css')
+if (!staffWorkspaceCss.includes('GC-STAFF-MOBILE-DASHBOARD-READABILITY-20261021') ||
+    !staffWorkspaceCss.includes('grid-template-columns: repeat(2, minmax(0, 1fr)) !important') ||
+    !staff.includes('gc-staff-live-workspace-20261019.css?v=6') ||
+    !staffV5EnhancementLoader.includes("const href = '/gc-staff-live-workspace-20261019.css?v=6'")) {
+  fail('Staff mobile dashboard must use the final compact card layout as the last-loaded workspace layer')
+} else {
+  ok('Staff mobile dashboard final layout is pinned after legacy CSS layers')
+}
+if (!staffV5Script.includes('<bdi dir="ltr">${money(income)}</bdi>') ||
+    !staffV5Script.includes('<bdi dir="ltr">${number(x.count)} shipment') ||
+    !staffV5Script.includes('<bdi dir="ltr">${esc(l.target_id||\\'—\\')}</bdi>')) {
+  fail('Staff dashboard must isolate currencies, route totals and audit IDs from RTL text')
+} else {
+  ok('Staff dashboard values use explicit LTR/RTL isolation')
+}
 if (!publicShell.includes('gc-accessibility-mobile-20261021.css?v=1') || !staff.includes('gc-accessibility-mobile-20261021.css?v=1')) fail('Accessibility mobile viewport styles must be loaded by public and Staff OS shells');
 else ok('Public and Staff OS load the short-viewport accessibility repair');
 if (!publicShell.includes('id="gcMobileMenu"') || !publicShell.includes('aria-controls="gcMobileMenu"') || !publicShell.includes('aria-expanded="false"') || !publicShell.includes('role="navigation"') || !read('globall-redesign-20260922.js').includes("event.key === 'Escape'") || !read('globall-redesign-20260922.js').includes("setMobileMenuOpen(false, true)")) fail('Public mobile navigation needs accessible state, landmark, Escape close and focus restoration');
