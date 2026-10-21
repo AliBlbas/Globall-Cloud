@@ -29,7 +29,8 @@
       { file: 'gc-redesign-v2026.css', href: '/gc-redesign-v2026.css?v=20260927-3', marker: 'data-gc-redesign-v2026' },
       { file: 'gc-reference-app-20260927.css', href: '/gc-reference-app-20260927.css?v=1', marker: 'data-gc-reference-app' },
       { file: 'gc-reference-inspired-20260928.css', href: '/gc-reference-inspired-20260928.css?v=20260928-2', marker: 'data-gc-reference-inspired' },
-      { file: 'gc-homepage-mobile-content-20261019.css', href: '/gc-homepage-mobile-content-20261019.css?v=1', marker: 'data-gc-mobile-content-visibility' }
+      { file: 'gc-homepage-mobile-content-20261019.css', href: '/gc-homepage-mobile-content-20261019.css?v=1', marker: 'data-gc-mobile-content-visibility' },
+      { file: 'gc-accessibility-mobile-20261021.css', href: '/gc-accessibility-mobile-20261021.css?v=1', marker: 'data-gc-accessibility-mobile' }
     ];
 
     const mountedStyles = [];
