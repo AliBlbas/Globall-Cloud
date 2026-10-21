@@ -206,12 +206,14 @@
   }
 
   function renderApp() {
+    document.title = 'Globall Cloud — Staff OS V5';
     renderSurface(shellHTML());
     bindShell();
     void refreshRuntimeHealth();
   }
 
   function renderLogin(mfa=false, message='') {
+    document.title = `${mfa ? 'پشتڕاستکردنەوەی 2FA' : 'چوونەژوورەوە'} — Globall Cloud Staff`;
     renderSurface(`<main class="login"><section class="login-card"><div class="login-title"><div class="brand-logo">GC</div><div><b>Globall Cloud</b><div class="eyebrow">SECURE STAFF ACCESS</div></div></div><h1>${mfa?'پشتڕاستکردنەوەی 2FA':'Staff Command Center'}</h1><p>${mfa?'کۆدی ٦ ژمارەیی Google Authenticator بنووسە.':'چوونەژوورەوە بۆ سیستەمی کارگێڕی و عملیات.'}</p><form id="loginForm" style="margin-top:16px"><div id="loginFields" class="${mfa?'hidden':''}"><div class="form-field"><label>ئیمەیل</label><input class="field" id="loginEmail" type="email" autocomplete="username" required placeholder="staff@example.com"></div><div class="form-field" style="margin-top:9px"><label>وشەی نهێنی</label><input class="field" id="loginPassword" type="password" autocomplete="current-password" required placeholder="••••••••"></div></div>${mfa?'<div class="form-field"><label>کۆدی 2FA</label><input class="field" id="mfaCode" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000" style="text-align:center;letter-spacing:6px;font:900 20px var(--mono)"></div>':' '}<div class="login-msg" id="loginMsg">${esc(message)}</div><button class="btn primary" id="loginBtn" type="submit">${mfa?'پشتڕاستکردنەوەی 2FA':'چوونەژوورەوە'}</button></form><div style="margin-top:12px;color:#6f8da8;font-size:9px">GLOBALL CLOUD · AUTH + RLS + EDGE FUNCTIONS</div></section></main>`);
     const form = document.getElementById('loginForm');
     if (!form) return;
@@ -257,6 +259,7 @@
     state.tab = tab;
     document.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('active', x.dataset.tab === tab));
     const titles = {overview:['داشبۆرد','وێنەی گشتی لە دۆخی عملیات و پارە'],shipments:['بارەکان','ئاسمانی · وشکانی · دەریایی · tracking · carton · cargo'],alerts:['Alerts','ئاگادارییەکانی عملیات و کار'],customers:['کڕیاران','GC code · account · balance · shipment history'],pricing:['نرخەکان','Rate catalog · FX · calculator'],warehouses:['کۆگاكان','چین · دوبەی · هەولێر · ئەمریکا'],finance:['دارایی','داهات · خەرجی · قەرز · قازانج'], 'staff-chat':['چاتی ستاف','گفتوگۆی ناوخۆیی کارمەندان'], 'customer-chat':['چاتی کڕیار','وەڵامدانەوەی کڕیاران لە GC'],requests:['ئاگاداری / داواکاری','پرسیاری نرخ · account · support'],activity:['Audit Log','کێ چی کرد و کەی'],settings:['ڕێکخستنەکان','پڕۆفایل · زمان · وشەی نهێنی']};
+    document.title = `${titles[tab]?.[0] || tab} — Globall Cloud Staff`;
     document.getElementById('pageTitle').textContent = titles[tab]?.[0] || tab;
     document.getElementById('pageSub').textContent = titles[tab]?.[1] || '';
     const view = document.getElementById('view');
