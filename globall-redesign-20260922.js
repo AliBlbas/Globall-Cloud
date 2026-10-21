@@ -73,8 +73,38 @@
 
   const menu = document.querySelector('[data-gc-menu]');
   const mobile = document.querySelector('[data-gc-mobile-menu]');
-  menu?.addEventListener('click', () => { if (mobile) mobile.hidden = !mobile.hidden; });
-  document.querySelectorAll('[data-gc-mobile-menu] a').forEach(a => a.addEventListener('click', () => { if (mobile) mobile.hidden = true; }));
+  if (menu && mobile) {
+    if (!mobile.id) mobile.id = 'gcMobileMenu';
+    menu.setAttribute('aria-controls', mobile.id);
+    menu.setAttribute('aria-expanded', String(!mobile.hidden));
+    menu.setAttribute('aria-label', 'کردنەوەی لیستی سەرەکی');
+
+    const setMobileMenuOpen = (open, restoreFocus = false) => {
+      mobile.hidden = !open;
+      menu.setAttribute('aria-expanded', String(open));
+      if (open) {
+        mobile.querySelector('a[href]')?.focus({ preventScroll: true });
+      } else if (restoreFocus) {
+        menu.focus({ preventScroll: true });
+      }
+    };
+
+    menu.addEventListener('click', () => setMobileMenuOpen(mobile.hidden));
+    mobile.querySelectorAll('a[href]').forEach((link) => {
+      link.addEventListener('click', () => setMobileMenuOpen(false));
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !mobile.hidden) {
+        event.preventDefault();
+        setMobileMenuOpen(false, true);
+      }
+    });
+    document.addEventListener('click', (event) => {
+      if (!mobile.hidden && !mobile.contains(event.target) && !menu.contains(event.target)) {
+        setMobileMenuOpen(false);
+      }
+    });
+  }
 
   const RATE_CATALOG_URL = 'https://ahslifnthiwfkmaswjno.supabase.co/functions/v1/public-quote?catalog=1';
   const ORIGIN_LABELS = { china: 'چین', dubai: 'دوبەی', usa: 'ئەمریکا' };
