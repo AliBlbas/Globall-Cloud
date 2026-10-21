@@ -852,3 +852,310 @@ html[data-gc-theme="dark"] body.gc-staff-os-shell #app #view .tower-route i{back
   body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis>.kpi,
   body.gc-staff-os-shell #app #view .tower-hero-actions>.btn{transition:none!important}
 }
+
+
+/* GC-STAFF-MOBILE-DASHBOARD-READABILITY-20261021
+   Final viewport + RTL/LTR correction for the Operations Control Tower.
+   Kept in the last-loaded Staff workspace stylesheet so older style layers
+   cannot undo the mobile layout. */
+body.gc-staff-os-shell #app,
+body.gc-staff-os-shell #app .gc-shell,
+body.gc-staff-os-shell #app .gc-main,
+body.gc-staff-os-shell #app #view {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  font-family: var(--font, "Vazirmatn"), system-ui, sans-serif !important;
+}
+body.gc-staff-os-shell #app #view :where(.tower-hero,.tower-grid,.grid-kpi,.card,.card-head,.tower-route-list,.tower-stream) {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+body.gc-staff-os-shell #app #view :where(.tower-hero h1,.tower-hero p,.card-head h3,.tower-route b,.tower-route small,.tower-stream-row b,.tower-stream-row small) {
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+  white-space: normal !important;
+}
+body.gc-staff-os-shell #app #view :where(.mono,code,time,.tower-route > strong,.grid-kpi.tower-kpis > .kpi > strong) {
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  font-variant-numeric: tabular-nums !important;
+}
+body.gc-staff-os-shell #app #view .tower-route small,
+body.gc-staff-os-shell #app #view .tower-stream-row small,
+body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis > .kpi > small {
+  direction: rtl !important;
+  unicode-bidi: plaintext !important;
+  line-height: 1.65 !important;
+  overflow-wrap: anywhere !important;
+}
+body.gc-staff-os-shell #app #view .tower-stream-row > .mono {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+}
+
+@media (max-width: 760px) {
+  body.gc-staff-os-shell {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: clip !important;
+    padding-inline: 7px !important;
+  }
+  body.gc-staff-os-shell #app .gc-shell {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+  }
+  body.gc-staff-os-shell #app .gc-main,
+  body.gc-staff-os-shell #app #view {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  body.gc-staff-os-shell #app #view {
+    padding: 11px 9px !important;
+    overflow-x: clip !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-hero {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+    padding: 15px 13px !important;
+    margin-bottom: 11px !important;
+    border-radius: 18px !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-hero h1 {
+    max-width: 100% !important;
+    font-size: clamp(21px, 6vw, 27px) !important;
+    line-height: 1.5 !important;
+    letter-spacing: normal !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-hero p {
+    font-size: 12px !important;
+    line-height: 1.9 !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-hero-meta {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-hero-meta > * {
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+    white-space: normal !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-hero-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+    width: 100% !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-hero-actions > .btn {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    min-height: 42px !important;
+    padding: 8px !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-hero-actions > .btn:first-child {
+    grid-column: 1 / -1 !important;
+  }
+
+  body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-block: 10px 13px !important;
+  }
+  body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis > .kpi {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    gap: 5px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 104px !important;
+    padding: 11px !important;
+    border-radius: 15px !important;
+    border: 1px solid var(--gc-ui-line, rgba(143, 190, 212, .2)) !important;
+    box-shadow: 0 7px 18px rgba(0, 0, 0, .11) !important;
+  }
+  body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis > .kpi > span {
+    display: block !important;
+    font-size: 10px !important;
+    line-height: 1.6 !important;
+    overflow-wrap: anywhere !important;
+  }
+  body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis > .kpi > strong {
+    display: block !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    font-family: var(--mono, "JetBrains Mono"), ui-monospace, monospace !important;
+    font-size: clamp(15px, 4.4vw, 20px) !important;
+    line-height: 1.35 !important;
+    letter-spacing: normal !important;
+    text-align: start !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+  body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis > .kpi > small {
+    display: block !important;
+    min-height: 0 !important;
+    font-size: 9px !important;
+    line-height: 1.65 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  body.gc-staff-os-shell #app #view .tower-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-grid > .card {
+    display: block !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    padding: 12px !important;
+    border-radius: 16px !important;
+  }
+  body.gc-staff-os-shell #app #view .card-head {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+  }
+  body.gc-staff-os-shell #app #view .card-head > div {
+    flex: 1 1 150px !important;
+    min-width: 0 !important;
+  }
+  body.gc-staff-os-shell #app #view .card-head .btn {
+    flex: 0 1 auto !important;
+    max-width: 100% !important;
+  }
+
+  body.gc-staff-os-shell #app #view .tower-route-list,
+  body.gc-staff-os-shell #app #view .tower-stream {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-route {
+    display: grid !important;
+    grid-template-columns: 28px minmax(0, 1fr) !important;
+    align-items: start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 10px !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-route-rank {
+    width: 27px !important;
+    height: 27px !important;
+    font-size: 10px !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-route > div {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-route > strong {
+    grid-column: 2 !important;
+    display: block !important;
+    max-width: 100% !important;
+    margin-top: 1px !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    text-align: start !important;
+    overflow-wrap: anywhere !important;
+    white-space: normal !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-route i {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body.gc-staff-os-shell #app #view .tower-stream-row {
+    display: grid !important;
+    grid-template-columns: 8px minmax(0, 1fr) !important;
+    align-items: start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 10px !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-stream-row > div {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-stream-row b {
+    display: block !important;
+    max-width: 100% !important;
+    direction: ltr !important;
+    unicode-bidi: isolate !important;
+    text-align: start !important;
+    font-family: var(--mono, "JetBrains Mono"), ui-monospace, monospace !important;
+    font-size: 10px !important;
+    line-height: 1.6 !important;
+    overflow-wrap: anywhere !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-stream-row small {
+    display: block !important;
+    max-width: 100% !important;
+    font-size: 9px !important;
+    line-height: 1.7 !important;
+    overflow-wrap: anywhere !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-stream-row > .mono {
+    grid-column: 2 !important;
+    display: block !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin-top: 2px !important;
+    direction: ltr !important;
+    unicode-bidi: isolate !important;
+    text-align: start !important;
+    font-size: 9px !important;
+    line-height: 1.65 !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+  }
+}
+
+@media (max-width: 390px) {
+  body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis > .kpi {
+    min-height: 98px !important;
+    padding: 9px !important;
+  }
+  body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis > .kpi > strong {
+    font-size: 15px !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-route {
+    grid-template-columns: 25px minmax(0, 1fr) !important;
+    gap: 7px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.gc-staff-os-shell #app #view *,
+  body.gc-staff-os-shell #app .gc-staff-mobile-dock * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
