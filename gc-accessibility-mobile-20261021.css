@@ -1,0 +1,81 @@
+/* Globall Cloud accessibility and short-viewport repair — 2026-10-21.
+   Scoped to current public and Staff OS menus. No color theme or business logic is changed. */
+
+html body #gcApp .gc-mobile-menu:not([hidden]) {
+  max-height: min(68vh, calc(100vh - 110px - env(safe-area-inset-bottom, 0px)), 600px) !important;
+  max-height: min(68dvh, calc(100dvh - 110px - env(safe-area-inset-bottom, 0px)), 600px) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+
+html body #gcApp .gc-menu:focus-visible,
+html body #gcApp .gc-mobile-menu a:focus-visible {
+  outline: 3px solid #00cfe3 !important;
+  outline-offset: 3px !important;
+}
+
+html body #gcApp .gc-menu[aria-expanded="true"] {
+  border-color: #087f8c !important;
+  box-shadow: 0 0 0 2px rgba(0, 207, 227, .2) !important;
+}
+
+html body.gc-staff-os-shell #app .gc-staff-mobile-drawer {
+  max-height: calc(100vh - 100px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+  max-height: min(68dvh, calc(100dvh - 100px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)), 590px) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+html body.gc-staff-os-shell .gc-staff-mobile-menu-button:focus-visible,
+html body.gc-staff-os-shell .gc-staff-mobile-drawer button:focus-visible,
+html body.gc-staff-os-shell .gc-staff-mobile-dock button:focus-visible {
+  outline: 3px solid #59eaf2 !important;
+  outline-offset: 3px !important;
+}
+
+@media (max-width: 760px) and (max-height: 420px) {
+  html body #gcApp .gc-mobile-menu:not([hidden]) {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 5px !important;
+    padding: 8px !important;
+    max-height: calc(100vh - 96px - env(safe-area-inset-bottom, 0px)) !important;
+    max-height: min(62dvh, calc(100dvh - 96px - env(safe-area-inset-bottom, 0px)), 600px) !important;
+  }
+
+  html body #gcApp .gc-mobile-menu a {
+    min-height: 40px !important;
+    padding: 7px 10px !important;
+  }
+
+  html body.gc-staff-os-shell #app .gc-staff-mobile-drawer {
+    max-height: calc(100vh - 100px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+    max-height: min(62dvh, calc(100dvh - 100px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)), 590px) !important;
+    padding: 10px !important;
+    gap: 7px !important;
+  }
+
+  html body.gc-staff-os-shell .gc-staff-mobile-module-group-items {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 5px !important;
+  }
+
+  html body.gc-staff-os-shell .gc-staff-mobile-module-group-items > button {
+    min-height: 40px !important;
+    padding: 6px 8px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body #gcApp .gc-mobile-menu,
+  html body.gc-staff-os-shell .gc-staff-mobile-drawer,
+  html body.gc-staff-os-shell .gc-staff-mobile-backdrop {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
