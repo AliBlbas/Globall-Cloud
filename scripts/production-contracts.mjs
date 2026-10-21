@@ -429,7 +429,7 @@ if (!staffV5Script.includes("ROLES.filter((role) => role !== 'driver')")) fail('
 else ok('Staff alert audience choices exclude unsupported driver-only roles')
 if (!staffV5Script.includes('button.disabled = true') || !staffV5Script.includes('current.read_by = existing') || !staffV5Script.includes('renderList();')) fail('Staff alert read action must prevent duplicate submissions and update the local read state')
 else ok('Staff alert read action updates local state and prevents duplicate submissions')
-if (!publicShell.includes('staff-os-v5-20261017.js?v=20261021-1') || !publicShell.includes('gc-staff-console-elite-20261018.css?v=6')) fail('Staff Alert Center release must use new immutable-cache asset URLs')
+if (!staff.includes('staff-os-v5-20261017.js?v=20261021-1') || !staff.includes('gc-staff-console-elite-20261018.css?v=6')) fail('Staff Alert Center release must use new immutable-cache asset URLs')
 else ok('Staff Alert Center assets use cache-busted URLs')
 console.log('')
 if (failures) { console.error(`${failures} production contract check(s) failed.`); process.exit(1) }
