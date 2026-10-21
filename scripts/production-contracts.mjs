@@ -158,7 +158,7 @@ if (!staffWorkspaceCss.includes('GC-STAFF-MOBILE-DASHBOARD-READABILITY-20261021'
 }
 if (!staffV5Script.includes('<bdi dir="ltr">${money(income)}</bdi>') ||
     !staffV5Script.includes('<bdi dir="ltr">${number(x.count)} shipment') ||
-    !staffV5Script.includes('<bdi dir="ltr">${esc(l.target_id||\\'—\\')}</bdi>')) {
+    !staffV5Script.includes('class="mono" dir="ltr"><bdi dir="ltr">${esc(l.target_id')) {
   fail('Staff dashboard must isolate currencies, route totals and audit IDs from RTL text')
 } else {
   ok('Staff dashboard values use explicit LTR/RTL isolation')
