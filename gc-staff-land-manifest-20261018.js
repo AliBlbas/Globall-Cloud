@@ -536,7 +536,8 @@
     if(!tab)return;
     if(tab.dataset.tab==='land-manifests'){
       event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
-      state.active=true;$$('.nav-btn').forEach(x=>x.classList.toggle('active',x===tab));
+      state.active=true;$('.nav-btn').forEach(x=>x.classList.toggle('active',x===tab));
+      document.title='مانيفێستی دوبەی — Globall Cloud Staff';
       const title=$('#pageTitle');if(title)title.textContent='مانيفێستی دوبەی → هەولێر';
       const sub=$('#pageSub');if(sub)sub.textContent='Excel · manifest · boxes · pcs · kg · sell price';
       renderDashboard();
