@@ -63,6 +63,7 @@ const required = [
   'supabase/migrations/20261017181944_fix_warehouse_receipt_portal_route.sql',
   'supabase/migrations/20261017182723_warehouse_receipt_respect_in_app_preferences.sql',
   'supabase/migrations/20261018214814_simplify_dubai_receipt_customer_alerts.sql',
+  'supabase/migrations/20261022183500_dubai_only_warehouse_customer_notifications.sql',
   'supabase/migrations/20261017185000_warehouse_receipt_cartons.sql',
   'supabase/migrations/20261017203455_fix_customer_notification_uuid_text_join.sql',
   'supabase/migrations/20261017204122_add_missing_fk_covering_indexes.sql',
