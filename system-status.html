@@ -72,7 +72,7 @@
       <div class="brand">
         <div class="logo">GC</div>
         <div>
-          <div class="eyebrow">Verified production stack</div>
+          <div class="eyebrow">Live production health</div>
           <div style="font-weight:900;font-size:18px">Globall Cloud</div>
           <div class="subtitle">A clean internal status page for the live website, Supabase backend, Cloudflare hosting, and GitHub source control.</div>
         </div>
@@ -114,8 +114,8 @@
         <div class="card">
           <div class="section-title">
             <div>
-              <h2>Verified pieces</h2>
-              <p>Current stack and routes</p>
+              <h2>Connected components</h2>
+              <p>Repository-documented architecture</p>
             </div>
           </div>
           <div class="item"><div class="bullet">1</div><div><b>Cloudflare Pages</b><span>Static front end hosting with security headers and fast delivery.</span></div></div>
@@ -131,27 +131,28 @@
       <div class="card">
         <div class="section-title">
           <div>
-            <h2>Security and hardening</h2>
-            <p>What is already improved</p>
+            <h2>Security controls</h2>
+            <p>Implementation notes from the repository</p>
           </div>
-          <div class="status"><span class="dot good"></span> hardening applied</div>
+          <div class="status"><span class="dot good"></span> source-level controls</div>
         </div>
-        <div class="item"><div class="bullet">✓</div><div><b>Helper RPC functions tightened</b><span>Security-invoker changes were applied where appropriate.</span></div></div>
-        <div class="item"><div class="bullet">✓</div><div><b>Reproducible migration added</b><span>Database hardening is tracked in supabase/migrations/20260810_security_hardening.sql.</span></div></div>
-        <div class="item"><div class="bullet">✓</div><div><b>Analytics path cleaned up</b><span>admin-dashboard.js now uses the Edge Function API for its data path.</span></div></div>
+        <div class="item"><div class="bullet">✓</div><div><b>Helper RPC function changes</b><span>The repository documents security-invoker changes where appropriate; this page does not independently verify deployed database privileges.</span></div></div>
+        <div class="item"><div class="bullet">✓</div><div><b>Hardening migration in source</b><span>The migration is tracked in supabase/migrations/20260810_security_hardening.sql; this status page does not verify whether it has been applied to the live database.</span></div></div>
+        <div class="item"><div class="bullet">✓</div><div><b>Analytics API path</b><span>The repository documents an Edge Function path for admin dashboard analytics; this is not a full workflow test.</span></div></div>
       </div>
 
       <div class="card">
         <div class="section-title">
           <div>
-            <h2>Still worth tightening</h2>
-            <p>Not broken, but not the final polish</p>
+            <h2>Prior security-review items</h2>
+            <p>Re-check against current production settings</p>
           </div>
-          <div class="status"><span class="dot warn"></span> review recommended</div>
+          <div class="status"><span class="dot warn"></span> not live-verified</div>
         </div>
-        <div class="item"><div class="bullet">!</div><div><b>GraphQL exposure</b><span>Some tables are still visible to signed-in users and a small number to anon through GraphQL schema discovery.</span></div></div>
-        <div class="item"><div class="bullet">!</div><div><b>Security-definer RPCs</b><span>Publicly callable definer functions should stay under review until everything that can move behind the edge is moved.</span></div></div>
-        <div class="item"><div class="bullet">!</div><div><b>Auth settings</b><span>OTP expiry and leaked-password protection should be set to stricter production values.</span></div></div>
+        <div class="note">The items below are carried over from an earlier review. The current health check does not re-test GraphQL exposure or Supabase Auth configuration; verify them in the live project before treating them as current findings.</div>
+        <div class="item"><div class="bullet">!</div><div><b>GraphQL exposure</b><span>Earlier review noted visibility concerns through GraphQL schema discovery. Current exposure has not been independently re-verified.</span></div></div>
+        <div class="item"><div class="bullet">!</div><div><b>Security-definer RPCs</b><span>Earlier review recommended checking public execute grants and access boundaries; current grants have not been audited by this page.</span></div></div>
+        <div class="item"><div class="bullet">!</div><div><b>Auth settings</b><span>Earlier review called out OTP expiry and leaked-password protection. Current Supabase Auth settings have not been verified by this page.</span></div></div>
       </div>
     </div>
 
