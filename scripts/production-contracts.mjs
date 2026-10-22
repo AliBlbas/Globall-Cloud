@@ -450,6 +450,7 @@ const customerWarehouseNotify = read('supabase/functions/warehouse-notify/index.
 const customerWarehouseMigration = read('supabase/migrations/20261017181111_fix_warehouse_receipt_customer_notifications.sql')
 const customerWarehouseRouteMigration = read('supabase/migrations/20261017181944_fix_warehouse_receipt_portal_route.sql')
 const customerWarehousePreferenceMigration = read('supabase/migrations/20261017182723_warehouse_receipt_respect_in_app_preferences.sql')
+const dubaiOnlyWarehouseNotificationMigration = read('supabase/migrations/20261022183500_dubai_only_warehouse_customer_notifications.sql')
 const customerSelfSourceForReceiptEvidence = read('supabase/functions/customer-self/index.ts')
 if (!customerWarehouseHtml.includes('id="receipts"') || !customerWarehouseHtml.includes('gc-customer-warehouse-evidence-20261017.css?v=1')) fail('Customer portal must render a dedicated warehouse receipt evidence panel')
 else ok('Customer portal has a styled warehouse receipt evidence destination')
@@ -462,6 +463,10 @@ if (!customerWarehouseRouteMigration.includes("'/#records'") || !customerWarehou
 else ok('Final database trigger route matches the customer portal router')
 if (!customerWarehousePreferenceMigration.includes('COALESCE(p.in_app_enabled, TRUE)') || !customerWarehousePreferenceMigration.includes('v_in_app_enabled IS FALSE')) fail('Warehouse receipt trigger must respect customer in-app notification preferences')
 else ok('Warehouse receipt trigger respects customer in-app notification preferences')
+const dubaiGuardIndex = dubaiOnlyWarehouseNotificationMigration.indexOf('IF NOT v_is_dubai THEN')
+const customerNotificationInsertIndex = dubaiOnlyWarehouseNotificationMigration.indexOf('INSERT INTO public.customer_notifications')
+if (dubaiGuardIndex < 0 || customerNotificationInsertIndex < 0 || dubaiGuardIndex > customerNotificationInsertIndex || !dubaiOnlyWarehouseNotificationMigration.includes("v_title := 'کاڵاکەت لە کۆگای دوبەی وەرگیرا';") || dubaiOnlyWarehouseNotificationMigration.includes("v_title := 'کاڵاکەت لە کۆگا وەرگیرا';")) fail('Database trigger must exit before inserting alerts for non-Dubai warehouse receipts')
+else ok('Database trigger creates customer warehouse alerts for Dubai receipts only')
 
 const cartonManifestMigration = read('supabase/migrations/20261017185000_warehouse_receipt_cartons.sql')
 const cartonManifestReceiving = read('supabase/functions/warehouse-receiving/index.ts')
