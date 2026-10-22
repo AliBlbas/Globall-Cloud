@@ -776,3 +776,81 @@ html[data-gc-theme="dark"] body.gc-staff-os-shell #app #view :where(.tower-route
     scroll-behavior: auto !important;
   }
 }
+
+
+/* GC-STAFF-ACTION-RELIABILITY-20261022
+   Keep one mobile navigation surface and ensure hidden overlays never intercept taps. */
+body.gc-staff-os-shell #app,
+body.gc-staff-os-shell #app .gc-shell,
+body.gc-staff-os-shell #app .gc-main,
+body.gc-staff-os-shell #app .view,
+body.gc-staff-os-shell #app #view {
+  pointer-events: auto !important;
+}
+body.gc-staff-os-shell #app :where(button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[role="button"]) {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: rgba(8, 127, 140, .14) !important;
+}
+body.gc-staff-os-shell #app :where(button:disabled,[aria-disabled="true"]) {
+  cursor: not-allowed !important;
+}
+body.gc-staff-os-shell .gc-mobile-staff-dock,
+body.gc-staff-os-shell .gc-staff-more-sheet {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+body.gc-staff-os-shell .gc-staff-mobile-dock[hidden],
+body.gc-staff-os-shell .gc-staff-mobile-menu-button[hidden],
+body.gc-staff-os-shell .gc-staff-mobile-backdrop[hidden],
+body.gc-staff-os-shell .gc-staff-mobile-drawer[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+body.gc-staff-os-shell .gc-staff-mobile-backdrop:not(.open),
+body.gc-staff-os-shell .gc-staff-mobile-drawer:not(.open) {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+body.gc-staff-os-shell .gc-staff-mobile-dock {
+  z-index: 9500 !important;
+}
+body.gc-staff-os-shell .gc-staff-mobile-drawer.open {
+  z-index: 9600 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+body.gc-staff-os-shell .gc-staff-mobile-backdrop.open {
+  z-index: 9400 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+body.gc-staff-os-shell #gcModal,
+body.gc-staff-os-shell .modal-backdrop,
+body.gc-staff-os-shell .gc-customer-bind-backdrop {
+  pointer-events: auto !important;
+}
+@media (max-width: 760px) {
+  body.gc-staff-os-shell #app .gc-staff-mobile-dock:not([hidden]) {
+    display: grid !important;
+    position: fixed !important;
+    inset-inline: 7px !important;
+    bottom: calc(7px + env(safe-area-inset-bottom, 0px)) !important;
+    z-index: 9500 !important;
+  }
+  body.gc-staff-os-shell #app .gc-staff-mobile-dock button {
+    min-height: 54px !important;
+    touch-action: manipulation !important;
+    pointer-events: auto !important;
+  }
+  body.gc-staff-os-shell #app .gc-staff-mobile-drawer:not([hidden]).open {
+    display: grid !important;
+    z-index: 9600 !important;
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+    max-height: min(68dvh, 590px) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+  }
+}
