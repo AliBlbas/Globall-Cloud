@@ -56,9 +56,13 @@
   X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: private, no-store, max-age=0, must-revalidate
 
+/track
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: no-store, max-age=0, must-revalidate
+
 /tracking-integration.html
   X-Robots-Tag: noindex, nofollow, noarchive
-  Cache-Control: private, no-store, max-age=0, must-revalidate
+  Cache-Control: no-store, max-age=0, must-revalidate
 
 /driver-portal.html
   X-Robots-Tag: noindex, nofollow, noarchive

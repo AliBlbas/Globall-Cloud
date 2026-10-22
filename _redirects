@@ -1,6 +1,6 @@
-# The single customer workspace owns the root, tracking, login, and registration flows.
-/track /#shipmentsSection 302
-/track/ /#shipmentsSection 302
+# Public tracking uses the dedicated read-only tracker; keep query-string GC links intact.
+/track /tracking-integration.html 200
+/track/ /track 301
 # Legacy authentication URLs intentionally converge on the single customer entry.
 /login /#auth 302
 /login/ /#auth 302
