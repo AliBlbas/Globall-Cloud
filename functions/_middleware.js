@@ -220,12 +220,13 @@ export async function onRequest(context) {
     const finalDesignLink = '<link rel="stylesheet" href="/gc-staff-ui-refinement-20261019-v4.css?v=4" data-gc-staff-ui-refinement="1">';
     const finalWorkspaceLink = '<link rel="stylesheet" href="/gc-staff-live-workspace-20261019.css?v=6" data-gc-staff-live-workspace="1">';
     const finalOperationsRedesignLink = '<link rel="stylesheet" href="/gc-staff-operations-redesign-20261022.css?v=4" data-gc-staff-operations-redesign="1">';
+    const finalSignatureLink = '<link rel="stylesheet" href="/gc-staff-command-signature-20261022.css?v=1" data-gc-staff-command-signature="1">';
     html = html.replace(/<link[^>]*data-gc-staff-console-elite[^>]*>\s*/gi, '');
     html = html.replace(/<link[^>]*data-gc-staff-polish-mobile[^>]*>\s*/gi, '');
     html = html.replace(/<link[^>]*data-gc-staff-ui-refinement[^>]*>\s*/gi, '');
     html = html.replace(/<link[^>]*data-gc-staff-live-workspace[^>]*>\s*/gi, '');
     html = html.replace(/<link[^>]*data-gc-staff-operations-redesign[^>]*>\s*/gi, '');
-    html = html.replace(/<\/head>/i, eliteThemeLink + finalRepairLink + finalDesignLink + finalWorkspaceLink + finalOperationsRedesignLink + '</head>');
+    html = html.replace(/<\/head>/i, eliteThemeLink + finalRepairLink + finalDesignLink + finalWorkspaceLink + finalOperationsRedesignLink + finalSignatureLink + '</head>');
   }
   const headers=applySecurityHeaders(new Headers(response.headers)); headers.delete('content-encoding'); headers.delete('content-length'); headers.delete('etag'); headers.set('content-type','text/html; charset=UTF-8'); if(STAFF_V5.test(path)) headers.set('cache-control','no-store, max-age=0, must-revalidate');
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
