@@ -194,6 +194,16 @@ if (!staffV5Script.includes("window.addEventListener('unhandledrejection'") ||
 } else {
   ok('Async staff action failures are visible instead of silent')
 }
+if (!staffV5Script.includes('window.gcStaffLoadTab = (tab, force=false)') ||
+    staffV5Script.includes('button.disabled || event.defaultPrevented') ||
+    !staffMobileDock.includes('const navigate = (tab)') ||
+    !staffMobileDock.includes('window.gcStaffLoadTab(tab)') ||
+    !staffMobileDock.includes("if (tab === 'land-manifests') return findNav(tab)?.click()") ||
+    !staffV5EnhancementLoader.includes("'/gc-staff-mobile-dock-20261016.js?v=8'")) {
+  fail('Mobile Staff OS navigation must call the tab loader directly instead of proxying clicks to hidden sidebar buttons')
+} else {
+  ok('Mobile Staff OS navigation directly invokes the tab loader and preserves the land-manifest handler')
+}
 if (!staffV5Script.includes('staffTabClickDelegationInstalled') ||
     !staffV5Script.includes("body.gc-staff-os-shell #app .gc-side .nav-btn[data-tab]") ||
     !staffV5Script.includes("button.dataset.tab === 'land-manifests'") ||
@@ -296,7 +306,7 @@ if (warehouseNotifySource.includes('received_at,created_at')) fail('Warehouse no
 else ok('Warehouse notification query matches the live receipt schema')
 if (!realtimeSource.includes('client.auth.onAuthStateChange') || !realtimeSource.includes("event === 'SIGNED_OUT'")) fail('Realtime subscriptions must follow login and clean up after logout')
 else ok('Realtime subscriptions follow authentication state changes')
-if (!staffV5EnhancementLoader.includes("'/gc-staff-mobile-dock-20261016.js?v=7'") || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-command-system-20261017.css?v=2')")) fail('Staff mobile icon script or final command layer is stale')
+if (!staffV5EnhancementLoader.includes("'/gc-staff-mobile-dock-20261016.js?v=8'") || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-command-system-20261017.css?v=2')")) fail('Staff mobile icon script or final command layer is stale')
 else ok('Staff enhancement loader applies the refreshed mobile navigation and final visual layer')
 if (!staffMobileDock.includes("original.querySelector('.nav-icon svg')") || !staffMobileDock.includes('gc-staff-mobile-module-icon')) fail('Mobile staff module drawer must reuse the same SVG icons as the main navigation')
 else ok('Mobile staff module drawer uses consistent SVG navigation icons')
@@ -396,7 +406,7 @@ if (!staff.includes('staff-os-v5-20261017.js?v=20261022-2')) fail('Staff structu
 const mobileLoader = read('staff-os-v5-enhancement-loader-20261017.js')
 if (!staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=21')) fail('Staff enhancement loader cache-buster is stale')
 if (!staff.includes('data-gc-mobile-dock-preload="1"') || !staff.includes('/gc-staff-mobile-dock-20261016.css?v=5')) fail('Mobile dock CSS must be preloaded before the app initializes')
-if (mobileLoader.indexOf("'/gc-staff-mobile-dock-20261016.js?v=7'") > mobileLoader.indexOf("'/staff-os-v5-shipment-create-fix.js?v=20260912-2'")) fail('Mobile navigation must initialize before optional staff bridges')
+if (mobileLoader.indexOf("'/gc-staff-mobile-dock-20261016.js?v=8'") > mobileLoader.indexOf("'/staff-os-v5-shipment-create-fix.js?v=20260912-2'")) fail('Mobile navigation must initialize before optional staff bridges')
 if (!mobileLoader.includes("loadStyle('/gc-staff-mobile-dock-20261016.css?v=5')") || !mobileLoader.includes("loadStyle('/gc-staff-command-system-20261017.css?v=2')") || !mobileLoader.includes("loadStyle('/gc-staff-polish-mobile-20261019.css?v=6')") || !mobileLoader.includes("const href = '/gc-staff-operations-redesign-20261022.css?v=4'")) fail('Staff responsive dock and final refinement cascade are missing')
 const staffMobile = read('gc-staff-mobile-dock-20261016.css')
 if (!staffMobile.includes('#app .customer-control-hero') || !staffMobile.includes('#app .customer-control-kpis') || !staffMobile.includes('#app .customer-control-toolbar')) fail('Staff Customer 360 workspace styles are incomplete')
