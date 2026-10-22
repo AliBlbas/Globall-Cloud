@@ -247,7 +247,7 @@ else ok('Public mobile navigation exposes state and keyboard dismissal');
 if (!staffV5Script.includes('Globall Cloud Staff') || !staffV5Script.includes('document.title') || !read('gc-staff-land-manifest-20261018.js').includes("document.title='مانيفێستی دوبەی — Globall Cloud Staff'")) fail('Staff console document title must track the active view');
 else ok('Staff document title follows the active panel and land manifest');
 
-if (!staff.includes('gc-staff-command-system-20261017.css?v=2') || !staff.includes('gc-staff-polish-mobile-20261019.css?v=6') || !staff.includes('gc-staff-ui-refinement-20261019-v4.css?v=4') || !staff.includes('gc-staff-live-workspace-20261019.css?v=6') || !staff.includes('staff-os-v5-20261017.js?v=20261022-2') || !staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=21') || !staff.includes('<body class="gc-staff-os-shell">') || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-polish-mobile-20261019.css?v=6')") || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-ui-refinement-20261019-v4.css?v=4')") || !staffV5EnhancementLoader.includes("const href = '/gc-staff-operations-redesign-20261022.css?v=4'")) fail('Staff OS final responsive design layer, cache-busted mobile dock, or scoped shell is missing')
+if (!staff.includes('gc-staff-command-system-20261017.css?v=2') || !staff.includes('gc-staff-polish-mobile-20261019.css?v=6') || !staff.includes('gc-staff-ui-refinement-20261019-v4.css?v=4') || !staff.includes('gc-staff-live-workspace-20261019.css?v=6') || !staff.includes('staff-os-v5-20261017.js?v=20261022-3') || !staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=22') || !staff.includes('<body class="gc-staff-os-shell">') || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-polish-mobile-20261019.css?v=6')") || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-ui-refinement-20261019-v4.css?v=4')") || !staffV5EnhancementLoader.includes("const href = '/gc-staff-operations-redesign-20261022.css?v=4'")) fail('Staff OS final responsive design layer, cache-busted mobile dock, or scoped shell is missing')
 else ok('Staff OS loads the scoped command-system design layer')
 if (!read('gc-staff-live-workspace-20261019.css').includes('Locale-safe operations data and consistent dark/light workspace surfaces (v3).') || !read('gc-staff-live-workspace-20261019.css').includes('unicode-bidi: isolate') || !read('gc-staff-live-workspace-20261019.css').includes('html[data-gc-theme="dark"] body.gc-staff-os-shell #app .table-wrap') || !read('gc-staff-live-workspace-20261019.css').includes('html[data-gc-theme="dark"] body.gc-staff-os-shell .modal') || !read('gc-staff-live-workspace-20261019.css').includes('GC-STAFF-CONTROL-TOWER-PREMIUM-LAYER-V4')) fail('Staff workspace must support dark tables/dialogs and RTL/LTR data');
 else ok('Staff workspace supports dark table/dialog surfaces and RTL/LTR data')
@@ -401,10 +401,10 @@ else ok('Repository validation guards the retired public registration endpoint')
 
 
 
-if (!staff.includes('staff-os-v5-20261017.js?v=20261022-2')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
+if (!staff.includes('staff-os-v5-20261017.js?v=20261022-3')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
 
 const mobileLoader = read('staff-os-v5-enhancement-loader-20261017.js')
-if (!staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=21')) fail('Staff enhancement loader cache-buster is stale')
+if (!staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=22')) fail('Staff enhancement loader cache-buster is stale')
 if (!staff.includes('data-gc-mobile-dock-preload="1"') || !staff.includes('/gc-staff-mobile-dock-20261016.css?v=5')) fail('Mobile dock CSS must be preloaded before the app initializes')
 if (mobileLoader.indexOf("'/gc-staff-mobile-dock-20261016.js?v=8'") > mobileLoader.indexOf("'/staff-os-v5-shipment-create-fix.js?v=20260912-2'")) fail('Mobile navigation must initialize before optional staff bridges')
 if (!mobileLoader.includes("loadStyle('/gc-staff-mobile-dock-20261016.css?v=5')") || !mobileLoader.includes("loadStyle('/gc-staff-command-system-20261017.css?v=2')") || !mobileLoader.includes("loadStyle('/gc-staff-polish-mobile-20261019.css?v=6')") || !mobileLoader.includes("const href = '/gc-staff-operations-redesign-20261022.css?v=4'")) fail('Staff responsive dock and final refinement cascade are missing')
@@ -522,7 +522,7 @@ if (!staffV5Script.includes("ROLES.filter((role) => role !== 'driver')")) fail('
 else ok('Staff alert audience choices exclude unsupported driver-only roles')
 if (!staffV5Script.includes('button.disabled = true') || !staffV5Script.includes('current.read_by = existing') || !staffV5Script.includes('renderList();')) fail('Staff alert read action must prevent duplicate submissions and update the local read state')
 else ok('Staff alert read action updates local state and prevents duplicate submissions')
-if (!staff.includes('staff-os-v5-20261017.js?v=20261022-2') || !staff.includes('gc-staff-console-elite-20261018.css?v=6')) fail('Staff Alert Center release must use new immutable-cache asset URLs')
+if (!staff.includes('staff-os-v5-20261017.js?v=20261022-3') || !staff.includes('gc-staff-console-elite-20261018.css?v=6')) fail('Staff Alert Center release must use new immutable-cache asset URLs')
 else ok('Staff Alert Center assets use cache-busted URLs')
 console.log('')
 if (failures) { console.error(`${failures} production contract check(s) failed.`); process.exit(1) }
