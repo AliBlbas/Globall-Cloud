@@ -20,6 +20,12 @@
 
   const navButtons = () => [...document.querySelectorAll('.gc-side .nav-btn[data-tab]')];
   const findNav = (tab) => navButtons().find((button) => button.dataset.tab === tab);
+  const navigate = (tab) => {
+    // The land-manifest module has state of its own, so keep its delegated route.
+    if (tab === 'land-manifests') return findNav(tab)?.click();
+    if (typeof window.gcStaffLoadTab === 'function') return window.gcStaffLoadTab(tab);
+    return findNav(tab)?.click();
+  };
   const labelOf = (button) => {
     const clone = button.cloneNode(true);
     clone.querySelectorAll('.nav-icon,.nav-badge').forEach((node) => node.remove());
@@ -94,8 +100,8 @@
       caption.textContent = label;
       button.append(graphic, caption);
       button.addEventListener('click', () => {
-        findNav(tab)?.click();
-        sync();
+        void navigate(tab);
+        setTimeout(sync, 60);
       });
       dock.appendChild(button);
     });
@@ -165,9 +171,9 @@
             caption.textContent = labelOf(original);
             button.append(graphic, caption);
             button.addEventListener('click', () => {
-              findNav(tab)?.click();
+              void navigate(tab);
               close(false);
-              sync();
+              setTimeout(sync, 60);
             });
             items.appendChild(button);
           });
