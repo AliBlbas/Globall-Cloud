@@ -1,5 +1,5 @@
 # Public tracking uses the dedicated read-only tracker; keep query-string GC links intact.
-/track /tracking-integration.html 200
+/track /tracking-integration 200
 /track/ /track 301
 # Legacy authentication URLs intentionally converge on the single customer entry.
 /login /#auth 302
