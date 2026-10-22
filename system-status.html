@@ -51,8 +51,20 @@
     .note{margin-top:16px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:13.5px;line-height:1.8}
     .footer{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px;color:var(--muted);font-size:13px;line-height:1.6}
     @media(max-width:640px){body{padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom))} .hero{padding:18px} .card{padding:16px} .top{margin-bottom:14px} .btn{flex:1 1 100%}}
+    .health-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:18px}
+    .health-fact{min-width:0;padding:12px 14px;border:1px solid rgba(255,255,255,.1);border-radius:15px;background:rgba(255,255,255,.035)}
+    .health-fact span{display:block;color:var(--muted);font-size:12px;line-height:1.5}
+    .health-fact strong{display:block;margin-top:5px;color:var(--text);font-size:13px;line-height:1.65;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+    .health-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px}
+    .health-actions #checked{font-size:12px;line-height:1.6}
+    .status[data-state="ok"]{border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.09)}
+    .status[data-state="degraded"]{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.09)}
+    .status[data-state="down"]{border-color:rgba(244,63,94,.35);background:rgba(244,63,94,.09)}
+    .bad{background:#f43f5e;box-shadow:0 0 0 4px rgba(244,63,94,.12)}
+    @media(max-width:520px){.health-facts{grid-template-columns:1fr}.health-actions{align-items:stretch}.health-actions .btn{width:100%}}
   </style>
 <script src="/gc-csp-bridge.js?v=20260816-1" defer data-gc-csp-bridge="1"></script>  <link rel="stylesheet" href="/gc-unified-experience-20260922.css?v=20260922-1">
+  <script src="/status-page.js?v=20261022-2" defer data-gc-status-page="1"></script>
 </head>
 <body>
   <div class="wrap">
@@ -75,8 +87,8 @@
       <div class="grid">
         <div class="card">
           <div class="eyebrow">Current health</div>
-          <h1>Everything important is wired to real services, not placeholders.</h1>
-          <p class="lead">This page is meant for internal review. It reflects the current production direction of Globall Cloud and gives staff a quick view of what is already connected, what is already hardened, and what still deserves attention.</p>
+          <h1>Live service health, checked against production endpoints.</h1>
+          <p class="lead">This page checks the live Cloudflare Pages edge and the Supabase public-health dependency. It does not prove payment settlement, email or WhatsApp delivery, or every authenticated workflow.</p>
           <div class="chips">
             <span class="chip">Cloudflare Pages</span>
             <span class="chip">Supabase Postgres + Auth</span>
@@ -84,8 +96,19 @@
             <span class="chip">Staff-only tools</span>
             <span class="chip">Edge Function API</span>
           </div>
-          <div class="status"><span class="dot good"></span> Frontend + backend stack verified</div>
-          <div class="note">Keep browser secrets out of the front end. Use publishable keys in the site, and keep service-role access inside Edge Functions only.</div>
+          <div class="status" id="overall" data-state="checking" role="status" aria-live="polite"><span class="dot warn"></span><span id="overallText">پشکنین دەکرێت…</span></div>
+          <div class="health-facts" aria-live="polite">
+            <div class="health-fact"><span>Cloudflare edge</span><strong id="edge">پشکنین دەکرێت…</strong></div>
+            <div class="health-fact"><span>Supabase health</span><strong id="supabase">پشکنین دەکرێت…</strong></div>
+            <div class="health-fact"><span>Supabase HTTP</span><strong id="supabaseHttp">—</strong></div>
+            <div class="health-fact"><span>Response time</span><strong id="latency">—</strong></div>
+            <div class="health-fact"><span>Production branch</span><strong id="release">—</strong></div>
+            <div class="health-fact"><span>Live commit</span><strong id="version">—</strong></div>
+            <div class="health-fact"><span>Service</span><strong id="service">Globall Cloud</strong></div>
+            <div class="health-fact"><span>Last API check</span><strong id="timestamp">—</strong></div>
+          </div>
+          <div class="health-actions"><button id="refresh" class="btn btn-outline" type="button">نوێکردنەوەی پشکنین</button><span id="checked" aria-live="polite">چاوەڕێی یەکەم پشکنین…</span></div>
+          <div class="note">Browser code uses public keys only. Service-role access remains inside trusted server-side functions.</div>
         </div>
 
         <div class="card">
@@ -97,7 +120,7 @@
           </div>
           <div class="item"><div class="bullet">1</div><div><b>Cloudflare Pages</b><span>Static front end hosting with security headers and fast delivery.</span></div></div>
           <div class="item"><div class="bullet">2</div><div><b>Supabase project</b><span>Project ID ahslifnthiwfkmaswjno with API URL https://ahslifnthiwfkmaswjno.supabase.co.</span></div></div>
-          <div class="item"><div class="bullet">3</div><div><b>GitHub repository</b><span>Private repo under AliBlbas/Globall-Cloud stores the source of truth.</span></div></div>
+          <div class="item"><div class="bullet">3</div><div><b>GitHub repository</b><span>Repository <code>AliBlbas/Globall-Cloud</code> is the source of truth.</span></div></div>
           <div class="item"><div class="bullet">4</div><div><b>Staff tools</b><span>management.html, staff-portal.html, operations-suite.html, and accounts-console.html are part of the internal workflow.</span></div></div>
           <div class="item"><div class="bullet">5</div><div><b>Edge Function</b><span>account-admin handles account and receipt actions, while analytics now route through it instead of direct browser table reads.</span></div></div>
         </div>
