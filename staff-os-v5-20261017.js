@@ -269,7 +269,7 @@
     if (!staffTabClickDelegationInstalled) {
       document.addEventListener('click', (event) => {
         const button = event.target?.closest?.('body.gc-staff-os-shell #app .gc-side .nav-btn[data-tab]');
-        if (!button || button.disabled || event.defaultPrevented) return;
+        if (!button || button.disabled) return;
         // The land-manifest module owns its own stateful capture handler.
         if (button.dataset.tab === 'land-manifests') return;
         event.preventDefault();
@@ -321,6 +321,19 @@
     }
     updateBadges();
   }
+
+
+  // Stable navigation entry point for the mobile dock. Do not synthesize clicks
+  // on the hidden desktop sidebar; invoke the same tab loader directly instead.
+  const STAFF_NAV_TABS = new Set([
+    'overview','shipments','alerts','customers','pricing','warehouses','finance',
+    'staff-chat','customer-chat','requests','activity','settings'
+  ]);
+  window.gcStaffLoadTab = (tab, force=false) => {
+    const target = String(tab || '');
+    if (!STAFF_NAV_TABS.has(target)) return Promise.resolve(false);
+    return loadTab(target, force).then(() => true);
+  };
 
   async function loadOverview() {
     const canProcessInAppOutbox = ['admin','super_admin'].includes(state.staff?.role);
