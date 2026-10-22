@@ -37,7 +37,7 @@ if (sw.includes("fetch(request, { cache: 'no-store' })") && sw.includes('self.sk
 else fail('Service Worker network-first/lifecycle contract is incomplete')
 
 const required = [
-  'index.html','gc-accessibility-mobile-20261021.css','gc-customer-experience-signature-20261017.css','login.html','register.html','customer-access.html','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js','public-route-bootstrap.js','public-runtime-guarantee.js',
+  'index.html','system-status.html','status-page.js','gc-accessibility-mobile-20261021.css','gc-customer-experience-signature-20261017.css','login.html','register.html','customer-access.html','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js','public-route-bootstrap.js','public-runtime-guarantee.js',
   'public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js','tracking-integration.html','tracking-intelligence.js',
   'tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os-v5.html','staff-os-v5.css','gc-staff-ui-refinement-20261019-v4.css','gc-staff-live-workspace-20261019.css','gc-staff-operations-redesign-20261022.css','gc-staff-customer-bridge-20261019.js','staff-os-v5.js','staff-os-v5-20261017.js',
   'staff-os-v5-rescue.js','staff-logistics-intelligence.css','staff-logistics-intelligence.js','staff-mobile-command-dock.css','staff-mobile-command-dock.js',
@@ -78,7 +78,7 @@ const headers = read('_headers')
 const redirects = read('_redirects')
 if (!headers.includes('Content-Security-Policy:') || /script-src[^\n;]*unsafe-inline/.test(headers) || !headers.includes('Strict-Transport-Security:') || !headers.includes('X-Content-Type-Options: nosniff')) fail('security header contract is incomplete')
 else ok('Security headers are present')
-for (const route of ['/tracking-integration.html /track 301','/staff /staff-os-v5.html 200','/staff/ /staff-os-v5.html 200','/staff-os /staff-os-v5.html 200']) if (!redirects.includes(route)) fail(`route contract missing: ${route}`)
+for (const route of ['/tracking-integration.html /track 301','/staff /staff-os-v5.html 200','/staff/ /staff-os-v5.html 200','/staff-os /staff-os-v5.html 200','/status /system-status.html 302','/status/ /system-status.html 302']) if (!redirects.includes(route)) fail(`route contract missing: ${route}`)
 if (!failures) ok('Core public/staff routes are wired')
 
 const bridge = read('production-bridge.js')
@@ -98,6 +98,13 @@ if (!bridge.includes('https://ahslifnthiwfkmaswjno.supabase.co')) fail('producti
 if (!/^\[functions\.customer-self\]\s*verify_jwt\s*=\s*true$/m.test(config)) fail('customer-self verify_jwt must remain true')
 if (!/^\[functions\.public-health\]\s*verify_jwt\s*=\s*false$/m.test(config)) fail('public-health verify_jwt must remain false')
 if (!read('functions/api/ready.js').includes('/functions/v1/public-health')) fail('ready endpoint points at the wrong Supabase health function')
+
+const statusPage = read('system-status.html')
+const statusController = read('status-page.js')
+if (!statusPage.includes('status-page.js?v=20261022-2') || !['id="overall"', 'id="supabaseHttp"', 'id="refresh"'].every(marker => statusPage.includes(marker))) fail('System Status live health UI/controller is not wired')
+if (!statusController.includes("fetch('/api/ready?status='") || !statusController.includes('setInterval(load, 60000)') || !statusController.includes("$('refresh')?.addEventListener('click', load)")) fail('System Status readiness refresh contract is incomplete')
+if (statusPage.includes('Verified production stack') || statusPage.includes('<h2>Verified pieces</h2>') || !statusPage.includes('not live-verified')) fail('System Status still presents source notes as live-verified facts')
+else ok('System Status distinguishes live readiness from unverified source notes')
 if (!bridge.includes('SUPABASE_PUBLISHABLE_KEY')) fail('production bridge publishable key marker missing')
 if (!staff.includes('gc-staff-final-20260922.js?v=')) fail('Staff final mobile navigation JS is not loaded')
 if (staff.includes('staff-reference-mobile-20260922.js?v=') || staff.includes('staff-premium-mobile-20260909.js?v=')) fail('Legacy competing Staff mobile navigation scripts are still loaded')
