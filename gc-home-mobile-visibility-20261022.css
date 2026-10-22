@@ -1,0 +1,81 @@
+/* Globall Cloud — homepage readability guard (2026-10-22)
+   Last-layer presentation-only overrides for the public landing workspace.
+   Keeps the existing layout and routes; prevents later narrow-screen rules
+   from shrinking route labels into unreadable text or hiding descriptions. */
+
+#gcApp .gc-launchpad-card-copy {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#gcApp .gc-launchpad-card-copy b {
+  display: block !important;
+  color: #f3f9fc !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  line-height: 1.65 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#gcApp .gc-launchpad-card-copy small {
+  display: block !important;
+  color: #b5cbd8 !important;
+  font-size: 10.5px !important;
+  line-height: 1.8 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#gcApp .gc-transport-studio .gc-studio-tab {
+  min-width: 0 !important;
+  color: #eaf5fa !important;
+  text-align: start !important;
+}
+
+#gcApp .gc-transport-studio .gc-studio-tab > span:nth-of-type(3) {
+  display: grid !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#gcApp .gc-transport-studio .gc-studio-tab b {
+  display: block !important;
+  color: #f3f9fc !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+  line-height: 1.6 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#gcApp .gc-transport-studio .gc-studio-tab small {
+  display: block !important;
+  color: #b6ccd8 !important;
+  font-size: 10px !important;
+  line-height: 1.7 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 420px) {
+  #gcApp .gc-launchpad-card-copy b { font-size: 12px !important; }
+  #gcApp .gc-launchpad-card-copy small { font-size: 10px !important; }
+  #gcApp .gc-transport-studio .gc-studio-tab b { font-size: 12px !important; }
+  #gcApp .gc-transport-studio .gc-studio-tab small { font-size: 10px !important; }
+}
