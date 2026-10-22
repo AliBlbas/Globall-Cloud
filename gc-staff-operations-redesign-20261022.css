@@ -893,3 +893,15 @@ body.gc-staff-os-shell #gcModal.modal-backdrop:not(.gc-customer-bind-backdrop) .
     background: var(--gc-staff-redesign-surface, #fff) !important;
   }
 }
+
+
+/* Hide the quick dock while a modal is active so footer controls have the full
+   safe-area viewport and stray taps cannot be consumed by navigation buttons. */
+body.gc-staff-os-shell:has(#gcModal) .gc-staff-mobile-dock,
+body.gc-staff-os-shell:has(#gcModal) .gc-staff-mobile-menu-button,
+body.gc-staff-os-shell:has(#gcModal) .gc-staff-mobile-backdrop,
+body.gc-staff-os-shell:has(#gcModal) .gc-staff-mobile-drawer {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
