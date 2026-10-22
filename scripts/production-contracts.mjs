@@ -187,8 +187,6 @@ if (!staffRedesignCss.includes('GC-STAFF-FEEDBACK-VISIBILITY-20261022') ||
 } else {
   ok('Staff success/error feedback remains visible above the mobile dock')
 }
-if (false) {
-}
 if (!staffV5Script.includes("window.addEventListener('unhandledrejection'") ||
     !staffV5Script.includes('کردارەکە ئەنجام نەدرا') ||
     !staffV5Script.includes('lastStaffActionFailure')) {
