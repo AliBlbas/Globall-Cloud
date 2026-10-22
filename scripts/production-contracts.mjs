@@ -169,6 +169,7 @@ if (!staffRedesignCss.includes('GC-STAFF-OPERATIONS-REDESIGN-20261022') ||
 if (!staffRedesignCss.includes('GC-STAFF-MODAL-ACTION-LAYER-20261022') ||
     !staffRedesignCss.includes('z-index: 2147483600 !important') ||
     !staffRedesignCss.includes('position: sticky !important') ||
+    !staffRedesignCss.includes('body.gc-staff-os-shell:has(#gcModal) .gc-staff-mobile-dock') ||
     !staff.includes('gc-staff-operations-redesign-20261022.css?v=3') ||
     !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-operations-redesign-20261022.css?v=3')") ||
     !staffV5EnhancementLoader.includes("const href = '/gc-staff-operations-redesign-20261022.css?v=3'") ||
