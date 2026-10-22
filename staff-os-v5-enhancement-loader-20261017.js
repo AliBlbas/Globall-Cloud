@@ -12,7 +12,7 @@
   ];
 
   const enhancementScripts = [
-    '/gc-staff-mobile-dock-20261016.js?v=7',
+    '/gc-staff-mobile-dock-20261016.js?v=8',
     '/staff-os-v5-shipment-create-fix.js?v=20260912-2',
     '/staff-os-v5-shipment-control-bridge.js?v=20260912-2',
     '/staff-os-data-health-panel.js?v=20260912-2',
