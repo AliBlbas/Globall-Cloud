@@ -57,12 +57,12 @@
   addScript(`/public-staff-guard-20260909.js?v=${RELEASE}`, 'data-gc-public-staff-guard');
   addScript(`/public-production-safety.js?v=${RELEASE}`, 'data-gc-public-production-safety');
   addScript(`/site-navigation-20260909.js?v=${RELEASE}`, 'data-gc-public-navigation');
-  addScript(`/public-runtime-guarantee.js?v=${RELEASE}`, 'data-gc-public-runtime-guarantee');
+  addScript('/public-runtime-guarantee.js?v=20261022-1', 'data-gc-public-runtime-guarantee');
 
   const registerStableWorker = () => {
     if (!('serviceWorker' in navigator)) return;
     try {
-      navigator.serviceWorker.register(`/sw.js?v=${RELEASE}-enterprise`, { scope: '/' }).then((registration) => {
+      navigator.serviceWorker.register('/sw.js?v=20261022-1-enterprise', { scope: '/' }).then((registration) => {
         try { registration.update(); } catch (_) {}
       }).catch(() => {});
     } catch (_) {}

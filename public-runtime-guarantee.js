@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '20260912-4';
+  const VERSION = '20261022-1';
   const RENDERERS = [
     'renderHomeServices',
     'renderBusinessHub',
@@ -131,15 +131,10 @@
       </div>`;
   };
 
-  const registerFreshServiceWorker = async () => {
-    if (!('serviceWorker' in navigator)) return;
-    try {
-      const registration = await navigator.serviceWorker.register(`/sw-v98.js?v=${VERSION}`, { scope: '/' });
-      await registration.update();
-    } catch (_) {
-      // Service worker is an optimization; never block page rendering.
-    }
-  };
+  // Service-worker ownership is centralized in public-route-bootstrap.js.
+  // Do not register sw-v98.js here: that aliases sw.js at the same '/' scope
+  // and can cause unnecessary worker updates/cache churn on customer devices.
+
 
   const hydrate = () => {
     const hasPublicShell = Boolean(document.querySelector('.page') || document.querySelector('[data-i18n]'));
@@ -159,7 +154,6 @@
     document.documentElement.dataset.gcRuntimeGuarantee = VERSION;
 
     hydrate();
-    registerFreshServiceWorker();
 
     [120, 350, 800, 1600, 3000, 5000].forEach((delay) => {
       window.setTimeout(() => {
