@@ -854,3 +854,42 @@ body.gc-staff-os-shell .gc-customer-bind-backdrop {
     overscroll-behavior: contain !important;
   }
 }
+
+
+/* GC-STAFF-MODAL-ACTION-LAYER-20261022
+   Modal save/confirm buttons must sit above the fixed mobile navigation dock.
+   The dock uses z-index 9500; a modal left at the legacy z-index 100 loses taps
+   on its footer in iOS Safari even though the form and API are healthy. */
+body.gc-staff-os-shell #gcModal.modal-backdrop:not(.gc-customer-bind-backdrop),
+body.gc-staff-os-shell .modal-backdrop:not(.gc-customer-bind-backdrop) {
+  position: fixed !important;
+  z-index: 2147483600 !important;
+  pointer-events: auto !important;
+}
+body.gc-staff-os-shell #gcModal.modal-backdrop:not(.gc-customer-bind-backdrop) .modal,
+body.gc-staff-os-shell #gcModal.modal-backdrop:not(.gc-customer-bind-backdrop) .modal-card,
+body.gc-staff-os-shell #gcModal.modal-backdrop:not(.gc-customer-bind-backdrop) .modal-panel {
+  position: relative !important;
+  z-index: 1 !important;
+  pointer-events: auto !important;
+}
+@media (max-width: 760px) {
+  body.gc-staff-os-shell #gcModal.modal-backdrop:not(.gc-customer-bind-backdrop) {
+    padding-top: max(8px, env(safe-area-inset-top, 0px)) !important;
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+  }
+  body.gc-staff-os-shell #gcModal.modal-backdrop:not(.gc-customer-bind-backdrop) .modal {
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 16px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  body.gc-staff-os-shell #gcModal.modal-backdrop:not(.gc-customer-bind-backdrop) .modal-foot {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 3 !important;
+    padding: 8px !important;
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+    border-top: 1px solid var(--gc-staff-redesign-line, #dbe7ed) !important;
+    background: var(--gc-staff-redesign-surface, #fff) !important;
+  }
+}
