@@ -905,3 +905,31 @@ body.gc-staff-os-shell:has(#gcModal) .gc-staff-mobile-drawer {
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+
+/* GC-STAFF-FEEDBACK-VISIBILITY-20261022
+   Toasts are appended to body. Keep success/error feedback above the fixed dock
+   so a rejected API action never appears to have silently done nothing. */
+body.gc-staff-os-shell #gcToast,
+body.gc-staff-os-shell .toast#gcToast {
+  position: fixed !important;
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+  max-width: min(440px, calc(100vw - 24px)) !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  line-height: 1.65 !important;
+}
+@media (max-width: 760px) {
+  body.gc-staff-os-shell #gcToast,
+  body.gc-staff-os-shell .toast#gcToast {
+    inset-inline-start: 12px !important;
+    inset-inline-end: 12px !important;
+    bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
+    width: auto !important;
+    max-width: none !important;
+    padding: 12px 14px !important;
+    border-radius: 14px !important;
+    font-size: 12px !important;
+  }
+}
