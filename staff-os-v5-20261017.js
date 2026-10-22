@@ -248,9 +248,32 @@
     };
   }
 
+  let staffTabClickDelegationInstalled = false;
+
   function bindShell() {
-    document.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => loadTab(btn.dataset.tab)));
-    document.getElementById('logoutBtn')?.addEventListener('click', async () => { await state.client.auth.signOut(); state.session=null; state.staff=null; renderLogin(); });
+    // Use one capture-phase delegate for navigation. The shell is re-rendered
+    // after login and mobile navigation proxies click the sidebar buttons; this
+    // keeps tab changes reliable without stacking duplicate handlers.
+    if (!staffTabClickDelegationInstalled) {
+      document.addEventListener('click', (event) => {
+        const button = event.target?.closest?.('body.gc-staff-os-shell #app .gc-side .nav-btn[data-tab]');
+        if (!button || button.disabled || event.defaultPrevented) return;
+        // The land-manifest module owns its own stateful capture handler.
+        if (button.dataset.tab === 'land-manifests') return;
+        event.preventDefault();
+        event.stopPropagation();
+        void loadTab(button.dataset.tab);
+      }, true);
+      staffTabClickDelegationInstalled = true;
+    }
+    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+      try {
+        await state.client.auth.signOut();
+        state.session=null; state.staff=null; renderLogin();
+      } catch (error) {
+        toast(errorText(error, 'چوونەدەرەوە سەرکەوتوو نەبوو'), 'bad');
+      }
+    });
     document.getElementById('refreshBtn')?.addEventListener('click', () => loadTab(state.tab, true));
     updateBadges();
   }
