@@ -219,7 +219,7 @@ export async function onRequest(context) {
     const finalRepairLink = '<link rel="stylesheet" href="/gc-staff-polish-mobile-20261019.css?v=6" data-gc-staff-polish-mobile="1">';
     const finalDesignLink = '<link rel="stylesheet" href="/gc-staff-ui-refinement-20261019-v4.css?v=4" data-gc-staff-ui-refinement="1">';
     const finalWorkspaceLink = '<link rel="stylesheet" href="/gc-staff-live-workspace-20261019.css?v=6" data-gc-staff-live-workspace="1">';
-    const finalOperationsRedesignLink = '<link rel="stylesheet" href="/gc-staff-operations-redesign-20261022.css?v=1" data-gc-staff-operations-redesign="1">';
+    const finalOperationsRedesignLink = '<link rel="stylesheet" href="/gc-staff-operations-redesign-20261022.css?v=2" data-gc-staff-operations-redesign="1">';
     html = html.replace(/<link[^>]*data-gc-staff-console-elite[^>]*>\s*/gi, '');
     html = html.replace(/<link[^>]*data-gc-staff-polish-mobile[^>]*>\s*/gi, '');
     html = html.replace(/<link[^>]*data-gc-staff-ui-refinement[^>]*>\s*/gi, '');
