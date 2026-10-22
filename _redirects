@@ -32,8 +32,9 @@
 /staff-os/ /staff-os-v5.html 200
 /control-tower /control-tower.html 200
 /control-tower/ /control-tower.html 200
-/status /status.html 200
-/status/ /status.html 200
+# Send status aliases directly to the canonical static page rather than relying on client-side redirect code.
+/status /system-status.html 302
+/status/ /system-status.html 302
 /tracking-integration.html /track 301
 /staff-os-compat.js /staff-os-compat-v2.js 200
 /shop /services 302
