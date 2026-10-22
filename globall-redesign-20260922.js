@@ -30,7 +30,9 @@
       { file: 'gc-reference-app-20260927.css', href: '/gc-reference-app-20260927.css?v=1', marker: 'data-gc-reference-app' },
       { file: 'gc-reference-inspired-20260928.css', href: '/gc-reference-inspired-20260928.css?v=20260928-2', marker: 'data-gc-reference-inspired' },
       { file: 'gc-homepage-mobile-content-20261019.css', href: '/gc-homepage-mobile-content-20261019.css?v=1', marker: 'data-gc-mobile-content-visibility' },
-      { file: 'gc-accessibility-mobile-20261021.css', href: '/gc-accessibility-mobile-20261021.css?v=1', marker: 'data-gc-accessibility-mobile' }
+      { file: 'gc-accessibility-mobile-20261021.css', href: '/gc-accessibility-mobile-20261021.css?v=1', marker: 'data-gc-accessibility-mobile' },
+      // Keep the mobile route-label readability guard as the final cascade layer.
+      { file: 'gc-home-mobile-visibility-20261022.css', href: '/gc-home-mobile-visibility-20261022.css?v=1', marker: 'data-gc-home-mobile-visibility' }
     ];
 
     const mountedStyles = [];
