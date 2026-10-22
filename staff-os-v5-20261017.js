@@ -71,6 +71,18 @@
     el._timer = setTimeout(() => el.remove(), 3400);
   }
 
+  // Several detail panes are opened by async element handlers. Surface rejected
+  // actions so a tap never looks like it was ignored when the API returns an error.
+  let lastStaffActionFailure = { message: '', at: 0 };
+  window.addEventListener('unhandledrejection', (event) => {
+    if (!document.querySelector('body.gc-staff-os-shell #app .gc-shell')) return;
+    const message = errorText(event?.reason, 'هەڵەی نەناسراو لە ئەنجامدانی کردار');
+    const now = Date.now();
+    if (message === lastStaffActionFailure.message && now - lastStaffActionFailure.at < 1800) return;
+    lastStaffActionFailure = { message, at: now };
+    toast('کردارەکە ئەنجام نەدرا: ' + message, 'bad');
+  });
+
   async function waitForSupabase() {
     const start = Date.now();
     while (!window.supabase?.createClient && Date.now() - start < 12000) await new Promise(r => setTimeout(r, 60));
