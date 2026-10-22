@@ -72,11 +72,21 @@
 
   const startDeepLinkSearch = async () => {
     if (!deepLinkId || deepLinkStarted || !input) return;
-    input.value = deepLinkId;
-    await waitForSupabase();
-    if (typeof window.doTrackSearch !== 'function') return;
+    // Claim the lookup before awaiting Supabase: the load and timeout fallbacks
+    // can race on slow mobile networks, so only one may issue a request.
     deepLinkStarted = true;
-    window.doTrackSearch();
+    input.value = deepLinkId;
+    try {
+      await waitForSupabase();
+      if (typeof window.doTrackSearch !== 'function') {
+        deepLinkStarted = false;
+        return;
+      }
+      window.doTrackSearch();
+    } catch (_) {
+      deepLinkStarted = false;
+      window.showToast?.('سیستەمی شوێنکەوتن بەردەست نییە. تکایە دووبارە هەوڵبدەوە.', 'error');
+    }
   };
 
   if (deepLinkId && input) {
