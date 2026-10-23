@@ -500,3 +500,113 @@ body.gc-staff-os-shell #app>.gc-rescue-shell>section:not(.staff-command-matrix) 
 @media(prefers-reduced-motion:reduce) {
   body.gc-staff-os-shell #app * {animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
+
+
+/* 2026-10-23 live staff-console refinement: clear hierarchy, high-signal actions, compact mobile */
+body.gc-staff-os-shell #app .sidebar,
+body.gc-staff-os-shell #app .side-panel,
+body.gc-staff-os-shell #app aside {
+  border-radius:22px!important;
+  box-shadow:0 16px 42px rgba(16,49,69,.09)!important;
+}
+body.gc-staff-os-shell #app .nav-item,
+body.gc-staff-os-shell #app [data-tab] {
+  border-radius:13px!important;
+  transition:background .16s ease,border-color .16s ease,transform .16s ease!important;
+}
+body.gc-staff-os-shell #app .nav-item:hover,
+body.gc-staff-os-shell #app [data-tab]:hover {
+  transform:translateY(-1px);
+}
+body.gc-staff-os-shell #app #view {
+  min-width:0!important;
+  overflow-wrap:anywhere;
+}
+body.gc-staff-os-shell #app #view .section-head,
+body.gc-staff-os-shell #app #view .panel-head,
+body.gc-staff-os-shell #app #view .section-header {
+  gap:12px!important;
+  align-items:center!important;
+}
+body.gc-staff-os-shell #app #view .metric,
+body.gc-staff-os-shell #app #view .stat,
+body.gc-staff-os-shell #app #view .kpi,
+body.gc-staff-os-shell #app #view .metric-card {
+  border-radius:17px!important;
+  box-shadow:0 8px 22px rgba(16,49,69,.045)!important;
+}
+body.gc-staff-os-shell #app #view .table-wrap,
+body.gc-staff-os-shell #app #view .table-responsive,
+body.gc-staff-os-shell #app #view .overflow-x-auto {
+  max-width:100%!important;
+  overflow-x:auto!important;
+  -webkit-overflow-scrolling:touch;
+}
+body.gc-staff-os-shell #app #view table {
+  border-collapse:separate!important;
+  border-spacing:0!important;
+}
+body.gc-staff-os-shell #app #view th {
+  position:sticky;
+  top:0;
+  z-index:1;
+}
+body.gc-staff-os-shell #app #view input:focus-visible,
+body.gc-staff-os-shell #app #view select:focus-visible,
+body.gc-staff-os-shell #app #view textarea:focus-visible,
+body.gc-staff-os-shell #app #view button:focus-visible,
+body.gc-staff-os-shell #app #view a:focus-visible {
+  outline:3px solid color-mix(in srgb,var(--gcd-cyan) 72%,transparent)!important;
+  outline-offset:2px!important;
+}
+body.gc-staff-os-shell #app button:disabled,
+body.gc-staff-os-shell #app .btn:disabled {
+  opacity:.55!important;
+  cursor:not-allowed!important;
+  transform:none!important;
+}
+@media(max-width:900px) {
+  body.gc-staff-os-shell {padding:8px!important}
+  body.gc-staff-os-shell #app .shell,
+  body.gc-staff-os-shell #app .workspace,
+  body.gc-staff-os-shell #app .layout {
+    gap:10px!important;
+  }
+  body.gc-staff-os-shell #app #view {
+    border-radius:18px!important;
+  }
+  body.gc-staff-os-shell #app #view .section-head,
+  body.gc-staff-os-shell #app #view .panel-head,
+  body.gc-staff-os-shell #app #view .section-header {
+    align-items:flex-start!important;
+    flex-wrap:wrap!important;
+  }
+  body.gc-staff-os-shell #app #view .section-head .actions,
+  body.gc-staff-os-shell #app #view .panel-head .actions,
+  body.gc-staff-os-shell #app #view .section-header .actions {
+    width:100%!important;
+    display:flex!important;
+    flex-wrap:wrap!important;
+  }
+}
+@media(max-width:600px) {
+  body.gc-staff-os-shell {padding:6px!important}
+  body.gc-staff-os-shell #app #view {padding:12px!important}
+  body.gc-staff-os-shell #app #view .metric,
+  body.gc-staff-os-shell #app #view .stat,
+  body.gc-staff-os-shell #app #view .kpi,
+  body.gc-staff-os-shell #app #view .metric-card {min-width:0!important}
+  body.gc-staff-os-shell #app #view input,
+  body.gc-staff-os-shell #app #view select,
+  body.gc-staff-os-shell #app #view textarea {max-width:100%!important;min-width:0!important}
+  body.gc-staff-os-shell #app #view button,
+  body.gc-staff-os-shell #app #view .btn {min-height:40px}
+  body.gc-staff-os-shell #app #view .modal,
+  body.gc-staff-os-shell #app #view [role="dialog"] {max-width:calc(100vw - 16px)!important}
+}
+@media(prefers-reduced-motion:reduce) {
+  body.gc-staff-os-shell #app *,
+  body.gc-staff-os-shell #app *::before,
+  body.gc-staff-os-shell #app *::after {transition:none!important;animation:none!important}
+}
+
