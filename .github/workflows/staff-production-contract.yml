@@ -49,10 +49,10 @@ jobs:
           grep -q 'gc-live-wh-list' staff-os-v5-20261017.js
           grep -q 'staff-os-v5-enhancement-loader-20261017.js?v=23' staff-os-v5.html
           grep -q 'gc-staff-mobile-dock-20261016.css?v=5' staff-os-v5.html
-          grep -q 'staff-os-v5-20261017.js?v=20261022-3' staff-os-v5.html
-          grep -Fq "loadStyle('/gc-staff-command-deck-20261023.css?v=1')" staff-os-v5-enhancement-loader-20261017.js
-          grep -Fq "const href = '/gc-staff-command-deck-20261023.css?v=1'" staff-os-v5-enhancement-loader-20261017.js
-          grep -q 'gc-staff-command-deck-20261023.css?v=1' staff-os-v5.html
+          grep -q 'staff-os-v5-20261017.js?v=20261023-4' staff-os-v5.html
+          grep -Fq "loadStyle('/gc-staff-command-deck-20261023.css?v=4')" staff-os-v5-enhancement-loader-20261017.js
+          grep -Fq "const href = '/gc-staff-command-deck-20261023.css?v=4'" staff-os-v5-enhancement-loader-20261017.js
+          grep -q 'gc-staff-command-deck-20261023.css?v=4' staff-os-v5.html
           grep -q 'GC-STAFF-COMMAND-DECK-20261023' gc-staff-command-deck-20261023.css
           grep -q 'finalCommandDeckLink' functions/_middleware.js
           grep -q 'gc-staff-operations-redesign-20261022.css?v=5' functions/_middleware.js
