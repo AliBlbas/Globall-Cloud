@@ -1,0 +1,120 @@
+
+/* Globall Cloud Staff OS — single visual authority, RTL-first */
+:root{
+ --gcs-bg:#f3f7fb;--gcs-surface:#fff;--gcs-surface-soft:#f7fafc;
+ --gcs-ink:#10243b;--gcs-muted:#64778c;--gcs-line:#dce6ef;
+ --gcs-brand:#087f8c;--gcs-brand-2:#11a6ad;--gcs-brand-soft:#e4f7f7;
+ --gcs-success:#16845b;--gcs-warning:#b7791f;--gcs-danger:#c43d52;
+ --gcs-radius:18px;--gcs-shadow:0 8px 28px rgba(20,48,75,.07);
+ color-scheme:light;
+}
+html{background:var(--gcs-bg);scroll-behavior:smooth}
+body.gc-staff-os-shell{
+ margin:0!important;min-height:100vh;background:var(--gcs-bg)!important;
+ color:var(--gcs-ink)!important;font-family:Vazirmatn,"Noto Sans Arabic",system-ui,sans-serif!important;
+}
+body.gc-staff-os-shell *{box-sizing:border-box}
+body.gc-staff-os-shell button,
+body.gc-staff-os-shell input,
+body.gc-staff-os-shell select,
+body.gc-staff-os-shell textarea{font:inherit}
+body.gc-staff-os-shell #app{min-height:100vh;min-width:0}
+body.gc-staff-os-shell #app .gc-shell,
+body.gc-staff-os-shell #app .shell,
+body.gc-staff-os-shell #app .workspace,
+body.gc-staff-os-shell #app .layout{min-width:0}
+body.gc-staff-os-shell #app :is(.sidebar,.side-panel,aside,.staff-sidebar){
+ background:var(--gcs-surface)!important;color:var(--gcs-ink)!important;
+ border:1px solid var(--gcs-line)!important;border-radius:var(--gcs-radius)!important;
+ box-shadow:var(--gcs-shadow)!important;
+}
+body.gc-staff-os-shell #app :is(.nav-item,[data-tab],.nav-link){
+ border:1px solid transparent!important;border-radius:12px!important;
+ color:var(--gcs-muted)!important;transition:background .16s,border-color .16s,color .16s!important;
+}
+body.gc-staff-os-shell #app :is(.nav-item.active,[data-tab].active,.nav-link.active,[aria-current="page"]){
+ background:var(--gcs-brand-soft)!important;border-color:#b7e7e7!important;
+ color:var(--gcs-brand)!important;font-weight:800!important;
+}
+body.gc-staff-os-shell #app :is(.nav-item:hover,[data-tab]:hover,.nav-link:hover){
+ background:#f0f8fa!important;color:var(--gcs-brand)!important;
+}
+body.gc-staff-os-shell #app :is(#view,.view,.main-content,.content-area){
+ min-width:0!important;color:var(--gcs-ink)!important;overflow-wrap:anywhere;
+}
+body.gc-staff-os-shell #app :is(.panel,.card,.stat,.metric,.kpi,.metric-card,.section-card,.table-card,.modal-content,.drawer-panel){
+ background:var(--gcs-surface)!important;color:var(--gcs-ink)!important;
+ border:1px solid var(--gcs-line)!important;border-radius:var(--gcs-radius)!important;
+ box-shadow:var(--gcs-shadow)!important;
+}
+body.gc-staff-os-shell #app :is(h1,h2,h3,h4,.page-title,.section-title){color:var(--gcs-ink)!important;letter-spacing:-.025em}
+body.gc-staff-os-shell #app :is(p,.muted,.subtitle,.helper-text,.text-muted){color:var(--gcs-muted)}
+body.gc-staff-os-shell #app :is(button,.btn,[role="button"]){
+ min-height:38px;border-radius:11px!important;font-weight:750;
+ transition:background .16s,border-color .16s,box-shadow .16s,transform .16s;
+}
+body.gc-staff-os-shell #app :is(button.primary,.btn-primary,.primary-button,[data-primary="true"],#loginBtn){
+ background:linear-gradient(110deg,var(--gcs-brand),var(--gcs-brand-2))!important;
+ color:#fff!important;border:1px solid transparent!important;
+ box-shadow:0 5px 14px rgba(8,127,140,.14)!important;
+}
+body.gc-staff-os-shell #app :is(button:hover,.btn:hover,[role="button"]:hover){filter:saturate(1.04)}
+body.gc-staff-os-shell #app :is(input,select,textarea,.field){
+ max-width:100%;min-width:0;border:1px solid var(--gcs-line)!important;
+ border-radius:11px!important;background:#fff!important;color:var(--gcs-ink)!important;
+}
+body.gc-staff-os-shell #app :is(input,select,textarea):focus-visible{
+ outline:0!important;border-color:var(--gcs-brand)!important;
+ box-shadow:0 0 0 3px rgba(8,127,140,.13)!important;
+}
+body.gc-staff-os-shell #app :is(.badge,.pill,.status-badge,[data-status]){
+ border-radius:999px!important;font-weight:750;
+}
+body.gc-staff-os-shell #app table{width:100%;border-collapse:separate!important;border-spacing:0;min-width:640px}
+body.gc-staff-os-shell #app :is(th,td){padding:12px 14px;text-align:right;border-bottom:1px solid #e8eef4}
+body.gc-staff-os-shell #app th{background:#f4f8fb!important;color:#50677e!important;font-size:12px;font-weight:800}
+body.gc-staff-os-shell #app tbody tr:hover td{background:#f7fbfd}
+body.gc-staff-os-shell #app :is(.table-wrap,.table-responsive,.overflow-x-auto){max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+body.gc-staff-os-shell #app :is(.login,.gc-rescue-shell){
+ min-height:100dvh!important;display:grid!important;place-items:center!important;
+ padding:clamp(12px,3vw,36px)!important;
+ background:radial-gradient(ellipse at 80% 0%,rgba(17,166,173,.11),transparent 38%),var(--gcs-bg)!important;
+ color:var(--gcs-ink)!important;
+}
+body.gc-staff-os-shell #app :is(.login-card,.gc-rescue-card){
+ width:min(480px,100%)!important;padding:clamp(22px,4vw,36px)!important;
+ border:1px solid var(--gcs-line)!important;border-radius:24px!important;
+ background:var(--gcs-surface)!important;color:var(--gcs-ink)!important;
+ box-shadow:0 24px 80px rgba(16,36,59,.12)!important;text-align:start!important;
+}
+body.gc-staff-os-shell #app .gc-rescue-shell .gc-rescue-card{text-align:center!important}
+body.gc-staff-os-shell #app :is(.login-card,.gc-rescue-card) h1{color:var(--gcs-ink)!important;line-height:1.45}
+body.gc-staff-os-shell #app :is(.login-card,.gc-rescue-card) p{color:var(--gcs-muted)!important;line-height:1.9}
+body.gc-staff-os-shell #app .gc-rescue-mark{
+ background:linear-gradient(135deg,#d9f8f7,#36c3c8)!important;color:#07323b!important;
+ border-radius:16px!important;box-shadow:0 8px 20px rgba(8,127,140,.12)
+}
+body.gc-staff-os-shell #app :is(.gc-rescue-eyebrow,.eyebrow){color:var(--gcs-brand)!important}
+body.gc-staff-os-shell #app :is(a,button,input,select,textarea):focus-visible{outline:3px solid rgba(8,127,140,.5);outline-offset:2px}
+body.gc-staff-os-shell #app :is(.toast,.alert,.notice){border-radius:12px}
+@media(max-width:1100px){
+ body.gc-staff-os-shell #app :is(.shell,.workspace,.layout){gap:12px!important}
+ body.gc-staff-os-shell #app :is(.sidebar,.side-panel,aside,.staff-sidebar){border-radius:16px!important}
+}
+@media(max-width:720px){
+ body.gc-staff-os-shell{padding:0!important}
+ body.gc-staff-os-shell #app :is(#view,.view,.main-content,.content-area){padding:12px!important}
+ body.gc-staff-os-shell #app :is(.panel,.card,.stat,.metric,.kpi,.metric-card,.section-card){border-radius:14px!important}
+ body.gc-staff-os-shell #app :is(.page-head,.section-head,.panel-head,.section-header){align-items:flex-start!important;flex-wrap:wrap!important;gap:10px!important}
+ body.gc-staff-os-shell #app :is(.page-head .actions,.section-head .actions,.panel-head .actions,.section-header .actions){width:100%;display:flex;flex-wrap:wrap;gap:8px}
+ body.gc-staff-os-shell #app :is(.page-head .actions button,.section-head .actions button,.panel-head .actions button,.section-header .actions button){flex:1 1 auto}
+ body.gc-staff-os-shell #app table{min-width:590px}
+ body.gc-staff-os-shell #app :is(.modal,.modal-content,[role="dialog"]){max-width:calc(100vw - 16px)!important}
+}
+@media(max-width:380px){
+ body.gc-staff-os-shell #app :is(#view,.view,.main-content,.content-area){padding:9px!important}
+ body.gc-staff-os-shell #app :is(.login-card,.gc-rescue-card){padding:20px!important;border-radius:18px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ body.gc-staff-os-shell #app *,body.gc-staff-os-shell #app *::before,body.gc-staff-os-shell #app *::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}
+}
