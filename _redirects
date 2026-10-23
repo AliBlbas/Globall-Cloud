@@ -44,3 +44,7 @@
 /customer-access /#auth 302
 /customer-access/ /#auth 302
 /customer-access.html /#auth 302
+
+# Canonical staff console: legacy entry paths must converge on one V5 login/session.
+/staff-os.html /staff-os-v5.html 302!
+/staff-os-v5 /staff-os-v5.html 302!
