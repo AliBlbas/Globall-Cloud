@@ -610,3 +610,82 @@ body.gc-staff-os-shell #app .btn:disabled {
   body.gc-staff-os-shell #app *::after {transition:none!important;animation:none!important}
 }
 
+
+
+/* Single-entry login and high-fidelity Staff OS polish */
+body.gc-staff-os-shell #app > .login {
+  min-height:calc(100dvh - 24px)!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:clamp(14px,3vw,38px)!important;
+  background:
+    radial-gradient(700px 420px at 88% 8%,rgba(34,188,198,.13),transparent 68%),
+    radial-gradient(600px 420px at 8% 88%,rgba(53,124,181,.10),transparent 70%),
+    transparent!important;
+}
+body.gc-staff-os-shell #app > .login .login-card {
+  width:min(460px,100%)!important;
+  padding:clamp(22px,4vw,36px)!important;
+  border:1px solid var(--gcd-line)!important;
+  border-radius:26px!important;
+  background:var(--gcd-surface)!important;
+  color:var(--gcd-ink)!important;
+  box-shadow:0 28px 90px rgba(9,36,59,.16)!important;
+  text-align:start!important;
+}
+body.gc-staff-os-shell #app > .login .login-title {
+  display:flex!important;align-items:center!important;gap:13px!important;
+  padding-bottom:20px!important;margin-bottom:20px!important;
+  border-bottom:1px solid var(--gcd-line)!important;
+}
+body.gc-staff-os-shell #app > .login .login-title .brand-logo {
+  width:52px!important;height:52px!important;min-width:52px!important;
+  display:grid!important;place-items:center!important;
+  border-radius:17px!important;
+  background:linear-gradient(145deg,#bff8f7,#37c5cb)!important;
+  color:#062c3a!important;font-size:17px!important;font-weight:1000!important;
+  box-shadow:0 9px 22px rgba(34,188,198,.18)!important;
+}
+body.gc-staff-os-shell #app > .login .eyebrow {
+  color:var(--gcd-teal)!important;font-size:10px!important;letter-spacing:1.2px!important;
+}
+body.gc-staff-os-shell #app > .login h1 {
+  color:var(--gcd-ink)!important;font-size:clamp(23px,4vw,30px)!important;
+  line-height:1.45!important;margin:0 0 8px!important;
+}
+body.gc-staff-os-shell #app > .login p {
+  color:var(--gcd-muted)!important;font-size:13px!important;line-height:1.9!important;
+}
+body.gc-staff-os-shell #app > .login .form-field label {
+  color:var(--gcd-ink)!important;font-size:12px!important;font-weight:800!important;
+}
+body.gc-staff-os-shell #app > .login input.field {
+  width:100%!important;min-height:48px!important;padding:12px 14px!important;
+  border:1px solid var(--gcd-line)!important;border-radius:13px!important;
+  background:var(--gcd-surface-alt)!important;color:var(--gcd-ink)!important;
+  font:inherit!important;
+}
+body.gc-staff-os-shell #app > .login input.field:focus {
+  outline:0!important;border-color:var(--gcd-teal)!important;
+  box-shadow:0 0 0 4px rgba(8,127,140,.12)!important;
+}
+body.gc-staff-os-shell #app > .login #loginBtn {
+  width:100%!important;min-height:48px!important;margin-top:12px!important;
+  border:0!important;border-radius:13px!important;
+  background:linear-gradient(105deg,#087f8c,#22aeb8)!important;
+  color:#fff!important;font-weight:900!important;
+  box-shadow:0 10px 24px rgba(8,127,140,.2)!important;
+}
+body.gc-staff-os-shell #app > .login #loginBtn:disabled {opacity:.6!important;cursor:wait!important}
+body.gc-staff-os-shell #app > .gc-rescue-shell .staff-command-matrix {display:none!important}
+body.gc-staff-os-shell #app > .gc-rescue-shell.gc-staff-single-entry .gc-rescue-card {
+  width:min(520px,100%)!important;padding:clamp(22px,4vw,38px)!important;
+  border:1px solid var(--gcd-line)!important;border-radius:26px!important;
+  background:var(--gcd-surface)!important;color:var(--gcd-ink)!important;
+  box-shadow:0 28px 90px rgba(9,36,59,.12)!important;
+}
+@media(max-width:520px) {
+ body.gc-staff-os-shell #app > .login {padding:10px!important}
+ body.gc-staff-os-shell #app > .login .login-card {border-radius:20px!important}
+}
+
