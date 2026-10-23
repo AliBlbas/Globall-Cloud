@@ -21,10 +21,90 @@ main{min-width:0}.topbar{position:sticky;top:12px;z-index:10;display:flex;align-
 @media(max-width:720px){body{padding:8px}.topbar{position:static;align-items:flex-start;flex-direction:column}.top-actions{width:100%}.top-actions .btn,.top-actions .status{flex:1;text-align:center;justify-content:center}.metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.quick-grid{grid-template-columns:repeat(2,1fr)}.chat-layout{grid-template-columns:1fr}.room-list{display:flex;overflow:auto}.room{min-width:200px}.composer{grid-template-columns:1fr}.view{padding:13px}}
 @media(max-width:460px){.metrics-grid{grid-template-columns:1fr 1fr}.quick-grid{grid-template-columns:1fr}.top-title strong{font-size:16px}.section-head h2{font-size:21px}}
 :focus-visible{outline:3px solid var(--cyan2);outline-offset:3px}
+
+/* Staff OS visual refresh — production-safe CSS layer */
+:root{
+ --bg:#050b16;--panel:#0b1b30;--panel2:#102743;--line:rgba(130,190,229,.17);
+ --text:#f5f9ff;--muted:#a3b7ce;--cyan:#32d5ed;--mint:#63e6b2;
+ --gold:#f4c46b;--danger:#ff7385;--shadow:0 22px 64px rgba(0,0,0,.34);
+ --radius:22px;
+}
+html{scroll-behavior:smooth;scroll-padding-top:20px}
+body{padding:16px;background:
+ radial-gradient(ellipse at 85% -8%,rgba(50,213,237,.13),transparent 38%),
+ radial-gradient(ellipse at 4% 48%,rgba(244,196,107,.06),transparent 30%),
+ #050b16}
+button,a,input,select,textarea{transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(50,213,237,.8);outline-offset:3px}
+.shell{gap:18px;grid-template-columns:260px minmax(0,1fr)}
+.sidebar{border-radius:24px;border-color:var(--line);background:linear-gradient(180deg,rgba(10,31,53,.98),rgba(5,15,28,.98));backdrop-filter:blur(16px)}
+.brand{padding:10px 8px 18px}
+.logo{border-radius:17px;background:linear-gradient(145deg,#fff0b4,#e2a744 56%,#a56820);box-shadow:0 10px 30px rgba(226,167,68,.16)}
+.nav{gap:7px}
+.nav-item{min-height:44px;border-radius:14px;border-color:transparent;transition:all .18s ease}
+.nav-item:hover{background:rgba(50,213,237,.075);border-color:rgba(50,213,237,.15);transform:translateX(-2px)}
+.nav-item.active,.nav-item[aria-current="page"]{background:linear-gradient(100deg,rgba(50,213,237,.17),rgba(50,213,237,.045));border-color:rgba(50,213,237,.27);color:#fff;box-shadow:inset -3px 0 0 var(--cyan)}
+main,.main,.content{min-width:0}
+.top,.topbar,.page-head,.top-actions{gap:12px}
+.panel,.card,.stat,.metric,.section-card,.table-card,.view>section,.view>.panel{
+ border:1px solid var(--line);border-radius:20px;
+ background:linear-gradient(155deg,rgba(13,36,61,.96),rgba(7,22,39,.96));
+ box-shadow:0 12px 34px rgba(0,0,0,.16)
+}
+h1,h2,h3{letter-spacing:-.025em}
+button,.btn{border-radius:12px;font-weight:800}
+button:hover,.btn:hover{border-color:rgba(50,213,237,.42);box-shadow:0 8px 22px rgba(0,0,0,.18)}
+button:active,.btn:active{transform:translateY(1px)}
+input,select,textarea{border-radius:12px!important;border-color:rgba(130,190,229,.22)!important;background:rgba(3,13,25,.68)!important;min-height:42px}
+input:focus,select:focus,textarea:focus{border-color:rgba(50,213,237,.7)!important;box-shadow:0 0 0 3px rgba(50,213,237,.1)!important}
+table{border-collapse:separate;border-spacing:0;min-width:620px}
+th{font-size:11px;letter-spacing:.04em;color:#b8cee4;background:rgba(50,213,237,.055)}
+th,td{padding:12px 13px;border-bottom:1px solid rgba(130,190,229,.1);text-align:right}
+tbody tr:hover td{background:rgba(50,213,237,.035)}
+.view{min-width:0;overflow-wrap:anywhere}
+.view img{max-width:100%;height:auto}
+.gc-staff-mobile-dock{backdrop-filter:blur(18px);background:rgba(5,17,31,.92);border:1px solid rgba(130,190,229,.2);box-shadow:0 18px 50px rgba(0,0,0,.4)}
+.gc-staff-mobile-dock button{border-radius:14px}
+.gc-staff-mobile-dock button.active{background:rgba(50,213,237,.13);color:var(--cyan)}
+.gc-staff-more-sheet{backdrop-filter:blur(22px);background:rgba(5,17,31,.98);border:1px solid var(--line);box-shadow:0 25px 80px rgba(0,0,0,.55)}
+@media(max-width:1100px){
+ body{padding:12px}
+ .shell{grid-template-columns:1fr;gap:12px}
+ .sidebar{position:relative;top:auto;height:auto;max-height:none;padding:12px}
+ .brand{padding:5px 6px 12px}
+ .nav{display:flex;gap:7px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding:3px 0 8px}
+ .nav-item{flex:0 0 auto;width:auto;min-width:max-content}
+ .nav-item:hover{transform:none}
+}
+@media(max-width:720px){
+ body{padding:8px;padding-bottom:calc(92px + env(safe-area-inset-bottom))}
+ .shell{gap:10px}
+ .sidebar{border-radius:18px}
+ .top,.topbar,.page-head{align-items:stretch;flex-direction:column}
+ .top-actions{display:flex;flex-wrap:wrap;width:100%}
+ .top-actions>*{flex:1 1 auto}
+ .view{padding:12px!important;border-radius:18px}
+ .view h1,.view h2{font-size:clamp(19px,5vw,25px)}
+ .panel,.card,.stat,.metric,.section-card,.table-card{border-radius:16px}
+ table{min-width:580px}
+ .table-wrap,.table-responsive,.overflow-x-auto{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+ .gc-staff-mobile-dock{padding-bottom:env(safe-area-inset-bottom)}
+}
+@media(max-width:380px){
+ body{padding:6px;padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+ .logo{width:42px;height:42px}
+ .brand b{font-size:15px}
+ .view{padding:9px!important}
+ .nav-item{padding:9px 10px}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}
+
 </style>
 <link rel="stylesheet" href="staff-os-premium.css?v=20260825-2"><link rel="stylesheet" href="staff-os-ultra.css?v=20260826-1"><link rel="stylesheet" href="/staff-os-command-signature-20261022.css?v=1" data-gc-staff-signature="1"><link rel="stylesheet" href="staff-os-mobile-20260922.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="/staff-os-compat.js?v=20260831-4" defer></script>
+<script src="/staff-os-compat.js?v=20261023-1" defer></script>
 <style id="staff-mobile-polish">
 @media (max-width:760px){
   body{padding:5px 5px calc(82px + env(safe-area-inset-bottom,0px))!important}
@@ -47,7 +127,7 @@ main{min-width:0}.topbar{position:sticky;top:12px;z-index:10;display:flex;align-
 <body>
 <div id="loginGate" class="gate hidden" data-auth-protection="Protected by Supabase Auth"><div class="gate-card"><div class="brand-row"><div class="logo">GC</div><div><div class="kicker">GLOBAL CLOUD</div><h1>Staff Command Center</h1></div></div><p>تەنها بۆ ستافی پشتڕاستکراوە. هەژماری staff ـەکەت لە Supabase Auth ـەوە بە شێوەی پارێزراو دەپشکنرێت.</p><div id="loginError" class="gate-error"></div><form id="loginForm"><input id="email" class="field" type="email" autocomplete="username" placeholder="ئیمەیڵ" required><input id="password" class="field" type="password" autocomplete="current-password" placeholder="وشەی نهێنی" required><button class="btn primary" type="submit">چوونەژوورەوە بۆ Staff OS →</button></form></div></div>
 <div id="app" class="hidden"><div class="shell"><aside class="sidebar"><div class="brand"><div class="brand-row"><div class="logo">GC</div><div><b>Globall Cloud</b><small>Staff Command Center</small></div><button class="mobile-nav-toggle" id="mobileNavToggle" type="button" aria-expanded="false" aria-label="کردنەوەی ناوبەری">☰</button></div></div><nav id="nav" class="nav" aria-label="Staff navigation"></nav><div class="side-foot"><strong id="staffName">—</strong><span id="staffRole">—</span><div id="staffBranch" class="branch">—</div></div></aside><main><header class="topbar"><div class="top-title"><strong id="pageTitle">Staff Command Center</strong><small id="pageSubtitle">Operational workspace</small></div><div class="top-actions"><span id="systemStatus" class="status" data-kind="loading">SYSTEM: CHECKING</span><a class="btn tiny" href="/">سایت</a><a class="btn tiny" href="/careers.html">کار</a><button id="refreshBtn" class="btn tiny" type="button">نوێکردنەوە</button><button id="logoutBtn" class="btn danger tiny" type="button">چوونەدەرەوە</button></div></header><section id="view" class="view"></section></main></div></div>
-<script src="/staff-os-console.js?v=20260831-4" defer></script>
+<script src="/staff-os-console.js?v=20261023-1" defer></script>
 <nav class="gc-staff-mobile-dock gc-staff-mobile-command" id="gcStaffMobileDock" aria-label="ناوبەری خێرای ستاف">
 <button type="button" data-mobile-tab="overview"><i>⌂</i><span>داشبۆرد</span></button>
 <button type="button" data-mobile-tab="shipments"><i>▣</i><span>بارەکان</span></button>
