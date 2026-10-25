@@ -78,13 +78,15 @@
     loadStyle('/gc-staff-operations-redesign-20261022.css?v=5');
     // One unified command deck is the authoritative final cascade for the authenticated console.
     loadStyle('/gc-staff-command-deck-20261023.css?v=5');
+    // Versioned high-priority override fixes stale mobile cascades without touching operations data.
+    loadStyle('/gc-staff-live-override-20261025.css?v=1');
     lockFinalStaffStylesLast();
   };
 
   // Several legacy helpers append style sheets after the app shell mounts.
-  // Keep the command deck last so legacy themes cannot undo the layout.
+  // Keep the versioned Staff OS override last so legacy themes cannot undo the layout.
   const lockFinalStaffStylesLast = () => {
-    const href = '/gc-staff-command-deck-20261023.css?v=5';
+    const href = '/gc-staff-live-override-20261025.css?v=1';
     const ensureLast = () => {
       const link = document.querySelector('link[data-gc-enhancement-style="' + href + '"]')
         || document.querySelector('link[href="' + href + '"]');
