@@ -26,10 +26,10 @@
 /customer-portal/ /#auth 302
 /portal /#auth 302
 /portal/ /#auth 302
-/staff /staff-os-v5.html?gc_staff_ui=20261025-1 302!
-/staff/ /staff-os-v5.html?gc_staff_ui=20261025-1 302!
-/staff-os /staff-os-v5.html?gc_staff_ui=20261025-1 302!
-/staff-os/ /staff-os-v5.html?gc_staff_ui=20261025-1 302!
+/staff /staff-os-v5.html 200
+/staff/ /staff-os-v5.html 200
+/staff-os /staff-os-v5.html 200
+/staff-os/ /staff-os-v5.html 200
 /control-tower /control-tower.html 200
 /control-tower/ /control-tower.html 200
 # Send status aliases directly to the canonical static page rather than relying on client-side redirect code.
@@ -46,5 +46,5 @@
 /customer-access.html /#auth 302
 
 # Canonical staff console: legacy entry paths must converge on one V5 login/session.
-/staff-os.html /staff-os-v5.html?gc_staff_ui=20261025-1 302!
-/staff-os-v5 /staff-os-v5.html?gc_staff_ui=20261025-1 302!
+/staff-os.html /staff-os-v5.html 302!
+/staff-os-v5 /staff-os-v5.html 302!
