@@ -221,7 +221,7 @@ export async function onRequest(context) {
     const finalOperationsRedesignLink = '<link rel="stylesheet" href="/gc-staff-operations-redesign-20261022.css?v=5" data-gc-staff-operations-redesign="1">';
     const finalSignatureLink = '<link rel="stylesheet" href="/gc-staff-command-signature-20261022.css?v=1" data-gc-staff-command-signature="1">';
     const finalCommandDeckLink = '<link rel="stylesheet" href="/gc-staff-command-deck-20261023.css?v=4" data-gc-staff-command-deck="1">';
-    const finalLiveFinishLink = '<link rel="stylesheet" href="/gc-staff-live-finish-20261027.css?v=1" data-gc-staff-live-finish="1">';
+    const finalLiveFinishLink = '<link rel="stylesheet" href="/gc-staff-live-finish-20261027.css?v=2" data-gc-staff-live-finish="1">';
     html = html.replace(/<link[^>]*data-gc-staff-console-elite[^>]*>\s*/gi, '');
     html = html.replace(/<link[^>]*data-gc-staff-polish-mobile[^>]*>\s*/gi, '');
     html = html.replace(/<link[^>]*data-gc-staff-ui-refinement[^>]*>\s*/gi, '');
