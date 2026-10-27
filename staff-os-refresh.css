@@ -423,3 +423,162 @@ body.gc-staff-page .hidden { display:none !important; }
 }
 @media (max-width:360px) { body.gc-staff-page .grid { grid-template-columns:1fr; } body.gc-staff-page .top .brand b { font-size:12px; } }
 @media (prefers-reduced-motion:reduce) { body.gc-staff-page *,body.gc-staff-page *:before,body.gc-staff-page *:after { scroll-behavior:auto !important; transition-duration:.01ms !important; animation-duration:.01ms !important; } }
+
+
+/* STAFF-V5-COMPATIBLE-VISUAL-BRIDGE-20261028
+   Map the October visual system onto the actual authenticated Staff OS V5 components.
+   All selectors remain scoped to the staff page. */
+body.gc-staff-page.gc-staff-os-shell {
+  --staff-panel: rgba(8, 25, 43, .97);
+  --staff-panel-raised: rgba(13, 35, 58, .97);
+  --staff-panel-soft: rgba(255, 255, 255, .035);
+  --staff-heading: #eaf7ff;
+  --staff-focus: #55e8f3;
+  background:
+    radial-gradient(780px 440px at 96% -8%,rgba(21,208,225,.17),transparent 65%),
+    radial-gradient(620px 480px at -12% 25%,rgba(78,111,255,.12),transparent 66%),
+    linear-gradient(180deg,#081524 0%,#050b14 100%) !important;
+}
+body.gc-staff-page.gc-staff-os-shell #app .gc-side,
+body.gc-staff-page.gc-staff-os-shell #app .topbar,
+body.gc-staff-page.gc-staff-os-shell #app .view,
+body.gc-staff-page.gc-staff-os-shell #app .card,
+body.gc-staff-page.gc-staff-os-shell #app .panel,
+body.gc-staff-page.gc-staff-os-shell #app .section-card,
+body.gc-staff-page.gc-staff-os-shell #app .table-card,
+body.gc-staff-page.gc-staff-os-shell #app .notice,
+body.gc-staff-page.gc-staff-os-shell #app .chat-card,
+body.gc-staff-page.gc-staff-os-shell #app .metric,
+body.gc-staff-page.gc-staff-os-shell #app .grid-kpi.tower-kpis > .kpi {
+  color: var(--staff-ink) !important;
+  border-color: var(--staff-line) !important;
+  background: linear-gradient(155deg,var(--staff-panel-raised),var(--staff-panel)) !important;
+  box-shadow: 0 18px 46px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.025) !important;
+}
+body.gc-staff-page.gc-staff-os-shell #app .gc-side,
+body.gc-staff-page.gc-staff-os-shell #app .topbar {
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+body.gc-staff-page.gc-staff-os-shell #app :is(.top-title strong,.section-head h2,.card h2,.card h3,.panel h2,.panel h3,.tower-hero h1,.tower-hero h2,.tower-hero h3) {
+  color: var(--staff-heading) !important;
+  letter-spacing: -.025em;
+  line-height: 1.6;
+}
+body.gc-staff-page.gc-staff-os-shell #app :is(.muted,.top-title small,.section-head p,.card small,.panel small,.grid-kpi.tower-kpis > .kpi > span,.grid-kpi.tower-kpis > .kpi small) {
+  color: var(--staff-muted) !important;
+}
+body.gc-staff-page.gc-staff-os-shell #app .tower-hero {
+  background: radial-gradient(ellipse at 100% 0,rgba(42,210,230,.13),transparent 46%),linear-gradient(145deg,rgba(15,39,63,.99),rgba(7,17,30,.99)) !important;
+  border: 1px solid var(--staff-line) !important;
+  border-radius: 26px !important;
+  box-shadow: 0 22px 60px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.04) !important;
+}
+body.gc-staff-page.gc-staff-os-shell #app .tower-hero :is(h1,h2,h3,p,.muted) {
+  color: var(--staff-heading) !important;
+}
+body.gc-staff-page.gc-staff-os-shell #app .tower-hero .eyebrow {
+  color: var(--staff-cyan) !important;
+}
+body.gc-staff-page.gc-staff-os-shell #app .grid-kpi.tower-kpis > .kpi > strong,
+body.gc-staff-page.gc-staff-os-shell #app .metric strong {
+  color: var(--staff-cyan) !important;
+  font-variant-numeric: tabular-nums;
+}
+body.gc-staff-page.gc-staff-os-shell #app .nav-item {
+  color: #cfe1f3 !important;
+  border-color: transparent !important;
+}
+body.gc-staff-page.gc-staff-os-shell #app .nav-item:hover,
+body.gc-staff-page.gc-staff-os-shell #app .nav-item.active,
+body.gc-staff-page.gc-staff-os-shell #app .nav-item[aria-current="page"] {
+  background: linear-gradient(100deg,rgba(21,208,225,.16),rgba(78,111,255,.06)) !important;
+  border-color: rgba(85,232,243,.28) !important;
+  color: #fff !important;
+}
+body.gc-staff-page.gc-staff-os-shell #app :is(input,select,textarea,.field) {
+  background: rgba(3,13,25,.9) !important;
+  color: var(--staff-ink) !important;
+  border-color: var(--staff-line) !important;
+}
+body.gc-staff-page.gc-staff-os-shell #app :is(input,select,textarea,.field)::placeholder {
+  color: var(--staff-muted) !important;
+}
+body.gc-staff-page.gc-staff-os-shell #app :is(input,select,textarea,.field):focus,
+body.gc-staff-page.gc-staff-os-shell #app :is(input,select,textarea,.field):focus-visible {
+  border-color: var(--staff-cyan) !important;
+  box-shadow: 0 0 0 4px rgba(85,232,243,.1) !important;
+}
+body.gc-staff-page.gc-staff-os-shell #app :is(.btn,button.btn,a.btn) {
+  border-color: var(--staff-line) !important;
+  border-radius: 12px !important;
+}
+body.gc-staff-page.gc-staff-os-shell #app :is(.btn.primary,button.btn.primary,a.btn.primary) {
+  border-color: transparent !important;
+  background: linear-gradient(130deg,#a6fbff,#47e4ed 56%,#19bfd2) !important;
+  color: #032029 !important;
+  box-shadow: 0 10px 28px rgba(19,199,220,.18),inset 0 1px rgba(255,255,255,.55) !important;
+}
+body.gc-staff-page.gc-staff-os-shell #app .table-wrap,
+body.gc-staff-page.gc-staff-os-shell #app .table-scroll,
+body.gc-staff-page.gc-staff-os-shell #app .table-container {
+  border-color: var(--staff-line) !important;
+  border-radius: 16px !important;
+  background: var(--staff-panel) !important;
+}
+body.gc-staff-page.gc-staff-os-shell #app .table th {
+  color: #d9eefb !important;
+  background: rgba(85,232,243,.075) !important;
+  border-color: var(--staff-line) !important;
+}
+body.gc-staff-page.gc-staff-os-shell #app .table td {
+  color: var(--staff-ink) !important;
+  background: rgba(255,255,255,.015) !important;
+  border-color: var(--staff-line) !important;
+}
+body.gc-staff-page.gc-staff-os-shell #app > .gc-staff-mobile-dock,
+body.gc-staff-page.gc-staff-os-shell > .gc-staff-mobile-dock {
+  color: var(--staff-ink) !important;
+  border-color: var(--staff-line) !important;
+  background: rgba(5,16,29,.96) !important;
+  box-shadow: 0 18px 50px rgba(0,0,0,.4) !important;
+}
+body.gc-staff-page.gc-staff-os-shell .gc-staff-mobile-dock button.active,
+body.gc-staff-page.gc-staff-os-shell .gc-staff-mobile-dock button[aria-current="page"] {
+  background: rgba(85,232,243,.13) !important;
+  color: var(--staff-cyan) !important;
+}
+@media (max-width: 760px) {
+  body.gc-staff-page.gc-staff-os-shell #app .topbar {
+    border-radius: 0 0 18px 18px !important;
+  }
+  body.gc-staff-page.gc-staff-os-shell #app .tower-hero {
+    padding: 21px 17px !important;
+    border-radius: 0 0 24px 24px !important;
+  }
+  body.gc-staff-page.gc-staff-os-shell #app .grid-kpi.tower-kpis > .kpi {
+    min-width: 0 !important;
+  }
+}
+html[data-gc-theme="light"] body.gc-staff-page.gc-staff-os-shell {
+  --staff-ink: #17384b;
+  --staff-muted: #60798b;
+  --staff-line: #d6e3eb;
+  --staff-heading: #17384b;
+  --staff-panel: #fff;
+  --staff-panel-raised: #f6fafc;
+  --staff-panel-soft: #fff;
+  --staff-focus: #087fce;
+  background: radial-gradient(780px 440px at 96% -8%,rgba(21,150,170,.12),transparent 65%),linear-gradient(180deg,#edf4f8 0%,#f7fafc 100%) !important;
+}
+html[data-gc-theme="light"] body.gc-staff-page.gc-staff-os-shell #app .tower-hero {
+  background: linear-gradient(125deg,#08263d 0%,#0b4055 62%,#0a6065 100%) !important;
+}
+html[data-gc-theme="light"] body.gc-staff-page.gc-staff-os-shell #app .tower-hero :is(h1,h2,h3,p,.muted) {
+  color: #f4fbff !important;
+}
+html[data-gc-theme="light"] body.gc-staff-page.gc-staff-os-shell #app :is(input,select,textarea,.field) {
+  background: #fff !important;
+  color: var(--staff-ink) !important;
+}
+
