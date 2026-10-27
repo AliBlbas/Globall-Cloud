@@ -1,0 +1,310 @@
+/*
+ * Globall Cloud Staff OS refresh — page-scoped visual layer.
+ * Designed to sit above legacy Staff OS styles without touching customer/public pages.
+ */
+body.gc-staff-page {
+  --gc-refresh-canvas: #edf4f8;
+  --gc-refresh-surface: #ffffff;
+  --gc-refresh-surface-soft: #f6fafc;
+  --gc-refresh-ink: #17384b;
+  --gc-refresh-muted: #60798b;
+  --gc-refresh-line: #d6e3eb;
+  --gc-refresh-line-strong: #b9cedb;
+  --gc-refresh-teal: #087f8c;
+  --gc-refresh-teal-bright: #13aab2;
+  --gc-refresh-focus: #087fce;
+  background:
+    radial-gradient(ellipse at 88% -8%, rgba(19, 170, 178, .12), transparent 36%),
+    var(--gc-refresh-canvas) !important;
+  color: var(--gc-refresh-ink);
+  font-family: "Vazirmatn", "Noto Sans Arabic", system-ui, sans-serif;
+  overflow-x: clip;
+}
+
+body.gc-staff-page #app {
+  min-width: 0;
+  color: var(--gc-refresh-ink);
+}
+
+body.gc-staff-page .gc-rescue-shell,
+body.gc-staff-page .gate {
+  min-height: 100svh;
+  padding: clamp(16px, 4vw, 36px);
+}
+
+body.gc-staff-page .gc-rescue-card,
+body.gc-staff-page .gate-card,
+body.gc-staff-page .login {
+  color: var(--gc-refresh-ink);
+  background: rgba(255, 255, 255, .97);
+  border: 1px solid var(--gc-refresh-line);
+  border-radius: 24px;
+  box-shadow: 0 22px 64px rgba(16, 48, 68, .12);
+}
+
+body.gc-staff-page .gc-rescue-card,
+body.gc-staff-page .gate-card {
+  width: min(560px, 100%);
+  padding: clamp(22px, 4vw, 36px);
+}
+
+body.gc-staff-page .gc-rescue-card h1,
+body.gc-staff-page .gate-card h1,
+body.gc-staff-page .login h1,
+body.gc-staff-page .login h2 {
+  color: var(--gc-refresh-ink);
+  font-weight: 900;
+  letter-spacing: -.025em;
+  line-height: 1.55;
+}
+
+body.gc-staff-page .gc-rescue-card p,
+body.gc-staff-page .gate-card p,
+body.gc-staff-page .login p {
+  color: var(--gc-refresh-muted);
+  line-height: 1.9;
+}
+
+body.gc-staff-page .gc-rescue-mark,
+body.gc-staff-page .gate-card .logo,
+body.gc-staff-page .brand .logo {
+  box-shadow: 0 8px 22px rgba(8, 127, 140, .15);
+}
+
+body.gc-staff-page .gc-rescue-loader span {
+  background: var(--gc-refresh-teal-bright);
+}
+
+body.gc-staff-page #app .gc-side,
+body.gc-staff-page #app .sidebar,
+body.gc-staff-page #app .topbar,
+body.gc-staff-page #app .view,
+body.gc-staff-page #app .card,
+body.gc-staff-page #app .panel,
+body.gc-staff-page #app .section-card,
+body.gc-staff-page #app .table-card,
+body.gc-staff-page #app .metric,
+body.gc-staff-page #app .kpi,
+body.gc-staff-page #app .notice,
+body.gc-staff-page #app .chat-card,
+body.gc-staff-page #app .modal {
+  border-color: var(--gc-refresh-line) !important;
+  box-shadow: 0 10px 30px rgba(16, 48, 68, .055) !important;
+}
+
+body.gc-staff-page #app .gc-side,
+body.gc-staff-page #app .sidebar {
+  background: var(--gc-refresh-surface) !important;
+  color: var(--gc-refresh-ink) !important;
+}
+
+body.gc-staff-page #app .topbar,
+body.gc-staff-page #app .view,
+body.gc-staff-page #app .card,
+body.gc-staff-page #app .panel,
+body.gc-staff-page #app .section-card,
+body.gc-staff-page #app .table-card,
+body.gc-staff-page #app .metric,
+body.gc-staff-page #app .kpi,
+body.gc-staff-page #app .notice,
+body.gc-staff-page #app .chat-card {
+  background: var(--gc-refresh-surface) !important;
+  color: var(--gc-refresh-ink) !important;
+}
+
+body.gc-staff-page #app .top-title strong,
+body.gc-staff-page #app .section-head h2,
+body.gc-staff-page #app .card h2,
+body.gc-staff-page #app .card h3,
+body.gc-staff-page #app .panel h2,
+body.gc-staff-page #app .panel h3 {
+  color: var(--gc-refresh-ink) !important;
+  font-weight: 850;
+  line-height: 1.65;
+}
+
+body.gc-staff-page #app .muted,
+body.gc-staff-page #app .top-title small,
+body.gc-staff-page #app .section-head p,
+body.gc-staff-page #app .card small,
+body.gc-staff-page #app .metric span,
+body.gc-staff-page #app .kpi span {
+  color: var(--gc-refresh-muted) !important;
+}
+
+body.gc-staff-page #app .nav-item {
+  min-height: 44px;
+  border-radius: 13px;
+}
+
+body.gc-staff-page #app .nav-item.active,
+body.gc-staff-page #app .nav-item[aria-current="page"] {
+  box-shadow: inset -3px 0 0 var(--gc-refresh-teal);
+}
+
+body.gc-staff-page #app .metric strong,
+body.gc-staff-page #app .kpi strong {
+  color: var(--gc-refresh-teal) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+body.gc-staff-page #app :is(input, select, textarea, .field) {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--gc-refresh-line-strong) !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+  color: var(--gc-refresh-ink) !important;
+  font: 500 14px/1.6 "Vazirmatn", "Noto Sans Arabic", system-ui, sans-serif;
+}
+
+body.gc-staff-page #app :is(input, select, textarea, .field)::placeholder {
+  color: #7a909e;
+  opacity: 1;
+}
+
+body.gc-staff-page #app :is(input, select, textarea, .field):focus,
+body.gc-staff-page #app :is(input, select, textarea, .field):focus-visible {
+  border-color: var(--gc-refresh-focus) !important;
+  box-shadow: 0 0 0 3px rgba(8, 127, 206, .14) !important;
+  outline: none;
+}
+
+body.gc-staff-page #app :is(button, .btn, a.btn) {
+  min-height: 42px;
+  border-radius: 12px;
+  font-weight: 800;
+  touch-action: manipulation;
+}
+
+body.gc-staff-page #app :is(button, .btn, a.btn):focus-visible,
+body.gc-staff-page #app a:focus-visible {
+  outline: 3px solid rgba(8, 127, 206, .85) !important;
+  outline-offset: 3px !important;
+}
+
+body.gc-staff-page #app .btn.primary {
+  background: linear-gradient(130deg, var(--gc-refresh-teal-bright), var(--gc-refresh-teal)) !important;
+  color: #fff !important;
+}
+
+body.gc-staff-page #app .table-wrap,
+body.gc-staff-page #app .table-scroll,
+body.gc-staff-page #app .table-container,
+body.gc-staff-page #app .table-responsive {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+body.gc-staff-page #app table {
+  font-variant-numeric: tabular-nums;
+}
+
+body.gc-staff-page #app img,
+body.gc-staff-page #app video {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 760px) {
+  body.gc-staff-page {
+    padding: 6px 6px calc(92px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  body.gc-staff-page #app,
+  body.gc-staff-page #app .gc-shell,
+  body.gc-staff-page #app .view,
+  body.gc-staff-page #app #view {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  body.gc-staff-page #app .topbar {
+    gap: 9px !important;
+    padding: 12px !important;
+    border-radius: 0 0 16px 16px !important;
+  }
+
+  body.gc-staff-page #app .top-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    width: 100%;
+  }
+
+  body.gc-staff-page #app .top-actions > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  body.gc-staff-page #app .card,
+  body.gc-staff-page #app .panel,
+  body.gc-staff-page #app .section-card,
+  body.gc-staff-page #app .table-card {
+    border-radius: 16px !important;
+    padding: 13px !important;
+  }
+
+  body.gc-staff-page #app .metrics-grid,
+  body.gc-staff-page #app .grid-kpi.tower-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  body.gc-staff-page #app .quick-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  body.gc-staff-page #app .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.gc-staff-page #app :is(button, .btn, a.btn) {
+    min-height: 44px;
+  }
+
+  body.gc-staff-page #app .table-wrap table,
+  body.gc-staff-page #app .table-scroll table,
+  body.gc-staff-page #app .table-container table {
+    min-width: 580px;
+  }
+
+  body.gc-staff-page #app .gc-rescue-card,
+  body.gc-staff-page #app .gate-card {
+    padding: 22px 17px;
+    border-radius: 20px;
+  }
+}
+
+@media (max-width: 390px) {
+  body.gc-staff-page #app .section-head h2 {
+    font-size: 20px !important;
+  }
+
+  body.gc-staff-page #app .metrics-grid,
+  body.gc-staff-page #app .grid-kpi.tower-kpis,
+  body.gc-staff-page #app .quick-grid {
+    gap: 7px !important;
+  }
+
+  body.gc-staff-page #app .metric,
+  body.gc-staff-page #app .kpi {
+    padding: 11px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.gc-staff-page *,
+  body.gc-staff-page *::before,
+  body.gc-staff-page *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
