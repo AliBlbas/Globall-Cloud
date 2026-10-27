@@ -1,19 +1,20 @@
-/* Keep the authoritative Staff OS design layer last, even when legacy
-   scripts append theme/visual styles after the initial HTML has loaded. */
+/* Keep the page-scoped Staff OS refresh last, even when legacy scripts
+   append theme/visual styles after the initial HTML has loaded. */
 (() => {
   'use strict';
   const head = document.head;
   if (!head) return;
 
-  const href = '/gc-staff-live-finish-20261027.css?v=4';
+  const href = '/staff-os-refresh.css?v=20261028-1';
   let queued = false;
 
   function pinFinalStylesheet() {
-    let link = head.querySelector('link[data-gc-staff-live-finish="1"]');
+    let link = head.querySelector('link[data-gc-staff-refresh="1"]')
+      || head.querySelector('link[rel="stylesheet"][href="' + href + '"]');
     if (!link) {
       link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.dataset.gcStaffLiveFinish = '1';
+      link.dataset.gcStaffRefresh = '1';
       head.appendChild(link);
     }
 
