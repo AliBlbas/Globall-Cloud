@@ -78,13 +78,15 @@ const headers = read('_headers')
 const redirects = read('_redirects')
 if (!headers.includes('Content-Security-Policy:') || /script-src[^\n;]*unsafe-inline/.test(headers) || !headers.includes('Strict-Transport-Security:') || !headers.includes('X-Content-Type-Options: nosniff')) fail('security header contract is incomplete')
 else ok('Security headers are present')
-for (const route of ['/tracking-integration.html /track 301','/staff /staff-os.html 302','/staff/ /staff-os.html 302','/staff-os /staff-os-v5.html 200','/status /system-status.html 302','/status/ /system-status.html 302']) if (!redirects.includes(route)) fail(`route contract missing: ${route}`)
-if (redirects.includes('/staff-os.html /staff-os-v5.html 302!')) fail('legacy Staff OS page must not redirect back to V5');
+for (const route of ['/tracking-integration.html /track 301','/staff /staff-os.html 302','/staff/ /staff-os.html 302','/staff-os-v5 /staff-os-v5.html 302!','/status /system-status.html 302','/status/ /system-status.html 302']) if (!redirects.includes(route)) fail(`route contract missing: ${route}`)
+if (redirects.includes('/staff-os.html /staff-os-v5.html 302!') || redirects.includes('/staff-os /staff-os-v5.html 200') || redirects.includes('/staff-os/ /staff-os-v5.html 200')) fail('legacy Staff OS entry must not redirect back to V5');
 else ok('Legacy Staff OS entry is reachable without a redirect loop');
 const productionMiddleware = read('functions/_middleware.js');
 const staffV5Matcher = productionMiddleware.split('\n').find((line) => line.startsWith('const STAFF_V5 = ')) || '';
 if (!staffV5Matcher.includes('staff-os-v5') || staffV5Matcher.includes('staff|') || staffV5Matcher.includes('staff-os|')) fail('V5-only middleware route scope is incorrect');
 else ok('V5 middleware assets are isolated to V5 routes');
+if (!productionMiddleware.includes("if (requestPath === '/staff' || requestPath === '/staff/')") || !productionMiddleware.includes("new URL('/staff-os.html', requestUrl)")) fail('short Staff routes must redirect in the Pages middleware');
+else ok('Short Staff routes redirect directly to the styled legacy entry');
 if (!failures) ok('Core public/staff routes are wired')
 
 const bridge = read('production-bridge.js')
