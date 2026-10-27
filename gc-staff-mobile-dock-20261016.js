@@ -6,13 +6,14 @@
   const primary = [
     ['overview', 'داشبۆرد', 'home'],
     ['shipments', 'بارەکان', 'package'],
-    ['land-manifests', 'مانيفێست', 'package'],
+    ['requests', 'Inbox', 'inbox'],
     ['warehouses', 'کۆگا', 'warehouse'],
     ['alerts', 'ئاگاداری', 'bell']
   ];
   const iconMarkup = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
     package: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.3 7.6 7.7 4.3 7.7-4.3M12 12v9M8 5.2l8 4.5"/></svg>',
+    inbox: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M4 13h4l2 3h4l2-3h4M8 8h8"/></svg>',
     users: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.5-3.6 2.5-5.5 6-5.5s5.5 1.9 6 5.5M16 5.3a3.1 3.1 0 0 1 0 5.9M17 14.8c2.3.6 3.6 2.3 4 5.2"/></svg>',
     warehouse: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-6 9 6v10H3V10Z"/><path d="M7 20v-6h10v6M7 10h.01M12 10h.01M17 10h.01"/></svg>',
     bell: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg>'
