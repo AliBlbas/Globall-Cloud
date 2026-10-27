@@ -1,9 +1,10 @@
 /* Globall Cloud — production HTML middleware. */
 const HTML_ACCEPT = 'text/html';
-const VERSION = '20261017-13';
+const VERSION = '20261028-1';
 const VISUAL_REFRESH = `<link rel="stylesheet" href="/globall-visual-refresh-20260921.css?v=20260921-1" data-gc-visual-refresh="20260921-1">`;
 const ENTERPRISE_SHELL = `<link rel="stylesheet" href="/enterprise-shell-v2026.css?v=${VERSION}" data-gc-enterprise-shell="1">`;
 const THEME_CSS = `<link rel="stylesheet" href="/gc-theme-sync.css?v=${VERSION}" data-gc-theme-css="1">`;
+const THEME_IMPROV_CSS = `<link rel="stylesheet" href="/css/gc-theme-improvements.css?v=${VERSION}" data-gc-theme-improvements="1">`;
 const THEME_JS = `<script src="/gc-theme-sync.js?v=${VERSION}" defer data-gc-theme-sync="1"></script>`;
 const SETTINGS_CSS = `<link rel="stylesheet" href="/gc-settings-hub.css?v=${VERSION}" data-gc-settings-css="1">`;
 const SETTINGS_JS = `<script src="/gc-settings-hub.js?v=${VERSION}" defer data-gc-settings-hub="1"></script>`;
@@ -131,6 +132,7 @@ export async function onRequest(context) {
   if (path === '/' || path === '/index.html') html = rewriteRootHtml(html); else html = html.split(LEGACY_SUPABASE_NOTICE).join('');
   const headAssets = [
     ['href="/gc-theme-sync.css',THEME_CSS],
+    ['href="/css/gc-theme-improvements.css',THEME_IMPROV_CSS],
     ['src="/gc-theme-sync.js',THEME_JS],
     ['href="/gc-settings-hub.css',SETTINGS_CSS],
     ['src="/gc-settings-hub.js',SETTINGS_JS],
