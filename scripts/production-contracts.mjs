@@ -39,7 +39,7 @@ else fail('Service Worker network-first/lifecycle contract is incomplete')
 const required = [
   'index.html','system-status.html','status-page.js','gc-accessibility-mobile-20261021.css','gc-customer-experience-signature-20261017.css','login.html','register.html','customer-access.html','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js','public-route-bootstrap.js','public-runtime-guarantee.js',
   'public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js','tracking-integration.html','tracking-intelligence.js',
-  'tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os-v5.html','staff-os-v5.css','gc-staff-ui-refinement-20261019-v4.css','gc-staff-live-workspace-20261019.css','gc-staff-operations-redesign-20261022.css','gc-staff-command-deck-20261023.css','gc-staff-customer-bridge-20261019.js','staff-os-v5.js','staff-os-v5-20261017.js',
+  'tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os.html','staff-os-refresh.css','staff-os-v5.html','staff-os-v5.css','gc-staff-ui-refinement-20261019-v4.css','gc-staff-live-workspace-20261019.css','gc-staff-operations-redesign-20261022.css','gc-staff-command-deck-20261023.css','gc-staff-customer-bridge-20261019.js','staff-os-v5.js','staff-os-v5-20261017.js',
   'staff-os-v5-rescue.js','staff-logistics-intelligence.css','staff-logistics-intelligence.js','staff-mobile-command-dock.css','staff-mobile-command-dock.js',
   'staff-os-pro-20260909.css','staff-os-pro-20260909.js','staff-shell-polish-20260909.css','staff-shell-polish-20260909.js',
   'staff-premium-mobile-20260909.css','staff-premium-mobile-20260909.js','warehouse-offline-sync.js','production-mobile-ux-v2026.css','gc-platform-vnext.js',
@@ -78,7 +78,13 @@ const headers = read('_headers')
 const redirects = read('_redirects')
 if (!headers.includes('Content-Security-Policy:') || /script-src[^\n;]*unsafe-inline/.test(headers) || !headers.includes('Strict-Transport-Security:') || !headers.includes('X-Content-Type-Options: nosniff')) fail('security header contract is incomplete')
 else ok('Security headers are present')
-for (const route of ['/tracking-integration.html /track 301','/staff /staff-os-v5.html 200','/staff/ /staff-os-v5.html 200','/staff-os /staff-os-v5.html 200','/status /system-status.html 302','/status/ /system-status.html 302']) if (!redirects.includes(route)) fail(`route contract missing: ${route}`)
+for (const route of ['/tracking-integration.html /track 301','/staff /staff-os.html 302','/staff/ /staff-os.html 302','/staff-os /staff-os-v5.html 200','/status /system-status.html 302','/status/ /system-status.html 302']) if (!redirects.includes(route)) fail(`route contract missing: ${route}`)
+if (redirects.includes('/staff-os.html /staff-os-v5.html 302!')) fail('legacy Staff OS page must not redirect back to V5');
+else ok('Legacy Staff OS entry is reachable without a redirect loop');
+const productionMiddleware = read('functions/_middleware.js');
+const staffV5Matcher = productionMiddleware.split('\n').find((line) => line.startsWith('const STAFF_V5 = ')) || '';
+if (!staffV5Matcher.includes('staff-os-v5') || staffV5Matcher.includes('staff|') || staffV5Matcher.includes('staff-os|')) fail('V5-only middleware route scope is incorrect');
+else ok('V5 middleware assets are isolated to V5 routes');
 if (!failures) ok('Core public/staff routes are wired')
 
 const bridge = read('production-bridge.js')
