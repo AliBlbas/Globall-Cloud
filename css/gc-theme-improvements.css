@@ -1,0 +1,24 @@
+/*
+ * Globall Cloud theme improvements.
+ * Lightweight, accessible refinements shared across public and operational pages.
+ * Keep component-specific layouts and staff console styling owned by their existing assets.
+ */
+:where(a, button, input, select, textarea, [role="button"], [tabindex]):focus-visible {
+  outline: 2px solid #64e5ec;
+  outline-offset: 3px;
+}
+:where(input, select, textarea) {
+  max-width: 100%;
+}
+img, video {
+  max-width: 100%;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within { scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
