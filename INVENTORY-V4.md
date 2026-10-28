@@ -2,10 +2,10 @@
 
 | Metric | Value |
 |---|---:|
-| SHA-256 | `3598bd26f06f39f718bdfdb44333fe7ed36cd761ed8e8a91951afcc3662a6799` |
-| Total files | 247 |
+| SHA-256 (original V4 snapshot; not recalculated after cleanup) | `3598bd26f06f39f718bdfdb44333fe7ed36cd761ed8e8a91951afcc3662a6799` |
+| Total files (V4 inventory scope) | 246 |
 | HTML files | 21 |
-| JavaScript files | 44 |
+| JavaScript files (V4 inventory scope) | 43 |
 | TypeScript files | 17 |
 | SQL migrations | 102 |
 | Edge Functions | 16 |
@@ -29,7 +29,6 @@ SECURITY.md
 SUPABASE-EMAIL-SETUP.md
 SYSTEM_STATUS.md
 _headers
-accounts-console-script.js
 accounts-console.html
 admin-console-enhanced.css
 admin-console-enhanced.js
@@ -107,6 +106,9 @@ ux-polish.css
 warehouse-os.html
 webhook-handler.js
 whatsapp-messenger.js
+
+## Accounts Console active script
+`accounts-console.html` loads `/gc-csp-scripts/accounts-console-inline-1.js?v=20261028-accounts-fix-1`. The obsolete root-level duplicate `accounts-console-script.js` has been removed.
 
 ## Latest migrations
 20260813045336_bind_staff_auth_identity.sql
