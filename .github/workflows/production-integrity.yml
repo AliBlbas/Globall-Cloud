@@ -155,7 +155,7 @@ jobs:
           grep -F -A1 '[functions.customer-gc-login]' supabase/config.toml | grep -Fq 'verify_jwt = false'
           ! grep -q 'staff-reference-mobile-20260922.js?v=' staff-os-v5.html
           ! grep -q 'staff-premium-mobile-20260909.js?v=' staff-os-v5.html
-          ! grep -q 'staff-mobile-command-dock.js?v=' staff-os-v5-enhancement-loader.js
+          ! grep -q 'staff-mobile-command-dock.js?v=' staff-os-v5-enhancement-loader-20261017.js
           grep -q 'functions/v1/public-quote' gc-csp-scripts/index-inline-2.js
           grep -q 'functions/v1/public-message' gc-csp-scripts/index-inline-2.js
           grep -q '/public-runtime-guarantee.js' public-route-bootstrap.js
