@@ -26,8 +26,8 @@
 /customer-portal/ /#auth 302
 /portal /#auth 302
 /portal/ /#auth 302
-/staff /staff-os.html 200
-/staff/ /staff-os.html 200
+/staff /staff-os-v5.html 200
+/staff/ /staff-os-v5.html 200
 /control-tower /control-tower.html 200
 /control-tower/ /control-tower.html 200
 # Send status aliases directly to the canonical static page rather than relying on client-side redirect code.
@@ -43,5 +43,5 @@
 /customer-access/ /#auth 302
 /customer-access.html /#auth 302
 
-# Staff short URLs redirect to the legacy Staff OS entry styled by staff-os-refresh.css.
+# Keep the V5 extensionless URL canonicalized; /staff is internally served by middleware as V5.
 /staff-os-v5 /staff-os-v5.html 302!
