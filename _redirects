@@ -43,5 +43,5 @@
 /customer-access/ /#auth 302
 /customer-access.html /#auth 302
 
-# Keep the V5 extensionless URL canonicalized; /staff is internally served by middleware as V5.
+# Staff entry aliases are kept on the single V5 console (middleware handles HTML navigations first).\n/staff-portal /staff-os-v5.html 200\n/staff-portal/ /staff-os-v5.html 200\n/staff-portal.html /staff-os-v5.html 200\n# Keep the V5 extensionless URL canonicalized; /staff and /staff-portal are served internally as V5.
 /staff-os-v5 /staff-os-v5.html 302!
