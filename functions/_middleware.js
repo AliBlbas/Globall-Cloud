@@ -152,12 +152,12 @@ export async function onRequest(context) {
   if (RETIRED_LEGACY_ASSETS.has(requestPath.slice(1))) return new Response('Gone: retired legacy asset.', {status:410,headers:{'content-type':'text/plain; charset=UTF-8','cache-control':'no-store, max-age=0, must-revalidate','x-robots-tag':'noindex, nofollow, noarchive','x-content-type-options':'nosniff'}});
   // Pages _redirects rules do not run for requests handled by this global middleware.
   // Use the extensionless asset path internally because Pages normalizes direct .html URLs;
-  // this serves staff-os.html while keeping /staff in the browser address bar.
+  // this serves staff-os-v5.html while keeping /staff in the browser address bar.
   if (requestPath === '/staff' || requestPath === '/staff/') {
-    const destination = new URL('/staff-os', requestUrl);
+    const destination = new URL('/staff-os-v5', requestUrl);
     destination.search = requestUrl.search;
     pageRequest = new Request(destination.toString(), context.request);
-    path = '/staff-os.html';
+    path = '/staff-os-v5.html';
   }
   if (requestPath === '/health' || requestPath === '/api/health') return new Response(JSON.stringify({ok:true,service:'globall-cloud',cloudflare:'pages',edge:'ok',timestamp:new Date().toISOString()}), {status:200,headers:{'content-type':'application/json; charset=UTF-8','cache-control':'no-store'}});
   if (requestPath === '/release.json') return new Response(JSON.stringify({service:'globall-cloud',branch:context.env?.CF_PAGES_BRANCH||'main',commit:context.env?.CF_PAGES_COMMIT_SHA||null,generated_at:new Date().toISOString()}), {status:200,headers:{'content-type':'application/json; charset=UTF-8','cache-control':'no-store'}});
