@@ -123,16 +123,19 @@ const rewriteRootHtml = (html) => {
 };
 export async function onRequest(context) {
   const requestUrl = new URL(context.request.url), requestPath = requestUrl.pathname, accept = context.request.headers.get('accept') || '';
-  // Redirect the short staff entry here because Pages _redirects rules do not run for requests handled by this global middleware.
+  let pageRequest = context.request, path = requestPath;
+  // Pages _redirects rules do not run for requests handled by this global middleware,
+  // so internally rewrite the short staff entry to the styled legacy Staff OS asset.
   if (requestPath === '/staff' || requestPath === '/staff/') {
     const destination = new URL('/staff-os.html', requestUrl);
     destination.search = requestUrl.search;
-    return new Response(null, { status: 302, headers: { location: destination.toString(), 'cache-control': 'no-store' } });
+    pageRequest = new Request(destination.toString(), context.request);
+    path = '/staff-os.html';
   }
   if (requestPath === '/health' || requestPath === '/api/health') return new Response(JSON.stringify({ok:true,service:'globall-cloud',cloudflare:'pages',edge:'ok',timestamp:new Date().toISOString()}), {status:200,headers:{'content-type':'application/json; charset=UTF-8','cache-control':'no-store'}});
   if (requestPath === '/release.json') return new Response(JSON.stringify({service:'globall-cloud',branch:context.env?.CF_PAGES_BRANCH||'main',commit:context.env?.CF_PAGES_COMMIT_SHA||null,generated_at:new Date().toISOString()}), {status:200,headers:{'content-type':'application/json; charset=UTF-8','cache-control':'no-store'}});
-  if (!accept.toLowerCase().includes(HTML_ACCEPT)) return context.next();
-  const path = requestUrl.pathname, response = await context.next(), contentType = response.headers.get('content-type') || '';
+  if (!accept.toLowerCase().includes(HTML_ACCEPT)) return context.next(pageRequest);
+  const response = await context.next(pageRequest), contentType = response.headers.get('content-type') || '';
   if (!contentType.toLowerCase().includes(HTML_ACCEPT)) return response;
   let html = await response.text();
   if (path === '/' || path === '/index.html') html = rewriteRootHtml(html); else html = html.split(LEGACY_SUPABASE_NOTICE).join('');
