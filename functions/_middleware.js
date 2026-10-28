@@ -124,10 +124,11 @@ const rewriteRootHtml = (html) => {
 export async function onRequest(context) {
   const requestUrl = new URL(context.request.url), requestPath = requestUrl.pathname, accept = context.request.headers.get('accept') || '';
   let pageRequest = context.request, path = requestPath;
-  // Pages _redirects rules do not run for requests handled by this global middleware,
-  // so internally rewrite the short staff entry to the styled legacy Staff OS asset.
+  // Pages _redirects rules do not run for requests handled by this global middleware.
+  // Use the extensionless asset path internally because Pages normalizes direct .html URLs;
+  // this serves staff-os.html while keeping /staff in the browser address bar.
   if (requestPath === '/staff' || requestPath === '/staff/') {
-    const destination = new URL('/staff-os.html', requestUrl);
+    const destination = new URL('/staff-os', requestUrl);
     destination.search = requestUrl.search;
     pageRequest = new Request(destination.toString(), context.request);
     path = '/staff-os.html';
