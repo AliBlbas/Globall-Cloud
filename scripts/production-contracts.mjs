@@ -78,6 +78,17 @@ const headers = read('_headers')
 const redirects = read('_redirects')
 if (!headers.includes('Content-Security-Policy:') || /script-src[^\n;]*unsafe-inline/.test(headers) || !headers.includes('Strict-Transport-Security:') || !headers.includes('X-Content-Type-Options: nosniff')) fail('security header contract is incomplete')
 else ok('Security headers are present')
+const headerGuards = [
+  ['Supabase Auth and Realtime are allowed by CSP', headers.includes('https://ahslifnthiwfkmaswjno.supabase.co') && headers.includes('wss://ahslifnthiwfkmaswjno.supabase.co')],
+  ['Quote submission and route estimation origins are allowed by CSP', headers.includes('https://formsubmit.co') && headers.includes('https://router.project-osrm.org')],
+  ['WhatsApp links and the CSP form destination are allowed', headers.includes('https://wa.me') && headers.includes('form-action: \'self\' https://formsubmit.co')],
+  ['CSP blocks inline scripts while allowing worker assets', !/script-src[^\n;]*unsafe-inline/.test(headers) && headers.includes("worker-src 'self' blob:")],
+  ['Staff consoles are noindex and use private no-store caching', headers.includes('/accounts-console.html\n  X-Robots-Tag: noindex, nofollow, noarchive\n  Cache-Control: private, no-store, max-age=0, must-revalidate') && headers.includes('/staff-os.html\n  X-Robots-Tag: noindex, nofollow, noarchive\n  Cache-Control: private, no-store, max-age=0, must-revalidate')],
+  ['Service worker and release marker remain uncacheable', headers.includes('/sw.js\n  Cache-Control: no-cache, no-store, must-revalidate') && headers.includes('/release.json\n  Cache-Control: no-store, max-age=0, must-revalidate')],
+  ['JavaScript and CSS use a bounded cache lifetime', headers.includes('/*.css\n  Cache-Control: public, max-age=3600') && headers.includes('/*.js\n  Cache-Control: public, max-age=3600')],
+]
+for (const [label, passed] of headerGuards) if (!passed) fail(label)
+if (headerGuards.every(([, passed]) => passed)) ok('CSP service allowlist and private/static cache contracts are aligned')
 for (const route of ['/tracking-integration.html /track 301','/staff /staff-os.html 302','/staff/ /staff-os.html 302','/staff-os-v5 /staff-os-v5.html 302!','/status /system-status.html 302','/status/ /system-status.html 302']) if (!redirects.includes(route)) fail(`route contract missing: ${route}`)
 if (redirects.includes('/staff-os.html /staff-os-v5.html 302!') || redirects.includes('/staff-os /staff-os-v5.html 200') || redirects.includes('/staff-os/ /staff-os-v5.html 200')) fail('legacy Staff OS entry must not redirect back to V5');
 else ok('Legacy Staff OS entry is reachable without a redirect loop');
