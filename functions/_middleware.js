@@ -128,7 +128,7 @@ const RETIRED_LEGACY_ASSETS = new Set([
   'gc-customer-dashboard-v2-20260929.js',
   'gc-command-nav-polish-2026.css',
 ]);
-const OPERATIONAL_PAGE = /^\/(?:staff(?:-os)?|staff-os-v5|warehouse(?:-os)?|customer-portal|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\.html)?\/?$/i;
+const OPERATIONAL_PAGE = /^\/(?:staff(?:-os)?|staff-os-v5|staff-portal|warehouse(?:-os)?|customer-portal|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\.html)?\/?$/i;
 const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`);
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`);
 const applySecurityHeaders = (headers) => {
@@ -152,8 +152,8 @@ export async function onRequest(context) {
   if (RETIRED_LEGACY_ASSETS.has(requestPath.slice(1))) return new Response('Gone: retired legacy asset.', {status:410,headers:{'content-type':'text/plain; charset=UTF-8','cache-control':'no-store, max-age=0, must-revalidate','x-robots-tag':'noindex, nofollow, noarchive','x-content-type-options':'nosniff'}});
   // Pages _redirects rules do not run for requests handled by this global middleware.
   // Use the extensionless asset path internally because Pages normalizes direct .html URLs;
-  // this serves staff-os-v5.html while keeping /staff in the browser address bar.
-  if (requestPath === '/staff' || requestPath === '/staff/') {
+  // this serves staff-os-v5.html while keeping the requested staff entry URL in the browser address bar.
+  if (['/staff', '/staff/', '/staff-portal', '/staff-portal/', '/staff-portal.html'].includes(requestPath)) {
     const destination = new URL('/staff-os-v5', requestUrl);
     destination.search = requestUrl.search;
     pageRequest = new Request(destination.toString(), context.request);
