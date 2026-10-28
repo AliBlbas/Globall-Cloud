@@ -26,8 +26,8 @@
 /customer-portal/ /#auth 302
 /portal /#auth 302
 /portal/ /#auth 302
-/staff /staff-os.html 302
-/staff/ /staff-os.html 302
+/staff /staff-os.html 200
+/staff/ /staff-os.html 200
 /control-tower /control-tower.html 200
 /control-tower/ /control-tower.html 200
 # Send status aliases directly to the canonical static page rather than relying on client-side redirect code.
