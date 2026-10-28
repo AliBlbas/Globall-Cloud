@@ -124,6 +124,9 @@ const rewriteRootHtml = (html) => {
 export async function onRequest(context) {
   const requestUrl = new URL(context.request.url), requestPath = requestUrl.pathname, accept = context.request.headers.get('accept') || '';
   let pageRequest = context.request, path = requestPath;
+  // Retire the obsolete root-level Accounts Console bundle explicitly. This
+  // tombstone prevents a cached old asset from being reused by future clients.
+  if (requestPath === '/accounts-console-script.js') return new Response('Gone: legacy account console script has been retired.', {status:410,headers:{'content-type':'text/plain; charset=UTF-8','cache-control':'no-store, max-age=0, must-revalidate','x-robots-tag':'noindex, nofollow, noarchive'}});
   // Pages _redirects rules do not run for requests handled by this global middleware.
   // Use the extensionless asset path internally because Pages normalizes direct .html URLs;
   // this serves staff-os.html while keeping /staff in the browser address bar.
