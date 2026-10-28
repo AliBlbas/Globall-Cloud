@@ -3,9 +3,9 @@
 | Metric | Value |
 |---|---:|
 | SHA-256 (original V4 snapshot; not recalculated after cleanup) | `3598bd26f06f39f718bdfdb44333fe7ed36cd761ed8e8a91951afcc3662a6799` |
-| Total files (V4 inventory scope) | 246 |
+| Total files (V4 inventory scope, after legacy cleanup) | 225 |
 | HTML files | 21 |
-| JavaScript files (V4 inventory scope) | 43 |
+| JavaScript files (V4 inventory scope, after legacy cleanup) | 30 |
 | TypeScript files | 17 |
 | SQL migrations | 102 |
 | Edge Functions | 16 |
