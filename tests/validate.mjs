@@ -131,7 +131,7 @@ const guards = [
   ['mobile drawer styles and refreshed loader are wired', read('staff-os-v5.html').includes('gc-staff-mobile-drawer-groups-20261019.css?v=1') && read('staff-os-v5.html').includes('staff-os-v5-enhancement-loader-20261017.js?v=22') && read('staff-os-v5-enhancement-loader-20261017.js').includes('gc-staff-mobile-dock-20261016.js?v=8')],
   ['staff entry has final mobile shell', /gc-staff-final-20260922\.js\?v=/.test(read('staff-os-v5.html'))],
   ['staff entry has no competing legacy mobile JS', !/staff-reference-mobile-20260922\.js\?v=|staff-premium-mobile-20260909\.js\?v=/.test(read('staff-os-v5.html'))],
-  ['staff loader has no legacy mobile command dock', !/staff-mobile-command-dock\.js\?v=/.test(read('staff-os-v5-enhancement-loader.js'))],
+  ['active staff loader has no legacy mobile command dock', !/staff-mobile-command-dock\.js\?v=/.test(read('staff-os-v5-enhancement-loader-20261017.js'))],
   ['public menu declares accessible controls and initial state', publicShell.includes('id="gcMobileMenu"') && publicShell.includes('aria-controls="gcMobileMenu"') && publicShell.includes('aria-expanded="false"') && publicShell.includes('role="navigation"')],
   ['public menu supports Escape and restores keyboard focus', read('globall-redesign-20260922.js').includes("event.key === 'Escape'") && read('globall-redesign-20260922.js').includes("setMobileMenuOpen(false, true)")],
   ['short mobile viewports keep both menus scrollable', read('gc-accessibility-mobile-20261021.css').includes('overflow-y: auto') && read('gc-accessibility-mobile-20261021.css').includes('max-height: min(62dvh') && publicShell.includes('gc-accessibility-mobile-20261021.css?v=1') && read('staff-os-v5.html').includes('gc-accessibility-mobile-20261021.css?v=1')],
