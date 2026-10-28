@@ -98,6 +98,8 @@ if (!staffV5Matcher.includes('staff-os-v5') || staffV5Matcher.includes('staff|')
 else ok('V5 middleware assets are isolated to V5 routes');
 if (!productionMiddleware.includes("if (requestPath === '/staff' || requestPath === '/staff/')") || !productionMiddleware.includes("new URL('/staff-os', requestUrl)") || !productionMiddleware.includes("pageRequest = new Request(destination.toString(), context.request)") || !productionMiddleware.includes('destination.search = requestUrl.search')) fail('short Staff routes must internally rewrite in the Pages middleware');
 else ok('Short Staff routes internally rewrite to the styled legacy entry');
+if (!productionMiddleware.includes("if (requestPath === '/accounts-console-script.js')") || !productionMiddleware.includes('status:410') || !productionMiddleware.includes('cache-control\':\'no-store, max-age=0, must-revalidate')) fail('obsolete Accounts Console bundle must be explicitly retired without caching');
+else ok('Obsolete Accounts Console bundle is retired with a no-store 410 response');
 if (!failures) ok('Core public/staff routes are wired')
 
 const bridge = read('production-bridge.js')
