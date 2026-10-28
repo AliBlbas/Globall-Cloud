@@ -96,7 +96,7 @@ const productionMiddleware = read('functions/_middleware.js');
 const staffV5Matcher = productionMiddleware.split('\n').find((line) => line.startsWith('const STAFF_V5 = ')) || '';
 if (!staffV5Matcher.includes('staff-os-v5') || staffV5Matcher.includes('staff|') || staffV5Matcher.includes('staff-os|')) fail('V5-only middleware route scope is incorrect');
 else ok('V5 middleware assets are isolated to V5 routes');
-if (!productionMiddleware.includes("if (requestPath === '/staff' || requestPath === '/staff/')") || !productionMiddleware.includes("new URL('/staff-os.html', requestUrl)") || !productionMiddleware.includes("pageRequest = new Request(destination.toString(), context.request)") || !productionMiddleware.includes('destination.search = requestUrl.search')) fail('short Staff routes must internally rewrite in the Pages middleware');
+if (!productionMiddleware.includes("if (requestPath === '/staff' || requestPath === '/staff/')") || !productionMiddleware.includes("new URL('/staff-os', requestUrl)") || !productionMiddleware.includes("pageRequest = new Request(destination.toString(), context.request)") || !productionMiddleware.includes('destination.search = requestUrl.search')) fail('short Staff routes must internally rewrite in the Pages middleware');
 else ok('Short Staff routes internally rewrite to the styled legacy entry');
 if (!failures) ok('Core public/staff routes are wired')
 
