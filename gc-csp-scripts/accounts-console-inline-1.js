@@ -22,6 +22,7 @@ async function authFetch(path = '/', opts = {}) {
   if (!session) throw new Error('Please sign in first');
   const headers = new Headers(opts.headers || {});
   headers.set('Authorization', `Bearer ${session.access_token}`);
+  headers.set('apikey', SUPABASE_PUBLISHABLE_KEY);
   if (opts.body && !(opts.body instanceof FormData)) headers.set('Content-Type', 'application/json');
   const res = await fetch(`${API_URL}${path}`, { ...opts, headers });
   const text = await res.text();
@@ -220,7 +221,7 @@ async function refreshAll() {
       opsFetch('/?kind=shipments'),
       authFetch('/?kind=log'),
     ]);
-    const [customers, staff, receipts, logs, shipments] = settled;
+    const [customers, staff, receipts, shipments, logs] = settled;
     if (customers.status === 'fulfilled') state.customers = customers.value.items || []; else console.error(customers.reason);
     if (staff.status === 'fulfilled') state.staff = staff.value.items || []; else console.error(staff.reason);
     if (receipts.status === 'fulfilled') state.receipts = receipts.value.items || []; else console.error(receipts.reason);
@@ -228,7 +229,7 @@ async function refreshAll() {
     if (shipments.status === 'fulfilled') state.shipments = shipments.value.items || []; else console.error(shipments.reason);
 
     const failed = settled
-      .map((r, i) => (r.status === 'rejected' ? ['customers','staff','receipts','logs','shipments'][i] : null))
+      .map((r, i) => (r.status === 'rejected' ? ['customers','staff','receipts','shipments','logs'][i] : null))
       .filter(Boolean);
     if (failed.length) setLoadError(`Some panels failed to load: ${failed.join(', ')}`);
 
