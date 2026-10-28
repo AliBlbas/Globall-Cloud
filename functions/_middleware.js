@@ -104,6 +104,30 @@ const MOBILE_PRIMARY_NAV = `<style data-gc-mobile-primary-nav="1">
 const LEGACY_SUPABASE_NOTICE = 'Supabase هێشتا پەیوەست نەکراوە — URL و publishable key لە کۆدەکەدا زیادبکە (سەرەتای script tag).';
 const CSP = "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://rum-static.pingdom.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.supabase.co https://rum-ingest.pingdom.net https://*.sentry.io https://sentry.io; frame-src 'self' https://www.google.com; worker-src 'self' blob:";
 const STAFF_V5 = /^\/staff-os-v5(?:\.html)?\/?$/i;
+const RETIRED_LEGACY_ASSETS = new Set([
+  'accounts-console-script.js',
+  'staff-os-enhancements.js',
+  'staff-os-enhancements-v2.js',
+  'staff-os-production.js',
+  'staff-os-production-layer.js',
+  'staff-os-production-fix.js',
+  'staff-os-ultimate-control.js',
+  'staff-os-ultimate-fix.js',
+  'staff-os-v2-compat.js',
+  'staff-os-v5-enhancement-loader.js',
+  'staff-mobile-final-polish-20260919.css',
+  'staff-mobile-smart-enhancement-20260919.css',
+  'staff-mobile-smart-enhancement-20260919.js',
+  'staff-mobile-ultimate-20260919.css',
+  'staff-mobile-ultimate-20260919.js',
+  'gc-staff-ui-refinement-20261019-v2.css',
+  'gc-staff-ui-refinement-20261019-v3.css',
+  'gc-customer-dashboard-polish-20260929.css',
+  'gc-customer-dashboard-polish-20260929.js',
+  'gc-customer-dashboard-v2-20260929.css',
+  'gc-customer-dashboard-v2-20260929.js',
+  'gc-command-nav-polish-2026.css',
+]);
 const OPERATIONAL_PAGE = /^\/(?:staff(?:-os)?|staff-os-v5|warehouse(?:-os)?|customer-portal|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\.html)?\/?$/i;
 const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`);
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`);
@@ -124,9 +148,8 @@ const rewriteRootHtml = (html) => {
 export async function onRequest(context) {
   const requestUrl = new URL(context.request.url), requestPath = requestUrl.pathname, accept = context.request.headers.get('accept') || '';
   let pageRequest = context.request, path = requestPath;
-  // Retire the obsolete root-level Accounts Console bundle explicitly. This
-  // tombstone prevents a cached old asset from being reused by future clients.
-  if (requestPath === '/accounts-console-script.js') return new Response('Gone: legacy account console script has been retired.', {status:410,headers:{'content-type':'text/plain; charset=UTF-8','cache-control':'no-store, max-age=0, must-revalidate','x-robots-tag':'noindex, nofollow, noarchive'}});
+  // Retired assets return 410 instead of falling through to the homepage HTML.
+  if (RETIRED_LEGACY_ASSETS.has(requestPath.slice(1))) return new Response('Gone: retired legacy asset.', {status:410,headers:{'content-type':'text/plain; charset=UTF-8','cache-control':'no-store, max-age=0, must-revalidate','x-robots-tag':'noindex, nofollow, noarchive','x-content-type-options':'nosniff'}});
   // Pages _redirects rules do not run for requests handled by this global middleware.
   // Use the extensionless asset path internally because Pages normalizes direct .html URLs;
   // this serves staff-os.html while keeping /staff in the browser address bar.
