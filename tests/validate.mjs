@@ -9,6 +9,7 @@ let failures = 0
 const fail = (msg) => { console.error(`  ✗ ${msg}`); failures++ }
 const ok = (msg) => console.log(`  ✓ ${msg}`)
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
+const legacyAccessPage = read('customer-access.html')
 
 function walk(dir, exts = null, out = []) {
   if (!existsSync(dir)) return out
@@ -246,7 +247,6 @@ const retiredRegisterFunction = read('supabase/functions/customer-gc-register/in
 const supabaseAuthConfig = read('supabase/config.toml')
 const legacyLoginPage = read('login.html')
 const legacyRegisterPage = read('register.html')
-const legacyAccessPage = read('customer-access.html')
 const authRedirects = read('_redirects')
 const accountsConsoleScript = read('gc-csp-scripts/accounts-console-inline-1.js')
 const staffConsoleHtml = read('staff-os-v5.html')
