@@ -11,6 +11,11 @@
   }[c]));
 
   const hasRealStaffApp = () => Boolean(document.querySelector('.gc-shell, .login-card, .login'));
+  const appIsBlank = () => {
+    if (!app || hasRealStaffApp()) return false;
+    const text = String(app.textContent || '').replace(/\s+/g, ' ').trim();
+    return !app.children.length || text.length < 24;
+  };
 
   const render = (mode = 'loading', message = '') => {
     // A rescue script may run asynchronously after the real app has rendered; never overwrite a live login or shell.
@@ -159,7 +164,9 @@
       clearInterval(timer);
       return;
     }
-    if (Date.now() - startedAt >= 18000) {
+    // Cache/session failures can leave only a theme control in #app. Never
+    // leave staff users on a blank screen: switch to an actionable recovery UI.
+    if ((appIsBlank() && Date.now() - startedAt >= 6000) || Date.now() - startedAt >= 18000) {
       clearInterval(timer);
       showFailure('Staff OS لە کاتی داناندا وەستاوە. deployment، cache یان script loading پشکنین بکە.');
     }
