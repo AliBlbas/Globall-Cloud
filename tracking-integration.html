@@ -36,10 +36,10 @@
     /* This route has its own vertical panel composition. The shared homepage
        polish stylesheet also defines .gc-track-panel as a two-column grid;
        keep that rule from splitting the heading, copy, and lookup form here. */
-    .gc-track-panel { display: block; border: 1px solid rgba(127, 213, 241, .24); background: linear-gradient(145deg, rgba(12, 40, 65, .96), rgba(5, 20, 34, .96)); padding: 26px; box-shadow: 0 24px 70px rgba(0,0,0,.24); }
+    .gc-track-panel { display: block !important; grid-template-columns: none !important; border: 1px solid rgba(127, 213, 241, .24); background: linear-gradient(145deg, rgba(12, 40, 65, .96), rgba(5, 20, 34, .96)); padding: 26px; box-shadow: 0 24px 70px rgba(0,0,0,.24); }
     .gc-track-panel h2 { margin: 0 0 8px; font-size: 23px; }
     .gc-track-panel p { color: #9fb7c7; line-height: 1.7; margin: 0 0 18px; font-size: 14px; }
-    .gc-track-form { display: flex; width: 100%; gap: 10px; }
+    .gc-track-form { display: flex !important; width: 100% !important; grid-template-columns: none !important; gap: 10px; }
     .gc-track-form input { flex: 1; min-width: 0; border: 1px solid rgba(158, 213, 237, .28); background: #071a2c; color: #fff; padding: 14px 15px; font-size: 16px; outline: none; }
     .gc-track-form input:focus { border-color: #63d5ef; box-shadow: 0 0 0 3px rgba(99, 213, 239, .15); }
     .gc-track-form button, .gc-notification-button { border: 0; background: #10c7e8; color: #031421; padding: 14px 18px; font-weight: 800; cursor: pointer; }
