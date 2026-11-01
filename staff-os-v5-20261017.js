@@ -169,6 +169,7 @@
       pricing: icon('M6 3h9l3 3v15H6zM9 8h6M9 12h6M9 16h4'),
       warehouses: icon('M3 10h18v10H3zM5 10 12 4l7 6M7 13h3v7H7M14 13h3v7h-3'),
       finance: icon('M4 19V9M10 19V5M16 19v-7M22 19H2'),
+      'excel-review': icon('M5 4h14v16H5zM8 8h8M8 12h8M8 16h5'),
       'staff-chat': icon('M7 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6M2 20c.3-3 2-5 5-5s4.7 2 5 5M16 10a3 3 0 1 0 0-6M16 14c3.5 0 5 2 5 5'),
       'customer-chat': icon('M4 4h16v13h-9l-4 3v-3H4zM8 8h8M8 12h5'),
       requests: icon('M5 4h14v16H5zM8 8h8M8 12h8M8 16h5'),
@@ -177,7 +178,7 @@
     };
     const items = [
       ['overview','داشبۆرد',''],['shipments','بارەکان',''],['alerts','ئاگادارییەکان','alertsBadge'],['customers','کڕیاران',''],
-      ['pricing','نرخەکان',''],['warehouses','کۆگاكان',''],['finance','دارایی',''],['staff-chat','چاتی ستاف','staffChatBadge'],
+      ['pricing','نرخەکان',''],['warehouses','کۆگاكان',''],['finance','دارایی',''],['excel-review','Excel · پشکنین',''],['staff-chat','چاتی ستاف','staffChatBadge'],
       ['customer-chat','چاتی کڕیار','customerChatBadge'],['requests','داواکاری و پرسیارەکان','requestBadge'],['activity','تۆماری کردارەکان',''],['settings','ڕێکخستنەکان','']
     ];
     const navButtons = items.map(([id,label,badge]) =>
@@ -293,7 +294,7 @@
   async function loadTab(tab, force=false) {
     state.tab = tab;
     document.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('active', x.dataset.tab === tab));
-    const titles = {overview:['داشبۆرد','وێنەی گشتی لە دۆخی عملیات و پارە'],shipments:['بارەکان','ئاسمانی · وشکانی · دەریایی · tracking · carton · cargo'],alerts:['Alerts','ئاگادارییەکانی عملیات و کار'],customers:['کڕیاران','GC code · account · balance · shipment history'],pricing:['نرخەکان','Rate catalog · FX · calculator'],warehouses:['کۆگاكان','چین · دوبەی · هەولێر · ئەمریکا'],finance:['دارایی','داهات · خەرجی · قەرز · قازانج'], 'staff-chat':['چاتی ستاف','گفتوگۆی ناوخۆیی کارمەندان'], 'customer-chat':['چاتی کڕیار','وەڵامدانەوەی کڕیاران لە GC'],requests:['ئاگاداری / داواکاری','پرسیاری نرخ · account · support'],activity:['Audit Log','کێ چی کرد و کەی'],settings:['ڕێکخستنەکان','پڕۆفایل · زمان · وشەی نهێنی']};
+    const titles = {overview:['داشبۆرد','وێنەی گشتی لە دۆخی عملیات و پارە'],shipments:['بارەکان','ئاسمانی · وشکانی · دەریایی · tracking · carton · cargo'],alerts:['Alerts','ئاگادارییەکانی عملیات و کار'],customers:['کڕیاران','GC code · account · balance · shipment history'],pricing:['نرخەکان','Rate catalog · FX · calculator'],warehouses:['کۆگاكان','چین · دوبەی · هەولێر · ئەمریکا'],finance:['دارایی','داهات · خەرجی · قەرز · قازانج'],'excel-review':['Excel · پشکنین','بارکردن · row review · approval · audit trail'], 'staff-chat':['چاتی ستاف','گفتوگۆی ناوخۆیی کارمەندان'], 'customer-chat':['چاتی کڕیار','وەڵامدانەوەی کڕیاران لە GC'],requests:['ئاگاداری / داواکاری','پرسیاری نرخ · account · support'],activity:['Audit Log','کێ چی کرد و کەی'],settings:['ڕێکخستنەکان','پڕۆفایل · زمان · وشەی نهێنی']};
     document.title = `${titles[tab]?.[0] || tab} — Globall Cloud Staff`;
     document.getElementById('pageTitle').textContent = titles[tab]?.[0] || tab;
     document.getElementById('pageSub').textContent = titles[tab]?.[1] || '';
@@ -307,6 +308,7 @@
       else if (tab==='pricing') await renderPricing();
       else if (tab==='warehouses') await renderWarehouses();
       else if (tab==='finance') await renderFinance();
+      else if (tab==='excel-review') await window.gcStaffExcelRender?.();
       else if (tab==='staff-chat') await renderStaffChat();
       else if (tab==='customer-chat') await renderCustomerChat();
       else if (tab==='requests') await renderRequests();
@@ -327,7 +329,7 @@
   // on the hidden desktop sidebar; invoke the same tab loader directly instead.
   const STAFF_NAV_TABS = new Set([
     'overview','shipments','alerts','customers','pricing','warehouses','finance',
-    'staff-chat','customer-chat','requests','activity','settings'
+    'excel-review','staff-chat','customer-chat','requests','activity','settings'
   ]);
   window.gcStaffLoadTab = (tab, force=false) => {
     const target = String(tab || '');
