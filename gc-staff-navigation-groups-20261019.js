@@ -6,7 +6,7 @@
   const GROUPS = [
     { title: 'سەرەکی و بار', tabs: ['overview', 'shipments', 'land-manifests', 'warehouses'] },
     { title: 'کڕیار و داواکاری', tabs: ['customers', 'customer-chat', 'requests'] },
-    { title: 'بازرگانی و دارایی', tabs: ['pricing', 'finance'] },
+    { title: 'بازرگانی و دارایی', tabs: ['pricing', 'finance', 'analytics'] },
     { title: 'ئاگاداری و بەڕێوەبردن', tabs: ['alerts', 'staff-chat', 'activity', 'settings'] }
   ];
 

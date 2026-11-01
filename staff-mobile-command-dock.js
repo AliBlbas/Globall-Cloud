@@ -14,6 +14,7 @@
     ...tabs,
     ['pricing','05','نرخەکان'],
     ['finance','07','دارایی'],
+    ['analytics','06','Traffic · Analytics'],
     ['staff-chat','08','چاتی ستاف'],
     ['customer-chat','09','چاتی کڕیار'],
     ['requests','10','داواکاری'],
