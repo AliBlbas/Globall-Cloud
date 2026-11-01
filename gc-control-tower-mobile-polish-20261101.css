@@ -1,0 +1,65 @@
+/* Control Tower mobile polish — 2026-11-01 */
+body:has(#app){overflow-x:hidden}
+body:has(#app) .gc-shell,body:has(#app) .gc-main,body:has(#app) .view{min-width:0}
+body:has(#app) .tower-hero,body:has(#app) .tower-grid,body:has(#app) .tower-kpis{direction:rtl}
+body:has(#app) .tower-hero h1,body:has(#app) .tower-hero p,body:has(#app) .tower-hero-meta,body:has(#app) .tower-flow-step,body:has(#app) .tower-exception,body:has(#app) .tower-route,body:has(#app) .tower-stream-row{text-align:right}
+body:has(#app) .tower-hero-actions{direction:rtl}
+body:has(#app) .tower-hero-actions .btn{white-space:nowrap}
+@media (max-width:700px){
+  body:has(#app){padding:5px;background:radial-gradient(500px 260px at 50% -5%,rgba(24,201,232,.13),transparent 70%),var(--bg)}
+  body:has(#app) .gc-shell{display:block;min-height:0}
+  body:has(#app) .gc-side{border-radius:16px;padding:7px;margin-bottom:7px;overflow:hidden}
+  body:has(#app) .brand{display:flex;align-items:center;justify-content:space-between;padding:5px 6px 8px;margin-bottom:7px}
+  body:has(#app) .brand-row{gap:8px}
+  body:has(#app) .brand-logo{width:34px;height:34px;border-radius:11px;font-size:12px}
+  body:has(#app) .brand b{font-size:13px}
+  body:has(#app) .brand small{font-size:8px}
+  body:has(#app) .nav{display:flex;gap:5px;overflow-x:auto;padding-bottom:1px;scrollbar-width:none}
+  body:has(#app) .nav::-webkit-scrollbar{display:none}
+  body:has(#app) .nav-btn{flex:0 0 auto;width:auto;min-height:34px;padding:7px 9px;border-radius:10px;font-size:10px;white-space:nowrap}
+  body:has(#app) .nav-icon{width:18px;font-size:10px}
+  body:has(#app) .topbar{top:5px;padding:8px 10px;margin-bottom:7px;border-radius:15px;gap:7px}
+  body:has(#app) .top-title strong{font-size:13px}
+  body:has(#app) .top-title span{font-size:8px}
+  body:has(#app) .top-actions{width:auto;margin-inline-start:auto;gap:4px;flex-wrap:nowrap}
+  body:has(#app) .top-actions>*{flex:0 0 auto}
+  body:has(#app) .status{padding:6px 7px;font-size:8px}
+  body:has(#app) .view{padding:9px;border-radius:17px;min-height:0}
+  body:has(#app) .tower-hero{display:block;padding:14px;border-radius:17px;margin-bottom:8px}
+  body:has(#app) .tower-hero h1{font-size:clamp(22px,7.5vw,30px);line-height:1.35;margin:6px 0 4px}
+  body:has(#app) .tower-hero p{font-size:10px;line-height:1.8}
+  body:has(#app) .tower-hero-meta{gap:6px 10px;margin-top:10px;font-size:8px}
+  body:has(#app) .tower-hero-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:12px}
+  body:has(#app) .tower-hero-actions .btn{min-width:0;min-height:34px;padding:6px 4px;font-size:9px;overflow:hidden;text-overflow:ellipsis}
+  body:has(#app) .tower-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-bottom:8px}
+  body:has(#app) .tower-kpis .kpi{padding:9px;border-radius:13px}
+  body:has(#app) .tower-kpis .kpi span{font-size:8px}
+  body:has(#app) .tower-kpis .kpi strong{font-size:17px;margin-top:4px}
+  body:has(#app) .tower-kpis .kpi small{font-size:8px;line-height:1.5}
+  body:has(#app) .tower-grid{display:grid;grid-template-columns:1fr;gap:7px}
+  body:has(#app) .card{padding:10px;border-radius:15px}
+  body:has(#app) .card-head{margin-bottom:8px}
+  body:has(#app) .card-head h3{font-size:12px}
+  body:has(#app) .card-head .btn{min-height:30px;padding:5px 7px;font-size:8px}
+  body:has(#app) .tower-flow{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+  body:has(#app) .tower-flow-step,.tower-flow-step:last-child{grid-column:auto;min-height:72px;padding:8px}
+  body:has(#app) .tower-flow-step b{font-size:18px;margin-top:3px}
+  body:has(#app) .tower-flow-step small{font-size:8px;white-space:normal;line-height:1.4}
+  body:has(#app) .tower-flow-icon{width:19px;height:19px;border-radius:6px;font-size:8px}
+  body:has(#app) .tower-mode-strip{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+  body:has(#app) .tower-mode-strip>div{padding:7px 5px;gap:4px;font-size:8px;justify-content:flex-start}
+  body:has(#app) .tower-mode-strip strong{font-size:9px}
+  body:has(#app) .tower-exception{grid-template-columns:6px minmax(0,1fr) auto;padding:8px 6px}
+  body:has(#app) .tower-exception b{font-size:9px}
+  body:has(#app) .tower-exception small{font-size:8px}
+  body:has(#app) .tower-route{grid-template-columns:20px minmax(0,1fr) auto;gap:6px}
+  body:has(#app) .tower-route>strong{grid-column:auto;text-align:start;font-size:9px}
+  body:has(#app) .tower-stream-row{grid-template-columns:7px minmax(0,1fr) auto;gap:6px}
+  body:has(#app) .tower-stream-row b{font-size:9px}
+  body:has(#app) .tower-stream-row small{font-size:8px}
+}
+@media (max-width:390px){
+  body:has(#app) .tower-hero-actions{grid-template-columns:1fr 1fr}
+  body:has(#app) .tower-hero-actions .btn:last-child{grid-column:1/-1}
+  body:has(#app) .tower-mode-strip{grid-template-columns:1fr}
+}

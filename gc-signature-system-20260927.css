@@ -124,3 +124,8 @@ body:has(.gc-rescue-shell) .gc-rescue-card{border-color:rgba(126,225,234,.22)!im
 /* Customer quote calculator preview */
 .gc-quote-preview{grid-column:1/-1;display:grid;gap:3px;margin-top:4px;padding:14px 16px;border:1px solid rgba(244,201,104,.25);border-radius:16px;background:radial-gradient(220px 90px at 90% 0%,rgba(244,201,104,.12),transparent 72%),linear-gradient(145deg,rgba(244,201,104,.07),rgba(10,32,52,.66));box-shadow:0 12px 28px rgba(0,0,0,.16)}
 .gc-quote-preview-label{color:#f5d27b;font:800 9px/1.4 'JetBrains Mono',monospace;letter-spacing:.13em}.gc-quote-preview strong{color:#efffff;font-size:22px;line-height:1.25}.gc-quote-preview small{color:#9bb5c8;font-size:10px;line-height:1.7}
+
+/* Bottom dock contract: five destinations — home, shipments, calculator, chat, account */
+@media(max-width:760px){
+  #gcPublicMobileActions,.gc-customer-mobile-dock{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+}
