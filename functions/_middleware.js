@@ -48,7 +48,7 @@ export async function onRequest(context) {
   }
 
   const adminSurface = /^\/(management|accounts-console|operations-suite|operations-command-center|operations-control|operations-control-v2|staff-os|staff-portal|warehouse-os|superadmin|super-admin-command-center|super-admin|super-admin-command-center)\b/
-  if (adminSurface) {
+  if (adminSurface.test(path)) {
     html = addHeadAsset(html, 'href="/admin-console-enhanced.css', `<link rel="stylesheet" href="/admin-console-enhanced.css?v=${VERSION}" data-gc-admin-polish="1">`)
     html = addHeadAsset(html, 'src="/admin-console-enhanced.js', `<script src="/admin-console-enhanced.js?v=${VERSION}" defer data-gc-admin-recovery="1"></script>`)
   }
