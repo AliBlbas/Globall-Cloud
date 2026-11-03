@@ -74,8 +74,26 @@
     }
   };
 
+  const publicHashes = new Set(['#public','#about','#services','#countries','#warehouses','#track','#request','#quote','#pricing','#contact']);
+  const isCustomerRoute = () => {
+    const path = window.location.pathname.replace(/\/$/, '') || '/';
+    const hash = window.location.hash;
+    return path === '/dashboard' || path === '/portal' || customerHashes.has(hash);
+  };
+  const showPublicMode = () => {
+    body.classList.remove('gc-customer-app');
+    body.classList.add('gc-public-site');
+    body.dataset.gcUnifiedExperience = 'public';
+    publicShell.hidden = false;
+    workspace.hidden = true;
+    auth?.classList.add('hidden');
+    document.title = 'Globall Cloud — China · USA · Dubai · Iraq Logistics';
+    window.dispatchEvent(new CustomEvent('gc:unified-view-changed', {detail:{mode:'public'}}));
+  };
   const normalizeHash = () => {
-    let hash = window.location.hash || '#auth';
+    let hash = window.location.hash;
+    if (!isCustomerRoute() && (!hash || publicHashes.has(hash))) return hash;
+    hash = hash || '#auth';
     if (legacyRoutes[hash]) {
       hash = legacyRoutes[hash];
       replaceHash(hash);
@@ -123,6 +141,10 @@
   };
 
   const handleRoute = () => {
+    if (!isCustomerRoute() && (!window.location.hash || publicHashes.has(window.location.hash))) {
+      showPublicMode();
+      return;
+    }
     const hash = normalizeHash();
     enterCustomerMode({showAuth: hash === '#auth' || hash === '#register'});
     selectCustomerView(hash);
@@ -163,10 +185,8 @@
   window.addEventListener('hashchange', handleRoute);
   window.addEventListener('popstate', handleRoute);
 
-  // The root opens the unified portal. Existing sessions restore directly to the workspace.
-  body.classList.add('gc-customer-app');
-  body.dataset.gcUnifiedExperience = 'customer';
-  let initialHash = window.location.hash || '#auth';
-  if (!window.location.hash) replaceHash('#auth');
+  // The root is public. Customer mode is entered only through /dashboard, /portal,
+  // or an explicit customer hash such as #auth or #shipmentsSection.
+  let initialHash = window.location.hash;
   handleRoute();
 })();

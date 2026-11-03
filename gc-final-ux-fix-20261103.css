@@ -1,0 +1,39 @@
+/* Globall Cloud — final route and mobile UX layer, 2026-11-03 */
+:root{--gc-gold:#e7c46a;--gc-gold-soft:#fff0b0;--gc-navy:#061524;--gc-navy-2:#0b263b;--gc-cyan:#53d8e5}
+body.gc-public-site{min-height:100dvh;background:#061524;color:#eef7fb}
+body.gc-public-site #gcApp{display:block!important;visibility:visible!important;opacity:1!important}
+body.gc-public-site #gcCustomerWorkspace{display:none!important}
+body.gc-customer-app #gcApp{display:none!important}
+body.gc-customer-app #gcCustomerWorkspace{display:block!important}
+/* Keep the public first paint clean; account UI is only opened by #auth or /dashboard. */
+body.gc-public-site .gc-app{min-height:100dvh}
+body.gc-public-site .gc-nav{position:relative;z-index:20}
+body.gc-public-site .gc-btn-primary,.gc-public-site .app-primary-action{background:linear-gradient(135deg,#ffe59a 0%,#e7bd58 52%,#b47b27 100%)!important;color:#162333!important;box-shadow:0 10px 28px rgba(210,166,66,.2)}
+body.gc-public-site .gc-eyebrow,body.gc-public-site .gc-app-kicker{color:var(--gc-gold-soft)!important}
+body.gc-public-site .gc-mobile-dock-v3{background:rgba(4,17,29,.96);border-color:rgba(231,196,106,.2)}
+body.gc-public-site .gc-mobile-dock-v3 .primary{color:#182532!important;background:linear-gradient(135deg,#ffe59a,#c99739)!important}
+/* Customer auth sheet: tighter, calmer, and safe on short phones. */
+body.gc-public-site #auth:not(.hidden){display:grid;place-items:center;padding:clamp(12px,4vw,28px);background:rgba(2,11,20,.78);backdrop-filter:blur(14px)}
+body.gc-public-site #auth .auth-sheet{width:min(620px,100%);max-height:calc(100dvh - 24px);overflow:auto;border-color:rgba(231,196,106,.3);background:linear-gradient(155deg,#0d2b43,#061624 78%);box-shadow:0 26px 90px rgba(0,0,0,.45)}
+body.gc-public-site #auth .auth-mark{background:linear-gradient(145deg,#fff1b2,#e6bc5d 58%,#9c6b22)!important;color:#1a2a37!important}
+body.gc-public-site #auth .eyebrow{color:var(--gc-gold-soft)!important}
+body.gc-public-site #auth .field{border-color:rgba(231,196,106,.24);background:#061827;color:#f4fbff}
+/* Staff login: remove the oversized nested frame and keep the card centered at 390px. */
+body.gc-staff-os-shell{background:radial-gradient(700px 420px at 80% 0%,rgba(30,121,151,.2),transparent 65%),#04121f!important}
+body.gc-staff-os-shell #app>.gc-rescue-shell{min-height:100dvh!important;padding:clamp(14px,4vw,32px)!important;background:transparent!important}
+body.gc-staff-os-shell #app .login-card,body.gc-staff-os-shell #loginGate .gate-card{width:min(560px,100%);margin-inline:auto;border:1px solid rgba(231,196,106,.28)!important;border-radius:24px!important;background:linear-gradient(155deg,#102d43,#061725 82%)!important;box-shadow:0 24px 90px rgba(0,0,0,.34)!important}
+body.gc-staff-os-shell #app .login-card h1,body.gc-staff-os-shell #loginGate h1{color:#f8fbff!important}
+body.gc-staff-os-shell #app .login-card .eyebrow,body.gc-staff-os-shell #loginGate .eyebrow{color:var(--gc-gold-soft)!important}
+body.gc-staff-os-shell #app .login-card .btn.primary,body.gc-staff-os-shell #loginGate button[type=submit]{background:linear-gradient(135deg,#ffe59a,#c99739)!important;color:#172433!important;border:0!important;box-shadow:0 10px 24px rgba(210,166,66,.18)}
+@media(max-width:680px){
+  body.gc-public-site{padding-bottom:calc(70px + env(safe-area-inset-bottom))}
+  body.gc-public-site .gc-nav-inner{padding-inline:14px}
+  body.gc-public-site .gc-hero-rebuild{padding-top:18px}
+  body.gc-public-site .gc-hero-grid,.gc-public-site .gc-trust{gap:12px}
+  body.gc-public-site #auth .auth-sheet{border-radius:22px;padding:20px 16px;max-height:calc(100dvh - 18px)}
+  body.gc-staff-os-shell #app>.gc-rescue-shell{align-content:center!important}
+  body.gc-staff-os-shell #app .login-card,body.gc-staff-os-shell #loginGate .gate-card{padding:22px 16px!important;border-radius:20px!important}
+  body.gc-staff-os-shell #app .login-card h1,body.gc-staff-os-shell #loginGate h1{font-size:clamp(22px,7vw,28px)!important;line-height:1.45!important}
+  body.gc-staff-os-shell #app .login-card input,body.gc-staff-os-shell #loginGate input{min-height:52px!important;font-size:16px!important}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
