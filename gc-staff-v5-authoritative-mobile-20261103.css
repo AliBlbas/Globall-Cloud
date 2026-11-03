@@ -253,7 +253,7 @@ body.gc-staff-os-shell #app .top-actions > * {
 }
 @media (max-width: 520px) {
   body.gc-staff-os-shell {
-    padding: 8px 8px calc(92px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: 8px 8px max(12px, env(safe-area-inset-bottom, 0px)) !important;
     background: radial-gradient(560px 300px at 80% -6%, rgba(27, 184, 204, .13), transparent 65%), #04121f !important;
   }
   body.gc-staff-os-shell #app .gc-shell {
