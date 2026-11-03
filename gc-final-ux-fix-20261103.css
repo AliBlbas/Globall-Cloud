@@ -20,6 +20,7 @@ body.gc-public-site #auth .eyebrow{color:var(--gc-gold-soft)!important}
 body.gc-public-site #auth .field{border-color:rgba(231,196,106,.24);background:#061827;color:#f4fbff}
 /* Staff login: remove the oversized nested frame and keep the card centered at 390px. */
 body.gc-staff-os-shell{background:radial-gradient(700px 420px at 80% 0%,rgba(30,121,151,.2),transparent 65%),#04121f!important}
+body.gc-staff-os-shell #app main.login{display:grid!important;place-items:center!important;width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;padding:clamp(14px,4vw,32px)!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
 body.gc-staff-os-shell #app>.gc-rescue-shell{min-height:100dvh!important;padding:clamp(14px,4vw,32px)!important;background:transparent!important}
 body.gc-staff-os-shell #app .login-card,body.gc-staff-os-shell #loginGate .gate-card{width:min(560px,100%);margin-inline:auto;border:1px solid rgba(231,196,106,.28)!important;border-radius:24px!important;background:linear-gradient(155deg,#102d43,#061725 82%)!important;box-shadow:0 24px 90px rgba(0,0,0,.34)!important}
 body.gc-staff-os-shell #app .login-card h1,body.gc-staff-os-shell #loginGate h1{color:#f8fbff!important}
