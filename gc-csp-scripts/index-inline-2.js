@@ -1614,12 +1614,24 @@ async function renderAdminGate(){
   }
   document.getElementById('adminMfaView').style.display = 'none';
 
-  const {data:staffRow} = await sb.from('staff').select('*').eq('id', session.user.id).maybeSingle();
-  if(!staffRow){
-    document.getElementById('staffLoginError').style.display = 'block';
-    document.getElementById('staffLoginError').textContent = 'ئەم هەژمارە هیچ ڕۆڵێکی دیاریکراوی نییە لە staff دا.';
+  const {data:staffRow, error:staffLookupError} = await sb.from('staff')
+    .select('id,email,role,is_active,branch,full_name')
+    .eq('id', session.user.id)
+    .maybeSingle();
+  const staffRoleAllowed = ['admin','super_admin','accountant'].includes(String(staffRow?.role || ''));
+  const staffActive = staffRow?.is_active === true;
+  const staffEmailMatches = !staffRow?.email ||
+    String(staffRow.email).trim().toLowerCase() === String(session.user.email || '').trim().toLowerCase();
+  if(staffLookupError || !staffRow || !staffActive || !staffRoleAllowed || !staffEmailMatches){
+    const errorNode = document.getElementById('staffLoginError');
+    errorNode.style.display = 'block';
+    errorNode.textContent = staffLookupError
+      ? 'پشتڕاستکردنەوەی دەستڕاگەیشتن سەرکەوتوو نەبوو. تکایە دووبارە هەوڵبدەوە.'
+      : 'ئەم هەژمارە دەستڕاگەیشتنی چالاک و ڕۆڵی ڕێگەپێدراوی Staff Console ـی نییە.';
     await sb.auth.signOut();
     loginView.style.display = 'block'; dashView.style.display = 'none';
+    document.getElementById('adminMfaView').style.display = 'none';
+    stopInactivityTimer();
     return;
   }
   loginView.style.display = 'none'; dashView.style.display = 'block';
