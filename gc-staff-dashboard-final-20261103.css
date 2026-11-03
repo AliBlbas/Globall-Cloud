@@ -1,0 +1,55 @@
+/* Globall Cloud Staff OS — last-mile dashboard repair, 2026-11-03 */
+body.gc-staff-os-shell{background:radial-gradient(900px 520px at 90% -5%,rgba(30,170,190,.16),transparent 60%),#061522!important;color:#eef8fb!important;font-family:"Vazirmatn","Noto Sans Arabic",system-ui,sans-serif!important;overflow-x:hidden!important}
+body.gc-staff-os-shell #app{display:block!important;width:100%!important;max-width:1680px!important;min-width:0!important;margin-inline:auto!important}
+body.gc-staff-os-shell #app .gc-shell{display:grid!important;grid-template-columns:minmax(220px,260px) minmax(0,1fr)!important;gap:14px!important;min-width:0!important}
+body.gc-staff-os-shell #app .gc-side,body.gc-staff-os-shell #app .topbar,body.gc-staff-os-shell #app .view,body.gc-staff-os-shell #app .card,body.gc-staff-os-shell #app .kpi{box-sizing:border-box!important;border:1px solid rgba(126,195,232,.18)!important;border-radius:18px!important;background:linear-gradient(150deg,rgba(12,43,70,.96),rgba(3,15,28,.98))!important;color:#eef8fb!important;box-shadow:0 18px 55px rgba(0,0,0,.24)!important}
+body.gc-staff-os-shell #app .gc-side{display:flex!important;flex-direction:column!important;padding:14px!important}
+body.gc-staff-os-shell #app .topbar{display:flex!important;align-items:center!important;gap:12px!important;padding:12px 15px!important;margin-bottom:12px!important;background:rgba(4,18,32,.92)!important}
+body.gc-staff-os-shell #app .view{min-height:calc(100dvh - 104px)!important;padding:16px!important}
+body.gc-staff-os-shell #app .top-title strong,body.gc-staff-os-shell #app h1,body.gc-staff-os-shell #app h2,body.gc-staff-os-shell #app h3{font-family:"Vazirmatn","Noto Sans Arabic",system-ui,sans-serif!important;color:#f2fbff!important;line-height:1.65!important}
+body.gc-staff-os-shell #app .top-title strong{font-size:18px!important}
+body.gc-staff-os-shell #app .eyebrow{font:800 9px/1.5 "JetBrains Mono",monospace!important;letter-spacing:1.2px!important;color:#8beaf6!important}
+body.gc-staff-os-shell #app .muted,body.gc-staff-os-shell #app small,body.gc-staff-os-shell #app p{color:#9ab5cf!important;line-height:1.8!important}
+body.gc-staff-os-shell #app .btn,body.gc-staff-os-shell #app button.btn,body.gc-staff-os-shell #app a.btn{appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;min-height:42px!important;max-width:100%!important;padding:9px 13px!important;border:1px solid rgba(126,195,232,.22)!important;border-radius:12px!important;background:rgba(255,255,255,.055)!important;color:#eaf8fc!important;font:800 12px/1.5 "Vazirmatn",system-ui,sans-serif!important;text-align:center!important;white-space:normal!important;box-shadow:none!important}
+body.gc-staff-os-shell #app .btn:hover{border-color:rgba(139,234,246,.55)!important;background:rgba(139,234,246,.1)!important}
+body.gc-staff-os-shell #app .btn.primary{background:linear-gradient(135deg,#ffe7a8,#f5c96a 54%,#c58b33)!important;border-color:transparent!important;color:#172536!important;box-shadow:0 9px 24px rgba(245,201,106,.16)!important}
+body.gc-staff-os-shell #app .status{border-color:rgba(99,232,182,.3)!important;background:rgba(99,232,182,.1)!important;color:#bdf7e3!important}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis>.kpi{display:flex!important;flex-direction:column!important;gap:7px!important;min-width:0!important;min-height:108px!important;padding:14px!important}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis>.kpi>span{font-size:10px!important;color:#9ab5cf!important}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis>.kpi>strong{font:900 clamp(19px,2.2vw,27px)/1.3 "JetBrains Mono",monospace!important;color:#ffe7a8!important;direction:ltr!important;unicode-bidi:isolate!important}
+body.gc-staff-os-shell #app .tower-hero{display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:16px!important;padding:22px!important;margin-bottom:12px!important;border:1px solid rgba(139,234,246,.25)!important;border-radius:22px!important;background:linear-gradient(125deg,#08263d,#0a5261 70%,#0c6d6b)!important;color:#f4fbff!important;overflow:hidden!important}
+body.gc-staff-os-shell #app .tower-hero h1,body.gc-staff-os-shell #app .tower-hero p,body.gc-staff-os-shell #app .tower-hero .eyebrow{color:#f4fbff!important}
+body.gc-staff-os-shell #app .tower-hero-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;min-width:min(440px,45%)!important}
+body.gc-staff-os-shell #app .tower-hero-actions>*{width:100%!important;min-width:0!important}
+body.gc-staff-os-shell #app .tower-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;min-width:0!important}
+body.gc-staff-os-shell #app .tower-grid>*{min-width:0!important}
+body.gc-staff-os-shell #app .tower-flow{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:7px!important}
+body.gc-staff-os-shell #app .tower-flow-step{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;min-width:0!important;min-height:78px!important;padding:8px 4px!important;border:1px solid rgba(126,195,232,.18)!important;border-radius:12px!important;background:rgba(255,255,255,.04)!important;color:#b9d7e8!important}
+body.gc-staff-os-shell #app .tower-flow-step b{font:900 16px "JetBrains Mono",monospace!important;color:#ffe7a8!important;direction:ltr!important}
+body.gc-staff-os-shell #app .tower-flow-step small{font-size:9px!important;color:inherit!important}
+body.gc-staff-os-shell #app .tower-flow-step.has-data{border-color:rgba(139,234,246,.38)!important;background:rgba(24,201,232,.1)!important}
+body.gc-staff-os-shell #app .field{min-height:42px!important;background:#04111f!important;color:#f5fbff!important;border:1px solid rgba(126,195,232,.25)!important;border-radius:11px!important}
+@media(max-width:760px){
+ body.gc-staff-os-shell{padding:0 0 calc(78px + env(safe-area-inset-bottom))!important}
+ body.gc-staff-os-shell #app .gc-shell{display:flex!important;flex-direction:column!important;gap:0!important;min-height:100dvh!important}
+ body.gc-staff-os-shell #app .gc-side{display:none!important}
+ body.gc-staff-os-shell #app .gc-main{width:100%!important;min-width:0!important}
+ body.gc-staff-os-shell #app .topbar{position:sticky!important;top:0!important;z-index:50!important;margin:0 0 8px!important;border-radius:0 0 17px 17px!important;padding:10px 12px!important;flex-wrap:wrap!important}
+ body.gc-staff-os-shell #app .top-actions{display:flex!important;width:100%!important;gap:6px!important;flex-wrap:nowrap!important}
+ body.gc-staff-os-shell #app .top-actions>*{flex:1 1 0!important;min-width:0!important}
+ body.gc-staff-os-shell #app .view{min-height:auto!important;margin:0!important;padding:10px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+ body.gc-staff-os-shell #app .tower-hero{display:block!important;margin:0 -10px 10px!important;padding:17px 14px!important;border-radius:0 0 20px 20px!important}
+ body.gc-staff-os-shell #app .tower-hero h1{font-size:clamp(22px,7vw,31px)!important}
+ body.gc-staff-os-shell #app .tower-hero-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important;min-width:0!important;margin-top:12px!important}
+ body.gc-staff-os-shell #app .tower-hero-actions>:last-child{grid-column:1/-1!important}
+ body.gc-staff-os-shell #app .grid-kpi.tower-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+ body.gc-staff-os-shell #app .grid-kpi.tower-kpis>.kpi{min-height:92px!important;padding:11px!important}
+ body.gc-staff-os-shell #app .tower-grid{grid-template-columns:1fr!important;gap:9px!important}
+ body.gc-staff-os-shell #app .tower-grid>.card{padding:12px!important}
+ body.gc-staff-os-shell #app .tower-flow{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ body.gc-staff-os-shell #app .tower-flow-step{min-height:72px!important}
+ body.gc-staff-os-shell #app > .gc-staff-mobile-dock{display:grid!important;position:fixed!important;z-index:9999!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;inset-inline:7px!important;bottom:calc(7px + env(safe-area-inset-bottom))!important;min-height:62px!important;padding:5px!important;border:1px solid rgba(126,195,232,.28)!important;border-radius:18px!important;background:rgba(4,18,32,.96)!important;box-shadow:0 16px 46px rgba(0,0,0,.5)!important}
+ body.gc-staff-os-shell > .gc-staff-mobile-dock button{min-height:48px!important;background:transparent!important;color:#9ab5cf!important;border:0!important;font:800 9px/1.35 "Vazirmatn",sans-serif!important}
+ body.gc-staff-os-shell > .gc-staff-mobile-dock button.active{background:rgba(24,201,232,.14)!important;color:#ffe7a8!important}
+}
