@@ -532,3 +532,61 @@ body.gc-staff-os-shell #app .top-actions > * {
     animation-duration: .01ms !important;
   }
 }
+
+
+/* 2026-11-03 mobile control-tower correction: stable at 320–430px. */
+body.gc-staff-os-shell #app #view .tower-hero-meta .tower-meta-date {
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-variant-numeric: tabular-nums !important;
+  white-space: nowrap !important;
+}
+body.gc-staff-os-shell #app #view .tower-hero-meta bdi,
+body.gc-staff-os-shell #app #view .tower-kpis bdi,
+body.gc-staff-os-shell #app #view .tower-flow-step > b,
+body.gc-staff-os-shell #app #view .tower-mode-strip strong {
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  font-variant-numeric: tabular-nums !important;
+}
+@media (max-width: 430px) {
+  body.gc-staff-os-shell #app #view .tower-hero-actions {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-hero-actions > .btn,
+  body.gc-staff-os-shell #app #view .tower-hero-actions > .btn:last-child {
+    grid-column: auto !important;
+    min-height: 46px !important;
+    width: 100% !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-hero-meta {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: stretch !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-hero-meta > span {
+    display: block !important;
+    max-width: 100% !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-kpis,
+  body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis > .kpi {
+    min-height: 100px !important;
+    padding: 10px !important;
+  }
+  body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis > .kpi > strong {
+    font-size: clamp(14px, 4vw, 18px) !important;
+    white-space: nowrap !important;
+  }
+  body.gc-staff-os-shell #app #view .tower-flow-step {
+    align-items: center !important;
+    text-align: center !important;
+  }
+  body.gc-staff-os-shell #app #view {
+    padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
