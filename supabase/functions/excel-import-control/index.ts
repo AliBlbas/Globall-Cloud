@@ -64,7 +64,9 @@ async function uploadBatch(a: any, data: Json) {
   const sha256 = text(data.source_sha256)
   const rows = Array.isArray(data.rows) ? data.rows : []
   if (!filename || !sha256 || !rows.length || rows.length > 10000) throw new Error('Invalid Excel batch')
-  const { data: batch, error } = await a.admin.from('excel_import_batches').insert({ source_filename: filename, source_sha256: sha256, source_size_bytes: Number(data.source_size_bytes) || null, import_status: 'reviewing', source_row_count: rows.length, warning_count: rows.reduce((n: number, row: any) => n + (Array.isArray(row.warnings) ? row.warnings.length : 0), 0), created_by: a.staff.id }).select('*').single()
+  const profile = data.workbook_profile && typeof data.workbook_profile === 'object' ? data.workbook_profile : null
+  const notes = profile ? JSON.stringify({ workbook_profile: profile }) : null
+  const { data: batch, error } = await a.admin.from('excel_import_batches').insert({ source_filename: filename, source_sha256: sha256, source_size_bytes: Number(data.source_size_bytes) || null, import_status: 'reviewing', source_row_count: rows.length, warning_count: rows.reduce((n: number, row: any) => n + (Array.isArray(row.warnings) ? row.warnings.length : 0), 0), created_by: a.staff.id, notes }).select('*').single()
   if (error) throw error
   for (let i = 0; i < rows.length; i += 400) {
     const chunk = rows.slice(i, i + 400).map((row: any) => ({ batch_id: batch.id, source_sheet: text(row.source_sheet) || 'unknown', source_row: Number(row.source_row) || 0, source_category: text(row.category || row.source_category) || 'unclassified', raw_values: row.raw_values || [], normalized_candidates: row.normalized_candidates || {}, warnings: row.warnings || [], review_status: 'unreviewed' }))
