@@ -98,7 +98,12 @@
   const registerFreshServiceWorker = async () => {
     if (!('serviceWorker' in navigator)) return;
     try {
-      const registration = await navigator.serviceWorker.register('/sw-v98.js?v=20261019-2', { scope: '/' });
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.filter((registration) => {
+        const script = registration.active?.scriptURL || registration.waiting?.scriptURL || registration.installing?.scriptURL || '';
+        return /\/staff-sw\.js(?:\?|$)/i.test(script);
+      }).map((registration) => registration.unregister()));
+      const registration = await navigator.serviceWorker.register('/sw-v98.js?v=20261106-1', { scope: '/' });
       await registration.update();
     } catch (_) {}
   };
