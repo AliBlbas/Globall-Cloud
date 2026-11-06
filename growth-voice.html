@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#071522">
+  <meta name="description" content="Globall Cloud Growth & Voice Studio — traffic intelligence and voice tools.">
+  <title>Growth & Voice Studio — Globall Cloud</title>
+  <link rel="icon" href="/logo-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap">
+  <link rel="stylesheet" href="/gc-growth-voice-studio-20261106.css?v=1">
+</head>
+<body class="gv-body">
+  <header class="gv-topbar">
+    <a class="gv-brand" href="/"><span class="gv-mark">GC</span><span><b>Globall Cloud</b><small>GROWTH & VOICE STUDIO</small></span></a>
+    <nav><a href="/">سەرەکی</a><a href="/staff">کۆنسۆڵی ستاف</a><a class="gv-nav-active" href="/growth-voice">Studio</a></nav>
+  </header>
+  <main class="gv-shell">
+    <section class="gv-hero">
+      <div><span class="gv-kicker">LOGISTICS OS · INTELLIGENCE LAYER</span><h1>داتا بکە بە دەنگ و بڕیار.</h1><p>Traffic ـی سایتەکەت ببینە، نیشانە سەرەکییەکان بخوێنەوە و پەیامەکانی Globall Cloud بە دەنگێکی سروشتی پێشبینیکە.</p><div class="gv-hero-actions"><a class="gv-btn gv-btn-primary" href="#traffic">پشکنینی traffic <span>↘</span></a><a class="gv-btn gv-btn-ghost" href="#voice">Voice Studio <span>↘</span></a></div></div>
+      <div class="gv-hero-orbit"><span class="gv-orbit-line"></span><strong>GROWTH<br>&amp; VOICE</strong><small>ONE WORKSPACE · TWO SIGNALS</small></div>
+    </section>
+
+    <section id="traffic" class="gv-section">
+      <div class="gv-section-head"><div><span class="gv-kicker">01 · WEBSITE TRAFFIC ANALYTICS</span><h2>هێزی بینەرەکانت لە کوێوە دێت؟</h2><p>Domain ـەکەت بنووسە بۆ وەرگرتنی visits، engagement، source و geography.</p></div><span id="analyticsState" class="gv-status"><i></i> ئامادەیە</span></div>
+      <form id="analyticsForm" class="gv-domain-form"><label for="domainInput">Domain</label><input id="domainInput" value="globall-cloud.pages.dev" inputmode="url" autocomplete="off"><button class="gv-btn gv-btn-primary" type="submit">Load intelligence</button></form>
+      <div id="analyticsMessage" class="gv-message" role="status">داتا لە SimilarWeb ـەوە بار دەکرێت...</div>
+      <div id="analyticsCards" class="gv-metrics"></div>
+      <div class="gv-analytics-grid"><article class="gv-panel"><div class="gv-panel-head"><div><span class="gv-kicker">VISITS TREND</span><h3>گەشەی سەردان</h3></div><span class="gv-mono" id="periodLabel">—</span></div><div id="visitsChart" class="gv-chart" aria-label="Visits chart"></div></article><article class="gv-panel"><div class="gv-panel-head"><div><span class="gv-kicker">MARKETING MIX</span><h3>سەرچاوەکانی traffic</h3></div></div><div id="sourcesList" class="gv-source-list"></div></article></div>
+    </section>
+
+    <section id="voice" class="gv-section gv-voice-section">
+      <div class="gv-section-head"><div><span class="gv-kicker">02 · TTS PROMPTER</span><h2>پەیامەکەت بە دەنگی خۆت ببیستە.</h2><p>بۆ voice preview ـی کوردی، عەرەبی و ئینگلیزی. دەقەکە لە browser ـەکەتدا دەخوێندرێتەوە و هیچ secret ـێک بڵاوناکرێتەوە.</p></div><span class="gv-voice-badge">VOICE READY</span></div>
+      <div class="gv-voice-grid"><div class="gv-voice-editor"><label for="voiceText">دەقی دەنگ</label><textarea id="voiceText" rows="7">بەخێربێیت بۆ Globall Cloud. لێرەوە بارەکانت، نرخەکانت و ڕێڕەوی گەیاندنت بە ئاسانی بەڕێوەببە.</textarea><div class="gv-voice-controls"><label>زمان<select id="voiceLanguage"><option value="ckb">کوردی</option><option value="ar">عەرەبی</option><option value="en">English</option></select></label><label>خێرایی<input id="voiceRate" type="range" min="0.6" max="1.4" step="0.1" value="0.9"><output id="voiceRateValue">0.9×</output></label><label>بەرزی دەنگ<input id="voicePitch" type="range" min="0.6" max="1.4" step="0.1" value="1"><output id="voicePitchValue">1.0</output></label></div><div class="gv-voice-actions"><button id="speakBtn" class="gv-btn gv-btn-primary" type="button">▶ دەستپێکردن</button><button id="pauseBtn" class="gv-btn gv-btn-ghost" type="button">Ⅱ وەستاندن</button><button id="stopBtn" class="gv-btn gv-btn-ghost" type="button">■ کۆتایی</button></div><p id="voiceMessage" class="gv-message">Voice preview لە browser ـەکەتدا ئامادەیە.</p></div><aside class="gv-voice-card"><div class="gv-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="gv-kicker">NARRATION PREVIEW</span><h3>دەنگێکی پاک بۆ برندەکەت.</h3><p>بۆ ئاگادارکردنەوەی کڕیار، پەیامی پشتیوانی، onboarding و پەیامەکانی عملیات بەکاربهێنە.</p><div class="gv-voice-note"><b>پێشنیاری style</b><span>warm, clear, confident</span></div></aside></div>
+    </section>
+  </main>
+  <footer class="gv-footer"><span>GLOBALL CLOUD · GROWTH & VOICE STUDIO</span><a href="/">گەڕانەوە بۆ Globall Cloud ↗</a></footer>
+  <script src="/gc-growth-voice-studio-20261106.js?v=1" defer></script>
+</body>
+</html>
