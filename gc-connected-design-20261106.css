@@ -1,0 +1,98 @@
+/* Globall Cloud — Connected Command visual layer
+   One visual language for public, customer and staff surfaces.
+   Structure and data contracts remain owned by the existing bundles. */
+:root{
+  --gcx-ink:#102d42;
+  --gcx-muted:#668092;
+  --gcx-line:rgba(25,78,101,.14);
+  --gcx-paper:#ffffff;
+  --gcx-navy:#061b2d;
+  --gcx-navy-2:#0b3149;
+  --gcx-teal:#16a7ad;
+  --gcx-cyan:#71e5e5;
+  --gcx-gold:#e5bd62;
+  --gcx-radius:22px;
+  --gcx-shadow:0 22px 64px rgba(4,31,50,.12);
+  --gcx-ease:cubic-bezier(.23,1,.32,1);
+}
+
+/* Shared focus and motion language */
+.gc-app a:focus-visible,
+.gc-app button:focus-visible,
+body.gc-staff-os-shell a:focus-visible,
+body.gc-staff-os-shell button:focus-visible,
+body.gc-customer-app a:focus-visible,
+body.gc-customer-app button:focus-visible{
+  outline:3px solid var(--gcx-cyan)!important;
+  outline-offset:3px!important;
+}
+@media(prefers-reduced-motion:no-preference){
+  .gc-app .gc-btn,.gc-app .gc-launchpad-card,.gc-app .gc-trust-card,
+  .gc-app .gc-studio-tab,body.gc-staff-os-shell #app .btn,
+  body.gc-staff-os-shell #app .nav-btn,body.gc-customer-app .card,
+  body.gc-customer-app .btn{transition:transform .22s var(--gcx-ease),box-shadow .22s var(--gcx-ease),border-color .22s var(--gcx-ease),background .22s var(--gcx-ease)!important}
+}
+
+/* Public command surface */
+body.gc-public-site,
+body.gc-public-site .gc-app{background:#061b2d!important}
+body.gc-public-site .gc-announcement{background:linear-gradient(90deg,#041421,#0b3149 48%,#041421)!important;border-bottom:1px solid rgba(113,229,229,.12)!important}
+body.gc-public-site .gc-nav{background:rgba(6,27,45,.86)!important;border-bottom:1px solid rgba(113,229,229,.12)!important;backdrop-filter:blur(22px)!important}
+body.gc-public-site .gc-nav-inner{min-height:78px!important}
+body.gc-public-site .gc-brand img{filter:drop-shadow(0 7px 18px rgba(113,229,229,.2))}
+body.gc-public-site .gc-brand b{letter-spacing:-.3px!important}
+body.gc-public-site .gc-brand small{color:#80cbd1!important;letter-spacing:1.7px!important}
+body.gc-public-site .gc-hero-rebuild{position:relative;isolation:isolate;background:radial-gradient(650px 400px at 8% 7%,rgba(22,167,173,.2),transparent 68%),radial-gradient(700px 460px at 92% 30%,rgba(229,189,98,.11),transparent 70%),#061b2d!important}
+body.gc-public-site .gc-hero-rebuild:after{content:"";position:absolute;inset:auto 0 0;height:1px;background:linear-gradient(90deg,transparent,rgba(113,229,229,.45),transparent);z-index:-1}
+body.gc-public-site .gc-hero-copy h1{letter-spacing:-1.1px!important}
+body.gc-public-site .gc-hero-copy h1 em{color:#f0cf79!important;text-shadow:0 8px 30px rgba(229,189,98,.18)}
+body.gc-public-site .gc-hero-track{border-color:rgba(113,229,229,.25)!important;background:rgba(3,18,31,.72)!important;box-shadow:0 18px 60px rgba(0,0,0,.16),inset 0 1px rgba(255,255,255,.05)!important}
+body.gc-public-site .gc-map-shell{border-color:rgba(113,229,229,.22)!important;box-shadow:var(--gcx-shadow)!important}
+body.gc-public-site .gc-launchpad-grid{position:relative;isolation:isolate;gap:12px!important}
+body.gc-public-site .gc-launchpad-grid:before{content:"";position:absolute;z-index:-1;inset:50% 8% auto;height:1px;background:linear-gradient(90deg,transparent,rgba(22,167,173,.45),rgba(229,189,98,.45),transparent);pointer-events:none}
+body.gc-public-site .gc-launchpad-card{position:relative!important;border-color:rgba(22,167,173,.18)!important;background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.025))!important;box-shadow:0 12px 32px rgba(0,0,0,.14)!important;overflow:hidden!important}
+body.gc-public-site .gc-launchpad-card:after{content:"";position:absolute;inset-inline-end:16px;inset-block-start:50%;width:7px;height:7px;border-radius:50%;background:var(--gcx-cyan);box-shadow:0 0 0 6px rgba(113,229,229,.1),0 0 18px rgba(113,229,229,.55);transform:translateY(-50%);opacity:.8}
+body.gc-public-site .gc-launchpad-card:hover{transform:translateY(-5px)!important;border-color:rgba(113,229,229,.5)!important;box-shadow:0 22px 46px rgba(0,0,0,.22),0 0 0 1px rgba(113,229,229,.1)!important}
+body.gc-public-site .gc-launchpad-icon{border-color:rgba(113,229,229,.28)!important;background:rgba(22,167,173,.13)!important;color:#9af4ef!important}
+body.gc-public-site .gc-launchpad-foot{border-top-color:rgba(113,229,229,.16)!important}
+body.gc-public-site .gc-transport-studio{border-top-color:rgba(113,229,229,.2)!important}
+
+/* Customer workspace: same route language, calmer density */
+body.gc-customer-app{background:radial-gradient(780px 420px at 100% 0%,rgba(22,167,173,.12),transparent 70%),#061b2d!important}
+body.gc-customer-app .customer-welcome,
+body.gc-customer-app .top{border-color:rgba(113,229,229,.18)!important;box-shadow:0 18px 54px rgba(0,0,0,.16)!important}
+body.gc-customer-app .card{border-color:rgba(113,229,229,.16)!important;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.035))!important}
+body.gc-customer-app .card:hover{transform:translateY(-3px)!important;border-color:rgba(113,229,229,.4)!important}
+body.gc-customer-app .btn.primary{background:linear-gradient(135deg,#73e5e0,#16a7ad)!important;color:#062431!important;box-shadow:0 12px 28px rgba(22,167,173,.2)!important}
+body.gc-customer-app .eyebrow,body.gc-customer-app .portal-section-heading span{color:#8cefeb!important}
+
+/* Staff OS: bridge the dark command rail and light operational canvas */
+body.gc-staff-os-shell{background:radial-gradient(760px 480px at 100% -10%,rgba(22,167,173,.12),transparent 68%),#edf3f7!important}
+body.gc-staff-os-shell #app .gc-side{border-color:rgba(113,229,229,.2)!important;background:radial-gradient(340px 220px at 0% 0%,rgba(22,167,173,.18),transparent 72%),linear-gradient(170deg,#071c2e,#0b3149 58%,#082437)!important;box-shadow:0 24px 62px rgba(5,30,47,.2)!important}
+body.gc-staff-os-shell #app .gc-side .nav-btn.active{background:linear-gradient(105deg,rgba(113,229,229,.2),rgba(22,167,173,.1))!important;box-shadow:inset -3px 0 0 #71e5e5,0 10px 24px rgba(0,0,0,.1)!important}
+body.gc-staff-os-shell #app .topbar{border-color:rgba(22,167,173,.18)!important;background:rgba(255,255,255,.78)!important;box-shadow:0 16px 40px rgba(7,45,64,.09)!important}
+body.gc-staff-os-shell #app .topbar:before{content:"";width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#25c58c;box-shadow:0 0 0 6px rgba(37,197,140,.12);order:-1}
+body.gc-staff-os-shell #app #view .tower-hero{border-color:rgba(113,229,229,.34)!important;background:radial-gradient(380px 280px at 0% 100%,rgba(22,167,173,.26),transparent 72%),radial-gradient(330px 260px at 100% 0%,rgba(229,189,98,.16),transparent 72%),linear-gradient(120deg,#061b2d,#0b3b53 55%,#087f8c)!important;box-shadow:0 24px 58px rgba(7,42,61,.18)!important}
+body.gc-staff-os-shell #app #view .tower-hero-actions{border-color:rgba(113,229,229,.22)!important;background:rgba(3,18,31,.3)!important}
+body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis>.kpi{border-color:rgba(22,167,173,.14)!important;box-shadow:0 12px 30px rgba(7,45,64,.07)!important}
+body.gc-staff-os-shell #app .btn.primary{background:linear-gradient(135deg,#087f8c,#16a7ad)!important;box-shadow:0 12px 26px rgba(22,167,173,.2)!important}
+body.gc-staff-os-shell #app .card,
+body.gc-staff-os-shell #app .panel{border-color:rgba(22,167,173,.14)!important;box-shadow:0 12px 32px rgba(7,45,64,.06)!important}
+body.gc-staff-os-shell #app .section-head{border-bottom-color:rgba(22,167,173,.18)!important}
+
+/* Route/chain cues on operational cards */
+body.gc-staff-os-shell #app .tower-flow{position:relative}
+body.gc-staff-os-shell #app .tower-flow:before{content:"";position:absolute;inset-inline:5%;inset-block-start:50%;height:1px;background:linear-gradient(90deg,transparent,rgba(22,167,173,.35),rgba(229,189,98,.35),transparent);z-index:0}
+body.gc-staff-os-shell #app .tower-flow-step{position:relative;z-index:1;border-color:rgba(22,167,173,.16)!important;background:rgba(255,255,255,.78)!important}
+body.gc-staff-os-shell #app .tower-flow-step.active,
+body.gc-staff-os-shell #app .tower-flow-step.has-data{border-color:rgba(22,167,173,.4)!important;background:linear-gradient(145deg,rgba(225,250,249,.95),rgba(255,255,255,.8))!important;box-shadow:0 10px 24px rgba(22,167,173,.12)!important}
+
+@media(max-width:760px){
+  body.gc-public-site .gc-launchpad-grid:before,body.gc-staff-os-shell #app .tower-flow:before{display:none}
+  body.gc-public-site .gc-launchpad-grid{grid-template-columns:1fr!important}
+  body.gc-public-site .gc-launchpad-card{min-height:78px!important}
+  body.gc-public-site .gc-nav-inner{min-height:66px!important}
+  body.gc-staff-os-shell{padding:0!important}
+  body.gc-staff-os-shell #app .topbar{border-radius:0 0 18px 18px!important;box-shadow:0 10px 28px rgba(7,45,64,.1)!important}
+  body.gc-staff-os-shell #app #view .tower-hero{border-radius:0 0 22px 22px!important;margin-inline:-10px!important}
+}
