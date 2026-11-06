@@ -31,6 +31,11 @@
     activeCustomerThread: null,
     scanStream: null,
   };
+  const requestedStaffTab = () => {
+    const requested = new URLSearchParams(location.search).get('tab');
+    const allowed = new Set(['overview','shipments','alerts','customers','pricing','warehouses','finance','analytics','excel-review','staff-chat','customer-chat','requests','activity','settings']);
+    return allowed.has(requested) ? requested : 'overview';
+  };
 
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const money = (v, c = 'USD') => `${Number(v || 0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})} ${c}`;
@@ -144,7 +149,7 @@
       throw Object.assign(new Error('MFA_REQUIRED'), { code:'MFA_REQUIRED' });
     }
     renderApp();
-    await loadTab('overview');
+    await loadTab(requestedStaffTab());
   }
 
   async function verifyStoredSession() {
@@ -155,7 +160,7 @@
     const aal = await state.client.auth.mfa.getAuthenticatorAssuranceLevel().catch(() => ({ data:null }));
     if (aal.data?.nextLevel === 'aal2' && aal.data.currentLevel !== 'aal2') { renderLogin(true); return true; }
     renderApp();
-    await loadTab('overview');
+    await loadTab(requestedStaffTab());
     return true;
   }
 
@@ -250,10 +255,10 @@
           if (verified.error) throw verified.error;
           const { data } = await state.client.auth.getSession();
           state.session = data.session;
-          await identify(state.session);
-          renderApp();
-          await loadTab('overview');
-        } else {
+           await identify(state.session);
+           renderApp();
+           await loadTab(requestedStaffTab());
+         } else {
           await handleLogin(text(document.getElementById('loginEmail').value), document.getElementById('loginPassword').value);
         }
       } catch (err) {
