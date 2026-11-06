@@ -7,9 +7,7 @@
    * mobile uses one five-action dock plus an accessible drawer for all modules.
    * Legacy visual shells and duplicate floating command layers remain excluded.
    */
-  const enhancementStyles = [
-    '/staff-os-premium-20260918.css?v=20260918-1'
-  ];
+  const enhancementStyles = [];
 
   const enhancementScripts = [
     '/gc-staff-mobile-dock-20261016.js?v=9',
@@ -62,52 +60,8 @@
     window.__gcStaffEnhancementsLoaded = true;
     enhancementStyles.forEach(loadStyle);
     for (const src of enhancementScripts) await loadOne(src);
-    loadStyle('/gc-final-ui-20260927.css?v=4');
-    loadStyle('/gc-staff-elite-20261014.css?v=3');
-    // This scoped layer loads last so it can replace the old scrollable mobile
-    // sidebar dock without changing desktop navigation or shipment actions.
-    loadStyle('/gc-staff-mobile-dock-20261016.css?v=6');
-    // Keep the known mobile integrity guard and command-system layer, then apply
-    // the dedicated final repair after all legacy helpers have finished loading.
-    loadStyle('/gc-ui-integrity-mobile-20261017.css?v=6');
-    loadStyle('/gc-staff-command-system-20261017.css?v=2');
-    loadStyle('/gc-staff-console-elite-20261018.css?v=6');
-    loadStyle('/gc-staff-polish-mobile-20261019.css?v=6');
-    loadStyle('/gc-staff-ui-refinement-20261019-v4.css?v=4');
-    loadStyle('/gc-staff-live-workspace-20261019.css?v=6');
-    loadStyle('/gc-staff-operations-redesign-20261022.css?v=5');
-    // One unified command deck is the authoritative final cascade for the authenticated console.
-    loadStyle('/gc-staff-command-deck-20261023.css?v=5');
-    // Preserve the established operations override, then apply the page-scoped refresh last.
-    loadStyle('/gc-staff-live-override-20261025.css?v=1');
-    loadStyle('/staff-os-refresh.css?v=20261028-1');
-    lockFinalStaffStylesLast();
-  };
-
-  // Several legacy helpers append style sheets after the app shell mounts.
-  // Keep the page-scoped refresh last so older themes cannot undo its layout.
-  const lockFinalStaffStylesLast = () => {
-    const href = '/staff-os-refresh.css?v=20261028-1';
-    const ensureLast = () => {
-      const link = document.querySelector('link[data-gc-enhancement-style="' + href + '"]')
-        || document.querySelector('link[href="' + href + '"]');
-      if (link && link.parentNode === document.head && document.head.lastElementChild !== link) {
-        document.head.appendChild(link);
-      }
-    };
-    ensureLast();
-    if (window.__gcStaffFinalCascadeObserver) return;
-    const observer = new MutationObserver((records) => {
-      const addedStyles = records.some((record) => [...record.addedNodes].some((node) =>
-        node.nodeType === 1 && (
-          node.matches?.('link[rel="stylesheet"],style')
-          || node.querySelector?.('link[rel="stylesheet"],style')
-        )
-      ));
-      if (addedStyles) ensureLast();
-    });
-    observer.observe(document.head, { childList: true, subtree: true });
-    window.__gcStaffFinalCascadeObserver = observer;
+    // The entrypoint owns the canonical style stack; do not append legacy themes.
+    loadStyle('/gc-staff-mobile-elegance-20261106.css?v=3');
   };
 
   const waitForShell = () => {
