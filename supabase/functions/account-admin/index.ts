@@ -1113,8 +1113,15 @@ Deno.serve(async (req) => {
       if (kind === 'notification' && canReadOperations) return json(await listStaffNotifications(serviceClient, staffRow.id), {}, req)
       if (kind === 'notification_delivery' && canReadOperations) return json(await listNotificationDelivery(serviceClient), {}, req)
       if (kind === 'chat' && canChat) return json(await listChat(serviceClient, staffRow.id), {}, req)
+      // Staff OS bootstrap asks for the current staff row after Supabase sign-in.
+      // Non-admin roles must be able to identify themselves without gaining access
+      // to the full staff directory. Admin, Super Admin and Accountant keep the
+      // existing full-directory read permission.
+      if (kind === 'staff') {
+        if (!canRead) return json({ items: [staffRow], kind: 'staff', scope: 'self' }, {}, req)
+        return json(await listStaff(serviceClient), {}, req)
+      }
       if (!canRead) return json({ error: 'Forbidden' }, { status: 403 }, req)
-      if (kind === 'staff') return json(await listStaff(serviceClient), {}, req)
       if (kind === 'log') return json(await listLogs(serviceClient), {}, req)
       if (kind === 'shipment') return json(await listShipments(serviceClient), {}, req)
       return json(await listCustomers(serviceClient), {}, req)
