@@ -1,0 +1,55 @@
+/* Globall Cloud Staff OS — mobile elegance layer, 2026-11-06 */
+:root{--gc-ink:#06111d;--gc-panel:#0a2033;--gc-panel-2:#0d2c42;--gc-cyan:#65dbe8;--gc-gold:#f1c86a;--gc-muted:#9bb7c8;--gc-line:rgba(145,215,231,.2)}
+body.gc-staff-os-shell{background:radial-gradient(80rem 40rem at 80% -10%,rgba(31,126,154,.28),transparent 58%),linear-gradient(150deg,#05111d,#071d30 55%,#04111c)!important}
+body.gc-staff-os-shell #app .gc-shell{gap:18px!important}
+body.gc-staff-os-shell #app .view{background:linear-gradient(180deg,rgba(5,18,30,.72),rgba(4,14,25,.9))!important}
+body.gc-staff-os-shell #app .tower-hero{position:relative;border:1px solid rgba(101,219,232,.34)!important;background:linear-gradient(135deg,#0a2a42 0%,#0b5262 62%,#123b54 100%)!important;box-shadow:0 22px 70px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.1)!important}
+body.gc-staff-os-shell #app .tower-hero:after{content:"";position:absolute;inset:auto -20% -65% 18%;height:150px;background:radial-gradient(ellipse,rgba(101,219,232,.18),transparent 65%);pointer-events:none}
+body.gc-staff-os-shell #app .tower-hero>*{position:relative;z-index:1}
+body.gc-staff-os-shell #app .tower-hero h1{letter-spacing:-.03em!important;text-shadow:0 2px 20px rgba(0,0,0,.22)!important}
+body.gc-staff-os-shell #app .tower-hero p{max-width:46rem!important;color:rgba(244,251,255,.78)!important}
+body.gc-staff-os-shell #app .tower-hero-meta{display:flex!important;flex-wrap:wrap!important;gap:7px!important;margin-top:12px!important}
+body.gc-staff-os-shell #app .tower-hero-meta>span{border:1px solid rgba(255,255,255,.16)!important;border-radius:999px!important;padding:7px 10px!important;background:rgba(0,0,0,.16)!important;color:#e8fbff!important}
+body.gc-staff-os-shell #app .tower-hero-actions .btn{min-height:44px!important;border-radius:13px!important;background:rgba(3,18,30,.46)!important;border-color:rgba(255,255,255,.22)!important}
+body.gc-staff-os-shell #app .tower-hero-actions .btn.primary{background:linear-gradient(135deg,#ffe4a0,#e6b84e)!important;color:#132333!important}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis>.kpi{position:relative;overflow:hidden;border-color:var(--gc-line)!important;background:linear-gradient(145deg,rgba(13,47,69,.94),rgba(5,20,34,.98))!important}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis>.kpi:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--gc-cyan);opacity:.7}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis>.kpi:nth-child(2):before{background:var(--gc-gold)}
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis>.kpi>strong{letter-spacing:-.04em!important}
+body.gc-staff-os-shell #app .tower-grid>.card{background:linear-gradient(145deg,rgba(12,43,64,.92),rgba(4,17,29,.98))!important}
+body.gc-staff-os-shell #app .tower-flow{position:relative;counter-reset:flow}
+body.gc-staff-os-shell #app .tower-flow-step{position:relative;border-color:var(--gc-line)!important;background:rgba(9,35,52,.82)!important;transition:transform .2s ease,border-color .2s ease,background .2s ease!important}
+body.gc-staff-os-shell #app .tower-flow-step:hover{transform:translateY(-2px)!important;border-color:rgba(101,219,232,.58)!important}
+body.gc-staff-os-shell #app .tower-flow-step b{color:var(--gc-gold)!important}
+body.gc-staff-os-shell #app .tower-flow-step.has-data{background:linear-gradient(145deg,rgba(16,92,103,.55),rgba(8,39,58,.8))!important}
+body.gc-staff-os-shell #app .tower-flow-step small{font-weight:700!important;color:#c0d9e3!important}
+body.gc-staff-os-shell #app .section-title,.gc-staff-os-shell #app .card-title{letter-spacing:-.02em!important}
+@media(max-width:680px){
+ body.gc-staff-os-shell{padding-bottom:calc(88px + env(safe-area-inset-bottom))!important}
+ body.gc-staff-os-shell #app .topbar{padding:10px 12px 11px!important;background:rgba(3,15,27,.97)!important;border-bottom:1px solid rgba(101,219,232,.24)!important}
+ body.gc-staff-os-shell #app .topbar .top-title strong{font-size:15px!important;line-height:1.35!important}
+ body.gc-staff-os-shell #app .topbar .top-title small{font-size:9px!important}
+ body.gc-staff-os-shell #app .top-actions{gap:7px!important;margin-top:3px!important}
+ body.gc-staff-os-shell #app .top-actions .btn{min-height:40px!important;border-radius:12px!important;font-size:11px!important;padding:7px 8px!important}
+ body.gc-staff-os-shell #app .view{padding:8px 10px 24px!important}
+ body.gc-staff-os-shell #app .tower-hero{margin:0 -10px 12px!important;padding:18px 14px 15px!important;border-radius:0 0 24px 24px!important}
+ body.gc-staff-os-shell #app .tower-hero h1{font-size:clamp(24px,8vw,31px)!important;line-height:1.45!important;margin:6px 0!important}
+ body.gc-staff-os-shell #app .tower-hero p{font-size:12px!important;line-height:1.9!important;margin:3px 0 0!important}
+ body.gc-staff-os-shell #app .tower-hero-meta{grid-template-columns:1fr 1fr!important;display:grid!important;margin-top:14px!important}
+ body.gc-staff-os-shell #app .tower-hero-meta>span{min-width:0!important;text-align:center!important;font-size:10px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+ body.gc-staff-os-shell #app .tower-hero-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin-top:12px!important}
+ body.gc-staff-os-shell #app .tower-hero-actions>:last-child{grid-column:1/-1!important}
+ body.gc-staff-os-shell #app .tower-hero-actions .btn{min-height:46px!important;font-size:11px!important}
+ body.gc-staff-os-shell #app .grid-kpi.tower-kpis{gap:8px!important;margin-bottom:12px!important}
+ body.gc-staff-os-shell #app .grid-kpi.tower-kpis>.kpi{min-height:92px!important;padding:12px 11px!important;border-radius:15px!important}
+ body.gc-staff-os-shell #app .grid-kpi.tower-kpis>.kpi>span{font-size:10px!important;line-height:1.5!important}
+ body.gc-staff-os-shell #app .grid-kpi.tower-kpis>.kpi>strong{font-size:clamp(16px,5vw,23px)!important}
+ body.gc-staff-os-shell #app .tower-grid{gap:10px!important}
+ body.gc-staff-os-shell #app .tower-grid>.card{padding:13px!important;border-radius:17px!important}
+ body.gc-staff-os-shell #app .tower-flow{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+ body.gc-staff-os-shell #app .tower-flow-step{min-height:78px!important;padding:9px 6px!important;border-radius:14px!important}
+ body.gc-staff-os-shell #app .tower-flow-step b{font-size:18px!important}
+ body.gc-staff-os-shell #app .tower-flow-step small{font-size:9px!important;line-height:1.5!important}
+ body.gc-staff-os-shell > .gc-staff-mobile-dock{inset-inline:8px!important;bottom:calc(8px + env(safe-area-inset-bottom))!important;min-height:66px!important;border-radius:20px!important;background:rgba(3,17,29,.98)!important}
+}
+@media(max-width:360px){body.gc-staff-os-shell #app .grid-kpi.tower-kpis{grid-template-columns:1fr!important}.gc-staff-os-shell #app .tower-hero-meta{grid-template-columns:1fr!important}.gc-staff-os-shell #app .tower-hero-actions{grid-template-columns:1fr!important}.gc-staff-os-shell #app .tower-hero-actions>:last-child{grid-column:auto!important}}
