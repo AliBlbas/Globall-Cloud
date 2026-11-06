@@ -103,7 +103,7 @@
         const script = registration.active?.scriptURL || registration.waiting?.scriptURL || registration.installing?.scriptURL || '';
         return /\/staff-sw\.js(?:\?|$)/i.test(script);
       }).map((registration) => registration.unregister()));
-      const registration = await navigator.serviceWorker.register('/sw-v98.js?v=20261106-2', { scope: '/' });
+      const registration = await navigator.serviceWorker.register('/sw-v98.js?v=20261106-3', { scope: '/' });
       await registration.update();
     } catch (_) {}
   };

@@ -262,7 +262,7 @@ export async function onRequest(context) {
     const finalCommandDeckLink = '<link rel="stylesheet" href="/gc-staff-command-deck-20261023.css?v=4" data-gc-staff-command-deck="1">';
     const finalLiveFinishLink = '<link rel="stylesheet" href="/gc-staff-live-finish-20261027.css?v=4" data-gc-staff-live-finish="1">';
     const finalStylePinScript = '<script src="/gc-staff-style-last-20261028.js?v=1" defer data-gc-staff-style-last="1"></script>';
-    const finalMobileEleganceLink = '<link rel="stylesheet" href="/gc-staff-mobile-elegance-20261106.css?v=2" data-gc-staff-mobile-elegance-final="1">';
+    const finalMobileEleganceLink = '<link rel="stylesheet" href="/gc-staff-mobile-elegance-20261106.css?v=3" data-gc-staff-mobile-elegance-final="1">';
     html = html.replace(/<link[^>]*data-gc-staff-console-elite[^>]*>\s*/gi, '');
     html = html.replace(/<link[^>]*data-gc-staff-polish-mobile[^>]*>\s*/gi, '');
     html = html.replace(/<link[^>]*data-gc-staff-ui-refinement[^>]*>\s*/gi, '');

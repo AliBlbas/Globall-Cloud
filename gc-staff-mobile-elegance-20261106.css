@@ -53,3 +53,35 @@ body.gc-staff-os-shell #app .section-title,.gc-staff-os-shell #app .card-title{l
  body.gc-staff-os-shell > .gc-staff-mobile-dock{inset-inline:8px!important;bottom:calc(8px + env(safe-area-inset-bottom))!important;min-height:66px!important;border-radius:20px!important;background:rgba(3,17,29,.98)!important}
 }
 @media(max-width:360px){body.gc-staff-os-shell #app .grid-kpi.tower-kpis{grid-template-columns:1fr!important}.gc-staff-os-shell #app .tower-hero-meta{grid-template-columns:1fr!important}.gc-staff-os-shell #app .tower-hero-actions{grid-template-columns:1fr!important}.gc-staff-os-shell #app .tower-hero-actions>:last-child{grid-column:auto!important}}
+
+/* Final authority: normalize legacy runtime selectors that carry stronger typography/layout rules. */
+body.gc-staff-os-shell #app,
+body.gc-staff-os-shell #app *{font-family:"Vazirmatn","Noto Sans Arabic",system-ui,sans-serif!important}
+body.gc-staff-os-shell #app .mono,
+body.gc-staff-os-shell #app bdi[dir="ltr"],
+body.gc-staff-os-shell #app .tower-flow-step>b,
+body.gc-staff-os-shell #app .tower-flow-step>strong,
+body.gc-staff-os-shell #app .grid-kpi.tower-kpis>.kpi>strong{font-family:"JetBrains Mono",ui-monospace,monospace!important}
+body.gc-staff-os-shell #app .tower-hero h1,
+body.gc-staff-os-shell #app .tower-hero h2,
+body.gc-staff-os-shell #app .tower-hero h3,
+body.gc-staff-os-shell #app .tower-hero p,
+body.gc-staff-os-shell #app .tower-hero .eyebrow{font-family:"Vazirmatn","Noto Sans Arabic",system-ui,sans-serif!important}
+body.gc-staff-os-shell #app .tower-hero-actions>.btn,
+body.gc-staff-os-shell #app .tower-hero-actions>button,
+body.gc-staff-os-shell #app .tower-hero-actions>a{background:linear-gradient(135deg,rgba(14,61,82,.98),rgba(7,34,51,.98))!important;color:#e9fbff!important;border:1px solid rgba(101,219,232,.42)!important;border-radius:14px!important;box-shadow:0 8px 22px rgba(0,0,0,.18)!important}
+body.gc-staff-os-shell #app .tower-hero-actions>.btn.primary,
+body.gc-staff-os-shell #app .tower-hero-actions>button.primary,
+body.gc-staff-os-shell #app .tower-hero-actions>a.primary{background:linear-gradient(135deg,#65e0e5,#18aeba)!important;color:#052631!important;border-color:transparent!important}
+body.gc-staff-os-shell #app .tower-flow-step{background:linear-gradient(145deg,rgba(14,52,72,.98),rgba(5,22,37,.98))!important;color:#c8e1e8!important;border:1px solid rgba(101,219,232,.26)!important;border-radius:14px!important}
+body.gc-staff-os-shell #app .tower-flow-step.has-data{background:linear-gradient(145deg,rgba(17,103,111,.72),rgba(7,44,59,.98))!important;color:#efffff!important;border-color:rgba(101,219,232,.58)!important}
+body.gc-staff-os-shell #app .tower-flow-step small{font-family:"Vazirmatn","Noto Sans Arabic",system-ui,sans-serif!important;color:inherit!important}
+@media(max-width:680px){
+ body.gc-staff-os-shell #app .tower-hero{padding:16px 13px 14px!important}
+ body.gc-staff-os-shell #app .tower-hero h1{font-size:clamp(23px,7.6vw,30px)!important;line-height:1.5!important}
+ body.gc-staff-os-shell #app .tower-hero p{font-size:12px!important;line-height:1.9!important}
+ body.gc-staff-os-shell #app .tower-hero-actions>.btn,
+ body.gc-staff-os-shell #app .tower-hero-actions>button,
+ body.gc-staff-os-shell #app .tower-hero-actions>a{min-height:45px!important;padding:8px 9px!important;font-size:11px!important}
+ body.gc-staff-os-shell #app .tower-flow-step{min-height:74px!important}
+}
