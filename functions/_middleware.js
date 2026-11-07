@@ -1,6 +1,6 @@
 /* Globall Cloud — production HTML middleware. */
 const HTML_ACCEPT = 'text/html';
-const VERSION = '20261028-1';
+const VERSION = '20261107-1';
 const VISUAL_REFRESH = `<link rel="stylesheet" href="/globall-visual-refresh-20260921.css?v=20260921-1" data-gc-visual-refresh="20260921-1">`;
 const ENTERPRISE_SHELL = `<link rel="stylesheet" href="/enterprise-shell-v2026.css?v=${VERSION}" data-gc-enterprise-shell="1">`;
 const THEME_CSS = `<link rel="stylesheet" href="/gc-theme-sync.css?v=${VERSION}" data-gc-theme-css="1">`;
@@ -129,7 +129,7 @@ const RETIRED_LEGACY_ASSETS = new Set([
   'gc-customer-dashboard-v2-20260929.js',
   'gc-command-nav-polish-2026.css',
 ]);
-const OPERATIONAL_PAGE = /^\/(?:staff(?:-os)?|staff-os-v5|staff-portal|warehouse(?:-os)?|customer-portal|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\.html)?\/?$/i;
+const OPERATIONAL_PAGE = /^\/(?:staff(?:-os)?|staff-os-v5|staff-portal|warehouse(?:-os)?|customer-portal|shop-operations|superadmin|super-admin-command-center|operations(?:-[a-z0-9-]+)?|accounts-console|management)(?:\.html)?\/?$/i;
 const addHeadAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/head>/i, `${fragment}</head>`);
 const addBodyAsset = (html, needle, fragment) => html.includes(needle) ? html : html.replace(/<\/body>/i, `${fragment}</body>`);
 const applySecurityHeaders = (headers) => {

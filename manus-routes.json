@@ -11,6 +11,10 @@
     {"path": "/login.html", "title": "Customer Login"},
     {"path": "/register.html", "title": "Customer Registration"},
     {"path": "/dashboard.html", "title": "Customer Dashboard"},
+    {"path": "/staff", "title": "Globall Cloud Staff OS"},
+    {"path": "/staff-os-v5", "title": "Globall Cloud Staff OS"},
+    {"path": "/shop", "title": "Globall Cloud Shop"},
+    {"path": "/shop-operations", "title": "Shop Operations"},
     {"path": "/careers.html", "title": "Careers"}
   ]
 }
