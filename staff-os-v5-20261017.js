@@ -1015,6 +1015,7 @@
     const registeredCount = alerts.filter((item) => statusFor(item).key === 'registered').length;
     const unlinkedCount = alerts.filter((item) => statusFor(item).key === 'unlinked').length;
     const attentionCount = alerts.length - registeredCount - unlinkedCount;
+    const severityLabel = (item) => item.photo_signing_warning || ['failed', 'retry'].includes(String(item.notification_status || '').toLowerCase()) ? 'high' : (item.account_linked === false ? 'medium' : 'normal');
     const metric = (label, value, detail, tone) =>
       '<article class="gc-live-wh-metric ' + (tone || '') + '">' +
         '<span>' + esc(label) + '</span><strong>' + esc(number(value)) + '</strong>' +
@@ -1048,6 +1049,8 @@
             '<option value="unlinked">هەژمار پەیوەست نییە</option>' +
             '<option value="registered">لە هەژماری کڕیار تۆمارکراوە</option>' +
           '</select></label>' +
+          '<label><span>دۆخی خوێندنەوە</span><select class="field" id="alertReadFilter"><option value="all">هەموو</option><option value="unread">نەخوێندراوە</option><option value="read">خوێندراوە</option></select></label>' +
+          '<label><span>ئاستی گرنگی</span><select class="field" id="alertSeverityFilter"><option value="all">هەموو</option><option value="high">بەرز</option><option value="medium">مامناوەند</option><option value="normal">ئاسایی</option></select></label>' +
         '</div>' +
         '<div class="gc-live-wh-count" id="gcDubaiAlertCount" aria-live="polite"></div>' +
         '<div class="gc-live-wh-list" id="gcDubaiAlertList" aria-live="polite"></div>' +
@@ -1060,8 +1063,11 @@
     const draw = () => {
       const query = text(document.getElementById('gcDubaiAlertSearch')?.value).toLocaleLowerCase();
       const filter = document.getElementById('gcDubaiAlertFilter')?.value || 'all';
+      const readFilter = document.getElementById('alertReadFilter')?.value || 'all';
+      const severityFilter = document.getElementById('alertSeverityFilter')?.value || 'all';
       const rows = alerts.filter((item) => {
         const status = statusFor(item);
+        const readState = Array.isArray(item.read_by) ? item.read_by.includes(state.staff?.id) : Boolean(item.read_at);
         const searchText = [
           item.gc_code, item.gc_code_detected, item.customer_name, item.batch_code,
           item.barcode, item.scan_code, item.location, item.source_warehouse,
@@ -1071,7 +1077,9 @@
           && (filter === 'all'
             || (filter === 'registered' && status.key === 'registered')
             || (filter === 'unlinked' && status.key === 'unlinked')
-            || (filter === 'action' && status.key !== 'registered'));
+            || (filter === 'action' && status.key !== 'registered'))
+          && (readFilter === 'all' || (readFilter === 'read' && readState) || (readFilter === 'unread' && !readState))
+          && (severityFilter === 'all' || severityLabel(item) === severityFilter);
       });
 
       resultCount.textContent = number(rows.length) + ' / ' + number(alerts.length) + ' تۆماری دوبەی';
@@ -1145,6 +1153,8 @@
 
     document.getElementById('gcDubaiAlertSearch')?.addEventListener('input', draw);
     document.getElementById('gcDubaiAlertFilter')?.addEventListener('change', draw);
+    document.getElementById('alertReadFilter')?.addEventListener('change', draw);
+    document.getElementById('alertSeverityFilter')?.addEventListener('change', draw);
     document.getElementById('gcDubaiAlertRefresh')?.addEventListener('click', () => loadTab('alerts', true));
     document.getElementById('gcDubaiAlertOpenWarehouse')?.addEventListener('click', () => loadTab('warehouses'));
     draw();

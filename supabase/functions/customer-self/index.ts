@@ -18,6 +18,19 @@ const env = (name: string) => {
   return value
 }
 const text = (value: unknown, max: number) => typeof value === 'string' ? value.trim().slice(0, max) : ''
+function normalizeGcCode(value: unknown): string {
+  const raw = String(value ?? '').trim().slice(0, 50).toUpperCase().replace(/\s+/g, '')
+  if (/^GC-\d+$/.test(raw)) return raw
+  if (/^GC\d+$/.test(raw)) return 'GC-' + raw.slice(2)
+  if (/^\d+$/.test(raw)) return 'GC-' + raw
+  return ''
+}
+function normalizePhone(value: unknown): string {
+  let digits = String(value ?? '').replace(/\D/g, '')
+  if (digits.startsWith('964')) digits = '0' + digits.slice(3)
+  else if (/^7\d{9}$/.test(digits)) digits = '0' + digits
+  return digits.slice(0, 15)
+}
 const numberOrNull = (value: unknown, max: number) => {
   if (value === null || value === undefined || value === '') return null
   const number = Number(value)
@@ -120,7 +133,7 @@ Deno.serve(async (req) => {
 
       if (action === 'update_profile') {
         const name = text(data.full_name, 160)
-        const phone = text(data.phone, 40)
+        const phone = normalizePhone(text(data.phone, 40))
         const email = text(data.email, 180).toLowerCase()
         const language = text(data.language, 8)
         const avatarUrl = text(data.avatar_url, 1000)
@@ -418,7 +431,7 @@ Deno.serve(async (req) => {
         is_consolidated:shared
       }
     })
-    const financeCode=String(customer.gc_code||customer.code||'').normalize('NFKC').trim().toUpperCase()
+    const financeCode=normalizeGcCode(customer.gc_code||customer.code)
     const [notifications,preferences,quotes,documentsByUser,invoicesByUser,events,receipts,chatThreads,customerTransactions]=await Promise.all([
       service.from('customer_notifications').select('id,shipment_id,kind,title,body,action_url,event_key,read_at,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(30),
       service.from('customer_notification_preferences').select('email_enabled,whatsapp_enabled,sms_enabled,in_app_enabled,quiet_hours_start,quiet_hours_end,updated_at').eq('customer_user_id',user.id).maybeSingle(),
@@ -485,7 +498,7 @@ Deno.serve(async (req) => {
       const cartonCount = Math.max(1, Number(receipt.carton_count ?? metadata.total_packages ?? cartons.length ?? 1) || 1)
       const weight = Number(receipt.weight_actual ?? metadata.gross_weight_kg ?? 0) || 0
       const photos = Array.isArray(receipt.photos) ? receipt.photos.filter((url: unknown) => typeof url === 'string' && /^https?:\/\//i.test(url)) : []
-      const gcCode = String(receipt.gc_code_detected || receipt.gc_code || 'GC-—').normalize('NFKC').trim().toUpperCase()
+      const gcCode = normalizeGcCode(receipt.gc_code_detected || receipt.gc_code) || 'GC-—'
       const cartonCodes = cartons.map((carton: Record<string, any>) => String(carton.carton_code || '')).filter(Boolean)
       const cartonLine = cartonCodes.length
         ? `کۆدی کارتۆنەکان: ${cartonCodes.slice(0, 15).join(', ')}${cartonCodes.length > 15 ? ` و ${cartonCodes.length - 15} دانەی تر` : ''}`
@@ -550,10 +563,10 @@ Deno.serve(async (req) => {
     return json(req,{
       ok:true,
       profile:{
-        id:customer.id,code:customer.gc_code||customer.code||null,
+        id:customer.id,code:normalizeGcCode(customer.gc_code||customer.code)||null,
         name:customer.name||user.user_metadata?.full_name||user.email||'Customer',
-        email:customer.email||user.email||null,phone:customer.phone||customer.phone2||user.phone||null,
-        whatsapp_phone:customer.whatsapp_phone||customer.phone||customer.phone2||user.phone||null,
+        email:customer.email||user.email||null,phone:normalizePhone(customer.phone||customer.phone2||user.phone)||null,
+        whatsapp_phone:normalizePhone(customer.whatsapp_phone||customer.phone||customer.phone2||user.phone)||null,
         whatsapp_group_name:customer.whatsapp_group_name||(customer.gc_code?String(customer.gc_code).replace(/^GC-/,'Gc-'):null),
         purchase_first_name:customer.purchase_first_name||(customer.gc_code?String(customer.gc_code).replace(/^GC-/,'Gc-'):null),
         purchase_last_name:customer.purchase_last_name||customer.name||user.user_metadata?.full_name||user.email||'Customer',
