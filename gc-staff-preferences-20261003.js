@@ -7,7 +7,10 @@
     localStorage.setItem(THEME,next);
     document.documentElement.dataset.staffTheme=next;
     document.documentElement.style.colorScheme=next;
-    const b=document.querySelector('[data-staff-theme]');
+    // Scope this lookup to the actual toggle button. The html element also
+    // receives data-staff-theme via dataset.staffTheme; selecting it and
+    // assigning textContent would erase the entire document.
+    const b=document.querySelector('button[data-staff-theme]');
     if(b){b.textContent=next==='dark'?'☼ ڕووناک':'☾ تاریک';b.setAttribute('aria-label',next==='dark'?'گۆڕین بۆ دۆخی ڕووناک':'گۆڕین بۆ دۆخی تاریک');}
   };
   const mount=()=>{
