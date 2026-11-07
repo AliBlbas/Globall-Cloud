@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" role="img" aria-labelledby="title desc">
+  <title id="title">Globall Cloud general goods</title>
+  <desc id="desc">A midnight-blue shipping box with a blue and mint accent.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071a2d"/>
+      <stop offset="1" stop-color="#123c5e"/>
+    </linearGradient>
+    <linearGradient id="box" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="640" rx="48" fill="url(#bg)"/>
+  <circle cx="790" cy="130" r="120" fill="#64e5ec" opacity=".12"/>
+  <circle cx="140" cy="530" r="180" fill="#3b82f6" opacity=".1"/>
+  <path d="m246 244 232-112 236 112-236 116z" fill="#d9f4ff" opacity=".94"/>
+  <path d="m246 244 232 116v174L246 414z" fill="url(#box)"/>
+  <path d="m714 244-236 116v174l236-120z" fill="#1c6d9a"/>
+  <path d="m478 360v174M246 244l236 116 232-116M478 360l236-116" fill="none" stroke="#d9f4ff" stroke-width="10" opacity=".78"/>
+  <path d="m420 190 58-28 60 28-60 29z" fill="#f0cf79"/>
+  <path d="M445 214v53l33 17 35-18v-52" fill="none" stroke="#f0cf79" stroke-width="8"/>
+  <text x="480" y="590" text-anchor="middle" fill="#d9f4ff" font-family="Arial, sans-serif" font-size="24" letter-spacing="5" opacity=".86">GLOBALL CLOUD · GOODS</text>
+</svg>
