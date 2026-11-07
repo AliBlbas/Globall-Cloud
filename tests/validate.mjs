@@ -99,6 +99,7 @@ const publicShell = read('index.html')
 const publicIndex = read('gc-csp-scripts/index-inline-2.js')
 const publicBootstrap = read('public-route-bootstrap.js')
 const publicRuntime = read('public-runtime-guarantee.js')
+const staffShipmentScript = read('staff-os-v5-20261017.js')
 const configContracts = [
   ['customer-self requires JWT verification', /^\[functions\.customer-self\]\s*verify_jwt\s*=\s*true$/m.test(config)],
   ['public-health is public', /^\[functions\.public-health\]\s*verify_jwt\s*=\s*false$/m.test(config)],
@@ -397,7 +398,6 @@ const staffMobileDockSource = read('gc-staff-mobile-dock-20261016.js')
 const staffRescueScript = read('staff-os-v5-rescue.js')
 const staffConsoleEliteCss = read('gc-staff-console-elite-20261018.css')
 const staffOsHtml = read('staff-os-v5.html')
-const staffShipmentScript = read('staff-os-v5-20261017.js')
 
 const warehouseReceivingSource = read('supabase/functions/warehouse-receiving/index.ts')
 const warehouseNotifySource = read('supabase/functions/warehouse-notify/index.ts')
