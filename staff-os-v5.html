@@ -93,7 +93,8 @@
   <script src="/gc-staff-preferences-20261003.js?v=2" defer></script>
   <script src="/staff-os-final-visibility-guard.js?v=20261004-1" defer></script>
 <script src="/gc-staff-carton-tools-20261017.js?v=2" defer data-gc-staff-carton-tools="1"></script>
-  <script src="/staff-os-v5-rescue.js?v=20261106-3" async data-gc-staff-rescue="1"></script>
+  <!-- Run recovery after the primary Staff OS boot script so the loader never wins a race against login. -->
+  <script src="/staff-os-v5-rescue.js?v=20261107-1" defer data-gc-staff-rescue="1"></script>
   <script src="/gc-staff-blank-screen-fix-20261107.js?v=3" defer data-gc-staff-blank-screen-fix="3"></script>
 </body>
 </html>
