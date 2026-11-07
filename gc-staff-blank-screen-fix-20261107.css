@@ -52,6 +52,16 @@ body.gc-staff-os-shell #app #view .gc-blank-state button {
   font-weight: 900 !important;
   cursor: pointer !important;
 }
+body.gc-staff-os-shell #app .gc-root-recovery {
+  display: grid !important;
+  place-items: center !important;
+  min-height: 100dvh !important;
+  padding: 24px !important;
+  background: #07131f !important;
+}
+body.gc-staff-os-shell #app .gc-root-recovery .gc-blank-state {
+  width: min(560px, 100%) !important;
+}
 @media (max-width:680px) {
   body.gc-staff-os-shell #app .gc-shell {
     display: flex !important;

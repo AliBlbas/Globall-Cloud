@@ -5,6 +5,13 @@
   if (document.documentElement.dataset.gcBlankScreenFix === marker) return;
   document.documentElement.dataset.gcBlankScreenFix = marker;
   const shell = () => document.querySelector('#app .gc-shell');
+  const login = () => document.querySelector('#app .login, #app .login-card');
+  const renderRootRecovery = () => {
+    const root = document.getElementById('app');
+    if (!root || shell() || login()) return;
+    root.innerHTML = `<main class="gc-root-recovery" dir="rtl"><section class="gc-blank-state"><div><strong>کۆنسۆڵی ستاف بار نەکرا</strong><br><small>پەیوەندییەکانی سیستەم یان cache ـی براوزەر کێشەی تێدا هەیە.</small><br><button type="button" data-gc-root-retry>↻ دووبارە هەوڵدان</button></div></section></main>`;
+    root.querySelector('[data-gc-root-retry]')?.addEventListener('click', () => location.reload(), { once: true });
+  };
   const ensureView = () => {
     const root = document.querySelector('#app');
     const currentShell = shell();
@@ -70,6 +77,9 @@
   };
   const start = () => {
     check();
+    window.setTimeout(() => {
+      if (!shell() && !login()) renderRootRecovery();
+    }, 6500);
     window.setTimeout(() => {
       const view = ensureView();
       if (shell() && view && !String(view.textContent || '').replace(/\s+/g, ' ').trim()) renderError(view);
