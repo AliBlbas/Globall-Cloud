@@ -190,7 +190,31 @@ export async function onRequest(context) {
     ['src="/gc-final-experience-2026.js',`<script src="/gc-final-experience-2026.js?v=${VERSION}" defer data-gc-final-experience="1"></script>`],
     ['href="/gc-final-ui-20260927.css',`<link rel="stylesheet" href="/gc-final-ui-20260927.css?v=4" data-gc-final-ui="3">`]
   ];
-  for (const [needle,fragment] of headAssets) html = addHeadAsset(html,needle,fragment);
+  const STAFF_V5_PUBLIC_ASSETS = new Set([
+    'href="/gc-theme-sync.css',
+    'href="/css/gc-theme-improvements.css',
+    'src="/gc-theme-sync.js',
+    'href="/gc-settings-hub.css',
+    'src="/gc-settings-hub.js',
+    'href="/globall-visual-refresh-20260921.css',
+    'href="/enterprise-shell-v2026.css',
+    'href="/site-polish.css',
+    'href="/production-mobile-hotfix.css',
+    'href="/production-mobile-ux-v2026.css',
+    'href="/gc-public-premium-ux-2026.css',
+    'href="/gc-home-final-2026.css',
+    'src="/production-bridge.js',
+    'src="/public-customer-auth-fix.js',
+    'src="/production-brand-repair.js',
+    'src="/gc-final-experience-2026.js'
+  ]);
+  // Staff OS V5 owns its auth client, account settings and mobile shell.
+  // Do not mix public/customer bootstraps or public layout layers into this
+  // page; they can create a second Supabase client and override the V5 UI.
+  for (const [needle,fragment] of headAssets) {
+    if (STAFF_V5.test(path) && STAFF_V5_PUBLIC_ASSETS.has(needle)) continue;
+    html = addHeadAsset(html,needle,fragment);
+  }
   // Staff OS V5 has its own Supabase bootstrap, authentication, feature loader and recovery UI.
   // Do not inject the legacy runtime guard into /staff, which now rewrites to the V5 entry.
   if (OPERATIONAL_PAGE.test(path) && !STAFF_V5.test(path)) html=addHeadAsset(html,'src="/runtime-guard.js',`<script src="/runtime-guard.js?v=${VERSION}" defer data-gc-runtime-guard="1"></script>`);

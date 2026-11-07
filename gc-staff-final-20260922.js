@@ -1,5 +1,8 @@
 (() => {
   'use strict';
+  // Staff OS V5 has its own maintained mobile dock in the enhancement loader.
+  // The older dock creates a second navigation surface and must not mount here.
+  if (document.body?.classList.contains('gc-staff-os-shell')) return;
   const svg = (d) => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+d+'"></path></svg>';
   const icons = {
     overview: svg('M4 10.5 12 4l8 6.5V20H4z'),
