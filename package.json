@@ -12,6 +12,7 @@
   "scripts": {
     "build": "node scripts/cloudflare-build.mjs",
     "test": "node tests/validate.mjs",
+    "test:public-release": "node tests/public-release-smoke.mjs",
     "test:contracts": "node scripts/production-contracts.mjs",
     "test:syntax": "node tests/validate.mjs",
     "test:e2e": "node tests/e2e/run.mjs ${E2E_MODE:-smoke}",
