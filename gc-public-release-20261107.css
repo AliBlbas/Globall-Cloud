@@ -1,0 +1,110 @@
+/* Globall Cloud public release layer — 2026-11-07
+ * Scoped to the public shell so authenticated workspaces and staff consoles
+ * keep their own design systems. This is the final homepage cascade.
+ */
+:root {
+  --gc-release-cyan: #64e5ec;
+  --gc-release-ink: #071c2e;
+  --gc-release-panel: rgba(11, 42, 59, .78);
+  --gc-release-border: rgba(148, 227, 235, .22);
+  --gc-release-shadow: 0 20px 60px rgba(2, 12, 24, .22);
+}
+
+html { scroll-behavior: smooth; }
+body.gc-public-site { overflow-x: hidden; }
+
+.gc-skip-link {
+  position: fixed;
+  inset-block-start: .75rem;
+  inset-inline-start: .75rem;
+  z-index: 10000;
+  transform: translateY(-180%);
+  padding: .7rem 1rem;
+  border-radius: 999px;
+  background: var(--gc-release-cyan);
+  color: var(--gc-release-ink);
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: var(--gc-release-shadow);
+  transition: transform .18s ease-out;
+}
+.gc-skip-link:focus { transform: translateY(0); }
+
+.gc-public-site .gc-btn,
+.gc-public-site button,
+.gc-public-site input,
+.gc-public-site select,
+.gc-public-site textarea { font: inherit; }
+
+.gc-public-site .gc-btn,
+.gc-public-site .gc-hero-track button,
+.gc-public-site .gc-form button {
+  min-height: 48px;
+  transition: transform .16s ease-out, box-shadow .18s ease-out, background-color .18s ease-out;
+}
+.gc-public-site .gc-btn:hover,
+.gc-public-site .gc-hero-track button:hover,
+.gc-public-site .gc-form button:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0, 0, 0, .18); }
+.gc-public-site .gc-btn:active,
+.gc-public-site button:active { transform: scale(.98); }
+
+.gc-public-site .gc-hero-track {
+  border: 1px solid var(--gc-release-border);
+  box-shadow: 0 16px 40px rgba(1, 15, 29, .22);
+}
+.gc-public-site .gc-hero-track input,
+.gc-public-site .gc-form input,
+.gc-public-site .gc-form select,
+.gc-public-site .gc-form textarea {
+  min-height: 48px;
+  border-color: rgba(148, 227, 235, .22);
+}
+.gc-public-site .gc-form textarea { min-height: 120px; }
+.gc-public-site .gc-form label { gap: .45rem; }
+
+.gc-public-site .gc-launchpad-card,
+.gc-public-site .gc-transport-card,
+.gc-public-site .gc-service-inspector,
+.gc-public-site .gc-rate-result {
+  transition: transform .2s ease-out, border-color .2s ease-out, box-shadow .2s ease-out;
+}
+.gc-public-site .gc-launchpad-card:hover,
+.gc-public-site .gc-transport-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(100, 229, 236, .5);
+  box-shadow: 0 16px 34px rgba(2, 12, 24, .2);
+}
+
+.gc-public-site .gc-footer {
+  border-top: 1px solid rgba(148, 227, 235, .14);
+}
+.gc-public-site .gc-footer-grid {
+  grid-template-columns: 1.35fr repeat(4, minmax(0, 1fr));
+}
+.gc-public-site .gc-footer a { min-height: 32px; display: inline-flex; align-items: center; }
+
+@media (max-width: 760px) {
+  .gc-public-site .gc-announcement-inner { gap: .5rem; flex-wrap: wrap; justify-content: center; text-align: center; }
+  .gc-public-site .gc-nav-inner { min-height: 64px; }
+  .gc-public-site .gc-brand small { letter-spacing: .08em; }
+  .gc-public-site .gc-nav-actions { gap: .4rem; }
+  .gc-public-site .gc-staff,
+  .gc-public-site .gc-register-link,
+  .gc-public-site .gc-socials { display: none; }
+  .gc-public-site .gc-customer-entry { min-width: 0; padding-inline: .8rem; }
+  .gc-public-site .gc-customer-entry span { display: none; }
+  .gc-public-site .gc-hero-copy h1 { max-width: 19ch; }
+  .gc-public-site .gc-actions { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; }
+  .gc-public-site .gc-actions .gc-btn { width: 100%; text-align: center; }
+  .gc-public-site .gc-hero-track { grid-template-columns: 1fr; gap: .55rem; }
+  .gc-public-site .gc-hero-track button { width: 100%; }
+  .gc-public-site .gc-trust { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gc-public-site .gc-launchpad-grid { grid-template-columns: 1fr; }
+  .gc-public-site .gc-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; }
+  .gc-public-site .gc-footer-bottom { gap: .45rem; flex-direction: column; align-items: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .gc-skip-link { transition: none; }
+}
