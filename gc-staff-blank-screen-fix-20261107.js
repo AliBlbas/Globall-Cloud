@@ -6,6 +6,22 @@
   document.documentElement.dataset.gcBlankScreenFix = marker;
   const shell = () => document.querySelector('#app .gc-shell');
   const ensureView = () => {
+    const root = document.querySelector('#app');
+    const currentShell = shell();
+    if (root) {
+      root.hidden = false;
+      root.removeAttribute('aria-hidden');
+      root.style.setProperty('display', 'block', 'important');
+      root.style.setProperty('visibility', 'visible', 'important');
+      root.style.setProperty('opacity', '1', 'important');
+    }
+    if (currentShell) {
+      currentShell.hidden = false;
+      currentShell.removeAttribute('aria-hidden');
+      currentShell.style.setProperty('visibility', 'visible', 'important');
+      currentShell.style.setProperty('opacity', '1', 'important');
+      currentShell.style.setProperty('display', innerWidth <= 680 ? 'flex' : 'grid', 'important');
+    }
     const main = document.querySelector('#app .gc-main');
     if (!main) return null;
     let view = document.querySelector('#app #view');
@@ -42,7 +58,15 @@
     const view = renderLoading();
     if (!view) return;
     const text = String(view.textContent || '').replace(/\s+/g, ' ').trim();
-    if (!view.children.length || text.length < 8) renderError(view);
+    const rect = view.getBoundingClientRect();
+    const style = getComputedStyle(view);
+    const hidden = style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0 || rect.height < 24;
+    if (hidden || !view.children.length || text.length < 8) {
+      view.style.setProperty('display', 'block', 'important');
+      view.style.setProperty('visibility', 'visible', 'important');
+      view.style.setProperty('opacity', '1', 'important');
+      renderError(view);
+    }
   };
   const start = () => {
     check();

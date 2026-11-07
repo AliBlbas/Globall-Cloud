@@ -4,10 +4,17 @@ body.gc-staff-os-shell #app .gc-shell,
 body.gc-staff-os-shell #app .gc-main,
 body.gc-staff-os-shell #app .view,
 body.gc-staff-os-shell #app #view {
+  display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
   min-width: 0 !important;
   max-width: 100% !important;
+}
+body.gc-staff-os-shell #app .gc-shell {
+  display: grid !important;
+  grid-template-columns: minmax(220px, 270px) minmax(0, 1fr) !important;
+  min-height: 100dvh !important;
+  width: 100% !important;
 }
 body.gc-staff-os-shell #app .gc-main,
 body.gc-staff-os-shell #app .view,
@@ -46,6 +53,11 @@ body.gc-staff-os-shell #app #view .gc-blank-state button {
   cursor: pointer !important;
 }
 @media (max-width:680px) {
+  body.gc-staff-os-shell #app .gc-shell {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100dvh !important;
+  }
   body.gc-staff-os-shell #app .gc-main { padding-bottom: calc(92px + env(safe-area-inset-bottom,0px)) !important; }
   body.gc-staff-os-shell #app #view { padding: 10px 10px 24px !important; }
 }
