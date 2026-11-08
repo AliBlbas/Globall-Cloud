@@ -31,11 +31,11 @@
 /staff-os-v5 /staff-os-v5.html 302!
 
 # Retired standalone UI surfaces: Customer Portal and Staff Console are the only public workspaces.
-/track /tracking-integration.html 200
-/track/ /tracking-integration.html 200
-/tracking /tracking-integration.html 200
-/tracking/ /tracking-integration.html 200
-/tracking-integration /tracking-integration.html 200
+/track /tracking-integration 200
+/track/ /tracking-integration 200
+/tracking /tracking-integration 200
+/tracking/ /tracking-integration 200
+/tracking-integration /tracking-integration 200
 
 /quote /#auth 302
 /quote/ /#auth 302
