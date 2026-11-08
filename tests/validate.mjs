@@ -531,7 +531,7 @@ const trackingRedirects = read('_redirects')
 const trackingPage = read('tracking-integration.html')
 const trackingContracts = [
   ['short tracking routes internally serve the dedicated tracking page and preserve query strings',
-    trackingMiddleware.includes("['/track', '/track/', '/tracking', '/tracking/', '/tracking-integration'].includes(requestPath)") &&
+    trackingMiddleware.includes("['/track', '/track/', '/tracking', '/tracking/'].includes(requestPath)") &&
     trackingMiddleware.includes("new URL('/tracking-integration', requestUrl)") &&
     trackingMiddleware.includes('destination.search = requestUrl.search') &&
     trackingMiddleware.includes("path = '/tracking-integration.html'")],
