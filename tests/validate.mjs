@@ -532,11 +532,11 @@ const trackingPage = read('tracking-integration.html')
 const trackingContracts = [
   ['short tracking routes internally serve the dedicated tracking page and preserve query strings',
     trackingMiddleware.includes("['/track', '/track/', '/tracking', '/tracking/', '/tracking-integration'].includes(requestPath)") &&
-    trackingMiddleware.includes("new URL('/tracking-integration.html', requestUrl)") &&
+    trackingMiddleware.includes("new URL('/tracking-integration', requestUrl)") &&
     trackingMiddleware.includes('destination.search = requestUrl.search') &&
     trackingMiddleware.includes("path = '/tracking-integration.html'")],
   ['Cloudflare fallback rewrites tracking aliases to the dedicated tracker, never to customer login',
-    ['/track /tracking-integration.html 200','/track/ /tracking-integration.html 200','/tracking /tracking-integration.html 200','/tracking/ /tracking-integration.html 200','/tracking-integration /tracking-integration.html 200'].every(rule => trackingRedirects.includes(rule)) &&
+    ['/track /tracking-integration 200','/track/ /tracking-integration 200','/tracking /tracking-integration 200','/tracking/ /tracking-integration 200','/tracking-integration /tracking-integration 200'].every(rule => trackingRedirects.includes(rule)) &&
     !trackingRedirects.includes('/track /#auth 302') &&
     !trackingRedirects.includes('/tracking /#auth 302') &&
     !trackingRedirects.includes('/tracking-integration /#auth 302')],
