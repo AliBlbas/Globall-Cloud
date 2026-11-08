@@ -525,6 +525,33 @@ for (const [label, passed] of mobileUiContracts) {
 }
 
 
+console.log('Production tracking routes and Supabase Realtime policy')
+const trackingMiddleware = read('functions/_middleware.js')
+const trackingRedirects = read('_redirects')
+const trackingPage = read('tracking-integration.html')
+const trackingContracts = [
+  ['short tracking routes internally serve the dedicated tracking page and preserve query strings',
+    trackingMiddleware.includes("['/track', '/track/', '/tracking', '/tracking/', '/tracking-integration'].includes(requestPath)") &&
+    trackingMiddleware.includes("new URL('/tracking-integration.html', requestUrl)") &&
+    trackingMiddleware.includes('destination.search = requestUrl.search') &&
+    trackingMiddleware.includes("path = '/tracking-integration.html'")],
+  ['Cloudflare fallback rewrites tracking aliases to the dedicated tracker, never to customer login',
+    ['/track /tracking-integration.html 200','/track/ /tracking-integration.html 200','/tracking /tracking-integration.html 200','/tracking/ /tracking-integration.html 200','/tracking-integration /tracking-integration.html 200'].every(rule => trackingRedirects.includes(rule)) &&
+    !trackingRedirects.includes('/track /#auth 302') &&
+    !trackingRedirects.includes('/tracking /#auth 302') &&
+    !trackingRedirects.includes('/tracking-integration /#auth 302')],
+  ['dedicated tracking page still owns its lookup form and route controller',
+    trackingPage.includes('id="gcTrackingForm"') &&
+    trackingPage.includes('tracking-route-controller-20261022.js') &&
+    trackingPage.includes('tracking-enhanced.js')],
+  ['production CSP allows Supabase Realtime WebSocket connections',
+    trackingMiddleware.includes("connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.supabase.co")],
+]
+for (const [label, passed] of trackingContracts) {
+  if (passed) ok(label)
+  else fail(label)
+}
+
 console.log('Super Admin write-path contracts')
 const superAdminUi = read('super-admin-live-control-v2.js')
 const superAdminMain = read('super-admin-command-center.js')
