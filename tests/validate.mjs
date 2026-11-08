@@ -536,7 +536,7 @@ const trackingContracts = [
     trackingMiddleware.includes('destination.search = requestUrl.search') &&
     trackingMiddleware.includes("path = '/tracking-integration.html'")],
   ['Cloudflare fallback rewrites tracking aliases to the dedicated tracker, never to customer login',
-    ['/track /tracking-integration 200','/track/ /tracking-integration 200','/tracking /tracking-integration 200','/tracking/ /tracking-integration 200','/tracking-integration /tracking-integration 200'].every(rule => trackingRedirects.includes(rule)) &&
+    ['/track /tracking-integration 200','/track/ /tracking-integration 200','/tracking /tracking-integration 200','/tracking/ /tracking-integration 200'].every(rule => trackingRedirects.includes(rule)) &&
     !trackingRedirects.includes('/track /#auth 302') &&
     !trackingRedirects.includes('/tracking /#auth 302') &&
     !trackingRedirects.includes('/tracking-integration /#auth 302')],
@@ -544,6 +544,9 @@ const trackingContracts = [
     trackingPage.includes('id="gcTrackingForm"') &&
     trackingPage.includes('tracking-route-controller-20261022.js') &&
     trackingPage.includes('tracking-enhanced.js')],
+  ['canonical extensionless tracking route is not rewritten to itself',
+    !trackingRedirects.includes('/tracking-integration /tracking-integration 200') &&
+    !trackingMiddleware.includes("'/tracking-integration'].includes(requestPath)")],
   ['production CSP allows Supabase Realtime WebSocket connections',
     trackingMiddleware.includes("connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.supabase.co")],
   ['dedicated tracking page does not load a second deep-link submitter beside its native controller',
