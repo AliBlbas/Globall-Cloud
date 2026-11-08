@@ -28,6 +28,85 @@ const customerApi = async ({ method = 'GET', body } = {}) => {
 };
 // Shared only within this signed-in customer page; all requests remain session-authenticated.
 window.gcCustomerApi = customerApi;
+let customerRealtimeChannel = null;
+let customerRealtimeReloadTimer = null;
+let customerRealtimeToastTimer = null;
+const realtimeUi = () => {
+  let status = document.getElementById('gcRealtimeStatus');
+  if (!status) {
+    const toolbar = document.querySelector('.workspace-toolbar');
+    status = document.createElement('span');
+    status.id = 'gcRealtimeStatus';
+    status.className = 'gc-realtime-status is-connecting';
+    status.textContent = 'ئاگادارکردنەوە زیندووە';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+    toolbar?.appendChild(status);
+  }
+  return status;
+};
+const showRealtimeToast = (title, body) => {
+  let toast = document.getElementById('gcRealtimeToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'gcRealtimeToast';
+    toast.className = 'gc-realtime-toast';
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = `<strong>${esc(title || 'ئاگادارکردنەوەی نوێ')}</strong><span>${esc(body || 'داتای هەژمارت نوێ کرایەوە.')}</span>`;
+  toast.classList.add('is-visible');
+  clearTimeout(customerRealtimeToastTimer);
+  customerRealtimeToastTimer = window.setTimeout(() => toast.classList.remove('is-visible'), 5200);
+};
+const scheduleCustomerRealtimeReload = (payload) => {
+  clearTimeout(customerRealtimeReloadTimer);
+  customerRealtimeReloadTimer = window.setTimeout(async () => {
+    try {
+      await load();
+      if (payload?.eventType !== 'UPDATE' || payload?.new?.read_at) {
+        showRealtimeToast(payload?.new?.title || 'ئاگادارکردنەوەی نوێ', payload?.new?.body || 'ئاگادارکردنەوەکەت بە نوێترین داتا نوێ کرایەوە.');
+      }
+    } catch (error) { console.warn('[gc-realtime] reload failed', error); }
+  }, 240);
+};
+const stopCustomerRealtime = async () => {
+  if (customerRealtimeChannel) {
+    try { await sb.removeChannel(customerRealtimeChannel); } catch (error) { console.warn('[gc-realtime] channel cleanup', error); }
+    customerRealtimeChannel = null;
+  }
+};
+const subscribeCustomerRealtime = async (userId) => {
+  if (!userId) return stopCustomerRealtime();
+  if (customerRealtimeChannel?.__gcUserId === userId) return;
+  await stopCustomerRealtime();
+  const status = realtimeUi();
+  status.className = 'gc-realtime-status is-connecting';
+  status.textContent = 'ئاگادارکردنەوە زیندوو دەکرێت…';
+  const channel = sb.channel(`gc-customer-notifications-${userId}`);
+  channel.__gcUserId = userId;
+  channel.on('postgres_changes', {
+    event: '*', schema: 'public', table: 'customer_notifications', filter: `customer_user_id=eq.${userId}`
+  }, (payload) => {
+    window.dispatchEvent(new CustomEvent('gc:customer-notification', { detail: payload }));
+    scheduleCustomerRealtimeReload(payload);
+  });
+  channel.subscribe((state) => {
+    const current = realtimeUi();
+    if (state === 'SUBSCRIBED') {
+      current.className = 'gc-realtime-status';
+      current.textContent = 'ئاگادارکردنەوە زیندووە';
+    } else if (state === 'CHANNEL_ERROR' || state === 'TIMED_OUT' || state === 'CLOSED') {
+      current.className = 'gc-realtime-status is-offline';
+      current.textContent = 'پەیوەندی ئاگادارکردنەوە کاتییە';
+    } else {
+      current.className = 'gc-realtime-status is-connecting';
+      current.textContent = 'ئاگادارکردنەوە زیندوو دەکرێت…';
+    }
+  });
+  customerRealtimeChannel = channel;
+};
 const $ = (id) => document.getElementById(id);
 const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const setHtml = (id, html) => { const element = $(id); if (element) element.innerHTML = html; };
@@ -320,6 +399,8 @@ const load = async () => {
   const { data: sessionResult } = await sb.auth.getSession();
   const session = sessionResult.session;
   if (!session) {
+    await stopCustomerRealtime();
+    document.getElementById('gcRealtimeStatus')?.remove();
     $('loginBtn').classList.remove('hidden');
     $('logoutBtn').classList.add('hidden');
     $('portalStatus')?.classList.remove('hidden');
@@ -328,6 +409,7 @@ const load = async () => {
   $('loginBtn').classList.add('hidden');
   $('logoutBtn').classList.remove('hidden');
   $('portalStatus')?.classList.add('hidden');
+  await subscribeCustomerRealtime(session.user.id);
   $('hello').textContent = 'بەخێربێیت بۆ ناوەندی کڕیار';
   const welcome = $('customerWelcome');
   if (welcome) {
@@ -519,7 +601,7 @@ $('authForm').addEventListener('submit', async (event) => {
   }
 });
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !$('auth').classList.contains('hidden')) $('close').click(); });
-$('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); location.replace('/#auth'); });
+$('logoutBtn').addEventListener('click', async () => { await stopCustomerRealtime(); await sb.auth.signOut(); location.replace('/#auth'); });
 $('trackBtn')?.addEventListener('click', () => { location.href = '/#shipmentsSection'; });
 $('quoteBtn')?.addEventListener('click', () => { $('quoteForm')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); $('quoteOrigin')?.focus(); });
 $('quoteMode')?.addEventListener('change', syncQuoteMeasurements);
