@@ -1,0 +1,8 @@
+/* Surface cleanup: Customer Portal + Staff Console only. Backend/auth remain untouched. */
+body.gc-public-site .gc-hero-rebuild,body.gc-public-site .gc-transport-studio,body.gc-public-site .gc-app-dashboard-preview,body.gc-public-site .gc-intelligence,body.gc-public-site .gc-track-cta,body.gc-public-site .gc-section,body.gc-public-site .gc-rate-section,body.gc-public-site .gc-page,body.gc-public-site .gc-footer{display:none!important}
+body.gc-public-site .gc-system-launchpad{display:block!important;min-height:calc(100dvh - 210px);padding-block:clamp(72px,14vh,150px) 48px}
+body.gc-public-site .gc-system-launchpad .gc-launchpad-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+body.gc-public-site .gc-system-launchpad .gc-launchpad-card{min-height:118px!important}
+body.gc-public-site .gc-system-launchpad .gc-launchpad-foot{color:#8eb1c0!important}
+body.gc-public-site .gc-system-launchpad .gc-launchpad-foot span:last-child{color:#75e6ec!important}
+@media(max-width:700px){body.gc-public-site .gc-system-launchpad{min-height:calc(100dvh - 170px);padding-block:58px 32px}body.gc-public-site .gc-system-launchpad .gc-launchpad-grid{grid-template-columns:1fr!important}}

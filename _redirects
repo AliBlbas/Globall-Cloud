@@ -1,6 +1,4 @@
 # Public tracking uses the dedicated read-only tracker; keep query-string GC links intact.
-/track /tracking-integration 200
-/track/ /track 301
 # Legacy authentication URLs intentionally converge on the single customer entry.
 /login /#auth 302
 /login/ /#auth 302
@@ -12,30 +10,13 @@
 /dashboard/ /#auth 302
 /dashboard.html /#auth 302
 /customer-portal.html /#auth 302
-/about /#about 302
-/about/ /#about 302
-/services /#services 302
-/services/ /#services 302
-/contact /#contact 302
-/contact/ /#contact 302
-/quote /#request 302
-/quote/ /#request 302
-/request /#request 302
-/request/ /#request 302
 /customer-portal /#auth 302
 /customer-portal/ /#auth 302
 /portal /#auth 302
 /portal/ /#auth 302
 /staff /staff-os-v5.html 200
 /staff/ /staff-os-v5.html 200
-/growth-voice /growth-voice/ 301
-/growth-voice.html /growth-voice/ 301
-/control-tower /control-tower.html 200
-/control-tower/ /control-tower.html 200
 # Send status aliases directly to the canonical static page rather than relying on client-side redirect code.
-/status /system-status.html 302
-/status/ /system-status.html 302
-/tracking-integration.html /track 301
 /staff-os-compat.js /staff-os-compat-v2.js 200
 
 /customer-access /#auth 302
@@ -48,3 +29,44 @@
 /staff-portal.html /staff-os-v5.html 200
 # Keep the V5 extensionless URL canonicalized; /staff and /staff-portal are served internally as V5.
 /staff-os-v5 /staff-os-v5.html 302!
+
+# Retired standalone UI surfaces: Customer Portal and Staff Console are the only public workspaces.
+/track /#auth 302
+/track/ /#auth 302
+/tracking /#auth 302
+/tracking/ /#auth 302
+/tracking-integration /#auth 302
+/tracking-integration.html /#auth 302
+/quote /#auth 302
+/quote/ /#auth 302
+/request /#auth 302
+/request/ /#auth 302
+/about /#auth 302
+/about/ /#auth 302
+/services /#auth 302
+/services/ /#auth 302
+/contact /#auth 302
+/contact/ /#auth 302
+/growth-voice /#auth 302
+/growth-voice/ /#auth 302
+/growth-voice.html /#auth 302
+/control-tower /staff 302
+/control-tower/ /staff 302
+/control-plane /staff 302
+/control-plane/ /staff 302
+/operations/* /staff 302
+/command-center* /staff 302
+/management* /staff 302
+/accounts-console* /staff 302
+/admin* /staff 302
+/superadmin* /staff 302
+/super-admin* /staff 302
+/logistics-os* /staff 302
+/warehouse-os* /staff 302
+/driver-* /staff 302
+/shop* /#auth 302
+/payment-checkout* /#auth 302
+/provider-setup* /staff 302
+/careers* /#auth 302
+/traffic-analytics* /staff 302
+/status* /staff 302
