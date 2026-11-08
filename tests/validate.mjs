@@ -546,6 +546,10 @@ const trackingContracts = [
     trackingPage.includes('tracking-enhanced.js')],
   ['production CSP allows Supabase Realtime WebSocket connections',
     trackingMiddleware.includes("connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.supabase.co")],
+  ['dedicated tracking page does not load a second deep-link submitter beside its native controller',
+    trackingMiddleware.includes("if (/^\\/(?:tracking|track)(?:\\.html)?\\/?$/i.test(path))") &&
+    !trackingMiddleware.includes("if (/^\\/(?:tracking|track|tracking-integration)") &&
+    trackingPage.includes('tracking-route-controller-20261022.js')],
 ]
 for (const [label, passed] of trackingContracts) {
   if (passed) ok(label)
