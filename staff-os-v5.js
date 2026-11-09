@@ -158,12 +158,13 @@
       'customer-chat': icon('M4 5h16v11H8l-4 4zM8 10h8'),
       requests: icon('M5 4h14v16H5zM8 8h8M8 12h8M8 16h5'),
       activity: icon('M6 4h12M6 8h12M6 12h8M6 16h10'),
-      settings: icon('M12 3l1.6 2.8 3.2.5-.8 3.1 2.1 2.3-2.1 2.3.8 3.1-3.2.5L12 21l-1.6-2.8-3.2-.5.8-3.1-2.1-2.3L8 10.1 7.2 7l3.2-.5zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6')
+      settings: icon('M12 3l1.6 2.8 3.2.5-.8 3.1 2.1 2.3-2.1 2.3.8 3.1-3.2.5L12 21l-1.6-2.8-3.2-.5.8-3.1-2.1-2.3L8 10.1 7.2 7l3.2-.5zM12 9a3 3 0 1 0 0 6 3 3 0 0 0-3-3'),
+      excel: icon('M4 4h10l6 6v10H4zM14 4v6h6M8 13l4 4M12 13l-4 4')
     };
     const items = [
       ['overview','داشبۆرد',''],['shipments','بارەکان',''],['alerts','Alerts','alertsBadge'],['customers','کڕیاران',''],
       ['pricing','نرخەکان',''],['warehouses','کۆگاكان',''],['finance','دارایی',''],['staff-chat','چاتی ستاف','staffChatBadge'],
-      ['customer-chat','چاتی کڕیار','customerChatBadge'],['requests','ئاگاداری / داواکاری','requestBadge'],['activity','Audit Log',''],['settings','ڕێکخستنەکان','']
+      ['customer-chat','چاتی کڕیار','customerChatBadge'],['requests','ئاگاداری / داواکاری','requestBadge'],['activity','Audit Log',''],['settings','ڕێکخستنەکان',''],['excel','Excel · پشکنین','']
     ];
     const navButtons = items.map(([id,label,badge]) =>
       '<button class="nav-btn '+(state.tab===id?'active':'')+'" data-tab="'+id+'"><span class="nav-icon">'+(icons[id]||'')+'</span><span>'+label+'</span>'+(badge?'<em class="nav-badge '+(badge==='alertsBadge'?'hidden':'')+'" id="'+badge+'">0</em>':'')+'</button>'
@@ -253,7 +254,7 @@
   async function loadTab(tab, force=false) {
     state.tab = tab;
     document.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('active', x.dataset.tab === tab));
-    const titles = {overview:['داشبۆرد','وێنەی گشتی لە دۆخی عملیات و پارە'],shipments:['بارەکان','ئاسمانی · وشکانی · دەریایی · tracking · carton · cargo'],alerts:['Alerts','ئاگادارییەکانی عملیات و کار'],customers:['کڕیاران','GC code · account · balance · shipment history'],pricing:['نرخەکان','Rate catalog · FX · calculator'],warehouses:['کۆگاكان','چین · دوبەی · هەولێر · ئەمریکا'],finance:['دارایی','داهات · خەرجی · قەرز · قازانج'], 'staff-chat':['چاتی ستاف','گفتوگۆی ناوخۆیی کارمەندان'], 'customer-chat':['چاتی کڕیار','وەڵامدانەوەی کڕیاران لە GC'],requests:['ئاگاداری / داواکاری','پرسیاری نرخ · account · support'],activity:['Audit Log','کێ چی کرد و کەی'],settings:['ڕێکخستنەکان','پڕۆفایل · زمان · وشەی نهێنی']};
+    const titles = {overview:['داشبۆرد','وێنەی گشتی لە دۆخی عملیات و پارە'],shipments:['بارەکان','ئاسمانی · وشکانی · دەریایی · tracking · carton · cargo'],alerts:['Alerts','ئاگادارییەکانی عملیات و کار'],customers:['کڕیاران','GC code · account · balance · shipment history'],pricing:['نرخەکان','Rate catalog · FX · calculator'],warehouses:['کۆگاكان','چین · دوبەی · هەولێر · ئەمریکا'],finance:['دارایی','داهات · خەرجی · قەرز · قازانج'], 'staff-chat':['چاتی ستاف','گفتوگۆی ناوخۆیی کارمەندان'], 'customer-chat':['چاتی کڕیار','وەڵامدانەوەی کڕیاران لە GC'],requests:['ئاگاداری / داواکاری','پرسیاری نرخ · account · support'],activity:['Audit Log','کێ چی کرد و کەی'],settings:['ڕێکخستنەکان','پڕۆفایل · زمان · وشەی نهێنی'],excel:['Excel · پشکنین','staging · row review · audit trail']};
     document.getElementById('pageTitle').textContent = titles[tab]?.[0] || tab;
     document.getElementById('pageSub').textContent = titles[tab]?.[1] || '';
     const view = document.getElementById('view');
@@ -271,6 +272,10 @@
       else if (tab==='requests') await renderRequests();
       else if (tab==='activity') await renderActivity();
       else if (tab==='settings') await renderSettings();
+      else if (tab==='excel') {
+        if (typeof window.gcStaffExcelRender !== 'function') throw new Error('Excel review service هێشتا بار نەکراوە');
+        await window.gcStaffExcelRender();
+      }
       void refreshRuntimeHealth();
     } catch (err) {
       const message = errorText(err, 'Data service error');
