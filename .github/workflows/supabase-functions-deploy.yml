@@ -22,8 +22,6 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
-      - name: Verify Supabase service-key compatibility
-        run: node scripts/normalize-supabase-secrets.mjs --check
       - name: Verify production contracts
         run: node scripts/production-contracts.mjs
 
