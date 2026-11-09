@@ -263,6 +263,11 @@ Deno.serve(async (req:Request) => {
       patch.carton_count = totalBoxes
     }
 
+    // Shipment status is the single lifecycle source of truth. Cargo rows may
+    // carry the same value for filtering and audit display, but must never
+    // diverge from the parent shipment.
+    const canonicalStatus = requestedStatus || current.data.status || current.data.operational_status || 'received_origin'
+
     patch.updated_at = new Date().toISOString()
     patch.tracking_updated_at = new Date().toISOString()
 
@@ -286,7 +291,7 @@ Deno.serve(async (req:Request) => {
         const record = {
           shipment_id:id, customer_directory_id:item.customer_directory_id, customer_gc_code:item.customer_gc_code,
           item_name:item.item_name, quantity_pc:item.quantity_pc, box_count:item.box_count, weight_kg:item.weight_kg,
-          declared_value:item.declared_value, currency:item.currency, item_status:item.item_status, notes:item.notes,
+          declared_value:item.declared_value, currency:item.currency, item_status:canonicalStatus, notes:item.notes,
           updated_by:a.staff.id, updated_at:new Date().toISOString()
         }
         if (item.id) {
@@ -304,6 +309,13 @@ Deno.serve(async (req:Request) => {
         const deleted = await a.db.from('shipment_cargo_items').delete().eq('shipment_id',id).in('id',deletedCargoIds)
         if (deleted.error) throw deleted.error
       }
+    } else if (changedStatus) {
+      // The database trigger covers all other writers; this explicit update
+      // keeps the service response deterministic for the staff console.
+      const synced = await a.db.from('shipment_cargo_items')
+        .update({item_status:canonicalStatus, updated_by:a.staff.id, updated_at:new Date().toISOString()})
+        .eq('shipment_id',id)
+      if (synced.error) throw synced.error
     }
 
     const linkedCustomers = await syncShipmentCustomerLinks(a.db,id,current.data.directory_customer_id ? String(current.data.directory_customer_id) : null,a.staff.id,true)
