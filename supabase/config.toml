@@ -120,3 +120,6 @@ verify_jwt = false
 
 [functions.land-manifests]
 verify_jwt = true
+
+[functions.finance-control]
+verify_jwt = false

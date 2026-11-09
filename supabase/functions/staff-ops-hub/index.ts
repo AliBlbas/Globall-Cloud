@@ -106,6 +106,40 @@ async function notifyCustomerFinance(a:any, transaction:any, eventType:'created'
   }
 }
 
+async function getFinance(a:any){
+  if(!FINANCE_ROLES.has(a.role)) throw new Error('Finance permission required')
+  const [txQ,shipQ,customerQ,costEntryQ,legacyCostQ,fxQ]=await Promise.all([
+    a.admin.from('finance_transactions').select('id,type,gc_code,amount_usd,reference,note,created_at').order('created_at',{ascending:false}).limit(5000),
+    a.admin.from('shipments').select('id,customer_gc_code,directory_customer_id,total_amount,paid_amount,currency,status,created_at,archived_at').order('created_at',{ascending:false}).limit(5000),
+    a.admin.from('customer_directory').select('id,code,gc_code,name,phone,is_active').order('created_at',{ascending:false}).limit(5000),
+    a.admin.from('company_cost_entries').select('id,category,description,amount,currency,branch,route_key,occurred_at,created_at').order('occurred_at',{ascending:false}).limit(5000),
+    a.admin.from('company_costs').select('id,description,amount_iqd,origin_key,dest_key,branch,occurred_at,created_at').order('occurred_at',{ascending:false}).limit(5000),
+    a.admin.from('exchange_rates').select('rate,usd_to_iqd,is_active,created_at').order('created_at',{ascending:false}).limit(20)
+  ])
+  for(const q of [txQ,shipQ,customerQ]) if(q.error) throw q.error
+  const tx=txQ.data||[], shipments=(shipQ.data||[]).filter((x:any)=>!x.archived_at), customers=customerQ.data||[]
+  const fx=Number((fxQ.data||[]).find((x:any)=>x.is_active)?.rate||(fxQ.data||[])[0]?.rate||(fxQ.data||[])[0]?.usd_to_iqd||0)
+  const costs:any[]=[]
+  if(!costEntryQ.error) for(const x of costEntryQ.data||[]) costs.push({...x,source:'company_cost_entries'})
+  if(!legacyCostQ.error) for(const x of legacyCostQ.data||[]) costs.push({id:x.id,category:'legacy_operating_cost',description:x.description,amount:Number(x.amount_iqd||0),currency:'IQD',branch:x.branch,route_key:x.origin_key&&x.dest_key?`${x.origin_key} → ${x.dest_key}`:null,occurred_at:x.occurred_at,created_at:x.created_at,source:'company_costs'})
+  const byType=(types:string[])=>tx.filter((x:any)=>types.includes(String(x.type||'').toLowerCase())).reduce((n:number,x:any)=>n+Number(x.amount_usd||0),0)
+  const revenue=shipments.reduce((n:number,x:any)=>n+Number(x.total_amount||0),0)
+  const collected=shipments.reduce((n:number,x:any)=>n+Number(x.paid_amount||0),0)
+  const outstanding=Math.max(0,revenue-collected)
+  const otherIncome=byType(['income'])
+  const manualExpense=byType(['expense','cost','out'])
+  const customerLedger=byType(['customer_charge','customer_payment','refund','adjustment'])
+  const costsByCurrency:any={}
+  for(const c of costs){const cur=String(c.currency||'USD').toUpperCase();costsByCurrency[cur]=(costsByCurrency[cur]||0)+Number(c.amount||0)}
+  const operatingCostUsd=Number(costsByCurrency.USD||0)+(fx>0?Number(costsByCurrency.IQD||0)/fx:0)
+  const profit=revenue+otherIncome-manualExpense-operatingCostUsd
+  const balances=new Map<string,any>()
+  for(const c of customers){const code=String(c.gc_code||c.code||'').toUpperCase();if(code)balances.set(code,{gc_code:code,name:c.name||'—',phone:c.phone||'',is_active:c.is_active!==false,shipment_count:0,shipment_total:0,shipment_paid:0,shipment_outstanding:0,ledger_delta:0,account_balance:0})}
+  for(const x of shipments){const code=String(x.customer_gc_code||'').toUpperCase();if(!code)continue;const r=balances.get(code)||{gc_code:code,name:'—',phone:'',is_active:true,shipment_count:0,shipment_total:0,shipment_paid:0,shipment_outstanding:0,ledger_delta:0,account_balance:0};r.shipment_count++;r.shipment_total+=Number(x.total_amount||0);r.shipment_paid+=Number(x.paid_amount||0);r.shipment_outstanding+=Math.max(0,Number(x.total_amount||0)-Number(x.paid_amount||0));balances.set(code,r)}
+  for(const x of tx){const code=String(x.gc_code||'').toUpperCase();if(!code)continue;const r=balances.get(code)||{gc_code:code,name:'—',phone:'',is_active:true,shipment_count:0,shipment_total:0,shipment_paid:0,shipment_outstanding:0,ledger_delta:0,account_balance:0};const type=String(x.type||'').toLowerCase();const amount=Number(x.amount_usd||0);if(type==='customer_charge')r.ledger_delta+=amount;else if(type==='customer_payment'||type==='refund')r.ledger_delta-=amount;else if(type==='adjustment')r.ledger_delta+=amount;balances.set(code,r)}
+  const customer_balances=[...balances.values()].map((r:any)=>({...r,account_balance:Number(Math.max(0,r.shipment_outstanding+r.ledger_delta).toFixed(2)),ledger_delta:Number(r.ledger_delta.toFixed(2)),shipment_total:Number(r.shipment_total.toFixed(2)),shipment_paid:Number(r.shipment_paid.toFixed(2)),shipment_outstanding:Number(r.shipment_outstanding.toFixed(2))})).sort((a:any,b:any)=>b.account_balance-a.account_balance)
+  return {kind:'finance',transactions:tx,customers:customer_balances,company_costs:costs,exchange_rate_usd_iqd:fx,summary:{revenue_usd:Number(revenue.toFixed(2)),collected_usd:Number(collected.toFixed(2)),outstanding_usd:Number(outstanding.toFixed(2)),other_income_usd:Number(otherIncome.toFixed(2)),manual_expense_usd:Number(manualExpense.toFixed(2)),operating_cost_usd:Number(operatingCostUsd.toFixed(2)),profit_usd:Number(profit.toFixed(2)),customer_ledger_delta_usd:Number(customerLedger.toFixed(2)),costs_by_currency:costsByCurrency},period:'all_available_records'}
+}
 async function financeCreate(a:any,data:Json){
   if(!FINANCE_ROLES.has(a.role))throw new Error('Finance permission required')
   const type=txt(data.type)||'income',amount=num(data.amount_usd)
@@ -165,12 +199,7 @@ Deno.serve(async(req:Request)=>{
       }
       if(kind==='finance'){
         if(!FINANCE_ROLES.has(a.role)) return json(req,{error:'Finance permission required'},403)
-        const {data:transactions,error}=await a.admin.from('finance_transactions').select('id,type,gc_code,amount_usd,reference,note,created_at').order('created_at',{ascending:false}).limit(1000)
-        if(error) throw error
-        const rows=transactions||[]
-        const income=rows.filter((x:any)=>['income','customer_payment','payment'].includes(String(x.type))).reduce((sum:number,x:any)=>sum+Number(x.amount_usd||0),0)
-        const expense=rows.filter((x:any)=>['expense','cost'].includes(String(x.type))).reduce((sum:number,x:any)=>sum+Number(x.amount_usd||0),0)
-        return json(req,{kind:'finance',transactions:rows,summary:{income,expense,profit:income-expense},period:'all_available_records'})
+        return json(req,await getFinance(a))
       }
       return json(req,{ok:true})
     }
