@@ -117,7 +117,7 @@ const surfaceChecks = [
   ['staff shell loads current responsive layers', staff.includes('gc-staff-dashboard-final-20261103.css?v=2') && staff.includes('gc-staff-mobile-elegance-20261106.css?v=3')],
   ['staff command deck is the final loader layer', loader.includes("/gc-staff-command-deck-20261023.css?v=4") && loader.includes('loadStyle')],
   ['staff auth runtime is injected only through current middleware', middleware.includes('staff-auth-runtime-fix.js') && middleware.includes('STAFF_V5')],
-  ['canonical public tracking route is stable and loop-free', routes.includes('/track /tracking-integration.html 200') && routes.includes('/tracking /tracking-integration.html 200') && !routes.includes('/tracking /track 301') && !routes.includes('/tracking-integration.html /track 301')],
+  ['canonical public tracking route is stable and loop-free', routes.includes('/track /track/index.html 200') && routes.includes('/tracking /track/index.html 200') && !routes.includes('/tracking /track 301') && !routes.includes('/tracking-integration.html /track 301')],
   ['canonical status route is public', routes.includes('/status /system-status.html 302')],
 ]
 for (const [label, passed] of surfaceChecks) passed ? ok(label) : fail(label)

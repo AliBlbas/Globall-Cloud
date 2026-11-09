@@ -160,16 +160,6 @@ export async function onRequest(context) {
     pageRequest = new Request(destination.toString(), context.request);
     path = '/staff-os-v5.html';
   }
-  // Public shipment tracking has a dedicated read-only page. Keep ?gc=, ?id= and
-  // legacy tracking query aliases intact while rewriting internally (no login redirect).
-  // Resolve directly to the .html asset; routing through /tracking-integration would
-  // be normalized by Pages and could re-enter the same middleware branch indefinitely.
-  if (['/track', '/track/', '/tracking', '/tracking/'].includes(requestPath)) {
-    const destination = new URL('/tracking-integration.html', requestUrl);
-    destination.search = requestUrl.search;
-    pageRequest = new Request(destination.toString(), context.request);
-    path = '/tracking-integration.html';
-  }
   if (requestPath === '/health' || requestPath === '/api/health') return new Response(JSON.stringify({ok:true,service:'globall-cloud',cloudflare:'pages',edge:'ok',timestamp:new Date().toISOString()}), {status:200,headers:{'content-type':'application/json; charset=UTF-8','cache-control':'no-store'}});
   if (requestPath === '/release.json') return new Response(JSON.stringify({service:'globall-cloud',branch:context.env?.CF_PAGES_BRANCH||'main',commit:context.env?.CF_PAGES_COMMIT_SHA||null,generated_at:new Date().toISOString()}), {status:200,headers:{'content-type':'application/json; charset=UTF-8','cache-control':'no-store'}});
   if (!accept.toLowerCase().includes(HTML_ACCEPT)) return context.next(pageRequest);
