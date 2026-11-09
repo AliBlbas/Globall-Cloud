@@ -22,6 +22,23 @@ const txt = (value: unknown) => {
   const result = String(value ?? '').trim()
   return result || null
 }
+function warehouseHub(value: unknown) {
+  const normalized = String(value ?? '').normalize('NFKC').trim().toLowerCase()
+  if (normalized === 'uae' || normalized === 'dubai' || normalized === 'دوبەی' || normalized === 'دوبی') return 'dubai'
+  if (normalized === 'china' || normalized === 'چین') return 'china'
+  if (normalized === 'erbil' || normalized === 'hawler' || normalized === 'هەولێر') return 'erbil'
+  if (normalized === 'usa' || normalized === 'united states' || normalized === 'ئەمریکا') return 'usa'
+  return normalized
+}
+function staffCanAccessLocation(staff: Record<string, unknown>, location: unknown) {
+  const role = String(staff.role || '')
+  if (role === 'admin' || role === 'super_admin') return true
+  const target = warehouseHub(location)
+  const roleHub = ({ warehouse_china: 'china', warehouse_uae: 'dubai', warehouse_erbil: 'erbil' } as Record<string, string>)[role]
+  if (roleHub && roleHub !== target) return false
+  const branch = String(staff.branch || 'all').trim().toLowerCase()
+  return branch === 'all' || warehouseHub(branch) === target
+}
 function storagePath(value: unknown): string | null {
   const raw = txt(value)
   if (!raw) return null
@@ -48,7 +65,7 @@ async function actor(req: Request) {
   if (authError || !authData.user) throw new Error('Unauthorized')
   const admin = createClient(url, service, { auth: { persistSession: false, autoRefreshToken: false } })
   const { data: staff, error: staffError } = await admin.from('staff')
-    .select('id,full_name,role,is_active')
+    .select('id,full_name,role,branch,is_active')
     .eq('id', authData.user.id)
     .maybeSingle()
   if (staffError) throw staffError
@@ -153,6 +170,7 @@ Deno.serve(async (req: Request) => {
     if (receiptError) throw receiptError
     if (!receipt) throw new Error('Receipt not found')
     const receiptLocation = String(receipt.location || receipt.source_warehouse || receipt.warehouse || 'warehouse')
+    if (!staffCanAccessLocation(staff, receiptLocation)) throw new Error('Warehouse branch is not authorized for this receipt location')
     if (!isDubaiLocation(receiptLocation)) {
       return json(req, {
         ok: true, receipt_id: receipt.id, warehouse: receiptLocation, received_at: receipt.received_at || null,
