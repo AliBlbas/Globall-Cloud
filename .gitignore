@@ -6,3 +6,8 @@ supabase/.temp/
 .DS_Store
 *.log
 coverage/
+# Private operational workbooks and local audit extracts must never enter Git.
+data/private/
+*.xlsx
+*.xlsm
+workbook-audit.json

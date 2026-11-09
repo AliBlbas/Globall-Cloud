@@ -7,10 +7,13 @@
    * mobile uses one five-action dock plus an accessible drawer for all modules.
    * Legacy visual shells and duplicate floating command layers remain excluded.
    */
-  const enhancementStyles = [];
+  const enhancementStyles = [
+    // Keep the command deck as the final staff visual layer after runtime
+    // bridges append their compatibility styles.
+    '/gc-staff-command-deck-20261023.css?v=4'
+  ];
 
   const enhancementScripts = [
-    '/gc-staff-mobile-dock-20261016.js?v=9',
     '/staff-os-v5-shipment-create-fix.js?v=20260912-2',
     '/staff-os-v5-shipment-control-bridge.js?v=20260912-2',
     '/staff-os-data-health-panel.js?v=20260912-2',
@@ -60,8 +63,8 @@
     window.__gcStaffEnhancementsLoaded = true;
     enhancementStyles.forEach(loadStyle);
     for (const src of enhancementScripts) await loadOne(src);
-    // The entrypoint owns the canonical style stack; do not append legacy themes.
-    loadStyle('/gc-staff-mobile-elegance-20261106.css?v=3');
+    // The command deck is intentionally re-appended after runtime bridges.
+    loadStyle('/gc-staff-command-deck-20261023.css?v=4');
   };
 
   const waitForShell = () => {

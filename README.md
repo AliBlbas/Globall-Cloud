@@ -92,6 +92,10 @@ npm test
 bash scripts/validate-production.sh
 ```
 
+## Private Excel reconciliation
+
+The repository includes `scripts/audit-workbook.py` and `docs/WORKBOOK_IMPORT.md` for reviewing private operational workbooks before an approved import. The utility repairs Excel files locally when their stylesheet XML is incompatible with strict readers, reports sheet structure, and deliberately avoids exporting or uploading private rows. Raw `.xlsx`/`.xlsm` files and local audit outputs are ignored by Git.
+
 The validation suite now treats the TypeScript parser as mandatory and checks all Supabase Edge Function files instead of silently skipping TypeScript syntax validation when dependencies are unavailable. The GitHub Actions production-integrity workflow runs the same dependency installation step before its release gates.
 
 ## GitHub Actions and Cloudflare Pages status

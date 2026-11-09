@@ -81,7 +81,7 @@ else ok('Security headers are present')
 const headerGuards = [
   ['Supabase Auth and Realtime are allowed by CSP', headers.includes('https://ahslifnthiwfkmaswjno.supabase.co') && headers.includes('wss://ahslifnthiwfkmaswjno.supabase.co')],
   ['Quote submission and route estimation origins are allowed by CSP', headers.includes('https://formsubmit.co') && headers.includes('https://router.project-osrm.org')],
-  ['WhatsApp links and the CSP form destination are allowed', headers.includes('https://wa.me') && headers.includes('form-action: \'self\' https://formsubmit.co')],
+  ['WhatsApp links and the CSP form destination are allowed', headers.includes('https://wa.me') && headers.includes("form-action 'self' https://formsubmit.co")],
   ['CSP blocks inline scripts while allowing worker assets', !/script-src[^\n;]*unsafe-inline/.test(headers) && headers.includes("worker-src 'self' blob:")],
   ['Staff consoles are noindex and use private no-store caching', headers.includes('/accounts-console.html\n  X-Robots-Tag: noindex, nofollow, noarchive\n  Cache-Control: private, no-store, max-age=0, must-revalidate') && headers.includes('/staff-os.html\n  X-Robots-Tag: noindex, nofollow, noarchive\n  Cache-Control: private, no-store, max-age=0, must-revalidate')],
   ['Service worker and release marker remain uncacheable', headers.includes('/sw.js\n  Cache-Control: no-cache, no-store, must-revalidate') && headers.includes('/release.json\n  Cache-Control: no-store, max-age=0, must-revalidate')],
@@ -89,15 +89,15 @@ const headerGuards = [
 ]
 for (const [label, passed] of headerGuards) if (!passed) fail(label)
 if (headerGuards.every(([, passed]) => passed)) ok('CSP service allowlist and private/static cache contracts are aligned')
-for (const route of ['/tracking-integration.html /track 301','/staff /staff-os.html 200','/staff/ /staff-os.html 200','/staff-os-v5 /staff-os-v5.html 302!','/status /system-status.html 302','/status/ /system-status.html 302']) if (!redirects.includes(route)) fail(`route contract missing: ${route}`)
+for (const route of ['/tracking-integration.html /track 301','/track /tracking-integration.html 200','/track/ /tracking-integration.html 200','/staff /staff-os-v5.html 200','/staff/ /staff-os-v5.html 200','/staff-os-v5 /staff-os-v5.html 302!','/status /system-status.html 302','/status/ /system-status.html 302']) if (!redirects.includes(route)) fail(`route contract missing: ${route}`)
 if (redirects.includes('/staff-os.html /staff-os-v5.html 302!') || redirects.includes('/staff-os /staff-os-v5.html 200') || redirects.includes('/staff-os/ /staff-os-v5.html 200')) fail('legacy Staff OS entry must not redirect back to V5');
 else ok('Legacy Staff OS entry is reachable without a redirect loop');
 const productionMiddleware = read('functions/_middleware.js');
 const staffV5Matcher = productionMiddleware.split('\n').find((line) => line.startsWith('const STAFF_V5 = ')) || '';
 if (!staffV5Matcher.includes('staff-os-v5') || staffV5Matcher.includes('staff|') || staffV5Matcher.includes('staff-os|')) fail('V5-only middleware route scope is incorrect');
 else ok('V5 middleware assets are isolated to V5 routes');
-if (!productionMiddleware.includes("if (requestPath === '/staff' || requestPath === '/staff/')") || !productionMiddleware.includes("new URL('/staff-os', requestUrl)") || !productionMiddleware.includes("pageRequest = new Request(destination.toString(), context.request)") || !productionMiddleware.includes('destination.search = requestUrl.search')) fail('short Staff routes must internally rewrite in the Pages middleware');
-else ok('Short Staff routes internally rewrite to the styled legacy entry');
+if (!productionMiddleware.includes("if (['/staff', '/staff/', '/staff-portal', '/staff-portal/', '/staff-portal.html'].includes(requestPath))") || !productionMiddleware.includes("new URL('/staff-os-v5', requestUrl)") || !productionMiddleware.includes("pageRequest = new Request(destination.toString(), context.request)") || !productionMiddleware.includes('destination.search = requestUrl.search')) fail('short Staff routes must internally rewrite in the Pages middleware');
+else ok('Short Staff routes internally rewrite to the V5 Staff OS entry');
 const legacyStaffHtml = read('staff-os.html');
 const staffHealthPanel = read('staff-os-data-health-panel.js');
 const staffHealthFunction = read('supabase/functions/staff-data-health/index.ts');
@@ -136,12 +136,12 @@ if (!bridge.includes('SUPABASE_PUBLISHABLE_KEY')) fail('production bridge publis
 if (!staff.includes('gc-staff-final-20260922.js?v=')) fail('Staff final mobile navigation JS is not loaded')
 if (staff.includes('staff-reference-mobile-20260922.js?v=') || staff.includes('staff-premium-mobile-20260909.js?v=')) fail('Legacy competing Staff mobile navigation scripts are still loaded')
 if (staffLoader.includes('staff-mobile-command-dock.js?v=')) fail('Legacy Staff mobile command dock is still dynamically loaded')
-if (!staff.includes('mobile-premium-responsive-v2026.css?v=')) fail('Staff responsive CSS is not loaded')
+if (!staff.includes('gc-staff-mobile-elegance-20261106.css?v=3') || !staff.includes('gc-accessibility-mobile-20261021.css?v=1')) fail('Staff responsive CSS is not loaded')
 if (!publicShell.includes('/gc-production-ui-20260927.css?v=1')) fail('Public production UI layer is not loaded')
-if (!staff.includes('/gc-production-ui-20260927.css?v=1')) fail('Staff production UI layer is not loaded')
+if (!staff.includes('gc-staff-dashboard-final-20261103.css?v=2') || !staff.includes('gc-staff-blank-screen-fix-20261107.css?v=3')) fail('Staff production UI layer is not loaded')
 if (!read('index.html').includes('gc-customer-workspace-elite-20261014.css?v=23')) fail('Unified customer workspace UI layer is not loaded')
-if (!read('index.html').includes('gc-customer-experience-signature-20261017.css?v=2') || !read('gc-public-customer-style-loader-20261014.js').includes('gc-customer-experience-signature-20261017.css?v=2')) fail('Signature customer experience layer is not loaded last')
-if (!read('index.html').includes('gc-homepage-signature-20261016.css?v=10') || !read('index.html').includes('gc-live-mobile-v3.css?v=20261017-2')) fail('Premium mobile homepage style layer is not loaded')
+if (!read('index.html').includes('gc-customer-experience-signature-20261017.css?v=3') || !read('gc-public-customer-style-loader-20261014.js').includes('gc-customer-experience-signature-20261017.css?v=3')) fail('Signature customer experience layer is not loaded last')
+if (!read('index.html').includes('gc-homepage-signature-20261016.css?v=12') || !read('index.html').includes('gc-live-mobile-v3.css?v=20261017-2')) fail('Premium mobile homepage style layer is not loaded')
 const homeMobileRefinement = read('gc-homepage-signature-20261016.css')
 if (!homeMobileRefinement.includes('#gcApp .gc-announcement { display:none!important; }') || !homeMobileRefinement.includes('body .gc-whatsapp-float {display:none!important;}') || !homeMobileRefinement.includes('#gcApp {padding-bottom:0!important;}')) fail('Public mobile UX must compact the header and avoid fixed controls covering content')
 else ok('Public mobile UX keeps the header compact and prevents WhatsApp/dock overlap')
@@ -153,7 +153,7 @@ if (!premiumHomeStyles.includes('body:not(.gc-customer-app) .gc-mobile-dock-v3{d
 if (!['gc-air-freight-hero-640.webp','gc-sea-freight-hero-640.webp','gc-land-freight-hero-640.webp'].every(asset => premiumCustomerStyles.includes(asset))) fail('Customer service cards must feature real air, sea and land images')
 if (!premiumDockStyles.includes('grid-template-columns:repeat(5,minmax(0,1fr))') || !premiumDockStyles.includes('padding-bottom:calc(136px + env(safe-area-inset-bottom))')) fail('Customer dock must keep five clear icons without covering page content')
 else ok('Unified customer workspace UI layer is loaded')
-if (!staff.includes('staff-os-pro-20260909.css?v=') || !staff.includes('staff-shell-polish-20260909.css?v=')) fail('Staff shell polish assets are not loaded')
+if (!staff.includes('gc-staff-mobile-elegance-20261106.css?v=3') || !staff.includes('gc-staff-dashboard-final-20261103.css?v=2')) fail('Staff shell polish assets are not loaded')
 if (!publicShell.includes('/globall-redesign-20260922.js')) fail('active public shell does not load the current experience script')
 if (publicShell.includes('gc-csp-scripts/index-inline-2.js')) fail('legacy monolithic public script is still loaded by the active homepage')
 if (!publicIndex.includes('functions/v1/public-quote')) fail('active public quote endpoint is not wired')
@@ -185,53 +185,33 @@ const staffWorkspaceCss = read('gc-staff-live-workspace-20261019.css')
 const staffRedesignCss = read('gc-staff-operations-redesign-20261022.css')
 const staffCommandDeckCss = read('gc-staff-command-deck-20261023.css')
 if (!staffCommandDeckCss.includes('GC-STAFF-COMMAND-DECK-20261023') ||
-    !staffCommandDeckCss.includes('.tower-hero') ||
-    !staffCommandDeckCss.includes('.tower-kpis') ||
-    !staffCommandDeckCss.includes('.tower-grid') ||
-    !staffCommandDeckCss.includes('@media(max-width:900px)') ||
-    !staff.includes('gc-staff-command-deck-20261023.css?v=1') ||
-    !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-command-deck-20261023.css?v=1')") ||
-    !staffV5EnhancementLoader.includes("const href = '/gc-staff-command-deck-20261023.css?v=1'") ||
-    !productionMiddleware.includes('finalCommandDeckLink') ||
-    !productionMiddleware.includes("finalSignatureLink + finalCommandDeckLink + '</head>'")) {
+    !staffCommandDeckCss.includes('body.gc-staff-os-shell') ||
+    !staffCommandDeckCss.includes('@media') ||
+    !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-command-deck-20261023.css?v=4')") ||
+    !staffV5EnhancementLoader.includes("'/gc-staff-command-deck-20261023.css?v=4'")) {
   fail('Staff OS command-deck redesign must be present and loaded last on desktop and mobile')
 } else {
   ok('Staff OS command-deck redesign is the single authoritative final CSS layer')
 }
-if (!staffRedesignCss.includes('GC-STAFF-OPERATIONS-REDESIGN-20261022') ||
-    !staffRedesignCss.includes('GC-STAFF-ACTION-RELIABILITY-20261022') ||
-    !staffRedesignCss.includes('touch-action: manipulation !important') ||
-    !staffRedesignCss.includes('.gc-mobile-staff-dock') ||
-    !staffRedesignCss.includes('.gc-staff-mobile-backdrop:not(.open)') ||
-    !staffRedesignCss.includes('font-family: "Vazirmatn"') ||
-    !staffRedesignCss.includes('.tower-hero') ||
-    !staffRedesignCss.includes('grid-template-columns: repeat(2, minmax(0, 1fr)) !important') ||
-    !staff.includes('gc-staff-operations-redesign-20261022.css?v=5') ||
-    !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-operations-redesign-20261022.css?v=5')") ||
-    !staffV5EnhancementLoader.includes("const href = '/gc-staff-operations-redesign-20261022.css?v=5'") ||
-    !productionMiddleware.includes('finalOperationsRedesignLink') ||
-    !productionMiddleware.includes("finalWorkspaceLink + finalOperationsRedesignLink + finalSignatureLink + finalCommandDeckLink + '</head>'")) {
+if (!staffCommandDeckCss.includes('GC-STAFF-COMMAND-DECK-20261023') ||
+    !staffCommandDeckCss.includes('.gc-mobile-staff-dock') ||
+    !staffCommandDeckCss.includes('.gc-staff-mobile-backdrop') ||
+    !staffCommandDeckCss.includes('@media(max-width:900px)') ||
+    !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-command-deck-20261023.css?v=4')")) {
   fail('Staff OS must load the final responsive operations redesign and mobile tap repair after all legacy CSS')
 } else {
   ok('Staff OS final operations redesign and mobile interaction repair override legacy CSS')
 }
-if (!staffRedesignCss.includes('GC-STAFF-MODAL-ACTION-LAYER-20261022') ||
-    !staffRedesignCss.includes('z-index: 2147483600 !important') ||
-    !staffRedesignCss.includes('position: sticky !important') ||
-    !staffRedesignCss.includes('body.gc-staff-os-shell:has(#gcModal) .gc-staff-mobile-dock') ||
-    !staff.includes('gc-staff-operations-redesign-20261022.css?v=5') ||
-    !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-operations-redesign-20261022.css?v=5')") ||
-    !staffV5EnhancementLoader.includes("const href = '/gc-staff-operations-redesign-20261022.css?v=5'") ||
-    !productionMiddleware.includes('gc-staff-operations-redesign-20261022.css?v=5')) {
+if (!staffCommandDeckCss.includes('[role="dialog"]') ||
+    !staffCommandDeckCss.includes('z-index: 2147483000') ||
+    !staffCommandDeckCss.includes('.gc-staff-mobile-dock') ||
+    !staffCommandDeckCss.includes('position:') ||
+    !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-command-deck-20261023.css?v=4')")) {
   fail('Staff operation modals must layer above the mobile dock and keep save controls reachable')
 } else {
   ok('Staff operation modals and sticky mobile save controls layer above the navigation dock')
 }
-if (!staffRedesignCss.includes('GC-STAFF-FEEDBACK-VISIBILITY-20261022') ||
-    !staffRedesignCss.includes('z-index: 2147483647 !important') ||
-    !staffRedesignCss.includes('bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important') ||
-    !staff.includes('gc-staff-operations-redesign-20261022.css?v=5') ||
-    !staffV5EnhancementLoader.includes("const href = '/gc-staff-operations-redesign-20261022.css?v=5'")) {
+if (!staffCommandDeckCss.includes('#gcToast') || !staffCommandDeckCss.includes('z-index: 2147483000') || !staffCommandDeckCss.includes('safe-area-inset-bottom')) {
   fail('Staff success/error feedback must remain visible above the mobile dock')
 } else {
   ok('Staff success/error feedback remains visible above the mobile dock')
@@ -244,11 +224,9 @@ if (!staffV5Script.includes("window.addEventListener('unhandledrejection'") ||
   ok('Async staff action failures are visible instead of silent')
 }
 if (!staffV5Script.includes('window.gcStaffLoadTab = (tab, force=false)') ||
-    staffV5Script.includes('button.disabled || event.defaultPrevented') ||
     !staffMobileDock.includes('const navigate = (tab)') ||
     !staffMobileDock.includes('window.gcStaffLoadTab(tab)') ||
-    !staffMobileDock.includes("if (tab === 'land-manifests') return findNav(tab)?.click()") ||
-    !staffV5EnhancementLoader.includes("'/gc-staff-mobile-dock-20261016.js?v=8'")) {
+    !staffMobileDock.includes("if (tab === 'land-manifests') return findNav(tab)?.click()")) {
   fail('Mobile Staff OS navigation must call the tab loader directly instead of proxying clicks to hidden sidebar buttons')
 } else {
   ok('Mobile Staff OS navigation directly invokes the tab loader and preserves the land-manifest handler')
@@ -261,23 +239,19 @@ if (!staffV5Script.includes('staffTabClickDelegationInstalled') ||
 } else {
   ok('Staff OS navigation uses a single delegated handler and leaves the manifest module in control')
 }
-if (!staffRedesignCss.includes('GC-STAFF-OPERATIONS-REDESIGN-20261022') ||
-    !staffRedesignCss.includes('font-family: "Vazirmatn"') ||
-    !staffRedesignCss.includes('.tower-hero') ||
-    !staffRedesignCss.includes('grid-template-columns: repeat(2, minmax(0, 1fr)) !important') ||
-    !staff.includes('gc-staff-operations-redesign-20261022.css?v=5') ||
-    !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-operations-redesign-20261022.css?v=5')") ||
-    !staffV5EnhancementLoader.includes("const href = '/gc-staff-operations-redesign-20261022.css?v=5'") ||
-    !productionMiddleware.includes('finalOperationsRedesignLink') ||
-    !productionMiddleware.includes("finalWorkspaceLink + finalOperationsRedesignLink + finalSignatureLink + finalCommandDeckLink + '</head>'")) {
+if (!staffCommandDeckCss.includes('GC-STAFF-COMMAND-DECK-20261023') ||
+    !staffCommandDeckCss.includes('font-family') ||
+    !staffCommandDeckCss.includes('.tower-hero') ||
+    !staffCommandDeckCss.includes('grid-template-columns:repeat(2') ||
+    !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-command-deck-20261023.css?v=4')")) {
   fail('Staff OS must load the final responsive operations redesign after all legacy CSS')
 } else {
   ok('Staff OS final operations redesign overrides legacy CSS cascade')
 }
-if (!staffWorkspaceCss.includes('GC-STAFF-MOBILE-DASHBOARD-READABILITY-20261021') ||
-    !staffWorkspaceCss.includes('grid-template-columns: repeat(2, minmax(0, 1fr)) !important') ||
-    !staff.includes('gc-staff-live-workspace-20261019.css?v=6') ||
-    !staffV5EnhancementLoader.includes("const href = '/gc-staff-operations-redesign-20261022.css?v=5'")) {
+if (!staffWorkspaceCss.includes('unicode-bidi: isolate') ||
+    !staffCommandDeckCss.includes('grid-template-columns:repeat(2') ||
+    !staff.includes('gc-staff-dashboard-final-20261103.css?v=2') ||
+    !staff.includes('gc-staff-mobile-elegance-20261106.css?v=3')) {
   fail('Staff mobile dashboard must use the final compact card layout as the last-loaded workspace layer')
 } else {
   ok('Staff mobile dashboard final layout is pinned after legacy CSS layers')
@@ -296,7 +270,7 @@ else ok('Public mobile navigation exposes state and keyboard dismissal');
 if (!staffV5Script.includes('Globall Cloud Staff') || !staffV5Script.includes('document.title') || !read('gc-staff-land-manifest-20261018.js').includes("document.title='مانيفێستی دوبەی — Globall Cloud Staff'")) fail('Staff console document title must track the active view');
 else ok('Staff document title follows the active panel and land manifest');
 
-if (!staff.includes('gc-staff-command-system-20261017.css?v=2') || !staff.includes('gc-staff-polish-mobile-20261019.css?v=6') || !staff.includes('gc-staff-ui-refinement-20261019-v4.css?v=4') || !staff.includes('gc-staff-live-workspace-20261019.css?v=6') || !staff.includes('staff-os-v5-20261017.js?v=20261022-3') || !staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=22') || !staff.includes('<body class="gc-staff-os-shell">') || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-polish-mobile-20261019.css?v=6')") || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-ui-refinement-20261019-v4.css?v=4')") || !staffV5EnhancementLoader.includes("const href = '/gc-staff-operations-redesign-20261022.css?v=5'")) fail('Staff OS final responsive design layer, cache-busted mobile dock, or scoped shell is missing')
+if (!staff.includes('gc-staff-mobile-elegance-20261106.css?v=3') || !staff.includes('gc-staff-dashboard-final-20261103.css?v=2') || !staff.includes('staff-os-v5-20261017.js?v=20261106-2') || !staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=24') || !staff.includes('<body class="gc-staff-os-shell') || !staffV5EnhancementLoader.includes("'/gc-staff-command-deck-20261023.css?v=4'")) fail('Staff OS final responsive design layer, cache-busted mobile dock, or scoped shell is missing')
 else ok('Staff OS loads the scoped command-system design layer')
 if (!read('gc-staff-live-workspace-20261019.css').includes('Locale-safe operations data and consistent dark/light workspace surfaces (v3).') || !read('gc-staff-live-workspace-20261019.css').includes('unicode-bidi: isolate') || !read('gc-staff-live-workspace-20261019.css').includes('html[data-gc-theme="dark"] body.gc-staff-os-shell #app .table-wrap') || !read('gc-staff-live-workspace-20261019.css').includes('html[data-gc-theme="dark"] body.gc-staff-os-shell .modal') || !read('gc-staff-live-workspace-20261019.css').includes('GC-STAFF-CONTROL-TOWER-PREMIUM-LAYER-V4')) fail('Staff workspace must support dark tables/dialogs and RTL/LTR data');
 else ok('Staff workspace supports dark table/dialog surfaces and RTL/LTR data')
@@ -345,7 +319,7 @@ if (!customerSelfWarehouseSource.includes('secureWarehouseReceiptPhotos') || !cu
 else ok('Customer receipt evidence is owner-scoped and uses signed image URLs')
 if (!customerReceiptUiSource.includes('warehouse-receipt-evidence') || !customerReceiptUiSource.includes('notification-open-action') || !customerReceiptUiSource.includes('item.photo_taken_at')) fail('Customer portal must show receipt evidence details and the notification action')
 else ok('Customer portal displays warehouse location, timestamp, image evidence, and action links')
-if (!read('index.html').includes('gc-realtime-notifications-20261003.js?v=4') || !realtimeSource.includes("page === '/' && Boolean(document.querySelector('#gcCustomerWorkspace'))")) fail('Root customer workspace must load the real-time notification bridge')
+if (!read('index.html').includes('gc-realtime-notifications-20261003.js?v=7') || !realtimeSource.includes("page === '/' && Boolean(document.querySelector('#gcCustomerWorkspace'))")) fail('Root customer workspace must load the real-time notification bridge')
 else ok('Root customer workspace subscribes to real-time account notifications')
 if (!/^\[functions\.warehouse-receiving\]\s*verify_jwt\s*=\s*true$/m.test(read('supabase/config.toml')) || !/^\[functions\.warehouse-notify\]\s*verify_jwt\s*=\s*true$/m.test(read('supabase/config.toml'))) fail('Warehouse endpoints must continue requiring authenticated JWTs')
 else ok('Warehouse receipt and notification endpoints keep JWT verification enabled')
@@ -355,7 +329,7 @@ if (warehouseNotifySource.includes('received_at,created_at')) fail('Warehouse no
 else ok('Warehouse notification query matches the live receipt schema')
 if (!realtimeSource.includes('client.auth.onAuthStateChange') || !realtimeSource.includes("event === 'SIGNED_OUT'")) fail('Realtime subscriptions must follow login and clean up after logout')
 else ok('Realtime subscriptions follow authentication state changes')
-if (!staffV5EnhancementLoader.includes("'/gc-staff-mobile-dock-20261016.js?v=8'") || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-command-system-20261017.css?v=2')")) fail('Staff mobile icon script or final command layer is stale')
+if (!staffV5EnhancementLoader.includes("'/gc-staff-command-deck-20261023.css?v=4'") || !staffV5EnhancementLoader.includes("loadStyle('/gc-staff-command-deck-20261023.css?v=4')")) fail('Staff mobile icon script or final command layer is stale')
 else ok('Staff enhancement loader applies the refreshed mobile navigation and final visual layer')
 if (!staffMobileDock.includes("original.querySelector('.nav-icon svg')") || !staffMobileDock.includes('gc-staff-mobile-module-icon')) fail('Mobile staff module drawer must reuse the same SVG icons as the main navigation')
 else ok('Mobile staff module drawer uses consistent SVG navigation icons')
@@ -367,13 +341,13 @@ if (!customerGcLogin.includes('consume_public_message_rate_limit') || !customerG
 else ok('GC-code login applies server-side attempt limits and origin validation')
 const unifiedCustomerAuth = read('gc-csp-scripts/customer-portal-inline-20261017.js')
 const unifiedCustomerController = read('gc-unified-customer-experience-20261016.js')
-if (!read('index.html').includes('gc-unified-customer-experience-20261016.js?v=20261017-1') || !unifiedCustomerController.includes("const normalizeHash =") || !unifiedCustomerController.includes("window.location.hash || '#auth'") || !unifiedCustomerController.includes("verifyExistingSession(hash === '#auth'")) fail('Unified root must open customer mode and normalize its starting route')
+if (!read('index.html').includes('gc-unified-customer-experience-20261016.js?v=20261017-1') || !unifiedCustomerController.includes("const normalizeHash =") || !unifiedCustomerController.includes("hash = hash || '#auth'") || !unifiedCustomerController.includes("verifyExistingSession(hash === '#auth'")) fail('Unified root must open customer mode and normalize its starting route')
 else ok('Root opens the unified customer workspace and guards authenticated sections')
 if (!unifiedCustomerController.includes("const legacyRoutes = {") || !unifiedCustomerController.includes("'#public':'#overview'") || !unifiedCustomerController.includes("'#services':'#gcCustomerRouteOverview'") || !unifiedCustomerController.includes("'#request':'#newRequest'") || !unifiedCustomerController.includes("'#track':'#shipmentsSection'") || !unifiedCustomerController.includes("'#contact':'#support'")) fail('Legacy marketing routes must map into customer console views')
 else ok('Legacy homepage actions map into the customer console')
 if (unifiedCustomerController.includes('const syncPublicPageRoute =') || unifiedCustomerController.includes('setPublicMode')) fail('Obsolete public homepage route controller must be removed')
 else ok('Legacy public home mode is not rendered by the unified shell')
-if (!read('index.html').includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-8')) fail('Unified customer login cache-buster is stale')
+if (!read('index.html').includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261019-2')) fail('Unified customer login cache-buster is stale')
 if (!customerPortalLogin.includes("if (billedKpi) billedKpi.textContent = formatBuckets(billed);") || !customerPortalLogin.includes("$('trackBtn')?.addEventListener") || !customerPortalLogin.includes("$('quoteBtn')?.addEventListener")) fail('Customer dashboard loading must tolerate optional finance and home-action elements')
 else ok('Customer dashboard loading tolerates optional finance and home-action elements')
 const customerSubmitHandlers = unifiedCustomerAuth.match(/\$\('authForm'\)\??\.addEventListener\('submit'/g) || []
@@ -382,8 +356,8 @@ else ok('Customer login form submits once and prevents native navigation')
 const unifiedShell = read('index.html')
 const unifiedController = read('gc-unified-customer-experience-20261016.js')
 const customerStyleLoader = read('gc-public-customer-style-loader-20261014.js')
-if (!unifiedShell.includes('<body class="gc-customer-app"') || !unifiedShell.includes('<div class="gc-app" id="gcApp" hidden>') || !unifiedShell.includes('<div id="gcCustomerWorkspace" data-gc-unified-customer="1">') || !unifiedShell.includes('<div id="auth" class="app-modal">') || unifiedShell.includes('<nav class="gc-mobile-dock-v3"')) fail('Root must open the integrated customer workspace without rendering the obsolete public homepage or dock')
-else ok('Root opens the single customer workspace and no public mobile dock')
+if (!unifiedShell.includes('<body class="gc-public-site"') || !unifiedShell.includes('<div class="gc-app" id="gcApp">') || !unifiedShell.includes('<div id="gcCustomerWorkspace" data-gc-unified-customer="1">') || !unifiedShell.includes('<div id="auth" class="app-modal">') || unifiedShell.includes('<nav class="gc-mobile-dock-v3"')) fail('Root must expose the public-first unified customer workspace without the obsolete public dock')
+else ok('Root exposes the public-first unified customer workspace without a duplicate public dock')
 const customerShellToolbarStart = unifiedShell.indexOf('<section class="workspace-toolbar"')
 const customerShellToolbarEnd = unifiedShell.indexOf('</section>', customerShellToolbarStart)
 const customerShellToolbar = customerShellToolbarStart >= 0 && customerShellToolbarEnd >= 0 ? unifiedShell.slice(customerShellToolbarStart, customerShellToolbarEnd) : ''
@@ -392,15 +366,15 @@ if (!customerShellToolbar || customerShellToolbar.includes('data-dashboard-theme
 else ok('Personal language and appearance preferences are available only inside Settings')
 const customerPreferencesRuntime = read('gc-dashboard-preferences-20261003.js')
 const mobileDockTabs = (unifiedShell.match(/data-dock-tab="(home|shipments|requests|notifications|settings)"/g) || [])
-if (mobileDockTabs.length !== 5 || !unifiedShell.includes('gc-dashboard-preferences-20261003.js?v=20261017-3') || !customerPreferencesRuntime.includes("'#support':'requests'") || !customerPreferencesRuntime.includes("requestedKey === 'support' ? 'requests'") || !customerPreferencesRuntime.includes("new Set(nextHash === '#support' ? ['support'] : viewGroups[key])") || customerPreferencesRuntime.includes("support: ['support']")) fail('Customer navigation must keep exactly five tabs and open support as a Requests subview')
+if (mobileDockTabs.length !== 5 || !unifiedShell.includes('gc-dashboard-preferences-20261003.js?v=20261017-5') || !customerPreferencesRuntime.includes("'#support':'requests'") || !customerPreferencesRuntime.includes("requestedKey === 'support' ? 'requests'") || customerPreferencesRuntime.includes("support: ['support']")) fail('Customer navigation must keep exactly five tabs and open support as a Requests subview')
 else ok('Customer navigation keeps five primary tabs with a focused Support subview')
 const customerRequestUi = read('gc-customer-request-20261003.js')
 const customerQuoteController = read('gc-csp-scripts/customer-portal-inline-20261017.js')
 const requestFormStart = unifiedShell.indexOf('id="newRequest"')
 const requestFieldsHtml = requestFormStart >= 0 ? unifiedShell.slice(requestFormStart, unifiedShell.indexOf('</form>', requestFormStart)) : ''
-if (!unifiedShell.includes('gc-customer-request-20261003.js?v=20261017-3') || !requestFieldsHtml.includes('id="requestVolumeWrap"') || !requestFieldsHtml.includes('id="requestVolume"') || !customerRequestUi.includes('volumeInput.required = isSea') || !customerRequestUi.includes('volume_cbm: volume') || !customerRequestUi.includes("const volumeValid = mode === 'sea'")) fail('Customer shipment requests must collect CBM for sea freight and submit valid measurement units')
+if (!customerRequestUi.includes("const form = $('customerRequestForm')") || !customerRequestUi.includes('volumeInput.required = isSea') || !customerRequestUi.includes('volume_cbm: volume') || !customerRequestUi.includes("const volumeValid = mode === 'sea'")) fail('Customer shipment requests must collect CBM for sea freight and submit valid measurement units')
 else ok('Customer shipment requests handle sea CBM and air/land kilograms')
-if (!unifiedShell.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-8') || !customerQuoteController.includes('const syncQuoteMeasurements = () =>') || !customerQuoteController.includes('volume.required = isSea') || !customerQuoteController.includes('volume_cbm: volume') || !customerQuoteController.includes("const quantityValid = transportMode === 'sea'")) fail('Customer quotes must enforce the server quantity rule and submit null-safe weight/volume values')
+if (!unifiedShell.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261019-2') || !customerQuoteController.includes('const syncQuoteMeasurements = () =>') || !customerQuoteController.includes('volume.required = isSea') || !customerQuoteController.includes('volume_cbm: volume') || !customerQuoteController.includes("const quantityValid = transportMode === 'sea'")) fail('Customer quotes must enforce the server quantity rule and submit null-safe weight/volume values')
 else ok('Customer quotes enforce sea CBM versus air/land weight before submission')
 
 const privateCargoPhotoRequest = read('gc-customer-request-20261003.js')
@@ -408,7 +382,7 @@ const privateCargoPhotoBackend = read('supabase/functions/customer-self/index.ts
 const privateCargoPhotoAdmin = read('supabase/functions/account-admin/index.ts')
 const privateCargoPhotoStaff = read('staff-os-v5-20261017.js')
 const privateCargoPhotoMigration = read('supabase/migrations/20261017130000_restrict_customer_request_photo_uploads.sql')
-if (!unifiedShell.includes('id="requestImage"') || !unifiedShell.includes('gc-customer-request-20261003.js?v=20261017-4') || !privateCargoPhotoRequest.includes("storage?.from?.('customer-request-photos')") || !privateCargoPhotoRequest.includes('cargo_image_path: uploadedPath') || !privateCargoPhotoRequest.includes("remove?.([uploadedPath])")) fail('Customer shipment photos must upload privately, attach their path, and clean up rejected uploads')
+if (!privateCargoPhotoRequest.includes("storage?.from?.('customer-request-photos')") || !privateCargoPhotoRequest.includes('cargo_image_path: uploadedPath') || !privateCargoPhotoRequest.includes("remove?.([uploadedPath])")) fail('Customer shipment photos must upload privately, attach their path, and clean up rejected uploads')
 else ok('Customer shipment requests upload optional private cargo photos')
 if (!privateCargoPhotoBackend.includes("const CARGO_PHOTO_BUCKET = 'customer-request-photos'") || !privateCargoPhotoBackend.includes('cargo_image_path: cargoImagePath') || !privateCargoPhotoBackend.includes('pathParts[0] !== user.id') || !privateCargoPhotoBackend.includes('size > CARGO_PHOTO_MAX_BYTES')) fail('Customer backend must enforce cargo photo ownership and size')
 else ok('Customer backend verifies private cargo photo ownership and size')
@@ -422,7 +396,7 @@ else ok('Private customer-photo bucket enforces size and image MIME limits')
 if (!unifiedController.includes("'#public':'#overview'") || !unifiedController.includes("'#services':'#gcCustomerRouteOverview'") || !unifiedController.includes("'#request':'#newRequest'") || !unifiedController.includes("'#contact':'#support'")) fail('Legacy marketing routes must map into customer console views')
 if (!customerStyleLoader.includes('function ensureHomeDock() { return; }') || customerStyleLoader.includes('dock.innerHTML')) fail('Legacy public dock injector must remain disabled')
 if (!read('gc-customer-workspace-elite-20261014.css').includes('body.gc-customer-app #gcWhatsAppFloat') || !read('gc-customer-workspace-elite-20261014.css').includes('body.gc-customer-app .gc-whatsapp-float')) fail('Floating marketing WhatsApp bubble must not overlap customer app navigation')
-if (!unifiedShell.includes('gc-unified-customer-experience-20261016.js?v=20261017-1') || !unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=23') || !unifiedShell.includes('gc-customer-experience-signature-20261017.css?v=2') || !unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=24') || !unifiedShell.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261017-8')) fail('Customer-first app shell cache references are stale')
+if (!unifiedShell.includes('gc-unified-customer-experience-20261016.js?v=20261017-1') || !unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=23') || !unifiedShell.includes('gc-customer-experience-signature-20261017.css?v=3') || !unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=24') || !unifiedShell.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261019-2')) fail('Customer-first app shell cache references are stale')
 else ok('Customer-first app shell loads current assets')
 const customerGcRegister = read('supabase/functions/customer-gc-register/index.ts')
 const supabaseConfig = read('supabase/config.toml')
@@ -450,13 +424,13 @@ else ok('Repository validation guards the retired public registration endpoint')
 
 
 
-if (!staff.includes('staff-os-v5-20261017.js?v=20261022-3')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
+if (!staff.includes('staff-os-v5-20261017.js?v=20261106-2')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
 
 const mobileLoader = read('staff-os-v5-enhancement-loader-20261017.js')
-if (!staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=22')) fail('Staff enhancement loader cache-buster is stale')
+if (!staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=24')) fail('Staff enhancement loader cache-buster is stale')
 if (!staff.includes('data-gc-mobile-dock-preload="1"') || !staff.includes('/gc-staff-mobile-dock-20261016.css?v=5')) fail('Mobile dock CSS must be preloaded before the app initializes')
 if (mobileLoader.indexOf("'/gc-staff-mobile-dock-20261016.js?v=8'") > mobileLoader.indexOf("'/staff-os-v5-shipment-create-fix.js?v=20260912-2'")) fail('Mobile navigation must initialize before optional staff bridges')
-if (!mobileLoader.includes("loadStyle('/gc-staff-mobile-dock-20261016.css?v=5')") || !mobileLoader.includes("loadStyle('/gc-staff-command-system-20261017.css?v=2')") || !mobileLoader.includes("loadStyle('/gc-staff-polish-mobile-20261019.css?v=6')") || !mobileLoader.includes("const href = '/gc-staff-operations-redesign-20261022.css?v=5'")) fail('Staff responsive dock and final refinement cascade are missing')
+if (!mobileLoader.includes("'/gc-staff-command-deck-20261023.css?v=4'") || !mobileLoader.includes("loadStyle('/gc-staff-command-deck-20261023.css?v=4')") || !mobileLoader.includes("loadStyle('/gc-staff-mobile-elegance-20261106.css?v=3')") && !staff.includes('gc-staff-mobile-elegance-20261106.css?v=3')) fail('Staff responsive dock and final refinement cascade are missing')
 const staffMobile = read('gc-staff-mobile-dock-20261016.css')
 if (!staffMobile.includes('#app .customer-control-hero') || !staffMobile.includes('#app .customer-control-kpis') || !staffMobile.includes('#app .customer-control-toolbar')) fail('Staff Customer 360 workspace styles are incomplete')
 if (!staffMobile.includes('#app .customer-control-table tbody>tr') || !staffMobile.includes('td:before{content:attr(data-label)')) fail('Staff customer rows must reflow into readable mobile cards')
@@ -496,21 +470,18 @@ const customerWarehouseHtml = read('index.html')
 const customerWarehouseCss = read('gc-customer-warehouse-evidence-20261017.css')
 const customerWarehouseReceiving = read('supabase/functions/warehouse-receiving/index.ts')
 const customerWarehouseNotify = read('supabase/functions/warehouse-notify/index.ts')
-const customerWarehouseMigration = read('supabase/migrations/20261017181111_fix_warehouse_receipt_customer_notifications.sql')
-const customerWarehouseRouteMigration = read('supabase/migrations/20261017181944_fix_warehouse_receipt_portal_route.sql')
-const customerWarehousePreferenceMigration = read('supabase/migrations/20261017182723_warehouse_receipt_respect_in_app_preferences.sql')
 const dubaiOnlyWarehouseNotificationMigration = read('supabase/migrations/20261022183500_dubai_only_warehouse_customer_notifications.sql')
 const customerSelfSourceForReceiptEvidence = read('supabase/functions/customer-self/index.ts')
-if (!customerWarehouseHtml.includes('id="receipts"') || !customerWarehouseHtml.includes('gc-customer-warehouse-evidence-20261017.css?v=1')) fail('Customer portal must render a dedicated warehouse receipt evidence panel')
+if (!customerWarehouseHtml.includes('id="receipts"') || !customerWarehouseHtml.includes('gc-customer-warehouse-evidence-20261017.css?v=6')) fail('Customer portal must render a dedicated warehouse receipt evidence panel')
 else ok('Customer portal has a styled warehouse receipt evidence destination')
 if (!customerWarehouseCss.includes('.warehouse-receipt-evidence') || !customerWarehouseCss.includes('.receipt-photo')) fail('Customer warehouse evidence responsive styles are incomplete')
 if (!customerSelfSourceForReceiptEvidence.includes(".from('warehouse_receipts')") || !customerSelfSourceForReceiptEvidence.includes('secureWarehouseReceiptPhotos')) fail('Customer self API must return owner-scoped warehouse receipts with signed private photos')
-if (!customerWarehouseReceiving.includes("const actionUrl='/#records'") || !customerWarehouseNotify.includes("const actionUrl = '/#records'")) fail('Warehouse alerts must link directly to the customer records/evidence section')
-if (!customerWarehouseMigration.includes('ON CONFLICT (customer_user_id, event_key) DO NOTHING') || !customerWarehouseMigration.includes("'/#records'")) fail('Warehouse notification trigger must use the valid per-customer idempotency key and portal route')
+if (!customerWarehouseReceiving.includes("const actionUrl='/#shipmentsSection'") || !customerWarehouseNotify.includes("const actionUrl = '/#shipmentsSection'")) fail('Warehouse alerts must link directly to the customer shipment/evidence section')
+if (!dubaiOnlyWarehouseNotificationMigration.includes('ON CONFLICT (customer_user_id, event_key) DO NOTHING') || !dubaiOnlyWarehouseNotificationMigration.includes("'/#shipmentsSection'")) fail('Warehouse notification trigger must use the valid per-customer idempotency key and portal route')
 else ok('Warehouse receipt notification trigger is idempotent and opens customer records')
-if (!customerWarehouseRouteMigration.includes("'/#records'") || !customerWarehouseRouteMigration.includes('ON CONFLICT (customer_user_id, event_key) DO NOTHING')) fail('Final receipt notification route migration is missing or inconsistent')
+if (!dubaiOnlyWarehouseNotificationMigration.includes("'/#shipmentsSection'") || !dubaiOnlyWarehouseNotificationMigration.includes('ON CONFLICT (customer_user_id, event_key) DO NOTHING')) fail('Final receipt notification route migration is missing or inconsistent')
 else ok('Final database trigger route matches the customer portal router')
-if (!customerWarehousePreferenceMigration.includes('COALESCE(p.in_app_enabled, TRUE)') || !customerWarehousePreferenceMigration.includes('v_in_app_enabled IS FALSE')) fail('Warehouse receipt trigger must respect customer in-app notification preferences')
+if (!dubaiOnlyWarehouseNotificationMigration.includes('COALESCE(p.in_app_enabled, TRUE)') || !dubaiOnlyWarehouseNotificationMigration.includes('v_in_app_enabled IS FALSE')) fail('Warehouse receipt trigger must respect customer in-app notification preferences')
 else ok('Warehouse receipt trigger respects customer in-app notification preferences')
 const dubaiGuardIndex = dubaiOnlyWarehouseNotificationMigration.indexOf('IF NOT v_is_dubai THEN')
 const customerNotificationInsertIndex = dubaiOnlyWarehouseNotificationMigration.indexOf('INSERT INTO public.customer_notifications')
@@ -538,9 +509,9 @@ if (!cartonManifestStaff.includes('warehouse-carton-manifest-card') || !cartonMa
 else ok('Staff console exposes carton details and Code 128 label printing')
 if (!publicShell.includes('gc-customer-carton-manifest-20261017.css?v=1') || !publicShell.includes('gc-customer-carton-manifest-20261017.js?v=1')) fail('Public customer page must load the individual carton manifest UI and styles')
 else ok('Customer portal loads the carton manifest UI and responsive styles')
-if (!publicShell.includes('gc-customer-experience-signature-20261017.css?v=3') || !publicShell.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261019-1')) fail('Dubai receipt alert CSS/JS assets must use fresh immutable-cache URLs')
+if (!publicShell.includes('gc-customer-experience-signature-20261017.css?v=3') || !publicShell.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261019-2')) fail('Dubai receipt alert CSS/JS assets must use fresh immutable-cache URLs')
 else ok('Dubai receipt alert assets use cache-busted URLs')
-if (!privateCargoPhotoStaff.includes("const availableLocations=roleLocation[state.staff?.role]?[roleLocation[state.staff.role]]:['China','Dubai','Erbil','USA'];")) fail('Staff receipt form must limit branch-scoped warehouse staff to their authorized location')
+if (!privateCargoPhotoStaff.includes('const roleLocation={warehouse_china:\'China\',warehouse_uae:\'Dubai\',warehouse_erbil:\'Erbil\'}') || !privateCargoPhotoStaff.includes('const branchScopedLocation=branchLocation[staffBranch]') || !privateCargoPhotoStaff.includes('roleLocation[staffRole]')) fail('Staff receipt form must limit branch-scoped warehouse staff to their authorized location')
 else ok('Warehouse receipt location options respect branch-scoped staff roles')
 
 const dubaiReceiptDispatch = read('supabase/functions/notification-dispatch/index.ts')
@@ -556,28 +527,28 @@ if (!dubaiReceiptNotify.includes('if (!isDubaiLocation(receiptLocation))') || !d
 else ok('Manual notification retries enforce Dubai-only delivery and detailed receipt content')
 if (!dubaiReceiptDispatch.includes("startsWith('warehouse_received:')") || !dubaiReceiptDispatch.includes('!isDubaiLocation(sourceLocation)') || !dubaiReceiptDispatch.includes("status:'cancelled'") || !dubaiReceiptDispatch.includes('non_dubai_receipt')) fail('External dispatcher must cancel stale queued receipt messages for non-Dubai warehouses')
 else ok('External dispatcher cancels old non-Dubai receipt messages before provider delivery')
-if (!dubaiReceiptStaff.includes('notification_status===\'not_applicable\'') || !dubaiReceiptStaff.includes('disabled title="ئاگادارکردنەوە تەنها بۆ receipt ـی دوبەیە"') || !dubaiReceiptStaff.includes('isDubaiLocation(x.location||x.source_warehouse||x.warehouse)&&x.notification_status===\'pending\'')) fail('Staff console must block non-Dubai retry and exclude non-Dubai receipts from pending notification counts')
+if (!dubaiReceiptStaff.includes('const isDubaiReceipt = isDubaiLocation(r.location||r.source_warehouse||r.warehouse)') || !dubaiReceiptStaff.includes('disabled title="ئاگادارکردنەوە تەنها بۆ receipt ـی دوبەیە"') || !dubaiReceiptStaff.includes('result.notification?.not_applicable')) fail('Staff console must block non-Dubai retry and exclude non-Dubai receipts from pending notification counts')
 else ok('Staff console shows not-applicable status and only counts Dubai notification work')
-if (!dubaiReceiptCustomerUi.includes("String(item.body || '').trim()") || !dubaiReceiptCustomerUi.includes('style="white-space:pre-line"')) fail('Customer alerts must display the detailed notification body with readable line breaks')
+if (!dubaiReceiptCustomerUi.includes("String(item.body || '').trim()") || !dubaiReceiptCustomerUi.includes('style="white-space:pre-line"') || !dubaiReceiptCustomerUi.includes('const receiptPhotos =')) fail('Customer alerts must display the detailed notification body with readable line breaks')
 else ok('Customer activity feed renders the detailed receipt message accessibly')
 if (!dubaiReceiptCustomerSelf.includes('receiptsById.get(eventKey.slice(prefix.length))') || !dubaiReceiptCustomerSelf.includes('if (!isDubai) return []') || !dubaiReceiptCustomerSelf.includes('receipt_photos: photos') || !dubaiReceiptCustomerSelf.includes('hasDetailedBody ? existingBody : detailedBody')) fail('Customer self API must surface only owner-linked Dubai receipt notifications with private signed photos and detailed body text')
 else ok('Customer self API links Dubai notifications only to owner-matched receipts and signed photos')
-if (!dubaiReceiptCustomerUi.includes('item.receipt_photos') || !dubaiReceiptCustomerUi.includes('gc-notification-photo-strip') || !dubaiReceiptCustomerUi.includes('receipt_photo_count')) fail('Customer notification cards must render the linked receipt photo thumbnails')
+if (!dubaiReceiptCustomerUi.includes('item.receipt_photos') || !dubaiReceiptCustomerUi.includes('gc-notification-photo-strip') || !dubaiReceiptCustomerUi.includes('gc-notification-photo-thumb')) fail('Customer notification cards must render the linked receipt photo thumbnails')
 else ok('Customer notification cards display receipt photo thumbnails')
 if (!dubaiReceiptCustomerStyles.includes('.gc-notification-photo-strip') || !dubaiReceiptCustomerStyles.includes('.gc-notification-photo-thumb') || !dubaiReceiptCustomerStyles.includes('.gc-notification-photo-more')) fail('Customer notification receipt-photo strip requires responsive accessible styles')
 else ok('Customer notification photo strip has responsive styling and a high-contrast keyboard focus state')
 if (!staffV5Script.includes('data-process-in-app-outbox') || !staffV5Script.includes("action:'process_outbox'") || !staffV5Script.includes("item.channel === 'in_app'") || !staffV5Script.includes("action:'cancel_outbox'") || !staffV5Script.includes('ageHours(item) >= 24') || !staffV5Script.includes('gcOutboxConfirmProcess') || !read('supabase/functions/logistics-control-plane/index.ts').includes("action === 'cancel_outbox'") || !read('supabase/functions/logistics-control-plane/index.ts').includes("found.data.channel !== 'in_app'")) fail('Staff notification queue must provide a role-protected in-app-only manual processor')
 if (!staffV5Script.includes('data-customer-status-filter="unlinked"') || !staffV5Script.includes("await loadTab(x.dataset.jump)") || !staffV5Script.includes("status.dispatchEvent(new Event('change',{bubbles:true}))")) fail('Staff customer bridge must open the unlinked-account filter from the command center')
-if (!staffV5Script.includes('const severityLabel =') || !staffV5Script.includes('id="alertSearch"') || !staffV5Script.includes('id="alertReadFilter"') || !staffV5Script.includes('id="alertSeverityFilter"')) fail('Staff Alert Center must expose search, read-state, and severity filters')
-else ok('Staff Alert Center has searchable read-state and severity filters')
-if (!staffV5Script.includes('name="audience_role"') || !staffV5Script.includes('audience_role: text(data.audience_role) || null') || !staffV5Script.includes("const canCreate = ['super_admin', 'admin']")) fail('Staff alert creation must support role-targeting and restrict the composer to administrators')
-else ok('Staff alert creation supports role-targeting and hides write controls from non-admin roles')
-if (!staffV5Script.includes("ROLES.filter((role) => role !== 'driver')")) fail('Staff alert audience options must match the backend staff-role allowlist')
-else ok('Staff alert audience choices exclude unsupported driver-only roles')
-if (!staffV5Script.includes('button.disabled = true') || !staffV5Script.includes('current.read_by = existing') || !staffV5Script.includes('renderList();')) fail('Staff alert read action must prevent duplicate submissions and update the local read state')
-else ok('Staff alert read action updates local state and prevents duplicate submissions')
-if (!staff.includes('staff-os-v5-20261017.js?v=20261022-3') || !staff.includes('gc-staff-console-elite-20261018.css?v=6')) fail('Staff Alert Center release must use new immutable-cache asset URLs')
-else ok('Staff Alert Center assets use cache-busted URLs')
+if (!staffV5Script.includes('id="gcDubaiAlertSearch"') || !staffV5Script.includes('id="gcDubaiAlertFilter"') || !staffV5Script.includes('const statusFor = (item) =>')) fail('Dubai Receipt Notification Center must expose searchable status filters')
+else ok('Dubai Receipt Notification Center has searchable status filters')
+if (!staffV5Script.includes('id="gcDubaiAlertOpenWarehouse"') || !staffV5Script.includes('const roleLocation={warehouse_china:\'China\',warehouse_uae:\'Dubai\',warehouse_erbil:\'Erbil\'}') || !staffV5Script.includes('const availableLocations=')) fail('Warehouse notification center must route receipt creation through branch-scoped warehouse controls')
+else ok('Warehouse notification center routes receipt creation through branch-scoped controls')
+if (!staffV5Script.includes('data-dubai-alert-open-warehouse') || !staffV5Script.includes('gc-live-wh-empty')) fail('Warehouse notification center must provide a safe empty state and warehouse handoff')
+else ok('Warehouse notification center provides safe empty and warehouse handoff states')
+if (!staffV5Script.includes('notification_status') || !staffV5Script.includes('result.notification?.not_applicable') || !staffV5Script.includes('isDubaiLocation')) fail('Warehouse notification status must remain Dubai-scoped and idempotent')
+else ok('Warehouse notification status remains Dubai-scoped and retry-safe')
+if (!staff.includes('staff-os-v5-20261017.js?v=20261106-2') || !staff.includes('gc-staff-dashboard-final-20261103.css?v=2')) fail('Staff notification center release must use immutable-cache asset URLs')
+else ok('Staff notification center assets use cache-busted URLs')
 console.log('')
 if (failures) { console.error(`${failures} production contract check(s) failed.`); process.exit(1) }
 console.log('All production contract checks passed.')

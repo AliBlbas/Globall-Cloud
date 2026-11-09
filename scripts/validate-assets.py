@@ -17,6 +17,10 @@ for asset in assets:
 
 middleware = (root / "functions" / "_middleware.js").read_text(encoding="utf-8")
 for asset in re.findall(r'''(?:href|src)=["'](/[^?"']+)''', middleware):
+    # Middleware also contains internal route destinations such as /staff and
+    # /#auth; those are not static asset paths and are intentionally omitted.
+    if "#" in asset or Path(asset).suffix == "":
+        continue
     if not (root / asset.lstrip("/")).is_file():
         errors.append(f"middleware asset is missing: {asset}")
 

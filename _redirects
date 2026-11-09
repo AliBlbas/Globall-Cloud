@@ -30,12 +30,16 @@
 # Keep the V5 extensionless URL canonicalized; /staff and /staff-portal are served internally as V5.
 /staff-os-v5 /staff-os-v5.html 302!
 
-# Retired standalone UI surfaces: Customer Portal and Staff Console are the only public workspaces.
-/track /tracking-integration 200
-/track/ /tracking-integration 200
-/tracking /tracking-integration 200
-/tracking/ /tracking-integration 200
+# Public tracking is intentionally anonymous and uses the read-only tracker.
+# Keep the canonical /track URL stable while preserving query-string GC codes.
+/track /tracking-integration.html 200
+/track/ /tracking-integration.html 200
+/tracking /track 301
+/tracking/ /track 301
+/tracking-integration /tracking-integration.html 200
+/tracking-integration.html /track 301
 
+# Retired standalone UI surfaces: Customer Portal and Staff Console are the only public workspaces.
 /quote /#auth 302
 /quote/ /#auth 302
 /request /#auth 302
@@ -68,4 +72,7 @@
 /provider-setup* /staff 302
 /careers* /#auth 302
 /traffic-analytics* /staff 302
-/status* /staff 302
+# The status page is public and reports live edge/backend readiness.
+/status /system-status.html 302
+/status/ /system-status.html 302
+/status.html /system-status.html 302

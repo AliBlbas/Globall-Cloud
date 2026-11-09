@@ -9,13 +9,13 @@
   const homeStyles = [
     '/gc-live-mobile-v3.css?v=20261017-2',
     '/gc-homepage-elite-20261014.css?v=4',
-    '/gc-homepage-signature-20261016.css?v=10'
+    '/gc-homepage-signature-20261016.css?v=12'
   ];
   const customerStyles = [
     '/gc-customer-workspace-elite-20261014.css?v=23',
     '/gc-customer-mobile-dock-20261016.css?v=5',
-    '/gc-customer-experience-signature-20261017.css?v=2',
-    '//gc-ui-integrity-mobile-20261017.css?v=6'
+    '/gc-customer-experience-signature-20261017.css?v=3',
+    '/gc-ui-integrity-mobile-20261017.css?v=6'
   ];
 
   const desiredStyles = () => {

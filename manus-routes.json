@@ -2,6 +2,9 @@
   "routes": [
     {"path": "/", "title": "Globall Cloud"},
     {"path": "/track", "title": "شوێنکەوتنی بار"},
+    {"path": "/tracking-integration.html", "title": "شوێنکەوتنی بار"},
+    {"path": "/status", "title": "دۆخی سیستەم"},
+    {"path": "/system-status.html", "title": "دۆخی سیستەم"},
     {"path": "/customer-portal", "title": "Customer Portal"},
     {"path": "/customer-portal.html", "title": "Customer Portal"},
     {"path": "/login", "title": "Customer Login"},

@@ -214,13 +214,17 @@ const renderNotifications = (items) => setHtml('notifications',
       const title = isReceiptNotice
         ? (isDubaiReceipt ? 'کاڵاکەت لە کۆگای دوبەی وەرگیرا' : 'کاڵاکەت لە کۆگا وەرگیرا')
         : item.title;
-      // Receipt notifications intentionally stay concise. Photos, carton IDs,
-      // package counts, weights and timestamps are rendered under Shipments.
-      const body = isReceiptNotice
+      const body = String(item.body || '').trim() || (isReceiptNotice
         ? (isDubaiReceipt
           ? 'وردەکاری، وێنە و ژمارەی کارتۆن لە بەشی بارەکان ببینە.'
           : 'وردەکاری و بەڵگەی کاڵاکەت لە بەشی بارەکان ببینە.')
-        : item.body;
+        : '');
+      const receiptPhotos = isReceiptNotice && Array.isArray(item.receipt_photos)
+        ? item.receipt_photos.filter((url) => typeof url === 'string' && /^https?:\/\//i.test(url)).slice(0, 8)
+        : [];
+      const photoStrip = receiptPhotos.length
+        ? `<div class="gc-notification-photo-strip" aria-label="وێنەکانی بەڵگەی وەرگرتن">${receiptPhotos.map((url, index) => `<a class="gc-notification-photo-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img class="gc-notification-photo-thumb" src="${esc(url)}" alt="بەڵگەی وەرگرتن ${index + 1}" loading="lazy"></a>`).join('')}</div>`
+        : '';
       const givenAction = typeof item.action_url === 'string' && (item.action_url.startsWith('/') || item.action_url.startsWith('#')) && !item.action_url.startsWith('//')
         ? item.action_url
         : '';
@@ -228,7 +232,7 @@ const renderNotifications = (items) => setHtml('notifications',
       const actionLabel = isReceiptNotice ? 'بینینی بارەکان' : 'بینینی بەشی پەیوەندیدارەکە';
       return `<article class="item notification-item ${isRead ? 'is-read' : 'is-unread'}" data-notification-state="${isRead ? 'read' : 'unread'}">
         <div class="row notification-item-head"><strong>${esc(title)}</strong>${isRead ? '<span class="pill">خوێندراوە</span>' : `<button class="btn notification-action" type="button" data-read-notification="${esc(item.id)}">خوێندراوە بکە</button>`}</div>
-        <div class="muted notification-body" style="white-space:pre-line">${esc(body)}</div>
+        <div class="muted notification-body" style="white-space:pre-line">${esc(body)}</div>${photoStrip}
         <div class="row notification-item-foot"><small class="notification-time">${esc(date(item.created_at))}</small>${action ? `<a class="btn notification-open-action" href="${esc(action)}">${esc(actionLabel)} ↗</a>` : ''}</div>
       </article>`;
     }).join('')
