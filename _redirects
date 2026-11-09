@@ -31,13 +31,13 @@
 /staff-os-v5 /staff-os-v5.html 302!
 
 # Public tracking is intentionally anonymous and uses the read-only tracker.
-# Keep the canonical /track URL stable while preserving query-string GC codes.
+# Every alias serves the same static page directly; none redirects back to another
+# tracking alias, which prevents Cloudflare/Pages normalization loops.
 /track /tracking-integration.html 200
 /track/ /tracking-integration.html 200
-/tracking /track 301
-/tracking/ /track 301
+/tracking /tracking-integration.html 200
+/tracking/ /tracking-integration.html 200
 /tracking-integration /tracking-integration.html 200
-/tracking-integration.html /track 301
 
 # Retired standalone UI surfaces: Customer Portal and Staff Console are the only public workspaces.
 /quote /#auth 302

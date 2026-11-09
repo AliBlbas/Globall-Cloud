@@ -162,8 +162,10 @@ export async function onRequest(context) {
   }
   // Public shipment tracking has a dedicated read-only page. Keep ?gc=, ?id= and
   // legacy tracking query aliases intact while rewriting internally (no login redirect).
+  // Resolve directly to the .html asset; routing through /tracking-integration would
+  // be normalized by Pages and could re-enter the same middleware branch indefinitely.
   if (['/track', '/track/', '/tracking', '/tracking/'].includes(requestPath)) {
-    const destination = new URL('/tracking-integration', requestUrl);
+    const destination = new URL('/tracking-integration.html', requestUrl);
     destination.search = requestUrl.search;
     pageRequest = new Request(destination.toString(), context.request);
     path = '/tracking-integration.html';

@@ -15,6 +15,7 @@ const checks = [
   ['release CSS provides mobile action layout', releaseCss.includes('@media (max-width: 760px)') && releaseCss.includes('.gc-public-site .gc-actions')],
   ['redirect file contains no escaped newline records', !redirects.includes('\\n')],
   ['staff portal aliases are individual redirect records', redirects.includes('/staff-portal /staff-os-v5.html 200') && redirects.includes('/staff-portal/ /staff-os-v5.html 200')],
+  ['tracking aliases are loop-free direct rewrites', redirects.includes('/track /tracking-integration.html 200') && redirects.includes('/tracking /tracking-integration.html 200') && !redirects.includes('/tracking-integration.html /track 301')],
 ];
 
 let failed = 0;

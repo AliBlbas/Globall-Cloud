@@ -8,7 +8,6 @@
   Cross-Origin-Resource-Policy: same-site
   Origin-Agent-Cluster: ?1
   Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://rum-static.pingdom.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; connect-src 'self' https://ahslifnthiwfkmaswjno.supabase.co wss://ahslifnthiwfkmaswjno.supabase.co https://api.supabase.com https://formsubmit.co https://wa.me https://rum-static.pingdom.net https://rum-ingest.pingdom.net https://router.project-osrm.org https://*.sentry.io https://sentry.io; frame-src 'self' https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://formsubmit.co; frame-ancestors 'none'; upgrade-insecure-requests; worker-src 'self' blob:
-  Cache-Control: no-store, max-age=0, must-revalidate
 
 /index.html
   Cache-Control: no-store, max-age=0, must-revalidate

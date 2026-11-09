@@ -89,7 +89,9 @@ const headerGuards = [
 ]
 for (const [label, passed] of headerGuards) if (!passed) fail(label)
 if (headerGuards.every(([, passed]) => passed)) ok('CSP service allowlist and private/static cache contracts are aligned')
-for (const route of ['/tracking-integration.html /track 301','/track /tracking-integration.html 200','/track/ /tracking-integration.html 200','/staff /staff-os-v5.html 200','/staff/ /staff-os-v5.html 200','/staff-os-v5 /staff-os-v5.html 302!','/status /system-status.html 302','/status/ /system-status.html 302']) if (!redirects.includes(route)) fail(`route contract missing: ${route}`)
+for (const route of ['/track /tracking-integration.html 200','/track/ /tracking-integration.html 200','/tracking /tracking-integration.html 200','/tracking/ /tracking-integration.html 200','/tracking-integration /tracking-integration.html 200','/staff /staff-os-v5.html 200','/staff/ /staff-os-v5.html 200','/staff-os-v5 /staff-os-v5.html 302!','/status /system-status.html 302','/status/ /system-status.html 302']) if (!redirects.includes(route)) fail(`route contract missing: ${route}`)
+if (redirects.includes('/tracking-integration.html /track 301') || redirects.includes('/tracking /track 301')) fail('tracking aliases must not redirect back into another tracking alias')
+else ok('Tracking aliases are loop-free and serve one canonical static page')
 if (redirects.includes('/staff-os.html /staff-os-v5.html 302!') || redirects.includes('/staff-os /staff-os-v5.html 200') || redirects.includes('/staff-os/ /staff-os-v5.html 200')) fail('legacy Staff OS entry must not redirect back to V5');
 else ok('Legacy Staff OS entry is reachable without a redirect loop');
 const productionMiddleware = read('functions/_middleware.js');
