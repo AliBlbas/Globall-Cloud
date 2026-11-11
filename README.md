@@ -77,10 +77,15 @@ Set these as Supabase Edge Function secrets, never in HTML or JavaScript: `NOTIF
 Provider documentation must be checked again before switching from sandbox to live. Qicard production access requires merchant-terminal credentials and its gateway public key; FIB production access requires credentials issued through its integration process. The system intentionally returns configuration errors rather than pretending that a payment was accepted.
 
 ## Deployment
-The intended release path is:
-**GitHub `main` → Cloudflare Pages production deployment → Supabase production backend.**
+The live release observed on 2026-11-11 was served from GitHub branch `Product`, commit `5e19e98e55515c2df17b9cb7ef87d740dc5ebaff`. Do not assume `main` is the production branch; confirm the deployed branch and exact commit from `/release.json` before preparing a release.
 
-Live deployment verification is a release gate; source code being present on GitHub alone is not treated as proof that the live site is updated. Production release order is: apply the migrations, deploy `logistics-control-plane`, `document-access`, `notification-dispatch`, `payment-checkout`, `payment-webhook`, `payment-reconcile` and `system-health`, set server-side provider secrets, configure the notification worker to run from a protected scheduler/heartbeat, configure public HTTPS callback URLs in Qicard/FIB, then deploy the Pages frontend and run a sandbox transaction and notification test for each enabled provider.
+Cloudflare Pages is the live frontend host. Production releases must use the checked GitHub Actions workflow; source code or a successful CI run alone is not proof that the live site updated. After deploy, verify `/api/health`, `/api/ready`, and `/release.json`, and require the live release commit to equal the intended source commit. Production release order is: apply the migrations, deploy `logistics-control-plane`, `document-access`, `notification-dispatch`, `payment-checkout`, `payment-webhook`, `payment-reconcile` and `system-health`, set server-side provider secrets, configure the notification worker to run from a protected scheduler/heartbeat, configure public HTTPS callback URLs in Qicard/FIB, then deploy the Pages frontend and run a sandbox transaction and notification test for each enabled provider.
+
+## CI/CD release gate
+
+`Production CI and Cloudflare Pages Deploy` is configured to run on every push and pull request. It runs `npm ci`, `npm test`, production contract checks, production/security validation, asset integrity validation, and the Pages build. Only after all of those steps pass may a push to `Product` proceed to Cloudflare deployment; that run then checks health, backend readiness, exact release SHA, and read-only public/international smoke tests. The Supabase Edge Functions workflow runs the same validation suite before its deployment job.
+
+Activation is not complete until Cloudflare's automatic Git production/preview builds are disabled and these repository Actions secrets are configured: `CLOUDFLARE_API_TOKEN` (Account → Cloudflare Pages → Edit), `CLOUDFLARE_ACCOUNT_ID`, and `SUPABASE_ACCESS_TOKEN` (for the existing Edge Function deployment). Never commit these values. Until the Cloudflare auto-build switch and credentials are in place, do not merge the production workflow: Cloudflare's current Git integration can deploy independently of Actions, and the current repository's deploy runs report missing credentials.
 
 ## Local validation
 
@@ -100,9 +105,9 @@ The validation suite now treats the TypeScript parser as mandatory and checks al
 
 ## GitHub Actions and Cloudflare Pages status
 
-Cloudflare Pages is the production frontend host for this repository. The repository does not require GitHub Pages or a Jekyll build; production deploy status is reported by the Cloudflare Pages check on each `main` commit. GitHub Actions checks such as Production Integrity and CodeQL require the GitHub account to be eligible to run Actions. If GitHub reports that the account is locked due to a billing issue, resolve that account-level issue in GitHub Billing & licensing and rerun the failed workflows; this does not indicate a Cloudflare Pages deployment failure.
+Cloudflare Pages is the production frontend host for this repository. The repository does not require GitHub Pages or a Jekyll build. The `Production CI and Cloudflare Pages Deploy` workflow validates every push and pull request; its Product deployment steps are sequentially downstream of all tests and build checks. The separate Supabase function deploy job also depends on full validation and is configured only for the `Product` branch. GitHub Actions checks such as Production Integrity and CodeQL still require the GitHub account to be eligible to run Actions. If GitHub reports that the account is locked due to a billing issue, resolve that account-level issue in GitHub Billing & licensing; a runner or secret failure blocks deployment and must not be bypassed.
 
-After billing is cleared, verify the latest commit with `gh run list --repo AliBlbas/Globall-Cloud --branch main` and confirm the Cloudflare Pages check is successful before treating the release as complete.
+Use `gh run list --repo AliBlbas/Globall-Cloud --branch Product` to inspect release workflow runs. Treat `/release.json` exact-commit verification and `/api/ready` as the live deployment evidence; do not infer deployment status from a branch name or Actions history alone.
 
 ## Reliability and recovery runbook
 

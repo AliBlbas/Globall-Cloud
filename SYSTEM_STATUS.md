@@ -4,10 +4,10 @@ This repository reflects the current production direction of Globall Cloud:
 
 - **Frontend**: Cloudflare Pages static site
 - **Backend**: Supabase Postgres + Auth + Storage + RLS + Edge Functions
-- **Staff entry**: `management.html`
-- **Staff portal**: `staff-portal.html`
-- **Operations suite**: `operations-suite.html`
-- **Management console**: `accounts-console.html`
+- **Customer entry**: `/` is the unified customer workspace; `/track` is public tracking.
+- **Canonical staff entry**: `/staff` internally serves `staff-os-v5.html`; `/staff-os` and `/staff-portal` are compatibility aliases.
+- **Legacy staff routes**: old management, operations, warehouse, driver, and control-plane URLs redirect to `/staff`; do not treat the legacy HTML files as independent current consoles.
+- **Live release observed 2026-11-11**: branch `Product`, commit `5e19e98e55515c2df17b9cb7ef87d740dc5ebaff`. Check `/release.json` for the current deployed commit and `/api/ready` for dependency readiness; this dated value is a snapshot, not a future release guarantee.
 - **Analytics**: `admin-dashboard.js` loads through the `account-admin` Edge Function instead of querying sensitive tables directly from the browser
 
 ## Live logistics tracking
