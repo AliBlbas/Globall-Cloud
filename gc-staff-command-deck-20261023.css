@@ -1390,3 +1390,46 @@ body.gc-staff-os-shell #app :where(.gc-staff-mobile-dock,.gc-mobile-staff-dock) 
 @media (max-width: 330px) {
   body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis { grid-template-columns: minmax(0,1fr) !important; }
 }
+
+
+/* Screenshot-driven mobile Staff dashboard correction · 2026-11-11 */
+body.gc-staff-os-shell #app .topbar .top-actions > .btn:not(.primary):not(.danger) {
+  min-height: 44px !important;
+  border-color: var(--gcd-line) !important;
+  background: var(--gcd-surface-alt) !important;
+  color: var(--gcd-ink) !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+body.gc-staff-os-shell #app .topbar .top-actions > .btn:not(.primary):not(.danger) svg {
+  color: currentColor !important;
+  stroke: currentColor !important;
+}
+body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis > .kpi > span {
+  color: var(--gcd-muted) !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+  line-height: 1.6 !important;
+}
+body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis > .kpi > small {
+  color: var(--gcd-muted) !important;
+  font-size: 11px !important;
+  line-height: 1.7 !important;
+}
+@media (max-width: 900px) {
+  body.gc-staff-os-shell #app .gc-shell {
+    padding-bottom: calc(148px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  body.gc-staff-os-shell #gcStaffAiButton {
+    bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 16px !important;
+  }
+}
+
+body.gc-staff-os-shell #app .topbar .top-title span,
+body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis > .kpi > span,
+body.gc-staff-os-shell #app #view .grid-kpi.tower-kpis > .kpi > small {
+  color: color-mix(in srgb, var(--gcd-muted) 80%, var(--gcd-ink) 20%) !important;
+}

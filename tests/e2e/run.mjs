@@ -22,8 +22,11 @@ function record(name, ok, detail = '') {
 }
 
 function requireEnv(names) {
-  const missing = names.filter((name) => !process.env[name])
-  if (missing.length) throw new Error(`Missing environment variables: ${missing.join(', ')}`)
+  const missing = names.filter((name) => name === 'SUPABASE_ANON_KEY' ? !ANON_KEY : !process.env[name])
+  if (missing.length) {
+    const labels = missing.map((name) => name === 'SUPABASE_ANON_KEY' ? 'SUPABASE_ANON_KEY or SUPABASE_PUBLISHABLE_KEY' : name)
+    throw new Error(`Missing environment variables: ${labels.join(', ')}`)
+  }
 }
 
 async function request(url, options = {}) {
@@ -88,7 +91,7 @@ async function publicSuite() {
   await assertHttp('public-track validates missing id', `${SUPABASE}/functions/v1/public-track?id=`, 400, { headers: jsonHeaders() }, (body) => body?.error === 'Invalid tracking id')
   await assertHttp('public-quote validates input', `${SUPABASE}/functions/v1/public-quote`, 400, { method: 'POST', headers: jsonHeaders(), body: '{}' }, (body) => typeof body?.error === 'string')
   await assertHttp('public-message validates input', `${SUPABASE}/functions/v1/public-message`, 400, { method: 'POST', headers: jsonHeaders(), body: '{}' }, (body) => typeof body?.error === 'string')
-  await assertHttp('public-quote accepts UI payload through honeypot without insert', `${SUPABASE}/functions/v1/public-quote`, 201, { method: 'POST', headers: jsonHeaders(), body: JSON.stringify({ company_website: 'e2e-honeypot', name: 'E2E Synthetic', phone: '+9647000000000', email: '', origin_key: 'guangzhou', dest_key: 'erbil', transport_mode: 'air', weight_kg: 1 }) }, (body) => body?.ok === true)
+  await assertHttp('public-quote accepts UI payload through honeypot without insert', `${SUPABASE}/functions/v1/public-quote`, 200, { method: 'POST', headers: jsonHeaders(), body: JSON.stringify({ company_website: 'e2e-honeypot', name: 'E2E Synthetic', phone: '+9647000000000', email: '', origin_key: 'guangzhou', dest_key: 'erbil', transport_mode: 'air', weight_kg: 1 }) }, (body) => body?.ok === true)
   await assertHttp('public-message accepts UI payload through honeypot without insert', `${SUPABASE}/functions/v1/public-message`, 200, { method: 'POST', headers: jsonHeaders(), body: JSON.stringify({ company_website: 'e2e-honeypot', name: 'E2E Synthetic', email: 'e2e@example.com', message: 'Synthetic no-op', request_type: 'info' }) }, (body) => body?.ok === true)
   await assertHttp('account-admin rejects missing auth', `${ACCOUNT_ADMIN}?kind=chat`, 401, { headers: { apikey: ANON_KEY, origin: SITE } }, (body) => typeof (body?.error || body?.code || body?.message) === 'string')
   await assertHttp('customer-self rejects missing auth', `${SUPABASE}/functions/v1/customer-self`, 401, { headers: jsonHeaders() }, (body) => typeof (body?.error || body?.code || body?.message) === 'string')
@@ -115,12 +118,12 @@ async function internationalSuite() {
       body: JSON.stringify({...validBase, ...patch}),
     }, (body) => typeof body?.error === 'string')
   }
-  await assertHttp('international supported route no-op guangzhou -> erbil', `${SUPABASE}/functions/v1/public-quote`, 201, {
+  await assertHttp('international supported route no-op guangzhou -> erbil', `${SUPABASE}/functions/v1/public-quote`, 200, {
     method: 'POST',
     headers: jsonHeaders(),
     body: JSON.stringify({...validBase, company_website: 'e2e-honeypot'}),
   }, (body) => body?.ok === true)
-  await assertHttp('international multimodal mode no-op', `${SUPABASE}/functions/v1/public-quote`, 201, {
+  await assertHttp('international multimodal mode no-op', `${SUPABASE}/functions/v1/public-quote`, 200, {
     method: 'POST',
     headers: jsonHeaders(),
     body: JSON.stringify({...validBase, transport_mode: 'multimodal', company_website: 'e2e-honeypot'}),

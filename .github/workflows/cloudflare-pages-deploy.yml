@@ -1,24 +1,22 @@
-name: Deploy Cloudflare Pages
+name: Production CI and Cloudflare Pages Deploy
 
-# Cloudflare's GitHub App is already attached to this repository and is
-# responsible for automatic Pages deployments. Keep this Actions workflow
-# manual-only so an exhausted Actions runner quota cannot mark every commit
-# red or duplicate the production deploy.
 on:
+  push:
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: cloudflare-pages-production
-  cancel-in-progress: true
+  group: globall-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/Product' }}
 
 jobs:
-  deploy:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 25
-    name: Deploy frontend and Pages Functions to Cloudflare
+  verify-and-deploy:
+    name: Validate every change; deploy Product only after PASS
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -31,86 +29,88 @@ jobs:
           node-version: 24
           package-manager-cache: false
 
-      - name: Install validation dependencies
-        run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false
+      - name: Install locked validation dependencies
+        run: npm ci --ignore-scripts
 
-      - name: Validate repository before deployment
+      - name: Repository validation
         run: npm test
 
-      - name: Verify Cloudflare credentials are configured
+      - name: Production contract validation
+        run: npm run test:contracts
+
+      - name: Production and security validation
+        run: bash scripts/validate-production.sh
+
+      - name: Asset integrity validation
+        run: python3 scripts/validate-assets.py
+
+      - name: Build Cloudflare Pages output
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_PAGES_COMMIT_SHA: ${{ github.sha }}
+          CF_PAGES_BRANCH: ${{ github.ref_name }}
+        run: npm run build
+
+      - name: Validate deployment bundle and pin release metadata
         run: |
           set -euo pipefail
-          test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing CLOUDFLARE_API_TOKEN"; exit 1; }
-          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "Missing CLOUDFLARE_ACCOUNT_ID"; exit 1; }
-
-      - name: Validate server-side JavaScript
-        run: |
-          set -euo pipefail
-          node --check functions/_middleware.js
-          node --check functions/api/health.js
-          node --check functions/api/ready.js
-
-      - name: Prepare production deployment bundle
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf .pages-dist
-          mkdir -p .pages-dist
-          git ls-files -z | while IFS= read -r -d '' file; do
-            case "$file" in
-              .github/*|.git/*|.wrangler/*|scripts/*|supabase/*|tests/*|docs/*|.devcontainer/*|.vscode/*|*.md|*.MD|*.txt|*.patch|package.json|package-lock.json|pnpm-lock.yaml|yarn.lock|bun.lockb|tsconfig.json|vite.config.*|wrangler.toml|wrangler.json|wrangler.jsonc|*.sql|*.dump|*.bak|*.log|*.pem|*.key|*.crt|.env|.env.*|*.tf|*.tfvars)
-                continue
-                ;;
-            esac
-            mkdir -p ".pages-dist/$(dirname "$file")"
-            cp "$file" ".pages-dist/$file"
-          done
-          test -f .pages-dist/index.html
-          test -f .pages-dist/_headers
-          test -f .pages-dist/_redirects
-          test -d .pages-dist/functions
-          test -f .pages-dist/functions/_middleware.js
-          test -f .pages-dist/functions/api/health.js
-          test -f .pages-dist/functions/api/ready.js
-          ! test -d .pages-dist/supabase
-          ! test -d .pages-dist/scripts
-          ! find .pages-dist -type f \( -name '*.sql' -o -name '*.pem' -o -name '*.key' -o -name '.env' -o -name '.env.*' \) -print -quit | grep -q .
-
+          test -f public/index.html
+          test -f public/_headers
+          test -f public/_redirects
+          test -f public/functions/_middleware.js
+          test -f public/functions/api/health.js
+          test -f public/functions/api/ready.js
+          ! test -d public/supabase
+          ! test -d public/scripts
+          ! find public -type f \( -name '*.sql' -o -name '*.pem' -o -name '*.key' -o -name '.env' -o -name '.env.*' \) -print -quit | grep -q .
           python3 - <<'PY'
           import json, os
           from pathlib import Path
-          Path('.pages-dist/release.json').write_text(json.dumps({
+          release = {
               'service': 'globall-cloud',
               'commit': os.environ['GITHUB_SHA'],
-              'ref': os.environ['GITHUB_REF_NAME'],
+              'branch': os.environ['GITHUB_REF_NAME'],
               'workflow_run': os.environ['GITHUB_RUN_ID'],
-          }, separators=(',', ':')) + '\n', encoding='utf-8')
+          }
+          Path('public/release.json').write_text(json.dumps(release, separators=(',', ':')) + '\n', encoding='utf-8')
           PY
-          test -f .pages-dist/release.json
-          grep -q "$GITHUB_SHA" .pages-dist/release.json
+          grep -q "$GITHUB_SHA" public/release.json
+
+      - name: Require Cloudflare deployment credentials
+        if: github.ref == 'refs/heads/Product' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing repository secret CLOUDFLARE_API_TOKEN (Cloudflare Pages Edit scope required)." >&2; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "Missing repository secret CLOUDFLARE_ACCOUNT_ID." >&2; exit 1; }
 
       - name: Install Wrangler
+        if: github.ref == 'refs/heads/Product' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         run: npx --yes wrangler@4 --version
 
-      - name: Deploy frontend and Pages Functions to production
+      - name: Deploy the tested Product commit to Cloudflare Pages
+        if: github.ref == 'refs/heads/Product' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
-          cd .pages-dist
-          npx --yes wrangler@4 pages deploy . --project-name=globall-cloud --commit-hash="$GITHUB_SHA" --commit-message="$GITHUB_SHA $GITHUB_REF_NAME"
+          npx --yes wrangler@4 pages deploy public \
+            --project-name=globall-cloud \
+            --branch=Product \
+            --commit-hash="$GITHUB_SHA" \
+            --commit-message="$GITHUB_SHA $GITHUB_REF_NAME"
 
       - name: Verify production edge health
+        if: github.ref == 'refs/heads/Product' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         shell: bash
         run: |
           set -euo pipefail
           url="https://globall-cloud.pages.dev/api/health"
           for attempt in {1..12}; do
-            body="$(curl -fsS --max-time 10 "$url" 2>/dev/null || true)"
+            body="$(curl -fsS --max-time 10 -H 'Cache-Control: no-cache' "$url?verify=$GITHUB_SHA" 2>/dev/null || true)"
             if printf '%s' "$body" | grep -q '\"ok\":true'; then
               printf '%s\n' "$body"
               exit 0
@@ -122,6 +122,7 @@ jobs:
           exit 1
 
       - name: Verify production readiness including Supabase dependency
+        if: github.ref == 'refs/heads/Product' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         shell: bash
         run: |
           set -euo pipefail
@@ -141,7 +142,8 @@ jobs:
           printf '%s\n' "$body"
           exit 1
 
-      - name: Verify exact live release matches GitHub commit
+      - name: Verify exact live release matches the tested commit
+        if: github.ref == 'refs/heads/Product' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         shell: bash
         run: |
           set -euo pipefail
@@ -154,3 +156,22 @@ jobs:
           assert body.get('commit') == expected, body
           print(json.dumps(body, ensure_ascii=False))
           PY
+
+      - name: Run read-only live public and international smoke tests
+        if: github.ref == 'refs/heads/Product' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        env:
+          GC_SITE_URL: https://globall-cloud.pages.dev
+        shell: bash
+        run: |
+          set -euo pipefail
+          key="$(node - <<'NODE'
+          const fs = require('node:fs');
+          const source = fs.readFileSync('gc-csp-scripts/index-inline-2.js', 'utf8');
+          const match = source.match(/SUPABASE_PUBLISHABLE_KEY\s*=\s*'([^']+)'/);
+          if (!match) process.exit(2);
+          process.stdout.write(match[1]);
+          NODE
+          )"
+          echo "::add-mask::$key"
+          SUPABASE_PUBLISHABLE_KEY="$key" npm run test:e2e:public
+          SUPABASE_PUBLISHABLE_KEY="$key" npm run test:e2e:international
