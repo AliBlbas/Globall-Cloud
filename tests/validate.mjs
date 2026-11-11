@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { execFileSync } from 'node:child_process'
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
+import { runInNewContext } from 'node:vm'
 import { fileURLToPath } from 'node:url'
 import { dirname, join, extname, relative } from 'node:path'
 
@@ -121,6 +122,55 @@ const surfaceChecks = [
   ['canonical status route is public', routes.includes('/status /system-status.html 302')],
 ]
 for (const [label, passed] of surfaceChecks) passed ? ok(label) : fail(label)
+
+console.log('Staff theme preference runtime')
+function exerciseStaffTheme(initialTheme, storageAvailable = true) {
+  const state = { values: {}, attributes: {}, handlers: {}, textContent: '', dataset: {}, style: {}, title: '' }
+  if (initialTheme) state.values['gc-staff-theme'] = initialTheme
+  const button = {
+    dataset: {},
+    setAttribute(name, value) { state.attributes[name] = value },
+    addEventListener(name, callback) { state.handlers[name] = callback },
+  }
+  const top = {
+    querySelector(selector) { return selector === 'button[data-staff-theme]' ? (state.button || null) : null },
+    insertBefore(element) { state.button = element; element.dataset = {}; element.setAttribute = button.setAttribute; element.addEventListener = button.addEventListener; element.dataset.__state = true; state.button = element },
+  }
+  const shell = { querySelector(selector) { return selector === '.top-actions' ? top : null } }
+  const document = {
+    readyState: 'complete',
+    body: {},
+    documentElement: { dataset: state.dataset, style: state.style },
+    querySelector(selector) { return selector === '.gc-shell' ? shell : selector === 'button[data-staff-theme]' ? (state.button || null) : null },
+    createElement() { return { dataset: {}, addEventListener: button.addEventListener, setAttribute: button.setAttribute, textContent: '', title: '' } },
+  }
+  const localStorage = {
+    getItem(key) { if (!storageAvailable) throw new Error('storage blocked'); return state.values[key] || null },
+    setItem(key, value) { if (!storageAvailable) throw new Error('storage blocked'); state.values[key] = value },
+  }
+  class MutationObserver { observe() {} }
+  runInNewContext(read('gc-staff-preferences-20261003.js'), { document, localStorage, MutationObserver })
+  return { state, click() { (state.button?.handlers?.click || state.handlers.click)?.() } }
+}
+const lightTheme = exerciseStaffTheme('light')
+const darkRestored = lightTheme.state.dataset.gcTheme === 'light'
+  && lightTheme.state.dataset.staffTheme === 'light'
+  && lightTheme.state.style.colorScheme === 'light'
+  && lightTheme.state.attributes['aria-pressed'] === 'true'
+lightTheme.click()
+const darkToggle = lightTheme.state.dataset.gcTheme === 'dark'
+  && lightTheme.state.dataset.staffTheme === 'dark'
+  && lightTheme.state.values['gc-staff-theme'] === 'dark'
+lightTheme.click()
+const lightToggle = lightTheme.state.dataset.gcTheme === 'light'
+  && lightTheme.state.dataset.staffTheme === 'light'
+  && lightTheme.state.values['gc-staff-theme'] === 'light'
+const noStorage = exerciseStaffTheme(null, false)
+const storageFallback = noStorage.state.dataset.gcTheme === 'dark'
+  && noStorage.state.dataset.staffTheme === 'dark'
+  && noStorage.state.style.colorScheme === 'dark'
+if (darkRestored && darkToggle && lightToggle && storageFallback) ok('Dark/light themes restore, toggle both CSS selectors, persist, and fall back when storage is blocked')
+else fail('Staff dark/light theme state failed restore, toggle, persistence, or blocked-storage behavior')
 
 console.log('Production contract suites')
 for (const script of ['scripts/production-contracts.mjs', 'tests/public-release-smoke.mjs']) {
