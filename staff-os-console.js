@@ -135,7 +135,142 @@
   async function shipments(){ const data=await logisticsApi('shipments',{limit:100}); const rows=data.items||[]; const shipmentHealth=(r)=>{const priority=String(r.priority||'normal').toLowerCase();const latest=r.last_tracking_at||r.tracking_updated_at||r.updated_at;const stale=latest&&Date.now()-new Date(latest).getTime()>86400000;const eta=r.eta?new Date(r.eta).getTime():0;const delivered=String(r.operational_status||'').toLowerCase()==='delivered';if(!delivered&&((eta&&eta<Date.now())||priority==='critical'))return{label:'Critical',className:'bad'};if(priority==='high'||stale)return{label:'Attention',className:'warn'};return{label:'On track',className:'ok'}}; const modules=[['shipments','Shipments'],['packages','Packages'],['route_legs','Route legs'],['customs','Customs'],['movements','Warehouse movements'],['consolidations','Consolidation'],['manifests','Manifests'],['exceptions','Exceptions'],['status_history','Status history']]; $('#view').innerHTML=shell('Logistics Control','بارەکان و هەموو زنجیرەی ئۆپەراسیۆنیان لە یەک workspace ـی پارێزراودا.','<button class="btn primary" id="refreshLogistics">نوێکردنەوەی داتا</button>') + `<div class="logistics-hero"><div><div class="kicker">OPERATIONS CONTROL PLANE</div><h3>کۆنترۆڵی زنجیرەی بار</h3><p>Search، status، timeline و logistics records بە داتای ڕاستەقینەی Supabase.</p></div><div class="logistics-kpis"><div><b>${rows.length}</b><span>Visible shipments</span></div><div><b>${rows.filter(r=>Number(r.current_step_index||0)>0&&Number(r.current_step_index||0)<5).length}</b><span>In transit</span></div><div><b>${rows.filter(r=>['critical','high'].includes(String(r.priority||'').toLowerCase())).length}</b><span>Priority</span></div></div></div><div class="logistics-toolbar"><label>گەڕان<input id="shipmentSearch" class="field" type="search" placeholder="Tracking ID، customer، route…"></label><label>Status<select id="shipmentStatus" class="field"><option value="all">All statuses</option><option value="pending">Pending</option><option value="in_transit">In transit</option><option value="arrived">Arrived</option><option value="out_for_delivery">Out for delivery</option><option value="delivered">Delivered</option></select></label><label>Priority<select id="shipmentPriority" class="field"><option value="all">All priorities</option><option value="critical">Critical</option><option value="high">High</option><option value="normal">Normal</option></select></label><label>Freshness<select id="shipmentFreshness" class="field"><option value="all">All freshness</option><option value="fresh">Fresh</option><option value="stale">Stale &gt; 24h</option></select></label><div class="toolbar-note"><span class="live">PROTECTED READ MODEL</span><small>هیچ write ـێک لێرە بەخۆکار ناکرێت.</small></div></div><div class="logistics-modules" role="tablist" aria-label="Logistics modules">${modules.map(([id,label],index)=>`<button class="module-tab ${index===0?'active':''}" type="button" role="tab" aria-selected="${index===0}" data-logistics-module="${id}">${label}</button>`).join('')}</div><div id="logisticsRows"></div><div class="card" id="shipmentTimeline"><div class="empty"><strong>بارێک هەڵبژێرە بۆ بینینی lifecycle timeline</strong><span>ڕووداوەکانی ئەو بارەی کە لە scope ـی ئەم ستافەدایە لێرە دەردەکەون.</span></div></div>`; const renderShipments=()=>{const needle=String($('#shipmentSearch').value||'').trim().toLowerCase(),status=$('#shipmentStatus').value,priority=$('#shipmentPriority').value,freshness=$('#shipmentFreshness').value,now=Date.now(); const filtered=rows.filter(r=>{const hay=[r.id,r.customer_name,r.origin_key,r.dest_key,r.current_location_label,r.operational_status].map(x=>String(x||'').toLowerCase()).join(' ');const latest=r.last_tracking_at||r.tracking_updated_at||r.updated_at;const stale=latest&&now-new Date(latest).getTime()>86400000;return(!needle||hay.includes(needle))&&(status==='all'||String(r.operational_status||'').toLowerCase()===status)&&(priority==='all'||String(r.priority||'normal').toLowerCase()===priority)&&(freshness==='all'||(freshness==='stale'?Boolean(stale):!stale))});const healthCounts=filtered.reduce((acc,row)=>{acc[shipmentHealth(row).className]=(acc[shipmentHealth(row).className]||0)+1;return acc},{ok:0,warn:0,bad:0});const insights=`<div class="logistics-insights"><div><span>Visible after filters</span><b>${filtered.length}</b></div><div><span>On track</span><b class="ok-text">${healthCounts.ok}</b></div><div><span>Attention</span><b class="warn-text">${healthCounts.warn}</b></div><div><span>Critical</span><b class="bad-text">${healthCounts.bad}</b></div></div>`; $('#logisticsRows').innerHTML=insights+table([['Tracking / ID',r=>`<button class="btn tiny" type="button" data-shipment-events="${esc(r.id)}">${fmt(r.id)}</button> <button class="btn tiny" type="button" data-shipment-360="${esc(r.id)}">360</button>`],['Customer',r=>fmt(r.customer_name)],['Route',r=>`${fmt(r.origin_key)} → ${fmt(r.dest_key)}`],['Current location',r=>fmt(r.current_location_label)],['Status',r=>`<span class="${String(r.operational_status||'').toLowerCase()==='delivered'?'ok':'pill'}">${fmt(r.operational_status||'pending')}</span>`],['Priority',r=>fmt(r.priority)],['Health',r=>{const h=shipmentHealth(r);return `<span class="${h.className}">${h.label}</span>`}],['ETA',r=>date(r.eta)]],filtered,'هیچ shipment ـێک بەم فلتەرە نەدۆزرایەوە'); $$('#view [data-shipment-events]').forEach((button)=>button.onclick=()=>loadShipmentTimeline(button.dataset.shipmentEvents,rows.find((row)=>String(row.id)===String(button.dataset.shipmentEvents)))); $$('#view [data-shipment-360]').forEach((button)=>button.onclick=()=>loadShipment360(button.getAttribute('data-shipment-360'),rows.find((row)=>String(row.id)===String(button.getAttribute('data-shipment-360')))));}; const renderModule=async(kind)=>{if(kind==='shipments'){renderShipments();return} $('#logisticsRows').innerHTML='<div class="loading">داتا لە وەرگرتندایە…</div>'; try{const payload=await logisticsApi(kind,{limit:100});$('#logisticsRows').innerHTML=table(logisticsColumns(kind),payload.items||[],'هیچ داتایەکی ئەم بەشە نییە')}catch(err){$('#logisticsRows').innerHTML=`<div class="notice bad"><strong>Module بارنەکرا</strong><span>${fmt(err.message||'هەڵەیەک ڕوویدا')}</span><button class="btn tiny" type="button" id="retryLogisticsModule">دووبارە هەوڵدان</button></div>`;$('#retryLogisticsModule').onclick=()=>renderModule(kind)}}; const requestedShipmentId=new URLSearchParams(location.search).get('shipment_id'); $('#shipmentSearch').oninput=renderShipments; $('#shipmentStatus').onchange=renderShipments; $('#shipmentPriority').onchange=renderShipments; $('#shipmentFreshness').onchange=renderShipments; $$('#view [data-logistics-module]').forEach((button)=>button.onclick=()=>{$$('#view [data-logistics-module]').forEach(x=>{x.classList.remove('active');x.setAttribute('aria-selected','false')});button.classList.add('active');button.setAttribute('aria-selected','true');renderModule(button.dataset.logisticsModule)}); $('#refreshLogistics').onclick=()=>renderTab(true); renderShipments(); if(requestedShipmentId){const focused=rows.find(row=>String(row.id)===String(requestedShipmentId)); if(focused) setTimeout(()=>loadShipmentTimeline(focused.id,focused),0);} }
   async function loadShipment360(id, shipment){ const panel=$('#shipmentTimeline'); if(!panel||!shipment)return; panel.innerHTML='<div class="loading">Shipment 360 لە وەرگرتندایە…</div>'; const kinds=['events','packages','route_legs','customs','movements','manifests','exceptions','documents']; if(canFinance()) kinds.push('invoices','payments'); try{ const results=await Promise.allSettled(kinds.map(kind=>logisticsApi(kind,{shipment_id:id,limit:50}))); const data=Object.fromEntries(kinds.map((kind,index)=>[kind,results[index].status==='fulfilled'?results[index].value:null])); const failed=kinds.filter((kind,index)=>results[index].status==='rejected'); const rows=(kind)=>data[kind]?.items||[]; const section=(title,kind,columns,empty)=>{if(!data[kind])return `<section class="shipment360-section"><div class="card-head"><h4>${title}</h4><span class="muted">${canFinance()||!['invoices','payments'].includes(kind)?'بەردەست نییە یان scope ـەکە بەردەست نەبوو':'تەنها بۆ تیمی دارایی'}</span></div><div class="empty"><strong>${failed.includes(kind)?'داتا بەردەست نەبوو':'ئەم بەشە بۆ ئەم ڕۆڵە نییە'}</strong><span>هیچ داتایەکی زیادە نیشان نادرێت.</span></div></section>`;return `<section class="shipment360-section"><div class="card-head"><h4>${title}</h4><span class="muted">${rows(kind).length} records</span></div>${table(columns,rows(kind),empty)}</section>`}; const summary=`<div class="shipment360-summary"><div><span>Status</span><b>${fmt(shipment.operational_status||'—')}</b></div><div><span>Priority</span><b>${fmt(shipment.priority||'—')}</b></div><div><span>Weight</span><b>${fmt(shipment.weight_kg||'—')}</b></div><div><span>Volume</span><b>${fmt(shipment.volume_cbm||'—')}</b></div><div><span>ETA</span><b>${date(shipment.eta)}</b></div><div><span>Location</span><b>${fmt(shipment.current_location_label||'—')}</b></div></div>`; const warning=failed.length?`<div class="notice warn"><strong>هەندێک بەشی Shipment 360 بەردەست نەبوو</strong><span>${esc(failed.join('، '))}؛ هیچ داتایەکی خۆدروستکراو جێگرەوە نەکرا.</span></div>`:''; panel.innerHTML=`<div class="section-head"><div><div class="kicker">SHIPMENT 360</div><h3>${fmt(shipment.id)}</h3><p>${fmt(shipment.customer_name||'—')} · ${fmt(shipment.origin_key)} → ${fmt(shipment.dest_key)}</p></div><div class="head-actions"><button class="btn tiny" type="button" id="shipmentTimelineBack">Lifecycle timeline</button></div></div>${warning}${summary}<div class="shipment360-grid">${section('Lifecycle events','events',[['Status',r=>`<span class="pill">${fmt(r.status||r.event_type)}</span>`],['Location',r=>fmt(r.location)],['Occurred',r=>date(r.occurred_at)],['Note',r=>fmt(r.note)]],'هێشتا event نییە')}${section('Packages','packages',[['Package',r=>`<span class="mono">${logisticsField(r,'id','package_code')}</span>`],['Code',r=>logisticsField(r,'barcode','scan_code','tracking_code')],['Status',r=>`<span class="pill">${logisticsField(r,'status','package_status')}</span>`],['Weight',r=>logisticsField(r,'weight_kg')],['Dimensions',r=>`${logisticsField(r,'length_cm')} × ${logisticsField(r,'width_cm')} × ${logisticsField(r,'height_cm')}`]],'هیچ package ـێک نییە')}${section('Route legs','route_legs',[['Leg',r=>logisticsField(r,'leg_number')],['From',r=>logisticsField(r,'from_hub')],['To',r=>logisticsField(r,'to_hub')],['Mode',r=>logisticsField(r,'transport_mode')],['Status',r=>`<span class="pill">${logisticsField(r,'status')}</span>`],['ETA',r=>date(r.planned_arrival||r.actual_arrival)]],'هیچ route leg ـێک نییە')}${section('Customs','customs',[['Status',r=>`<span class="${String(r.status||'').toLowerCase()==='held'?'bad':'pill'}">${logisticsField(r,'status')}</span>`],['Declaration',r=>logisticsField(r,'declaration_number')],['Broker',r=>logisticsField(r,'broker_name')],['Duty',r=>logisticsField(r,'duty_amount')],['Hold reason',r=>logisticsField(r,'hold_reason')]],'هیچ customs case ـێک نییە')}${section('Warehouse chain','movements',[['Movement',r=>logisticsField(r,'movement_type')],['From',r=>logisticsField(r,'from_hub')],['To',r=>logisticsField(r,'to_hub')],['Scan',r=>logisticsField(r,'scan_code')],['Scanned',r=>date(r.scanned_at)]],'هیچ warehouse movement ـێک نییە')}${section('Manifests','manifests',[['Manifest',r=>`<span class="mono">${logisticsField(r,'manifest_number','id')}</span>`],['Status',r=>`<span class="pill">${logisticsField(r,'status')}</span>`],['Origin',r=>logisticsField(r,'origin_hub')],['Destination',r=>logisticsField(r,'destination_hub')]],'هیچ manifest ـێک نییە')}${section('Exceptions','exceptions',[['Severity',r=>`<span class="${String(r.severity||'').toLowerCase()==='critical'?'bad':'warn'}">${logisticsField(r,'severity')}</span>`],['Title',r=>logisticsField(r,'title','description')],['Status',r=>`<span class="pill">${logisticsField(r,'status')}</span>`],['Due',r=>date(r.due_at)]],'هیچ exception ـێکی کراوە نییە')}${section('Documents','documents',[['Type',r=>logisticsField(r,'document_type')],['Title',r=>logisticsField(r,'title')],['Status',r=>`<span class="pill">${logisticsField(r,'document_status','status')}</span>`],['Version',r=>logisticsField(r,'version')],['Uploaded',r=>date(r.created_at)]],'هیچ document ـێک نییە')}${section('Invoices','invoices',[['Invoice',r=>logisticsField(r,'invoice_number','id')],['Status',r=>`<span class="pill">${logisticsField(r,'status')}</span>`],['Amount',r=>`${logisticsField(r,'total_amount','grand_total','subtotal')} ${logisticsField(r,'currency')}`],['Due',r=>date(r.due_at)]],'هیچ invoice ـێک نییە')}${section('Payments','payments',[['Invoice',r=>logisticsField(r,'invoice_id')],['Amount',r=>`${logisticsField(r,'amount')} ${logisticsField(r,'currency')}`],['Status',r=>`<span class="pill">${logisticsField(r,'status')}</span>`],['Paid',r=>date(r.paid_at||r.created_at)]],'هیچ payment ـێک نییە')}</div>`; $('#shipmentTimelineBack').onclick=()=>loadShipmentTimeline(id,shipment); }catch(err){ panel.innerHTML=`<div class="notice bad"><strong>Shipment 360 بارنەکرا</strong><span>${fmt(err.message||'هەڵەیەک ڕوویدا')}</span><button class="btn tiny" type="button" id="retryShipment360">دووبارە هەوڵدان</button></div>`; $('#retryShipment360').onclick=()=>loadShipment360(id,shipment); } }
   async function loadShipmentTimeline(id, shipment){ const panel=$('#shipmentTimeline'); if(!panel||!shipment)return; panel.innerHTML='<div class="loading">Timeline لە وەرگرتندایە…</div>'; try{ const data=await logisticsApi('events',{shipment_id:id,limit:100}); const events=(data.items||[]).sort((a,b)=>new Date(b.occurred_at||0)-new Date(a.occurred_at||0)); const lat=Number(shipment.current_lat),lng=Number(shipment.current_lng); const map=Number.isFinite(lat)&&Number.isFinite(lng)?`<a class="btn tiny" href="https://www.google.com/maps?q=${encodeURIComponent(`${lat},${lng}`)}" target="_blank" rel="noopener">نیشاندانی شوێن</a>`:''; panel.innerHTML=`<div class="section-head"><div><div class="kicker">SHIPMENT LIFECYCLE</div><h3>${fmt(shipment.id)}</h3><p>${fmt(shipment.origin_key)} → ${fmt(shipment.dest_key)} · ${fmt(shipment.current_location_label)}</p></div><div class="head-actions">${map}</div></div><div class="timeline">${events.map((event)=>`<div class="timeline-item"><span class="timeline-dot"></span><div><strong>${fmt(event.status||event.event_type||'update')}</strong><div class="muted">${fmt(event.location||'—')} · ${date(event.occurred_at)}</div>${event.note?`<small>${fmt(event.note)}</small>`:''}</div></div>`).join('')||'<div class="empty"><strong>هێشتا lifecycle event نییە</strong><span>دۆخی ئێستا لە snapshot ـی shipment ـەوە نیشان دراوە.</span></div>'}</div>`; }catch(err){ panel.innerHTML=`<div class="notice bad"><strong>Timeline بارنەکرا</strong><span>${fmt(err.message||'هەڵەیەک ڕوویدا')}</span><button class="btn tiny" type="button" id="retryShipmentTimeline">دووبارە هەوڵدان</button></div>`; $('#retryShipmentTimeline').onclick=()=>loadShipmentTimeline(id,shipment); } }
-  async function customers(){ const data=await api('customer'); $('#view').innerHTML=shell('کڕیاران','Directory ـی کڕیاران، هەژمار و shipment summary.') + table([['Code',r=>`<span class="mono">${fmt(r.code)}</span>`],['ناو',r=>fmt(r.name)],['تەلەفۆن',r=>fmt(r.phone)],['شار',r=>fmt(r.city)],['بار',r=>fmt(r.shipment_count)],['قەرز',r=>Number(r.outstanding_amount||0).toFixed(2)],['دۆخ',r=>r.is_active?'<span class="ok">چالاک</span>':'<span class="bad">ناچالاک</span>']],data.items||[],'هیچ کڕیارێک نییە'); }
+  async function customers(){
+    const data=await api('customer');
+    const rows=data.items||[];
+    const linked=rows.filter(r=>Boolean(r.auth_user_id)).length;
+    const pending=rows.filter(r=>r.is_active===true&&!r.auth_user_id).length;
+    const canBind=state.staff?.role==='super_admin';
+    const cols=[
+      ['Code',r=>'<span class="mono">'+fmt(r.gc_code||r.code)+'</span>'],
+      ['ناو',r=>fmt(r.name)],
+      ['تەلەفۆن',r=>fmt(r.phone)],
+      ['شار',r=>fmt(r.city)],
+      ['بار',r=>fmt(r.shipment_count)],
+      ['قەرز',r=>Number(r.outstanding_amount||0).toFixed(2)],
+      ['Auth',r=>r.auth_user_id?'<span class="ok">بەستراوە</span>':r.is_active?'<span class="warn">پێویستی بە بەستن هەیە</span>':'<span class="muted">ناچالاک</span>'],
+      ['کردار',r=>{
+        const code=String(r.gc_code||r.code||'').trim();
+        if(r.auth_user_id)return '<span class="muted">هەژمار هەیە</span>';
+        if(!canBind||!r.is_active||!code)return '—';
+        return '<button class="btn tiny primary" type="button" data-bind-customer="'+esc(r.id)+'">بەستن بە Auth</button>';
+      }]
+    ];
+    $('#view').innerHTML=shell('کڕیاران','Directory ـی کڕیاران، هەژماری Auth و shipment summary')+
+      '<div class="metrics-grid">'+metric('کۆی کڕیاران',rows.length,'Customer directory')+metric('هەژماری بەستراو',linked,'Supabase Auth')+metric('چالاک و بەستراو نەبوو',pending,'پێویستی بە پشتڕاستکردنەوە')+metric('دەسەڵاتی بەستن',canBind?'Super Admin':'Read only','Identity verification required')+'</div>'+
+      table(cols,rows,'هیچ کڕیارێک نییە');
+    $('[data-bind-customer]').forEach(button=>{
+      button.addEventListener('click',()=>{
+        const customer=rows.find(r=>String(r.id)===String(button.dataset.bindCustomer));
+        if(customer)openCustomerBindModal(customer);
+      });
+    });
+  }
+
+  function openCustomerBindModal(customer){
+    if(state.staff?.role!=='super_admin'){
+      setStatus('تەنها Super Admin دەتوانێت هەژماری کڕیار ببەستێت','bad');
+      return;
+    }
+    if(customer.auth_user_id){
+      setStatus('ئەم کڕیارە پێشتر بە Auth بەستراوەتەوە؛ وشەی نهێنیی ئەو هەژمارە ناگۆڕدرێت','bad');
+      return;
+    }
+    const id=String(customer.id||'');
+    const code=String(customer.gc_code||customer.code||'').trim().toUpperCase().replace(/\s+/g,'');
+    if(!id||!code){
+      setStatus('ناسنامەی کڕیار یان GC Code بەردەست نییە','bad');
+      return;
+    }
+    $('#gcCustomerBindModal')?.remove();
+    const markup=
+      '<div class="modal-backdrop" id="gcCustomerBindModal" role="presentation">'+
+      '<form class="modal" id="gcCustomerBindForm">'+
+        '<div class="card-head"><div><div class="kicker">CUSTOMER AUTH · SUPER ADMIN</div><h3>بەستنی هەژماری کڕیار</h3></div><button type="button" class="icon-btn" id="gcCustomerBindClose" aria-label="داخستن">×</button></div>'+
+        '<div class="card"><div class="muted">کڕیار</div><strong>'+esc(customer.name||'—')+'</strong><div class="muted" style="margin-top:7px">GC Code</div><strong class="mono">'+esc(code)+'</strong></div>'+
+        '<p class="muted">پێش بەستن، ناسنامەی کڕیار لەگەڵ تۆمارەکانی کۆمپانیا بە دەستی پشتڕاست بکەرەوە. سیستەمەکە هیچ داتایەکی کۆن ناگۆڕێت.</p>'+
+        '<label>GC Code دووبارە بنووسە<input class="field" name="confirmed_gc_code" required autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="GC-...."></label>'+
+        '<label class="check-row"><input name="identity_verified" type="checkbox" required> ناسنامەی ئەم کڕیارەم بە دەستی پشتڕاست کردەوە</label>'+
+        '<label>وشەی نهێنیی کاتی (ئارەزوومەندانە)<input class="field" name="password" type="password" minlength="12" maxlength="128" autocomplete="new-password" placeholder="بەتاڵ بهێڵە بۆ دروستکردنی خۆکار"></label>'+
+        '<p class="muted">ئەگەر وشەی نهێنی دیاری نەکەیت، سیستەم وشەیەکی بەهێزی کاتی دروست دەکات. کڕیار دەتوانێت بە GC Code و ئەو وشەیە بچێتە ژوورەوە.</p>'+
+        '<div id="gcCustomerBindMessage" class="muted" role="status" aria-live="polite"></div>'+
+        '<div class="head-actions"><button class="btn primary" id="gcCustomerBindSubmit" type="submit">پشتڕاستکردنەوە و بەستن</button><button class="btn" id="gcCustomerBindCancel" type="button">پاشگەزبوونەوە</button></div>'+
+      '</form></div>';
+    document.body.insertAdjacentHTML('beforeend',markup);
+    const close=()=>$('#gcCustomerBindModal')?.remove();
+    $('#gcCustomerBindClose').onclick=close;
+    $('#gcCustomerBindCancel').onclick=close;
+    $('#gcCustomerBindModal').addEventListener('click',event=>{
+      if(event.target?.id==='gcCustomerBindModal')close();
+    });
+    $('#gcCustomerBindForm').addEventListener('submit',async event=>{
+      event.preventDefault();
+      const form=event.currentTarget;
+      const values=new FormData(form);
+      const confirmed=String(values.get('confirmed_gc_code')||'').trim().toUpperCase().replace(/\s+/g,'');
+      const password=String(values.get('password')||'');
+      const verified=values.get('identity_verified')==='on';
+      const message=$('#gcCustomerBindMessage');
+      const submit=$('#gcCustomerBindSubmit');
+      if(confirmed!==code){
+        message.textContent='GC Code ـەکە وەک یەک نین. تکایە کۆدی دروست دووبارە بنووسە.';
+        return;
+      }
+      if(!verified){
+        message.textContent='پشتڕاستکردنەوەی ناسنامە پێویستە.';
+        return;
+      }
+      if(password&&password.length<12){
+        message.textContent='وشەی نهێنی دەبێت لانیکەم ١٢ پیت بێت.';
+        return;
+      }
+      submit.disabled=true;
+      submit.textContent='لە پڕۆسەی بەستنە...';
+      message.textContent='هەژماری Auth دروست دەکرێت و بە GC Code دەبەسترێتەوە...';
+      try{
+        const result=await api('customer',{method:'POST',body:{
+          action:'bind',
+          data:{id,confirmed_gc_code:confirmed,identity_verified:true,...(password?{password}:{})}
+        }});
+        const temporaryPassword=String(result.temporary_password||password||'');
+        if(!result.ok||result.status!=='linked'||!temporaryPassword){
+          throw new Error('وەڵامی بەستنی Auth تەواو نییە؛ دۆخی هەژمارەکە بپشکنە پێش دووبارەکردنەوە.');
+        }
+        state.cache.delete('customer');
+        setStatus('هەژماری کڕیار بە سەرکەوتوویی بەسترا','ok');
+        form.innerHTML=
+          '<div class="card-head"><div><div class="kicker">AUTH ACCOUNT CREATED</div><h3>بەستنەکە سەرکەوتوو بوو</h3></div><span class="ok">LINKED</span></div>'+
+          '<p>ئەم زانیارییانە تەنها ئێستا نیشان دەدرێن. بە شێوەیەکی پارێزراو بگەیەنە بە خاوەنی هەژمارەکە.</p>'+
+          '<label>GC Code ـی چوونەژوورەوە<input class="field mono" id="gcBindCodeOutput" readonly value="'+esc(result.gc_code||code)+'"></label>'+
+          '<label>وشەی نهێنیی کاتی<input class="field mono" id="gcBindPasswordOutput" readonly value="'+esc(temporaryPassword)+'"></label>'+
+          '<div class="head-actions"><button type="button" class="btn" id="gcBindCopyCredentials">کۆپیکردنی زانیارییەکان</button><button type="button" class="btn primary" id="gcBindDone">تەواو</button></div>'+
+          '<p class="muted">وشەی نهێنی دوای داخستنی ئەم پەنجەرەیە جارێکی تر نیشان نادرێتەوە. لەگەڵ کڕیاردا لە ڕێگایەکی پارێزراو هاوبەشی بکە.</p>';
+        $('#gcBindCopyCredentials').onclick=async()=>{
+          const text='GC Code: '+(result.gc_code||code)+'\nTemporary password: '+temporaryPassword;
+          try{
+            if(navigator.clipboard?.writeText){
+              await navigator.clipboard.writeText(text);
+              $('#gcBindCopyCredentials').textContent='کۆپی کرا';
+            }else{
+              $('#gcBindCodeOutput').focus();$('#gcBindCodeOutput').select();
+              $('#gcBindCopyCredentials').textContent='دەستکاریکردنی دەستی';
+            }
+          }catch{
+            $('#gcBindPasswordOutput').focus();$('#gcBindPasswordOutput').select();
+            $('#gcBindCopyCredentials').textContent='زانیارییەکان دیاری کراون؛ بە دەستی کۆپی بکە';
+          }
+        };
+        $('#gcBindDone').onclick=async()=>{
+          close();
+          await customers().catch(error=>setStatus(error.message||'نوێکردنەوەی لیست سەرکەوتوو نەبوو','bad'));
+        };
+      }catch(error){
+        message.textContent=error.message||'بەستنی هەژمار سەرکەوتوو نەبوو.';
+        submit.disabled=false;
+        submit.textContent='دووبارە هەوڵدان';
+      }
+    });
+  }
   async function tasks(){ const data=await api('task'); $('#view').innerHTML=shell('ئەرکەکان','Task queue ـی تیم، بە پێی priority و branch.','<button class="btn primary" id="newTask">+ ئەرکی نوێ</button>') + table([['ئەرک',r=>`<b>${fmt(r.title)}</b><div class="muted">${fmt(r.description)}</div>`],['Priority',r=>`<span class="pill">${fmt(r.priority)}</span>`],['Status',r=>`<span class="${r.status==='done'?'ok':r.status==='blocked'?'bad':'warn'}">${fmt(r.status)}</span>`],['Branch',r=>fmt(r.branch)],['Due',r=>date(r.due_at)],['Assignee',r=>fmt(r.assignee?.full_name||r.assignee_id)]],data.items||[],'هیچ ئەرکێک نییە'); const btn=$('#newTask'); if(btn&&['admin','super_admin','accountant'].includes(state.staff.role)) btn.onclick=taskModal; }
   async function quotes(){ const data=await api('quote_requests'); const rows=data.items||[]; const canDecide=['admin','super_admin','accountant','finance','operations','staff'].includes(String(state.staff?.role||'')); $('#view').innerHTML=shell('داواکاری نرخەکان','داواکارییەکانی کڕیار بۆ خزمەتگوزاری و نرخ.','<button class="btn" id="refreshQuotes">نوێکردنەوە</button>') + table([['کڕیار',r=>fmt(r.customer_name)],['ڕێگا',r=>`${fmt(r.origin_key)} → ${fmt(r.dest_key)}`],['Mode',r=>fmt(r.transport_mode)],['کێش',r=>fmt(r.weight_kg)],['دۆخ',r=>`<span class="${r.status==='accepted'?'ok':r.status==='rejected'?'bad':'warn'}">${fmt(r.status)}</span>`],['نرخ',r=>r.quoted_amount?`${r.quoted_amount} ${fmt(r.currency)}`:'—'],['Created',r=>date(r.created_at)],['کردار',r=>canDecide&&['pending','reviewing','quoted'].includes(String(r.status))?`<button class="btn tiny" data-approve-quote="${esc(r.id)}">نرخ دانان</button> <button class="btn tiny" data-reject-quote="${esc(r.id)}">ڕەتکردنەوە</button>`:'—']],rows,'هیچ داواکارییەکی نرخ نییە'); $('#refreshQuotes').onclick=()=>renderTab(true); $$('#view [data-approve-quote]').forEach(b=>b.onclick=()=>quoteDecision(b.dataset.approveQuote,'approve',rows)); $$('#view [data-reject-quote]').forEach(b=>b.onclick=()=>quoteDecision(b.dataset.rejectQuote,'reject',rows)); }
   async function quoteDecision(id, decision, rows){ const q=rows.find(x=>String(x.id)===String(id))||{}; if(decision==='reject'){const note=window.prompt('هۆکاری ڕەتکردنەوەی quote بنووسە','لە ئێستادا ناتوانرێت نرخ بدرێت');if(note===null)return;try{await api('quote_requests',{method:'POST',body:{action:'reject',data:{id,decision_note:note}}});await quotes()}catch(e){toast(e.message,true)}return;} const amount=window.prompt('بڕی quote بە '+(q.currency||'USD')+' بنووسە',q.quoted_amount||'');if(amount===null)return;const n=Number(amount);if(!Number.isFinite(n)||n<=0){toast('بڕی quote دروست نییە',true);return}try{await api('quote_requests',{method:'POST',body:{action:'approve',data:{id,quoted_amount:n,currency:q.currency||'USD'}}});await quotes()}catch(e){toast(e.message,true)} }
