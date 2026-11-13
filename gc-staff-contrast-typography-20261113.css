@@ -117,3 +117,40 @@ body.gc-staff-os-shell #app :where(button,a,.btn):focus-visible{outline:3px soli
   body.gc-staff-os-shell #app .gc-live-wh-details span{display:grid!important;gap:2px!important}
   body.gc-staff-os-shell #app .gc-live-wh-details b{max-width:100%!important;text-align:start!important}
 }
+
+
+/* Mixed-theme repair: keep the main dashboard readable when the navigation remains navy. */
+html:not([data-gc-theme="dark"]) body.gc-staff-os-shell #app .gc-main,
+html:not([data-gc-theme="dark"]) body.gc-staff-os-shell #app #view{
+  color:#173449!important;
+}
+html:not([data-gc-theme="dark"]) body.gc-staff-os-shell #app #view :where(.kpi,.metric,.metric-card,.stat-card,.card,.panel,.section-card,.notice,.room,.chat-card,.customer-control-kpi,.customer-control-hero,.customer-link-guidance,.tower-grid>.card,.tower-flow-card){
+  color:#173449!important;
+  background:#ffffff!important;
+  border-color:#cfe1e6!important;
+}
+html:not([data-gc-theme="dark"]) body.gc-staff-os-shell #app #view :where(.kpi>span,.kpi small,.metric>span,.metric small,.card p,.card small,.panel p,.panel small,.muted,.tower-route small,.tower-stream-row small,.section-head p,.customer-control-hero p){
+  color:#527080!important;
+  opacity:1!important;
+}
+html:not([data-gc-theme="dark"]) body.gc-staff-os-shell #app #view :where(.kpi>strong,.metric>strong,.metric-card>strong,.stat-card>strong,.card h2,.card h3,.panel h2,.panel h3,.tower-route b,.tower-route>strong,.tower-stream-row b,.customer-control-hero h2,.customer-control-hero h3){
+  color:#173449!important;
+  opacity:1!important;
+}
+html:not([data-gc-theme="dark"]) body.gc-staff-os-shell #app #view :where(.toolbar,.customer-control-toolbar,.table-wrap,.table-responsive){
+  color:#173449!important;
+  background:#ffffff!important;
+  border-color:#cfe1e6!important;
+}
+html:not([data-gc-theme="dark"]) body.gc-staff-os-shell #app #view :where(table,thead,tbody,tr,td,th){color:#294b5b!important}
+html:not([data-gc-theme="dark"]) body.gc-staff-os-shell #app #view :where(th){background:#e9f7f8!important;color:#356572!important}
+html:not([data-gc-theme="dark"]) body.gc-staff-os-shell #app #view :where(td){background:#ffffff!important;border-bottom-color:#e1edf0!important}
+html:not([data-gc-theme="dark"]) body.gc-staff-os-shell #app #view :where(label>span,.form-field label,.field-label){color:#527080!important}
+html:not([data-gc-theme="dark"]) body.gc-staff-os-shell #app #view :where(input,select,textarea,.field){background:#ffffff!important;color:#173449!important;border-color:#bcd5dc!important}
+html:not([data-gc-theme="dark"]) body.gc-staff-os-shell #app #view :where(input,select,textarea,.field)::placeholder{color:#6d8794!important;opacity:1!important}
+html:not([data-gc-theme="dark"]) body.gc-staff-os-shell #app #view :where(.eyebrow,.gc-live-wh-eyebrow){color:#087f8c!important;opacity:1!important}
+
+/* Preserve a coherent dark canvas when the user explicitly selects dark mode. */
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app #view :where(.kpi,.metric,.metric-card,.stat-card,.card,.panel,.section-card,.notice,.room,.chat-card,.customer-control-kpi,.customer-control-hero,.customer-link-guidance,.tower-grid>.card,.tower-flow-card){background:#102536!important;color:#eefaff!important;border-color:#365666!important}
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app #view :where(.kpi>span,.kpi small,.metric>span,.metric small,.card p,.card small,.panel p,.panel small,.muted,.tower-route small,.tower-stream-row small,.section-head p){color:#bad2dc!important;opacity:1!important}
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app #view :where(.kpi>strong,.metric>strong,.metric-card>strong,.stat-card>strong,.card h2,.card h3,.panel h2,.panel h3,.tower-route b,.tower-route>strong,.tower-stream-row b){color:#eefaff!important;opacity:1!important}
