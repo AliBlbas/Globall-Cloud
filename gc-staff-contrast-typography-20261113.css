@@ -1,0 +1,119 @@
+/* Globall Cloud Staff Console — contrast, hierarchy and responsive type polish — 2026-11-13 */
+
+/* Shared readability tokens. This layer intentionally comes last so older visual layers cannot hide labels. */
+body.gc-staff-os-shell #app{
+  --gc-readable-ink:#173449;
+  --gc-readable-muted:#527080;
+  --gc-readable-soft:#6d8794;
+  --gc-readable-line:#cfe1e6;
+  --gc-readable-surface:#ffffff;
+  --gc-readable-subtle:#f4fafb;
+}
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app{
+  --gc-readable-ink:#eefaff;
+  --gc-readable-muted:#bad2dc;
+  --gc-readable-soft:#9fb9c5;
+  --gc-readable-line:#365666;
+  --gc-readable-surface:#102536;
+  --gc-readable-subtle:#152f40;
+}
+
+/* Keep the main console shell legible even when a legacy component inherits a stale ink token. */
+body.gc-staff-os-shell #app .gc-main,
+body.gc-staff-os-shell #app #view,
+body.gc-staff-os-shell #app #view > *{
+  color:var(--gc-readable-ink);
+}
+body.gc-staff-os-shell #app :where(.top-title strong,.section-head h1,.section-head h2,.card h2,.card h3,.panel h2,.panel h3){
+  color:var(--gc-readable-ink)!important;
+  text-shadow:none!important;
+}
+body.gc-staff-os-shell #app :where(.top-title span,.section-head p,.muted,.card p,.card small,.panel small){
+  color:var(--gc-readable-muted)!important;
+}
+
+/* Warehouse workspace: explicit surface/text pairs for both themes. */
+body.gc-staff-os-shell #app .gc-live-wh-workspace{color:var(--gc-readable-ink)!important}
+body.gc-staff-os-shell #app .gc-live-wh-hero{color:#f4feff!important}
+body.gc-staff-os-shell #app .gc-live-wh-hero :where(.gc-live-wh-eyebrow,h1,p,.gc-live-wh-flow,.gc-live-wh-flow span,.gc-live-wh-flow i){
+  color:inherit!important;
+}
+body.gc-staff-os-shell #app .gc-live-wh-hero h1{color:#ffffff!important;text-shadow:0 1px 0 rgba(0,0,0,.12)!important}
+body.gc-staff-os-shell #app .gc-live-wh-hero p{color:#d8f0f3!important}
+body.gc-staff-os-shell #app .gc-live-wh-flow{color:#eaffff!important}
+body.gc-staff-os-shell #app .gc-live-wh-flow span{color:#eaffff!important}
+body.gc-staff-os-shell #app .gc-live-wh-hero-actions .btn:not(.primary){color:#f4feff!important}
+
+body.gc-staff-os-shell #app :where(.gc-live-wh-metric,.gc-live-wh-toolbar,.gc-live-wh-card,.gc-live-wh-empty){
+  color:var(--gc-readable-ink)!important;
+  border-color:var(--gc-readable-line)!important;
+  background:var(--gc-readable-surface)!important;
+}
+body.gc-staff-os-shell #app :where(.gc-live-wh-metric span,.gc-live-wh-metric small,.gc-live-wh-id>small,.gc-live-wh-facts span,.gc-live-wh-details,.gc-live-wh-count,.gc-live-wh-toolbar>label>span,.gc-live-wh-empty p){
+  color:var(--gc-readable-muted)!important;
+}
+body.gc-staff-os-shell #app :where(.gc-live-wh-metric strong,.gc-live-wh-id>strong,.gc-live-wh-facts strong,.gc-live-wh-details b,.gc-live-wh-empty h3){
+  color:var(--gc-readable-ink)!important;
+}
+body.gc-staff-os-shell #app .gc-live-wh-id>strong{color:#087986!important}
+body.gc-staff-os-shell #app .gc-live-wh-search{background:var(--gc-readable-subtle)!important;border-color:var(--gc-readable-line)!important}
+body.gc-staff-os-shell #app .gc-live-wh-search>span{color:#087f8c!important}
+body.gc-staff-os-shell #app .gc-live-wh-toolbar .field,
+body.gc-staff-os-shell #app :where(.gc-live-wh-search .field,.gc-live-wh-toolbar select){
+  color:var(--gc-readable-ink)!important;
+  background:var(--gc-readable-surface)!important;
+}
+body.gc-staff-os-shell #app .gc-live-wh-toolbar .field::placeholder{color:var(--gc-readable-soft)!important;opacity:1!important}
+body.gc-staff-os-shell #app .gc-live-wh-facts>div{background:var(--gc-readable-subtle)!important;border-color:var(--gc-readable-line)!important}
+body.gc-staff-os-shell #app :where(.gc-live-wh-badge,.gc-live-wh-link){color:#315d6b!important;background:#eef7f8!important;border-color:#c6dfe4!important}
+body.gc-staff-os-shell #app :where(.gc-live-wh-badge.green,.gc-live-wh-link.green){color:#176c50!important;background:#eaf8f1!important;border-color:#b9dfcd!important}
+body.gc-staff-os-shell #app :where(.gc-live-wh-badge.amber,.gc-live-wh-link.amber){color:#825611!important;background:#fff6df!important;border-color:#e7d19d!important}
+body.gc-staff-os-shell #app .gc-live-wh-badge.red{color:#9a3043!important;background:#fff0f3!important;border-color:#e5b9c2!important}
+body.gc-staff-os-shell #app .gc-live-wh-linkstate small{color:#795d2b!important}
+
+/* Dark mode keeps the same information hierarchy without dark-on-dark labels. */
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app :where(.gc-live-wh-metric,.gc-live-wh-toolbar,.gc-live-wh-card,.gc-live-wh-empty){
+  background:#102536!important;border-color:#365666!important;color:#eefaff!important;
+}
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app :where(.gc-live-wh-metric span,.gc-live-wh-metric small,.gc-live-wh-id>small,.gc-live-wh-facts span,.gc-live-wh-details,.gc-live-wh-count,.gc-live-wh-toolbar>label>span,.gc-live-wh-empty p){color:#bad2dc!important}
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app :where(.gc-live-wh-metric strong,.gc-live-wh-facts strong,.gc-live-wh-details b,.gc-live-wh-empty h3){color:#eefaff!important}
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app .gc-live-wh-id>strong{color:#72e5e7!important}
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app .gc-live-wh-search,
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app .gc-live-wh-facts>div{background:#163244!important;border-color:#365666!important}
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app .gc-live-wh-toolbar .field,
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app :where(.gc-live-wh-search .field,.gc-live-wh-toolbar select){background:#0a1d2b!important;color:#eefaff!important;border-color:#365666!important}
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app .gc-live-wh-toolbar .field::placeholder{color:#9fb9c5!important}
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app :where(.gc-live-wh-badge,.gc-live-wh-link){color:#d7edf2!important;background:#1a3545!important;border-color:#456475!important}
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app :where(.gc-live-wh-badge.green,.gc-live-wh-link.green){color:#a9eed3!important;background:#12362c!important;border-color:#28674f!important}
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app :where(.gc-live-wh-badge.amber,.gc-live-wh-link.amber){color:#f4d38c!important;background:#372b18!important;border-color:#795c2e!important}
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app .gc-live-wh-badge.red{color:#ffb1bb!important;background:#381c26!important;border-color:#7a3e4b!important}
+html[data-gc-theme="dark"] body.gc-staff-os-shell #app .gc-live-wh-linkstate small{color:#e1c27d!important}
+
+/* Forms and controls: stronger labels, stable sizing and visible focus states. */
+body.gc-staff-os-shell #app :where(label>span,.form-field label,.field-label){color:var(--gc-readable-muted)!important;font-weight:800!important}
+body.gc-staff-os-shell #app :where(input,select,textarea,.field){color:var(--gc-readable-ink)!important}
+body.gc-staff-os-shell #app :where(input,select,textarea,.field)::placeholder{color:var(--gc-readable-soft)!important;opacity:1!important}
+body.gc-staff-os-shell #app :where(input,select,textarea,.field):focus-visible{outline:3px solid rgba(15,166,178,.28)!important;outline-offset:1px!important}
+body.gc-staff-os-shell #app :where(button,a,.btn):focus-visible{outline:3px solid rgba(15,166,178,.38)!important;outline-offset:2px!important}
+
+/* Mobile: prevent clipped Kurdish labels and let actions breathe. */
+@media(max-width:760px){
+  body.gc-staff-os-shell #app .gc-live-wh-hero{padding:19px 15px!important}
+  body.gc-staff-os-shell #app .gc-live-wh-hero h1{font-size:clamp(21px,6vw,27px)!important;line-height:1.55!important}
+  body.gc-staff-os-shell #app .gc-live-wh-hero p{font-size:12px!important;line-height:1.9!important}
+  body.gc-staff-os-shell #app .gc-live-wh-flow span{font-size:10px!important;line-height:1.55!important}
+  body.gc-staff-os-shell #app .gc-live-wh-metric{min-height:96px!important;padding:12px!important}
+  body.gc-staff-os-shell #app .gc-live-wh-metric span{font-size:10px!important;line-height:1.65!important}
+  body.gc-staff-os-shell #app .gc-live-wh-metric small{font-size:9px!important;line-height:1.6!important}
+  body.gc-staff-os-shell #app .gc-live-wh-card{padding:14px!important}
+  body.gc-staff-os-shell #app .gc-live-wh-details span{align-items:flex-start!important;line-height:1.8!important}
+  body.gc-staff-os-shell #app .gc-live-wh-details b{max-width:62%!important}
+  body.gc-staff-os-shell #app .gc-live-wh-actions .btn{font-size:11px!important;line-height:1.55!important;white-space:normal!important}
+}
+@media(max-width:390px){
+  body.gc-staff-os-shell #app .gc-live-wh-flow{display:grid!important;grid-template-columns:1fr!important}
+  body.gc-staff-os-shell #app .gc-live-wh-flow i{display:none!important}
+  body.gc-staff-os-shell #app .gc-live-wh-metrics{grid-template-columns:1fr 1fr!important}
+  body.gc-staff-os-shell #app .gc-live-wh-details span{display:grid!important;gap:2px!important}
+  body.gc-staff-os-shell #app .gc-live-wh-details b{max-width:100%!important;text-align:start!important}
+}
