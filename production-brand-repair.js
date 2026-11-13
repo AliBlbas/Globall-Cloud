@@ -182,7 +182,7 @@
     if (location.pathname.startsWith('/api/')) return;
     loadAsset({tag:'link', rel:'stylesheet', href:'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700;800;900&display=swap', attr:'data-gc-font-system'});
     loadAsset({tag:'link', rel:'stylesheet', href:'/gc-platform-vnext.css?v=20260908-1', attr:'data-gc-vnext-css'});
-    loadAsset({tag:'link', rel:'stylesheet', href:'/gc-platform-vnext-plus.css?v=20260908-1', attr:'data-gc-vnext-plus-css'});
+    loadAsset({tag:'link', rel:'stylesheet', href:'/gc-platform-vnext-plus.css?v=20261113-1', attr:'data-gc-vnext-plus-css'});
     loadAsset({tag:'link', rel:'stylesheet', href:'/gc-premium-design-2026.css?v=20260915-3', attr:'data-gc-premium-design-2026'});
     loadAsset({tag:'link', rel:'stylesheet', href:'/gc-live-visual-refresh-2026.css?v=20260915-2', attr:'data-gc-live-visual-refresh'});
     loadAsset({tag:'link', rel:'stylesheet', href:'/gc-mobile-visual-rebuild-2026.css?v=20260918-1', attr:'data-gc-mobile-visual-rebuild'});
@@ -194,7 +194,7 @@
     // Final public visual layer intentionally loads last so it wins over legacy responsive layers.
     loadAsset({tag:'link', rel:'stylesheet', href:'/gc-public-visual-system-2026.css?v=20260918-1', attr:'data-gc-public-visual-system'});
     // The public mobile action dock is canonical; do not load the legacy floating vNext strip.
-    loadAsset({tag:'script', src:'/gc-platform-vnext-plus.js?v=20260928-1', attr:'data-gc-vnext-plus-loader'});
+    loadAsset({tag:'script', src:'/gc-platform-vnext-plus.js?v=20261113-1', attr:'data-gc-vnext-plus-loader'});
     loadAsset({tag:'script', src:'/gc-icon-polish-2026.js?v=20260915-2', attr:'data-gc-icon-polish-2026'});
     loadAsset({tag:'link', rel:'stylesheet', href:'/gc-command-nav-polish-2026.css?v=20260915-2', attr:'data-gc-command-nav-polish'});
     loadAsset({tag:'script', src:'/gc-runtime-safety-v2026.js?v=20260908-1', attr:'data-gc-runtime-safety-loader'});

@@ -108,6 +108,16 @@ else ok('Staff Data Health is active with a read-only, role-protected backend');
 const retiredLegacyAssets = ["accounts-console-script.js","staff-os-enhancements.js","staff-os-enhancements-v2.js","staff-os-production.js","staff-os-production-layer.js","staff-os-production-fix.js","staff-os-ultimate-control.js","staff-os-ultimate-fix.js","staff-os-v2-compat.js","staff-os-v5-enhancement-loader.js","staff-mobile-final-polish-20260919.css","staff-mobile-smart-enhancement-20260919.css","staff-mobile-smart-enhancement-20260919.js","staff-mobile-ultimate-20260919.css","staff-mobile-ultimate-20260919.js","gc-staff-ui-refinement-20261019-v2.css","gc-staff-ui-refinement-20261019-v3.css","gc-customer-dashboard-polish-20260929.css","gc-customer-dashboard-polish-20260929.js","gc-customer-dashboard-v2-20260929.css","gc-customer-dashboard-v2-20260929.js","gc-command-nav-polish-2026.css"];
 if (!productionMiddleware.includes('const RETIRED_LEGACY_ASSETS = new Set([') || !productionMiddleware.includes('RETIRED_LEGACY_ASSETS.has(requestPath.slice(1))') || !productionMiddleware.includes('status:410') || !productionMiddleware.includes('no-store, max-age=0, must-revalidate') || !retiredLegacyAssets.every((asset) => productionMiddleware.includes(`'${asset}'`))) fail('retired legacy assets must return non-cacheable 410 responses');
 else ok('All removed legacy assets are explicitly retired with no-store 410 responses');
+const launcherJs = read('gc-platform-vnext-plus.js');
+const launcherCss = read('gc-platform-vnext-plus.css');
+const brandRepair = read('production-brand-repair.js');
+const launcherChecks = [
+  ['command palette labels and descriptions isolate their own text direction', (launcherJs.match(/dir="auto"/g) || []).length >= 4],
+  ['command palette text containers can shrink and wrap on narrow screens', launcherCss.includes('.gc-vx-item>.gc-vx-copy') && launcherCss.includes('min-width:0') && launcherCss.includes('overflow-wrap:anywhere')],
+  ['launcher script and stylesheet cache keys are current and consistent', launcherJs.includes('/gc-platform-vnext-plus.css?v=20261113-1') && brandRepair.includes('/gc-platform-vnext-plus.css?v=20261113-1') && brandRepair.includes('/gc-platform-vnext-plus.js?v=20261113-1')],
+  ['shared injected asset version invalidates the launcher bootstrap', productionMiddleware.includes("const VERSION = '20261113-1'")],
+]
+for (const [label, passed] of launcherChecks) passed ? ok(label) : fail(label)
 if (!failures) ok('Core public/staff routes are wired')
 
 const bridge = read('production-bridge.js')
