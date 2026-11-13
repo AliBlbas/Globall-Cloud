@@ -815,6 +815,7 @@ async function bindCustomerAuth(client: ReturnType<typeof createClient>, payload
   const { data: customer, error: customerError } = await client.from('customer_directory').select('id,code,gc_code,name,email,phone,auth_user_id,is_active').eq('id', id).maybeSingle()
   if (customerError) throw customerError
   if (!customer) throw responseError('Customer not found', 404)
+  if (customer.auth_user_id) throw responseError('This customer already has a linked Auth account. Re-binding is blocked to protect the existing password and session.', 409)
   if (customer.is_active !== true) throw responseError('Inactive customers cannot be bound', 400)
   const code = normalizeGcCode(customer.gc_code ?? customer.code)
   if (!code) throw responseError('Customer has no valid GC code', 400)
@@ -834,10 +835,17 @@ async function bindCustomerAuth(client: ReturnType<typeof createClient>, payload
     if (error) throw error
     userId = data.user?.id ?? null
     if (!userId) throw new Error('Customer Auth account was not created')
-    const { error: linkError } = await client.from('customer_directory').update({ auth_user_id: userId }).eq('id', id)
-    if (linkError) {
+    const { data: linkedCustomer, error: linkError } = await client
+      .from('customer_directory')
+      .update({ auth_user_id: userId })
+      .eq('id', id)
+      .is('auth_user_id', null)
+      .select('id')
+      .maybeSingle()
+    if (linkError || !linkedCustomer) {
       await client.auth.admin.deleteUser(userId).catch(() => undefined)
-      throw linkError
+      if (linkError) throw linkError
+      throw responseError('This customer was linked by another staff member. Refresh the customer record before continuing.', 409)
     }
   }
   const linkedRows = await client.from('shipment_customer_links').update({customer_user_id:userId,customer_gc_code:code,updated_at:new Date().toISOString()}).eq('customer_directory_id',id).select('shipment_id')
