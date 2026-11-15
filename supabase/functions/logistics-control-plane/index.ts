@@ -211,17 +211,24 @@ const invoiceUpsert = async (service: ReturnType<typeof serviceClient>, staff: S
   const invoiceNumber = text(data.invoice_number, 120)
   const shipmentId = text(data.shipment_id, 128)
   if (!invoiceNumber || !shipmentId) throw new Error('invoice_number and shipment_id are required')
-  const result = await service.rpc('upsert_shipment_invoice', {
+  const result = await service.rpc('upsert_shipment_invoice_template', {
     p_actor_id: staff.id,
     p_invoice_number: invoiceNumber,
     p_shipment_id: shipmentId,
     p_line_items: Array.isArray(data.line_items) ? data.line_items : [],
     p_subtotal: numberOrNull(data.subtotal) ?? 0,
     p_discount: numberOrNull(data.discount) ?? 0,
+    p_additional_charges: numberOrNull(data.additional_charges) ?? 0,
     p_tax: numberOrNull(data.tax) ?? 0,
     p_currency: text(data.currency, 8) || 'USD',
     p_status: text(data.status, 30) || 'draft',
+    p_invoice_date: text(data.invoice_date, 20) || null,
     p_due_at: text(data.due_at, 80),
+    p_receipt_no: text(data.receipt_no, 120),
+    p_bill_to_name: text(data.bill_to_name, 200),
+    p_bill_to_address: text(data.bill_to_address, 500),
+    p_payment_method: text(data.payment_method, 200),
+    p_notes: text(data.notes, 1000),
   })
   if (result.error) throw result.error
   return result.data

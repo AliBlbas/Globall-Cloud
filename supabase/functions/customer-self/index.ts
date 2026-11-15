@@ -424,7 +424,7 @@ Deno.serve(async (req) => {
       service.from('customer_notification_preferences').select('email_enabled,whatsapp_enabled,sms_enabled,in_app_enabled,quiet_hours_start,quiet_hours_end,updated_at').eq('customer_user_id',user.id).maybeSingle(),
       service.from('quote_requests').select('id,origin_key,dest_key,transport_mode,weight_kg,volume_cbm,status,quoted_amount,currency,valid_until,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(30),
       service.from('shipment_documents').select('id,shipment_id,document_type,title,file_url,is_public,document_status,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(30),
-      service.from('shipment_invoices').select('id,invoice_number,shipment_id,total,paid_total,currency,status,due_at,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(50),
+      service.from('shipment_invoices').select('id,invoice_number,shipment_id,line_items,subtotal,discount,additional_charges,tax,total,paid_total,currency,status,due_at,invoice_date,receipt_no,bill_to_name,bill_to_address,payment_method,notes,issued_at,created_at').eq('customer_user_id',user.id).order('created_at',{ascending:false}).limit(50),
       shipmentIds.length?service.from('shipment_tracking_events').select('id,shipment_id,status_key,title,note,location_label,lat,lng,occurred_at,photos').in('shipment_id',shipmentIds).eq('is_public',true).order('occurred_at',{ascending:false}).limit(200):Promise.resolve({data:[],error:null}),
       service.from('warehouse_receipts').select('id,batch_code,warehouse,source_warehouse,location,stage,photo_taken_at,gc_code,gc_code_detected,verification_status,photos,shipment_id,received_at,carton_count,weight_actual,created_by_name,scan_code,notes').eq('directory_customer_id',customer.id).order('received_at',{ascending:false}).limit(50),
       service.from('customer_chat_threads').select('id,subject,status,priority,last_message_at,created_at').eq('customer_user_id',user.id).neq('status','closed').order('last_message_at',{ascending:false}).limit(30),
@@ -525,7 +525,7 @@ Deno.serve(async (req) => {
     // Never attach an unowned invoice/document from a consolidated shipment.
     const [soloDocumentsResult, soloInvoicesResult] = await Promise.all([
       soloShipmentIds.length ? service.from('shipment_documents').select('id,shipment_id,document_type,title,file_url,is_public,document_status,created_at').in('shipment_id',soloShipmentIds).is('customer_user_id',null).eq('is_public',true).order('created_at',{ascending:false}).limit(100) : Promise.resolve({data:[],error:null}),
-      soloShipmentIds.length ? service.from('shipment_invoices').select('id,invoice_number,shipment_id,total,paid_total,currency,status,due_at,created_at').in('shipment_id',soloShipmentIds).is('customer_user_id',null).order('created_at',{ascending:false}).limit(100) : Promise.resolve({data:[],error:null}),
+      soloShipmentIds.length ? service.from('shipment_invoices').select('id,invoice_number,shipment_id,line_items,subtotal,discount,additional_charges,tax,total,paid_total,currency,status,due_at,invoice_date,receipt_no,bill_to_name,bill_to_address,payment_method,notes,issued_at,created_at').in('shipment_id',soloShipmentIds).is('customer_user_id',null).order('created_at',{ascending:false}).limit(100) : Promise.resolve({data:[],error:null}),
     ])
     if(soloDocumentsResult.error)throw soloDocumentsResult.error
     if(soloInvoicesResult.error)throw soloInvoicesResult.error
