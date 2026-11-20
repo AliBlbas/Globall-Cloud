@@ -28,7 +28,6 @@
       const cells = Object.entries(worksheet).filter(([address, cell]) => !address.startsWith('!') && cell && typeof cell === 'object');
       const formulaCells = cells.filter(([, cell]) => typeof cell.f === 'string' && cell.f.trim());
       const errorCells = cells.filter(([, cell]) => cell.t === 'e' || formulaError(cell.w) || formulaError(cell.v));
-      const formulaErrorCells = errorCells.filter(([, cell]) => typeof cell.f === 'string' && cell.f.trim());
       const errorsByRow = new Map();
       for (const [address, cell] of errorCells) {
         const rowNumber = Number(address.match(/\d+$/)?.[0]);
@@ -38,7 +37,7 @@
         errorsByRow.set(rowNumber, list);
       }
       const header = (populated.find((raw) => raw.filter((v) => v !== null && v !== '').length >= 2) || []).slice(0, 12).map((v) => text(v)).filter(Boolean);
-      sheets.push({ name: wsName, category: kind, rows: populated.length, formulas: formulaCells.length, formula_errors: formulaErrorCells.length, header });
+      sheets.push({ name: wsName, category: kind, rows: populated.length, formulas: formulaCells.length, formula_errors: errorCells.length, header });
       values.forEach((raw, index) => {
         const cleaned = raw.map((v) => v instanceof Date ? v.toISOString() : v);
         if (cleaned.filter((v) => v !== null && v !== '').length < 2) return;
