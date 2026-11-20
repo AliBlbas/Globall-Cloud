@@ -218,11 +218,10 @@ const invoiceUpsert = async (service: ReturnType<typeof serviceClient>, staff: S
     p_line_items: Array.isArray(data.line_items) ? data.line_items : [],
     p_subtotal: numberOrNull(data.subtotal) ?? 0,
     p_previous_debt: numberOrNull(data.previous_debt) ?? 0,
-    p_discount: numberOrNull(data.discount) ?? 0,
     p_additional_charges: numberOrNull(data.additional_charges) ?? 0,
     p_tax: numberOrNull(data.tax) ?? 0,
     p_currency: text(data.currency, 8) || 'USD',
-    p_status: text(data.status, 30) || 'draft',
+    p_status: text(data.status, 30) || 'issued',
     p_invoice_date: text(data.invoice_date, 20) || null,
     p_due_at: text(data.due_at, 80),
     p_receipt_no: text(data.receipt_no, 120),
@@ -230,6 +229,7 @@ const invoiceUpsert = async (service: ReturnType<typeof serviceClient>, staff: S
     p_bill_to_address: text(data.bill_to_address, 500),
     p_payment_method: text(data.payment_method, 200),
     p_notes: text(data.notes, 1000),
+    p_iqd_exchange_rate: numberOrNull(data.iqd_exchange_rate),
   })
   if (result.error) throw result.error
   return result.data
@@ -466,6 +466,23 @@ const listOperationalAlerts = async (service: ReturnType<typeof serviceClient>, 
 const list = async (service: ReturnType<typeof serviceClient>, staff: Staff, requestUrl: URL) => {
   const kind = requestUrl.searchParams.get('kind') || 'shipments'
   if (kind === 'alerts') return listOperationalAlerts(service, staff)
+  if (kind === 'invoice_options') {
+    requireRole(staff, ['admin', 'super_admin', 'accountant'])
+    let shipmentQuery = service.from('shipments')
+      .select('id,tracking_number,customer_gc_code,customer_name,created_at,total_amount,paid_amount,currency,status,branch,archived_at')
+      .is('archived_at', null)
+      .order('created_at', { ascending: false })
+    if (staff.branch && staff.branch !== 'all') shipmentQuery = shipmentQuery.eq('branch', staff.branch)
+    const [shipmentResult, rateResult] = await Promise.all([
+      shipmentQuery.limit(200),
+      service.from('exchange_rates').select('rate,usd_to_iqd,is_active,updated_at')
+        .eq('is_active', true).order('updated_at', { ascending: false }).limit(1).maybeSingle(),
+    ])
+    if (shipmentResult.error) throw shipmentResult.error
+    if (rateResult.error) throw rateResult.error
+    const rate = Number(rateResult.data?.rate || rateResult.data?.usd_to_iqd || 0)
+    return { kind, items: shipmentResult.data || [], exchange_rate_usd_iqd: Number.isFinite(rate) && rate > 0 ? rate : null }
+  }
   if (kind === 'events') {
     const shipmentId = text(requestUrl.searchParams.get('shipment_id'), 128)
     if (!shipmentId) throw new Error('shipment_id is required')
@@ -480,7 +497,7 @@ const list = async (service: ReturnType<typeof serviceClient>, staff: Staff, req
   }
   const limit = Math.min(200, Math.max(1, Number(requestUrl.searchParams.get('limit') || 50)))
   const offset = Math.max(0, Number(requestUrl.searchParams.get('offset') || 0))
-  const allowed = new Set(['shipments', 'events', 'packages', 'customs', 'consolidations', 'invoices', 'payments', 'exceptions', 'outbox', 'status_history', 'quotes', 'documents', 'movements', 'route_legs', 'manifests', 'alerts'])
+  const allowed = new Set(['shipments', 'events', 'packages', 'customs', 'consolidations', 'invoices', 'payments', 'exceptions', 'outbox', 'status_history', 'quotes', 'documents', 'movements', 'route_legs', 'manifests', 'alerts', 'invoice_options'])
   if (!allowed.has(kind)) throw new Error('Unsupported list kind')
   const scopedKinds = new Set(['packages', 'customs', 'invoices', 'payments', 'exceptions', 'status_history', 'documents', 'movements', 'route_legs', 'manifests'])
   const shipmentId = text(requestUrl.searchParams.get('shipment_id'), 128)
