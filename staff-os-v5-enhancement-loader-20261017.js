@@ -10,7 +10,8 @@
   const enhancementStyles = [
     // Keep the command deck as the final staff visual layer after runtime
     // bridges append their compatibility styles.
-    '/gc-staff-command-deck-20261023.css?v=20261120-2'
+    '/gc-staff-command-deck-20261023.css?v=20261120-2',
+    '/gc-staff-mobile-finance-fix-20261120.css?v=1'
   ];
 
   const enhancementScripts = [
@@ -66,6 +67,7 @@
     for (const src of enhancementScripts) await loadOne(src);
     // The command deck is intentionally re-appended after runtime bridges.
     loadStyle('/gc-staff-command-deck-20261023.css?v=20261120-2');
+    loadStyle('/gc-staff-mobile-finance-fix-20261120.css?v=1');
   };
 
   const waitForShell = () => {
