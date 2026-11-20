@@ -99,8 +99,23 @@
     return state.client;
   }
 
+  // Keep Supabase session reads bounded so the workspace never spins forever.
+  async function getSessionSafely(timeoutMs = 5000) {
+    let timer;
+    try {
+      return await Promise.race([
+        state.client.auth.getSession(),
+        new Promise((_, reject) => {
+          timer = setTimeout(() => reject(new Error('وەرگرتنی Session لە کاتی دیاریکراودا تەواو نەبوو. تکایە دووبارە هەوڵ بدە.')), timeoutMs);
+        })
+      ]);
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  }
+
   async function request(base, path='/', options={}) {
-    const { data } = await state.client.auth.getSession();
+    const { data } = await getSessionSafely();
     state.session = data?.session || state.session;
     if (!state.session?.access_token) throw new Error('Session ـی کارپێکردن نییە');
 
@@ -155,7 +170,7 @@
   }
 
   async function verifyStoredSession() {
-    const { data, error } = await state.client.auth.getSession();
+    const { data, error } = await getSessionSafely();
     if (error) throw error;
     if (!data?.session) return false;
     try { await identify(data.session); } catch { await state.client.auth.signOut(); return false; }
@@ -255,7 +270,7 @@
           if (challenge.error) throw challenge.error;
           const verified = await state.client.auth.mfa.verify({ factorId: factor.id, challengeId: challenge.data.id, code });
           if (verified.error) throw verified.error;
-          const { data } = await state.client.auth.getSession();
+          const { data } = await getSessionSafely();
           state.session = data.session;
            await identify(state.session);
            renderApp();
@@ -348,9 +363,11 @@
 
   async function loadOverview() {
     const canProcessInAppOutbox = ['admin','super_admin'].includes(state.staff?.role);
-    const outboxTask = canProcessInAppOutbox ? request(FN.controlPlane, '/?kind=outbox&limit=200') : Promise.resolve(null);
-    const results = await Promise.allSettled([ops('shipments'), ops('customers'), ops('finance'), ops('alerts'), account('notification'), account('quote_requests'), account('task'), account('log'), ops('pricing')]);
-    const outboxProbe = canProcessInAppOutbox ? (await Promise.allSettled([outboxTask]))[0] : {status:'fulfilled',value:null};
+    const dashboardFeeds = [ops('shipments'), ops('customers'), ops('finance'), ops('alerts'), account('notification'), account('quote_requests'), account('task'), account('log'), ops('pricing')];
+    const outboxTask = canProcessInAppOutbox ? request(FN.controlPlane, '/?kind=outbox&limit=200') : null;
+    const settledFeeds = await Promise.allSettled(canProcessInAppOutbox ? [...dashboardFeeds, outboxTask] : dashboardFeeds);
+    const results = settledFeeds.slice(0, dashboardFeeds.length);
+    const outboxProbe = canProcessInAppOutbox ? settledFeeds[dashboardFeeds.length] : {status:'fulfilled',value:null};
     const outboxItems = outboxProbe.status === 'fulfilled' && Array.isArray(outboxProbe.value?.items) ? outboxProbe.value.items : [];
     const outboxLoadFailed = canProcessInAppOutbox && outboxProbe.status === 'rejected';
     const pendingInAppJobs = outboxItems.filter(item => item.channel === 'in_app' && item.status === 'pending').length;
