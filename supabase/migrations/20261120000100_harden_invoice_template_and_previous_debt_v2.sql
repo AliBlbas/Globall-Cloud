@@ -19,6 +19,7 @@ create or replace function public.upsert_shipment_invoice_template(
   p_shipment_id text,
   p_line_items jsonb default '[]'::jsonb,
   p_subtotal numeric default 0,
+  p_discount numeric default 0,
   p_previous_debt numeric default 0,
   p_additional_charges numeric default 0,
   p_tax numeric default 0,
@@ -45,6 +46,7 @@ declare
   v_shipment_uuid uuid;
   v_invoice_number text := upper(trim(coalesce(p_invoice_number, '')));
   v_subtotal numeric(14,2) := round(coalesce(p_subtotal, 0), 2);
+  v_discount numeric(14,2) := round(coalesce(p_discount, 0), 2);
   v_previous_debt numeric(14,2) := round(coalesce(p_previous_debt, 0), 2);
   v_additional numeric(14,2) := round(coalesce(p_additional_charges, 0), 2);
   v_tax numeric(14,2) := round(coalesce(p_tax, 0), 2);
@@ -89,7 +91,7 @@ begin
     raise exception 'Shipment not found';
   end if;
 
-  if v_subtotal < 0 or v_previous_debt < 0 or v_additional < 0 or v_tax < 0 then
+  if v_subtotal < 0 or v_discount < 0 or v_previous_debt < 0 or v_additional < 0 or v_tax < 0 then
     raise exception 'Invoice amounts cannot be negative';
   end if;
   if v_currency not in ('USD', 'IQD', 'AED', 'CNY', 'EUR') then
@@ -99,7 +101,7 @@ begin
     raise exception 'Unsupported invoice status';
   end if;
 
-  v_total := greatest(0, v_subtotal + v_previous_debt + v_additional + v_tax);
+  v_total := greatest(0, v_subtotal - v_discount + v_previous_debt + v_additional + v_tax);
   v_rate := case
     when p_iqd_exchange_rate is null or p_iqd_exchange_rate <= 0 then null
     else round(p_iqd_exchange_rate, 4)
@@ -120,7 +122,7 @@ begin
   values (
     v_invoice_number, v_shipment.id::text, v_shipment.customer_user_id,
     coalesce(p_line_items, '[]'::jsonb),
-    v_subtotal, 0, v_tax, v_total, v_currency, v_status, p_due_at,
+    v_subtotal, v_discount, v_tax, v_total, v_currency, v_status, p_due_at,
     case when v_status <> 'draft' then now() else null end,
     p_actor_id, p_actor_id, nullif(trim(p_receipt_no), ''),
     coalesce(p_invoice_date, current_date),
@@ -133,7 +135,7 @@ begin
   on conflict (invoice_number) do update set
     line_items = excluded.line_items,
     subtotal = excluded.subtotal,
-    discount = 0,
+    discount = excluded.discount,
     tax = excluded.tax,
     total = excluded.total,
     currency = excluded.currency,
@@ -178,6 +180,7 @@ begin
     jsonb_build_object(
       'invoice_number', v_invoice_number,
       'subtotal', v_subtotal,
+      'discount', v_discount,
       'previous_debt', v_previous_debt,
       'additional_charges', v_additional,
       'total_usd', v_total,
@@ -192,10 +195,10 @@ end;
 $$;
 
 revoke all on function public.upsert_shipment_invoice_template(
-  uuid,text,text,jsonb,numeric,numeric,numeric,numeric,text,text,date,timestamptz,text,text,text,text,text,numeric
+  uuid,text,text,jsonb,numeric,numeric,numeric,numeric,numeric,text,text,date,timestamptz,text,text,text,text,text,numeric
 ) from public, anon, authenticated;
 grant execute on function public.upsert_shipment_invoice_template(
-  uuid,text,text,jsonb,numeric,numeric,numeric,numeric,text,text,date,timestamptz,text,text,text,text,text,numeric
+  uuid,text,text,jsonb,numeric,numeric,numeric,numeric,numeric,text,text,date,timestamptz,text,text,text,text,text,numeric
 ) to service_role;
 
 commit;
