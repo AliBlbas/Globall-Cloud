@@ -126,15 +126,49 @@
 
   const line = () => `<div class="gc-invoice-line" data-invoice-line><input name="description" placeholder="Item / Description" aria-label="Item / Description"><input name="quantity" type="number" min="0" step="0.01" value="1" placeholder="Qty"><input name="basis" placeholder="Basis" aria-label="Basis"><input name="unit_price" type="number" min="0" step="0.01" value="0" placeholder="Unit price"><output data-line-amount>0.00</output><button type="button" data-remove-line aria-label="Remove">×</button></div>`;
 
-  const printInvoice = (data) => {
+
+  const loadInvoiceOptions = async (form) => {
+    const select = form.elements.shipment_id;
+    const message = document.getElementById('gcInvoiceMsg');
+    select.innerHTML = '<option value="">بارەکان بارکردنە…</option>';
+    try {
+      const result = await get(`${API}?kind=invoice_options&limit=200`);
+      const shipments = Array.isArray(result.items) ? result.items : [];
+      if (!shipments.length) {
+        select.innerHTML = '<option value="">هیچ بارێکی چالاک لەم لقەدا نییە</option>';
+        message.textContent = 'بارێکی چالاک نەدۆزرایەوە؛ پێش دروستکردنی فاتورە بارێک تۆمار بکە.';
+        return;
+      }
+      select.innerHTML = '<option value="">بارێک هەڵبژێرە…</option>' + shipments.map((item) => {
+        const code = item.customer_gc_code || item.tracking_number || item.id;
+        const name = item.customer_name || 'بێ ناو';
+        const status = item.operational_status || item.status || '';
+        const label = [code, name, status].filter(Boolean).join(' · ');
+        return `<option value="${esc(item.id)}" data-name="${esc(name)}" data-date="${esc(item.created_at || '')}">${esc(label)}</option>`;
+      }).join('');
+      if (Number(result.exchange_rate_usd_iqd) > 0) form.elements.iqd_exchange_rate.value = String(result.exchange_rate_usd_iqd);
+      select.addEventListener('change', () => {
+        const option = select.options[select.selectedIndex];
+        form.elements.bill_to_name.value = option?.dataset.name || '';
+        form.elements.shipment_date.value = option?.dataset.date ? new Date(option.dataset.date).toISOString().slice(0, 10) : '';
+      });
+      message.textContent = `${shipments.length} بار ئامادەی هەڵبژاردنن. زانیاریی کڕیار لە بارەکەوە دەهێنرێت.`;
+    } catch (error) {
+      select.innerHTML = '<option value="">بارەکان نەهاتن</option>';
+      message.textContent = error.message || 'بارەکان نەهاتن.';
+    }
+  };
+
+  const printInvoice = (data, win) => {
     const theme = data.theme || 'modern';
     const currency = esc(data.currency || 'USD');
     const paid = n(data.paid_total);
     const total = n(data.total);
     const status = paid >= total && total > 0 ? 'PAID' : paid > 0 ? 'PARTIALLY PAID' : 'ISSUED';
     const items = (data.line_items || []).map((item) => `<div class="item-row"><div class="item">${esc(item.description || '')}</div><div>${esc(item.quantity || '')} ${esc(item.unit || '')}</div><div class="muted">${esc(item.basis || '')}</div><div>${money(item.unit_price, currency)}</div><div class="amount">${money(item.amount, currency)}</div></div>`).join('');
-    const win = window.open('', '_blank', 'noopener,noreferrer');
-    if (!win) { alert('Popup ـەکە ڕێگەپێنەدراوە؛ تکایە popup چالاک بکە.'); return; }
+    if (!win) { alert('پەنجەرەی چاپ نەکرایەوە؛ تکایە پاپ-ئەپ چالاک بکە.'); return; }
+    win.opener = null;
+    win.document.open();
     win.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(data.invoice_number || 'Invoice')}</title><style>${styles}</style></head><body><main class="invoice ${theme === 'dark' ? 'theme-dark' : theme === 'gold' ? 'theme-gold' : theme === 'sky' ? 'theme-sky' : ''}"><header class="invoice-header"><div class="brand"><img src="/logo-icon.png" alt="Global Cloud logo"><div><h1>GLOBAL CLOUD</h1><p>GLOBAL LOGISTICS • FOR GENERAL TRADING</p><small>IMPORT &amp; EXPORT • ERBIL</small></div></div><div class="invoice-badge"><b>INVOICE</b><strong>${esc(data.invoice_number || '')}</strong><span>Receipt • ${esc(data.receipt_no || '—')}</span></div></header><div class="accent"></div><section class="body"><div class="contact"><span>0772 944 1884</span><span>0750 768 1884</span><span>0750 429 1341</span><span>globallcloud@gmail.com</span></div><section class="card customer"><div class="bill"><div class="label">Bill to / کڕیار</div><h2>${esc(data.bill_to_name || '—')}</h2><p>Shipment: ${esc(data.shipment_id || '—')} • Address: ${esc(data.bill_to_address || '—')}</p></div><div class="meta"><div class="meta-box"><label>Invoice Date</label><em>بەرواری فاتورە</em><strong>${esc(data.invoice_date || '—')}</strong></div><div class="meta-box"><label>Due Date</label><em>بەرواری پارەدان</em><strong>${esc(data.due_at || '—')}</strong></div><div class="meta-box"><label>Status</label><em>دۆخ</em><strong>${status}</strong></div></div></section><div class="status"><span>${status} • ${esc(data.payment_method || 'Payment pending')}</span><span class="total">TOTAL ${currency} • ${money(total, currency)}</span></div><section class="card items"><div class="items-head"><div>ITEM<small>جۆری کاڵا</small></div><div>QUANTITY<small>کێش</small></div><div>BASIS<small>بنەما</small></div><div>UNIT PRICE<small>نرخی یەکە</small></div><div>AMOUNT<small>بڕی پارە</small></div></div>${items || '<div class="item-row"><div class="item">—</div><div>—</div><div>—</div><div>—</div><div class="amount">—</div></div>'}</section><section class="card financial"><div class="payment"><div class="label">Payment / پارەدان</div><div class="mini">Amount Paid / پارەی دراو</div><div class="paid">${money(paid, currency)}</div><span class="balance">BALANCE • ${money(Math.max(0,total-paid), currency)}</span></div><div class="summary"><div class="sumline"><span>SUBTOTAL</span><b>${money(data.subtotal, currency)}</b></div><div class="sumline"><span>DISCOUNT</span><b>${money(data.discount, currency)}</b></div><div class="sumline"><span>ADDITIONAL</span><b>${money(data.additional_charges, currency)}</b></div><div class="sumline total-line"><span>TOTAL ${currency}</span><b>${money(total, currency)}</b></div></div></section><section class="bottom"><div class="card"><div class="label">TOTAL IN IQD</div><div class="iqd">${n(data.total_iqd) ? `${n(data.total_iqd).toLocaleString('en-US')} IQD` : '—'}</div></div><div class="card signature">Customer Signature / واژووی کڕیار<div class="sigline"></div></div></section><footer class="footer"><strong>GLOBAL CLOUD • ERBIL - HAWLERI NWE, NEXT TO GASHA INSTITUTE</strong><br>Hawler - Hawleri Nwe, Tanisht Paymangay Gasha • globalcloud@gmail.com<div class="thanks">Thank you for your business with Globall Cloud.</div></footer></section></main><script>setTimeout(()=>window.print(),300)<\/script></body></html>`);
     win.document.close();
   };
