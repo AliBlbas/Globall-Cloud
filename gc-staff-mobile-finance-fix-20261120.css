@@ -1,0 +1,442 @@
+/* Globall Cloud Staff OS — mobile finance readability and drawer correction · 2026-11-20
+   Shared by the current V5 console and the legacy Staff Console entry.
+   This layer intentionally defines explicit surface/text pairs instead of inherited color. */
+
+body.gc-staff-page #view :is(.table-wrap,.table-responsive,.table-container,.table-scroll) {
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  overflow-x:auto!important;
+  overscroll-behavior-inline:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+  border:1px solid #c9dce4!important;
+  border-radius:15px!important;
+  background:#fff!important;
+  color:#1a3a4d!important;
+  scrollbar-width:thin;
+}
+body.gc-staff-page #view :is(.table-wrap,.table-responsive,.table-container,.table-scroll) table,
+body.gc-staff-page #view table.table {
+  color:#1a3a4d!important;
+  border-collapse:separate!important;
+  border-spacing:0!important;
+}
+body.gc-staff-page #view :is(.table-wrap,.table-responsive,.table-container,.table-scroll) th,
+body.gc-staff-page #view table.table th {
+  color:#31596b!important;
+  background:#edf5f8!important;
+  border-color:#d5e4e9!important;
+  font-weight:850!important;
+  opacity:1!important;
+}
+body.gc-staff-page #view :is(.table-wrap,.table-responsive,.table-container,.table-scroll) td,
+body.gc-staff-page #view table.table td {
+  color:#1d4054!important;
+  background:#fff!important;
+  border-color:#e0ebef!important;
+  opacity:1!important;
+  font-weight:600;
+}
+body.gc-staff-page #view :is(.table-wrap,.table-responsive,.table-container,.table-scroll) td :is(b,strong,.mono),
+body.gc-staff-page #view table.table td :is(b,strong,.mono) {
+  color:#16394e!important;
+  opacity:1!important;
+}
+body.gc-staff-page #view :is(.table-wrap,.table-responsive,.table-container,.table-scroll) td small,
+body.gc-staff-page #view table.table td small {
+  display:block;
+  margin-top:3px;
+  color:#587486!important;
+  opacity:1!important;
+  line-height:1.65!important;
+}
+body.gc-staff-page #view :is(.table-wrap,.table-responsive,.table-container,.table-scroll) tbody tr:hover td,
+body.gc-staff-page #view table.table tbody tr:hover td {
+  background:#f3f9fb!important;
+}
+body.gc-staff-page #view :is(.finance-debt-card,.card) .toolbar-note {
+  color:#526f80!important;
+  opacity:1!important;
+}
+body.gc-staff-page #view .finance-debt-card .empty {
+  color:#3f6072!important;
+  background:#f1f6f8!important;
+  border:1px solid #d7e5ea!important;
+  border-radius:15px!important;
+  opacity:1!important;
+}
+body.gc-staff-page #view .finance-debt-card .empty strong {
+  color:#193e52!important;
+}
+body.gc-staff-page #view .pill.mint {
+  color:#176b50!important;
+  background:#eaf8f1!important;
+  border:1px solid #bde4d2!important;
+  opacity:1!important;
+}
+body.gc-staff-page #view .pill.red {
+  color:#963747!important;
+  background:#fff0f2!important;
+  border:1px solid #efc6cd!important;
+  opacity:1!important;
+}
+body.gc-staff-page #view .pill.warn {
+  color:#805915!important;
+  background:#fff7e5!important;
+  border:1px solid #eed7a8!important;
+  opacity:1!important;
+}
+
+/* Explicit dark-mode counterpart; never leave pale text sitting on a white ledger. */
+html[data-gc-theme="dark"] body.gc-staff-page #view :is(.table-wrap,.table-responsive,.table-container,.table-scroll) {
+  background:#0d2332!important;
+  color:#e8f3f7!important;
+  border-color:#365567!important;
+}
+html[data-gc-theme="dark"] body.gc-staff-page #view :is(.table-wrap,.table-responsive,.table-container,.table-scroll) table,
+html[data-gc-theme="dark"] body.gc-staff-page #view table.table {
+  color:#e8f3f7!important;
+}
+html[data-gc-theme="dark"] body.gc-staff-page #view :is(.table-wrap,.table-responsive,.table-container,.table-scroll) th,
+html[data-gc-theme="dark"] body.gc-staff-page #view table.table th {
+  color:#e7f7fb!important;
+  background:#17384a!important;
+  border-color:#365567!important;
+}
+html[data-gc-theme="dark"] body.gc-staff-page #view :is(.table-wrap,.table-responsive,.table-container,.table-scroll) td,
+html[data-gc-theme="dark"] body.gc-staff-page #view table.table td {
+  color:#d6e7ee!important;
+  background:#102b3b!important;
+  border-color:#29495a!important;
+}
+html[data-gc-theme="dark"] body.gc-staff-page #view :is(.table-wrap,.table-responsive,.table-container,.table-scroll) td :is(b,strong,.mono),
+html[data-gc-theme="dark"] body.gc-staff-page #view table.table td :is(b,strong,.mono) {
+  color:#f0f9fc!important;
+}
+html[data-gc-theme="dark"] body.gc-staff-page #view :is(.table-wrap,.table-responsive,.table-container,.table-scroll) td small,
+html[data-gc-theme="dark"] body.gc-staff-page #view table.table td small {
+  color:#a8c1cc!important;
+}
+html[data-gc-theme="dark"] body.gc-staff-page #view :is(.table-wrap,.table-responsive,.table-container,.table-scroll) tbody tr:hover td,
+html[data-gc-theme="dark"] body.gc-staff-page #view table.table tbody tr:hover td {
+  background:#16374a!important;
+}
+html[data-gc-theme="dark"] body.gc-staff-page #view .finance-debt-card .empty {
+  color:#d5e6ed!important;
+  background:#132f40!important;
+  border-color:#385b6d!important;
+}
+html[data-gc-theme="dark"] body.gc-staff-page #view .finance-debt-card .empty strong {
+  color:#f0f9fc!important;
+}
+html[data-gc-theme="dark"] body.gc-staff-page #view .finance-debt-card .toolbar-note {
+  color:#aec6d0!important;
+}
+
+/* Legacy More sheet: predictable two-column cards instead of a squeezed row of tiny tabs. */
+body.gc-staff-page .gc-staff-more-sheet:not(.hidden) {
+  display:block!important;
+  position:fixed!important;
+  inset-inline:8px!important;
+  inset-block-start:auto!important;
+  inset-block-end:calc(86px + env(safe-area-inset-bottom,0px))!important;
+  width:auto!important;
+  max-width:760px!important;
+  max-height:min(68dvh,620px)!important;
+  overflow:auto!important;
+  margin-inline:auto!important;
+  padding:14px!important;
+  border:1px solid rgba(115,205,222,.28)!important;
+  border-radius:22px!important;
+  background:rgba(5,20,34,.985)!important;
+  box-shadow:0 24px 80px rgba(0,0,0,.5)!important;
+  backdrop-filter:blur(22px)!important;
+  z-index:10020!important;
+  color:#effaff!important;
+}
+body.gc-staff-page .gc-staff-more-head {
+  position:sticky!important;
+  top:-14px!important;
+  z-index:2!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  margin:-14px -14px 12px!important;
+  padding:14px!important;
+  border-bottom:1px solid rgba(131,194,213,.18)!important;
+  background:rgba(5,20,34,.985)!important;
+  color:#f1fbff!important;
+}
+body.gc-staff-page .gc-staff-more-head strong {
+  color:#f1fbff!important;
+  font:850 15px/1.6 Vazirmatn,system-ui,sans-serif!important;
+}
+body.gc-staff-page .gc-staff-more-head button {
+  display:grid!important;
+  place-items:center!important;
+  flex:0 0 38px!important;
+  width:38px!important;
+  min-width:38px!important;
+  height:38px!important;
+  border:1px solid rgba(131,194,213,.25)!important;
+  border-radius:12px!important;
+  background:#123349!important;
+  color:#f3fbff!important;
+  font-size:22px!important;
+}
+body.gc-staff-page .gc-staff-more-grid,
+body.gc-staff-page #gcStaffMoreGrid {
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:stretch!important;
+  gap:8px!important;
+  width:100%!important;
+  min-width:0!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+body.gc-staff-page .gc-staff-more-grid > button,
+body.gc-staff-page #gcStaffMoreGrid > button {
+  display:grid!important;
+  grid-template-columns:34px minmax(0,1fr)!important;
+  align-items:center!important;
+  justify-items:start!important;
+  gap:8px!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:62px!important;
+  padding:9px!important;
+  border:1px solid rgba(130,199,217,.2)!important;
+  border-radius:14px!important;
+  background:linear-gradient(145deg,#12364b,#0a2639)!important;
+  color:#e8f6fb!important;
+  text-align:start!important;
+  box-shadow:0 5px 16px rgba(0,0,0,.16)!important;
+  white-space:normal!important;
+}
+body.gc-staff-page .gc-staff-more-grid > button span,
+body.gc-staff-page #gcStaffMoreGrid > button span {
+  display:grid!important;
+  place-items:center!important;
+  width:32px!important;
+  min-width:32px!important;
+  height:32px!important;
+  margin:0!important;
+  border:1px solid rgba(109,222,235,.2)!important;
+  border-radius:10px!important;
+  background:rgba(109,222,235,.1)!important;
+  color:#8aeaf4!important;
+  font:800 12px/1.2 JetBrains Mono,monospace!important;
+}
+body.gc-staff-page .gc-staff-more-grid > button b,
+body.gc-staff-page #gcStaffMoreGrid > button b {
+  display:block!important;
+  min-width:0!important;
+  color:#eefaff!important;
+  font:800 11px/1.6 Vazirmatn,system-ui,sans-serif!important;
+  overflow-wrap:anywhere!important;
+}
+body.gc-staff-page .gc-staff-more-grid > button:hover,
+body.gc-staff-page #gcStaffMoreGrid > button:hover {
+  background:linear-gradient(145deg,#17475b,#0b3043)!important;
+  border-color:rgba(109,222,235,.42)!important;
+}
+body.gc-staff-page .gc-staff-more-grid > button:active,
+body.gc-staff-page #gcStaffMoreGrid > button:active {
+  transform:translateY(1px)!important;
+}
+
+/* Current V5 drawer: compact grouped navigation with explicit button surfaces. */
+body.gc-staff-page > .gc-staff-mobile-backdrop {
+  z-index:10000!important;
+}
+body.gc-staff-page > .gc-staff-mobile-drawer {
+  display:grid!important;
+  align-content:start!important;
+  grid-auto-rows:min-content!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  height:auto!important;
+  max-height:min(70dvh,650px)!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain!important;
+  padding:14px!important;
+  border:1px solid rgba(130,199,217,.25)!important;
+  border-radius:22px!important;
+  background:linear-gradient(155deg,rgba(9,34,53,.99),rgba(3,17,29,.99))!important;
+  box-shadow:0 24px 85px rgba(0,0,0,.56)!important;
+  z-index:10010!important;
+}
+body.gc-staff-page > .gc-staff-mobile-drawer[hidden] {
+  display:none!important;
+}
+body.gc-staff-page > .gc-staff-mobile-drawer .gc-staff-mobile-drawer-head {
+  display:grid!important;
+  gap:4px!important;
+  padding:3px 2px 11px!important;
+  border-bottom:1px solid rgba(143,203,224,.16)!important;
+}
+body.gc-staff-page > .gc-staff-mobile-drawer .gc-staff-mobile-drawer-head strong {
+  color:#f2fbff!important;
+  font:850 15px/1.7 Vazirmatn,system-ui,sans-serif!important;
+}
+body.gc-staff-page > .gc-staff-mobile-drawer .gc-staff-mobile-drawer-head span {
+  color:#7edce8!important;
+  font:800 9px/1.5 JetBrains Mono,monospace!important;
+  letter-spacing:1px!important;
+}
+body.gc-staff-page > .gc-staff-mobile-drawer .gc-staff-mobile-module-grid {
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  align-content:start!important;
+  gap:12px!important;
+  min-width:0!important;
+}
+body.gc-staff-page > .gc-staff-mobile-drawer .gc-staff-mobile-module-group {
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:7px!important;
+  min-width:0!important;
+}
+body.gc-staff-page > .gc-staff-mobile-drawer .gc-staff-mobile-module-group-title {
+  color:#9dbbc9!important;
+  font:850 10px/1.6 Vazirmatn,system-ui,sans-serif!important;
+}
+body.gc-staff-page > .gc-staff-mobile-drawer .gc-staff-mobile-module-group-items {
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;
+  min-width:0!important;
+}
+body.gc-staff-page > .gc-staff-mobile-drawer .gc-staff-mobile-module-group-items > button {
+  display:grid!important;
+  grid-template-columns:34px minmax(0,1fr)!important;
+  align-items:center!important;
+  justify-items:start!important;
+  gap:8px!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:60px!important;
+  padding:9px!important;
+  border:1px solid rgba(130,199,217,.2)!important;
+  border-radius:14px!important;
+  background:linear-gradient(145deg,#12364b,#0a2639)!important;
+  color:#e8f6fb!important;
+  text-align:start!important;
+  white-space:normal!important;
+}
+body.gc-staff-page > .gc-staff-mobile-drawer .gc-staff-mobile-module-icon {
+  display:grid!important;
+  place-items:center!important;
+  width:32px!important;
+  height:32px!important;
+  border:1px solid rgba(109,222,235,.2)!important;
+  border-radius:10px!important;
+  background:rgba(109,222,235,.1)!important;
+  color:#8aeaf4!important;
+}
+body.gc-staff-page > .gc-staff-mobile-drawer .gc-staff-mobile-module-icon svg {
+  width:19px!important;
+  height:19px!important;
+  stroke:currentColor!important;
+  fill:none!important;
+}
+body.gc-staff-page > .gc-staff-mobile-drawer .gc-staff-mobile-module-label {
+  min-width:0!important;
+  color:#eefaff!important;
+  font:800 11px/1.6 Vazirmatn,system-ui,sans-serif!important;
+  overflow-wrap:anywhere!important;
+}
+
+/* Keep content scrollable above the floating AI action and bottom navigation. */
+@media(max-width:760px) {
+  body.gc-staff-page {
+    width:100%!important;
+    max-width:100%!important;
+    overflow-x:clip!important;
+    padding-bottom:calc(190px + env(safe-area-inset-bottom,0px))!important;
+  }
+  body.gc-staff-page #view,
+  body.gc-staff-page #app .view {
+    min-width:0!important;
+    max-width:100%!important;
+    padding-bottom:calc(190px + env(safe-area-inset-bottom,0px))!important;
+    scroll-padding-bottom:calc(190px + env(safe-area-inset-bottom,0px))!important;
+  }
+  body.gc-staff-page .gc-staff-mobile-command,
+  body.gc-staff-page #gcStaffMobileDock {
+    position:fixed!important;
+    left:8px!important;
+    right:8px!important;
+    bottom:calc(7px + env(safe-area-inset-bottom,0px))!important;
+    z-index:10000!important;
+    min-height:66px!important;
+    padding:6px!important;
+    border:1px solid rgba(130,199,217,.25)!important;
+    border-radius:20px!important;
+    background:rgba(4,18,31,.98)!important;
+    box-shadow:0 18px 50px rgba(0,0,0,.42)!important;
+    backdrop-filter:blur(20px)!important;
+  }
+  body.gc-staff-page .gc-staff-mobile-command > button,
+  body.gc-staff-page #gcStaffMobileDock > button {
+    display:grid!important;
+    place-items:center!important;
+    align-content:center!important;
+    gap:3px!important;
+    min-width:0!important;
+    min-height:54px!important;
+    padding:4px 2px!important;
+    border:1px solid transparent!important;
+    border-radius:14px!important;
+    background:transparent!important;
+    color:#aec4d1!important;
+    font:800 9px/1.45 Vazirmatn,system-ui,sans-serif!important;
+    white-space:normal!important;
+    text-align:center!important;
+  }
+  body.gc-staff-page .gc-staff-mobile-command > button.active,
+  body.gc-staff-page #gcStaffMobileDock > button.active {
+    background:rgba(85,232,243,.13)!important;
+    border-color:rgba(85,232,243,.22)!important;
+    color:#8cebf3!important;
+  }
+  body.gc-staff-page #gcStaffAiButton {
+    left:auto!important;
+    right:14px!important;
+    bottom:calc(92px + env(safe-area-inset-bottom,0px))!important;
+    width:44px!important;
+    height:44px!important;
+    z-index:10005!important;
+  }
+  body.gc-staff-page #gcStaffAiPanel {
+    left:10px!important;
+    right:10px!important;
+    bottom:calc(88px + env(safe-area-inset-bottom,0px))!important;
+    width:auto!important;
+    max-height:calc(100dvh - 112px - env(safe-area-inset-bottom,0px))!important;
+    z-index:10015!important;
+  }
+}
+@media(max-width:390px) {
+  body.gc-staff-page .gc-staff-more-grid,
+  body.gc-staff-page #gcStaffMoreGrid,
+  body.gc-staff-page > .gc-staff-mobile-drawer .gc-staff-mobile-module-group-items {
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important;
+  }
+  body.gc-staff-page #view :is(.table-wrap,.table-responsive,.table-container,.table-scroll) td,
+  body.gc-staff-page #view table.table td {
+    font-size:11px!important;
+    padding:11px 9px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  body.gc-staff-page .gc-staff-more-sheet,
+  body.gc-staff-page .gc-staff-more-grid > button,
+  body.gc-staff-page > .gc-staff-mobile-drawer,
+  body.gc-staff-page > .gc-staff-mobile-drawer * {
+    animation:none!important;
+    transition:none!important;
+  }
+}
