@@ -584,10 +584,53 @@ async function updateTask(client: ReturnType<typeof createClient>, payload: Json
   return { task: saved }
 }
 
+const WAREHOUSE_RECEIPT_BUCKET = 'warehouse-receipts';
+const WAREHOUSE_RECEIPT_SIGNED_URL_TTL = 60 * 60;
+
+function warehouseReceiptObjectPath(value: unknown): string | null {
+  const raw = String(value ?? '').trim();
+  if (!raw) return null;
+  let path = raw;
+  if (/^https?:\/\//i.test(raw)) {
+    const markers = [
+      `/storage/v1/object/public/${WAREHOUSE_RECEIPT_BUCKET}/`,
+      `/storage/v1/object/sign/${WAREHOUSE_RECEIPT_BUCKET}/`,
+      `/storage/v1/object/authenticated/${WAREHOUSE_RECEIPT_BUCKET}/`
+    ];
+    const marker = markers.find((candidate) => raw.includes(candidate));
+    if (!marker) return null;
+    path = raw.slice(raw.indexOf(marker) + marker.length).split('?')[0];
+  }
+  try { path = decodeURIComponent(path.replace(/^\/+/, '')); } catch { return null; }
+  if (!path || path.split('/').some((part) => part === '..' || part === '.')) return null;
+  return path;
+}
+
+async function secureWarehouseReceiptPhotos(client: ReturnType<typeof createClient>, receipt: Record<string, any>) {
+  const values = Array.isArray(receipt.photos) ? receipt.photos : [];
+  const paths = values.map(warehouseReceiptObjectPath).filter((value): value is string => Boolean(value));
+  if (!paths.length) return { ...receipt, photos: [] };
+  try {
+    const { data, error } = await client.storage.from(WAREHOUSE_RECEIPT_BUCKET)
+      .createSignedUrls(paths, WAREHOUSE_RECEIPT_SIGNED_URL_TTL);
+    if (error) throw error;
+    const photos = (data || [])
+      .map((item: any) => item?.signedUrl || null)
+      .filter((value: unknown): value is string => typeof value === 'string' && /^https?:\/\//i.test(value));
+    return { ...receipt, photos };
+  } catch (error) {
+    console.warn('[account-admin] warehouse receipt photo signing failed', error instanceof Error ? error.message : String(error));
+    return { ...receipt, photos: [] };
+  }
+}
+
 async function listReceipts(client: ReturnType<typeof createClient>) {
-  const { data, error } = await client.from('warehouse_receipts').select('id,batch_code,location,stage,latitude,longitude,photo_taken_at,gc_code_detected,ocr_text,ocr_confidence,ai_detected_items,auto_assigned,notes,received_at,created_by_name,directory_customer_id,directory_phone,consolidated,photos,shipment_id,scan_code,scan_type,verification_status,created_at:received_at').order('received_at', { ascending: false }).limit(100)
-  if (error) throw error
-  return { items: data ?? [], kind: 'receipt' }
+  const { data, error } = await client.from('warehouse_receipts')
+    .select('id,batch_code,location,stage,latitude,longitude,photo_taken_at,gc_code_detected,ocr_text,ocr_confidence,ai_detected_items,auto_assigned,notes,received_at,created_by_name,directory_customer_id,directory_phone,consolidated,photos,shipment_id,scan_code,scan_type,verification_status,created_at:received_at')
+    .order('received_at', { ascending: false }).limit(100);
+  if (error) throw error;
+  const items = await Promise.all((data ?? []).map((receipt: any) => secureWarehouseReceiptPhotos(client, receipt)));
+  return { items, kind: 'receipt' };
 }
 
 async function listLogs(client: ReturnType<typeof createClient>) {
@@ -1077,11 +1120,11 @@ async function createReceipt(client: ReturnType<typeof createClient>, payload: J
   if (idempotencyKey) {
     const { data: existing, error: existingError } = await client.from('warehouse_receipts').select('id,batch_code,location,stage,latitude,longitude,photo_taken_at,gc_code_detected,ocr_text,ocr_confidence,ai_detected_items,auto_assigned,notes,received_at,created_by_name,directory_customer_id,directory_phone,consolidated,photos,shipment_id,scan_code,scan_type,verification_status,created_at').eq('idempotency_key', idempotencyKey).maybeSingle()
     if (existingError) throw existingError
-    if (existing) return { receipt: existing, customer: null, uploaded_urls: existing.photos || [], notification_created: false, reused: true }
+    if (existing) { const receipt = await secureWarehouseReceiptPhotos(client, existing); return { receipt, customer: null, uploaded_urls: receipt.photos || [], notification_created: false, reused: true } }
   }
   const customer = await lookupCustomer(client, payload)
   const bucket = 'warehouse-receipts'
-  const uploadedUrls: string[] = []
+  const uploadedPaths: string[] = []
   for (const file of files) {
     if (!file.type.startsWith('image/')) throw responseError('Only image uploads are allowed', 400)
     if (file.size > 10 * 1024 * 1024) throw responseError('Each receipt photo must be 10MB or smaller', 400)
@@ -1089,19 +1132,19 @@ async function createReceipt(client: ReturnType<typeof createClient>, payload: J
     const path = `${batchCode}/${stage}/${crypto.randomUUID()}-${safeName}`
     const { error: uploadErr } = await client.storage.from(bucket).upload(path, file, { contentType: file.type, upsert: false })
     if (uploadErr) throw uploadErr
-    const { data: publicUrl } = client.storage.from(bucket).getPublicUrl(path)
-    uploadedUrls.push(publicUrl.publicUrl)
+    uploadedPaths.push(path)
   }
-  const { data: row, error } = await client.from('warehouse_receipts').insert({ batch_code: batchCode, location, stage, latitude, longitude, photo_taken_at: photoTakenAt, gc_code_detected: gcCode, ocr_text: ocrText, ocr_confidence: ocrConfidence, ai_detected_items: [], auto_assigned: Boolean(gcCode && customer), idempotency_key: idempotencyKey, shipment_id: shipmentId, scan_code: gcCode, scan_type: gcCode ? 'barcode' : 'qr', notes, directory_customer_id: customer?.id ?? null, directory_phone: customer?.phone ?? txt(payload.customer_phone) ?? null, created_by: actor.id, created_by_name: actor.name, photos: uploadedUrls, consolidated: false }).select('id,batch_code,location,stage,latitude,longitude,photo_taken_at,gc_code_detected,ocr_text,ocr_confidence,ai_detected_items,auto_assigned,notes,received_at,created_by_name,directory_customer_id,directory_phone,consolidated,photos,shipment_id,scan_code,scan_type,verification_status,created_at').single()
+  const { data: row, error } = await client.from('warehouse_receipts').insert({ batch_code: batchCode, location, stage, latitude, longitude, photo_taken_at: photoTakenAt, gc_code_detected: gcCode, ocr_text: ocrText, ocr_confidence: ocrConfidence, ai_detected_items: [], auto_assigned: Boolean(gcCode && customer), idempotency_key: idempotencyKey, shipment_id: shipmentId, scan_code: gcCode, scan_type: gcCode ? 'barcode' : 'qr', notes, directory_customer_id: customer?.id ?? null, directory_phone: customer?.phone ?? txt(payload.customer_phone) ?? null, created_by: actor.id, created_by_name: actor.name, photos: uploadedPaths, consolidated: false }).select('id,batch_code,location,stage,latitude,longitude,photo_taken_at,gc_code_detected,ocr_text,ocr_confidence,ai_detected_items,auto_assigned,notes,received_at,created_by_name,directory_customer_id,directory_phone,consolidated,photos,shipment_id,scan_code,scan_type,verification_status,created_at').single()
   if (error) throw error
   let notificationCreated = false
   if (customer?.auth_user_id) {
-    const { error: notificationError } = await client.from('customer_notifications').insert({ customer_user_id: customer.auth_user_id, shipment_id: shipmentId, kind: 'warehouse_received', title: 'کارگۆکەت لە کۆگا وەرگیرا', body: `کارگۆکەت ${gcCode || batchCode} لە ${location} وەرگیرا. ${uploadedUrls.length} وێنە بەردەستە.`, action_url: shipmentId ? `/tracking-integration.html?id=${encodeURIComponent(shipmentId)}` : null, event_key: `warehouse_received:${row.id}` })
+    const { error: notificationError } = await client.from('customer_notifications').insert({ customer_user_id: customer.auth_user_id, shipment_id: shipmentId, kind: 'warehouse_received', title: 'کارگۆکەت لە کۆگا وەرگیرا', body: `کارگۆکەت ${gcCode || batchCode} لە ${location} وەرگیرا. ${uploadedPaths.length} وێنە بەردەستە.`, action_url: shipmentId ? `/tracking-integration.html?id=${encodeURIComponent(shipmentId)}` : null, event_key: `warehouse_received:${row.id}` })
     if (notificationError) console.error('warehouse receipt notification failed', notificationError.message)
     else notificationCreated = true
   }
-  await logActivity(client, actor.id, actor.name, 'create_warehouse_receipt', String(row.id), { batch_code: batchCode, location, stage, photo_count: uploadedUrls.length, gc_code_detected: gcCode, notification_created: notificationCreated })
-  return { receipt: row, customer, uploaded_urls: uploadedUrls, notification_created: notificationCreated }
+  await logActivity(client, actor.id, actor.name, 'create_warehouse_receipt', String(row.id), { batch_code: batchCode, location, stage, photo_count: uploadedPaths.length, gc_code_detected: gcCode, notification_created: notificationCreated })
+  const receipt = await secureWarehouseReceiptPhotos(client, row)
+  return { receipt, customer, uploaded_urls: receipt.photos || [], notification_created: notificationCreated }
 }
 
 Deno.serve(async (req) => {

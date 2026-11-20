@@ -2964,6 +2964,45 @@ async function editBatchCode(shipmentId){
   renderAdminShipmentList();
 }
 
+const WAREHOUSE_RECEIPT_BUCKET = 'warehouse-receipts';
+const WAREHOUSE_RECEIPT_SIGNED_URL_TTL = 60 * 60;
+function warehouseReceiptObjectPath(value){
+  const raw=String(value||'').trim();
+  if(!raw) return null;
+  let path=raw;
+  if(/^https?:\/\//i.test(raw)){
+    const markers=[
+      `/storage/v1/object/public/${WAREHOUSE_RECEIPT_BUCKET}/`,
+      `/storage/v1/object/sign/${WAREHOUSE_RECEIPT_BUCKET}/`,
+      `/storage/v1/object/authenticated/${WAREHOUSE_RECEIPT_BUCKET}/`
+    ];
+    const marker=markers.find(item=>raw.includes(item));
+    if(!marker) return null;
+    path=raw.slice(raw.indexOf(marker)+marker.length).split('?')[0];
+  }
+  try{path=decodeURIComponent(path.replace(/^\/+/,''));}catch(_){return null;}
+  if(!path||path.split('/').some(part=>part==='.'||part==='..')) return null;
+  return path;
+}
+async function signWarehouseReceiptRows(rows){
+  const allPaths=[];
+  for(const row of rows||[]) for(const value of Array.isArray(row.photos)?row.photos:[]){
+    const path=warehouseReceiptObjectPath(value); if(path) allPaths.push(path);
+  }
+  const uniquePaths=[...new Set(allPaths)], signedByPath=new Map();
+  for(let offset=0;offset<uniquePaths.length;offset+=100){
+    const chunk=uniquePaths.slice(offset,offset+100);
+    const {data,error}=await sb.storage.from(WAREHOUSE_RECEIPT_BUCKET).createSignedUrls(chunk,WAREHOUSE_RECEIPT_SIGNED_URL_TTL);
+    if(error){console.warn('[warehouse] receipt photo signing failed',error.message);continue;}
+    chunk.forEach((path,index)=>{
+      const url=data?.[index]?.signedUrl;
+      if(typeof url==='string'&&/^https?:\/\//i.test(url)) signedByPath.set(path,url);
+    });
+  }
+  return (rows||[]).map(row=>({...row,photos:(Array.isArray(row.photos)?row.photos:[])
+    .map(value=>warehouseReceiptObjectPath(value)).map(path=>path?signedByPath.get(path):null).filter(Boolean)}));
+}
+
 async function submitWarehouseReceipt(){
   const batchCode = document.getElementById('whBatchCode').value.trim();
   const location = document.getElementById('whLocation').value;
@@ -2987,7 +3026,7 @@ async function submitWarehouseReceipt(){
     .select('id').single();
   if(insErr){ msgEl.textContent = 'هەڵەیەک ڕوویدا، تۆمار نەکرا.'; msgEl.style.display = 'block'; return; }
 
-  let photoUrls = [];
+  let photoPaths = [];
   for(let i=0; i<files.length; i++){
     const file = files[i];
     if(!file.type.startsWith('image/')) continue;
@@ -2995,14 +3034,15 @@ async function submitWarehouseReceipt(){
     const path = `${inserted.id}/${Date.now()}-${i}.${ext}`;
     const {error: upErr} = await sb.storage.from('warehouse-receipts').upload(path, file, {upsert:true});
     if(upErr) continue;
-    const {data: pub} = sb.storage.from('warehouse-receipts').getPublicUrl(path);
-    photoUrls.push(pub.publicUrl);
+
+    photoPaths.push(path);
   }
-  if(photoUrls.length){
-    await sb.from('warehouse_receipts').update({photos: photoUrls}).eq('id', inserted.id);
+  if(photoPaths.length){
+    const {error: photoErr} = await sb.from('warehouse_receipts').update({photos: photoPaths}).eq('id', inserted.id);
+    if(photoErr) console.warn('[warehouse] receipt paths uploaded but not linked', photoErr.message);
   }
 
-  logActivity('warehouse_receipt', batchCode, location+(photoUrls.length?' — '+photoUrls.length+' وێنە':''));
+  logActivity('warehouse_receipt', batchCode, location+(photoPaths.length?' — '+photoPaths.length+' وێنە':''));
   showToast('وەرگرتنی باچ تۆمارکرا.', 'success');
   document.getElementById('whBatchCode').value = '';
   document.getElementById('whNotes').value = '';
@@ -3019,10 +3059,12 @@ async function submitWarehouseReceipt(){
 
 async function loadWarehouseReceipts(){
   const wrap = document.getElementById('warehouseListWrap');
+  if(!wrap) return;
   const {data, error} = await sb.from('warehouse_receipts').select('*').order('received_at', {ascending:false}).limit(50);
   if(error){ wrap.innerHTML = '<p class="hint">هەڵەیەک ڕوویدا لە هێنانی تۆمارەکان.</p>'; return; }
   if(!data || data.length===0){ wrap.innerHTML = `<div class="admin-empty"><svg><use href="#i-box"></use></svg><p>هێشتا هیچ تۆمارێک نییە.</p></div>`; return; }
-  wrap.innerHTML = data.map(r => `
+  const displayRows = await signWarehouseReceiptRows(data);
+  wrap.innerHTML = displayRows.map(r => `
     <div class="admin-row" style="align-items:flex-start;">
       <div class="admin-row-main">
         <div class="admin-row-top"><b class="mono">📦 ${escapeHtml(r.batch_code)}</b><span class="hint">${r.location==='Dubai'?'عەنبەری دوبەی':r.location==='China'?'عەنبەری چین':'عەنبەری هەولێر'}</span></div>
