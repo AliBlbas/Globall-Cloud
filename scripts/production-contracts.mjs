@@ -101,10 +101,6 @@ else ok('V5 middleware assets are isolated to V5 routes');
 if (!productionMiddleware.includes("if (['/staff', '/staff/', '/staff-portal', '/staff-portal/', '/staff-portal.html'].includes(requestPath))") || !productionMiddleware.includes("new URL('/staff-os-v5', requestUrl)") || !productionMiddleware.includes("pageRequest = new Request(destination.toString(), context.request)") || !productionMiddleware.includes('destination.search = requestUrl.search')) fail('short Staff routes must internally rewrite in the Pages middleware');
 else ok('Short Staff routes internally rewrite to the V5 Staff OS entry');
 const legacyStaffHtml = read('staff-os.html')
-const staffMobileFinanceFix = read('gc-staff-mobile-finance-fix-20261120.css')
-if (!legacyStaffHtml.includes('gc-staff-mobile-finance-fix-20261120.css?v=1') || !staff.includes('gc-staff-mobile-finance-fix-20261120.css?v=1') || !staffV5EnhancementLoader.includes("'/gc-staff-mobile-finance-fix-20261120.css?v=1'")) fail('Staff mobile finance readability and drawer correction must load on both Staff entry points and after V5 bridges')
-if (!staffMobileFinanceFix.includes('.gc-staff-more-grid > button') || !staffMobileFinanceFix.includes('finance-debt-card .empty') || !staffMobileFinanceFix.includes('gc-staff-mobile-module-group-items > button')) fail('Staff mobile finance and navigation corrective style contract is incomplete')
-else ok('Staff finance tables, debt empty state, legacy More sheet, and V5 drawer have explicit responsive styles');
 const staffHealthPanel = read('staff-os-data-health-panel.js');
 const staffHealthFunction = read('supabase/functions/staff-data-health/index.ts');
 if (!legacyStaffHtml.includes('<script src="/staff-os-data-health-panel.js?v=20261028-1" defer></script>') || !staffHealthPanel.includes("/functions/v1/staff-data-health") || !staffHealthPanel.includes('data-gc-health-card') || !staffHealthFunction.includes("req.method!=='GET'") || !staffHealthFunction.includes('Staff permission required')) fail('staff data-health panel must be loaded and backed by a read-only role-protected endpoint');
@@ -190,6 +186,11 @@ const staffMobileDock = read('gc-staff-mobile-dock-20261016.js')
 const staffWorkspaceCss = read('gc-staff-live-workspace-20261019.css')
 const staffRedesignCss = read('gc-staff-operations-redesign-20261022.css')
 const staffCommandDeckCss = read('gc-staff-command-deck-20261023.css')
+const staffMobileFinanceFix = read('gc-staff-mobile-finance-fix-20261120.css')
+if (!legacyStaffHtml.includes('gc-staff-mobile-finance-fix-20261120.css?v=1') || !staff.includes('gc-staff-mobile-finance-fix-20261120.css?v=1') || !staffV5EnhancementLoader.includes("'\/gc-staff-mobile-finance-fix-20261120.css?v=1'")) fail('Staff mobile finance readability and drawer correction must load on both Staff entry points and after V5 bridges')
+if (!staffMobileFinanceFix.includes('.gc-staff-more-grid > button') || !staffMobileFinanceFix.includes('finance-debt-card .empty') || !staffMobileFinanceFix.includes('gc-staff-mobile-module-group-items > button')) fail('Staff mobile finance and navigation corrective style contract is incomplete')
+else ok('Staff finance tables, debt empty state, legacy More sheet, and V5 drawer have explicit responsive styles')
+
 if (!staffCommandDeckCss.includes('GC-STAFF-COMMAND-DECK-20261023') ||
     !staffCommandDeckCss.includes('body.gc-staff-os-shell') ||
     !staffCommandDeckCss.includes('@media') ||
