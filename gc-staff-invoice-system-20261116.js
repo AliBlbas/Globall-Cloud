@@ -174,24 +174,156 @@
   };
 
   const open = () => {
-    const modal = openModal(`<form id="gcInvoiceForm" class="gc-invoice-form"><div class="gc-invoice-grid"><label>Invoice number<input name="invoice_number" required value="INV/${new Date().getFullYear()}/"></label><label>Shipment ID<input name="shipment_id" required placeholder="GC-338"></label><label>Invoice date<input name="invoice_date" type="date" value="${today()}"></label><label>Due date<input name="due_at" type="date"></label><label>Receipt No.<input name="receipt_no" placeholder="Receipt reference"></label><label>Currency<select name="currency"><option>USD</option><option>IQD</option><option>AED</option><option>CNY</option><option>EUR</option></select></label><label>Bill to / Customer<input name="bill_to_name" placeholder="Customer name"></label><label>Shipping address<input name="bill_to_address" placeholder="Address"></label><label>Invoice design<select name="theme"><option value="modern">Modern Formal</option><option value="light">Light Simple</option><option value="dark">Dark Vivid</option><option value="sky">Sky &amp; Mint</option><option value="gold">Classic Black &amp; Gold</option></select></label></div><div class="gc-invoice-lines-head"><strong>ITEM / DESCRIPTION</strong><strong>QTY</strong><strong>BASIS</strong><strong>UNIT PRICE</strong><strong>AMOUNT</strong><span></span></div><div id="gcInvoiceLines">${line()}</div><button type="button" class="btn" id="gcAddInvoiceLine">+ زیادکردنی item</button><div class="gc-invoice-totals"><label>Subtotal<input name="subtotal" type="number" step="0.01" value="0" readonly></label><label>Discount<input name="discount" type="number" min="0" step="0.01" value="0"></label><label>Additional charges<input name="additional_charges" type="number" min="0" step="0.01" value="0"></label><label>Amount paid<input name="amount_paid" type="number" min="0" step="0.01" value="0"></label><strong>Total <output id="gcInvoiceTotal">0.00</output></strong></div><div class="gc-invoice-grid"><label>Payment method / Notes<textarea name="payment_method" rows="2" placeholder="Cash, bank transfer, QiCard…"></textarea></label><label>Internal notes<textarea name="notes" rows="2" placeholder="Notes"></textarea></label></div><p id="gcInvoiceMsg" class="gc-invoice-msg" role="status"></p></form>`, '<button type="button" class="btn" data-invoice-close>هەڵوەشاندنەوە</button><button type="button" class="btn primary" id="gcSaveInvoice">پاشەکەوتکردن و چاپکردن</button>');
+    const modal = openModal(`<form id="gcInvoiceForm" class="gc-invoice-form">
+      <div class="gc-invoice-grid">
+        <label>Invoice number<input name="invoice_number" required value="INV/${new Date().getFullYear()}/"></label>
+        <label>Shipment / GC code<select name="shipment_id" required><option value="">بارەکان بارکردنە…</option></select></label>
+        <label>Invoice date<input name="invoice_date" type="date" value="${today()}"></label>
+        <label>Shipment date<input name="shipment_date" type="date" readonly></label>
+        <label>Due date<input name="due_at" type="date"></label>
+        <label>Receipt No.<input name="receipt_no" placeholder="Receipt reference"></label>
+        <input type="hidden" name="currency" value="USD">
+        <label>Bill to / Customer<input name="bill_to_name" placeholder="Customer name"></label>
+        <label>Shipping address<input name="bill_to_address" placeholder="Address"></label>
+        <label>USD → IQD rate<input name="iqd_exchange_rate" type="number" min="0.0001" step="0.01" required placeholder="نرخی ڕۆژی فاتورە"></label>
+        <label>Invoice design<select name="theme"><option value="modern">Modern Formal</option><option value="light">Light Simple</option><option value="dark">Dark Vivid</option><option value="sky">Sky &amp; Mint</option><option value="gold">Classic Black &amp; Gold</option></select></label>
+      </div>
+      <div class="gc-invoice-lines-head"><strong>ITEM / DESCRIPTION</strong><strong>QTY</strong><strong>BASIS</strong><strong>UNIT PRICE</strong><strong>AMOUNT</strong><span></span></div>
+      <div id="gcInvoiceLines">${line()}</div>
+      <button type="button" class="btn" id="gcAddInvoiceLine">+ زیادکردنی item</button>
+      <div class="gc-invoice-totals">
+        <label>Subtotal<input name="subtotal" type="number" step="0.01" value="0" readonly></label>
+        <label>Previous debt<input name="previous_debt" type="number" min="0" step="0.01" value="0"></label>
+        <label>Additional charges<input name="additional_charges" type="number" min="0" step="0.01" value="0"></label>
+        <label>Amount paid<input name="amount_paid" type="number" min="0" step="0.01" value="0"></label>
+        <strong>Total USD <output id="gcInvoiceTotal">0.00</output></strong>
+        <strong>Total IQD <output id="gcInvoiceTotalIQD">—</output></strong>
+      </div>
+      <div class="gc-invoice-grid">
+        <label>Payment method / Notes<textarea name="payment_method" rows="2" placeholder="Cash, bank transfer, QiCard…"></textarea></label>
+        <label>Internal notes<textarea name="notes" rows="2" placeholder="Notes"></textarea></label>
+      </div>
+      <p id="gcInvoiceMsg" class="gc-invoice-msg" role="status"></p>
+    </form>`, '<button type="button" class="btn" data-invoice-close>هەڵوەشاندنەوە</button><button type="button" class="btn primary" id="gcSaveInvoice">پاشەکەوتکردن و چاپکردن</button>');
     const form = modal.querySelector('#gcInvoiceForm');
     const lines = modal.querySelector('#gcInvoiceLines');
-    const calc = () => { let subtotal = 0; lines.querySelectorAll('[data-invoice-line]').forEach((row) => { const amount = n(row.querySelector('[name=quantity]').value) * n(row.querySelector('[name=unit_price]').value); subtotal += amount; row.querySelector('[data-line-amount]').textContent = amount.toFixed(2); }); form.elements.subtotal.value = subtotal.toFixed(2); const total = Math.max(0, subtotal - n(form.elements.discount.value) + n(form.elements.additional_charges.value)); modal.querySelector('#gcInvoiceTotal').textContent = total.toFixed(2); return { subtotal, total }; };
+    const calc = () => {
+      let subtotal = 0;
+      lines.querySelectorAll('[data-invoice-line]').forEach((row) => {
+        const amount = n(row.querySelector('[name=quantity]').value) * n(row.querySelector('[name=unit_price]').value);
+        subtotal += amount;
+        row.querySelector('[data-line-amount]').textContent = amount.toFixed(2);
+      });
+      form.elements.subtotal.value = subtotal.toFixed(2);
+      const previousDebt = n(form.elements.previous_debt.value);
+      const additional = n(form.elements.additional_charges.value);
+      const total = Math.max(0, subtotal + previousDebt + additional);
+      const rate = n(form.elements.iqd_exchange_rate.value);
+      modal.querySelector('#gcInvoiceTotal').textContent = total.toFixed(2);
+      modal.querySelector('#gcInvoiceTotalIQD').textContent = rate > 0 ? Math.round(total * rate).toLocaleString('en-US') + ' IQD' : '—';
+      return { subtotal, previousDebt, total, totalIqd: rate > 0 ? Math.round(total * rate) : null, rate };
+    };
     form.addEventListener('input', calc);
+    form.addEventListener('change', calc);
+    void loadInvoiceOptions(form);
     modal.querySelector('#gcAddInvoiceLine').onclick = () => { lines.insertAdjacentHTML('beforeend', line()); calc(); };
-    lines.addEventListener('click', (event) => { if (event.target.closest('[data-remove-line]')) { event.target.closest('[data-invoice-line]').remove(); calc(); } });
+    lines.addEventListener('click', (event) => {
+      if (event.target.closest('[data-remove-line]')) {
+        event.target.closest('[data-invoice-line]').remove();
+        calc();
+      }
+    });
     calc();
     modal.querySelector('#gcSaveInvoice').onclick = async () => {
-      const button = modal.querySelector('#gcSaveInvoice'); const message = modal.querySelector('#gcInvoiceMsg'); button.disabled = true; message.textContent = 'خەریکی پاشەکەوتکردنە…';
+      const button = modal.querySelector('#gcSaveInvoice');
+      const message = modal.querySelector('#gcInvoiceMsg');
+      // Open synchronously from the tap so Safari/iOS does not block the print window after the network request.
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        message.textContent = 'پەنجەرەی چاپ نەکرایەوە؛ پاپ-ئەپ لە Safari ڕێگەپێبدە و دووبارە هەوڵ بدە.';
+        return;
+      }
+      printWindow.document.write('<!doctype html><html><body style="font:16px sans-serif;padding:24px;direction:rtl">فاتورەکە خەریکی ئامادەکردنە…</body></html>');
+      button.disabled = true;
+      message.textContent = 'خەریکی پاشەکەوتکردنی فاتورە…';
+      let invoice = null;
+      let paidTotal = 0;
+      let paymentWarning = '';
+      let values;
+      let data;
       try {
-        const { subtotal, total } = calc(); const formData = new FormData(form);
-        const items = [...lines.querySelectorAll('[data-invoice-line]')].map((row) => ({ description: row.querySelector('[name=description]').value.trim(), quantity: n(row.querySelector('[name=quantity]').value), basis: row.querySelector('[name=basis]').value.trim(), unit_price: n(row.querySelector('[name=unit_price]').value), amount: n(row.querySelector('[data-line-amount]').textContent) })).filter((item) => item.description || item.amount);
-        const data = { invoice_number: formData.get('invoice_number'), shipment_id: formData.get('shipment_id'), invoice_date: formData.get('invoice_date') || today(), due_at: formData.get('due_at') || null, receipt_no: formData.get('receipt_no'), bill_to_name: formData.get('bill_to_name'), bill_to_address: formData.get('bill_to_address'), currency: formData.get('currency'), payment_method: formData.get('payment_method'), notes: formData.get('notes'), line_items: items, subtotal, discount: n(formData.get('discount')), additional_charges: n(formData.get('additional_charges')), tax: 0, status: 'issued' };
-        const invoice = await post('upsert_invoice', data); const paid = n(formData.get('amount_paid'));
-        if (paid > 0 && invoice?.id) await post('record_payment', { invoice_id: invoice.id, amount: paid, transaction_type: 'payment', status: 'succeeded', provider: 'manual', method: formData.get('payment_method') || 'manual', idempotency_key: `invoice-${invoice.id}-${Date.now()}` });
-        message.textContent = 'Invoice پاشەکەوت کرا و ئامادەی چاپە.'; printInvoice({ ...data, ...invoice, paid_total: paid, total, theme: formData.get('theme') });
-      } catch (error) { message.textContent = error.message || 'Invoice دروست نەکرا.'; button.disabled = false; }
+        values = calc();
+        const formData = new FormData(form);
+        const items = [...lines.querySelectorAll('[data-invoice-line]')].map((row) => ({
+          description: row.querySelector('[name=description]').value.trim(),
+          quantity: n(row.querySelector('[name=quantity]').value),
+          basis: row.querySelector('[name=basis]').value.trim(),
+          unit_price: n(row.querySelector('[name=unit_price]').value),
+          amount: n(row.querySelector('[data-line-amount]').textContent)
+        })).filter((item) => item.description || item.amount);
+        if (!formData.get('shipment_id')) throw new Error('تکایە بارێکی ڕاستەقینە هەڵبژێرە.');
+        if (!items.length || items.some((item) => !item.description || item.quantity <= 0)) throw new Error('لانیکەم یەک Item بە ناو و ژمارەی دروست پێویستە.');
+        const paid = n(formData.get('amount_paid'));
+        if (paid < 0 || paid > values.total) throw new Error('پارەی دراو نابێت لە کۆی فاتورە زیاتر بێت.');
+        if (!(values.rate > 0)) throw new Error('نرخی دۆلار بە دینار بنووسە.');
+        data = {
+          invoice_number: formData.get('invoice_number'),
+          shipment_id: formData.get('shipment_id'),
+          invoice_date: formData.get('invoice_date') || today(),
+          shipment_date: formData.get('shipment_date') || null,
+          due_at: formData.get('due_at') || null,
+          receipt_no: formData.get('receipt_no'),
+          bill_to_name: formData.get('bill_to_name'),
+          bill_to_address: formData.get('bill_to_address'),
+          currency: 'USD',
+          payment_method: formData.get('payment_method'),
+          notes: formData.get('notes'),
+          line_items: items,
+          subtotal: values.subtotal,
+          previous_debt: values.previousDebt,
+          additional_charges: n(formData.get('additional_charges')),
+          iqd_exchange_rate: values.rate,
+          total_iqd: values.totalIqd,
+          tax: 0,
+          status: 'issued'
+        };
+        invoice = await post('upsert_invoice', data);
+        paidTotal = n(invoice?.paid_total);
+        if (paid > 0 && invoice?.id) {
+          const paymentKey = form.dataset.paymentKey || (form.dataset.paymentKey = (crypto.randomUUID ? crypto.randomUUID() : `gc-${Date.now()}-${Math.random().toString(36).slice(2)}`));
+          try {
+            await post('record_payment', {
+              invoice_id: invoice.id,
+              amount: paid,
+              transaction_type: 'payment',
+              status: 'succeeded',
+              provider: 'manual',
+              method: data.payment_method || 'manual',
+              idempotency_key: `invoice-${invoice.id}-${paymentKey}`
+            });
+            paidTotal += paid;
+          } catch (error) {
+            paymentWarning = error.message || 'پارەدان تۆمار نەکرا.';
+          }
+        }
+        message.textContent = paymentWarning
+          ? `فاتورە پاشەکەوت کرا؛ بەڵام پارەدان تۆمار نەکرا: ${paymentWarning}`
+          : 'فاتورە پاشەکەوت کرا و ئامادەی چاپە.';
+        printInvoice({
+          ...data,
+          ...invoice,
+          paid_total: paidTotal,
+          total: n(invoice?.total) || values.total,
+          total_iqd: n(invoice?.total_iqd) || values.totalIqd,
+          iqd_exchange_rate: values.rate,
+          theme: formData.get('theme')
+        }, printWindow);
+      } catch (error) {
+        printWindow.close();
+        message.textContent = error.message || 'Invoice دروست نەکرا.';
+      } finally {
+        button.disabled = false;
+      }
     };
   };
 
