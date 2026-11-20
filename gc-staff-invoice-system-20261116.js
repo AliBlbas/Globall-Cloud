@@ -3,28 +3,39 @@
   'use strict';
 
   const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
   const API = `${SUPABASE_URL}/functions/v1/logistics-control-plane`;
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
   const n = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
   const money = (value, currency = 'USD') => `${n(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
   const today = () => new Date().toISOString().slice(0, 10);
-  const session = async () => (await window.sb?.auth?.getSession?.())?.data?.session || null;
+  const authClient = () => window.gcSupabase || window.sb || null;
+  const session = async () => {
+    const client = authClient();
+    if (!client?.auth?.getSession) throw new Error('Staff session ـی بەردەست نییە؛ تکایە دووبارە بچۆ ژوورەوە.');
+    return (await client.auth.getSession())?.data?.session || null;
+  };
 
-  const post = async (action, data) => {
+  const request = async (url, options = {}) => {
     const current = await session();
     if (!current?.access_token) throw new Error('تکایە دووبارە بچۆ ژوورەوەی Staff Console.');
-    const response = await fetch(API, {
-      method: 'POST',
+    const response = await fetch(url, {
+      ...options,
       headers: {
-        apikey: window.gcSupabaseConfig?.publishableKey || '',
+        apikey: SUPABASE_KEY,
         Authorization: `Bearer ${current.access_token}`,
-        'Content-Type': 'application/json'
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(options.headers || {})
       },
-      body: JSON.stringify({ action, data }),
       cache: 'no-store'
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.error || `Invoice HTTP ${response.status}`);
+    return result;
+  };
+  const get = (url) => request(url);
+  const post = async (action, data) => {
+    const result = await request(API, { method: 'POST', body: JSON.stringify({ action, data }) });
     return result.item || result;
   };
 
