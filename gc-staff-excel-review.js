@@ -4,7 +4,7 @@
   const ENDPOINT = `${SUPABASE_URL}/functions/v1/excel-import-control`;
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const text = (v) => String(v ?? '').trim();
-  const category = (name) => { const n = name.toLowerCase(); if (/wshkani|baraurd/.test(n)) return 'shipment_intake'; if (/qard|7isab/.test(n)) return 'receivables'; if (/qasa/.test(n)) return 'cash_ledger'; if (/rozhana/.test(n)) return 'expenses'; if (/mangana|^---$/.test(n)) return 'rollup'; return 'unclassified'; };
+  const category = (name) => { const n = name.toLowerCase(); if (/mangana/.test(n)) return 'rollup'; if (/7isab|qard/.test(n)) return 'receivables'; if (/qasa/.test(n)) return 'cash_ledger'; if (/rozhana/.test(n)) return 'expenses'; if (/wshkani|baraurd/.test(n)) return 'shipment_intake'; return 'unclassified'; };
   const api = async (path = '', options = {}) => {
     const session = (await window.gcSupabase?.auth.getSession())?.data?.session;
     if (!session?.access_token) throw new Error('Session ـی ستاف نەدۆزرایەوە');
@@ -16,24 +16,51 @@
   const post = (action, data) => api('', { method: 'POST', body: JSON.stringify({ action, data }) });
   const hash = async (file) => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', await file.arrayBuffer()))).map((b) => b.toString(16).padStart(2, '0')).join('');
   const rowsFromWorkbook = (file) => {
-    const wb = XLSX.read(file, { type: 'array', cellDates: true }); const rows = []; const sheets = [];
+    const wb = XLSX.read(file, { type: 'array', cellDates: true });
+    const rows = [];
+    const sheets = [];
+    const formulaError = (value) => /^#(?:REF!|DIV\/0!|VALUE!|NAME\?|N\/A|NUM!|NULL!)/i.test(String(value ?? '').trim());
     for (const wsName of wb.SheetNames) {
-      const values = XLSX.utils.sheet_to_json(wb.Sheets[wsName], { header: 1, raw: true, defval: null });
+      const worksheet = wb.Sheets[wsName];
+      const values = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true, defval: null });
       const kind = category(wsName);
       const populated = values.filter((raw) => raw.some((v) => v !== null && v !== ''));
-      const formulaCount = values.flat().filter((v) => typeof v === 'string' && v.startsWith('=')).length;
+      const cells = Object.entries(worksheet).filter(([address, cell]) => !address.startsWith('!') && cell && typeof cell === 'object');
+      const formulaCells = cells.filter(([, cell]) => typeof cell.f === 'string' && cell.f.trim());
+      const errorCells = cells.filter(([, cell]) => cell.t === 'e' || formulaError(cell.w) || formulaError(cell.v));
+      const formulaErrorCells = errorCells.filter(([, cell]) => typeof cell.f === 'string' && cell.f.trim());
+      const errorsByRow = new Map();
+      for (const [address, cell] of errorCells) {
+        const rowNumber = Number(address.match(/\d+$/)?.[0]);
+        if (!Number.isInteger(rowNumber) || rowNumber < 1) continue;
+        const list = errorsByRow.get(rowNumber) || [];
+        list.push(`${address}=${String(cell.w ?? cell.v ?? 'formula error')}`);
+        errorsByRow.set(rowNumber, list);
+      }
       const header = (populated.find((raw) => raw.filter((v) => v !== null && v !== '').length >= 2) || []).slice(0, 12).map((v) => text(v)).filter(Boolean);
-      sheets.push({ name: wsName, category: kind, rows: populated.length, formulas: formulaCount, header });
+      sheets.push({ name: wsName, category: kind, rows: populated.length, formulas: formulaCells.length, formula_errors: formulaErrorCells.length, header });
       values.forEach((raw, index) => {
         const cleaned = raw.map((v) => v instanceof Date ? v.toISOString() : v);
         if (cleaned.filter((v) => v !== null && v !== '').length < 2) return;
         const gcCodes = cleaned.map((v) => text(v).toUpperCase().replace(/\s+/g, '')).filter((v) => /^GC-?[A-Z0-9-]{2,30}$/.test(v)).map((v) => v.startsWith('GC-') ? v : `GC-${v.slice(2)}`);
         const warnings = [];
         if (['shipment_intake', 'receivables'].includes(kind) && !gcCodes.length) warnings.push('no_gc_code_candidate');
+        const rowErrors = errorsByRow.get(index + 1) || [];
+        if (rowErrors.length) warnings.push(`formula_error:${rowErrors.join('; ')}`);
         rows.push({ source_sheet: wsName, source_row: index + 1, category: kind, raw_values: cleaned, normalized_candidates: gcCodes.length ? { gc_codes: [...new Set(gcCodes)] } : {}, warnings });
       });
     }
-    return { rows, profile: { workbook_type: 'Globall Cloud operations workbook', sheet_count: sheets.length, total_rows: rows.length, total_formulas: sheets.reduce((n, sheet) => n + sheet.formulas, 0), sheets } };
+    return {
+      rows,
+      profile: {
+        workbook_type: 'Globall Cloud operations workbook',
+        sheet_count: sheets.length,
+        total_rows: rows.length,
+        total_formulas: sheets.reduce((n, sheet) => n + sheet.formulas, 0),
+        total_formula_errors: sheets.reduce((n, sheet) => n + sheet.formula_errors, 0),
+        sheets
+      }
+    };
   };
   const statusLabel = (status) => ({ unreviewed: 'پشکنین نەکراوە', accepted: 'پەسەندکراو', needs_mapping: 'پێویستی بە mapping ـە', rejected: 'ڕەتکراوە' }[status] || status);
   const statusClass = (status) => ({ unreviewed: 'warn', accepted: 'good', needs_mapping: 'danger', rejected: 'muted' }[status] || 'muted');
@@ -45,7 +72,7 @@
       const active = window.gcExcelActiveBatch || batches[0]?.id || '';
       window.gcExcelActiveBatch = active;
       const profile = active ? (batches.find((b) => b.id === active)?.notes ? (() => { try { return JSON.parse(batches.find((b) => b.id === active).notes).workbook_profile || null; } catch (_) { return null; } })() : null) : null;
-      view.innerHTML = `<div class="section-head"><div><div class="eyebrow">EXCEL CONTROL PLANE</div><h1>بەڕێوەبردنی Excel</h1><p>داتا سەرەتا لە staging ـدا پشکنین دەکرێت؛ هیچ row ـێک بەخۆکارانە ناچێتە shipment یان finance.</p></div><div class="actions"><label class="btn primary gc-excel-upload">+ بارکردنی Excel<input id="gcExcelFile" type="file" accept=".xlsx,.xls,.csv" hidden></label><button class="btn" id="gcExcelRefresh">نوێکردنەوە</button></div></div><div class="grid-kpi gc-excel-kpis"><div class="kpi"><span>Batch ـەکان</span><strong>${batches.length}</strong></div><div class="kpi"><span>Rows</span><strong>${batches.reduce((n, x) => n + (x.review?.rows || 0), 0)}</strong></div><div class="kpi"><span>پێویستی بە پشکنین</span><strong>${batches.reduce((n, x) => n + (x.review?.unreviewed || 0) + (x.review?.needs_mapping || 0), 0)}</strong></div><div class="kpi"><span>Approved</span><strong>${batches.filter((x) => x.import_status === 'approved').length}</strong></div></div>${profile ? `<section class="card gc-excel-profile"><div class="card-head"><div><h3>${esc(profile.workbook_type || 'Workbook profile')}</h3><small class="muted">${profile.sheet_count || 0} sheets · ${profile.total_rows || 0} parsed rows · ${profile.total_formulas || 0} formulas</small></div></div><div class="gc-excel-sheet-grid">${(profile.sheets || []).map((sheet) => `<div class="gc-excel-sheet"><b>${esc(sheet.name)}</b><span>${esc(sheet.category)} · ${sheet.rows || 0} rows</span><small>${esc((sheet.header || []).slice(0, 4).join(' · '))}</small></div>`).join('')}</div></section>` : ''}<section class="card gc-excel-workspace"><div class="card-head"><div><h3>Batch ـەکان</h3><small class="muted">هەر batch ـێک source hash و audit trail ـی خۆی هەیە.</small></div></div><div class="table-wrap"><table class="table"><thead><tr><th>File</th><th>Status</th><th>Rows</th><th>Review</th><th>Created</th><th></th></tr></thead><tbody>${batches.map((b) => `<tr class="${b.id === active ? 'gc-excel-active' : ''}"><td><b>${esc(b.source_filename)}</b><small class="mono">${esc(String(b.source_sha256).slice(0, 16))}…</small></td><td><span class="pill ${b.import_status === 'approved' ? 'mint' : b.import_status === 'rejected' ? 'red' : 'warn'}">${esc(b.import_status)}</span></td><td class="mono">${b.review?.rows || 0}</td><td>${b.review?.accepted || 0} accepted · ${b.review?.unreviewed || 0} pending · ${b.review?.needs_mapping || 0} mapping</td><td>${esc(new Date(b.created_at).toLocaleString('ku-IQ'))}</td><td><button class="btn tiny" data-excel-batch="${esc(b.id)}">بینین</button></td></tr>`).join('') || '<tr><td colspan="6"><div class="empty">هێشتا هیچ Excel batch ـێک نییە.</div></td></tr>'}</tbody></table></div></section><div id="gcExcelRows"></div>`;
+      view.innerHTML = `<div class="section-head"><div><div class="eyebrow">EXCEL CONTROL PLANE</div><h1>بەڕێوەبردنی Excel</h1><p>داتا سەرەتا لە staging ـدا پشکنین دەکرێت؛ هیچ row ـێک بەخۆکارانە ناچێتە shipment یان finance.</p></div><div class="actions"><label class="btn primary gc-excel-upload">+ بارکردنی Excel<input id="gcExcelFile" type="file" accept=".xlsx,.xls,.csv" hidden></label><button class="btn" id="gcExcelRefresh">نوێکردنەوە</button></div></div><div class="grid-kpi gc-excel-kpis"><div class="kpi"><span>Batch ـەکان</span><strong>${batches.length}</strong></div><div class="kpi"><span>Rows</span><strong>${batches.reduce((n, x) => n + (x.review?.rows || 0), 0)}</strong></div><div class="kpi"><span>پێویستی بە پشکنین</span><strong>${batches.reduce((n, x) => n + (x.review?.unreviewed || 0) + (x.review?.needs_mapping || 0), 0)}</strong></div><div class="kpi"><span>Approved</span><strong>${batches.filter((x) => x.import_status === 'approved').length}</strong></div></div>${profile ? `<section class="card gc-excel-profile"><div class="card-head"><div><h3>${esc(profile.workbook_type || 'Workbook profile')}</h3><small class="muted">${profile.sheet_count || 0} sheets · ${profile.total_rows || 0} parsed rows · ${profile.total_formulas || 0} formulas · ${profile.total_formula_errors || 0} formula errors</small></div></div><div class="gc-excel-sheet-grid">${(profile.sheets || []).map((sheet) => `<div class="gc-excel-sheet"><b>${esc(sheet.name)}</b><span>${esc(sheet.category)} · ${sheet.rows || 0} rows</span><small>${sheet.formulas || 0} formulas · ${sheet.formula_errors || 0} formula errors</small><small>${esc((sheet.header || []).slice(0, 4).join(' · '))}</small></div>`).join('')}</div></section>` : ''}<section class="card gc-excel-workspace"><div class="card-head"><div><h3>Batch ـەکان</h3><small class="muted">هەر batch ـێک source hash و audit trail ـی خۆی هەیە.</small></div></div><div class="table-wrap"><table class="table"><thead><tr><th>File</th><th>Status</th><th>Rows</th><th>Review</th><th>Created</th><th></th></tr></thead><tbody>${batches.map((b) => `<tr class="${b.id === active ? 'gc-excel-active' : ''}"><td><b>${esc(b.source_filename)}</b><small class="mono">${esc(String(b.source_sha256).slice(0, 16))}…</small></td><td><span class="pill ${b.import_status === 'approved' ? 'mint' : b.import_status === 'rejected' ? 'red' : 'warn'}">${esc(b.import_status)}</span></td><td class="mono">${b.review?.rows || 0}</td><td>${b.review?.accepted || 0} accepted · ${b.review?.unreviewed || 0} pending · ${b.review?.needs_mapping || 0} mapping</td><td>${esc(new Date(b.created_at).toLocaleString('ku-IQ'))}</td><td><button class="btn tiny" data-excel-batch="${esc(b.id)}">بینین</button></td></tr>`).join('') || '<tr><td colspan="6"><div class="empty">هێشتا هیچ Excel batch ـێک نییە.</div></td></tr>'}</tbody></table></div></section><div id="gcExcelRows"></div>`;
       document.getElementById('gcExcelRefresh').onclick = render;
       document.querySelectorAll('[data-excel-batch]').forEach((button) => button.onclick = () => { window.gcExcelActiveBatch = button.dataset.excelBatch; render(); });
       document.getElementById('gcExcelFile').onchange = upload;
