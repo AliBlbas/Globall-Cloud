@@ -217,6 +217,7 @@ const invoiceUpsert = async (service: ReturnType<typeof serviceClient>, staff: S
     p_shipment_id: shipmentId,
     p_line_items: Array.isArray(data.line_items) ? data.line_items : [],
     p_subtotal: numberOrNull(data.subtotal) ?? 0,
+    p_discount: numberOrNull(data.discount) ?? 0,
     p_previous_debt: numberOrNull(data.previous_debt) ?? 0,
     p_additional_charges: numberOrNull(data.additional_charges) ?? 0,
     p_tax: numberOrNull(data.tax) ?? 0,
