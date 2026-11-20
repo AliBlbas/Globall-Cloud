@@ -65,7 +65,7 @@
     .label { color:var(--teal); text-transform:uppercase; letter-spacing:.6px; font-size:2.8mm; font-weight:850; }
     .bill h2 { margin:2mm 0 2.5mm; color:var(--navy); font-size:6mm; }
     .bill p { margin:0; color:var(--muted); font-size:2.8mm; }
-    .meta { display:grid; grid-template-columns:repeat(3,1fr); gap:3mm; }
+    .meta { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:2.5mm; }
     .meta-box { min-height:20mm; padding:3.5mm 2.5mm; text-align:center; background:#f1f7fa; border:1px solid #dbe7ed; border-radius:2mm; }
     .meta-box label,.meta-box em { display:block; color:var(--muted); font-size:2.6mm; font-weight:750; }
     .meta-box em { margin-top:1mm; color:var(--teal); font-style:normal; }
@@ -87,13 +87,11 @@
     .balance { display:inline-block; padding:3mm 4mm; border-radius:2mm; background:linear-gradient(100deg,var(--teal),#088fb8); color:#fff; font-size:2.7mm; font-weight:850; }
     .summary .sumline { display:flex; justify-content:space-between; padding:1.8mm 0; color:var(--muted); font-size:2.9mm; font-weight:750; }
     .summary .sumline b { color:var(--ink); font-size:3.3mm; }
-    .summary .total-line { margin-top:2mm; padding:4mm; border-radius:2mm; background:linear-gradient(100deg,var(--navy),#183c62); color:#fff; }
-    .summary .total-line b { color:#fff; font-size:5mm; }
-    .bottom { display:grid; grid-template-columns:1.05fr 1fr; gap:5mm; margin-top:5mm; }
-    .bottom .card { min-height:17mm; padding:4mm; }
-    .iqd { margin-top:1.5mm; color:var(--navy); font-size:4mm; font-weight:900; }
-    .signature { color:var(--muted); font-size:2.7mm; }
-    .sigline { margin-top:6mm; border-bottom:1px solid #b9c8cf; }
+    .bottom { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5mm; margin-top:5mm; }
+    .bottom .card { min-height:20mm; padding:4mm 5mm; display:flex; justify-content:space-between; align-items:center; gap:4mm; }
+    .currency-total .mini { max-width:78mm; }
+    .currency-total .value { color:var(--navy); font-size:5mm; font-weight:950; white-space:nowrap; }
+    .theme-dark .currency-total .value,.theme-gold .currency-total .value { color:#f2f8ff; }
     .footer { margin-top:5mm; padding-top:4mm; border-top:1px solid var(--line); color:var(--muted); font-size:2.6mm; }
     .footer strong { color:var(--navy); font-size:2.9mm; }
     .thanks { margin-top:2mm; color:var(--teal); font-weight:850; }
@@ -169,7 +167,7 @@
     if (!win) { alert('پەنجەرەی چاپ نەکرایەوە؛ تکایە پاپ-ئەپ چالاک بکە.'); return; }
     win.opener = null;
     win.document.open();
-    win.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(data.invoice_number || 'Invoice')}</title><style>${styles}</style></head><body><main class="invoice ${theme === 'dark' ? 'theme-dark' : theme === 'gold' ? 'theme-gold' : theme === 'sky' ? 'theme-sky' : ''}"><header class="invoice-header"><div class="brand"><img src="/logo-icon.png" alt="Global Cloud logo"><div><h1>GLOBAL CLOUD</h1><p>GLOBAL LOGISTICS • FOR GENERAL TRADING</p><small>IMPORT &amp; EXPORT • ERBIL</small></div></div><div class="invoice-badge"><b>INVOICE</b><strong>${esc(data.invoice_number || '')}</strong><span>Receipt • ${esc(data.receipt_no || '—')}</span></div></header><div class="accent"></div><section class="body"><div class="contact"><span>0772 944 1884</span><span>0750 768 1884</span><span>0750 429 1341</span><span>globallcloud@gmail.com</span></div><section class="card customer"><div class="bill"><div class="label">Bill to / کڕیار</div><h2>${esc(data.bill_to_name || '—')}</h2><p>Shipment: ${esc(data.shipment_id || '—')} • Address: ${esc(data.bill_to_address || '—')}</p></div><div class="meta"><div class="meta-box"><label>Invoice Date</label><em>بەرواری فاتورە</em><strong>${esc(data.invoice_date || '—')}</strong></div><div class="meta-box"><label>Shipment Date</label><em>بەرواری بار</em><strong>${esc(data.shipment_date || '—')}</strong></div><div class="meta-box"><label>Receipt No.</label><em>ژمارەی وەسڵ</em><strong>${esc(data.receipt_no || '—')}</strong></div></div></section><div class="status"><span>${status} • ${esc(data.payment_method || 'Payment pending')}</span><span class="total">TOTAL USD • ${money(total, currency)}</span></div><section class="card items"><div class="items-head"><div>ITEM<small>جۆری کاڵا</small></div><div>QUANTITY<small>کێش</small></div><div>BASIS<small>بنەما</small></div><div>UNIT PRICE<small>نرخی یەکە</small></div><div>AMOUNT<small>بڕی پارە</small></div></div>${items || '<div class="item-row"><div class="item">—</div><div>—</div><div>—</div><div>—</div><div class="amount">—</div></div>'}</section><section class="card financial"><div class="payment"><div class="label">Payment / پارەدان</div><div class="mini">Amount Paid / پارەی دراو</div><div class="paid">${money(paid, currency)}</div><span class="balance">BALANCE • ${money(Math.max(0,total-paid), currency)}</span></div><div class="summary"><div class="sumline"><span>SUBTOTAL</span><b>${money(data.subtotal, currency)}</b></div><div class="sumline"><span>PREVIOUS DEBT</span><b>${money(data.previous_debt, currency)}</b></div><div class="sumline"><span>ADDITIONAL CHARGES</span><b>${money(data.additional_charges, currency)}</b></div><div class="sumline total-line"><span>TOTAL ${currency}</span><b>${money(total, currency)}</b></div></div></section><section class="bottom"><div class="card"><div class="label">TOTAL IN IQD</div><div class="iqd">${n(data.total_iqd) ? `${n(data.total_iqd).toLocaleString('en-US')} IQD` : '—'}</div><div class="mini">Rate: 1 USD = ${n(data.iqd_exchange_rate).toLocaleString('en-US')} IQD</div></div><div class="card signature">Customer Signature / واژوی کڕیار<div class="sigline"></div><div class="mini">GLOBALL CLOUD • Stamp / Signature</div><div class="sigline"></div></div></section><footer class="footer"><strong>GLOBAL CLOUD • ERBIL - HAWLERI NWE, NEXT TO GASHA INSTITUTE</strong><br>Hawler - Hawleri Nwe, Tanisht Paymangay Gasha • globalcloud@gmail.com<div class="thanks">Thank you for your business with Globall Cloud.</div></footer></section></main><script>setTimeout(()=>window.print(),300)<\/script></body></html>`);
+    win.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(data.invoice_number || 'Invoice')}</title><style>${styles}</style></head><body><main class="invoice ${theme === 'dark' ? 'theme-dark' : theme === 'gold' ? 'theme-gold' : theme === 'sky' ? 'theme-sky' : ''}"><header class="invoice-header"><div class="brand"><img src="/logo-icon.png" alt="Global Cloud logo"><div><h1>GLOBAL CLOUD</h1><p>GLOBAL LOGISTICS • FOR GENERAL TRADING</p><small>IMPORT &amp; EXPORT • ERBIL</small></div></div><div class="invoice-badge"><b>INVOICE</b><strong>${esc(data.invoice_number || '')}</strong><span>Receipt • ${esc(data.receipt_no || '—')}</span></div></header><div class="accent"></div><section class="body"><div class="contact"><span>0772 944 1884</span><span>0750 768 1884</span><span>0750 429 1341</span><span>globallcloud@gmail.com</span></div><section class="card customer"><div class="bill"><div class="label">Bill to / کڕیار</div><h2>${esc(data.bill_to_name || '—')}</h2><p>Shipment: ${esc(data.shipment_id || '—')} • Address: ${esc(data.bill_to_address || '—')}</p></div><div class="meta"><div class="meta-box"><label>Invoice Date</label><em>بەرواری فاتورە</em><strong>${esc(data.invoice_date || '—')}</strong></div><div class="meta-box"><label>Shipment Date</label><em>بەرواری بار</em><strong>${esc(data.shipment_date || '—')}</strong></div><div class="meta-box"><label>Due Date</label><em>بەرواری پارەدان</em><strong>${esc(data.due_at || '—')}</strong></div><div class="meta-box"><label>Receipt No.</label><em>ژمارەی وەسڵ</em><strong>${esc(data.receipt_no || '—')}</strong></div></div></section><div class="status"><span>INVOICE STATUS • ${status}</span><span class="total">TOTAL USD • ${money(total, currency)}</span></div><section class="card items"><div class="items-head"><div>ITEM<small>جۆری کاڵا</small></div><div>QUANTITY<small>کێش</small></div><div>BASIS<small>بنەما</small></div><div>UNIT PRICE<small>نرخی یەکە</small></div><div>AMOUNT<small>بڕی پارە</small></div></div>${items || '<div class="item-row"><div class="item">—</div><div>—</div><div>—</div><div>—</div><div class="amount">—</div></div>'}</section><section class="card financial"><div class="payment"><div class="label">Payment / پارەدان</div><div class="mini">Amount Paid / پارەی دراو</div><div class="paid">${money(paid, currency)}</div><span class="balance">BALANCE • ${money(Math.max(0,total-paid), currency)}</span></div><div class="summary"><div class="sumline"><span>SUBTOTAL</span><b>${money(data.subtotal, currency)}</b></div><div class="sumline"><span>PREVIOUS DEBT</span><b>${money(data.previous_debt, currency)}</b></div><div class="sumline"><span>ADDITIONAL CHARGES</span><b>${money(data.additional_charges, currency)}</b></div></div></section><section class="bottom"><div class="card currency-total"><div><div class="label">TOTAL USD</div><div class="mini">کۆی گشتی بە دۆلار</div></div><strong class="value">${money(total, currency)}</strong></div><div class="card currency-total"><div><div class="label">TOTAL IQD</div><div class="mini">نرخی گۆڕین: 1 USD = ${n(data.iqd_exchange_rate).toLocaleString('en-US')} IQD</div></div><strong class="value">${n(data.total_iqd) ? `${n(data.total_iqd).toLocaleString('en-US')} IQD` : '—'}</strong></div></section><footer class="footer"><strong>GLOBAL CLOUD • ERBIL - HAWLERI NWE, NEXT TO GASHA INSTITUTE</strong><br>Hawler - Hawleri Nwe, Tanisht Paymangay Gasha • globalcloud@gmail.com<div class="thanks">Thank you for your business with Globall Cloud.</div></footer></section></main><script>setTimeout(()=>window.print(),300)<\/script></body></html>`);
     win.document.close();
   };
 
@@ -200,8 +198,7 @@
         <strong>Total IQD <output id="gcInvoiceTotalIQD">—</output></strong>
       </div>
       <div class="gc-invoice-grid">
-        <label>Payment method / Notes<textarea name="payment_method" rows="2" placeholder="Cash, bank transfer, QiCard…"></textarea></label>
-        <label>Internal notes<textarea name="notes" rows="2" placeholder="Notes"></textarea></label>
+        <label>Internal notes<textarea name="notes" rows="2" placeholder="تێبینیی ناوخۆیی"></textarea></label>
       </div>
       <p id="gcInvoiceMsg" class="gc-invoice-msg" role="status"></p>
     </form>`, '<button type="button" class="btn" data-invoice-close>هەڵوەشاندنەوە</button><button type="button" class="btn primary" id="gcSaveInvoice">پاشەکەوتکردن و چاپکردن</button>');
@@ -276,7 +273,6 @@
           bill_to_name: formData.get('bill_to_name'),
           bill_to_address: formData.get('bill_to_address'),
           currency: 'USD',
-          payment_method: formData.get('payment_method'),
           notes: formData.get('notes'),
           line_items: items,
           subtotal: values.subtotal,
