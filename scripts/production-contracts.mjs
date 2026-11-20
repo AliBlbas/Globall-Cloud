@@ -584,7 +584,7 @@ const excelReviewChecks = [
   ['Excel review counts formulas from SheetJS cell metadata', staffExcelReview.includes('cell.f') && staffExcelReview.includes('formulaCells.length')],
   ['Excel review surfaces formula errors at sheet and row level', staffExcelReview.includes('total_formula_errors') && staffExcelReview.includes('formula_error:')],
   ['Excel review classifies 7ISAB debts and monthly rollup sheets', staffExcelReview.includes('/7isab|qard/') && staffExcelReview.includes('/mangana/') && staffExcelReview.includes("'rollup'")],
-  ['Excel review script is served with a fresh cache-busting version', staff.includes('gc-staff-excel-review.js?v=20261120-1')],
+  ['Excel review script is served with a fresh cache-busting version', staff.includes('gc-staff-excel-review.js?v=20261120-2')],
 ]
 for (const [label, passed] of excelReviewChecks) passed ? ok(label) : fail(label)
 
