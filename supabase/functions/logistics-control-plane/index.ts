@@ -469,7 +469,7 @@ const list = async (service: ReturnType<typeof serviceClient>, staff: Staff, req
   if (kind === 'invoice_options') {
     requireRole(staff, ['admin', 'super_admin', 'accountant'])
     let shipmentQuery = service.from('shipments')
-      .select('id,tracking_number,customer_gc_code,customer_name,created_at,total_amount,paid_amount,currency,status,branch,archived_at')
+      .select('id,tracking_number,customer_gc_code,customer_name,created_at,dispatched_at,total_amount,paid_amount,currency,status,branch,archived_at')
       .is('archived_at', null)
       .order('created_at', { ascending: false })
     if (staff.branch && staff.branch !== 'all') shipmentQuery = shipmentQuery.eq('branch', staff.branch)
