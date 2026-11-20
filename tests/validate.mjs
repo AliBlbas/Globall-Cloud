@@ -118,7 +118,7 @@ const routes = read('_redirects')
 const customer = read('gc-csp-scripts/customer-portal-inline-20261017.js')
 const surfaceChecks = [
   ['customer root is the unified workspace', index.includes('id="gcCustomerWorkspace"') && index.includes('id="auth"')],
-  ['customer root loads the current portal controller', index.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261019-2')],
+  ['customer root loads the current portal controller', index.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261120-authfix1')],
   ['customer receipt evidence is owner-scoped', customer.includes('warehouse-receipt-evidence') && customer.includes('item.carton_count') && customer.includes('item.photo_taken_at')],
   ['staff shell loads current responsive layers', staff.includes('gc-staff-dashboard-final-20261103.css?v=2') && staff.includes('gc-staff-mobile-elegance-20261106.css?v=3')],
   ['staff command deck is the final loader layer', loader.includes("/gc-staff-command-deck-20261023.css?v=20261120-2") && loader.includes('loadStyle')],
