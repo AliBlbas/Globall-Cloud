@@ -561,6 +561,20 @@ if (!staffV5Script.includes('notification_status') || !staffV5Script.includes('r
 else ok('Warehouse notification status remains Dubai-scoped and retry-safe')
 if (!staff.includes('staff-os-v5-20261017.js?v=20261106-2') || !staff.includes('gc-staff-dashboard-final-20261103.css?v=2')) fail('Staff notification center release must use immutable-cache asset URLs')
 else ok('Staff notification center assets use cache-busted URLs')
+console.log('Invoice finance contract')
+const invoiceSystem = read('gc-staff-invoice-system-20261116.js')
+const invoiceControlPlane = read('supabase/functions/logistics-control-plane/index.ts')
+const invoiceMigration = read('supabase/migrations/20261120000100_harden_invoice_template_and_previous_debt_v2.sql')
+const invoiceChecks = [
+  ['invoice selector reads only active shipments through the protected staff endpoint', invoiceControlPlane.includes("kind === 'invoice_options'") && invoiceControlPlane.includes(".is('archived_at', null)")],
+  ['invoice UI uses the active staff client and publishable API key', invoiceSystem.includes('window.gcSupabase || window.sb') && invoiceSystem.includes('apikey: SUPABASE_KEY')],
+  ['invoice writes use the template RPC and include prior debt plus FX snapshot', invoiceControlPlane.includes("service.rpc('upsert_shipment_invoice_template'") && invoiceControlPlane.includes('p_previous_debt') && invoiceControlPlane.includes('p_iqd_exchange_rate')],
+  ['invoice print window opens directly from the tap for mobile Safari', invoiceSystem.includes("const printWindow = window.open('', '_blank')") && invoiceSystem.includes('printInvoice({')],
+  ['invoice totals include previous debt and additional charges', invoiceSystem.includes('subtotal + previousDebt + additional') && invoiceSystem.includes('name="previous_debt"')],
+  ['invoice migration persists IQD rate and total and restricts execution to service role', invoiceMigration.includes('add column if not exists previous_debt') && invoiceMigration.includes('add column if not exists total_iqd') && invoiceMigration.includes('to service_role') && !invoiceMigration.includes('to authenticated;')],
+]
+for (const [label, passed] of invoiceChecks) passed ? ok(label) : fail(label)
+
 console.log('')
 if (failures) { console.error(`${failures} production contract check(s) failed.`); process.exit(1) }
 console.log('All production contract checks passed.')

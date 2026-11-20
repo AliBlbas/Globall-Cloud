@@ -63,6 +63,8 @@ const required = [
   'gc-staff-command-deck-20261023.css', 'gc-staff-mobile-dock-20261016.js',
   'gc-staff-land-manifest-20261018.js', 'gc-staff-land-manifest-20261018.css',
   'gc-staff-dashboard-final-20261103.css', 'gc-staff-mobile-elegance-20261106.css',
+  'gc-staff-invoice-system-20261116.js',
+  'supabase/migrations/20261120000100_harden_invoice_template_and_previous_debt_v2.sql',
   'gc-unified-customer-experience-20261016.js', 'gc-dashboard-preferences-20261003.js',
   'gc-public-customer-style-loader-20261014.js', 'gc-csp-scripts/customer-portal-inline-20261017.js',
   'gc-customer-warehouse-evidence-20261017.css', 'gc-customer-mobile-dock-20261016.css',

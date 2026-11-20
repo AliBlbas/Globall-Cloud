@@ -3,28 +3,39 @@
   'use strict';
 
   const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
   const API = `${SUPABASE_URL}/functions/v1/logistics-control-plane`;
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
   const n = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
   const money = (value, currency = 'USD') => `${n(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
   const today = () => new Date().toISOString().slice(0, 10);
-  const session = async () => (await window.sb?.auth?.getSession?.())?.data?.session || null;
+  const authClient = () => window.gcSupabase || window.sb || null;
+  const session = async () => {
+    const client = authClient();
+    if (!client?.auth?.getSession) throw new Error('Staff session ـی بەردەست نییە؛ تکایە دووبارە بچۆ ژوورەوە.');
+    return (await client.auth.getSession())?.data?.session || null;
+  };
 
-  const post = async (action, data) => {
+  const request = async (url, options = {}) => {
     const current = await session();
     if (!current?.access_token) throw new Error('تکایە دووبارە بچۆ ژوورەوەی Staff Console.');
-    const response = await fetch(API, {
-      method: 'POST',
+    const response = await fetch(url, {
+      ...options,
       headers: {
-        apikey: window.gcSupabaseConfig?.publishableKey || '',
+        apikey: SUPABASE_KEY,
         Authorization: `Bearer ${current.access_token}`,
-        'Content-Type': 'application/json'
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(options.headers || {})
       },
-      body: JSON.stringify({ action, data }),
       cache: 'no-store'
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.error || `Invoice HTTP ${response.status}`);
+    return result;
+  };
+  const get = (url) => request(url);
+  const post = async (action, data) => {
+    const result = await request(API, { method: 'POST', body: JSON.stringify({ action, data }) });
     return result.item || result;
   };
 
@@ -115,38 +126,204 @@
 
   const line = () => `<div class="gc-invoice-line" data-invoice-line><input name="description" placeholder="Item / Description" aria-label="Item / Description"><input name="quantity" type="number" min="0" step="0.01" value="1" placeholder="Qty"><input name="basis" placeholder="Basis" aria-label="Basis"><input name="unit_price" type="number" min="0" step="0.01" value="0" placeholder="Unit price"><output data-line-amount>0.00</output><button type="button" data-remove-line aria-label="Remove">×</button></div>`;
 
-  const printInvoice = (data) => {
+
+  const loadInvoiceOptions = async (form) => {
+    const select = form.elements.shipment_id;
+    const message = document.getElementById('gcInvoiceMsg');
+    select.innerHTML = '<option value="">بارەکان بارکردنە…</option>';
+    try {
+      const result = await get(`${API}?kind=invoice_options&limit=200`);
+      const shipments = Array.isArray(result.items) ? result.items : [];
+      if (!shipments.length) {
+        select.innerHTML = '<option value="">هیچ بارێکی چالاک لەم لقەدا نییە</option>';
+        message.textContent = 'بارێکی چالاک نەدۆزرایەوە؛ پێش دروستکردنی فاتورە بارێک تۆمار بکە.';
+        return;
+      }
+      select.innerHTML = '<option value="">بارێک هەڵبژێرە…</option>' + shipments.map((item) => {
+        const code = item.customer_gc_code || item.tracking_number || item.id;
+        const name = item.customer_name || 'بێ ناو';
+        const status = item.operational_status || item.status || '';
+        const label = [code, name, status].filter(Boolean).join(' · ');
+        return `<option value="${esc(item.id)}" data-name="${esc(name)}" data-date="${esc(item.created_at || '')}">${esc(label)}</option>`;
+      }).join('');
+      if (Number(result.exchange_rate_usd_iqd) > 0) form.elements.iqd_exchange_rate.value = String(result.exchange_rate_usd_iqd);
+      select.addEventListener('change', () => {
+        const option = select.options[select.selectedIndex];
+        form.elements.bill_to_name.value = option?.dataset.name || '';
+        form.elements.shipment_date.value = option?.dataset.date ? new Date(option.dataset.date).toISOString().slice(0, 10) : '';
+      });
+      message.textContent = `${shipments.length} بار ئامادەی هەڵبژاردنن. زانیاریی کڕیار لە بارەکەوە دەهێنرێت.`;
+    } catch (error) {
+      select.innerHTML = '<option value="">بارەکان نەهاتن</option>';
+      message.textContent = error.message || 'بارەکان نەهاتن.';
+    }
+  };
+
+  const printInvoice = (data, win) => {
     const theme = data.theme || 'modern';
     const currency = esc(data.currency || 'USD');
     const paid = n(data.paid_total);
     const total = n(data.total);
     const status = paid >= total && total > 0 ? 'PAID' : paid > 0 ? 'PARTIALLY PAID' : 'ISSUED';
     const items = (data.line_items || []).map((item) => `<div class="item-row"><div class="item">${esc(item.description || '')}</div><div>${esc(item.quantity || '')} ${esc(item.unit || '')}</div><div class="muted">${esc(item.basis || '')}</div><div>${money(item.unit_price, currency)}</div><div class="amount">${money(item.amount, currency)}</div></div>`).join('');
-    const win = window.open('', '_blank', 'noopener,noreferrer');
-    if (!win) { alert('Popup ـەکە ڕێگەپێنەدراوە؛ تکایە popup چالاک بکە.'); return; }
-    win.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(data.invoice_number || 'Invoice')}</title><style>${styles}</style></head><body><main class="invoice ${theme === 'dark' ? 'theme-dark' : theme === 'gold' ? 'theme-gold' : theme === 'sky' ? 'theme-sky' : ''}"><header class="invoice-header"><div class="brand"><img src="/logo-icon.png" alt="Global Cloud logo"><div><h1>GLOBAL CLOUD</h1><p>GLOBAL LOGISTICS • FOR GENERAL TRADING</p><small>IMPORT &amp; EXPORT • ERBIL</small></div></div><div class="invoice-badge"><b>INVOICE</b><strong>${esc(data.invoice_number || '')}</strong><span>Receipt • ${esc(data.receipt_no || '—')}</span></div></header><div class="accent"></div><section class="body"><div class="contact"><span>0772 944 1884</span><span>0750 768 1884</span><span>0750 429 1341</span><span>globallcloud@gmail.com</span></div><section class="card customer"><div class="bill"><div class="label">Bill to / کڕیار</div><h2>${esc(data.bill_to_name || '—')}</h2><p>Shipment: ${esc(data.shipment_id || '—')} • Address: ${esc(data.bill_to_address || '—')}</p></div><div class="meta"><div class="meta-box"><label>Invoice Date</label><em>بەرواری فاتورە</em><strong>${esc(data.invoice_date || '—')}</strong></div><div class="meta-box"><label>Due Date</label><em>بەرواری پارەدان</em><strong>${esc(data.due_at || '—')}</strong></div><div class="meta-box"><label>Status</label><em>دۆخ</em><strong>${status}</strong></div></div></section><div class="status"><span>${status} • ${esc(data.payment_method || 'Payment pending')}</span><span class="total">TOTAL ${currency} • ${money(total, currency)}</span></div><section class="card items"><div class="items-head"><div>ITEM<small>جۆری کاڵا</small></div><div>QUANTITY<small>کێش</small></div><div>BASIS<small>بنەما</small></div><div>UNIT PRICE<small>نرخی یەکە</small></div><div>AMOUNT<small>بڕی پارە</small></div></div>${items || '<div class="item-row"><div class="item">—</div><div>—</div><div>—</div><div>—</div><div class="amount">—</div></div>'}</section><section class="card financial"><div class="payment"><div class="label">Payment / پارەدان</div><div class="mini">Amount Paid / پارەی دراو</div><div class="paid">${money(paid, currency)}</div><span class="balance">BALANCE • ${money(Math.max(0,total-paid), currency)}</span></div><div class="summary"><div class="sumline"><span>SUBTOTAL</span><b>${money(data.subtotal, currency)}</b></div><div class="sumline"><span>DISCOUNT</span><b>${money(data.discount, currency)}</b></div><div class="sumline"><span>ADDITIONAL</span><b>${money(data.additional_charges, currency)}</b></div><div class="sumline total-line"><span>TOTAL ${currency}</span><b>${money(total, currency)}</b></div></div></section><section class="bottom"><div class="card"><div class="label">TOTAL IN IQD</div><div class="iqd">${n(data.total_iqd) ? `${n(data.total_iqd).toLocaleString('en-US')} IQD` : '—'}</div></div><div class="card signature">Customer Signature / واژووی کڕیار<div class="sigline"></div></div></section><footer class="footer"><strong>GLOBAL CLOUD • ERBIL - HAWLERI NWE, NEXT TO GASHA INSTITUTE</strong><br>Hawler - Hawleri Nwe, Tanisht Paymangay Gasha • globalcloud@gmail.com<div class="thanks">Thank you for your business with Globall Cloud.</div></footer></section></main><script>setTimeout(()=>window.print(),300)<\/script></body></html>`);
+    if (!win) { alert('پەنجەرەی چاپ نەکرایەوە؛ تکایە پاپ-ئەپ چالاک بکە.'); return; }
+    win.opener = null;
+    win.document.open();
+    win.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(data.invoice_number || 'Invoice')}</title><style>${styles}</style></head><body><main class="invoice ${theme === 'dark' ? 'theme-dark' : theme === 'gold' ? 'theme-gold' : theme === 'sky' ? 'theme-sky' : ''}"><header class="invoice-header"><div class="brand"><img src="/logo-icon.png" alt="Global Cloud logo"><div><h1>GLOBAL CLOUD</h1><p>GLOBAL LOGISTICS • FOR GENERAL TRADING</p><small>IMPORT &amp; EXPORT • ERBIL</small></div></div><div class="invoice-badge"><b>INVOICE</b><strong>${esc(data.invoice_number || '')}</strong><span>Receipt • ${esc(data.receipt_no || '—')}</span></div></header><div class="accent"></div><section class="body"><div class="contact"><span>0772 944 1884</span><span>0750 768 1884</span><span>0750 429 1341</span><span>globallcloud@gmail.com</span></div><section class="card customer"><div class="bill"><div class="label">Bill to / کڕیار</div><h2>${esc(data.bill_to_name || '—')}</h2><p>Shipment: ${esc(data.shipment_id || '—')} • Address: ${esc(data.bill_to_address || '—')}</p></div><div class="meta"><div class="meta-box"><label>Invoice Date</label><em>بەرواری فاتورە</em><strong>${esc(data.invoice_date || '—')}</strong></div><div class="meta-box"><label>Shipment Date</label><em>بەرواری بار</em><strong>${esc(data.shipment_date || '—')}</strong></div><div class="meta-box"><label>Receipt No.</label><em>ژمارەی وەسڵ</em><strong>${esc(data.receipt_no || '—')}</strong></div></div></section><div class="status"><span>${status} • ${esc(data.payment_method || 'Payment pending')}</span><span class="total">TOTAL USD • ${money(total, currency)}</span></div><section class="card items"><div class="items-head"><div>ITEM<small>جۆری کاڵا</small></div><div>QUANTITY<small>کێش</small></div><div>BASIS<small>بنەما</small></div><div>UNIT PRICE<small>نرخی یەکە</small></div><div>AMOUNT<small>بڕی پارە</small></div></div>${items || '<div class="item-row"><div class="item">—</div><div>—</div><div>—</div><div>—</div><div class="amount">—</div></div>'}</section><section class="card financial"><div class="payment"><div class="label">Payment / پارەدان</div><div class="mini">Amount Paid / پارەی دراو</div><div class="paid">${money(paid, currency)}</div><span class="balance">BALANCE • ${money(Math.max(0,total-paid), currency)}</span></div><div class="summary"><div class="sumline"><span>SUBTOTAL</span><b>${money(data.subtotal, currency)}</b></div><div class="sumline"><span>PREVIOUS DEBT</span><b>${money(data.previous_debt, currency)}</b></div><div class="sumline"><span>ADDITIONAL CHARGES</span><b>${money(data.additional_charges, currency)}</b></div><div class="sumline total-line"><span>TOTAL ${currency}</span><b>${money(total, currency)}</b></div></div></section><section class="bottom"><div class="card"><div class="label">TOTAL IN IQD</div><div class="iqd">${n(data.total_iqd) ? `${n(data.total_iqd).toLocaleString('en-US')} IQD` : '—'}</div><div class="mini">Rate: 1 USD = ${n(data.iqd_exchange_rate).toLocaleString('en-US')} IQD</div></div><div class="card signature">Customer Signature / واژوی کڕیار<div class="sigline"></div><div class="mini">GLOBALL CLOUD • Stamp / Signature</div><div class="sigline"></div></div></section><footer class="footer"><strong>GLOBAL CLOUD • ERBIL - HAWLERI NWE, NEXT TO GASHA INSTITUTE</strong><br>Hawler - Hawleri Nwe, Tanisht Paymangay Gasha • globalcloud@gmail.com<div class="thanks">Thank you for your business with Globall Cloud.</div></footer></section></main><script>setTimeout(()=>window.print(),300)<\/script></body></html>`);
     win.document.close();
   };
 
   const open = () => {
-    const modal = openModal(`<form id="gcInvoiceForm" class="gc-invoice-form"><div class="gc-invoice-grid"><label>Invoice number<input name="invoice_number" required value="INV/${new Date().getFullYear()}/"></label><label>Shipment ID<input name="shipment_id" required placeholder="GC-338"></label><label>Invoice date<input name="invoice_date" type="date" value="${today()}"></label><label>Due date<input name="due_at" type="date"></label><label>Receipt No.<input name="receipt_no" placeholder="Receipt reference"></label><label>Currency<select name="currency"><option>USD</option><option>IQD</option><option>AED</option><option>CNY</option><option>EUR</option></select></label><label>Bill to / Customer<input name="bill_to_name" placeholder="Customer name"></label><label>Shipping address<input name="bill_to_address" placeholder="Address"></label><label>Invoice design<select name="theme"><option value="modern">Modern Formal</option><option value="light">Light Simple</option><option value="dark">Dark Vivid</option><option value="sky">Sky &amp; Mint</option><option value="gold">Classic Black &amp; Gold</option></select></label></div><div class="gc-invoice-lines-head"><strong>ITEM / DESCRIPTION</strong><strong>QTY</strong><strong>BASIS</strong><strong>UNIT PRICE</strong><strong>AMOUNT</strong><span></span></div><div id="gcInvoiceLines">${line()}</div><button type="button" class="btn" id="gcAddInvoiceLine">+ زیادکردنی item</button><div class="gc-invoice-totals"><label>Subtotal<input name="subtotal" type="number" step="0.01" value="0" readonly></label><label>Discount<input name="discount" type="number" min="0" step="0.01" value="0"></label><label>Additional charges<input name="additional_charges" type="number" min="0" step="0.01" value="0"></label><label>Amount paid<input name="amount_paid" type="number" min="0" step="0.01" value="0"></label><strong>Total <output id="gcInvoiceTotal">0.00</output></strong></div><div class="gc-invoice-grid"><label>Payment method / Notes<textarea name="payment_method" rows="2" placeholder="Cash, bank transfer, QiCard…"></textarea></label><label>Internal notes<textarea name="notes" rows="2" placeholder="Notes"></textarea></label></div><p id="gcInvoiceMsg" class="gc-invoice-msg" role="status"></p></form>`, '<button type="button" class="btn" data-invoice-close>هەڵوەشاندنەوە</button><button type="button" class="btn primary" id="gcSaveInvoice">پاشەکەوتکردن و چاپکردن</button>');
+    const modal = openModal(`<form id="gcInvoiceForm" class="gc-invoice-form">
+      <div class="gc-invoice-grid">
+        <label>Invoice number<input name="invoice_number" required value="INV/${new Date().getFullYear()}/"></label>
+        <label>Shipment / GC code<select name="shipment_id" required><option value="">بارەکان بارکردنە…</option></select></label>
+        <label>Invoice date<input name="invoice_date" type="date" value="${today()}"></label>
+        <label>Shipment date<input name="shipment_date" type="date" readonly></label>
+        <label>Due date<input name="due_at" type="date"></label>
+        <label>Receipt No.<input name="receipt_no" placeholder="Receipt reference"></label>
+        <input type="hidden" name="currency" value="USD">
+        <label>Bill to / Customer<input name="bill_to_name" placeholder="Customer name"></label>
+        <label>Shipping address<input name="bill_to_address" placeholder="Address"></label>
+        <label>USD → IQD rate<input name="iqd_exchange_rate" type="number" min="0.0001" step="0.01" required placeholder="نرخی ڕۆژی فاتورە"></label>
+        <label>Invoice design<select name="theme"><option value="modern">Modern Formal</option><option value="light">Light Simple</option><option value="dark">Dark Vivid</option><option value="sky">Sky &amp; Mint</option><option value="gold">Classic Black &amp; Gold</option></select></label>
+      </div>
+      <div class="gc-invoice-lines-head"><strong>ITEM / DESCRIPTION</strong><strong>QTY</strong><strong>BASIS</strong><strong>UNIT PRICE</strong><strong>AMOUNT</strong><span></span></div>
+      <div id="gcInvoiceLines">${line()}</div>
+      <button type="button" class="btn" id="gcAddInvoiceLine">+ زیادکردنی item</button>
+      <div class="gc-invoice-totals">
+        <label>Subtotal<input name="subtotal" type="number" step="0.01" value="0" readonly></label>
+        <label>Previous debt<input name="previous_debt" type="number" min="0" step="0.01" value="0"></label>
+        <label>Additional charges<input name="additional_charges" type="number" min="0" step="0.01" value="0"></label>
+        <label>Amount paid<input name="amount_paid" type="number" min="0" step="0.01" value="0"></label>
+        <strong>Total USD <output id="gcInvoiceTotal">0.00</output></strong>
+        <strong>Total IQD <output id="gcInvoiceTotalIQD">—</output></strong>
+      </div>
+      <div class="gc-invoice-grid">
+        <label>Payment method / Notes<textarea name="payment_method" rows="2" placeholder="Cash, bank transfer, QiCard…"></textarea></label>
+        <label>Internal notes<textarea name="notes" rows="2" placeholder="Notes"></textarea></label>
+      </div>
+      <p id="gcInvoiceMsg" class="gc-invoice-msg" role="status"></p>
+    </form>`, '<button type="button" class="btn" data-invoice-close>هەڵوەشاندنەوە</button><button type="button" class="btn primary" id="gcSaveInvoice">پاشەکەوتکردن و چاپکردن</button>');
     const form = modal.querySelector('#gcInvoiceForm');
     const lines = modal.querySelector('#gcInvoiceLines');
-    const calc = () => { let subtotal = 0; lines.querySelectorAll('[data-invoice-line]').forEach((row) => { const amount = n(row.querySelector('[name=quantity]').value) * n(row.querySelector('[name=unit_price]').value); subtotal += amount; row.querySelector('[data-line-amount]').textContent = amount.toFixed(2); }); form.elements.subtotal.value = subtotal.toFixed(2); const total = Math.max(0, subtotal - n(form.elements.discount.value) + n(form.elements.additional_charges.value)); modal.querySelector('#gcInvoiceTotal').textContent = total.toFixed(2); return { subtotal, total }; };
+    const calc = () => {
+      let subtotal = 0;
+      lines.querySelectorAll('[data-invoice-line]').forEach((row) => {
+        const amount = n(row.querySelector('[name=quantity]').value) * n(row.querySelector('[name=unit_price]').value);
+        subtotal += amount;
+        row.querySelector('[data-line-amount]').textContent = amount.toFixed(2);
+      });
+      form.elements.subtotal.value = subtotal.toFixed(2);
+      const previousDebt = n(form.elements.previous_debt.value);
+      const additional = n(form.elements.additional_charges.value);
+      const total = Math.max(0, subtotal + previousDebt + additional);
+      const rate = n(form.elements.iqd_exchange_rate.value);
+      modal.querySelector('#gcInvoiceTotal').textContent = total.toFixed(2);
+      modal.querySelector('#gcInvoiceTotalIQD').textContent = rate > 0 ? Math.round(total * rate).toLocaleString('en-US') + ' IQD' : '—';
+      return { subtotal, previousDebt, total, totalIqd: rate > 0 ? Math.round(total * rate) : null, rate };
+    };
     form.addEventListener('input', calc);
+    form.addEventListener('change', calc);
+    void loadInvoiceOptions(form);
     modal.querySelector('#gcAddInvoiceLine').onclick = () => { lines.insertAdjacentHTML('beforeend', line()); calc(); };
-    lines.addEventListener('click', (event) => { if (event.target.closest('[data-remove-line]')) { event.target.closest('[data-invoice-line]').remove(); calc(); } });
+    lines.addEventListener('click', (event) => {
+      if (event.target.closest('[data-remove-line]')) {
+        event.target.closest('[data-invoice-line]').remove();
+        calc();
+      }
+    });
     calc();
     modal.querySelector('#gcSaveInvoice').onclick = async () => {
-      const button = modal.querySelector('#gcSaveInvoice'); const message = modal.querySelector('#gcInvoiceMsg'); button.disabled = true; message.textContent = 'خەریکی پاشەکەوتکردنە…';
+      const button = modal.querySelector('#gcSaveInvoice');
+      const message = modal.querySelector('#gcInvoiceMsg');
+      // Open synchronously from the tap so Safari/iOS does not block the print window after the network request.
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        message.textContent = 'پەنجەرەی چاپ نەکرایەوە؛ پاپ-ئەپ لە Safari ڕێگەپێبدە و دووبارە هەوڵ بدە.';
+        return;
+      }
+      printWindow.document.write('<!doctype html><html><body style="font:16px sans-serif;padding:24px;direction:rtl">فاتورەکە خەریکی ئامادەکردنە…</body></html>');
+      button.disabled = true;
+      message.textContent = 'خەریکی پاشەکەوتکردنی فاتورە…';
+      let invoice = null;
+      let paidTotal = 0;
+      let paymentWarning = '';
+      let values;
+      let data;
       try {
-        const { subtotal, total } = calc(); const formData = new FormData(form);
-        const items = [...lines.querySelectorAll('[data-invoice-line]')].map((row) => ({ description: row.querySelector('[name=description]').value.trim(), quantity: n(row.querySelector('[name=quantity]').value), basis: row.querySelector('[name=basis]').value.trim(), unit_price: n(row.querySelector('[name=unit_price]').value), amount: n(row.querySelector('[data-line-amount]').textContent) })).filter((item) => item.description || item.amount);
-        const data = { invoice_number: formData.get('invoice_number'), shipment_id: formData.get('shipment_id'), invoice_date: formData.get('invoice_date') || today(), due_at: formData.get('due_at') || null, receipt_no: formData.get('receipt_no'), bill_to_name: formData.get('bill_to_name'), bill_to_address: formData.get('bill_to_address'), currency: formData.get('currency'), payment_method: formData.get('payment_method'), notes: formData.get('notes'), line_items: items, subtotal, discount: n(formData.get('discount')), additional_charges: n(formData.get('additional_charges')), tax: 0, status: 'issued' };
-        const invoice = await post('upsert_invoice', data); const paid = n(formData.get('amount_paid'));
-        if (paid > 0 && invoice?.id) await post('record_payment', { invoice_id: invoice.id, amount: paid, transaction_type: 'payment', status: 'succeeded', provider: 'manual', method: formData.get('payment_method') || 'manual', idempotency_key: `invoice-${invoice.id}-${Date.now()}` });
-        message.textContent = 'Invoice پاشەکەوت کرا و ئامادەی چاپە.'; printInvoice({ ...data, ...invoice, paid_total: paid, total, theme: formData.get('theme') });
-      } catch (error) { message.textContent = error.message || 'Invoice دروست نەکرا.'; button.disabled = false; }
+        values = calc();
+        const formData = new FormData(form);
+        const items = [...lines.querySelectorAll('[data-invoice-line]')].map((row) => ({
+          description: row.querySelector('[name=description]').value.trim(),
+          quantity: n(row.querySelector('[name=quantity]').value),
+          basis: row.querySelector('[name=basis]').value.trim(),
+          unit_price: n(row.querySelector('[name=unit_price]').value),
+          amount: n(row.querySelector('[data-line-amount]').textContent)
+        })).filter((item) => item.description || item.amount);
+        if (!formData.get('shipment_id')) throw new Error('تکایە بارێکی ڕاستەقینە هەڵبژێرە.');
+        if (!items.length || items.some((item) => !item.description || item.quantity <= 0)) throw new Error('لانیکەم یەک Item بە ناو و ژمارەی دروست پێویستە.');
+        const paid = n(formData.get('amount_paid'));
+        if (paid < 0 || paid > values.total) throw new Error('پارەی دراو نابێت لە کۆی فاتورە زیاتر بێت.');
+        if (!(values.rate > 0)) throw new Error('نرخی دۆلار بە دینار بنووسە.');
+        data = {
+          invoice_number: formData.get('invoice_number'),
+          shipment_id: formData.get('shipment_id'),
+          invoice_date: formData.get('invoice_date') || today(),
+          shipment_date: formData.get('shipment_date') || null,
+          due_at: formData.get('due_at') || null,
+          receipt_no: formData.get('receipt_no'),
+          bill_to_name: formData.get('bill_to_name'),
+          bill_to_address: formData.get('bill_to_address'),
+          currency: 'USD',
+          payment_method: formData.get('payment_method'),
+          notes: formData.get('notes'),
+          line_items: items,
+          subtotal: values.subtotal,
+          previous_debt: values.previousDebt,
+          additional_charges: n(formData.get('additional_charges')),
+          iqd_exchange_rate: values.rate,
+          total_iqd: values.totalIqd,
+          tax: 0,
+          status: 'issued'
+        };
+        invoice = await post('upsert_invoice', data);
+        paidTotal = n(invoice?.paid_total);
+        if (paid > 0 && invoice?.id) {
+          const paymentKey = form.dataset.paymentKey || (form.dataset.paymentKey = (crypto.randomUUID ? crypto.randomUUID() : `gc-${Date.now()}-${Math.random().toString(36).slice(2)}`));
+          try {
+            await post('record_payment', {
+              invoice_id: invoice.id,
+              amount: paid,
+              transaction_type: 'payment',
+              status: 'succeeded',
+              provider: 'manual',
+              method: data.payment_method || 'manual',
+              idempotency_key: `invoice-${invoice.id}-${paymentKey}`
+            });
+            paidTotal += paid;
+          } catch (error) {
+            paymentWarning = error.message || 'پارەدان تۆمار نەکرا.';
+          }
+        }
+        message.textContent = paymentWarning
+          ? `فاتورە پاشەکەوت کرا؛ بەڵام پارەدان تۆمار نەکرا: ${paymentWarning}`
+          : 'فاتورە پاشەکەوت کرا و ئامادەی چاپە.';
+        printInvoice({
+          ...data,
+          ...invoice,
+          paid_total: paidTotal,
+          total: n(invoice?.total) || values.total,
+          total_iqd: n(invoice?.total_iqd) || values.totalIqd,
+          iqd_exchange_rate: values.rate,
+          theme: formData.get('theme')
+        }, printWindow);
+      } catch (error) {
+        printWindow.close();
+        message.textContent = error.message || 'Invoice دروست نەکرا.';
+      } finally {
+        button.disabled = false;
+      }
     };
   };
 
