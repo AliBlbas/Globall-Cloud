@@ -95,8 +95,9 @@ async function publicSuite() {
   await assertHttp('public-message accepts UI payload through honeypot without insert', `${SUPABASE}/functions/v1/public-message`, 200, { method: 'POST', headers: jsonHeaders(), body: JSON.stringify({ company_website: 'e2e-honeypot', name: 'E2E Synthetic', email: 'e2e@example.com', message: 'Synthetic no-op', request_type: 'info' }) }, (body) => body?.ok === true)
   await assertHttp('account-admin rejects missing auth', `${ACCOUNT_ADMIN}?kind=chat`, 401, { headers: { apikey: ANON_KEY, origin: SITE } }, (body) => typeof (body?.error || body?.code || body?.message) === 'string')
   await assertHttp('customer-self rejects missing auth', `${SUPABASE}/functions/v1/customer-self`, 401, { headers: jsonHeaders() }, (body) => typeof (body?.error || body?.code || body?.message) === 'string')
+  await assertHttp('staff-auth-verify rejects missing auth', `${SUPABASE}/functions/v1/staff-auth-verify`, 401, { headers: jsonHeaders() }, (body) => body?.authorized === false && typeof body?.error === 'string')
 
-  for (const table of ['staff', 'staff_activity_log', 'staff_notifications', 'staff_chat_rooms', 'staff_chat_members', 'staff_chat_messages', 'notification_delivery_events', 'quote_requests']) {
+  for (const table of ['staff', 'staff_activity_log', 'staff_notifications', 'staff_chat_rooms', 'staff_chat_members', 'staff_chat_messages', 'notification_delivery_events', 'quote_requests', 'chat_messages', 'excel_import_batches', 'excel_import_rows', 'financial_records', 'pricing_rates', 'shipment_customer_links', 'warehouse_items', 'warehouse_receipt_cartons', 'warehouse_receipts', 'customer_gc_sequence']) {
     await assertHttp(`anon REST denied ${table}`, `${SUPABASE}/rest/v1/${table}?select=*&limit=1`, [401, 403], { headers: jsonHeaders() }, (body) => body?.code === '42501' || body?.message || body?.error)
   }
 

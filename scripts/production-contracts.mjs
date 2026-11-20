@@ -175,8 +175,50 @@ const customerPortalLogin = read('gc-csp-scripts/customer-portal-inline-20261017
 const customerAccountEntry = read('gc-account-entry.js')
 if (!customerPortalLogin.includes('/functions/v1/customer-gc-login') || !customerPortalLogin.includes('sb.auth.setSession')) fail('Customer portal must authenticate GC codes via customer-gc-login and persist the returned session')
 else ok('GC-code sign-in uses the dedicated Edge Function and stores the Supabase session')
+const customerClientBootstrap = customerPortalLogin.slice(0, customerPortalLogin.indexOf('const customerApi'))
+if (!customerClientBootstrap.includes('window.gcSupabase?.auth') ||
+    !customerClientBootstrap.includes('window.sb?.auth') ||
+    !customerClientBootstrap.includes('window.supabase.createClient') ||
+    (customerClientBootstrap.match(/createClient\(/g) || []).length !== 1) {
+  fail('Customer Portal must reuse the shared production Supabase client instead of creating a parallel Auth session')
+} else {
+  ok('Customer Portal reuses one shared Supabase Auth client')
+}
+if (!bridge.includes('window.__gcSupabaseAuthStateListenerInstalled') ||
+    !bridge.includes('window.gcSupabase.auth.onAuthStateChange((event,session)=>publishAuthState(event,session))')) {
+  fail('Production bridge must subscribe to Auth state even when another script created the shared client first')
+} else {
+  ok('Production bridge installs one Auth-state listener after shared client bootstrap')
+}
 if (!customerAccountEntry.includes("email.setAttribute('type', 'text')")) fail('Customer login identifier must accept GC codes without email-type validation')
 else ok('Customer login input accepts GC codes')
+
+const authRlsMigration = read('supabase/migrations/20261120174547_harden_auth_rls_and_shop_order_rpc.sql')
+const shopStatusMigration = read('supabase/migrations/20261120174555_add_staff_only_shop_status_rpc.sql')
+const shopAuthMigration = read('supabase/migrations/20261120175413_harden_shop_authenticated_order_creation_and_remove_unused_staff_rpc.sql')
+const protectedAuthTables = ['chat_messages','excel_import_batches','excel_import_rows','financial_records','pricing_rates','shipment_customer_links','warehouse_items','warehouse_receipt_cartons','warehouse_receipts']
+if (!protectedAuthTables.every(name => authRlsMigration.includes(name)) ||
+    !authRlsMigration.includes('private.is_real_authenticated_session()') ||
+    !authRlsMigration.includes('private.is_staff()') ||
+    !authRlsMigration.includes('REVOKE ALL ON TABLE public.customer_gc_sequence')) {
+  fail('Auth hardening migration must keep sensitive tables staff-only and the GC sequence server-only')
+} else {
+  ok('Sensitive RLS policies and server-only GC sequence migration are mirrored in source control')
+}
+if (!shopStatusMigration.includes('CREATE OR REPLACE FUNCTION public.gc_staff_update_shop_order_status') ||
+    !shopStatusMigration.includes('Staff access required') ||
+    !shopAuthMigration.includes('DROP FUNCTION IF EXISTS public.gc_staff_update_shop_order_status(uuid, text)')) {
+  fail('Unused shop staff status RPC must be removed from the exposed Auth surface')
+} else {
+  ok('Unused and RLS-incompatible shop staff status RPC is retired')
+}
+if (!shopAuthMigration.includes('private.is_real_authenticated_session()') ||
+    !shopAuthMigration.includes('Duplicate products must be combined') ||
+    !shopAuthMigration.includes('GRANT EXECUTE ON FUNCTION public.shop_place_order')) {
+  fail('Shop order RPC must reject anonymous sessions and duplicate product reservations')
+} else {
+  ok('Authenticated shop order RPC rejects anonymous sessions and duplicate stock reservation lines')
+}
 
 const staffV5Script = read('staff-os-v5-20261017.js')
 const staffCustomerBridgeScript = read('gc-staff-customer-bridge-20261019.js')

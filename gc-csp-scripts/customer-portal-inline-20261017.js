@@ -1,11 +1,17 @@
 const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
 const CUSTOMER_SELF = `${SUPABASE_URL}/functions/v1/customer-self`;
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
-// Classic-script const bindings are not window properties; expose the same
-// session-aware client to independently loaded account modules.
-window.sb = sb;
+// Reuse the production bridge's Auth client whenever it is already available.
+// If this page wins the load race, publish one client so the bridge reuses it.
+const sb = window.gcSupabase?.auth
+  ? window.gcSupabase
+  : window.sb?.auth
+    ? window.sb
+    : window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' },
+    });
 window.gcSupabase = sb;
+window.sb = sb;
 
 const customerApi = async ({ method = 'GET', body } = {}) => {
   const { data: sessionResult } = await sb.auth.getSession();
