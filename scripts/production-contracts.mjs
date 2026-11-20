@@ -123,6 +123,21 @@ if (!['--gc-gold:', '--gc-gold-bright:', '--gc-gold-soft:'].every(token => brand
 const publicIndex = read('gc-csp-scripts/index-inline-2.js')
 const publicBootstrap = read('public-route-bootstrap.js')
 const publicRuntime = read('public-runtime-guarantee.js')
+const prepaintBootstrap = read('gc-csp-scripts/index-inline-1.js')
+const sharedSupabaseModule = read('assets/js/supabase.js')
+const runtimeGuard = read('runtime-guard.js')
+const authBridgeVersion = '20261120-authfix2'
+const authBridgePath = `/production-bridge.js?v=${authBridgeVersion}`
+if (!publicShell.includes(`gc-csp-scripts/index-inline-1.js?v=${authBridgeVersion}`) ||
+    !productionMiddleware.includes(`const VERSION = '${authBridgeVersion}'`) ||
+    !productionMiddleware.includes('src="/production-bridge.js?v=${VERSION}') ||
+    !prepaintBootstrap.includes(`script.src = '${authBridgePath}'`) ||
+    !sharedSupabaseModule.includes(`const BRIDGE_SRC = '${authBridgePath}'`) ||
+    !runtimeGuard.includes(`const BRIDGE = '${authBridgePath}'`)) {
+  fail('Production Supabase bridge cache versions must stay aligned across public bootstrap, middleware and operational guards')
+} else {
+  ok('Supabase Auth bridge uses one fresh cache-busted asset across all application entry points')
+}
 if (!bridge.includes('https://ahslifnthiwfkmaswjno.supabase.co')) fail('production bridge points at the wrong Supabase project')
 if (!/^\[functions\.customer-self\]\s*verify_jwt\s*=\s*true$/m.test(config)) fail('customer-self verify_jwt must remain true')
 if (!/^\[functions\.public-health\]\s*verify_jwt\s*=\s*false$/m.test(config)) fail('public-health verify_jwt must remain false')

@@ -1,6 +1,6 @@
 /* Globall Cloud — production HTML middleware. */
 const HTML_ACCEPT = 'text/html';
-const VERSION = '20261107-1';
+const VERSION = '20261120-authfix2';
 const VISUAL_REFRESH = `<link rel="stylesheet" href="/globall-visual-refresh-20260921.css?v=20260921-1" data-gc-visual-refresh="20260921-1">`;
 const ENTERPRISE_SHELL = `<link rel="stylesheet" href="/enterprise-shell-v2026.css?v=${VERSION}" data-gc-enterprise-shell="1">`;
 const THEME_CSS = `<link rel="stylesheet" href="/gc-theme-sync.css?v=${VERSION}" data-gc-theme-css="1">`;
@@ -143,7 +143,7 @@ const applySecurityHeaders = (headers) => {
 const rewriteRootHtml = (html) => {
   let out = html;
   out = out.split(LEGACY_SUPABASE_NOTICE).join('').split('href="#admin"').join('href="/staff"').split('href="./staff-os.html"').join('href="/staff"').split(' data-gc-onclick="route(\'admin\')"').join('');
-  out = out.split('/gc-csp-scripts/index-inline-1.js?v=20260821-1').join(`/gc-csp-scripts/index-inline-1.js?v=${VERSION}`);
+  out = out.replace(/\/gc-csp-scripts\/index-inline-1\.js\?v=[^"' ]+/g, `/gc-csp-scripts/index-inline-1.js?v=${VERSION}`);
   return out;
 };
 export async function onRequest(context) {
