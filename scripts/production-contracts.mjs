@@ -571,6 +571,9 @@ const invoiceChecks = [
   ['invoice writes use the template RPC and include prior debt plus FX snapshot', invoiceControlPlane.includes("service.rpc('upsert_shipment_invoice_template'") && invoiceControlPlane.includes('p_previous_debt') && invoiceControlPlane.includes('p_iqd_exchange_rate')],
   ['invoice print window opens directly from the tap for mobile Safari', invoiceSystem.includes("const printWindow = window.open('', '_blank')") && invoiceSystem.includes('printInvoice({')],
   ['invoice totals include previous debt and additional charges', invoiceSystem.includes('subtotal + previousDebt + additional') && invoiceSystem.includes('name="previous_debt"')],
+  ['invoice printout shows USD and IQD together without signature or payment-method fields', invoiceSystem.includes('class="currency-total"') && invoiceSystem.includes('TOTAL USD') && invoiceSystem.includes('TOTAL IQD') && !invoiceSystem.includes('Customer Signature') && !invoiceSystem.includes('Stamp / Signature') && !invoiceSystem.includes('name="payment_method"')],
+  ['invoice printout includes due date', invoiceSystem.includes("data.due_at || '—'")],
+  ['invoice script is served with a fresh cache-busting version', staff.includes('gc-staff-invoice-system-20261116.js?v=3')],
   ['invoice migration persists IQD rate and total and restricts execution to service role', invoiceMigration.includes('add column if not exists previous_debt') && invoiceMigration.includes('add column if not exists total_iqd') && invoiceMigration.includes('to service_role') && !invoiceMigration.includes('to authenticated;')],
 ]
 for (const [label, passed] of invoiceChecks) passed ? ok(label) : fail(label)
