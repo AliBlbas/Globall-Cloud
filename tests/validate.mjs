@@ -62,6 +62,7 @@ const required = [
   'staff-os-v5.html', 'staff-os-v5-20261017.js', 'staff-os-v5-enhancement-loader-20261017.js',
   'gc-staff-command-deck-20261023.css', 'gc-staff-mobile-dock-20261016.js',
   'gc-staff-land-manifest-20261018.js', 'gc-staff-land-manifest-20261018.css',
+  'gc-staff-mobile-finance-fix-20261120.css',
   'gc-staff-dashboard-final-20261103.css', 'gc-staff-mobile-elegance-20261106.css',
   'gc-staff-invoice-system-20261116.js',
   'supabase/migrations/20261120000100_harden_invoice_template_and_previous_debt_v2.sql',
