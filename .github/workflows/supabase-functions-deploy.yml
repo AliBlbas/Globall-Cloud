@@ -36,7 +36,14 @@ jobs:
 
   deploy-warehouse-functions:
     name: Deploy warehouse Edge Functions
-    if: github.ref == 'refs/heads/Product' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    # Avoid requiring a Supabase PAT for frontend-only releases.
+    # A manual workflow_dispatch always performs an explicit redeploy.
+    if: >-
+      ${{ github.ref == 'refs/heads/Product' &&
+        (github.event_name == 'workflow_dispatch' ||
+         contains(toJSON(github.event.commits), 'supabase/functions/warehouse-receiving/') ||
+         contains(toJSON(github.event.commits), 'supabase/functions/warehouse-notify/') ||
+         contains(toJSON(github.event.commits), 'supabase/functions/_shared/')) }}
     needs: verify
     runs-on: ubuntu-24.04
     timeout-minutes: 15
