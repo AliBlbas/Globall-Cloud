@@ -14,8 +14,17 @@ const money = (v) => `$${Number(v || 0).toLocaleString(undefined, { maximumFract
 const badge = (active) => `<span class="${active ? 'ok' : 'warn'}">${active ? 'ACTIVE' : 'INACTIVE'}</span>`;
 const roleLabel = { super_admin: 'Super Admin', admin: 'Admin', accountant: 'Accountant' };
 const roleClass = (r) => r === 'super_admin' ? 'badge-super' : r === 'accountant' ? 'badge-accountant' : 'badge-admin';
+const decodeRowData = (value) => {
+  if (!value) return {};
+  try {
+    return JSON.parse(decodeURIComponent(value));
+  } catch {
+    return {};
+  }
+};
+const encodeRowData = (row) => encodeURIComponent(JSON.stringify(row || {}));
 function setMsg(el, text, ok = false) { el.textContent = text || ''; el.style.color = ok ? 'var(--good)' : 'var(--muted)'; }
-function setLoadError(text) { state.lastLoadError = text || ''; const el = $('loadStatus'); if (el) { el.textContent = text || ''; el.classList.toggle('warn', Boolean(text)); el.classList.toggle('ok', false); } }
+function setLoadError(text) { state.lastLoadError = text || ''; const el = $('loadStatus'); if (el) { el.textContent = text || ''; el.classList.toggle('warn', Boolean(text)); el.classList.toggle('muted', !text); } }
 function showRole(role) { const el = $('roleBadge'); el.className = `badge ${roleClass(role)}`; el.textContent = `${roleLabel[role] || role || 'Guest'} access`; el.classList.remove('hidden'); }
 async function authFetch(path = '/', opts = {}) {
   const { data: { session } } = await sb.auth.getSession();
@@ -29,7 +38,7 @@ async function authFetch(path = '/', opts = {}) {
   if (!res.ok) throw new Error(data?.error || `Request failed (${res.status})`);
   return data;
 }
-const VALID_TABS = ['dashboard', 'customers', 'staff', 'receipts', 'logs'];
+const VALID_TABS = ['dashboard', 'customers', 'staff', 'receipts', 'logs', 'quote'];
 function setActiveTab(tab) {
   state.tab = tab;
   if (location.hash !== '#' + tab) history.replaceState(null, '', '#' + tab);
@@ -39,17 +48,42 @@ function setActiveTab(tab) {
   $('customerForm').classList.toggle('hidden', tab !== 'customers');
   $('staffForm').classList.toggle('hidden', tab !== 'staff');
   $('receiptForm').classList.toggle('hidden', tab !== 'receipts');
+  $('quotePane').classList.toggle('hidden', tab !== 'quote');
+  $('listPanel').classList.toggle('hidden', tab === 'quote');
   $('listTitle').textContent = tab === 'customers' ? 'Customer accounts' : tab === 'staff' ? 'Staff accounts' : tab === 'receipts' ? 'Warehouse receipts' : tab === 'logs' ? 'Activity logs' : 'Overview';
-  $('listSubtitle').textContent = tab === 'customers' ? 'Create, edit, archive, and link customer accounts' : tab === 'staff' ? 'Manage staff roles and access' : tab === 'receipts' ? 'Goods received in Dubai, China, or Erbil with photos' : tab === 'logs' ? 'Latest management activity' : 'Latest customer accounts and records';
-  renderList();
+  $('listSubtitle').textContent = tab === 'customers' ? 'Create, edit, archive, and link customer accounts' : tab === 'staff' ? 'Manage staff roles and access' : tab === 'receipts' ? 'Goods receipts and warehouse intake' : tab === 'logs' ? 'Recent admin activity' : 'Account overview';
+  if (tab !== 'quote') renderList();
+}
+/* Staff-side quick quote tool, powered by price-calculator.js's generic
+   rate/distance tables. Intentionally separate from index.html's own
+   calcQuote() (see price-calculator.js header comment) — this is for a
+   staff member to sanity-check a price internally, not the customer-facing
+   quote form. */
+function runQuickQuote() {
+  if (!window.priceCalculator) { $('quoteResult').textContent = 'price-calculator.js failed to load.'; return; }
+  const type = $('quoteType').value;
+  const weight = Number($('quoteWeight').value) || 0;
+  const origin = $('quoteOrigin').value;
+  const destination = $('quoteDest').value;
+  const useSeasonal = $('quoteSeasonal').checked;
+  const result = window.priceCalculator.calculateShippingCost(type, weight, origin, destination, { useSeasonal });
+  const time = window.priceCalculator.calculateDeliveryTime(type);
+  if (!result) { $('quoteResult').textContent = 'Could not calculate — check inputs.'; return; }
+  $('quoteResult').innerHTML = `
+    <div class="stats">
+      <div class="stat"><b>${money(result.totalCost)}</b><span>Estimated total (USD)</span></div>
+      <div class="stat"><b>${money(result.baseCost)}</b><span>Base cost</span></div>
+      <div class="stat"><b>${time ? `${time.min}–${time.max} ${time.unit}` : '—'}</b><span>Est. delivery time</span></div>
+    </div>`;
 }
 function loadManagerOptions() {
   $('customerManager').innerHTML = '<option value="">Unassigned</option>' + state.staff.map((s) => `<option value="${esc(s.id)}">${esc(s.full_name)} (${esc(s.role)})</option>`).join('');
 }
-function resetCustomerForm() { window.formValidator.resetForm('customerForm'); $('customerId').value=''; $('customerName').value=''; $('customerEmail').value=''; $('customerGcCode').value=''; $('customerPhone').value=''; $('customerPhone2').value=''; $('customerCity').value=''; $('customerDelivery').value=''; $('customerManager').value=''; $('customerStatus').value='true'; $('customerNote').value=''; $('customerInvite').value='true'; $('customerPassword').value=''; setMsg($('customerMsg'), ''); }
-function resetStaffForm() { window.formValidator.resetForm('staffForm'); $('staffId').value=''; $('staffFullName').value=''; $('staffEmail').value=''; $('staffRole').value='admin'; $('staffBranch').value='all'; $('staffInvite').value='true'; $('staffPassword').value=''; setMsg($('staffMsg'), ''); }
-function resetReceiptForm() { window.formValidator.resetForm('receiptForm'); $('receiptBatch').value=''; $('receiptLocation').value='Dubai'; $('receiptCustomerCode').value=''; $('receiptCargoType').value='standard'; $('receiptWeight').value=''; $('receiptCargoCost').value=''; $('receiptStatus').value='received_origin'; $('receiptCustomerPhone').value=''; $('receiptNotes').value=''; $('receiptPhotos').value=''; $('receiptPreview').innerHTML=''; setMsg($('receiptMsg'), ''); }
+function resetCustomerForm() { window.formValidator.resetForm('customerForm'); $('customerId').value=''; $('customerName').value=''; $('customerEmail').value=''; $('customerGcCode').value=''; $('customerManager').value=''; }
+function resetStaffForm() { window.formValidator.resetForm('staffForm'); $('staffId').value=''; $('staffFullName').value=''; $('staffEmail').value=''; $('staffRole').value='admin'; $('staffBranch').value=''; }
+function resetReceiptForm() { window.formValidator.resetForm('receiptForm'); $('receiptBatch').value=''; $('receiptLocation').value='Dubai'; $('receiptCustomerCode').value=''; $('receiptCargoType').value=''; $('receiptCustomerPhone').value=''; $('receiptPhotos').value=''; $('receiptPreview').innerHTML=''; }
 function renderList() {
+  if (state.tab === 'quote') return;
   const q = $('searchBox').value.trim().toLowerCase();
   if (state.tab === 'customers') {
     const rows = state.customers.filter((r) => !q || JSON.stringify(r).toLowerCase().includes(q));
@@ -65,7 +99,7 @@ function renderList() {
         <td>${esc(manager?.full_name || '—')}<div class="muted">${esc(manager?.role || '')}</div></td>
         <td><b>${r.shipment_count || 0}</b><div class="muted">${money(r.outstanding_amount || 0)} due</div></td>
         <td>${badge(r.is_active)}</td>
-        <td><div class="toolbar"><button class="btn btn-outline" data-gc-onclick='editCustomer(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button><button class="btn btn-danger" data-gc-onclick="archiveCustomerAccount('${esc(r.id)}')">Archive</button></div></td>
+        <td><div class="toolbar"><button class="btn btn-outline" type="button" data-action="edit-customer" data-row="${encodeRowData(r)}">Edit</button><button class="btn btn-danger" type="button" data-action="archive-customer" data-id="${esc(String(r.id || ''))}">Archive</button></div></td>
       </tr>`;
     }).join('') || '<tr><td colspan="8">No customers found.</td></tr>';
   } else if (state.tab === 'staff') {
@@ -77,7 +111,7 @@ function renderList() {
       <td><span class="ok">${esc(r.role || '')}</span></td>
       <td>${esc(r.branch || '')}</td>
       <td>${badge(r.is_active)}</td>
-      <td><div class="toolbar"><button class="btn btn-outline" data-gc-onclick='editStaff(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button><button class="btn btn-danger" data-gc-onclick="archiveStaffAccount('${esc(r.id)}')">Deactivate</button></div></td>
+      <td><div class="toolbar"><button class="btn btn-outline" type="button" data-action="edit-staff" data-row="${encodeRowData(r)}">Edit</button><button class="btn btn-danger" type="button" data-action="archive-staff" data-id="${esc(String(r.id || ''))}">Disable</button></div></td>
     </tr>`).join('') || '<tr><td colspan="6">No staff found.</td></tr>';
   } else if (state.tab === 'receipts') {
     const rows = state.receipts.filter((r) => !q || JSON.stringify(r).toLowerCase().includes(q));
@@ -202,7 +236,7 @@ async function syncSessionUI() {
 }
 $('staffLoginForm').addEventListener('submit', async (e) => {
   e.preventDefault(); setMsg($('loginMsg'), 'Signing in...');
-  try { const email = $('loginEmail').value.trim(); const password = $('loginPassword').value; const { error } = await sb.auth.signInWithPassword({ email, password }); if (error) throw error; setMsg($('loginMsg'), 'Signed in successfully', true); await syncSessionUI(); }
+  try { const email = $('loginEmail').value.trim(); const password = $('loginPassword').value; const { error } = await sb.auth.signInWithPassword({ email, password }); if (error) throw error; setMsg($('loginMsg'), 'Signed in', true); await syncSessionUI(); }
   catch (err) { setMsg($('loginMsg'), err.message || 'Login failed'); }
 });
 $('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); await syncSessionUI(); });
@@ -210,7 +244,7 @@ $('refreshBtn').addEventListener('click', refreshAll);
 $('searchBox').addEventListener('input', renderList);
 document.querySelectorAll('.tab').forEach((btn) => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
 $('customerClearBtn').addEventListener('click', resetCustomerForm);
-$('allocateGcBtn').addEventListener('click', async () => { try { $('allocateGcBtn').disabled = true; const { data: code, error } = await window.sb.rpc('generate_gc_customer_code'); if (error) throw error; $('customerGcCode').value = code || ''; setMsg($('customerMsg'), `Allocated ${code}`, true); } catch (err) { setMsg($('customerMsg'), err.message || 'Unable to allocate GC code'); } finally { $('allocateGcBtn').disabled = false; } });
+$('allocateGcBtn').addEventListener('click', async () => { try { $('allocateGcBtn').disabled = true; const { data: code, error } = await window.sb.rpc('generate_gc_customer_code'); if (error) throw error; $('customerGcCode').value = code || ''; } catch (err) { setMsg($('customerMsg'), err.message || 'Unable to generate code'); } finally { $('allocateGcBtn').disabled = false; } });
 $('staffClearBtn').addEventListener('click', resetStaffForm);
 $('receiptClearBtn').addEventListener('click', resetReceiptForm);
 ['customerForm', 'staffForm', 'receiptForm'].forEach((id) => window.formValidator.initializeForm(id, { manageSubmit: false }));
@@ -219,7 +253,7 @@ $('customerForm').addEventListener('submit', async (e) => {
   if (!window.formValidator.validateForm('customerForm')) { setMsg($('customerMsg'), 'Please fix the highlighted fields'); return; }
   setMsg($('customerMsg'), 'Saving customer...');
   try {
-    const payload = { id: $('customerId').value || undefined, gc_code: $('customerGcCode').value.trim() || undefined, code: $('customerGcCode').value.trim() || undefined, name: $('customerName').value.trim(), email: $('customerEmail').value.trim(), phone: $('customerPhone').value.trim(), phone2: $('customerPhone2').value.trim(), city: $('customerCity').value.trim(), delivery_location: $('customerDelivery').value.trim(), note: $('customerNote').value.trim(), manager_staff_id: $('customerManager').value || null, is_active: $('customerStatus').value === 'true', send_invite: $('customerInvite').value === 'true', password: $('customerPassword').value.trim() || undefined };
+    const payload = { id: $('customerId').value || undefined, gc_code: $('customerGcCode').value.trim() || undefined, code: $('customerGcCode').value.trim() || undefined, name: $('customerName').value.trim(), email: $('customerEmail').value.trim(), manager_staff_id: $('customerManager').value || null };
     const action = $('customerId').value ? 'update' : 'create';
     const res = await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'customer', action, data: payload }) });
     setMsg($('customerMsg'), action === 'create' ? `Customer saved${res.warning ? ' · ' + res.warning : ''}` : 'Customer updated', true);
@@ -231,7 +265,7 @@ $('staffForm').addEventListener('submit', async (e) => {
   if (!window.formValidator.validateForm('staffForm')) { setMsg($('staffMsg'), 'Please fix the highlighted fields'); return; }
   setMsg($('staffMsg'), 'Saving staff...');
   try {
-    const payload = { id: $('staffId').value || undefined, full_name: $('staffFullName').value.trim(), email: $('staffEmail').value.trim(), role: $('staffRole').value, branch: $('staffBranch').value, send_invite: $('staffInvite').value === 'true', password: $('staffPassword').value.trim() || undefined };
+    const payload = { id: $('staffId').value || undefined, full_name: $('staffFullName').value.trim(), email: $('staffEmail').value.trim(), role: $('staffRole').value, branch: $('staffBranch').value.trim() };
     const action = $('staffId').value ? 'update' : 'create';
     const res = await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'staff', action, data: payload }) });
     setMsg($('staffMsg'), action === 'create' ? `Staff saved${res.warning ? ' · ' + res.warning : ''}` : 'Staff updated', true);
@@ -249,7 +283,9 @@ $('receiptForm').addEventListener('submit', async (e) => {
   try {
     const formData = new FormData();
     formData.append('kind', 'receipt'); formData.append('action', 'create');
-    formData.append('batch_code', $('receiptBatch').value.trim()); formData.append('location', $('receiptLocation').value); formData.append('customer_code', $('receiptCustomerCode').value.trim()); formData.append('cargo_type', $('receiptCargoType').value); formData.append('weight_kg', $('receiptWeight').value); formData.append('cargo_cost', $('receiptCargoCost').value); formData.append('operational_status', $('receiptStatus').value); formData.append('customer_phone', $('receiptCustomerPhone').value.trim()); formData.append('notes', $('receiptNotes').value.trim());
+    formData.append('batch_code', $('receiptBatch').value.trim()); formData.append('location', $('receiptLocation').value); formData.append('customer_code', $('receiptCustomerCode').value.trim());
+    formData.append('customer_phone', $('receiptCustomerPhone').value.trim());
+    formData.append('cargo_type', $('receiptCargoType').value);
     for (const file of Array.from($('receiptPhotos').files || [])) formData.append('photos', file);
     const res = await authFetch('/', { method: 'POST', body: formData });
     setMsg($('receiptMsg'), `Receipt saved: ${res.receipt.batch_code}${res.customer ? ' · linked to customer' : ''}`, true);
@@ -258,22 +294,52 @@ $('receiptForm').addEventListener('submit', async (e) => {
 });
 window.editCustomer = (row) => {
   window.formValidator.resetForm('customerForm');
-  $('customerId').value = row.id || ''; $('customerName').value = row.name || ''; $('customerEmail').value = row.email || ''; $('customerGcCode').value = row.gc_code || row.code || '';  $('customerPhone').value = row.phone || ''; $('customerPhone2').value = row.phone2 || ''; $('customerCity').value = row.city || ''; $('customerDelivery').value = row.delivery_location || ''; $('customerManager').value = row.manager_staff_id || ''; $('customerStatus').value = String(Boolean(row.is_active)); $('customerNote').value = row.note || ''; $('customerInvite').value = row.auth_user_id ? 'false' : 'true'; $('customerPassword').value = ''; setActiveTab('customers'); $('customerForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('customerId').value = row.id || ''; $('customerName').value = row.name || ''; $('customerEmail').value = row.email || ''; $('customerGcCode').value = row.gc_code || row.code || ''; $('customerManager').value = row.manager_staff_id || '';
 };
 window.editStaff = (row) => {
   window.formValidator.resetForm('staffForm');
-  $('staffId').value = row.id || ''; $('staffFullName').value = row.full_name || ''; $('staffEmail').value = row.email || ''; $('staffRole').value = row.role || 'admin'; $('staffBranch').value = row.branch || 'all'; $('staffInvite').value = row.auth_user_id ? 'false' : 'true'; $('staffPassword').value = ''; setActiveTab('staff'); $('staffForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('staffId').value = row.id || ''; $('staffFullName').value = row.full_name || ''; $('staffEmail').value = row.email || ''; $('staffRole').value = row.role || 'admin'; $('staffBranch').value = row.branch || '';
 };
 window.archiveCustomerAccount = async (id) => {
-  if (!confirm('Archive this customer account?')) return;
+  if (!window.confirm('Archive this customer account?')) return;
   try { await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'customer', action: 'archive', data: { id } }) }); await refreshAll(); }
-  catch (err) { alert(err.message || 'Unable to archive customer'); }
+  catch (err) { window.alert(err.message || 'Unable to archive customer'); }
 };
 window.archiveStaffAccount = async (id) => {
-  if (!confirm('Deactivate this staff account?')) return;
+  if (!window.confirm('Deactivate this staff account?')) return;
   try { await authFetch('/', { method: 'POST', body: JSON.stringify({ kind: 'staff', action: 'archive', data: { id } }) }); await refreshAll(); }
-  catch (err) { alert(err.message || 'Unable to deactivate staff'); }
+  catch (err) { window.alert(err.message || 'Unable to deactivate staff'); }
 };
+document.addEventListener('click', async (event) => {
+  const actionButton = event.target.closest('[data-action]');
+  if (!actionButton) return;
+
+  const { action } = actionButton.dataset;
+  switch (action) {
+    case 'edit-customer': {
+      const row = decodeRowData(actionButton.dataset.row);
+      if (row && Object.keys(row).length) window.editCustomer(row);
+      break;
+    }
+    case 'edit-staff': {
+      const row = decodeRowData(actionButton.dataset.row);
+      if (row && Object.keys(row).length) window.editStaff(row);
+      break;
+    }
+    case 'archive-customer': {
+      const id = actionButton.dataset.id;
+      await window.archiveCustomerAccount(id);
+      break;
+    }
+    case 'archive-staff': {
+      const id = actionButton.dataset.id;
+      await window.archiveStaffAccount(id);
+      break;
+    }
+    default:
+      break;
+  }
+});
 window.addEventListener('hashchange', () => {
   const tab = location.hash.replace('#', '');
   if (VALID_TABS.includes(tab)) setActiveTab(tab);
