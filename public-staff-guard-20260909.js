@@ -6,7 +6,7 @@
 
   function guardHash() {
     if (PUBLIC_ROOT.test(location.pathname) && location.hash.replace(/^#/, '').toLowerCase() === 'admin') {
-      location.replace('/staff');
+      location.replace('/staff-os-v5.html');
       return true;
     }
     return false;
@@ -26,7 +26,7 @@
     const nativeRoute = window.route;
     window.route = function(id) {
       if (String(id).toLowerCase() === 'admin') {
-        location.assign('/staff');
+        location.assign('/staff-os-v5.html');
         return;
       }
       return nativeRoute.apply(this, arguments);
