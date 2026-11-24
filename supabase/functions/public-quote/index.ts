@@ -87,6 +87,7 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({})) as Json
     // Honeypot submissions are acknowledged without any database write, so
     // they should not consume the public POST rate-limit budget.
+    // This keeps automated no-op smoke checks from exhausting real quote capacity.
     if (text(body.company_website, 120)) return reply(req, { ok: true })
 
     const allowed = await applyRateLimit(db, req, POST_MAX_PER_WINDOW, 'post')
