@@ -1,0 +1,283 @@
+/* Globall Cloud — mobile visual quality pass · 2026-11-24
+   Scoped to public surfaces. No authentication, pricing, tracking, or data contracts change. */
+
+/* The rate explorer has a deliberate light palette in light mode. Keep its
+   controls legible instead of mixing pale dark-mode labels into white panels. */
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-panel {
+  color: #16344a !important;
+  background: linear-gradient(155deg,#ffffff,#f7fbfd) !important;
+  border-color: #d5e6ec !important;
+  box-shadow: 0 14px 34px rgba(20,66,92,.08) !important;
+}
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-label,
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-weight,
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-advanced-label,
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-advanced-fields label > span,
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-advanced-fields > div > .gc-advanced-label {
+  color: #244b63 !important;
+}
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-route {
+  background: #f5fafc !important;
+  border-color: #d8e8ed !important;
+}
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-route span,
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-route strong {
+  color: #355c73 !important;
+}
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-route .gc-rate-select,
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-product .gc-rate-select {
+  min-height: 48px !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  background: #142b3b !important;
+  color: #f5fbff !important;
+  border: 1px solid #35566d !important;
+}
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-product .gc-rate-select {
+  direction: ltr !important;
+  text-align: left !important;
+  padding-inline: 14px !important;
+  font-size: clamp(12px,3.2vw,15px) !important;
+  letter-spacing: -.015em;
+}
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-weight {
+  display: block;
+  padding: 14px !important;
+  border: 1px solid #d8e8ed !important;
+  border-radius: 15px !important;
+  background: #ffffff !important;
+}
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-weight > span {
+  color: #244b63 !important;
+}
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-weight > span small {
+  color: #087f96 !important;
+}
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-weight input[type="range"] {
+  width: 100% !important;
+  min-height: 34px !important;
+  accent-color: #0aaec1 !important;
+  cursor: pointer;
+}
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-presets button,
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-route-options button,
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-service-levels button {
+  color: #315c73 !important;
+  background: #f8fbfd !important;
+  border-color: #c9dfe7 !important;
+}
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-route-options button.active,
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-service-levels button.active {
+  color: #075e70 !important;
+  background: #e8f9fb !important;
+  border-color: #19b9c9 !important;
+}
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-insight {
+  color: #27586c !important;
+  background: #eaf8fa !important;
+  border-color: #c7eaf0 !important;
+}
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-dimensions {
+  color: #244b63 !important;
+  border-color: #d3e5eb !important;
+}
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-dimensions summary {
+  color: #315f77 !important;
+}
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-result {
+  color: #f4fbff !important;
+  background: radial-gradient(ellipse at 100% 0%,rgba(67,199,215,.18),transparent 50%),linear-gradient(155deg,#12364d,#071a2a) !important;
+  border-color: #2b7084 !important;
+}
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-result,
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-result b,
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-result strong {
+  color: #f4fbff !important;
+}
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-result small,
+html[data-gc-theme="light"] body.gc-public-site #gcApp .gc-rate-result span {
+  color: #b5cfdd !important;
+}
+
+/* Secure customer sign-in stays a high-contrast dark surface in both themes. */
+body.gc-public-site #auth:not(.hidden) {
+  z-index: 10020 !important;
+  padding: max(14px,env(safe-area-inset-top,0px)) 14px max(14px,env(safe-area-inset-bottom,0px)) !important;
+}
+body.gc-public-site #auth .auth-sheet {
+  width: min(620px,100%) !important;
+  max-height: calc(100dvh - 28px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  border: 1px solid rgba(91,220,235,.28) !important;
+  border-radius: 24px !important;
+  background: radial-gradient(ellipse at 100% 0%,rgba(25,166,191,.13),transparent 45%),linear-gradient(155deg,#0b2a42,#061625 78%) !important;
+  color: #f3faff !important;
+  box-shadow: 0 28px 90px rgba(0,0,0,.48) !important;
+}
+body.gc-public-site #auth .auth-sheet h2 { color: #f4fbff !important; line-height: 1.5 !important; }
+body.gc-public-site #auth .auth-sheet > p,
+body.gc-public-site #auth .auth-sheet label,
+body.gc-public-site #auth .auth-sheet .muted { color: #aac3d2 !important; }
+body.gc-public-site #auth .auth-sheet .field,
+body.gc-public-site #auth .auth-sheet input {
+  width: 100% !important;
+  min-height: 50px !important;
+  border: 1px solid rgba(125,190,216,.28) !important;
+  border-radius: 13px !important;
+  background: #061a2b !important;
+  color: #f5fbff !important;
+}
+body.gc-public-site #auth #email,
+body.gc-public-site #auth #password {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: plaintext;
+}
+body.gc-public-site #auth .auth-sheet input::placeholder { color: #7897ac !important; opacity: 1; }
+body.gc-public-site #auth .auth-sheet input:focus-visible {
+  border-color: #51d9e8 !important;
+  outline: 0 !important;
+  box-shadow: 0 0 0 3px rgba(81,217,232,.17) !important;
+}
+body.gc-public-site #auth .auth-sheet .app-primary-action {
+  min-height: 52px !important;
+  border-radius: 13px !important;
+  font-weight: 900 !important;
+  box-shadow: 0 12px 28px rgba(15,183,207,.2) !important;
+}
+body.gc-public-site #auth .gc-auth-support-note {
+  border-color: rgba(234,196,112,.2) !important;
+  background: rgba(255,255,255,.035) !important;
+  color: #c0d4df !important;
+}
+body.gc-public-site #auth .gc-auth-support-note strong { color: #f5dc9d !important; }
+
+/* Command palette: predictable phone sizing, clear hierarchy and safe-area spacing. */
+.gc-vx-command {
+  z-index: 10100 !important;
+  padding: max(14px,env(safe-area-inset-top,0px)) 12px max(14px,env(safe-area-inset-bottom,0px)) !important;
+  place-items: start center !important;
+}
+.gc-vx-cmdbox {
+  width: min(640px,100%) !important;
+  max-width: 100% !important;
+  max-height: calc(100dvh - 28px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border: 1px solid rgba(88,214,230,.3) !important;
+  border-radius: 22px !important;
+  background: linear-gradient(155deg,#102e45,#061626 82%) !important;
+  box-shadow: 0 32px 100px rgba(0,0,0,.58) !important;
+}
+.gc-vx-search {
+  flex: 0 0 auto !important;
+  min-height: 60px;
+  border-bottom: 1px solid rgba(151,198,225,.13) !important;
+  background: rgba(3,15,27,.45) !important;
+}
+.gc-vx-search input {
+  min-width: 0 !important;
+  min-height: 44px !important;
+  color: #f7fcff !important;
+  font-size: 16px !important;
+  caret-color: #5de2ee;
+}
+.gc-vx-search input::placeholder { color: #91aabd !important; opacity: 1; }
+.gc-vx-list {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 9px !important;
+}
+.gc-vx-item {
+  min-width: 0 !important;
+  min-height: 68px !important;
+  gap: 12px !important;
+  padding: 12px 13px !important;
+  border: 1px solid transparent !important;
+  border-radius: 14px !important;
+  background: rgba(255,255,255,.025) !important;
+  color: #f0f8fc !important;
+}
+.gc-vx-item > i {
+  flex: 0 0 42px !important;
+  width: 42px !important;
+  height: 42px !important;
+  border: 1px solid rgba(90,218,232,.12);
+  background: #0a2941 !important;
+  color: #78e7f0 !important;
+}
+.gc-vx-copy > b { color: #f4fbff !important; font-size: 14px !important; line-height: 1.5 !important; }
+.gc-vx-copy > small { color: #b2c8d5 !important; font-size: 12px !important; line-height: 1.6 !important; }
+.gc-vx-item:hover,
+.gc-vx-item:focus-visible,
+.gc-vx-item.active {
+  border-color: rgba(83,220,235,.32) !important;
+  background: rgba(44,173,194,.12) !important;
+  outline: none !important;
+}
+@media (max-width: 760px) {
+  .gc-vx-cmd {
+    top: auto !important;
+    bottom: calc(88px + env(safe-area-inset-bottom,0px)) !important;
+    inset-inline-start: 12px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: grid !important;
+    place-items: center !important;
+    padding: 0 12px !important;
+    border-radius: 14px !important;
+    background: rgba(7,25,41,.96) !important;
+    border-color: rgba(79,227,240,.34) !important;
+    color: #9af4fa !important;
+    box-shadow: 0 12px 30px rgba(0,0,0,.32) !important;
+  }
+  .gc-vx-cmdbox { max-height: calc(100dvh - 28px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)) !important; }
+  .gc-vx-item { min-height: 64px !important; }
+}
+
+/* Dedicated public tracker owns its own dock; never show a second global dock. */
+body:has(.gc-mobile-dock-v3) #gcPublicMobileActions { display: none !important; }
+body:has(.gc-mobile-dock-v3) { padding-bottom: calc(92px + env(safe-area-inset-bottom,0px)) !important; }
+body:has(.gc-mobile-dock-v3) .gc-mobile-dock-v3 {
+  z-index: 9000 !important;
+  bottom: calc(8px + env(safe-area-inset-bottom,0px)) !important;
+}
+html[data-gc-theme="light"] body:has(.gc-mobile-dock-v3) {
+  color: #17354b !important;
+  background: radial-gradient(900px 480px at 85% -10%,rgba(16,189,207,.1),transparent 62%),linear-gradient(180deg,#f7fbfd,#edf4f8) !important;
+}
+html[data-gc-theme="light"] body:has(.gc-mobile-dock-v3) .card {
+  color: #f2f9fd !important;
+  border-color: rgba(108,183,209,.28) !important;
+  background: linear-gradient(155deg,#0e3049,#061a2b 82%) !important;
+  box-shadow: 0 24px 64px rgba(8,33,52,.2) !important;
+}
+html[data-gc-theme="light"] body:has(.gc-mobile-dock-v3) .card h1,
+html[data-gc-theme="light"] body:has(.gc-mobile-dock-v3) .card h2,
+html[data-gc-theme="light"] body:has(.gc-mobile-dock-v3) .card h3,
+html[data-gc-theme="light"] body:has(.gc-mobile-dock-v3) .card b,
+html[data-gc-theme="light"] body:has(.gc-mobile-dock-v3) .card strong { color: #f4fbff !important; }
+html[data-gc-theme="light"] body:has(.gc-mobile-dock-v3) .card p,
+html[data-gc-theme="light"] body:has(.gc-mobile-dock-v3) .card .note,
+html[data-gc-theme="light"] body:has(.gc-mobile-dock-v3) .card small { color: #b6cfdd !important; }
+html[data-gc-theme="light"] body:has(.gc-mobile-dock-v3) .card input {
+  background: #031524 !important;
+  color: #f6fbff !important;
+  border-color: #31566f !important;
+}
+html[data-gc-theme="light"] body:has(.gc-mobile-dock-v3) .hero .brand,
+html[data-gc-theme="light"] body:has(.gc-mobile-dock-v3) .hero .brand strong { color: #102b43 !important; }
+html[data-gc-theme="light"] body:has(.gc-mobile-dock-v3) .hero .brand div { color: #58758a !important; }
+html[data-gc-theme="light"] body:has(.gc-mobile-dock-v3) .hero > a { color: #087d93 !important; }
+@media (prefers-reduced-motion: reduce) {
+  .gc-vx-command, .gc-vx-item, .gc-vx-cmd { transition: none !important; animation: none !important; }
+}
