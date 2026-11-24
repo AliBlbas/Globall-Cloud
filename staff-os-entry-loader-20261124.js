@@ -10,8 +10,8 @@
   if (!root) return;
 
   const SDK_SOURCES = [
-    'https://unpkg.com/@supabase/supabase-js@2.118.0/dist/umd/supabase.js',
-    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js'
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+    'https://unpkg.com/@supabase/supabase-js@2'
   ];
   const CONTROLLER = '/staff-os-v5-20261017.js?v=20261124-entryfix-1';
   const hasSdk = () => Boolean(window.supabase && typeof window.supabase.createClient === 'function');
@@ -31,7 +31,7 @@
     '#app .gc-entry-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:22px}',
     '#app .gc-entry-actions a,#app .gc-entry-actions button{min-height:46px;padding:11px 18px;border-radius:12px;border:1px solid #294d71;background:#102b48;color:#f5f9fd;text-decoration:none;font:800 13px Vazirmatn,system-ui,sans-serif;cursor:pointer}',
     '#app .gc-entry-actions button{background:linear-gradient(135deg,#4fe3f0,#00a8bd);border-color:transparent;color:#03101f}',
-    '#app .gc-entry-detail{display:block;margin-top:16px!important;font-size:11px;color:#7894b3!important;overflow-wrap:anywhere}',
+    '#app .gc-entry-detail{display:block;margin-top:16px!important;font-size:12px;color:#a8bdd5!important;overflow-wrap:anywhere}',
     '@keyframes gc-entry-pulse{0%,80%,100%{transform:scale(.7);opacity:.45}40%{transform:scale(1);opacity:1}}'
   ].join('');
   document.head.appendChild(style);
@@ -42,7 +42,7 @@
       root.innerHTML = '<main class="gc-entry-state" dir="rtl"><section class="gc-entry-card"><div class="gc-entry-mark">GC</div><div class="gc-entry-eyebrow">STAFF OPERATING SYSTEM · V5</div><h1>کۆنسۆڵی ستاف بە شێوەیەکی پارێزراو دەکرێتەوە</h1><p>سەرەتا پەیوەندیی پاراستن و پاشان کۆنسۆڵ بار دەکرێت.</p><div class="gc-entry-loader"><i></i><i></i><i></i></div></section></main>';
       return;
     }
-    root.innerHTML = '<main class="gc-entry-state" dir="rtl"><section class="gc-entry-card"><div class="gc-entry-mark">GC</div><div class="gc-entry-eyebrow">STAFF OS · RECOVERY</div><h1>کۆنسۆڵی ستاف نەیتوانی باربکرێت</h1><p>پەیوەندیی چوونەژوورەوە یان فایلێکی سەرەکی وەڵامی نەدا. دەتوانیت دووبارە هەوڵ بدەیتەوە.</p><small class="gc-entry-detail"></small><div class="gc-entry-actions"><button type="button" id="gcStaffEntryRetry">دووبارە هەوڵدانەوە</button><a href="/management.html">کردنەوەی Staff Gateway</a></div></section></main>';
+    root.innerHTML = '<main class="gc-entry-state" dir="rtl"><section class="gc-entry-card"><div class="gc-entry-mark">GC</div><div class="gc-entry-eyebrow">STAFF OS · RECOVERY</div><h1>کۆنسۆڵی ستاف نەیتوانی باربکرێت</h1><p>پەیوەندیی چوونەژوورەوە یان فایلێکی سەرەکی وەڵامی نەدا. دەتوانیت دووبارە هەوڵ بدەیتەوە.</p><p class="gc-entry-detail" role="alert"></p><div class="gc-entry-actions"><button type="button" id="gcStaffEntryRetry">دووبارە هەوڵدانەوە</button><a href="/management.html">کردنەوەی Staff Gateway</a></div></section></main>';
     const detail = root.querySelector('.gc-entry-detail');
     if (detail) detail.textContent = String(message || 'هەڵەیەک لە بارکردنی سیستەمی ستاف ڕوویدا.').slice(0, 260);
     root.querySelector('#gcStaffEntryRetry')?.addEventListener('click', () => {
