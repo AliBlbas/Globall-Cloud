@@ -76,7 +76,7 @@
 
   const routeFallback = (id) => {
     const paths = {
-      home:'/', about:'/about', services:'/services', track:'/#track', request:'/quote', portal:'/dashboard', contact:'/contact', staff:'/staff'
+      home:'/', about:'/about', services:'/services', track:'/#track', request:'/quote', portal:'/dashboard', contact:'/contact', staff:'/staff-os-v5.html'
     };
     const href = paths[id] || '/';
     if (id === 'track') window.location.href = href;
