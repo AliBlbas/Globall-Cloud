@@ -171,7 +171,7 @@
     }
     // Cache/session failures can leave only a theme control in #app. Never
     // leave staff users on a blank screen: switch to an actionable recovery UI.
-    if ((appIsBlank() && Date.now() - startedAt >= 6000) || Date.now() - startedAt >= 18000) {
+    if ((appIsBlank() && Date.now() - startedAt >= 6000) || Date.now() - startedAt >= 15000) {
       clearInterval(timer);
       showFailure('Staff OS لە کاتی داناندا وەستاوە. deployment، cache یان script loading پشکنین بکە.');
     }
