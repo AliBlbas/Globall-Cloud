@@ -82,8 +82,9 @@ jobs:
     if: >-
       ${{ github.ref == 'refs/heads/Product' &&
         (github.event_name == 'workflow_dispatch' ||
-         contains(toJSON(github.event.commits), 'supabase/functions/public-quote/') ||
-         contains(toJSON(github.event.commits), 'supabase/functions/_shared/')) }}
+         contains(toJSON(github.event.head_commit), 'supabase/functions/public-quote/') ||
+         contains(toJSON(github.event.head_commit), 'supabase/functions/_shared/') ||
+         contains(toJSON(github.event.head_commit), '.github/workflows/supabase-functions-deploy.yml')) }}
     needs: verify
     runs-on: ubuntu-24.04
     timeout-minutes: 15
