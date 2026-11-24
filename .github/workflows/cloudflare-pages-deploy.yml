@@ -79,12 +79,11 @@ jobs:
         if: github.ref == 'refs/heads/Product' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_ACCOUNT_ID: "1dc430373586bf07669a8a804a7867fb"
         shell: bash
         run: |
           set -euo pipefail
           test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing repository secret CLOUDFLARE_API_TOKEN (Cloudflare Pages Edit scope required)." >&2; exit 1; }
-          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "Missing repository secret CLOUDFLARE_ACCOUNT_ID." >&2; exit 1; }
 
       - name: Install Wrangler
         if: github.ref == 'refs/heads/Product' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
@@ -94,7 +93,7 @@ jobs:
         if: github.ref == 'refs/heads/Product' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_ACCOUNT_ID: "1dc430373586bf07669a8a804a7867fb"
         run: |
           set -euo pipefail
           npx --yes wrangler@4 pages deploy public \
