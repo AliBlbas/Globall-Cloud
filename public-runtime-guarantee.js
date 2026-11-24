@@ -120,7 +120,7 @@
           <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:26px">
             <a class="btn btn-primary" href="${data[3]}">${data[2]}</a>
             <a class="btn btn-outline" href="/track">شوێنکەوتنی بار</a>
-            <a class="btn btn-outline" href="/staff">بەشی ستاف</a>
+            <a class="btn btn-outline" href="/staff-os-v5.html">بەشی ستاف</a>
           </div>
           <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:32px;text-align:start">
             <div style="padding:18px;border:1px solid var(--line-soft);border-radius:16px;background:rgba(0,194,217,.05)"><b>✈ Air</b><small style="display:block;color:var(--muted);margin-top:6px">گواستنەوەی ئاسمانی</small></div>
