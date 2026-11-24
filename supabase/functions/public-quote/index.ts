@@ -76,16 +76,21 @@ Deno.serve(async (req) => {
 
   try {
     const db = serviceClient()
-    const allowed = await applyRateLimit(db, req, req.method === 'GET' ? GET_MAX_PER_WINDOW : POST_MAX_PER_WINDOW, req.method.toLowerCase())
-    if (!allowed) return reply(req, { error: 'Too many requests. Please try again later.' }, 429)
 
     if (req.method === 'GET') {
+      const allowed = await applyRateLimit(db, req, GET_MAX_PER_WINDOW, 'get')
+      if (!allowed) return reply(req, { error: 'Too many requests. Please try again later.' }, 429)
       if (new URL(req.url).searchParams.get('catalog') !== '1') return reply(req, { error: 'Catalog flag required' }, 400)
       return reply(req, { rates: await listPublicRates(db) })
     }
 
     const body = await req.json().catch(() => ({})) as Json
+    // Honeypot submissions are acknowledged without any database write, so
+    // they should not consume the public POST rate-limit budget.
     if (text(body.company_website, 120)) return reply(req, { ok: true })
+
+    const allowed = await applyRateLimit(db, req, POST_MAX_PER_WINDOW, 'post')
+    if (!allowed) return reply(req, { error: 'Too many requests. Please try again later.' }, 429)
 
     const name = text(body.name, 100)
     const email = text(body.email, 160).toLowerCase()
