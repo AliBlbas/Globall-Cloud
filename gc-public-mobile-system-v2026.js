@@ -6,7 +6,7 @@
   if (window.__gcPublicMobileSystem) return;
   window.__gcPublicMobileSystem = true;
 
-  const isPublicSurface = () => !document.querySelector('.gc-shell') && !/^\/(?:customer-portal|dashboard|portal)(?:\.html)?\/?$/i.test(location.pathname);
+  const isPublicSurface = () => !document.querySelector('.gc-shell, .gc-mobile-dock-v3') && !/^\\/(?:customer-portal|dashboard|portal|track|tracking|tracking-integration)(?:\\.html)?\\/?$/i.test(location.pathname);
 
   const resolveAccount = () => {
     const candidates = [
