@@ -15,7 +15,7 @@
     contact: { href: '/#contact',   key: 'nav.contact',   fallback: 'پەیوەندی',  icon: '✉' },
     privacy: { href: '/#privacy',  key: 'legal.privacyTitle', fallback: 'تایبەتێتی', icon: '◌' },
     terms:   { href: '/#terms',    key: 'legal.termsTitle',   fallback: 'مەرجەکان', icon: '§' },
-    staff:   { href: '/staff',     fallback: 'بەشی ستاف', icon: '◈' }
+    staff:   { href: '/staff-os-v5.html',     fallback: 'بەشی ستاف', icon: '◈' }
   };
 
   const PUBLIC_IDS = ['home','about','services','track','request','portal','contact','privacy','terms'];
