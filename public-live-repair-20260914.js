@@ -10,7 +10,7 @@
     request: '/request',
     portal: '/portal',
     contact: '/contact',
-    staff: '/staff',
+    staff: '/staff-os-v5.html',
   };
 
   const routeFromElement = (el) => {
