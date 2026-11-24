@@ -39,7 +39,7 @@ else fail('Service Worker network-first/lifecycle contract is incomplete')
 const required = [
   'index.html','system-status.html','status-page.js','gc-accessibility-mobile-20261021.css','gc-customer-experience-signature-20261017.css','login.html','register.html','customer-access.html','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js','public-route-bootstrap.js','public-runtime-guarantee.js',
   'public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js','tracking-integration.html','tracking-intelligence.js',
-  'tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os.html','staff-os-refresh.css','gc-staff-mobile-finance-fix-20261120.css','staff-os-v5.html','staff-os-v5.css','gc-staff-ui-refinement-20261019-v4.css','gc-staff-live-workspace-20261019.css','gc-staff-operations-redesign-20261022.css','gc-staff-command-deck-20261023.css','gc-staff-customer-bridge-20261019.js','staff-os-v5.js','staff-os-v5-20261017.js',
+  'tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os.html','staff-os-refresh.css','gc-staff-mobile-finance-fix-20261120.css','staff-os-v5.html','staff-os-entry-loader-20261124.js','staff-os-v5.css','gc-staff-ui-refinement-20261019-v4.css','gc-staff-live-workspace-20261019.css','gc-staff-operations-redesign-20261022.css','gc-staff-command-deck-20261023.css','gc-staff-customer-bridge-20261019.js','staff-os-v5.js','staff-os-v5-20261017.js',
   'staff-os-v5-rescue.js','staff-logistics-intelligence.css','staff-logistics-intelligence.js','staff-mobile-command-dock.css','staff-mobile-command-dock.js',
   'staff-os-pro-20260909.css','staff-os-pro-20260909.js','staff-shell-polish-20260909.css','staff-shell-polish-20260909.js',
   'staff-premium-mobile-20260909.css','staff-premium-mobile-20260909.js','warehouse-offline-sync.js','production-mobile-ux-v2026.css','gc-platform-vnext.js',
@@ -123,6 +123,7 @@ if (!failures) ok('Core public/staff routes are wired')
 
 const bridge = read('production-bridge.js')
 const staff = read('staff-os-v5.html')
+const staffEntryLoader = read('staff-os-entry-loader-20261124.js')
 const staffLoader = read('staff-os-v5-enhancement-loader-20261017.js')
 const publicShell = read('index.html')
 const brandSystem = read('gc-brand-system-20260929.css')
@@ -355,7 +356,7 @@ else ok('Public mobile navigation exposes state and keyboard dismissal');
 if (!staffV5Script.includes('Globall Cloud Staff') || !staffV5Script.includes('document.title') || !read('gc-staff-land-manifest-20261018.js').includes("document.title='مانيفێستی دوبەی — Globall Cloud Staff'")) fail('Staff console document title must track the active view');
 else ok('Staff document title follows the active panel and land manifest');
 
-if (!staff.includes('gc-staff-mobile-elegance-20261106.css?v=3') || !staff.includes('gc-staff-dashboard-final-20261103.css?v=2') || !staff.includes('staff-os-v5-20261017.js?v=20261120-1') || !staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=27') || !staff.includes('<body class="gc-staff-os-shell') || !staffV5EnhancementLoader.includes("'/gc-staff-command-deck-20261023.css?v=20261120-2'")) fail('Staff OS final responsive design layer, cache-busted mobile dock, or scoped shell is missing')
+if (!staff.includes('gc-staff-mobile-elegance-20261106.css?v=3') || !staff.includes('gc-staff-dashboard-final-20261103.css?v=2') || !staff.includes('staff-os-entry-loader-20261124.js?v=1') || !staffEntryLoader.includes("'/staff-os-v5-20261017.js?v=20261124-entryfix-1'") || !staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=27') || !staff.includes('<body class="gc-staff-os-shell') || !staffV5EnhancementLoader.includes("'/gc-staff-command-deck-20261023.css?v=20261120-2'")) fail('Staff OS entry loader, final responsive design layer, cache-busted mobile dock, or scoped shell is missing')
 else ok('Staff OS loads the scoped command-system design layer')
 const staffPreferences = read('gc-staff-preferences-20261003.js')
 if (!staff.includes('gc-staff-preferences-20261003.js?v=3') || !staffPreferences.includes('root.dataset.staffTheme = next') || !staffPreferences.includes('root.dataset.gcTheme = next') || !staffPreferences.includes("current === 'light' ? 'dark' : 'light'")) fail('Staff light/dark toggle must synchronize every theme selector and persist a reversible toggle')
@@ -516,7 +517,7 @@ else ok('Repository validation guards the retired public registration endpoint')
 
 
 
-if (!staff.includes('staff-os-v5-20261017.js?v=20261120-1')) fail('Staff structured cargo editor JavaScript cache-buster is stale')
+if (!staffEntryLoader.includes("'/staff-os-v5-20261017.js?v=20261124-entryfix-1'") || !staffEntryLoader.includes('await loadSdk()') || !staffEntryLoader.includes('await loadScript(CONTROLLER, 12000, null)')) fail('Staff structured cargo editor controller is not loaded through the deterministic entry loader')
 
 const mobileLoader = read('staff-os-v5-enhancement-loader-20261017.js')
 if (!mobileLoader.includes("'/gc-staff-mobile-dock-20261016.js?v=8'")) fail('Staff V5 must load the single mobile dock from its authenticated-shell enhancement loader')
@@ -640,7 +641,7 @@ if (!staffV5Script.includes('data-dubai-alert-open-warehouse') || !staffV5Script
 else ok('Warehouse notification center provides safe empty and warehouse handoff states')
 if (!staffV5Script.includes('notification_status') || !staffV5Script.includes('result.notification?.not_applicable') || !staffV5Script.includes('isDubaiLocation')) fail('Warehouse notification status must remain Dubai-scoped and idempotent')
 else ok('Warehouse notification status remains Dubai-scoped and retry-safe')
-if (!staff.includes('staff-os-v5-20261017.js?v=20261120-1') || !staff.includes('gc-staff-dashboard-final-20261103.css?v=2')) fail('Staff notification center release must use immutable-cache asset URLs')
+if (!staffEntryLoader.includes("'/staff-os-v5-20261017.js?v=20261124-entryfix-1'") || !staff.includes('gc-staff-dashboard-final-20261103.css?v=2')) fail('Staff notification center release must use immutable-cache asset URLs')
 else ok('Staff notification center assets use cache-busted URLs')
 console.log('Invoice finance contract')
 const invoiceSystem = read('gc-staff-invoice-system-20261116.js')
