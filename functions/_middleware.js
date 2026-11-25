@@ -34,7 +34,7 @@ const MOBILE_PRIMARY_NAV = `<style data-gc-mobile-primary-nav="1">
     box-shadow:0 -8px 24px rgba(0,0,0,.22)!important;
     backdrop-filter:blur(18px)!important;
     -webkit-backdrop-filter:blur(18px)!important;
-    z-index:2147483647!important;
+    z-index:9000!important;
   }
   #gcPrimaryMobileNav a{
     position:relative!important;
