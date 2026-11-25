@@ -356,7 +356,7 @@ else ok('Public mobile navigation exposes state and keyboard dismissal');
 if (!staffV5Script.includes('Globall Cloud Staff') || !staffV5Script.includes('document.title') || !read('gc-staff-land-manifest-20261018.js').includes("document.title='مانيفێستی دوبەی — Globall Cloud Staff'")) fail('Staff console document title must track the active view');
 else ok('Staff document title follows the active panel and land manifest');
 
-if (!staff.includes('gc-staff-mobile-elegance-20261106.css?v=3') || !staff.includes('gc-staff-dashboard-final-20261103.css?v=2') || !staff.includes('staff-os-entry-loader-20261124.js?v=2') || !staffEntryLoader.includes("'/staff-os-v5-20261017.js?v=20261124-entryfix-1'") || !staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=27') || !staff.includes('<body class="gc-staff-os-shell') || !staffV5EnhancementLoader.includes("'/gc-staff-command-deck-20261023.css?v=20261120-2'")) fail('Staff OS entry loader, final responsive design layer, cache-busted mobile dock, or scoped shell is missing')
+if (!staff.includes('gc-staff-mobile-elegance-20261106.css?v=3') || !staff.includes('gc-staff-dashboard-final-20261103.css?v=2') || !staff.includes('staff-os-entry-loader-20261124.js?v=3') || !staff.includes('data-gc-staff-entry-loader="1"></script>') || !staffEntryLoader.includes("'/staff-os-v5-20261017.js?v=20261124-entryfix-1'") || !staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=27') || !staff.includes('<body class="gc-staff-os-shell') || !staffV5EnhancementLoader.includes("'/gc-staff-command-deck-20261023.css?v=20261120-2'")) fail('Staff OS entry loader, final responsive design layer, cache-busted mobile dock, or scoped shell is missing')
 else ok('Staff OS loads the scoped command-system design layer')
 const staffPreferences = read('gc-staff-preferences-20261003.js')
 if (!staff.includes('gc-staff-preferences-20261003.js?v=3') || !staffPreferences.includes('root.dataset.staffTheme = next') || !staffPreferences.includes('root.dataset.gcTheme = next') || !staffPreferences.includes("current === 'light' ? 'dark' : 'light'")) fail('Staff light/dark toggle must synchronize every theme selector and persist a reversible toggle')
@@ -517,7 +517,7 @@ else ok('Repository validation guards the retired public registration endpoint')
 
 
 
-if (!staffEntryLoader.includes("'/staff-os-v5-20261017.js?v=20261124-entryfix-1'") || !staffEntryLoader.includes('await loadSdk()') || !staffEntryLoader.includes('await loadScript(CONTROLLER, 12000, null)')) fail('Staff structured cargo editor controller is not loaded through the deterministic entry loader')
+if (!staffEntryLoader.includes("'/staff-os-v5-20261017.js?v=20261124-entryfix-1'") || !staffEntryLoader.includes('await loadSdk()') || !staffEntryLoader.includes('await loadScript(CONTROLLER, 12000, null)') || !staff.includes('staff-os-entry-loader-20261124.js?v=3" defer')) fail('Staff structured cargo editor controller is not loaded through the deterministic deferred entry loader')
 
 const mobileLoader = read('staff-os-v5-enhancement-loader-20261017.js')
 if (!mobileLoader.includes("'/gc-staff-mobile-dock-20261016.js?v=8'")) fail('Staff V5 must load the single mobile dock from its authenticated-shell enhancement loader')
