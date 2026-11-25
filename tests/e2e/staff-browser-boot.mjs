@@ -30,8 +30,8 @@ for (const engine of engines) {
   try {
     for (const target of targets) {
       const context = await browser.newContext({
-        viewport: { width: 390, height: 844 },
-        screen: { width: 390, height: 844 },
+        viewport: { width: 375, height: 812 },
+        screen: { width: 375, height: 812 },
         deviceScaleFactor: 2,
         isMobile: true,
         hasTouch: true,
@@ -102,12 +102,15 @@ for (const engine of engines) {
           barcodeAvailable: typeof window.JsBarcode === 'function',
           entryLoaderRequested: resources.some((url) => url.includes('staff-os-entry-loader-20261124.js')),
           controllerRequested: resources.some((url) => url.includes('staff-os-v5-20261017.js')),
+          watchdogRequested: resources.some((url) => url.includes('staff-os-boot-watchdog-20261124.js')),
+          barcodeRequested: resources.some((url) => url.includes('JsBarcode.all.min.js')),
+          horizontalOverflowPx: Math.max(0, Math.max(document.documentElement.scrollWidth, document.body?.scrollWidth || 0) - document.documentElement.clientWidth),
           qrCodeRequested: resources.some((url) => url.includes('qrcode@1.5.1/build/qrcode.min.js')),
           appText: (root?.innerText || '').slice(0, 700),
         };
       });
 
-      const success = (state.loginVisible || state.dashboardVisible) && state.supabaseAvailable && state.qrCodeAvailable && state.barcodeAvailable;
+      const success = (state.loginVisible || state.dashboardVisible) && state.supabaseAvailable && state.qrCodeAvailable && state.barcodeAvailable && state.entryLoaderRequested && state.controllerRequested && state.watchdogRequested && state.qrCodeRequested && state.barcodeRequested && state.horizontalOverflowPx <= 1 && !navigationError && pageErrors.length === 0 && failedRequests.length === 0 && failedResponses.length === 0;
       console.log(JSON.stringify({
         engine: engine.name,
         target: target.label,

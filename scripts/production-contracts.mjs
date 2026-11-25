@@ -39,7 +39,7 @@ else fail('Service Worker network-first/lifecycle contract is incomplete')
 const required = [
   'index.html','system-status.html','status-page.js','gc-accessibility-mobile-20261021.css','gc-customer-experience-signature-20261017.css','login.html','register.html','customer-access.html','sw.js','gc-production-ui-20260927.css','production-bridge.js','runtime-guard.js','_headers','_redirects','functions/api/health.js','functions/api/ready.js','public-route-bootstrap.js','public-runtime-guarantee.js',
   'public-staff-guard-20260909.js','public-premium-mobile-20260909.css','public-premium-mobile-20260909.js','tracking-integration.html','tracking-intelligence.js',
-  'tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os.html','staff-os-refresh.css','gc-staff-mobile-finance-fix-20261120.css','staff-os-v5.html','staff-os-entry-loader-20261124.js','staff-os-v5.css','gc-staff-ui-refinement-20261019-v4.css','gc-staff-live-workspace-20261019.css','gc-staff-operations-redesign-20261022.css','gc-staff-command-deck-20261023.css','gc-staff-customer-bridge-20261019.js','staff-os-v5.js','staff-os-v5-20261017.js',
+  'tracking-intelligence.css','customer-portal.html','warehouse-os.html','driver-workspace.html','staff-os.html','staff-os-refresh.css','gc-staff-mobile-finance-fix-20261120.css','staff-os-v5.html','staff-os-entry-loader-20261124.js','staff-os-boot-watchdog-20261124.js','staff-os-v5.css','gc-staff-ui-refinement-20261019-v4.css','gc-staff-live-workspace-20261019.css','gc-staff-operations-redesign-20261022.css','gc-staff-command-deck-20261023.css','gc-staff-customer-bridge-20261019.js','staff-os-v5.js','staff-os-v5-20261017.js',
   'staff-os-v5-rescue.js','staff-logistics-intelligence.css','staff-logistics-intelligence.js','staff-mobile-command-dock.css','staff-mobile-command-dock.js',
   'staff-os-pro-20260909.css','staff-os-pro-20260909.js','staff-shell-polish-20260909.css','staff-shell-polish-20260909.js',
   'staff-premium-mobile-20260909.css','staff-premium-mobile-20260909.js','warehouse-offline-sync.js','production-mobile-ux-v2026.css','gc-platform-vnext.js',
@@ -125,6 +125,7 @@ if (!failures) ok('Core public/staff routes are wired')
 const bridge = read('production-bridge.js')
 const staff = read('staff-os-v5.html')
 const staffEntryLoader = read('staff-os-entry-loader-20261124.js')
+const staffBootWatchdog = read('staff-os-boot-watchdog-20261124.js')
 const staffLoader = read('staff-os-v5-enhancement-loader-20261017.js')
 const publicShell = read('index.html')
 const brandSystem = read('gc-brand-system-20260929.css')
@@ -362,6 +363,11 @@ else ok('Staff OS loads the scoped command-system design layer')
 
 if (!staff.includes('<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js" defer data-gc-qrcode="1"></script>') || !staff.includes('<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js" defer data-gc-jsbarcode="1"></script>')) fail('Staff QRCode and barcode libraries must use valid browser bundles and deterministic deferred loading')
 else ok('Staff QRCode and barcode libraries use valid deferred browser bundles')
+if (!staff.includes('<script async src="/staff-os-boot-watchdog-20261124.js?v=1" data-gc-staff-boot-watchdog="1"></script>') ||
+    !staff.includes('gc-visual-quality-20261124.css?v=2') ||
+    !staffBootWatchdog.includes('window.setTimeout(renderRecovery, 16000)') ||
+    !staffBootWatchdog.includes('.gc-entry-actions, .gc-entry-detail')) fail('Staff OS boot watchdog must load independently, be styled and preserve existing recovery UI')
+else ok('Staff OS has an independent 16-second boot recovery watchdog without overwriting useful fallback UI')
 const staffPreferences = read('gc-staff-preferences-20261003.js')
 if (!staff.includes('gc-staff-preferences-20261003.js?v=3') || !staffPreferences.includes('root.dataset.staffTheme = next') || !staffPreferences.includes('root.dataset.gcTheme = next') || !staffPreferences.includes("current === 'light' ? 'dark' : 'light'")) fail('Staff light/dark toggle must synchronize every theme selector and persist a reversible toggle')
 else ok('Staff light/dark toggle synchronizes legacy and current theme selectors')

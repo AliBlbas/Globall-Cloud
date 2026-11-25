@@ -6,7 +6,7 @@
   if (!app) return;
 
   const hasRealStaffApp = () => Boolean(app.querySelector('.gc-shell, .login-card, .login'));
-  const hasRecovery = () => Boolean(app.querySelector('.gc-rescue-error, .gc-blank-state, .gc-boot-watchdog'));
+  const hasRecovery = () => Boolean(app.querySelector('.gc-rescue-error, .gc-blank-state, .gc-boot-watchdog, .gc-entry-actions, .gc-entry-detail'));
 
   const renderRecovery = () => {
     if (hasRealStaffApp() || hasRecovery()) return;
