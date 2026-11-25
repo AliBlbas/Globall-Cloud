@@ -81,6 +81,7 @@ else ok('Security headers are present')
 const headerGuards = [
   ['Supabase Auth and Realtime are allowed by CSP', headers.includes('https://ahslifnthiwfkmaswjno.supabase.co') && headers.includes('wss://ahslifnthiwfkmaswjno.supabase.co')],
   ['Quote submission and route estimation origins are allowed by CSP', headers.includes('https://formsubmit.co') && headers.includes('https://router.project-osrm.org')],
+  ['Cloudflare Web Analytics is allowed by CSP', headers.includes('https://static.cloudflareinsights.com') && headers.includes('https://cloudflareinsights.com')],
   ['WhatsApp links and the CSP form destination are allowed', headers.includes('https://wa.me') && headers.includes("form-action 'self' https://formsubmit.co")],
   ['CSP blocks inline scripts while allowing worker assets', !/script-src[^\n;]*unsafe-inline/.test(headers) && headers.includes("worker-src 'self' blob:")],
   ['Staff consoles are noindex and use private no-store caching', headers.includes('/accounts-console.html\n  X-Robots-Tag: noindex, nofollow, noarchive\n  Cache-Control: private, no-store, max-age=0, must-revalidate') && headers.includes('/staff-os.html\n  X-Robots-Tag: noindex, nofollow, noarchive\n  Cache-Control: private, no-store, max-age=0, must-revalidate')],
