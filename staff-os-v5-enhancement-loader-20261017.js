@@ -11,14 +11,15 @@
     // Keep the command deck as the final staff visual layer after runtime
     // bridges append their compatibility styles.
     '/gc-staff-command-deck-20261023.css?v=20261120-2',
-    '/gc-staff-mobile-finance-fix-20261120.css?v=1'
+    '/gc-staff-mobile-finance-fix-20261120.css?v=1',
+    '/gc-action-center-20261125.css?v=1'
   ];
 
   const enhancementScripts = [
     '/gc-staff-mobile-dock-20261016.js?v=8',
     '/staff-os-v5-shipment-create-fix.js?v=20260912-2',
     '/staff-os-v5-shipment-control-bridge.js?v=20260912-2',
-    '/staff-os-data-health-panel.js?v=20260912-2',
+    '/staff-os-data-health-panel.js?v=20261125-1',
     '/staff-os-v5-integrations.js?v=20260912-2',
     '/staff-os-v5-profile.js?v=20260912-2',
     '/staff-os-production-analytics-bridge.js?v=20260912-2',
