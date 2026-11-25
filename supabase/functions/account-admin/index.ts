@@ -77,6 +77,21 @@ function txt(value: unknown): string | null {
   return str.length ? str : null
 }
 
+function normalizeWhatsappPhone(value: unknown): string | null {
+  const raw = txt(value)
+  if (!raw) return null
+  const compact = raw.replace(/[^\d+]/g, '')
+  if (!/^\+?[1-9]\d{6,14}$/.test(compact)) throw responseError('WhatsApp phone must be an international number (E.164 format).', 400)
+  return compact.startsWith('+') ? compact : '+' + compact
+}
+
+function normalizeWhatsappGroupId(value: unknown): string | null {
+  const raw = txt(value)
+  if (!raw) return null
+  if (raw.length > 200 || /[\u0000-\u0020]/.test(raw)) throw responseError('WhatsApp group ID must contain 1–200 non-space characters.', 400)
+  return raw
+}
+
 function normalizeGcCode(value: unknown): string | null {
   const raw = txt(value)
   if (!raw) return null
@@ -175,7 +190,7 @@ async function logActivity(client: ReturnType<typeof createClient>, staffId: str
 async function listCustomers(client: ReturnType<typeof createClient>) {
   const { data: customers, error } = await client
     .from('customer_directory')
-    .select('id,code,gc_code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at')
+    .select('id,code,gc_code,name,phone,phone2,whatsapp_phone,whatsapp_group_name,whatsapp_group_id,purchase_first_name,purchase_last_name,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at')
     .order('created_at', { ascending: false })
   if (error) throw error
 
@@ -713,11 +728,13 @@ async function upsertCustomer(client: ReturnType<typeof createClient>, payload: 
   const authResult = await createCustomerAuth(client, payload, existing?.auth_user_id ?? null)
   const newlyCreatedAuthUserId = authResult.userId && !existing?.auth_user_id ? authResult.userId : null
   const identity = requestedCode && !existing?.id ? { code: requestedCode, gc_code: requestedCode } : {}
-  const base = { name, email, phone, phone2, city, delivery_location: deliveryLocation, note, manager_staff_id: managerStaffId, is_active: typeof payload.is_active === 'boolean' ? payload.is_active : true, ...identity }
+  const base: JsonRecord = { name, email, phone, phone2, city, delivery_location: deliveryLocation, note, manager_staff_id: managerStaffId, is_active: typeof payload.is_active === 'boolean' ? payload.is_active : true, ...identity }
+  if (Object.prototype.hasOwnProperty.call(payload, 'whatsapp_phone')) base.whatsapp_phone = normalizeWhatsappPhone(payload.whatsapp_phone)
+  if (Object.prototype.hasOwnProperty.call(payload, 'whatsapp_group_id')) base.whatsapp_group_id = normalizeWhatsappGroupId(payload.whatsapp_group_id)
   let saved: any
   try {
     const write = existing?.id ? client.from('customer_directory').update({ ...base, auth_user_id: authResult.userId ?? null }).eq('id', existing.id) : client.from('customer_directory').insert({ ...base, auth_user_id: authResult.userId ?? null })
-    const result = await write.select('id,code,gc_code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
+    const result = await write.select('id,code,gc_code,name,phone,phone2,whatsapp_phone,whatsapp_group_name,whatsapp_group_id,purchase_first_name,purchase_last_name,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
     if (result.error) throw result.error
     saved = result.data
   } catch (error) {
@@ -933,8 +950,13 @@ async function bindCustomerAuth(client: ReturnType<typeof createClient>, payload
 async function updateCustomer(client: ReturnType<typeof createClient>, payload: JsonRecord, actor: { id: string, name: string | null, isSuperAdmin: boolean }) {
   const id = txt(payload.id)
   if (!id) throw responseError('Missing customer id', 400)
-  if (!actor.isSuperAdmin && (txt(payload.email) !== null || txt(payload.password) !== null || payload.gc_code !== undefined || payload.code !== undefined)) {
-    throw responseError('Email, password, and GC code are managed by Super Admin only', 403)
+  if (!actor.isSuperAdmin && (
+    txt(payload.email) !== null || txt(payload.password) !== null ||
+    payload.gc_code !== undefined || payload.code !== undefined ||
+    Object.prototype.hasOwnProperty.call(payload, 'whatsapp_phone') ||
+    Object.prototype.hasOwnProperty.call(payload, 'whatsapp_group_id')
+  )) {
+    throw responseError('Email, password, GC code, and WhatsApp identity are managed by Super Admin only', 403)
   }
   const updates: JsonRecord = {}
   for (const key of ['name', 'email', 'phone', 'phone2', 'city', 'delivery_location', 'note', 'manager_staff_id'] as const) {
@@ -943,6 +965,8 @@ async function updateCustomer(client: ReturnType<typeof createClient>, payload: 
     if (value !== null) updates[key] = value
   }
   if (typeof payload.is_active === 'boolean') updates.is_active = payload.is_active
+  if (actor.isSuperAdmin && Object.prototype.hasOwnProperty.call(payload, 'whatsapp_phone')) updates.whatsapp_phone = normalizeWhatsappPhone(payload.whatsapp_phone)
+  if (actor.isSuperAdmin && Object.prototype.hasOwnProperty.call(payload, 'whatsapp_group_id')) updates.whatsapp_group_id = normalizeWhatsappGroupId(payload.whatsapp_group_id)
   let requestedCode: string | null = null
   if (actor.isSuperAdmin && (payload.gc_code !== undefined || payload.code !== undefined)) {
     requestedCode = normalizeGcCode(payload.gc_code ?? payload.code)
@@ -963,7 +987,14 @@ async function updateCustomer(client: ReturnType<typeof createClient>, payload: 
     const email = txt(payload.email)
     const phone = txt(payload.phone)
     const phone2 = txt(payload.phone2)
-    if (name || phone || phone2) authUpdate.user_metadata = { full_name: name, phone: phone ?? '', phone2: phone2 ?? '', account_kind: 'customer' }
+    const whatsappPhoneWasUpdated = Object.prototype.hasOwnProperty.call(updates, 'whatsapp_phone')
+    if (name || phone || phone2 || whatsappPhoneWasUpdated) {
+      authUpdate.user_metadata = {
+        full_name: name, phone: phone ?? '', phone2: phone2 ?? '',
+        ...(whatsappPhoneWasUpdated ? { whatsapp_phone: String(updates.whatsapp_phone ?? '') } : {}),
+        account_kind: 'customer'
+      }
+    }
     if (email) authUpdate.email = email
     if (phone) authUpdate.phone = phone
     const password = txt(payload.password)
@@ -974,9 +1005,18 @@ async function updateCustomer(client: ReturnType<typeof createClient>, payload: 
     }
   }
 
-  const { data: updated, error } = await client.from('customer_directory').update(updates).eq('id', id).select('id,code,gc_code,name,phone,phone2,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
+  const { data: updated, error } = await client.from('customer_directory').update(updates).eq('id', id).select('id,code,gc_code,name,phone,phone2,whatsapp_phone,whatsapp_group_name,whatsapp_group_id,purchase_first_name,purchase_last_name,email,city,delivery_location,note,auth_user_id,manager_staff_id,is_active,created_at,updated_at').single()
   if (error) throw error
-  await logActivity(client, actor.id, actor.name, 'update_customer_account', id, updates)
+  const auditDetails: JsonRecord = { ...updates }
+  if (Object.prototype.hasOwnProperty.call(auditDetails, 'whatsapp_phone')) {
+    auditDetails.whatsapp_phone_updated = true
+    delete auditDetails.whatsapp_phone
+  }
+  if (Object.prototype.hasOwnProperty.call(auditDetails, 'whatsapp_group_id')) {
+    auditDetails.whatsapp_group_linked = Boolean(auditDetails.whatsapp_group_id)
+    delete auditDetails.whatsapp_group_id
+  }
+  await logActivity(client, actor.id, actor.name, 'update_customer_account', id, auditDetails)
   return canonicalCustomerIdentity(updated)
 }
 
