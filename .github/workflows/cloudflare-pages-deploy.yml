@@ -175,7 +175,7 @@ jobs:
           SUPABASE_PUBLISHABLE_KEY="$key" npm run test:e2e:public
           SUPABASE_PUBLISHABLE_KEY="$key" npm run test:e2e:international
 
-      - name: Install Playwright Chromium for Staff OS browser smoke
+      - name: Install Playwright Chromium and WebKit for Staff OS browser smoke
         if: github.ref == 'refs/heads/Product' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         shell: bash
         run: |
@@ -184,7 +184,7 @@ jobs:
           test -n "$PLAYWRIGHT_BIN"
           PLAYWRIGHT_PACKAGE="$(dirname "$(readlink -f "$PLAYWRIGHT_BIN")")"
           echo "PLAYWRIGHT_PACKAGE=$PLAYWRIGHT_PACKAGE" >> "$GITHUB_ENV"
-          "$PLAYWRIGHT_BIN" install --with-deps chromium
+          "$PLAYWRIGHT_BIN" install --with-deps chromium webkit
 
       - name: Verify Staff OS V5 boots in a mobile browser
         if: github.ref == 'refs/heads/Product' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
