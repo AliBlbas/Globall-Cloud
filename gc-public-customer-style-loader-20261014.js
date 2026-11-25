@@ -10,7 +10,9 @@
     '/gc-live-mobile-v3.css?v=20261017-2',
     '/gc-homepage-elite-20261014.css?v=4',
     '/gc-homepage-signature-20261016.css?v=12',
-    '/gc-visual-quality-20261124.css?v=2'
+    '/gc-visual-quality-20261124.css?v=2',
+    // Last in the public-home cascade: keep route tabs and mobile card labels visible.
+    '/gc-home-mobile-visibility-20261022.css?v=3'
   ];
   const customerStyles = [
     '/gc-customer-workspace-elite-20261014.css?v=23',
