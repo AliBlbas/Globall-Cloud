@@ -21,13 +21,13 @@
             <button class="primary" type="button" id="gcBootRetry">دووبارە بارکردنەوە</button>
             <a href="/management.html">کردنەوەی Staff Gateway</a>
           </div>
-          <p style="font-size:11px;margin-top:14px">ئەگەر ئەم دۆخە دووبارە بووەوە، پەیوەندی ئینتەرنێت و cache ـی براوزەر بپشکنە.</p>
+          <p style="font-size:11px;margin-top:14px">ئەگەر ئەم دۆخە دووبارە بووەوە، پەیوەندی ئینتەرنێت بپشکنە و ئەگەر لە ناو ئەپەوە کرایەوە، لە Safari بکەرەوە.</p>
         </section>
       </main>`;
     app.querySelector('#gcBootRetry')?.addEventListener('click', () => location.reload(), { once: true });
   };
 
-  let timer = window.setTimeout(renderRecovery, 16000);
+  let timer = window.setTimeout(renderRecovery, 14000);
   const observer = new MutationObserver(() => {
     if (hasRealStaffApp() || hasRecovery()) {
       window.clearTimeout(timer);
