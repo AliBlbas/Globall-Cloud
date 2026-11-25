@@ -9,9 +9,12 @@
   const root = document.getElementById('app');
   if (!root) return;
 
+  // Pin browser loading to the SDK's explicit UMD bundle. Keep a second CDN and
+  // the documented package-root URL as fallbacks for restrictive mobile browsers.
   const SDK_SOURCES = [
-    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
-    'https://unpkg.com/@supabase/supabase-js@2'
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js',
+    'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js',
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
   ];
   const CONTROLLER = '/staff-os-v5-20261017.js?v=20261125-whatsapp-1';
   const hasSdk = () => Boolean(window.supabase && typeof window.supabase.createClient === 'function');
@@ -39,7 +42,8 @@
   const render = (mode, message) => {
     if (hasSurface()) return;
     if (mode === 'loading') {
-      root.innerHTML = '<main class="gc-entry-state" dir="rtl"><section class="gc-entry-card"><div class="gc-entry-mark">GC</div><div class="gc-entry-eyebrow">STAFF OPERATING SYSTEM · V5</div><h1>کۆنسۆڵی ستاف بە شێوەیەکی پارێزراو دەکرێتەوە</h1><p>سەرەتا پەیوەندیی پاراستن و پاشان کۆنسۆڵ بار دەکرێت.</p><div class="gc-entry-loader"><i></i><i></i><i></i></div></section></main>';
+      root.innerHTML = '<main class="gc-entry-state" dir="rtl"><section class="gc-entry-card"><div class="gc-entry-mark">GC</div><div class="gc-entry-eyebrow">STAFF OPERATING SYSTEM · V5</div><h1>کۆنسۆڵی ستاف بە شێوەیەکی پارێزراو دەکرێتەوە</h1><p>سەرەتا پەیوەندیی پاراستن و پاشان کۆنسۆڵ بار دەکرێت.</p><p class="gc-entry-step" aria-live="polite">پەیوەندی بە خزمەتگوزاری پاراستن...</p><div class="gc-entry-loader"><i></i><i></i><i></i></div></section></main>';
+      if (message) { const step = root.querySelector('.gc-entry-step'); if (step) step.textContent = String(message).slice(0, 160); }
       return;
     }
     root.innerHTML = '<main class="gc-entry-state" dir="rtl"><section class="gc-entry-card"><div class="gc-entry-mark">GC</div><div class="gc-entry-eyebrow">STAFF OS · RECOVERY</div><h1>کۆنسۆڵی ستاف نەیتوانی باربکرێت</h1><p>پەیوەندیی چوونەژوورەوە یان فایلێکی سەرەکی وەڵامی نەدا. دەتوانیت دووبارە هەوڵ بدەیتەوە.</p><p class="gc-entry-detail" role="alert"></p><div class="gc-entry-actions"><button type="button" id="gcStaffEntryRetry">دووبارە هەوڵدانەوە</button><a href="/management.html">کردنەوەی Staff Gateway</a></div></section></main>';
@@ -102,7 +106,7 @@
     let lastError = null;
     for (const src of SDK_SOURCES) {
       try {
-        await loadScript(src, 10000, hasSdk);
+        await loadScript(src, 7000, hasSdk);
         if (hasSdk()) return;
       } catch (error) {
         lastError = error;
@@ -112,15 +116,27 @@
   };
 
   const boot = async () => {
-    render('loading');
+    render('loading', '١/٣ · بەستەری Supabase ئامادە دەکرێت...');
+    let settled = false;
+    const failSafe = window.setTimeout(() => {
+      if (settled || hasSurface()) return;
+      const message = 'کۆنسۆڵ لە کاتی دیاریکراودا بار نەبوو. براوزەرەکە نوێ بکەرەوە یان لە Safari بکەرەوە.';
+      console.error('[Globall Cloud] Staff entry boot timeout.');
+      render('error', message);
+    }, 40000);
     try {
       await loadSdk();
-      await loadScript(CONTROLLER, 12000, null);
-      const ready = await waitForSurface(18000);
-      if (!ready) throw new Error('کۆنتڕۆڵەری Staff OS بارکرا، بەڵام login یان dashboard دروست نەبوو.');
+      render('loading', '٢/٣ · پەیوەندی بە داتابەیسی پارێزراو دروست دەکرێت...');
+      await loadScript(CONTROLLER, 10000, null);
+      render('loading', '٣/٣ · پەڕەی چوونەژوورەوە ئامادە دەکرێت...');
+      const ready = await waitForSurface(12000);
+      if (!ready) throw new Error('کۆنتڕۆڵەری ستاف بارکرا، بەڵام پەڕەی چوونەژوورەوە دروست نەبوو.');
     } catch (error) {
       console.error('[Globall Cloud] Staff entry boot failed:', error);
       render('error', error && error.message ? error.message : String(error));
+    } finally {
+      settled = true;
+      window.clearTimeout(failSafe);
     }
   };
 
