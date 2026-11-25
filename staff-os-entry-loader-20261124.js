@@ -123,7 +123,7 @@
       const message = 'کۆنسۆڵ لە کاتی دیاریکراودا بار نەبوو. براوزەرەکە نوێ بکەرەوە یان لە Safari بکەرەوە.';
       console.error('[Globall Cloud] Staff entry boot timeout.');
       render('error', message);
-    }, 22000);
+    }, 40000);
     try {
       await loadSdk();
       render('loading', '٢/٣ · پەیوەندی بە داتابەیسی پارێزراو دروست دەکرێت...');
