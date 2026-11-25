@@ -197,7 +197,8 @@
     // The public mobile action dock is canonical; do not load the legacy floating vNext strip.
     loadAsset({tag:'script', src:'/gc-platform-vnext-plus.js?v=20261113-1', attr:'data-gc-vnext-plus-loader'});
     loadAsset({tag:'script', src:'/gc-icon-polish-2026.js?v=20260915-2', attr:'data-gc-icon-polish-2026'});
-    loadAsset({tag:'link', rel:'stylesheet', href:'/gc-command-nav-polish-2026.css?v=20260915-2', attr:'data-gc-command-nav-polish'});
+    // gc-command-nav-polish-2026.css is retired by the edge middleware (410).
+    // Do not request a deliberately removed legacy asset from production pages.
     loadAsset({tag:'script', src:'/gc-runtime-safety-v2026.js?v=20260908-1', attr:'data-gc-runtime-safety-loader'});
     loadAsset({tag:'script', src:'/public-production-safety.js?v=20260908-1', attr:'data-gc-public-production-safety'});
     /* Staff OS V5 owns mobile navigation. Legacy command-dock injection is disabled. */

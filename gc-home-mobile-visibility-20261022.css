@@ -204,3 +204,21 @@
     font-size: 13px !important;
   }
 }
+
+/* Highest-specificity mobile labels: override the old homepage performance layer. */
+#gcApp .gc-transport-studio .gc-studio-tabs .gc-studio-tab > span:nth-of-type(3) > b {
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+  color: #f3f9fc !important;
+  -webkit-text-fill-color: #f3f9fc !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+#gcApp .gc-transport-studio .gc-studio-tabs .gc-studio-tab > span:nth-of-type(3) > small {
+  font-size: 10px !important;
+  line-height: 1.7 !important;
+  color: #b6ccd8 !important;
+  -webkit-text-fill-color: #b6ccd8 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}

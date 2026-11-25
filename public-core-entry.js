@@ -3,13 +3,24 @@
   'use strict';
   const CORE = '/gc-csp-scripts/index-inline-2.js?v=20260913-6';
   const MARK = 'data-gc-public-core-entry';
+  const CORE_PATH = '/gc-csp-scripts/index-inline-2.js';
+
+  const existingCoreScript = () => [...document.scripts].find((node) => {
+    try { return new URL(node.src, location.href).pathname === CORE_PATH; }
+    catch (_) { return false; }
+  });
 
   const loadCore = () => {
     if (window.__gcPublicCoreEntryLoaded || window.route) {
       window.__gcPublicCoreEntryLoaded = true;
       return;
     }
-    if (document.querySelector(`script[${MARK}]`)) return;
+    const existing = existingCoreScript();
+    if (existing || window.__gcPublicCoreLoadRequested || document.querySelector(`script[${MARK}]`)) {
+      window.__gcPublicCoreLoadRequested = true;
+      return;
+    }
+    window.__gcPublicCoreLoadRequested = true;
     const script = document.createElement('script');
     script.src = CORE;
     script.defer = true;
@@ -19,6 +30,7 @@
       window.dispatchEvent(new CustomEvent('gc:public-core-ready'));
     }, { once: true });
     script.addEventListener('error', () => {
+      window.__gcPublicCoreLoadRequested = false;
       window.dispatchEvent(new CustomEvent('gc:public-core-failed'));
     }, { once: true });
     document.head.appendChild(script);

@@ -8,12 +8,20 @@
   const addCoreScript = () => {
     if (coreLoadStarted) return;
     if (typeof window.route === 'function' && typeof window.applyI18n === 'function') return;
-    if (document.querySelector('script[data-gc-core-recovery]')) return;
+    const entryLoader = document.querySelector('script[src*="public-core-entry.js"], script[data-gc-public-core-entry-loader]');
+    const coreAlreadyRequested = [...document.scripts].some((node) => {
+      try { return new URL(node.src, location.href).pathname === '/gc-csp-scripts/index-inline-2.js'; }
+      catch (_) { return false; }
+    });
+    if (entryLoader || coreAlreadyRequested || window.__gcPublicCoreLoadRequested || document.querySelector('script[data-gc-core-recovery]')) return;
     coreLoadStarted = true;
+    window.__gcPublicCoreLoadRequested = true;
     const script = document.createElement('script');
     script.src = CORE;
     script.dataset.gcCoreRecovery = '1';
     script.defer = true;
+    script.addEventListener('load', () => { window.__gcPublicCoreEntryLoaded = true; }, { once: true });
+    script.addEventListener('error', () => { window.__gcPublicCoreLoadRequested = false; }, { once: true });
     document.head.appendChild(script);
   };
 
