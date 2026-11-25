@@ -191,3 +191,9 @@ jobs:
         env:
           GC_SITE_URL: https://globall-cloud.pages.dev
         run: node tests/e2e/staff-browser-boot.mjs
+
+      - name: Verify public homepage labels and route cards at iPhone width
+        if: github.ref == 'refs/heads/Product' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        env:
+          GC_SITE_URL: https://globall-cloud.pages.dev
+        run: node tests/e2e/public-home-mobile.mjs
