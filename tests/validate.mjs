@@ -60,7 +60,7 @@ console.log('Required current production files')
 const required = [
   'index.html', 'system-status.html', 'status-page.js', 'sw.js', '_headers', '_redirects',
   'functions/_middleware.js', 'functions/api/health.js', 'functions/api/ready.js',
-  'staff-os-v5.html', 'staff-os-v5-20261017.js', 'staff-os-v5-enhancement-loader-20261017.js',
+  'staff-os-v5.html', 'staff-os-entry-loader-20261124.js', 'tests/e2e/staff-browser-boot.mjs', 'staff-os-v5-20261017.js', 'staff-os-v5-enhancement-loader-20261017.js',
   'gc-staff-command-deck-20261023.css', 'gc-staff-mobile-dock-20261016.js',
   'gc-staff-land-manifest-20261018.js', 'gc-staff-land-manifest-20261018.css',
   'gc-staff-mobile-finance-fix-20261120.css',
@@ -122,6 +122,7 @@ const surfaceChecks = [
   ['customer root loads the current portal controller', index.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261120-authfix1')],
   ['customer receipt evidence is owner-scoped', customer.includes('warehouse-receipt-evidence') && customer.includes('item.carton_count') && customer.includes('item.photo_taken_at')],
   ['staff shell loads current responsive layers', staff.includes('gc-staff-dashboard-final-20261103.css?v=2') && staff.includes('gc-staff-mobile-elegance-20261106.css?v=3')],
+  ['staff entry loader is deferred and covered by mobile browser smoke', staff.includes('staff-os-entry-loader-20261124.js?v=3" defer') && read('tests/e2e/staff-browser-boot.mjs').includes('loginVisible') && read('tests/e2e/staff-browser-boot.mjs').includes('pageErrors')],
   ['staff command deck is the final loader layer', loader.includes("/gc-staff-command-deck-20261023.css?v=20261120-2") && loader.includes('loadStyle')],
   ['staff auth runtime is injected only through current middleware', middleware.includes('staff-auth-runtime-fix.js') && middleware.includes('STAFF_V5')],
   ['canonical public tracking route is stable and loop-free', routes.includes('/track /track/index.html 200') && routes.includes('/tracking /track/index.html 200') && !routes.includes('/tracking /track 301') && !routes.includes('/tracking-integration.html /track 301')],
