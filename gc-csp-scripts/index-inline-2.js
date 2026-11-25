@@ -3410,30 +3410,48 @@ function setupReveal(){
 
 /* ================= INIT ================= */
 async function init(){
-  const storedLang = await safeGet('lang', false);
-  currentLang = storedLang || 'ku';
+  // Paint the public shell before any network-bound work. The old sequence
+  // awaited the FX/Supabase request before applying translations or routing,
+  // so a slow backend could leave a blank-looking first viewport.
   document.documentElement.lang = currentLang==='ku' ? 'ckb' : 'en';
   document.documentElement.dir = currentLang==='ku' ? 'rtl' : 'ltr';
   setThemeIcon();
-
-  await loadExchangeRate();
-  initQuotePricingUI();
-  await initShipments();
   applyI18n();
-  await updateNavAuthState();
+  initQuotePricingUI();
   setupReveal();
+
   const initialRoute = location.hash.replace('#','');
   const pathRoutes = {'/quote':'request','/request':'request','/dashboard':'portal','/portal':'portal','/services':'services','/about':'about','/contact':'contact'};
-  // Supports real, clickable links from outside the app. The query aliases
-  // keep QR/WhatsApp links compatible with the public tracking page.
   const params = new URLSearchParams(location.search);
   const trackParam = params.get('track') || params.get('id') || params.get('gc');
   const pathRoute = pathRoutes[location.pathname.replace(/\/$/,'')];
+
+  // Navigation is local and immediate; shipment lookup starts after the
+  // tracking view is visible and can fail independently without blocking it.
   route(trackParam ? 'track' : (VALID_ROUTES.includes(initialRoute) ? initialRoute : (pathRoute || 'home')));
   if(trackParam){
-    document.getElementById('trackInput').value = trackParam;
-    doTrackSearch();
+    const trackInput = document.getElementById('trackInput');
+    if(trackInput) trackInput.value = trackParam;
+    void Promise.resolve(doTrackSearch()).catch(()=>{});
   }
+
+  // Restore the saved language asynchronously and repaint only when it differs
+  // from the default Kurdish shell already shown to the visitor.
+  void safeGet('lang', false).then(storedLang=>{
+    const nextLang = storedLang === 'en' ? 'en' : 'ku';
+    if(nextLang !== currentLang){
+      currentLang = nextLang;
+      document.documentElement.lang = nextLang === 'ku' ? 'ckb' : 'en';
+      document.documentElement.dir = nextLang === 'ku' ? 'rtl' : 'ltr';
+      applyI18n();
+    }
+  }).catch(()=>{});
+
+  // Backend hydration is intentionally non-blocking. Each service has its own
+  // failure boundary so FX or shipment latency cannot delay the home screen.
+  void loadExchangeRate().catch(()=>{});
+  void initShipments().catch(()=>{});
+  void updateNavAuthState().catch(()=>{});
 }
 window.addEventListener('hashchange', ()=>{
   const id = location.hash.replace('#','');
