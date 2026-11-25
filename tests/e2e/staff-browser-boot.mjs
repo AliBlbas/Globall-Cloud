@@ -98,13 +98,16 @@ for (const engine of engines) {
           recoveryVisible: Boolean(recovery),
           recoveryDetail: errorDetail?.textContent || '',
           supabaseAvailable: Boolean(window.supabase && typeof window.supabase.createClient === 'function'),
+          qrCodeAvailable: Boolean(window.QRCode && typeof window.QRCode.toCanvas === 'function'),
+          barcodeAvailable: typeof window.JsBarcode === 'function',
           entryLoaderRequested: resources.some((url) => url.includes('staff-os-entry-loader-20261124.js')),
           controllerRequested: resources.some((url) => url.includes('staff-os-v5-20261017.js')),
+          qrCodeRequested: resources.some((url) => url.includes('qrcode@1.5.1/build/qrcode.min.js')),
           appText: (root?.innerText || '').slice(0, 700),
         };
       });
 
-      const success = state.loginVisible || state.dashboardVisible;
+      const success = (state.loginVisible || state.dashboardVisible) && state.supabaseAvailable && state.qrCodeAvailable && state.barcodeAvailable;
       console.log(JSON.stringify({
         engine: engine.name,
         target: target.label,
@@ -146,4 +149,4 @@ if (failures.length) {
   console.error(`Staff OS browser boot failed on ${failures.length} engine/route combination(s).`);
   process.exit(1);
 }
-console.log('PASS Staff OS V5 browser boot in Chromium and WebKit on canonical and short routes.');
+console.log('PASS Staff OS V5 browser boot, Supabase SDK, QRCode and Barcode libraries in Chromium and WebKit.');
