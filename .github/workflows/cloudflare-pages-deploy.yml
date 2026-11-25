@@ -174,3 +174,20 @@ jobs:
           echo "::add-mask::$key"
           SUPABASE_PUBLISHABLE_KEY="$key" npm run test:e2e:public
           SUPABASE_PUBLISHABLE_KEY="$key" npm run test:e2e:international
+
+      - name: Install Playwright Chromium for Staff OS browser smoke
+        if: github.ref == 'refs/heads/Product' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        shell: bash
+        run: |
+          set -euo pipefail
+          PLAYWRIGHT_BIN="$(npx --yes --package=playwright@1.56.1 -c 'command -v playwright')"
+          test -n "$PLAYWRIGHT_BIN"
+          PLAYWRIGHT_PACKAGE="$(dirname "$(readlink -f "$PLAYWRIGHT_BIN")")"
+          echo "PLAYWRIGHT_PACKAGE=$PLAYWRIGHT_PACKAGE" >> "$GITHUB_ENV"
+          "$PLAYWRIGHT_BIN" install --with-deps chromium
+
+      - name: Verify Staff OS V5 boots in a mobile browser
+        if: github.ref == 'refs/heads/Product' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        env:
+          GC_SITE_URL: https://globall-cloud.pages.dev
+        run: node tests/e2e/staff-browser-boot.mjs
