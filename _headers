@@ -59,6 +59,18 @@
   X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: no-store, max-age=0, must-revalidate
 
+/tracking
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/tracking/
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/track/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: no-store, max-age=0, must-revalidate
+
 /tracking-integration
   X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: no-store, max-age=0, must-revalidate
