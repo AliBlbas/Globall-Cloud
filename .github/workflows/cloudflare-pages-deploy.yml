@@ -130,14 +130,14 @@ jobs:
           for attempt in {1..12}; do
             status="$(curl -sS -o /tmp/globall-ready.json -w '%{http_code}' --max-time 12 -H 'Cache-Control: no-cache' "https://globall-cloud.pages.dev/api/ready?verify=$GITHUB_SHA" || true)"
             body="$(cat /tmp/globall-ready.json 2>/dev/null || true)"
-            if [ "$status" = "200" ] && printf '%s' "$body" | grep -q '"status":"ready"'; then
+            if [ "$status" = "200" ] && printf '%s' "$body" | grep -q '"status":"ready"' && printf '%s' "$body" | grep -q "\"commit\":\"$GITHUB_SHA\""; then
               printf '%s\n' "$body"
               exit 0
             fi
-            echo "Readiness attempt $attempt returned HTTP $status"
+            echo "Readiness attempt $attempt has not reached the tested release yet (HTTP $status)."
             sleep 5
           done
-          echo "Production readiness check failed."
+          echo "Production readiness check failed or the tested release is not active."
           printf '%s\n' "$body"
           exit 1
 
@@ -146,15 +146,29 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          body="$(curl -fsS --max-time 15 -H 'Cache-Control: no-cache' "https://globall-cloud.pages.dev/release.json?verify=$GITHUB_SHA")"
-          python3 - "$body" "$GITHUB_SHA" <<'PY'
+          body=""
+          for attempt in {1..12}; do
+            body="$(curl -fsS --max-time 15 -H 'Cache-Control: no-cache' "https://globall-cloud.pages.dev/release.json?verify=$GITHUB_SHA&attempt=$attempt" 2>/dev/null || true)"
+            if python3 - "$body" "$GITHUB_SHA" <<'PY'
           import json, sys
-          body = json.loads(sys.argv[1])
+          try:
+              body = json.loads(sys.argv[1])
+          except Exception:
+              sys.exit(1)
           expected = sys.argv[2]
-          assert body.get('service') == 'globall-cloud', body
-          assert body.get('commit') == expected, body
+          if body.get('service') != 'globall-cloud' or body.get('commit') != expected:
+              sys.exit(1)
           print(json.dumps(body, ensure_ascii=False))
           PY
+            then
+              exit 0
+            fi
+            echo "Live release attempt $attempt has not reached $GITHUB_SHA yet."
+            sleep 5
+          done
+          echo "Production release did not converge to the tested commit."
+          printf '%s\n' "$body"
+          exit 1
 
       - name: Run read-only live public and international smoke tests
         if: github.ref == 'refs/heads/Product' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
