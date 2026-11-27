@@ -450,7 +450,7 @@ async function findReceiptByTracking(req:Request){
  const tracking=String(new URL(req.url).searchParams.get('tracking_number')||'').normalize('NFKC').toUpperCase().replace(/\\s+/g,'').trim();
  if(!/^[A-Z0-9._\\/-]{5,160}$/.test(tracking))throw new Error('Valid tracking number is required');
  const [byBarcode,byTracking,byCarrierTracking]=await Promise.all([
-  admin.from('warehouse_receipts').select('id,batch_code,directory_customer_id,gc_code,barcode,location,received_at,label_metadata,shipment_id').ilike('barcode',tracking).order('received_at',{ascending:false}).limit(10),
+  admin.from('warehouse_receipts').select('id,batch_code,directory_customer_id,gc_code,barcode,location,received_at,label_metadata,shipment_id').eq('barcode',tracking).order('received_at',{ascending:false}).limit(10),
   admin.from('warehouse_receipts').select('id,batch_code,directory_customer_id,gc_code,barcode,location,received_at,label_metadata,shipment_id').contains('label_metadata',{tracking_number:tracking}).order('received_at',{ascending:false}).limit(10),
   admin.from('warehouse_receipts').select('id,batch_code,directory_customer_id,gc_code,barcode,location,received_at,label_metadata,shipment_id').contains('label_metadata',{carrier_tracking_number:tracking}).order('received_at',{ascending:false}).limit(10)
  ]);
