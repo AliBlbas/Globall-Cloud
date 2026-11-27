@@ -368,7 +368,7 @@ const trackingIntake = read('gc-staff-tracking-intake.js');
 if (!staff.includes('<script src="/gc-staff-tracking-intake.js?v=20261127-3" defer data-gc-staff-tracking-intake="1"></script>') ||
     !legacyStaffHtml.includes('gc-staff-tracking-intake.js?v=20261127-3') ||
     !trackingIntake.includes('BrowserMultiFormatReader') ||
-    !trackingIntake.includes('customer_directory') ||
+    !trackingIntake.includes("kind=customer_match") ||
     !trackingIntake.includes('tracking_number=') ||
     !trackingIntake.includes('warehouse-receiving')) fail('Staff tracking barcode intake must scan, find an existing customer, and create an owner-linked warehouse receipt');
 else ok('Staff tracking barcode intake is loaded and customer-first');
