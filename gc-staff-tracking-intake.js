@@ -186,9 +186,16 @@ async function openModal(){
  try{await getClient();const b=String(state.staff.branch||'all').toLowerCase();$('#gcScanLocation').value=b==='china'?'China':b==='erbil'?'Erbil':'Dubai';message('gcScanStatus','تراکینگ سکان بکە؛ پاشان کڕیاری هەبوو بدۆزەرەوە.');saveReady();}
  catch(e){message('gcScanStatus',e.message||'پەیوەندیی ستاف پشتڕاست نەکرایەوە.','bad');}
 }
-function bind(){
+function mountLaunchButton(){
  const actions=$('.top-actions');
- if(actions&&!$('#gcScanOpen')){const b=document.createElement('button');b.id='gcScanOpen';b.type='button';b.className='btn tiny';b.textContent='▦ سکانکردنی تراکینگ';b.addEventListener('click',openModal);const refresh=$('#refreshBtn',actions);actions.insertBefore(b,refresh||null);}
+ if(!actions||$('#gcScanOpen'))return;
+ const b=document.createElement('button');b.id='gcScanOpen';b.type='button';b.className='btn tiny';b.textContent='▦ سکانکردنی تراکینگ';b.addEventListener('click',openModal);
+ const refresh=$('#refreshBtn',actions);actions.insertBefore(b,refresh||null);
+}
+function bind(){
+ mountLaunchButton();
+ const shellObserver=new MutationObserver(()=>mountLaunchButton());
+ shellObserver.observe(document.documentElement,{childList:true,subtree:true});
  $('#gcScanClose')?.addEventListener('click',()=>{$('#gcScanModal').classList.remove('open');stopCamera();});
  $('#gcScanModal')?.addEventListener('click',e=>{if(e.target?.id==='gcScanModal'){$('#gcScanModal').classList.remove('open');stopCamera();}});
  $('#gcScanStart')?.addEventListener('click',startCamera);$('#gcScanStop')?.addEventListener('click',stopCamera);
