@@ -16,7 +16,7 @@
     'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js',
     'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
   ];
-  const CONTROLLER = '/staff-os-v5-20261017.js?v=20261127-tracking-intake-2';
+  const CONTROLLER = '/staff-os-v5-20261017.js?v=20261127-login-first-3';
   const hasSdk = () => Boolean(window.supabase && typeof window.supabase.createClient === 'function');
   const hasSurface = () => Boolean(root.querySelector('.gc-shell, .login, .login-card'));
 
