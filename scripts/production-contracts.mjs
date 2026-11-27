@@ -256,11 +256,13 @@ if (!productionMiddleware.includes("const STAFF_LOGIN = /^\\/staff-login") ||
     !productionMiddleware.includes("new URL('/staff-login', requestUrl)") ||
     !productionMiddleware.includes('if (STAFF_LOGIN.test(path)) continue;') ||
     !isolatedStaffLogin.includes('data-gc-isolated-login="1"') ||
-    !isolatedStaffLogin.includes('staff-login.js?v=20261127-1') ||
+    !isolatedStaffLogin.includes('staff-login.js?v=20261127-2') ||
     !isolatedStaffLoginCss.includes('-webkit-user-select:text!important') ||
     !isolatedStaffLoginCss.includes('-webkit-user-modify:read-write-plaintext-only!important') ||
     !isolatedStaffLoginJs.includes('auth.signInWithPassword') ||
     !isolatedStaffLoginJs.includes('storageKey:STORAGE_KEY') ||
+    !isolatedStaffLoginJs.includes('Do not auto-restore an old session on page load') ||
+    isolatedStaffLoginJs.includes('then(() => restoreSession())') ||
     !isolatedStaffLoginJs.includes('/functions/v1/account-admin/?kind=staff') ||
     !isolatedStaffLoginJs.includes("location.replace('/staff-os-v5?staff_login=success')")) {
   fail('Staff entry must use the isolated native login page and verify the signed-in user through the protected staff directory')
