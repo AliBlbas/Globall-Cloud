@@ -81,6 +81,20 @@ for (const engine of engines) {
         navigationError = String(error?.message || error).slice(0, 800);
       }
 
+      let emptySubmitGuardWorks = false;
+      const authPasswordRequests = [];
+      page.on('request', request => {
+        if (request.url().includes('/auth/v1/token?grant_type=password')) authPasswordRequests.push(request.url());
+      });
+      try {
+        const loginButton = page.locator('#loginBtn');
+        if (await loginButton.isVisible()) {
+          await loginButton.tap({ timeout: 5000 });
+          await page.waitForTimeout(150);
+          const msg = (await page.locator('#loginMsg').textContent().catch(() => '')) || '';
+          emptySubmitGuardWorks = msg.includes('ئیمەیلی') && authPasswordRequests.length === 0;
+        }
+      } catch {}
       let keyboardEntryWorks = false;
       let keyboardEntryError = '';
       try {
@@ -129,7 +143,7 @@ for (const engine of engines) {
         };
       });
 
-      const success = (state.loginVisible || state.dashboardVisible) && (!state.loginVisible || keyboardEntryWorks) && state.supabaseAvailable && state.qrCodeAvailable && state.barcodeAvailable && state.entryLoaderRequested && state.controllerRequested && state.watchdogRequested && state.qrCodeRequested && state.barcodeRequested && state.horizontalOverflowPx <= 1 && !navigationError && pageErrors.length === 0 && failedRequests.length === 0 && failedResponses.length === 0;
+      const success = (state.loginVisible || state.dashboardVisible) && (!state.loginVisible || (keyboardEntryWorks && emptySubmitGuardWorks)) && state.supabaseAvailable && state.qrCodeAvailable && state.barcodeAvailable && state.entryLoaderRequested && state.controllerRequested && state.watchdogRequested && state.qrCodeRequested && state.barcodeRequested && state.horizontalOverflowPx <= 1 && !navigationError && pageErrors.length === 0 && failedRequests.length === 0 && failedResponses.length === 0;
       console.log(JSON.stringify({
         engine: engine.name,
         target: target.label,
@@ -137,6 +151,7 @@ for (const engine of engines) {
         state,
         keyboardEntryWorks,
         keyboardEntryError,
+        emptySubmitGuardWorks,
         navigationError,
         consoleErrors,
         pageErrors,
@@ -151,6 +166,7 @@ for (const engine of engines) {
           state,
           keyboardEntryWorks,
           keyboardEntryError,
+          emptySubmitGuardWorks,
           navigationError,
           consoleErrors,
           pageErrors,
