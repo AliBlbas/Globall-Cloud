@@ -55,7 +55,7 @@ for (const engine of engines) {
       });
       page.on('response', (response) => {
         const url = response.url();
-        if (/staff-os-entry-loader|staff-os-v5-20261017|supabase-js/i.test(url) && response.status() >= 400) {
+        if (/staff-login\.(?:js|css)|staff-os-entry-loader|staff-os-v5-20261017|supabase-js/i.test(url) && response.status() >= 400) {
           failedResponses.push({ url, status: response.status() });
         }
       });
@@ -126,6 +126,9 @@ for (const engine of engines) {
           title: document.title,
           url: location.href,
           loginVisible: Boolean(login && email && password && email.getBoundingClientRect().height > 0),
+          standaloneLogin: Boolean(root?.querySelector('[data-gc-isolated-login="1"]')),
+          staffLoginScriptRequested: resources.some((url) => url.includes('/staff-login.js')),
+          staffLoginStylesRequested: resources.some((url) => url.includes('/staff-login.css')),
           loginEmailAttributes: email ? { name: email.name, inputMode: email.inputMode, autocapitalize: email.autocapitalize, autocomplete: email.autocomplete } : null,
           dashboardVisible: Boolean(dashboard && dashboard.getBoundingClientRect().height > 0),
           recoveryVisible: Boolean(recovery),
@@ -143,7 +146,10 @@ for (const engine of engines) {
         };
       });
 
-      const success = (state.loginVisible || state.dashboardVisible) && (!state.loginVisible || (keyboardEntryWorks && emptySubmitGuardWorks)) && state.supabaseAvailable && state.qrCodeAvailable && state.barcodeAvailable && state.entryLoaderRequested && state.controllerRequested && state.watchdogRequested && state.qrCodeRequested && state.barcodeRequested && state.horizontalOverflowPx <= 1 && !navigationError && pageErrors.length === 0 && failedRequests.length === 0 && failedResponses.length === 0;
+      const requiredAssetsReady = state.standaloneLogin
+        ? state.staffLoginScriptRequested && state.staffLoginStylesRequested
+        : state.qrCodeAvailable && state.barcodeAvailable && state.entryLoaderRequested && state.controllerRequested && state.watchdogRequested && state.qrCodeRequested && state.barcodeRequested;
+      const success = (state.loginVisible || state.dashboardVisible) && (!state.loginVisible || (keyboardEntryWorks && emptySubmitGuardWorks)) && state.supabaseAvailable && requiredAssetsReady && state.horizontalOverflowPx <= 1 && !navigationError && pageErrors.length === 0 && failedRequests.length === 0 && failedResponses.length === 0;
       console.log(JSON.stringify({
         engine: engine.name,
         target: target.label,
