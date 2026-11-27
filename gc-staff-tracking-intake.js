@@ -3,6 +3,7 @@
 const URL='https://ahslifnthiwfkmaswjno.supabase.co';
 const KEY='sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
 const API=URL+'/functions/v1/warehouse-receiving';
+const ACCOUNT=URL+'/functions/v1/account-admin';
 const ROLES=['admin','super_admin','warehouse','warehouse_china','warehouse_uae','warehouse_erbil','operations','delivery'];
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -134,8 +135,8 @@ async function findShipment(tracking){
   box.innerHTML='<strong>چەند Shipment ـی هاوتا بۆ ئەم کڕیارە هەیە؛ یەکێکیان هەڵبژێرە</strong><br><select id="gcScanShipmentChoice" class="gcs-field"><option value="">Shipment هەڵبژێرە...</option>'+owned.map(sh=>'<option value="'+esc(sh.id)+'">'+esc(sh.tracking_id||sh.tracking_number||sh.id)+' · '+esc(sh.origin_key||'')+' → '+esc(sh.dest_key||'')+'</option>').join('')+'</select>';
   $('#gcScanShipmentChoice').addEventListener('change',e=>{state.shipment=owned.find(sh=>String(sh.id)===String(e.target.value))||null;saveReady();});
  }catch(e){
-  state.shipment=null;state.shipmentMismatch=true;box.classList.remove('gcs-hidden');
-  box.textContent='نەتوانرا خاوەنی Shipment پشتڕاست بکرێتەوە: '+(e.message||'هەڵەی نادیار');
+  state.shipment=null;state.shipmentMismatch=false;box.classList.remove('gcs-hidden');
+  box.textContent='پشکنینی Shipment بەردەست نەبوو؛ وەسڵ بە GC code ـی کڕیاری پشتڕاستکراوەوە تۆمار دەکرێت. '+(e.message||'');
  }
 }
 
@@ -148,19 +149,21 @@ async function verifyTracking(){
  setMsg('gcScanStatus',state.duplicate.length?'ئەم تراکینگ ژمارەیە پێشتر تۆمار کراوە.':'تراکینگ ژمارەکە ئامادەیە؛ ئێستا کڕیار هەڵبژێرە.',state.duplicate.length?'bad':'good');saveReady();
 }
 async function searchCustomers(){
- if(state.selected){stopCamera();state.selected=null;state.shipment=null;state.shipmentMismatch=false;state.duplicate=[];state.photo=null;$('#gcScanStart').disabled=true;$('#gcScanTracking').disabled=true;$('#gcScanPhoto').disabled=true;$('#gcScanTracking').value='';$('#gcScanPhoto').value='';$('#gcScanSelected').classList.add('gcs-hidden');saveReady();}
  const q=String($('#gcScanQuery').value||'').trim();if(q.length<2){$('#gcScanCustomers').textContent='لانیکەم دوو پیت یان ژمارە بنووسە.';return;}
- const safe=q.replace(/[,%()]/g,' ').trim(),fields=['gc_code','code','name','phone','phone2','whatsapp_phone'];
+ if(state.selected){stopCamera();state.selected=null;state.shipment=null;state.shipmentMismatch=false;state.duplicate=[];state.photo=null;$('#gcScanStart').disabled=true;$('#gcScanTracking').disabled=true;$('#gcScanPhoto').disabled=true;$('#gcScanTracking').value='';$('#gcScanPhoto').value='';$('#gcScanSelected').classList.add('gcs-hidden');saveReady();}
  $('#gcScanCustomers').innerHTML='<div class="gcs-note">لە کڕیارە هەبووەکاندا دەگەڕێم…</div>';
  try{
-  const cols='id,code,gc_code,name,phone,phone2,whatsapp_phone,email,city,delivery_location,is_active,auth_user_id';
-  const res=await Promise.all(fields.map(f=>state.db.from('customer_directory').select(cols).eq('is_active',true).ilike(f,'%'+safe+'%').limit(8)));
-  res.forEach(x=>{if(x.error)throw x.error;});const byId=new Map();for(const r of res)for(const c of r.data||[])byId.set(String(c.id),c);
-  const customers=[...byId.values()].sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
+  const response=await fetch(ACCOUNT+'/?kind=customer_match&q='+encodeURIComponent(q),{
+   headers:{Authorization:'Bearer '+state.session.access_token,apikey:KEY,Accept:'application/json'},
+   cache:'no-store'
+  });
+  const payload=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(payload.error||payload.message||'گەڕانی کڕیار سەرکەوتوو نەبوو.');
+  const customers=Array.isArray(payload.customers)?payload.customers:(payload.customer?[payload.customer]:[]);
   if(!customers.length){$('#gcScanCustomers').textContent='هیچ کڕیاری چالاک بەم زانیارییە نەدۆزرایەوە.';return;}
   $('#gcScanCustomers').innerHTML=customers.map(c=>'<button class="gcs-customer" type="button" data-customer="'+esc(c.id)+'"><strong>'+esc(c.name||'کڕیاری بێ ناو')+' · <span dir="ltr">'+esc(c.gc_code||c.code||'GC code نییە')+'</span></strong><span dir="ltr">'+esc(c.phone||c.phone2||c.whatsapp_phone||'ژمارەی مۆبایل نییە')+'</span><span>'+esc(c.city||c.delivery_location||'')+'</span></button>').join('');
-  $('#gcScanCustomers').querySelectorAll('[data-customer]').forEach(b=>b.addEventListener('click',()=>{const c=customers.find(x=>String(x.id)===b.dataset.customer);if(c)selectCustomer(c,false);}));
- }catch(e){$('#gcScanCustomers').innerHTML='<div class="gcs-status bad">'+esc(e.message||'گەڕان سەرکەوتوو نەبوو.')+'</div>';}
+  $('#gcScanCustomers').querySelectorAll('[data-customer]').forEach(button=>button.addEventListener('click',()=>{const customer=customers.find(row=>String(row.id)===button.dataset.customer);if(customer)selectCustomer(customer,false);}));
+ }catch(error){$('#gcScanCustomers').innerHTML='<div class="gcs-status bad">'+esc(error.message||'گەڕان سەرکەوتوو نەبوو.')+'</div>';}
 }
 function selectCustomer(c,automatic){
  if(!c||c.is_active!==true){message('gcScanSaveStatus','تەنها کڕیاری چالاک دەتوانرێت هەڵبژێردرێت.','bad');return;}
