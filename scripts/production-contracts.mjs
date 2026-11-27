@@ -365,13 +365,20 @@ if (!staff.includes('<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/buil
 else ok('Staff QRCode and barcode libraries use valid deferred browser bundles')
 
 const trackingIntake = read('gc-staff-tracking-intake.js');
+const trackingCustomerSearch = read('supabase/functions/account-admin/index.ts');
+const trackingReceiptBackend = read('supabase/functions/warehouse-receiving/index.ts');
 if (!staff.includes('<script src="/gc-staff-tracking-intake.js?v=20261127-3" defer data-gc-staff-tracking-intake="1"></script>') ||
     !legacyStaffHtml.includes('gc-staff-tracking-intake.js?v=20261127-3') ||
     !trackingIntake.includes('BrowserMultiFormatReader') ||
     !trackingIntake.includes("kind=customer_match") ||
     !trackingIntake.includes('tracking_number=') ||
-    !trackingIntake.includes('warehouse-receiving')) fail('Staff tracking barcode intake must scan, find an existing customer, and create an owner-linked warehouse receipt');
-else ok('Staff tracking barcode intake is loaded and customer-first');
+    !trackingIntake.includes('warehouse-receiving') ||
+    !trackingCustomerSearch.includes("kind === 'customer_match' && canReadOperations") ||
+    !trackingCustomerSearch.includes('searchCustomerDirectory(serviceClient, query)') ||
+    !trackingCustomerSearch.includes(".eq('is_active', true)") ||
+    !trackingReceiptBackend.includes('findReceiptByTracking') ||
+    !trackingReceiptBackend.includes(".eq('barcode',tracking)")) fail('Staff tracking barcode intake must scan, search active existing customers through the protected Staff API, prevent duplicate receipts, and link the warehouse receipt');
+else ok('Staff tracking barcode intake is loaded with protected customer-first lookup and duplicate-safe receipt linking');
 const staffVisualQuality = read('gc-visual-quality-20261124.css');
 if (!staff.includes('<script async src="/staff-os-boot-watchdog-20261124.js?v=2" data-gc-staff-boot-watchdog="1"></script>') ||
     !staffVisualQuality.includes('.gc-boot-watchdog-actions') ||
