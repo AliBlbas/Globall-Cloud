@@ -44,20 +44,6 @@
   const openConsole = () => {
     location.replace('/staff-os-v5?staff_login=success');
   };
-  const restoreSession = async () => {
-    const { data, error } = await client.auth.getSession();
-    if (error) throw error;
-    if (!data?.session) return false;
-    try { await verifyStaff(data.session); }
-    catch (error) {
-      try { await client.auth.signOut({ scope:'local' }); } catch {}
-      show(error.message || 'هەژماری پێشووتر دەستگەیشتنی Staff نییە.');
-      return false;
-    }
-    openConsole();
-    return true;
-  };
-
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (busy) return;
@@ -87,7 +73,10 @@
     }
   });
 
+  // Do not auto-restore an old session on page load. The old V5 entry used to
+  // redirect immediately to its legacy login when a stale browser session existed.
+  // Keep the isolated login visible until the user explicitly submits credentials.
   waitForSdk()
-    .then(() => restoreSession())
+    .then(() => show('ئامادەی چوونەژوورەوە. ئیمەیل و وشەی نهێنی بنووسە.'))
     .catch(error => show(error.message || 'Supabase ئامادە نییە.'));
 })();
