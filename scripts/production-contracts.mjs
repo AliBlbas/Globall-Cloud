@@ -104,7 +104,7 @@ else ok('Short Staff routes internally rewrite to the V5 Staff OS entry');
 const legacyStaffHtml = read('staff-os.html')
 const staffHealthPanel = read('staff-os-data-health-panel.js');
 const staffHealthFunction = read('supabase/functions/staff-data-health/index.ts');
-if (!legacyStaffHtml.includes('<script src="/staff-os-data-health-panel.js?v=20261028-1" defer></script>') || !staffHealthPanel.includes("/functions/v1/staff-data-health") || !staffHealthPanel.includes('data-gc-health-card') || !staffHealthFunction.includes("req.method!=='GET'") || !staffHealthFunction.includes('Staff permission required')) fail('staff data-health panel must be loaded and backed by a read-only role-protected endpoint');
+if (!legacyStaffHtml.includes('<script src="/staff-os-data-health-panel.js?v=20261028-1" defer></script>') || !staffHealthPanel.includes("/functions/v1/staff-data-health") || !staffHealthPanel.includes('data-gc-action-center') || !/req\.method\s*!==?\s*['"]GET['"]/.test(staffHealthFunction) || !staffHealthFunction.includes('Staff permission required')) fail('staff data-health panel must be loaded and backed by a read-only role-protected endpoint');
 else ok('Staff Data Health is active with a read-only, role-protected backend');
 const retiredLegacyAssets = ["accounts-console-script.js","staff-os-enhancements.js","staff-os-enhancements-v2.js","staff-os-production.js","staff-os-production-layer.js","staff-os-production-fix.js","staff-os-ultimate-control.js","staff-os-ultimate-fix.js","staff-os-v2-compat.js","staff-os-v5-enhancement-loader.js","staff-mobile-final-polish-20260919.css","staff-mobile-smart-enhancement-20260919.css","staff-mobile-smart-enhancement-20260919.js","staff-mobile-ultimate-20260919.css","staff-mobile-ultimate-20260919.js","gc-staff-ui-refinement-20261019-v2.css","gc-staff-ui-refinement-20261019-v3.css","gc-customer-dashboard-polish-20260929.css","gc-customer-dashboard-polish-20260929.js","gc-customer-dashboard-v2-20260929.css","gc-customer-dashboard-v2-20260929.js","gc-command-nav-polish-2026.css"];
 if (!productionMiddleware.includes('const RETIRED_LEGACY_ASSETS = new Set([') || !productionMiddleware.includes('RETIRED_LEGACY_ASSETS.has(requestPath.slice(1))') || !productionMiddleware.includes('status:410') || !productionMiddleware.includes('no-store, max-age=0, must-revalidate') || !retiredLegacyAssets.every((asset) => productionMiddleware.includes(`'${asset}'`))) fail('retired legacy assets must return non-cacheable 410 responses');
@@ -363,11 +363,20 @@ else ok('Staff OS loads the scoped command-system design layer')
 
 if (!staff.includes('<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js" defer data-gc-qrcode="1"></script>') || !staff.includes('<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js" defer data-gc-jsbarcode="1"></script>')) fail('Staff QRCode and barcode libraries must use valid browser bundles and deterministic deferred loading')
 else ok('Staff QRCode and barcode libraries use valid deferred browser bundles')
+
+const trackingIntake = read('gc-staff-tracking-intake.js');
+if (!staff.includes('<script src="/gc-staff-tracking-intake.js?v=20261127-2" defer data-gc-staff-tracking-intake="1"></script>') ||
+    !legacyStaffHtml.includes('gc-staff-tracking-intake.js?v=20261127-2') ||
+    !trackingIntake.includes('BrowserMultiFormatReader') ||
+    !trackingIntake.includes('customer_directory') ||
+    !trackingIntake.includes('tracking_number=') ||
+    !trackingIntake.includes('warehouse-receiving')) fail('Staff tracking barcode intake must scan, find an existing customer, and create an owner-linked warehouse receipt');
+else ok('Staff tracking barcode intake is loaded and customer-first');
 if (!staff.includes('<script async src="/staff-os-boot-watchdog-20261124.js?v=2" data-gc-staff-boot-watchdog="1"></script>') ||
     !staff.includes('gc-visual-quality-20261124.css?v=2') ||
-    !staffBootWatchdog.includes('window.setTimeout(renderRecovery, 16000)') ||
-    !staffBootWatchdog.includes('.gc-entry-actions, .gc-entry-detail')) fail('Staff OS boot watchdog must load independently, be styled and preserve existing recovery UI')
-else ok('Staff OS has an independent 16-second boot recovery watchdog without overwriting useful fallback UI')
+    !staffBootWatchdog.includes('window.setTimeout(renderRecovery, 14000)') ||
+    !staffBootWatchdog.includes('.gc-boot-watchdog-actions')) fail('Staff OS boot watchdog must load independently, be styled and preserve existing recovery UI')
+else ok('Staff OS has an independent 14-second boot recovery watchdog without overwriting useful fallback UI')
 const staffPreferences = read('gc-staff-preferences-20261003.js')
 if (!staff.includes('gc-staff-preferences-20261003.js?v=3') || !staffPreferences.includes('root.dataset.staffTheme = next') || !staffPreferences.includes('root.dataset.gcTheme = next') || !staffPreferences.includes("current === 'light' ? 'dark' : 'light'")) fail('Staff light/dark toggle must synchronize every theme selector and persist a reversible toggle')
 else ok('Staff light/dark toggle synchronizes legacy and current theme selectors')
@@ -527,7 +536,7 @@ else ok('Repository validation guards the retired public registration endpoint')
 
 
 
-if (!staffEntryLoader.includes("'/staff-os-v5-20261017.js?v=20261127-customer-first-scan-1'") || !staffEntryLoader.includes('await loadSdk()') || !staffEntryLoader.includes('await loadScript(CONTROLLER, 12000, null)') || !staff.includes('staff-os-entry-loader-20261124.js?v=6" defer')) fail('Staff structured cargo editor controller is not loaded through the deterministic deferred entry loader')
+if (!staffEntryLoader.includes("'/staff-os-v5-20261017.js?v=20261127-customer-first-scan-1'") || !staffEntryLoader.includes('await loadSdk()') || !staffEntryLoader.includes('await loadScript(CONTROLLER, 10000, null)') || !staff.includes('staff-os-entry-loader-20261124.js?v=6" defer')) fail('Staff structured cargo editor controller is not loaded through the deterministic deferred entry loader')
 
 const mobileLoader = read('staff-os-v5-enhancement-loader-20261017.js')
 if (!mobileLoader.includes("'/gc-staff-mobile-dock-20261016.js?v=8'")) fail('Staff V5 must load the single mobile dock from its authenticated-shell enhancement loader')
