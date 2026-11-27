@@ -249,6 +249,24 @@ if (!shopAuthMigration.includes('private.is_real_authenticated_session()') ||
   ok('Authenticated shop order RPC rejects anonymous sessions and duplicate stock reservation lines')
 }
 
+const isolatedStaffLogin = read('staff-login.html')
+const isolatedStaffLoginCss = read('staff-login.css')
+const isolatedStaffLoginJs = read('staff-login.js')
+if (!productionMiddleware.includes("const STAFF_LOGIN = /^\\/staff-login") ||
+    !productionMiddleware.includes("new URL('/staff-login', requestUrl)") ||
+    !productionMiddleware.includes('if (STAFF_LOGIN.test(path)) continue;') ||
+    !isolatedStaffLogin.includes('data-gc-isolated-login="1"') ||
+    !isolatedStaffLogin.includes('staff-login.js?v=20261127-1') ||
+    !isolatedStaffLoginCss.includes('-webkit-user-select:text!important') ||
+    !isolatedStaffLoginCss.includes('-webkit-user-modify:read-write-plaintext-only!important') ||
+    !isolatedStaffLoginJs.includes('auth.signInWithPassword') ||
+    !isolatedStaffLoginJs.includes('storageKey:STORAGE_KEY') ||
+    !isolatedStaffLoginJs.includes('/functions/v1/account-admin/?kind=staff') ||
+    !isolatedStaffLoginJs.includes("location.replace('/staff-os-v5?staff_login=success')")) {
+  fail('Staff entry must use the isolated native login page and verify the signed-in user through the protected staff directory')
+} else {
+  ok('Staff entry uses isolated native inputs and redirects only after protected Staff identity verification')
+}
 const staffV5Script = read('staff-os-v5-20261017.js')
 if (!staffV5Script.includes('login-hint') || !staffV5Script.includes('هەژماری چالاکی Staff') || !staffV5Script.includes('invalid login credentials') || !staffV5Script.includes('if (!email)')) fail('Staff login must explain example email and show actionable authentication errors');
 else ok('Staff login clarifies example email and surfaces actionable Auth errors');
