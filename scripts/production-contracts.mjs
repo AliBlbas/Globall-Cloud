@@ -99,8 +99,8 @@ const productionMiddleware = read('functions/_middleware.js');
 const staffV5Matcher = productionMiddleware.split('\n').find((line) => line.startsWith('const STAFF_V5 = ')) || '';
 if (!staffV5Matcher.includes('staff-os-v5') || staffV5Matcher.includes('staff|') || staffV5Matcher.includes('staff-os|')) fail('V5-only middleware route scope is incorrect');
 else ok('V5 middleware assets are isolated to V5 routes');
-if (!productionMiddleware.includes("if (['/staff', '/staff/', '/staff-portal', '/staff-portal/', '/staff-portal.html'].includes(requestPath))") || !productionMiddleware.includes("new URL('/staff-os-v5', requestUrl)") || !productionMiddleware.includes("pageRequest = new Request(destination.toString(), context.request)") || !productionMiddleware.includes('destination.search = requestUrl.search')) fail('short Staff routes must internally rewrite in the Pages middleware');
-else ok('Short Staff routes internally rewrite to the V5 Staff OS entry');
+if (!productionMiddleware.includes("if (['/staff', '/staff/', '/staff-portal', '/staff-portal/', '/staff-portal.html'].includes(requestPath) || STAFF_LOGIN.test(requestPath))") || !productionMiddleware.includes("new URL('/staff-login', requestUrl)") || !productionMiddleware.includes("path = '/staff-login.html'") || !productionMiddleware.includes("pageRequest = new Request(destination.toString(), context.request)") || !productionMiddleware.includes('destination.search = requestUrl.search') || !productionMiddleware.includes('if (STAFF_LOGIN.test(path)) continue;')) fail('short Staff routes must internally rewrite to the standalone native login');
+else ok('Short Staff routes internally rewrite to the standalone mobile login before the V5 console');
 const legacyStaffHtml = read('staff-os.html')
 const staffHealthPanel = read('staff-os-data-health-panel.js');
 const staffHealthFunction = read('supabase/functions/staff-data-health/index.ts');
