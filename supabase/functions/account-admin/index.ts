@@ -1187,6 +1187,47 @@ async function createReceipt(client: ReturnType<typeof createClient>, payload: J
   return { receipt, customer, uploaded_urls: receipt.photos || [], notification_created: notificationCreated }
 }
 
+
+async function searchCustomerDirectory(client: ReturnType<typeof createClient>, rawQuery: unknown) {
+  const raw = txt(rawQuery)
+  if (!raw) return []
+  const query = raw.normalize('NFKC').replace(/\s+/g, ' ').slice(0, 80)
+  if (query.length < 2) return []
+  const escaped = query.replace(/[\\%_]/g, '\\Deno.serve(async (req) => {')
+  const pattern = '%' + escaped + '%'
+  const columns = 'id,code,gc_code,normalized_gc_code,name,phone,phone2,whatsapp_phone,city,delivery_location,is_active,auth_user_id'
+  const fields = ['name', 'code', 'gc_code', 'normalized_gc_code', 'phone', 'phone2', 'whatsapp_phone']
+  const results = await Promise.all(fields.map((field) =>
+    client.from('customer_directory').select(columns).eq('is_active', true).ilike(field, pattern).limit(8)
+  ))
+  const found = new Map<string, any>()
+  for (const result of results) {
+    if (result.error) throw result.error
+    for (const row of result.data || []) found.set(String((row as any).id), canonicalCustomerIdentity(row as any))
+  }
+  return [...found.values()].slice(0, 12)
+}
+
+async function listActiveCustomerShipments(client: ReturnType<typeof createClient>, customer: Record<string, any>) {
+  const customerId = String(customer.id || '')
+  if (!customerId) return []
+  const code = normalizeGcCode(customer.gc_code ?? customer.code)
+  let query = client.from('shipments')
+    .select('id,tracking_id,tracking_number,created_at,status,operational_status,origin_key,dest_key,external_reference,eta')
+    .is('archived_at', null)
+    .order('created_at', { ascending: false })
+    .limit(40)
+  if (code) query = query.or('directory_customer_id.eq.' + customerId + ',customer_gc_code.eq.' + code)
+  else query = query.eq('directory_customer_id', customerId)
+  const result = await query
+  if (result.error) throw result.error
+  const terminal = new Set(['delivered', 'completed', 'cancelled', 'archived', 'void'])
+  return (result.data || []).filter((row: any) => {
+    const status = String(row.operational_status || row.status || '').toLowerCase()
+    return !terminal.has(status)
+  })
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(req) })
   try {
@@ -1196,7 +1237,14 @@ Deno.serve(async (req) => {
     if (req.method === 'GET') {
       const kind = normalizeKind(url.searchParams.get('kind'))
       if (kind === 'receipt' && canReadOperations) return json(await listReceipts(serviceClient), {}, req)
-      if (kind === 'customer_match' && canReadOperations) { const code = normalizeGcCode(url.searchParams.get('code')); if (!code) return json({ customer: null, error: 'Invalid GC code' }, { status: 400 }, req); return json({ customer: await lookupCustomer(serviceClient, { customer_code: code }), normalized_code: code }, {}, req) }
+      if (kind === 'customer_match' && canReadOperations) {
+        const query = txt(url.searchParams.get('q') || url.searchParams.get('code'))
+        if (!query || query.length < 2) return json({ customer: null, customers: [], shipments: [], error: 'Enter at least 2 characters' }, { status: 400 }, req)
+        const customers = await searchCustomerDirectory(serviceClient, query)
+        const customer = customers.length === 1 ? customers[0] : null
+        const shipments = customer ? await listActiveCustomerShipments(serviceClient, customer) : []
+        return json({ customer, customers, shipments, query }, {}, req)
+      }
       if (kind === 'task' && canReadOperations) return json(await listTasks(serviceClient, { id: staffRow.id, role: String(staffRow.role || ''), branch: staffRow.branch }), {}, req)
       if (kind === 'finance' && canRead) return json(await listFinance(serviceClient), {}, req)
       if (kind === 'pricing' && canRead) return json(await listPricing(serviceClient), {}, req)
