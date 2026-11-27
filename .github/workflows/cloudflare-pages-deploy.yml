@@ -198,6 +198,10 @@ jobs:
           test -n "$PLAYWRIGHT_BIN"
           PLAYWRIGHT_PACKAGE="$(dirname "$(readlink -f "$PLAYWRIGHT_BIN")")"
           echo "PLAYWRIGHT_PACKAGE=$PLAYWRIGHT_PACKAGE" >> "$GITHUB_ENV"
+          # The hosted Ubuntu image may include a Microsoft apt feed that returns 403.
+          # It is unrelated to the Node/Pages build; remove only this optional feed
+          # before Playwright installs its Ubuntu browser runtime dependencies.
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list /etc/apt/sources.list.d/microsoft-prod.sources
           "$PLAYWRIGHT_BIN" install --with-deps chromium webkit
 
       - name: Verify Staff OS V5 boots in a mobile browser
