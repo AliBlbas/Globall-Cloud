@@ -81,6 +81,24 @@ for (const engine of engines) {
         navigationError = String(error?.message || error).slice(0, 800);
       }
 
+      let keyboardEntryWorks = false;
+      let keyboardEntryError = '';
+      try {
+        const emailField = page.locator('#loginEmail');
+        const passwordField = page.locator('#loginPassword');
+        if (await emailField.isVisible() && await passwordField.isVisible()) {
+          await emailField.tap({ timeout: 5000 });
+          await page.keyboard.type('ali.staff.test@example.invalid', { delay: 4 });
+          await passwordField.tap({ timeout: 5000 });
+          await page.keyboard.type('GC-Test-Keyboard-2026!', { delay: 4 });
+          keyboardEntryWorks =
+            await emailField.inputValue() === 'ali.staff.test@example.invalid' &&
+            await passwordField.inputValue() === 'GC-Test-Keyboard-2026!';
+        }
+      } catch (error) {
+        keyboardEntryError = String(error?.message || error).slice(0, 500);
+      }
+
       const state = await page.evaluate(() => {
         const root = document.querySelector('#app');
         const login = root?.querySelector('.login');
@@ -94,6 +112,7 @@ for (const engine of engines) {
           title: document.title,
           url: location.href,
           loginVisible: Boolean(login && email && password && email.getBoundingClientRect().height > 0),
+          loginEmailAttributes: email ? { name: email.name, inputMode: email.inputMode, autocapitalize: email.autocapitalize, autocomplete: email.autocomplete } : null,
           dashboardVisible: Boolean(dashboard && dashboard.getBoundingClientRect().height > 0),
           recoveryVisible: Boolean(recovery),
           recoveryDetail: errorDetail?.textContent || '',
@@ -110,12 +129,14 @@ for (const engine of engines) {
         };
       });
 
-      const success = (state.loginVisible || state.dashboardVisible) && state.supabaseAvailable && state.qrCodeAvailable && state.barcodeAvailable && state.entryLoaderRequested && state.controllerRequested && state.watchdogRequested && state.qrCodeRequested && state.barcodeRequested && state.horizontalOverflowPx <= 1 && !navigationError && pageErrors.length === 0 && failedRequests.length === 0 && failedResponses.length === 0;
+      const success = (state.loginVisible || state.dashboardVisible) && (!state.loginVisible || keyboardEntryWorks) && state.supabaseAvailable && state.qrCodeAvailable && state.barcodeAvailable && state.entryLoaderRequested && state.controllerRequested && state.watchdogRequested && state.qrCodeRequested && state.barcodeRequested && state.horizontalOverflowPx <= 1 && !navigationError && pageErrors.length === 0 && failedRequests.length === 0 && failedResponses.length === 0;
       console.log(JSON.stringify({
         engine: engine.name,
         target: target.label,
         success,
         state,
+        keyboardEntryWorks,
+        keyboardEntryError,
         navigationError,
         consoleErrors,
         pageErrors,
@@ -128,6 +149,8 @@ for (const engine of engines) {
           engine: engine.name,
           target: target.label,
           state,
+          keyboardEntryWorks,
+          keyboardEntryError,
           navigationError,
           consoleErrors,
           pageErrors,
