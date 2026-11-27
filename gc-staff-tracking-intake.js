@@ -223,6 +223,7 @@ async function openModal(){
  try{await getClient();const b=String(state.staff.branch||'all').toLowerCase();$('#gcScanLocation').value=b==='china'?'China':b==='erbil'?'Erbil':'Dubai';$('#gcScanStart').disabled=true;$('#gcScanTracking').disabled=true;$('#gcScanPhoto').disabled=true;message('gcScanStatus','سەرەتا لە بەشی یەکەم کڕیاری هەبوو بدۆزەوە و هەڵیبژێرە؛ پاشان سکانکردن چالاک دەبێت.');saveReady();}
  catch(e){message('gcScanStatus',e.message||'پەیوەندیی ستاف پشتڕاست نەکرایەوە.','bad');}
 }
+window.gcOpenTrackingIntake = openModal;
 function mountLaunchButton(){
  const actions=$('.top-actions');
  if(!actions||$('#gcScanOpen'))return;
