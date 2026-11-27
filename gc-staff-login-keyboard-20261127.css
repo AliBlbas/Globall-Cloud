@@ -78,3 +78,16 @@ html body.gc-staff-os-shell.gc-staff-page #app > .login input#mfaCode {
   html body.gc-staff-os-shell.gc-staff-page #app > .login { padding:12px 12px max(28px,env(safe-area-inset-bottom))!important; }
   html body.gc-staff-os-shell.gc-staff-page #app > .login .login-card { width:min(460px,100%)!important; }
 }
+
+/* Login guidance: distinguish the example email from a real Staff credential. */
+html body.gc-staff-os-shell.gc-staff-page #app > .login .login-hint{
+  margin:10px 0 12px!important;padding:10px 12px!important;
+  border:1px solid #cde5e9!important;border-radius:12px!important;
+  background:#f0fafb!important;color:#426675!important;
+  font:600 12px/1.9 "Vazirmatn",system-ui,sans-serif!important;
+  direction:rtl!important;text-align:right!important;
+}
+html body.gc-staff-os-shell.gc-staff-page #app > .login .login-msg{
+  min-height:24px!important;line-height:1.9!important;overflow-wrap:anywhere!important;
+}
+html body.gc-staff-os-shell.gc-staff-page #app > .login #loginBtn:disabled{opacity:.7!important;cursor:wait!important}
