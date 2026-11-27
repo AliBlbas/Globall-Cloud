@@ -127,6 +127,7 @@ for (const engine of engines) {
           url: location.href,
           loginVisible: Boolean(login && email && password && email.getBoundingClientRect().height > 0),
           standaloneLogin: Boolean(root?.querySelector('[data-gc-isolated-login="1"]')),
+          stayedOnStandaloneRoute: Boolean(root?.querySelector('[data-gc-isolated-login="1"]')) ? location.pathname === '/staff' : true,
           staffLoginScriptRequested: resources.some((url) => url.includes('/staff-login.js')),
           staffLoginStylesRequested: resources.some((url) => url.includes('/staff-login.css')),
           loginEmailAttributes: email ? { name: email.name, inputMode: email.inputMode, autocapitalize: email.autocapitalize, autocomplete: email.autocomplete } : null,
@@ -149,7 +150,7 @@ for (const engine of engines) {
       const requiredAssetsReady = state.standaloneLogin
         ? state.staffLoginScriptRequested && state.staffLoginStylesRequested
         : state.qrCodeAvailable && state.barcodeAvailable && state.entryLoaderRequested && state.controllerRequested && state.watchdogRequested && state.qrCodeRequested && state.barcodeRequested;
-      const success = (state.loginVisible || state.dashboardVisible) && (!state.loginVisible || (keyboardEntryWorks && emptySubmitGuardWorks)) && state.supabaseAvailable && requiredAssetsReady && state.horizontalOverflowPx <= 1 && !navigationError && pageErrors.length === 0 && failedRequests.length === 0 && failedResponses.length === 0;
+      const success = (state.loginVisible || state.dashboardVisible) && (!state.loginVisible || (keyboardEntryWorks && emptySubmitGuardWorks && state.stayedOnStandaloneRoute)) && state.supabaseAvailable && requiredAssetsReady && state.horizontalOverflowPx <= 1 && !navigationError && pageErrors.length === 0 && failedRequests.length === 0 && failedResponses.length === 0;
       console.log(JSON.stringify({
         engine: engine.name,
         target: target.label,
