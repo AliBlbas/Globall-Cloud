@@ -444,6 +444,29 @@ const stage=stageForLocation(location);const cartonCount=totalPackages!=null?tot
  }catch{}
  const securedReceipt={...receiptWithCartons,photos:securedPhotos};
  return{receipt:securedReceipt,customer:{id:customer.id,code:customer.gc_code||customer.code,name:customer.name,phone:customer.whatsapp_phone||customer.phone||customer.phone2,account_linked:Boolean(customer.auth_user_id)},chain,whatsapp_message:whatsappMessage,notification,duplicate:false}}
+
+async function findReceiptByTracking(req:Request){
+ const{admin,staff}=await actor(req);
+ const tracking=String(new URL(req.url).searchParams.get('tracking_number')||'').normalize('NFKC').toUpperCase().replace(/\\s+/g,'').trim();
+ if(!/^[A-Z0-9._\\/-]{5,160}$/.test(tracking))throw new Error('Valid tracking number is required');
+ const [byBarcode,byTracking,byCarrierTracking]=await Promise.all([
+  admin.from('warehouse_receipts').select('id,batch_code,directory_customer_id,gc_code,barcode,location,received_at,label_metadata,shipment_id').ilike('barcode',tracking).order('received_at',{ascending:false}).limit(10),
+  admin.from('warehouse_receipts').select('id,batch_code,directory_customer_id,gc_code,barcode,location,received_at,label_metadata,shipment_id').contains('label_metadata',{tracking_number:tracking}).order('received_at',{ascending:false}).limit(10),
+  admin.from('warehouse_receipts').select('id,batch_code,directory_customer_id,gc_code,barcode,location,received_at,label_metadata,shipment_id').contains('label_metadata',{carrier_tracking_number:tracking}).order('received_at',{ascending:false}).limit(10)
+ ]);
+ for(const result of [byBarcode,byTracking,byCarrierTracking])if(result.error)throw result.error;
+ const unique=new Map<string,Record<string,any>>();
+ for(const result of [byBarcode,byTracking,byCarrierTracking])for(const row of result.data||[])unique.set(String(row.id),row);
+ const visible=[...unique.values()].filter(row=>locationAllowed(staff,String(row.location||'')));
+ const ids=[...new Set(visible.map(row=>String(row.directory_customer_id||'')).filter(Boolean))];
+ const customerMap=new Map<string,Record<string,any>>();
+ if(ids.length){
+  const customers=await admin.from('customer_directory').select('id,name,code,gc_code,phone,phone2,is_active').in('id',ids);
+  if(customers.error)throw customers.error;
+  for(const customer of customers.data||[])customerMap.set(String(customer.id),customer);
+ }
+ return{items:visible.map(row=>({...row,customer:customerMap.get(String(row.directory_customer_id||''))||null}))};
+}
 async function listReceipts(req:Request){
  const{admin,staff}=await actor(req);
  const{data,error}=await admin.from('warehouse_receipts').select('*').order('received_at',{ascending:false}).limit(500);
@@ -536,7 +559,7 @@ Deno.serve(async(req)=>{
  if(req.method!=='POST'&&req.method!=='GET')return json(req,{error:'Method not allowed'},405);
  try{
   if(req.method==='POST')return json(req,await createReceipt(req));
-  return json(req,await listReceipts(req));
+  const trackingNumber=new URL(req.url).searchParams.get('tracking_number');\n  if(trackingNumber)return json(req,await findReceiptByTracking(req));\n  return json(req,await listReceipts(req));
  }catch(error){
   const message=error instanceof Error?error.message:String(error);
   const status=/Unauthorized/i.test(message)?401:/MEDICAL_EQUIPMENT_PROHIBITED/.test(message)?422:/Forbidden|permission|branch/i.test(message)?403:/MSDS_REQUIRED|not found|required|must be|belong|unsupported photo|unsupported warehouse|Invalid MSDS|12 MB|at most/i.test(message)?400:500;
