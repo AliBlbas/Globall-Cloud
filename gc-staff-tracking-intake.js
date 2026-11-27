@@ -7,7 +7,7 @@ const ROLES=['admin','super_admin','warehouse','warehouse_china','warehouse_uae'
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm=v=>String(v??'').normalize('NFKC').toUpperCase().replace(/\s+/g,'').trim();
-const state={db:null,session:null,staff:null,reader:null,controls:null,photo:null,selected:null,shipment:null,duplicate:[]};
+const state={db:null,session:null,staff:null,reader:null,controls:null,photo:null,selected:null,shipment:null,shipmentMismatch:false,duplicate:[]};
 
 function message(id,text,type=''){const n=$('#'+id);if(!n)return;n.textContent=text;n.classList.toggle('bad',type==='bad');n.classList.toggle('good',type==='good');}
 function addStyle(){
@@ -36,16 +36,16 @@ function makeModal(){
  const m=document.createElement('div');m.id='gcScanModal';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');
  m.innerHTML=[
  '<div class="gcs-panel">',
- '<header class="gcs-head"><div><div class="gcs-kicker">GLOBALL CLOUD · TRACKING INTAKE</div><h2>سکانی تراکینگ و بەستنی وەسڵ</h2><p>بارکۆد سکان بکە، کڕیاری هەبوو بدۆزەرەوە، پاشان وەسڵی کۆگا بەو کڕیارەوە ببەستە</p></div><button class="gcs-close" id="gcScanClose" type="button">×</button></header>',
+ '<header class="gcs-head"><div><div class="gcs-kicker">GLOBALL CLOUD · TRACKING INTAKE</div><h2>دۆزینەوەی کڕیار و سکانکردنی تراکینگ</h2><p>یەکەم کڕیاری هەبوو بە GC Code / ناو / مۆبایل بدۆزەرەوە؛ دوای پشتڕاستکردنەوە، بارکۆدی تراکینگ سکان بکە و وەسڵەکە بەو کڕیارەوە ببەستە.</p></div><button class="gcs-close" id="gcScanClose" type="button">×</button></header>',
  '<div class="gcs-grid">',
- '<section class="gcs-card"><h3>١. سکانکردنی تراکینگ</h3><div class="gcs-video"><video id="gcScanVideo" autoplay muted playsinline></video><div class="gcs-frame"></div></div>',
- '<div class="gcs-actions"><button class="gcs-btn primary" id="gcScanStart" type="button">کامێرا بکەرەوە و سکان بکە</button><button class="gcs-btn" id="gcScanStop" type="button" disabled>وەستاندن</button></div>',
- '<div class="gcs-status" id="gcScanStatus" role="status" aria-live="polite">بارکۆدی 1D / Code 128 یان QR لەبەردەم کامێرا دابنێ</div>',
- '<label class="gcs-label" for="gcScanTracking">Tracking Number</label><input class="gcs-field" id="gcScanTracking" dir="ltr" placeholder="JTE30053866832" autocomplete="off">',
- '<label class="gcs-label" for="gcScanPhoto">وێنەی پاکەت / لیبڵ (ئەگەر وێنەی کامێرا نەگیرا)</label><input class="gcs-field" id="gcScanPhoto" type="file" accept="image/*" capture="environment"><div class="gcs-note" id="gcScanPhotoNote">وێنەی کامێرا بە شێوەی خۆکار وەک بەڵگە هەڵدەگیرێت.</div>',
+ '<section class="gcs-card"><h3>١. گەڕان بۆ کڕیاری هەبوو</h3><label class="gcs-label" for="gcScanQuery">GC Code / ناو / ژمارەی مۆبایل</label><input class="gcs-field" id="gcScanQuery" placeholder="GC-338 یان 0770... یان ناوی کڕیار" autocomplete="off">',
+ '<div class="gcs-actions"><button class="gcs-btn primary" id="gcScanSearch" type="button">گەڕان لە کڕیارە هەبووەکان</button></div><div class="gcs-list" id="gcScanCustomers"></div><div class="gcs-selected gcs-hidden" id="gcScanSelected"></div><div class="gcs-alert gcs-hidden" id="gcScanShipment"></div></section>',
+ '<section class="gcs-card"><h3>٢. سکانکردنی تراکینگ</h3><div class="gcs-video"><video id="gcScanVideo" autoplay muted playsinline></video><div class="gcs-frame"></div></div>',
+ '<div class="gcs-actions"><button class="gcs-btn primary" id="gcScanStart" type="button" disabled>کامێرا بکەرەوە و سکان بکە</button><button class="gcs-btn" id="gcScanStop" type="button" disabled>وەستاندن</button></div>',
+ '<div class="gcs-status" id="gcScanStatus" role="status" aria-live="polite">سەرەتا کڕیاری هەبوو هەڵبژێرە؛ پاشان کامێرا چالاک دەبێت.</div>',
+ '<label class="gcs-label" for="gcScanTracking">Tracking Number</label><input class="gcs-field" id="gcScanTracking" dir="ltr" placeholder="JTE30053866832" autocomplete="off" disabled>',
+ '<label class="gcs-label" for="gcScanPhoto">وێنەی پاکەت / لیبڵ (ئەگەر وێنەی کامێرا نەگیرا)</label><input class="gcs-field" id="gcScanPhoto" type="file" accept="image/*" capture="environment" disabled><div class="gcs-note" id="gcScanPhotoNote">وێنەی کامێرا دوای سکان وەک بەڵگە هەڵدەگیرێت.</div>',
  '<div id="gcScanDuplicate" class="gcs-alert gcs-hidden"></div></section>',
- '<section class="gcs-card"><h3>٢. گەڕان بۆ کڕیاری هەبوو</h3><label class="gcs-label" for="gcScanQuery">GC Code / ناو / ژمارەی مۆبایل</label><input class="gcs-field" id="gcScanQuery" placeholder="GC-338 یان 0770... یان ناوی کڕیار" autocomplete="off">',
- '<div class="gcs-actions"><button class="gcs-btn" id="gcScanSearch" type="button">گەڕان لە کڕیارە هەبووەکان</button></div><div class="gcs-list" id="gcScanCustomers"></div><div class="gcs-selected gcs-hidden" id="gcScanSelected"></div><div class="gcs-alert gcs-hidden" id="gcScanShipment"></div></section>',
  '</div>',
  '<section class="gcs-card" style="margin-top:11px"><h3>٣. دروستکردنی وەسڵی کۆگا</h3><div class="gcs-fields">',
  '<label><span class="gcs-label">شوێنی وەرگرتن</span><select class="gcs-field" id="gcScanLocation"><option value="Dubai">Dubai / UAE</option><option value="China">China</option><option value="Erbil">Erbil</option></select></label>',
@@ -55,11 +55,12 @@ function makeModal(){
  '<label><span class="gcs-label">Invoice No.</span><input class="gcs-field" id="gcScanInvoice" placeholder="ژمارەی فاتورە"></label>',
  '<label><span class="gcs-label">ناوی کاڵا</span><input class="gcs-field" id="gcScanItem" placeholder="Clothes / Accessories"></label></div>',
  '<div class="gcs-actions"><button class="gcs-btn primary" id="gcScanSave" type="button" disabled>دروستکردنی وەسڵ و بەستن بە کڕیار</button><button class="gcs-btn" id="gcScanReset" type="button">پاککردنەوە</button></div>',
- '<div class="gcs-status" id="gcScanSaveStatus">سەرەتا تراکینگ سکان بکە و کڕیارێکی هەبوو هەڵبژێرە.</div><div class="gcs-success gcs-hidden" id="gcScanSuccess"></div></section>',
+ '<div class="gcs-status" id="gcScanSaveStatus">سەرەتا کڕیاری هەبوو بدۆزەوە و هەڵیبژێرە.</div><div class="gcs-success gcs-hidden" id="gcScanSuccess"></div></section>',
  '</div>'
  ].join('');
  document.body.appendChild(m);
 }
+
 async function getClient(){
  state.db=window.gcSupabase||window.sb||null;
  if(!state.db&&window.supabase?.createClient)state.db=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
@@ -78,6 +79,7 @@ async function loadZXing(){
  s=document.createElement('script');s.src='https://unpkg.com/@zxing/browser@0.2.1';s.async=true;s.dataset.gcZxing='1';s.onload=()=>window.ZXingBrowser?resolve(window.ZXingBrowser):reject(new Error('Barcode reader ئامادە نەبوو.'));s.onerror=()=>reject(new Error('کتێبخانەی سکانکردن بارنەکرا؛ ژمارەکە بە دەست بنووسە.'));document.head.appendChild(s);});
 }
 async function startCamera(){
+ if(!state.selected){setMsg('gcScanStatus','سەرەتا کڕیاری هەبوو بدۆزەوە و هەڵیبژێرە.','bad');return;}
  stopCamera();setMsg('gcScanStatus','کامێرا دەکرێتەوە…');
  try{if(!navigator.mediaDevices?.getUserMedia)throw new Error('کامێرا بەردەست نییە؛ لە Safari ڕێگەپێدانی کامێرا بدە.');
  const lib=await loadZXing();state.reader=new lib.BrowserMultiFormatReader();state.scanning=true;$('#gcScanStop').disabled=false;setMsg('gcScanStatus','کامێرا کراوەتەوە؛ بارکۆدی سەر پاکەت لە ناو چوارچێوەکە دابنێ.');
@@ -100,26 +102,45 @@ async function findDuplicate(tracking){
  else{box.classList.add('gcs-hidden');box.textContent='';}return state.duplicate;
 }
 async function findShipment(tracking){
- state.shipment=null;const box=$('#gcScanShipment');box.classList.add('gcs-hidden');
+ state.shipment=null;state.shipmentMismatch=false;const box=$('#gcScanShipment');box.classList.add('gcs-hidden');box.textContent='';
+ if(!state.selected)return;
  try{
-  const cols='id,tracking_id,tracking_number,external_reference,directory_customer_id,customer_gc_code,customer_name,status,operational_status';
+  const cols='id,tracking_id,tracking_number,external_reference,directory_customer_id,customer_gc_code,customer_name,status,operational_status,origin_key,dest_key';
   const results=await Promise.all([
    state.db.from('shipments').select(cols).eq('tracking_number',tracking).limit(4),
    state.db.from('shipments').select(cols).eq('tracking_id',tracking).limit(4),
    state.db.from('shipments').select(cols).eq('external_reference',tracking).limit(4)
   ]);
-  results.forEach(x=>{if(x.error)throw x.error;});const rows=new Map();
-  for(const r of results)for(const x of r.data||[])rows.set(String(x.id),x);
-  if(rows.size===1){
-   state.shipment=[...rows.values()][0];const sh=state.shipment;let customer=null;
-   if(sh.directory_customer_id){const r=await state.db.from('customer_directory').select('id,code,gc_code,name,phone,phone2,whatsapp_phone,city,is_active,auth_user_id').eq('id',sh.directory_customer_id).maybeSingle();if(r.error)throw r.error;customer=r.data;}
-   else if(sh.customer_gc_code){const r=await state.db.from('customer_directory').select('id,code,gc_code,name,phone,phone2,whatsapp_phone,city,is_active,auth_user_id').eq('gc_code',sh.customer_gc_code).maybeSingle();if(r.error)throw r.error;customer=r.data;}
-   if(customer?.is_active)selectCustomer(customer,true);
-   box.classList.remove('gcs-hidden');box.innerHTML='<strong>Shipment ـی هاوتا دۆزرایەوە</strong><br><span dir="ltr">'+esc(sh.id)+'</span> · '+esc(sh.customer_name||customer?.name||'—');
-  }else if(rows.size>1){box.classList.remove('gcs-hidden');box.textContent='زیاتر لە یەک Shipment هەیە؛ بەستن بە خۆکارانە ناکرێت.';}
- }catch(e){box.classList.remove('gcs-hidden');box.textContent='پشکنینی Shipment: '+(e.message||'بەردەست نییە');}
+  results.forEach(x=>{if(x.error)throw x.error;});
+  const rows=new Map();for(const r of results)for(const x of r.data||[])rows.set(String(x.id),x);
+  if(!rows.size)return;
+  const code=norm(state.selected.gc_code||state.selected.code);
+  const owned=[...rows.values()].filter(sh=>{
+   if(sh.directory_customer_id)return String(sh.directory_customer_id)===String(state.selected.id);
+   if(sh.customer_gc_code)return norm(sh.customer_gc_code)===code;
+   return false;
+  });
+  if(!owned.length){
+   state.shipmentMismatch=true;box.classList.remove('gcs-hidden');
+   box.innerHTML='<strong>⚠ ناسنامەی ئەم Tracking ـە لەگەڵ کڕیاری هەڵبژێردراو ناگونجێت</strong><br>وەسڵەکە بۆ کڕیاری تر نابەسترێتەوە.';
+   return;
+  }
+  if(owned.length===1){
+   state.shipment=owned[0];const sh=state.shipment;box.classList.remove('gcs-hidden');
+   box.innerHTML='<strong>✓ Shipment ـی هەمان کڕیار دۆزرایەوە</strong><br><span dir="ltr">'+esc(sh.tracking_id||sh.tracking_number||sh.id)+'</span> · '+esc(sh.customer_name||state.selected.name||'—');
+   return;
+  }
+  box.classList.remove('gcs-hidden');
+  box.innerHTML='<strong>چەند Shipment ـی هاوتا بۆ ئەم کڕیارە هەیە؛ یەکێکیان هەڵبژێرە</strong><br><select id="gcScanShipmentChoice" class="gcs-field"><option value="">Shipment هەڵبژێرە...</option>'+owned.map(sh=>'<option value="'+esc(sh.id)+'">'+esc(sh.tracking_id||sh.tracking_number||sh.id)+' · '+esc(sh.origin_key||'')+' → '+esc(sh.dest_key||'')+'</option>').join('')+'</select>';
+  $('#gcScanShipmentChoice').addEventListener('change',e=>{state.shipment=owned.find(sh=>String(sh.id)===String(e.target.value))||null;saveReady();});
+ }catch(e){
+  state.shipment=null;state.shipmentMismatch=true;box.classList.remove('gcs-hidden');
+  box.textContent='نەتوانرا خاوەنی Shipment پشتڕاست بکرێتەوە: '+(e.message||'هەڵەی نادیار');
+ }
 }
+
 async function verifyTracking(){
+ if(!state.selected){setMsg('gcScanStatus','سەرەتا کڕیاری هەبوو هەڵبژێرە.','bad');saveReady();return;}
  const tracking=norm($('#gcScanTracking').value);$('#gcScanTracking').value=tracking;
  if(!/^[A-Z0-9._/-]{5,160}$/.test(tracking)){state.duplicate=[];state.shipment=null;saveReady();return;}
  setMsg('gcScanStatus','پشکنینی تراکینگ لە وەسڵ و Shipment ـە هەبووەکاندا…');
@@ -127,6 +148,7 @@ async function verifyTracking(){
  setMsg('gcScanStatus',state.duplicate.length?'ئەم تراکینگ ژمارەیە پێشتر تۆمار کراوە.':'تراکینگ ژمارەکە ئامادەیە؛ ئێستا کڕیار هەڵبژێرە.',state.duplicate.length?'bad':'good');saveReady();
 }
 async function searchCustomers(){
+ if(state.selected){stopCamera();state.selected=null;state.shipment=null;state.shipmentMismatch=false;state.duplicate=[];state.photo=null;$('#gcScanStart').disabled=true;$('#gcScanTracking').disabled=true;$('#gcScanPhoto').disabled=true;$('#gcScanTracking').value='';$('#gcScanPhoto').value='';$('#gcScanSelected').classList.add('gcs-hidden');saveReady();}
  const q=String($('#gcScanQuery').value||'').trim();if(q.length<2){$('#gcScanCustomers').textContent='لانیکەم دوو پیت یان ژمارە بنووسە.';return;}
  const safe=q.replace(/[,%()]/g,' ').trim(),fields=['gc_code','code','name','phone','phone2','whatsapp_phone'];
  $('#gcScanCustomers').innerHTML='<div class="gcs-note">لە کڕیارە هەبووەکاندا دەگەڕێم…</div>';
@@ -142,14 +164,25 @@ async function searchCustomers(){
 }
 function selectCustomer(c,automatic){
  if(!c||c.is_active!==true){message('gcScanSaveStatus','تەنها کڕیاری چالاک دەتوانرێت هەڵبژێردرێت.','bad');return;}
- state.selected=c;const code=norm(c.gc_code||c.code),box=$('#gcScanSelected');box.classList.remove('gcs-hidden');
- box.innerHTML='<strong>'+(automatic?'کڕیاری پەیوەست بە Shipment دۆزرایەوە':'کڕیار هەڵبژێردرا')+'</strong><br>'+esc(c.name||'—')+'<br><b dir="ltr">'+esc(code||'GC Code نییە')+'</b><br><span dir="ltr">'+esc(c.phone||c.phone2||'—')+'</span>';
- const mismatch=state.shipment&&((state.shipment.directory_customer_id&&String(state.shipment.directory_customer_id)!==String(c.id))||(state.shipment.customer_gc_code&&norm(state.shipment.customer_gc_code)!==code));
- message('gcScanSaveStatus',mismatch?'ئەم Shipment ـە بە کڕیارێکی ترەوە بەستراوەتەوە؛ بەستن قەدەغەیە.':'کڕیاری هەبوو پشتڕاست کرا. وەسڵەکە بە GC Code ـەکەی دەبەسترێتەوە.',mismatch?'bad':'good');saveReady();
+ if(state.selected&&String(state.selected.id)!==String(c.id)){
+  stopCamera();state.shipment=null;state.shipmentMismatch=false;state.duplicate=[];state.photo=null;
+  $('#gcScanTracking').value='';$('#gcScanPhoto').value='';
+  $('#gcScanDuplicate').classList.add('gcs-hidden');$('#gcScanShipment').classList.add('gcs-hidden');
+ }
+ state.selected=c;
+ const code=norm(c.gc_code||c.code),box=$('#gcScanSelected');
+ box.classList.remove('gcs-hidden');
+ $('#gcScanStart').disabled=false;$('#gcScanTracking').disabled=false;$('#gcScanPhoto').disabled=false;
+ box.innerHTML='<strong>✓ کڕیار پشتڕاست و هەڵبژێردرا</strong><br>'+esc(c.name||'—')+'<br><b dir="ltr">'+esc(code||'GC Code نییە')+'</b><br><span dir="ltr">'+esc(c.phone||c.phone2||'—')+'</span>';
+ const mismatch=state.shipmentMismatch||(state.shipment&&((state.shipment.directory_customer_id&&String(state.shipment.directory_customer_id)!==String(c.id))||(state.shipment.customer_gc_code&&norm(state.shipment.customer_gc_code)!==code)));
+ message('gcScanSaveStatus',mismatch?'ئەم Shipment ـە بە کڕیارێکی ترەوە بەستراوەتەوە؛ بەستن قەدەغەیە.':'کڕیاری هەبوو پشتڕاست کرا. ئێستا تراکینگ سکان بکە و وەسڵەکە پەیوەست بکە.',mismatch?'bad':'good');
+ setMsg('gcScanStatus','✓ کڕیار هەڵبژێردرا؛ ئێستا کامێرا بکەرەوە و بارکۆدی تراکینگ سکان بکە.','good');
+ saveReady();
 }
+
 function saveReady(){
  const tr=norm($('#gcScanTracking')?.value),code=norm(state.selected?.gc_code||state.selected?.code),count=Number($('#gcScanPackages')?.value||1),w=$('#gcScanWeight')?.value;
- const mismatch=Boolean(state.shipment&&state.selected&&((state.shipment.directory_customer_id&&String(state.shipment.directory_customer_id)!==String(state.selected.id))||(state.shipment.customer_gc_code&&norm(state.shipment.customer_gc_code)!==code)));
+ const mismatch=Boolean(state.shipmentMismatch||(state.shipment&&state.selected&&((state.shipment.directory_customer_id&&String(state.shipment.directory_customer_id)!==String(state.selected.id))||(state.shipment.customer_gc_code&&norm(state.shipment.customer_gc_code)!==code))));
  const valid=/^[A-Z0-9._/-]{5,160}$/.test(tr)&&/^GC-[A-Z0-9-]{2,30}$/.test(code)&&Number.isInteger(count)&&count>=1&&count<=999&&(!w||(Number.isFinite(Number(w))&&Number(w)>=0));
  const photo=Boolean(state.photo||$('#gcScanPhoto')?.files?.[0]);
  if($('#gcScanSave'))$('#gcScanSave').disabled=!(valid&&photo&&state.selected&&!state.duplicate.length&&!mismatch);
@@ -174,16 +207,17 @@ async function saveReceipt(){
  }catch(e){message('gcScanSaveStatus',e.message||'هەڵەیەک لە تۆمارکردنی وەسڵ ڕوویدا.','bad');btn.textContent='دروستکردنی وەسڵ و بەستن بە کڕیار';saveReady();}
 }
 function reset(){
- stopCamera();state.photo=null;state.selected=null;state.shipment=null;state.duplicate=[];
+ stopCamera();state.photo=null;state.selected=null;state.shipment=null;state.shipmentMismatch=false;state.duplicate=[];
+ $('#gcScanStart').disabled=true;$('#gcScanTracking').disabled=true;$('#gcScanPhoto').disabled=true;
  ['gcScanTracking','gcScanQuery','gcScanWeight','gcScanInvoice','gcScanItem'].forEach(id=>{if($('#'+id))$('#'+id).value='';});
  $('#gcScanCarrier').value='TAG Express';$('#gcScanPackages').value='1';$('#gcScanPhoto').value='';
  $('#gcScanCustomers').innerHTML='';$('#gcScanSelected').classList.add('gcs-hidden');$('#gcScanShipment').classList.add('gcs-hidden');$('#gcScanDuplicate').classList.add('gcs-hidden');$('#gcScanSuccess').classList.add('gcs-hidden');
- $('#gcScanPhotoNote').textContent='وێنەی کامێرا بە شێوەی خۆکار وەک بەڵگە هەڵدەگیرێت.';$('#gcScanSave').textContent='دروستکردنی وەسڵ و بەستن بە کڕیار';
- message('gcScanStatus','بارکۆدی 1D / Code 128 یان QR لەبەردەم کامێرا دابنێ');message('gcScanSaveStatus','سەرەتا تراکینگ سکان بکە و کڕیارێکی هەبوو هەڵبژێرە.');saveReady();
+ $('#gcScanPhotoNote').textContent='وێنەی کامێرا دوای سکان وەک بەڵگە هەڵدەگیرێت.';$('#gcScanSave').textContent='دروستکردنی وەسڵ و بەستن بە کڕیار';
+ message('gcScanStatus','سەرەتا کڕیاری هەبوو بدۆزەوە و هەڵیبژێرە؛ پاشان بارکۆدی تراکینگ سکان بکە.');message('gcScanSaveStatus','سەرەتا کڕیاری هەبوو بدۆزەوە و هەڵیبژێرە.');saveReady();
 }
 async function openModal(){
  addStyle();makeModal();$('#gcScanModal').classList.add('open');
- try{await getClient();const b=String(state.staff.branch||'all').toLowerCase();$('#gcScanLocation').value=b==='china'?'China':b==='erbil'?'Erbil':'Dubai';message('gcScanStatus','تراکینگ سکان بکە؛ پاشان کڕیاری هەبوو بدۆزەرەوە.');saveReady();}
+ try{await getClient();const b=String(state.staff.branch||'all').toLowerCase();$('#gcScanLocation').value=b==='china'?'China':b==='erbil'?'Erbil':'Dubai';$('#gcScanStart').disabled=true;$('#gcScanTracking').disabled=true;$('#gcScanPhoto').disabled=true;message('gcScanStatus','سەرەتا لە بەشی یەکەم کڕیاری هەبوو بدۆزەوە و هەڵیبژێرە؛ پاشان سکانکردن چالاک دەبێت.');saveReady();}
  catch(e){message('gcScanStatus',e.message||'پەیوەندیی ستاف پشتڕاست نەکرایەوە.','bad');}
 }
 function mountLaunchButton(){
