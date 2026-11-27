@@ -105,6 +105,7 @@ const MOBILE_PRIMARY_NAV = `<style data-gc-mobile-primary-nav="1">
 const LEGACY_SUPABASE_NOTICE = 'Supabase هێشتا پەیوەست نەکراوە — URL و publishable key لە کۆدەکەدا زیادبکە (سەرەتای script tag).';
 const CSP = "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://rum-static.pingdom.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.supabase.co https://rum-ingest.pingdom.net https://cloudflareinsights.com https://*.sentry.io https://sentry.io; frame-src 'self' https://www.google.com; worker-src 'self' blob:";
 const STAFF_V5 = /^\/staff-os-v5(?:\.html)?\/?$/i;
+const STAFF_LOGIN = /^\/staff-login(?:\.html)?\/?$/i;
 const RETIRED_LEGACY_ASSETS = new Set([
   'accounts-console-script.js',
   'staff-os-enhancements.js',
@@ -154,11 +155,13 @@ export async function onRequest(context) {
   // Pages _redirects rules do not run for requests handled by this global middleware.
   // Use the extensionless asset path internally because Pages normalizes direct .html URLs;
   // this serves staff-os-v5.html while keeping the requested staff entry URL in the browser address bar.
-  if (['/staff', '/staff/', '/staff-portal', '/staff-portal/', '/staff-portal.html'].includes(requestPath)) {
-    const destination = new URL('/staff-os-v5', requestUrl);
+  if (['/staff', '/staff/', '/staff-portal', '/staff-portal/', '/staff-portal.html'].includes(requestPath) || STAFF_LOGIN.test(requestPath)) {
+    // Use a small standalone login page for mobile text entry. It deliberately
+    // avoids the full Staff OS CSS/JS stack until native email/password input is complete.
+    const destination = new URL('/staff-login', requestUrl);
     destination.search = requestUrl.search;
     pageRequest = new Request(destination.toString(), context.request);
-    path = '/staff-os-v5.html';
+    path = '/staff-login.html';
   }
   if (requestPath === '/health' || requestPath === '/api/health') return new Response(JSON.stringify({ok:true,service:'globall-cloud',cloudflare:'pages',edge:'ok',timestamp:new Date().toISOString()}), {status:200,headers:{'content-type':'application/json; charset=UTF-8','cache-control':'no-store'}});
   if (requestPath === '/release.json') return new Response(JSON.stringify({service:'globall-cloud',branch:context.env?.CF_PAGES_BRANCH||'main',commit:context.env?.CF_PAGES_COMMIT_SHA||null,generated_at:new Date().toISOString()}), {status:200,headers:{'content-type':'application/json; charset=UTF-8','cache-control':'no-store'}});
@@ -212,6 +215,7 @@ export async function onRequest(context) {
   // Do not mix public/customer bootstraps or public layout layers into this
   // page; they can create a second Supabase client and override the V5 UI.
   for (const [needle,fragment] of headAssets) {
+    if (STAFF_LOGIN.test(path)) continue;
     if (STAFF_V5.test(path) && STAFF_V5_PUBLIC_ASSETS.has(needle)) continue;
     html = addHeadAsset(html,needle,fragment);
   }
@@ -227,13 +231,15 @@ export async function onRequest(context) {
     html=addBodyAsset(html,'src="/public-core-recovery.js',`<script src="/public-core-recovery.js?v=${VERSION}" defer data-gc-public-core-recovery="1"></script>`);
     // index.html owns the single public dock; do not inject a second overlapping navbar.
   }
-  if (STAFF_V5.test(path)) {
+  if (STAFF_LOGIN.test(path)) {
+    // The standalone login owns its entire style stack; do not add shared visual layers.
+  } else if (STAFF_V5.test(path)) {
     // Staff presentation is owned by staff-os-v5.html and its canonical CSS stack.
     html = html.replace(/<link[^>]*data-gc-connected-design[^>]*>\s*/gi, '');
   } else {
     html = html.replace(/<link[^>]*data-gc-connected-design[^>]*>\s*/gi, '');
     html = html.replace(/<\/head>/i, CONNECTED_DESIGN_CSS + '</head>');
   }
-  const headers=applySecurityHeaders(new Headers(response.headers)); headers.delete('content-encoding'); headers.delete('content-length'); headers.delete('etag'); headers.set('content-type','text/html; charset=UTF-8'); if(STAFF_V5.test(path) || path === '/staff-os' || path === '/staff-os/' || path === '/staff-os.html') headers.set('cache-control','no-store, max-age=0, must-revalidate');
+  const headers=applySecurityHeaders(new Headers(response.headers)); headers.delete('content-encoding'); headers.delete('content-length'); headers.delete('etag'); headers.set('content-type','text/html; charset=UTF-8'); if(STAFF_LOGIN.test(path) || STAFF_V5.test(path) || path === '/staff-os' || path === '/staff-os/' || path === '/staff-os.html') headers.set('cache-control','no-store, max-age=0, must-revalidate');
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
