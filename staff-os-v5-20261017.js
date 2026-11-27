@@ -31,6 +31,7 @@
     activeStaffRoom: null,
     activeCustomerThread: null,
     scanStream: null,
+    loginAttempted: false,
   };
   const requestedStaffTab = () => {
     const requested = new URLSearchParams(location.search).get('tab');
@@ -172,9 +173,20 @@
   async function verifyStoredSession() {
     const { data, error } = await getSessionSafely();
     if (error) throw error;
-    if (!data?.session) return false;
-    try { await identify(data.session); } catch { await state.client.auth.signOut(); return false; }
+    if (state.loginAttempted || !data?.session) return false;
+    try {
+      await identify(data.session);
+    } catch {
+      // A stale session must not block the visible login form while sign-out waits on the network.
+      if (!state.loginAttempted) {
+        state.session = null;
+        try { void state.client.auth.signOut({ scope: 'local' }).catch(() => {}); } catch {}
+      }
+      return false;
+    }
+    if (state.loginAttempted) return false;
     const aal = await state.client.auth.mfa.getAuthenticatorAssuranceLevel().catch(() => ({ data:null }));
+    if (state.loginAttempted) return false;
     if (aal.data?.nextLevel === 'aal2' && aal.data.currentLevel !== 'aal2') { renderLogin(true); return true; }
     renderApp();
     await loadTab(requestedStaffTab());
@@ -255,6 +267,7 @@
     if (!form) return;
     form.onsubmit = async (e) => {
       e.preventDefault();
+      state.loginAttempted = true;
       const msg = document.getElementById('loginMsg');
       const btn = document.getElementById('loginBtn');
       msg.textContent = '';
@@ -305,7 +318,7 @@
     document.getElementById('logoutBtn')?.addEventListener('click', async () => {
       try {
         await state.client.auth.signOut();
-        state.session=null; state.staff=null; renderLogin();
+        state.session=null; state.staff=null; state.loginAttempted=false; renderLogin();
       } catch (error) {
         toast(errorText(error, 'چوونەدەرەوە سەرکەوتوو نەبوو'), 'bad');
       }
@@ -1844,8 +1857,28 @@ async function renderCustomers() {
   window.addEventListener('beforeunload',stopScanner);
 
   async function boot(){
-    try { await waitForSupabase(); const ready=await verifyStoredSession(); if(!ready) renderLogin(false); }
-    catch(e){ renderLogin(false,e.message); }
+    try {
+      await waitForSupabase();
+      // Present usable staff authentication immediately. Session restoration runs afterwards,
+      // so a slow Auth/network response cannot strand the user on the 3/3 splash screen.
+      renderLogin(false);
+      const restore = verifyStoredSession();
+      const result = await Promise.race([
+        restore.then(ready => ready ? 'restored' : 'login').catch(error => ({ error })),
+        new Promise(resolve => setTimeout(() => resolve('timeout'), 7000))
+      ]);
+      if (result === 'timeout' && !state.loginAttempted) {
+        const msg = document.getElementById('loginMsg');
+        if (msg) msg.textContent = 'پشکنینی Session دوا کەوتووە؛ دەتوانیت بە ئیمەیڵ و وشەی نهێنی بچیتەژوورەوە.';
+      } else if (result && typeof result === 'object' && result.error && !state.loginAttempted) {
+        const msg = document.getElementById('loginMsg');
+        if (msg) msg.textContent = result.error.message || 'پشکنینی Session سەرکەوتوو نەبوو.';
+      }
+    } catch(e){
+      const msg = document.getElementById('loginMsg');
+      if (msg) msg.textContent = e.message || 'Supabase ئامادە نییە.';
+      else renderLogin(false,e.message);
+    }
   }
   boot();
 })();
