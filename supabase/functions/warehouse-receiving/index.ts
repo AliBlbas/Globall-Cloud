@@ -373,7 +373,13 @@ async function createReceipt(req:Request){const{admin,staff}=await actor(req);co
  if(photoSigningWarning)notification={...notification,ok:false,errors:[...(Array.isArray(notification.errors)?notification.errors:[]),photoSigningWarning]};
  return{receipt:{...receiptWithCartons,photos:signed},duplicate:true,chain,notification,photo_signing_warning:Boolean(photoSigningWarning)}
 }
-if(medicalDevice)throw new Error('MEDICAL_EQUIPMENT_PROHIBITED: Medical equipment is not accepted');if((hasBattery||hasLiquid)&&!msdsFile)throw new Error('MSDS_REQUIRED: Battery or liquid cargo requires an MSDS document');if(msdsFile){const extension=String(msdsFile.name||'').split('.').pop()?.toLowerCase()||'';const allowed=MSDS_MIME_BY_EXTENSION[extension];const supplied=String(msdsFile.type||'').split(';')[0].trim().toLowerCase();if(!allowed||msdsFile.size>MAX_MSDS_BYTES||msdsFile.size<1||(supplied&&!allowed.includes(supplied)))throw new Error('Invalid MSDS document. Use PDF/JPG/PNG/WebP up to 10 MB');msdsExtension=extension;msdsContentType=supplied==='image/jpg'||supplied==='image/pjpeg'?'image/jpeg':(supplied||allowed[0])}
+if(tracking){
+  const duplicateTracking=await admin.from('warehouse_receipts')
+   .select('id,batch_code,gc_code_detected,directory_customer_id')
+   .eq('barcode',tracking).limit(1).maybeSingle();
+  if(duplicateTracking.error)throw duplicateTracking.error;
+  if(duplicateTracking.data)throw new Error('TRACKING_ALREADY_RECEIVED: '+tracking+' already exists on receipt '+String(duplicateTracking.data.batch_code||duplicateTracking.data.id));
+ }if(medicalDevice)throw new Error('MEDICAL_EQUIPMENT_PROHIBITED: Medical equipment is not accepted');if((hasBattery||hasLiquid)&&!msdsFile)throw new Error('MSDS_REQUIRED: Battery or liquid cargo requires an MSDS document');if(msdsFile){const extension=String(msdsFile.name||'').split('.').pop()?.toLowerCase()||'';const allowed=MSDS_MIME_BY_EXTENSION[extension];const supplied=String(msdsFile.type||'').split(';')[0].trim().toLowerCase();if(!allowed||msdsFile.size>MAX_MSDS_BYTES||msdsFile.size<1||(supplied&&!allowed.includes(supplied)))throw new Error('Invalid MSDS document. Use PDF/JPG/PNG/WebP up to 10 MB');msdsExtension=extension;msdsContentType=supplied==='image/jpg'||supplied==='image/pjpeg'?'image/jpeg':(supplied||allowed[0])}
 const files=form.getAll('photos').filter((x):x is File=>x instanceof File&&x.size>0);
 if(!files.length)throw new Error('At least one package photo is required');
 if(files.length>MAX_RECEIPT_PHOTOS)throw new Error(`A receipt may contain at most ${MAX_RECEIPT_PHOTOS} photos`);
