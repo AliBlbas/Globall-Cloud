@@ -8,7 +8,7 @@ const ROLES=['admin','super_admin','warehouse','warehouse_china','warehouse_uae'
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm=v=>String(v??'').normalize('NFKC').toUpperCase().replace(/\s+/g,'').trim();
-const state={db:null,session:null,staff:null,reader:null,controls:null,photo:null,selected:null,shipment:null,shipmentMismatch:false,duplicate:[]};
+const state={db:null,session:null,staff:null,reader:null,controls:null,photo:null,selected:null,shipment:null,shipmentMismatch:false,customerShipments:[],duplicate:[]};
 
 function message(id,text,type=''){const n=$('#'+id);if(!n)return;n.textContent=text;n.classList.toggle('bad',type==='bad');n.classList.toggle('good',type==='good');}
 function addStyle(){
@@ -103,51 +103,26 @@ async function findDuplicate(tracking){
  else{box.classList.add('gcs-hidden');box.textContent='';}return state.duplicate;
 }
 async function findShipment(tracking){
- state.shipment=null;state.shipmentMismatch=false;const box=$('#gcScanShipment');box.classList.add('gcs-hidden');box.textContent='';
- if(!state.selected)return;
- try{
-  const cols='id,tracking_id,tracking_number,external_reference,directory_customer_id,customer_gc_code,customer_name,status,operational_status,origin_key,dest_key';
-  const results=await Promise.all([
-   state.db.from('shipments').select(cols).eq('tracking_number',tracking).limit(4),
-   state.db.from('shipments').select(cols).eq('tracking_id',tracking).limit(4),
-   state.db.from('shipments').select(cols).eq('external_reference',tracking).limit(4)
-  ]);
-  results.forEach(x=>{if(x.error)throw x.error;});
-  const rows=new Map();for(const r of results)for(const x of r.data||[])rows.set(String(x.id),x);
-  if(!rows.size)return;
-  const code=norm(state.selected.gc_code||state.selected.code);
-  const owned=[...rows.values()].filter(sh=>{
-   if(sh.directory_customer_id)return String(sh.directory_customer_id)===String(state.selected.id);
-   if(sh.customer_gc_code)return norm(sh.customer_gc_code)===code;
-   return false;
-  });
-  if(!owned.length){
-   state.shipmentMismatch=true;box.classList.remove('gcs-hidden');
-   box.innerHTML='<strong>⚠ ناسنامەی ئەم Tracking ـە لەگەڵ کڕیاری هەڵبژێردراو ناگونجێت</strong><br>وەسڵەکە بۆ کڕیاری تر نابەسترێتەوە.';
-   return;
-  }
-  if(owned.length===1){
-   state.shipment=owned[0];const sh=state.shipment;box.classList.remove('gcs-hidden');
-   box.innerHTML='<strong>✓ Shipment ـی هەمان کڕیار دۆزرایەوە</strong><br><span dir="ltr">'+esc(sh.tracking_id||sh.tracking_number||sh.id)+'</span> · '+esc(sh.customer_name||state.selected.name||'—');
-   return;
-  }
-  box.classList.remove('gcs-hidden');
-  box.innerHTML='<strong>چەند Shipment ـی هاوتا بۆ ئەم کڕیارە هەیە؛ یەکێکیان هەڵبژێرە</strong><br><select id="gcScanShipmentChoice" class="gcs-field"><option value="">Shipment هەڵبژێرە...</option>'+owned.map(sh=>'<option value="'+esc(sh.id)+'">'+esc(sh.tracking_id||sh.tracking_number||sh.id)+' · '+esc(sh.origin_key||'')+' → '+esc(sh.dest_key||'')+'</option>').join('')+'</select>';
-  $('#gcScanShipmentChoice').addEventListener('change',e=>{state.shipment=owned.find(sh=>String(sh.id)===String(e.target.value))||null;saveReady();});
- }catch(e){
-  state.shipment=null;state.shipmentMismatch=false;box.classList.remove('gcs-hidden');
-  box.textContent='پشکنینی Shipment بەردەست نەبوو؛ وەسڵ بە GC code ـی کڕیاری پشتڕاستکراوەوە تۆمار دەکرێت. '+(e.message||'');
- }
+ if(!state.selected){state.shipment=null;return;}
+ renderShipmentChoices(tracking);
+ return state.shipment;
 }
 
 async function verifyTracking(){
  if(!state.selected){setMsg('gcScanStatus','سەرەتا کڕیاری هەبوو هەڵبژێرە.','bad');saveReady();return;}
  const tracking=norm($('#gcScanTracking').value);$('#gcScanTracking').value=tracking;
- if(!/^[A-Z0-9._/-]{5,160}$/.test(tracking)){state.duplicate=[];state.shipment=null;saveReady();return;}
- setMsg('gcScanStatus','پشکنینی تراکینگ لە وەسڵ و Shipment ـە هەبووەکاندا…');
- await Promise.all([findDuplicate(tracking),findShipment(tracking)]);
- setMsg('gcScanStatus',state.duplicate.length?'ئەم تراکینگ ژمارەیە پێشتر تۆمار کراوە.':'تراکینگ ژمارەکە ئامادەیە؛ ئێستا کڕیار هەڵبژێرە.',state.duplicate.length?'bad':'good');saveReady();
+ if(!/^[A-Z0-9._/-]{5,160}$/.test(tracking)){
+  state.duplicate=[];renderShipmentChoices('');saveReady();return;
+ }
+ setMsg('gcScanStatus','پشکنینی تراکینگ لە وەسڵە هەبووەکان و Shipment ـی هەمان کڕیار…');
+ try{
+  await Promise.all([findDuplicate(tracking),findShipment(tracking)]);
+  if(state.duplicate.length)setMsg('gcScanStatus','ئەم Tracking Number ـە پێشتر وەسڵی هەیە؛ دووبارە تۆمار ناکرێت.','bad');
+  else setMsg('gcScanStatus','Tracking Number پشکنین کرا؛ Shipment ـی گونجاو دیاری کرا.','good');
+ }catch(error){setMsg('gcScanStatus',error.message||'پشکنینی Tracking سەرکەوتوو نەبوو.','bad');}
+ saveReady();
 }
+
 async function searchCustomers(){
  const q=String($('#gcScanQuery').value||'').trim();if(q.length<2){$('#gcScanCustomers').textContent='لانیکەم دوو پیت یان ژمارە بنووسە.';return;}
  if(state.selected){stopCamera();state.selected=null;state.shipment=null;state.shipmentMismatch=false;state.duplicate=[];state.photo=null;$('#gcScanStart').disabled=true;$('#gcScanTracking').disabled=true;$('#gcScanPhoto').disabled=true;$('#gcScanTracking').value='';$('#gcScanPhoto').value='';$('#gcScanSelected').classList.add('gcs-hidden');saveReady();}
@@ -165,32 +140,77 @@ async function searchCustomers(){
   $('#gcScanCustomers').querySelectorAll('[data-customer]').forEach(button=>button.addEventListener('click',()=>{const customer=customers.find(row=>String(row.id)===button.dataset.customer);if(customer)selectCustomer(customer,false);}));
  }catch(error){$('#gcScanCustomers').innerHTML='<div class="gcs-status bad">'+esc(error.message||'گەڕان سەرکەوتوو نەبوو.')+'</div>';}
 }
-function selectCustomer(c,automatic){
- if(!c||c.is_active!==true){message('gcScanSaveStatus','تەنها کڕیاری چالاک دەتوانرێت هەڵبژێردرێت.','bad');return;}
- if(state.selected&&String(state.selected.id)!==String(c.id)){
-  stopCamera();state.shipment=null;state.shipmentMismatch=false;state.duplicate=[];state.photo=null;
-  $('#gcScanTracking').value='';$('#gcScanPhoto').value='';
+async function selectCustomer(candidate){
+ if(!candidate||candidate.is_active===false){message('gcScanCustomerStatus','تەنها کڕیاری چالاک دەتوانرێت هەڵبژێردرێت.','bad');return;}
+ const code=norm(candidate.gc_code||candidate.code);
+ if(!candidate.id||!/^GC-[A-Z0-9-]{2,30}$/.test(code)){message('gcScanCustomerStatus','کۆدی GC ـی کڕیار دروست نییە؛ پێویستی بە چاککردنەوەی هەژمارەکەیە.','bad');return;}
+ stopCamera();
+ if(state.selected&&String(state.selected.id)!==String(candidate.id)){
+  state.photo=null;state.shipment=null;state.duplicate=[];$('#gcScanTracking').value='';$('#gcScanPhoto').value='';
   $('#gcScanDuplicate').classList.add('gcs-hidden');$('#gcScanShipment').classList.add('gcs-hidden');
  }
- state.selected=c;
- const code=norm(c.gc_code||c.code),box=$('#gcScanSelected');
+ state.selected=null;state.customerShipments=[];state.shipment=null;state.shipmentMismatch=false;
+ $('#gcScanStart').disabled=true;$('#gcScanTracking').disabled=true;$('#gcScanPhoto').disabled=true;
+ message('gcScanCustomerStatus','ناسنامەی کڕیار لە خزمەتگوزاری پارێزراو پشتڕاست دەکرێتەوە…');
+ try{
+  const response=await fetch(ACCOUNT+'/?kind=customer_match&q='+encodeURIComponent(code),{
+   headers:{Authorization:'Bearer '+state.session.access_token,apikey:KEY,Accept:'application/json'},
+   cache:'no-store'
+  });
+  const payload=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(payload.error||payload.message||'پشتڕاستکردنەوەی کڕیار سەرکەوتوو نەبوو.');
+  const exact=payload.customer||((payload.customers||[]).find(row=>String(row.id)===String(candidate.id)));
+  if(!exact||String(exact.id)!==String(candidate.id)||exact.is_active===false)throw new Error('کڕیار لە داتابەیسی پارێزراودا پشتڕاست نەکرایەوە.');
+  state.selected=exact;
+  state.customerShipments=Array.isArray(payload.shipments)?payload.shipments:[];
+  const box=$('#gcScanSelected');box.classList.remove('gcs-hidden');
+  box.innerHTML='<strong>✓ کڕیار پشتڕاست کرایەوە</strong><br>'+esc(exact.name||'—')+'<br><b dir="ltr">'+esc(code)+'</b><br><span dir="ltr">'+esc(exact.phone||exact.phone2||exact.whatsapp_phone||'ژمارەی مۆبایل نییە')+'</span>';
+  $('#gcScanQuery').value=code;
+  $('#gcScanStart').disabled=false;$('#gcScanTracking').disabled=false;$('#gcScanPhoto').disabled=false;
+  renderShipmentChoices('');
+  message('gcScanCustomerStatus','✓ کڕیار هەڵبژێردرا. '+state.customerShipments.length+' Shipment ـی چالاک دۆزرایەوە.');
+  setMsg('gcScanStatus','کڕیار پشتڕاست کرا؛ ئێستا Tracking Number سکان بکە.','good');
+  saveReady();
+ }catch(error){
+  state.selected=null;state.customerShipments=[];state.shipment=null;state.shipmentMismatch=true;
+  $('#gcScanStart').disabled=true;$('#gcScanTracking').disabled=true;$('#gcScanPhoto').disabled=true;
+  message('gcScanCustomerStatus',error.message||'پشتڕاستکردنەوەی کڕیار سەرکەوتوو نەبوو.','bad');saveReady();
+ }
+}
+function renderShipmentChoices(tracking){
+ const box=$('#gcScanShipment');if(!box)return;
+ const rows=state.customerShipments||[];
+ const code=norm(tracking||'');
+ const exact=code?rows.filter(row=>[row.tracking_id,row.tracking_number,row.external_reference].some(value=>value&&norm(value)===code)):[];
+ const choices=exact.length?exact:rows;
+ state.shipment=null;state.shipmentMismatch=false;
+ if(choices.length===1){
+  state.shipment=choices[0];box.classList.remove('gcs-hidden');
+  const label=exact.length?'Tracking ـەکە لەگەڵ Shipment ـی ئەم کڕیارە گونجا':'یەک Shipment ـی چالاک بۆ ئەم کڕیارە هەیە';
+  box.innerHTML='<strong>✓ '+label+'</strong><br><span dir="ltr">'+esc(state.shipment.tracking_id||state.shipment.tracking_number||state.shipment.id)+'</span> · '+esc(state.shipment.origin_key||'')+' → '+esc(state.shipment.dest_key||'');
+  return;
+ }
+ if(choices.length>1){
+  box.classList.remove('gcs-hidden');
+  box.innerHTML='<strong>چەند Shipment ـی چالاک بۆ ئەم کڕیارە هەیە؛ ئەوەی پەیوەندی بە ئەم پاکەتەوە هەیە هەڵبژێرە</strong><select id="gcScanShipmentChoice" class="gcs-field" style="margin-top:8px"><option value="">Shipment ـی دروست هەڵبژێرە...</option>'+choices.map(row=>'<option value="'+esc(row.id)+'">'+esc(row.tracking_id||row.tracking_number||row.id)+' · '+esc(row.origin_key||'')+' → '+esc(row.dest_key||'')+'</option>').join('')+'</select>';
+  $('#gcScanShipmentChoice').addEventListener('change',event=>{state.shipment=choices.find(row=>String(row.id)===String(event.target.value))||null;saveReady();});
+  return;
+ }
  box.classList.remove('gcs-hidden');
- $('#gcScanStart').disabled=false;$('#gcScanTracking').disabled=false;$('#gcScanPhoto').disabled=false;
- box.innerHTML='<strong>✓ کڕیار پشتڕاست و هەڵبژێردرا</strong><br>'+esc(c.name||'—')+'<br><b dir="ltr">'+esc(code||'GC Code نییە')+'</b><br><span dir="ltr">'+esc(c.phone||c.phone2||'—')+'</span>';
- const mismatch=state.shipmentMismatch||(state.shipment&&((state.shipment.directory_customer_id&&String(state.shipment.directory_customer_id)!==String(c.id))||(state.shipment.customer_gc_code&&norm(state.shipment.customer_gc_code)!==code)));
- message('gcScanSaveStatus',mismatch?'ئەم Shipment ـە بە کڕیارێکی ترەوە بەستراوەتەوە؛ بەستن قەدەغەیە.':'کڕیاری هەبوو پشتڕاست کرا. ئێستا تراکینگ سکان بکە و وەسڵەکە پەیوەست بکە.',mismatch?'bad':'good');
- setMsg('gcScanStatus','✓ کڕیار هەڵبژێردرا؛ ئێستا کامێرا بکەرەوە و بارکۆدی تراکینگ سکان بکە.','good');
- saveReady();
+ box.textContent=rows.length?'Tracking ـەکە لە Shipment ـە چالاکەکانی ئەم کڕیارەدا نەدۆزرایەوە؛ باری دروست لە لیستەکە هەڵبژێرە.':'هیچ Shipment ـی چالاکی پێشوو بۆ ئەم کڕیارە نییە؛ وەسڵەکە بە ناسنامەی کڕیارەوە تۆمار دەکرێت.';
 }
 
 function saveReady(){
  const tr=norm($('#gcScanTracking')?.value),code=norm(state.selected?.gc_code||state.selected?.code),count=Number($('#gcScanPackages')?.value||1),w=$('#gcScanWeight')?.value;
  const mismatch=Boolean(state.shipmentMismatch||(state.shipment&&state.selected&&((state.shipment.directory_customer_id&&String(state.shipment.directory_customer_id)!==String(state.selected.id))||(state.shipment.customer_gc_code&&norm(state.shipment.customer_gc_code)!==code))));
- const valid=/^[A-Z0-9._/-]{5,160}$/.test(tr)&&/^GC-[A-Z0-9-]{2,30}$/.test(code)&&Number.isInteger(count)&&count>=1&&count<=999&&(!w||(Number.isFinite(Number(w))&&Number(w)>=0));
+ const ambiguous=(state.customerShipments||[]).length>1&&!state.shipment;
+ const valid=Boolean(state.selected)&&/^[A-Z0-9._/-]{5,160}$/.test(tr)&&/^GC-[A-Z0-9-]{2,30}$/.test(code)&&Number.isInteger(count)&&count>=1&&count<=999&&(!w||(Number.isFinite(Number(w))&&Number(w)>=0));
  const photo=Boolean(state.photo||$('#gcScanPhoto')?.files?.[0]);
- if($('#gcScanSave'))$('#gcScanSave').disabled=!(valid&&photo&&state.selected&&!state.duplicate.length&&!mismatch);
+ if($('#gcScanSave'))$('#gcScanSave').disabled=!(valid&&photo&&!state.duplicate.length&&!mismatch&&!ambiguous);
  if(state.selected&&!/^GC-[A-Z0-9-]{2,30}$/.test(code))message('gcScanSaveStatus','ئەم کڕیارە GC Code ـی دروستی نییە؛ ناتوانرێت وەسڵی warehouse پێوە ببەسترێت.','bad');
+ else if(ambiguous)message('gcScanSaveStatus','چەند Shipment ـی چالاک هەیە؛ یەکێک هەڵبژێرە تا وەسڵ بە باری دروستەوە ببەسترێت.','bad');
 }
+
 async function saveReceipt(){
  saveReady();if($('#gcScanSave').disabled)return;
  const tr=norm($('#gcScanTracking').value),c=state.selected,code=norm(c.gc_code||c.code),photo=$('#gcScanPhoto').files?.[0]||state.photo,btn=$('#gcScanSave');
@@ -210,14 +230,15 @@ async function saveReceipt(){
  }catch(e){message('gcScanSaveStatus',e.message||'هەڵەیەک لە تۆمارکردنی وەسڵ ڕوویدا.','bad');btn.textContent='دروستکردنی وەسڵ و بەستن بە کڕیار';saveReady();}
 }
 function reset(){
- stopCamera();state.photo=null;state.selected=null;state.shipment=null;state.shipmentMismatch=false;state.duplicate=[];
- $('#gcScanStart').disabled=true;$('#gcScanTracking').disabled=true;$('#gcScanPhoto').disabled=true;
+ stopCamera();state.photo=null;state.selected=null;state.shipment=null;state.shipmentMismatch=false;state.customerShipments=[];state.duplicate=[];
  ['gcScanTracking','gcScanQuery','gcScanWeight','gcScanInvoice','gcScanItem'].forEach(id=>{if($('#'+id))$('#'+id).value='';});
  $('#gcScanCarrier').value='TAG Express';$('#gcScanPackages').value='1';$('#gcScanPhoto').value='';
+ $('#gcScanStart').disabled=true;$('#gcScanTracking').disabled=true;$('#gcScanPhoto').disabled=true;
  $('#gcScanCustomers').innerHTML='';$('#gcScanSelected').classList.add('gcs-hidden');$('#gcScanShipment').classList.add('gcs-hidden');$('#gcScanDuplicate').classList.add('gcs-hidden');$('#gcScanSuccess').classList.add('gcs-hidden');
- $('#gcScanPhotoNote').textContent='وێنەی کامێرا دوای سکان وەک بەڵگە هەڵدەگیرێت.';$('#gcScanSave').textContent='دروستکردنی وەسڵ و بەستن بە کڕیار';
- message('gcScanStatus','سەرەتا کڕیاری هەبوو بدۆزەوە و هەڵیبژێرە؛ پاشان بارکۆدی تراکینگ سکان بکە.');message('gcScanSaveStatus','سەرەتا کڕیاری هەبوو بدۆزەوە و هەڵیبژێرە.');saveReady();
+ $('#gcScanPhotoNote').textContent='سەرەتا کڕیار هەڵبژێرە؛ وێنەی سکان وەک بەڵگە هەڵدەگیرێت.';$('#gcScanSave').textContent='دروستکردنی وەسڵ و بەستن بە کڕیار';
+ message('gcScanStatus','سەرەتا کڕیاری هەبوو بدۆزەرەوە و هەڵیبژێرە.');message('gcScanSaveStatus','سەرەتا کڕیاری هەبوو بدۆزەرەوە و هەڵیبژێرە.');saveReady();
 }
+
 async function openModal(){
  addStyle();makeModal();$('#gcScanModal').classList.add('open');
  try{await getClient();const b=String(state.staff.branch||'all').toLowerCase();$('#gcScanLocation').value=b==='china'?'China':b==='erbil'?'Erbil':'Dubai';$('#gcScanStart').disabled=true;$('#gcScanTracking').disabled=true;$('#gcScanPhoto').disabled=true;message('gcScanStatus','سەرەتا لە بەشی یەکەم کڕیاری هەبوو بدۆزەوە و هەڵیبژێرە؛ پاشان سکانکردن چالاک دەبێت.');saveReady();}
@@ -239,7 +260,7 @@ function bind(){
  $('#gcScanStart')?.addEventListener('click',startCamera);$('#gcScanStop')?.addEventListener('click',stopCamera);
  $('#gcScanSearch')?.addEventListener('click',searchCustomers);$('#gcScanQuery')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();searchCustomers();}});
  $('#gcScanSave')?.addEventListener('click',saveReceipt);$('#gcScanReset')?.addEventListener('click',reset);
- $('#gcScanTracking')?.addEventListener('change',()=>{state.duplicate=[];state.shipment=null;state.selected=null;$('#gcScanSelected').classList.add('gcs-hidden');verifyTracking();});
+ $('#gcScanTracking')?.addEventListener('change',()=>{state.duplicate=[];state.shipment=null;verifyTracking();});
  $('#gcScanTracking')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#gcScanTracking').dispatchEvent(new Event('change'));}});
  $('#gcScanPhoto')?.addEventListener('change',e=>{state.photo=null;const f=e.target.files?.[0];$('#gcScanPhotoNote').textContent=f?'وێنەی هەڵبژێردراو وەک بەڵگە بەکاردێت.':'وێنەی کامێرا بە شێوەی خۆکار وەک بەڵگە هەڵدەگیرێت.';if(f)decodePhoto(f);saveReady();});
  ['gcScanPackages','gcScanWeight'].forEach(id=>$('#'+id)?.addEventListener('input',saveReady));
