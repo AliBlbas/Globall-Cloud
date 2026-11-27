@@ -1426,7 +1426,7 @@ async function renderCustomers() {
         '<div class="gc-live-wh-card-head"><div class="gc-live-wh-id"><span>GC CODE · خاوەنی کاڵا</span><strong dir="ltr">' + esc(code) + '</strong><small>' + esc(owner?.name || item.customer_name || md.customer_name || 'ناوی خاوەن لە داتابەیسدا دیاری نەکراوە') + '</small></div>' +
         '<div class="gc-live-wh-status"><span class="gc-live-wh-badge ' + (attention ? 'amber' : 'neutral') + '">' + (attention ? 'پشکنین پێویستە' : 'تۆمارکراو') + '</span><span class="gc-live-wh-badge ' + tone + '">' + esc(noticeLabel(notice)) + '</span></div></div>' +
         '<div class="gc-live-wh-facts"><div><span>کۆگا</span><strong>' + esc(location) + '</strong></div><div><span>کارتۆن</span><strong>' + esc(number(cartonCount)) + '</strong></div><div><span>وێنە</span><strong>' + esc(number(photoCount)) + '</strong></div><div><span>کێش</span><strong>' + esc(weight == null || weight === '' ? '—' : String(weight) + ' kg') + '</strong></div></div>' +
-        '<div class="gc-live-wh-details"><span>Batch <b dir="ltr">' + esc(item.batch_code || '—') + '</b></span><span>Tracking <b dir="ltr">' + esc(item.barcode || md.carrier_tracking_number || md.tracking_number || item.scan_code || '—') + '</b></span><span>بەروار <b>' + esc(date(item.received_at || item.scanned_at || item.updated_at)) + '</b></span></div>' +
+        '<div class="gc-live-wh-details"><span>Batch <b dir="ltr">' + esc(item.batch_code || '—') + '</b></span><span>Tracking <b dir="ltr">' + esc(item.scan_code || md.tracking_number || '—') + '</b></span><span>بەروار <b>' + esc(date(item.received_at || item.scanned_at || item.updated_at)) + '</b></span></div>' +
         '<div class="gc-live-wh-linkstate"><span class="gc-live-wh-link ' + (linkKnown && linked ? 'green' : 'amber') + '">' + (linkKnown ? (linked ? 'هەژماری Portal پەیوەستە' : 'هەژماری Portal پەیوەست نییە') : 'پەیوەندی خاوەن پشکنین بکرێت') + '</span>' +
         (item.photo_signing_warning ? '<small>لینکی وێنە تایبەتەکان پێویستی بە پشکنینە.</small>' : '') + '</div>' +
         '<div class="gc-live-wh-actions"><button class="btn primary" type="button" data-receipt="' + esc(item.id) + '">وردەکاری و وێنەکان</button><button class="btn" type="button" data-receipt-owner="' + esc(item.id) + '">کونسۆڵی کڕیار</button>' +
@@ -1508,7 +1508,7 @@ async function renderCustomers() {
     locationFilter?.addEventListener('change', draw);
     noticeFilter?.addEventListener('change', draw);
     document.getElementById('newReceipt')?.addEventListener('click', () => newReceiptModal());
-    document.getElementById('scanReceipt')?.addEventListener('click', () => newReceiptModal({openScannerAfterMatch:true}));
+    document.getElementById('scanReceipt')?.addEventListener('click', () => scannerModal('warehouse'));
     draw();
   }
   function receiptDetail(id){
@@ -1537,7 +1537,7 @@ async function renderCustomers() {
         <p>Batch: <span class="mono">${esc(r.batch_code||'—')}</span></p>
         <p>ژمارەی کارتۆن: <b>${esc(r.carton_count||md.total_packages||1)}</b></p>
         <p>کێش: <b>${esc(r.weight_actual??md.gross_weight_kg??'—')} kg</b></p>
-        <p>Tracking / Scan: <span class="mono">${esc(r.barcode||md.carrier_tracking_number||md.tracking_number||r.scan_code||'—')}</span></p>
+        <p>Tracking / Scan: <span class="mono">${esc(r.scan_code||r.barcode||md.tracking_number||'—')}</span></p>
         <p>وەرگیرا لەلایەن: ${esc(r.created_by_name||'—')}</p>
         <p>کاتی وەرگرتن: ${esc(date(r.received_at||r.scanned_at||r.updated_at))}</p>
         <p>کاتی تۆمارکردنی وێنە: ${esc(date(r.photo_taken_at||r.received_at))}</p>
@@ -1603,11 +1603,11 @@ async function renderCustomers() {
     const branchScopedLocation=branchLocation[staffBranch];
     const defaultLocation=prefill.location||roleLocation[staffRole]||branchScopedLocation||(['super_admin','admin'].includes(staffRole)?'':'Dubai');
     const availableLocations=roleLocation[staffRole]?[roleLocation[staffRole]]:(['super_admin','admin'].includes(staffRole)||staffBranch==='all'?allLocations:(branchScopedLocation?[branchScopedLocation]:allLocations));
-    openModal('وەرگرتنی کاڵا لە کۆگا · GC Evidence',`<section class="form-field full gc-customer-first"><div class="eyebrow">CUSTOMER MATCH FIRST</div><label>سەرەتا کڕیاری هەبوو بدۆزەوە (GC Code / ناو / ژمارەی مۆبایل)</label><div class="form-grid"><input class="field" id="receiptCustomerLookup" value="\${esc(prefill.code||'')}" maxlength="80" autocomplete="off" placeholder="GC-338 یان ناوی کڕیار یان 07..."><button class="btn" type="button" id="receiptCustomerLookupBtn">گەڕان بۆ کڕیار</button></div><p id="receiptCustomerLookupStatus" class="muted" role="status" aria-live="polite">پێش سکانکردن، کڕیاری هەبوو هەڵبژێرە.</p><div id="receiptCustomerLookupResults"></div><div id="receiptShipmentPicker" class="form-field full" hidden></div></section><form id="receiptForm" class="form-grid" enctype="multipart/form-data">
-      <div class="form-field full"><label>کۆدی کڕیار لەسەر کارتۆن (GC Code)</label><input class="field" name="customer_code" required readonly value="" placeholder="پاشان کڕیار لە گەڕانەوە هەڵبژێرە" autocomplete="off" autocapitalize="characters"><input type="hidden" name="shipment_id" value=""><small class="receipt-owner-routing-hint">گرنگ: ئەم وەرگرتنە بۆ یەک کۆدی GC ـە. ئەگەر کارتۆنەکان کۆدی GC ـی جیاوازیان هەیە، هەر کۆدێک بە جیا تۆمار بکە تا وێنە و ئاگادارکردنەوەکە بۆ خاوەنی دروست بڕوات.</small></div>
+    openModal('وەرگرتنی کاڵا لە کۆگا · GC Evidence',`<form id="receiptForm" class="form-grid" enctype="multipart/form-data">
+      <div class="form-field full"><label>کۆدی کڕیار لەسەر کارتۆن (GC Code)</label><input class="field" name="customer_code" required value="${esc(prefill.code||'')}" placeholder="GC-1005" autocomplete="off" autocapitalize="characters"><small class="receipt-owner-routing-hint">گرنگ: ئەم وەرگرتنە بۆ یەک کۆدی GC ـە. ئەگەر کارتۆنەکان کۆدی GC ـی جیاوازیان هەیە، هەر کۆدێک بە جیا تۆمار بکە تا وێنە و ئاگادارکردنەوەکە بۆ خاوەنی دروست بڕوات.</small></div>
       <div class="form-field"><label>کۆگای وەرگرتن</label><select class="field" name="location" required>${['super_admin','admin'].includes(staffRole)?'<option value="" disabled>یەکەم کۆگای وەرگرتن هەڵبژێرە</option>':''}${availableLocations.map(location => `<option value="${location}">${location}</option>`).join('')}</select></div>
       <div class="form-field"><label>Batch code</label><input class="field" name="batch_code" value="${esc(prefill.batch||'')}" placeholder="بەتاڵ بهێڵەوە بۆ کۆدی تایبەتی خۆکار"></div>
-      <div class="form-field"><label>Tracking / Barcode</label><input class="field" id="receiptTrackingNumber" name="tracking_number" value="${esc(prefill.tracking||'')}" placeholder="Tracking ـی کۆمپانیا" autocomplete="off"><button class="btn" type="button" id="receiptTrackingScan" disabled>▦ سکانکردنی بارکۆدی تراکینگ</button></div>
+      <div class="form-field"><label>Tracking / Barcode</label><input class="field" name="tracking_number" value="${esc(prefill.tracking||'')}" placeholder="Tracking ـی کۆمپانیا"></div>
       <div class="form-field"><label>ژمارەی کارتۆن (هەموویان بۆ هەمان GC)</label><input class="field" name="total_packages" type="number" min="1" max="999" step="1" value="${esc(prefill.carton_count||1)}" required></div>
       <div class="form-field"><label>کێشی ڕاستەقینە (kg)</label><input class="field" name="gross_weight_kg" type="number" min="0" step="0.01"></div>
       <div class="form-field"><label>بەهای ڕاگەیەنراو</label><input class="field" name="declared_value" type="number" min="0" step="0.01"></div>
@@ -1617,127 +1617,11 @@ async function renderCustomers() {
       <div class="form-field"><label>Latitude (GPS)</label><input class="field" name="latitude" type="number" step="any" inputmode="decimal" placeholder="35.56"></div>
       <div class="form-field"><label>Longitude (GPS)</label><input class="field" name="longitude" type="number" step="any" inputmode="decimal" placeholder="44.00"></div>
       <div class="form-field full"><button class="btn" id="receiptGpsBtn" type="button">⌖ گرتنی شوێنی ئێستا بە GPS</button><small id="receiptGpsStatus" aria-live="polite">بە ڕەزامەندیی تۆ شوێن لە مۆبایلەکەوە تۆمار دەکرێت؛ دەتوانیت بە دەستیش بنووسیت.</small></div>
-      <div class="form-field full" id="gcTrackingScanner" hidden style="border:1px solid rgba(0,180,195,.35);border-radius:14px;padding:12px"><div class="form-field"><video id="gcTrackingScanVideo" autoplay muted playsinline style="width:100%;max-height:52vh;min-height:210px;object-fit:cover;background:#061321;border-radius:10px"></video><button class="btn" type="button" id="gcTrackingScanStop">داخستنی کامێرا</button><small id="gcTrackingScanStatus" class="muted" role="status" aria-live="polite">کامێرا ئامادە دەکرێت...</small></div></div><input type="hidden" name="photo_taken_at" value="">
+      <input type="hidden" name="photo_taken_at" value="">
       <input type="hidden" name="location_captured_at" value="">
       <div class="form-field full"><label>تێبینیی وەرگرتن</label><textarea class="field" name="notes" placeholder="بارودۆخی کارتۆن، کێشە، ژمارەی پەکەج یان زانیاریی زیاتری کۆگا"></textarea></div>
     </form>`,'<button class="btn" data-close>هەڵوەشاندنەوە</button><button class="btn primary" id="saveReceipt">تۆمارکردن و ئاگادارکردنەوەی کڕیار</button>');
     const receiptForm=document.getElementById('receiptForm');
-    const customerLookup=document.getElementById('receiptCustomerLookup');
-    const customerLookupStatus=document.getElementById('receiptCustomerLookupStatus');
-    const customerLookupResults=document.getElementById('receiptCustomerLookupResults');
-    const shipmentPicker=document.getElementById('receiptShipmentPicker');
-    const customerCodeField=receiptForm?.querySelector('input[name="customer_code"]');
-    const shipmentIdField=receiptForm?.querySelector('input[name="shipment_id"]');
-    const trackingInput=receiptForm?.querySelector('input[name="tracking_number"]');
-    let selectedCustomer=null, selectedShipments=[], trackingScanType=prefill.scanType||'manual', scannerControls=null, scannerActive=false, zxingLoadPromise=null;
-    const loadZXing=()=>{
-      if(window.ZXingBrowser?.BrowserMultiFormatReader)return Promise.resolve();
-      if(zxingLoadPromise)return zxingLoadPromise;
-      zxingLoadPromise=new Promise((resolve,reject)=>{
-        const script=document.createElement('script');
-        script.src='https://cdn.jsdelivr.net/npm/@zxing/browser@0.2.1/umd/zxing-browser.min.js';
-        script.onload=()=>window.ZXingBrowser?.BrowserMultiFormatReader?resolve():reject(new Error('Barcode library not initialized'));
-        script.onerror=()=>reject(new Error('Barcode library failed to load'));
-        document.head.appendChild(script);
-      });
-      return zxingLoadPromise;
-    };
-    const stopTrackingScanner=()=>{
-      scannerActive=false;
-      try{scannerControls?.stop()}catch{}
-      scannerControls=null;
-      const video=document.getElementById('gcTrackingScanVideo');
-      if(video?.srcObject){video.srcObject.getTracks().forEach(track=>track.stop());video.srcObject=null;}
-      const panel=document.getElementById('gcTrackingScanner');if(panel)panel.hidden=true;
-      if(window.__gcStopTrackingScanner===stopTrackingScanner)window.__gcStopTrackingScanner=null;
-    };
-    window.__gcStopTrackingScanner=stopTrackingScanner;
-    const startTrackingScanner=async()=>{
-      if(!selectedCustomer){toast('سەرەتا کڕیاری هەبوو هەڵبژێرە.','bad');return}
-      const panel=document.getElementById('gcTrackingScanner'),video=document.getElementById('gcTrackingScanVideo'),status=document.getElementById('gcTrackingScanStatus');
-      if(!navigator.mediaDevices?.getUserMedia){status.textContent='کامێرا لەم براوزەرەدا بەردەست نییە؛ ژمارەکە بە دەست بنووسە.';panel.hidden=false;return}
-      panel.hidden=false;status.textContent='داوای مۆڵەتی کامێرا دەکرێت…';scannerActive=true;
-      try{
-        await loadZXing();
-        const reader=new window.ZXingBrowser.BrowserMultiFormatReader();
-        scannerControls=await reader.decodeFromConstraints({audio:false,video:{facingMode:{ideal:'environment'}}},video,(result,_error,controls)=>{
-          if(!result||!scannerActive)return;
-          const value=String(result.getText()||'').trim();
-          if(!value)return;
-          trackingInput.value=value;trackingScanType='barcode';
-          const typeField=receiptForm.querySelector('input[name="scan_type"]');
-          if(typeField)typeField.value='barcode';
-          status.textContent='✓ تراکینگ خوێندرایەوە: '+value;
-          if(navigator.vibrate)navigator.vibrate(55);
-          stopTrackingScanner();
-          toast('Tracking Number سەرکەوتووانە سکان کرا.','ok');
-        });
-        if(!scannerActive)scannerControls?.stop();
-        else status.textContent='بارکۆدی سەر لیبڵەکە بخەرە ناو چوارچێوەی کامێرا.';
-      }catch(error){
-        stopTrackingScanner();
-        panel.hidden=false;
-        status.textContent='کامێرا نەکرایەوە؛ مۆڵەتی Camera بدە یان ژمارەکە بە دەست بنووسە. '+String(error.message||'');
-      }
-    };
-    const renderShipmentChoice=(shipments)=>{
-      selectedShipments=Array.isArray(shipments)?shipments:[];
-      const formatShipment=row=>String(row.tracking_id||row.tracking_number||row.id||'Shipment');
-      shipmentIdField.value='';
-      if(!selectedShipments.length){
-        shipmentPicker.hidden=false;
-        shipmentPicker.innerHTML='<small class="muted">کڕیار پشتڕاست کرایەوە؛ باری چالاکی پێشوو نەدۆزرایەوە. وەسڵەکە بە خاوەنی کڕیارەوە تۆمار دەکرێت.</small>';
-        return;
-      }
-      if(selectedShipments.length===1){
-        shipmentIdField.value=String(selectedShipments[0].id);
-        const row=selectedShipments[0];
-        shipmentPicker.hidden=false;
-        shipmentPicker.innerHTML='<strong>✓ باری چالاک خۆکارانە دیاری کرا</strong><small dir="ltr">'+esc(formatShipment(row))+' · '+esc(row.origin_key||'')+' → '+esc(row.dest_key||'')+'</small>';
-        return;
-      }
-      shipmentPicker.hidden=false;
-      shipmentPicker.innerHTML='<label>چەند باری چالاک بۆ ئەم کڕیارە هەیە؛ ئەوەی ئەم پاکەتە پەیوەندی پێوەیە هەڵبژێرە<select class="field" id="receiptShipmentChoice"><option value="">یەکێک هەڵبژێرە...</option>'+selectedShipments.map(row=>'<option value="'+esc(row.id)+'">'+esc(formatShipment(row))+' · '+esc(row.origin_key||'')+' → '+esc(row.dest_key||'')+'</option>').join('')+'</select></label><small class="muted">تا باری دروست هەڵنەبژێریت، وەسڵ تۆمار ناکرێت.</small>';
-      document.getElementById('receiptShipmentChoice').addEventListener('change',event=>{shipmentIdField.value=event.target.value;});
-    };
-    const confirmCustomer=async(customer)=>{
-      const code=String(customer?.gc_code||customer?.code||'').trim().toUpperCase().replace(/\s+/g,'');
-      if(!customer?.id||!/^GC-[A-Z0-9-]{2,30}$/.test(code)){customerLookupStatus.textContent='کڕیارێکی هەڵبژێردراو دەبێت GC Code ـی دروستی هەبێت.';return}
-      customerLookupStatus.textContent='زانیاریی کڕیار پشتڕاست دەکرێتەوە…';
-      try{
-        const detail=await request(FN.account,'/?kind=customer_match&q='+encodeURIComponent(code));
-        const exact=detail.customer||((detail.customers||[]).find(row=>String(row.id)===String(customer.id)));
-        if(!exact||String(exact.id)!==String(customer.id))throw new Error('کڕیار لە داتابەیسی پارێزراودا پشتڕاست نەکرایەوە.');
-        selectedCustomer=exact;
-        customerCodeField.value=code;
-        customerLookup.value=code;
-        customerLookupStatus.innerHTML='<strong>✓ کڕیار پشتڕاست کرایەوە</strong> · '+esc(exact.name||'')+' · '+esc(code)+' · '+esc(exact.phone||exact.phone2||'ژمارەی مۆبایل نییە');
-        document.getElementById('receiptTrackingScan').disabled=false;
-        renderShipmentChoice(detail.shipments||[]);
-        if(prefill.openScannerAfterMatch)startTrackingScanner();
-      }catch(error){selectedCustomer=null;customerCodeField.value='';shipmentIdField.value='';document.getElementById('receiptTrackingScan').disabled=true;customerLookupStatus.textContent=error.message||'پشتڕاستکردنەوەی کڕیار سەرکەوتوو نەبوو.';}
-    };
-    const lookupCustomer=async()=>{
-      const query=String(customerLookup.value||'').trim();
-      if(query.length<2){customerLookupStatus.textContent='لانیکەم دوو پیت یان ژمارە بنووسە.';return}
-      selectedCustomer=null;customerCodeField.value='';shipmentIdField.value='';document.getElementById('receiptTrackingScan').disabled=true;shipmentPicker.hidden=true;customerLookupResults.innerHTML='';
-      customerLookupStatus.textContent='لە کڕیارە چالاکەکاندا دەگەڕێت…';
-      try{
-        const result=await request(FN.account,'/?kind=customer_match&q='+encodeURIComponent(query));
-        const candidates=Array.isArray(result.customers)?result.customers:(result.customer?[result.customer]:[]);
-        if(!candidates.length){customerLookupStatus.textContent='هیچ کڕیارێکی چالاک بەو زانیارییە نەدۆزرایەوە.';return}
-        if(candidates.length===1){await confirmCustomer(candidates[0]);return}
-        customerLookupStatus.textContent='چەند کڕیارێک هاوشێوەن؛ تکایە یەکێکیان هەڵبژێرە.';
-        customerLookupResults.innerHTML=candidates.map((row,index)=>'<button class="btn" type="button" data-customer-match="'+index+'" style="display:flex;justify-content:space-between;gap:12px;width:100%;margin-top:7px;text-align:start"><span>'+esc(row.name||'کڕیار')+' · '+esc(row.gc_code||row.code||'—')+'</span><small>'+esc(row.phone||row.phone2||'')+'</small></button>').join('');
-        customerLookupResults.querySelectorAll('[data-customer-match]').forEach(button=>button.addEventListener('click',()=>confirmCustomer(candidates[Number(button.dataset.customerMatch)])));
-      }catch(error){customerLookupStatus.textContent=error.message||'گەڕانی کڕیار سەرکەوتوو نەبوو.';}
-    };
-    customerLookup?.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();lookupCustomer();}});
-    document.getElementById('receiptCustomerLookupBtn')?.addEventListener('click',lookupCustomer);
-    document.getElementById('receiptTrackingScan')?.addEventListener('click',startTrackingScanner);
-    document.getElementById('gcTrackingScanStop')?.addEventListener('click',stopTrackingScanner);
-    trackingInput?.addEventListener('input',()=>{trackingScanType='manual';const typeField=receiptForm?.querySelector('input[name="scan_type"]');if(typeField)typeField.value='manual';});
-    if(prefill.code){customerLookup.value=prefill.code;void lookupCustomer();}
     const locationField=receiptForm?.querySelector('select[name="location"]');
     if(locationField)locationField.value=defaultLocation;
     const photoInput=receiptForm?.querySelector('input[name="photos"]');
@@ -1802,15 +1686,13 @@ async function renderCustomers() {
       const form=document.getElementById('receiptForm');
       const button=document.getElementById('saveReceipt');
       if(!form||!button||button.disabled)return;
-      if(!selectedCustomer){toast('سەرەتا کڕیاری هەبوو بدۆزەوە و پشتڕاستی بکەرەوە.','bad');return}
-      if(selectedShipments.length>1&&!shipmentIdField.value){toast('چەند باری چالاک هەیە؛ یەکێک هەڵبژێرە.','bad');return}
       if(!form.reportValidity())return;
       const files=form.querySelector('input[name="photos"]')?.files;
       if(!files?.length){toast('لانیکەم یەک وێنەی بەڵگە باربکە','bad');return}
       if(files.length>8){toast('زۆرترین ژمارەی وێنە ٨ دانەیە','bad');return}
       const fd=new FormData(form);
       fd.set('idempotency_key',idempotencyKey);
-      fd.set('scan_type',trackingScanType);
+      fd.set('scan_type',prefill.scanType||'qr');
       button.disabled=true;button.setAttribute('aria-busy','true');button.textContent='لە تۆمارکردن و ناردنی ئاگادارکردنەوەدایە…';
       try{
         const result=await request(FN.warehouse,'/',{method:'POST',body:fd});
@@ -1936,7 +1818,7 @@ async function renderCustomers() {
   function updateBadges(){const set=(id,n)=>{const x=document.getElementById(id);if(!x)return;x.textContent=String(n||0);x.classList.toggle('hidden',!n)};const alerts=(state.data.alerts||[]).filter(x=>!Array.isArray(x.read_by)||!x.read_by.includes(state.staff?.id)).length;const requests=(state.data.quoteRequests||[]).filter(x=>!['closed','replied','accepted','rejected'].includes(x.status)).length;const staffChat=(state.data.chatRooms||[]).reduce((s,x)=>s+Number(x.unread_count||0),0);set('alertsBadge',alerts);set('requestBadge',requests);set('staffChatBadge',staffChat);set('customerChatBadge',(state.data.customerChat?.threads||[]).filter(x=>x.status==='open').length);}
 
   function openModal(title, body, footer='') { closeModal(); const back=document.createElement('div'); back.className='modal-backdrop'; back.id='gcModal'; back.innerHTML=`<div class="modal"><div class="modal-head"><div><div class="eyebrow">GLOBAL CLOUD · CONTROL</div><h2>${esc(title)}</h2></div><button class="btn" data-close>×</button></div><div>${body}</div>${footer?`<div class="modal-foot">${footer}</div>`:''}</div>`;document.body.appendChild(back);back.addEventListener('click',e=>{if(e.target===back||e.target.closest('[data-close]'))closeModal()});return back; }
-  function closeModal(){window.__gcStopTrackingScanner?.();const modal=document.getElementById('gcModal');modal?.querySelectorAll('img[data-receipt-preview-url]').forEach(image=>{try{URL.revokeObjectURL(image.dataset.receiptPreviewUrl||image.src)}catch{}});modal?.remove();stopScanner();}
+  function closeModal(){const modal=document.getElementById('gcModal');modal?.querySelectorAll('img[data-receipt-preview-url]').forEach(image=>{try{URL.revokeObjectURL(image.dataset.receiptPreviewUrl||image.src)}catch{}});modal?.remove();stopScanner();}
 
   async function scannerModal(kind){
     openModal(kind==='customer'?'Scan GC Customer':'Scan GC for Warehouse',`<div class="scanner"><video id="scanVideo" autoplay playsinline muted></video><div class="scanline"></div></div><div id="scanStatus" class="muted" style="margin-top:9px">Camera دەستپێدەکات…</div>`,'<button class="btn" id="manualScan">دابینکردنی دستی</button><button class="btn" data-close>داخستن</button>');
