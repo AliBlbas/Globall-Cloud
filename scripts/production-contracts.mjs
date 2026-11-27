@@ -250,6 +250,8 @@ if (!shopAuthMigration.includes('private.is_real_authenticated_session()') ||
 }
 
 const staffV5Script = read('staff-os-v5-20261017.js')
+if (!staffV5Script.includes('login-hint') || !staffV5Script.includes('هەژماری چالاکی Staff') || !staffV5Script.includes('invalid login credentials') || !staffV5Script.includes('if (!email)')) fail('Staff login must explain example email and show actionable authentication errors');
+else ok('Staff login clarifies example email and surfaces actionable Auth errors');
 const staffCustomerBridgeScript = read('gc-staff-customer-bridge-20261019.js')
 const staffUnifiedStyles = read('gc-staff-ui-refinement-20261019-v4.css')
 const staffV5EnhancementLoader = read('staff-os-v5-enhancement-loader-20261017.js')
@@ -358,7 +360,7 @@ else ok('Public mobile navigation exposes state and keyboard dismissal');
 if (!staffV5Script.includes('Globall Cloud Staff') || !staffV5Script.includes('document.title') || !read('gc-staff-land-manifest-20261018.js').includes("document.title='مانيفێستی دوبەی — Globall Cloud Staff'")) fail('Staff console document title must track the active view');
 else ok('Staff document title follows the active panel and land manifest');
 
-if (!staff.includes('gc-staff-mobile-elegance-20261106.css?v=3') || !staff.includes('gc-staff-dashboard-final-20261103.css?v=2') || !staff.includes('staff-os-entry-loader-20261124.js?v=7') || !staff.includes('data-gc-staff-entry-loader="1"></script>') || !staffEntryLoader.includes("'/staff-os-v5-20261017.js?v=20261127-login-keyboard-4'") || !staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=28') || !staff.includes('<body class="gc-staff-os-shell') || !staffV5EnhancementLoader.includes("'/gc-staff-command-deck-20261023.css?v=20261120-2'")) fail('Staff OS entry loader, final responsive design layer, cache-busted mobile dock, or scoped shell is missing')
+if (!staff.includes('gc-staff-mobile-elegance-20261106.css?v=3') || !staff.includes('gc-staff-dashboard-final-20261103.css?v=2') || !staff.includes('staff-os-entry-loader-20261124.js?v=7') || !staff.includes('data-gc-staff-entry-loader="1"></script>') || !staffEntryLoader.includes("'/staff-os-v5-20261017.js?v=20261127-login-help-5'") || !staff.includes('staff-os-v5-enhancement-loader-20261017.js?v=28') || !staff.includes('<body class="gc-staff-os-shell') || !staffV5EnhancementLoader.includes("'/gc-staff-command-deck-20261023.css?v=20261120-2'")) fail('Staff OS entry loader, final responsive design layer, cache-busted mobile dock, or scoped shell is missing')
 else ok('Staff OS loads the scoped command-system design layer')
 
 if (!staff.includes('<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js" defer data-gc-qrcode="1"></script>') || !staff.includes('<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js" defer data-gc-jsbarcode="1"></script>')) fail('Staff QRCode and barcode libraries must use valid browser bundles and deterministic deferred loading')
@@ -544,7 +546,7 @@ else ok('Repository validation guards the retired public registration endpoint')
 
 
 
-if (!staffEntryLoader.includes("'/staff-os-v5-20261017.js?v=20261127-login-keyboard-4'") || !staffEntryLoader.includes('await loadSdk()') || !staffEntryLoader.includes('await loadScript(CONTROLLER, 10000, null)') || !staff.includes('staff-os-entry-loader-20261124.js?v=7" defer')) fail('Staff structured cargo editor controller is not loaded through the deterministic deferred entry loader')
+if (!staffEntryLoader.includes("'/staff-os-v5-20261017.js?v=20261127-login-help-5'") || !staffEntryLoader.includes('await loadSdk()') || !staffEntryLoader.includes('await loadScript(CONTROLLER, 10000, null)') || !staff.includes('staff-os-entry-loader-20261124.js?v=7" defer')) fail('Staff structured cargo editor controller is not loaded through the deterministic deferred entry loader')
 
 const mobileLoader = read('staff-os-v5-enhancement-loader-20261017.js')
 if (!mobileLoader.includes("'/gc-staff-mobile-dock-20261016.js?v=8'")) fail('Staff V5 must load the single mobile dock from its authenticated-shell enhancement loader')
@@ -668,7 +670,7 @@ if (!staffV5Script.includes('data-dubai-alert-open-warehouse') || !staffV5Script
 else ok('Warehouse notification center provides safe empty and warehouse handoff states')
 if (!staffV5Script.includes('notification_status') || !staffV5Script.includes('result.notification?.not_applicable') || !staffV5Script.includes('isDubaiLocation')) fail('Warehouse notification status must remain Dubai-scoped and idempotent')
 else ok('Warehouse notification status remains Dubai-scoped and retry-safe')
-if (!staffEntryLoader.includes("'/staff-os-v5-20261017.js?v=20261127-login-keyboard-4'") || !staff.includes('gc-staff-dashboard-final-20261103.css?v=2')) fail('Staff notification center release must use immutable-cache asset URLs')
+if (!staffEntryLoader.includes("'/staff-os-v5-20261017.js?v=20261127-login-help-5'") || !staff.includes('gc-staff-dashboard-final-20261103.css?v=2')) fail('Staff notification center release must use immutable-cache asset URLs')
 else ok('Staff notification center assets use cache-busted URLs')
 console.log('Invoice finance contract')
 const invoiceSystem = read('gc-staff-invoice-system-20261116.js')
