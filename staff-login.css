@@ -1,0 +1,29 @@
+:root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#061525;color:#eef8fc}
+*{box-sizing:border-box}
+html,body{width:100%;min-width:320px;min-height:100%;margin:0;padding:0;overflow-x:hidden}
+body{min-height:100svh;min-height:100dvh;background:radial-gradient(ellipse at 50% 0%,#103a4a 0%,#071d2c 42%,#030d18 100%);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#app,.login,.login-card,.brand-row,.brand-copy,.field-group,form{ -webkit-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important}
+#app{min-height:100svh;min-height:100dvh;display:grid;place-items:center;padding:max(18px,env(safe-area-inset-top)) 14px max(24px,env(safe-area-inset-bottom))}
+.login{width:100%;display:grid;place-items:center}
+.login-card{width:min(100%,500px);padding:clamp(22px,5vw,34px);border-radius:26px;background:#fff;color:#153348;box-shadow:0 24px 80px rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.8)}
+.brand-row{display:flex;align-items:center;gap:12px;justify-content:flex-start;margin-bottom:26px}
+.brand-mark{width:62px;height:62px;flex:0 0 62px;display:grid;place-items:center;border-radius:19px;background:linear-gradient(145deg,#47d9e6,#0696aa);color:#062333;font-weight:900;font-size:22px}
+.brand-copy{display:grid;gap:4px}
+.brand-copy strong{font-size:20px;color:#102d40}
+.brand-copy span{font-size:10px;font-weight:900;letter-spacing:2px;color:#0d96a8;direction:ltr;text-align:right}
+.eyebrow{font-size:10px;letter-spacing:1.7px;color:#0e9cad;font-weight:900;direction:ltr;text-align:right;margin-bottom:7px}
+h1{font-size:clamp(23px,6vw,29px);line-height:1.6;margin:0 0 7px;color:#102d40}
+.intro{margin:0 0 15px;font-size:14px;line-height:1.9;color:#657c8c}
+.hint{padding:10px 12px;margin:0 0 18px;border:1px solid #c9e9ed;border-radius:12px;background:#f0fafb;color:#3d6573;font-size:12px;line-height:1.9}
+form{display:grid;gap:15px}
+.field-group{display:grid;gap:8px;min-width:0}
+label{font-size:13px;font-weight:800;color:#294b5d}
+input{display:block;width:100%;min-width:0;min-height:58px;padding:14px 15px;border:1px solid #bdd3dd;border-radius:14px;background:#fff;color:#153348;caret-color:#0799a9;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:17px;line-height:1.5;text-align:left;direction:ltr;opacity:1;visibility:visible;pointer-events:auto;touch-action:auto;-webkit-appearance:none;appearance:none;-webkit-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important;-webkit-user-modify:read-write-plaintext-only!important;outline:none;box-shadow:none}
+input::placeholder{color:#8397a1;opacity:1}
+input:focus{border:2px solid #20afbd;padding:13px 14px;box-shadow:0 0 0 3px rgba(32,175,189,.13)}
+.login-message{min-height:25px;margin:0;color:#b32635;font-size:12px;line-height:1.9;overflow-wrap:anywhere}
+button{display:block;width:100%;min-height:56px;border:0;border-radius:14px;padding:13px 16px;background:linear-gradient(120deg,#10b8c6,#087f97);color:#fff;font-size:16px;font-weight:900;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+button:disabled{opacity:.65;cursor:wait}
+.footer-line{margin-top:20px;text-align:center;color:#8195a2;font:700 9px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;letter-spacing:.6px;direction:ltr}
+@media(max-width:420px){.login-card{padding:22px 18px;border-radius:23px}.brand-mark{width:56px;height:56px;flex-basis:56px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
