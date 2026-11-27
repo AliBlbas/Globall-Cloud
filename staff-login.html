@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#061525">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>Globall Cloud — Staff Secure Login</title>
+  <link rel="icon" href="/logo-icon.png">
+  <link rel="stylesheet" href="/staff-login.css?v=20261127-1">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+  <script src="/staff-login.js?v=20261127-1" defer></script>
+</head>
+<body class="gc-standalone-staff-login">
+  <main id="app" data-gc-isolated-login="1">
+    <section class="login" dir="rtl">
+      <div class="login-card">
+        <div class="brand-row">
+          <div class="brand-mark" aria-hidden="true">GC</div>
+          <div class="brand-copy">
+            <strong>Globall Cloud</strong>
+            <span>SECURE STAFF ACCESS</span>
+          </div>
+        </div>
+        <div class="eyebrow">STAFF OPERATING SYSTEM · V5</div>
+        <h1>چوونەژوورەوەی ستاف</h1>
+        <p class="intro">بە ئیمەیل و وشەی نهێنیی هەژماری چالاکی Staff بچۆ ژوورەوە.</p>
+        <div class="hint">ئیمەیلی نموونە نییە؛ ئیمەیلی ڕاستەقینەی هەژماری ستافی خۆت بنووسە.</div>
+        <form id="loginForm" autocomplete="on" novalidate>
+          <div class="field-group">
+            <label for="loginEmail">ئیمەیل</label>
+            <input id="loginEmail" name="email" type="text" inputmode="email" dir="ltr"
+              autocapitalize="none" autocorrect="off" spellcheck="false"
+              autocomplete="username" enterkeyhint="next" required
+              placeholder="name@company.com">
+          </div>
+          <div class="field-group">
+            <label for="loginPassword">وشەی نهێنی</label>
+            <input id="loginPassword" name="password" type="password" dir="ltr"
+              autocapitalize="none" autocorrect="off" spellcheck="false"
+              autocomplete="current-password" enterkeyhint="go" required
+              placeholder="وشەی نهێنیی خۆت بنووسە">
+          </div>
+          <p id="loginMsg" class="login-message" role="alert" aria-live="assertive"></p>
+          <button id="loginBtn" type="submit">چوونەژوورەوە</button>
+        </form>
+        <div class="footer-line">AUTH · ROW LEVEL SECURITY · PROTECTED EDGE FUNCTIONS</div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
