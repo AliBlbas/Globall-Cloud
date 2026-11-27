@@ -559,7 +559,9 @@ Deno.serve(async(req)=>{
  if(req.method!=='POST'&&req.method!=='GET')return json(req,{error:'Method not allowed'},405);
  try{
   if(req.method==='POST')return json(req,await createReceipt(req));
-  const trackingNumber=new URL(req.url).searchParams.get('tracking_number');\n  if(trackingNumber)return json(req,await findReceiptByTracking(req));\n  return json(req,await listReceipts(req));
+  const trackingNumber=new URL(req.url).searchParams.get('tracking_number');
+  if(trackingNumber)return json(req,await findReceiptByTracking(req));
+  return json(req,await listReceipts(req));
  }catch(error){
   const message=error instanceof Error?error.message:String(error);
   const status=/Unauthorized/i.test(message)?401:/MEDICAL_EQUIPMENT_PROHIBITED/.test(message)?422:/Forbidden|permission|branch/i.test(message)?403:/MSDS_REQUIRED|not found|required|must be|belong|unsupported photo|unsupported warehouse|Invalid MSDS|12 MB|at most/i.test(message)?400:500;
