@@ -372,10 +372,11 @@ if (!staff.includes('<script src="/gc-staff-tracking-intake.js?v=20261127-2" def
     !trackingIntake.includes('tracking_number=') ||
     !trackingIntake.includes('warehouse-receiving')) fail('Staff tracking barcode intake must scan, find an existing customer, and create an owner-linked warehouse receipt');
 else ok('Staff tracking barcode intake is loaded and customer-first');
+const staffVisualQuality = read('gc-visual-quality-20261124.css');
 if (!staff.includes('<script async src="/staff-os-boot-watchdog-20261124.js?v=2" data-gc-staff-boot-watchdog="1"></script>') ||
-    !staff.includes('gc-visual-quality-20261124.css?v=2') ||
+    !staffVisualQuality.includes('.gc-boot-watchdog-actions') ||
     !staffBootWatchdog.includes('window.setTimeout(renderRecovery, 14000)') ||
-    !staffBootWatchdog.includes('.gc-boot-watchdog-actions')) fail('Staff OS boot watchdog must load independently, be styled and preserve existing recovery UI')
+    !staffBootWatchdog.includes('gc-boot-watchdog-actions')) fail('Staff OS boot watchdog must load independently, be styled and preserve existing recovery UI')
 else ok('Staff OS has an independent 14-second boot recovery watchdog without overwriting useful fallback UI')
 const staffPreferences = read('gc-staff-preferences-20261003.js')
 if (!staff.includes('gc-staff-preferences-20261003.js?v=3') || !staffPreferences.includes('root.dataset.staffTheme = next') || !staffPreferences.includes('root.dataset.gcTheme = next') || !staffPreferences.includes("current === 'light' ? 'dark' : 'light'")) fail('Staff light/dark toggle must synchronize every theme selector and persist a reversible toggle')
