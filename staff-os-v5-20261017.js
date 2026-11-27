@@ -160,7 +160,15 @@
     const { data, error } = await state.client.auth.signInWithPassword({ email, password });
     if (error) throw error;
     state.session = data.session;
-    await identify(state.session);
+    try {
+      await identify(state.session);
+    } catch (error) {
+      // Do not leave a non-staff Auth session active in the Staff OS browser context.
+      try { await state.client.auth.signOut({ scope: 'local' }); } catch {}
+      state.session = null;
+      state.staff = null;
+      throw error;
+    }
     const aal = await state.client.auth.mfa.getAuthenticatorAssuranceLevel().catch(() => ({ data:null }));
     if (aal.data?.nextLevel === 'aal2' && aal.data.currentLevel !== 'aal2') {
       renderLogin(true);
@@ -262,37 +270,65 @@
 
   function renderLogin(mfa=false, message='') {
     document.title = `${mfa ? 'پشتڕاستکردنەوەی 2FA' : 'چوونەژوورەوە'} — Globall Cloud Staff`;
-    renderSurface(`<main class="login"><section class="login-card"><div class="login-title"><div class="brand-logo">GC</div><div><b>Globall Cloud</b><div class="eyebrow">SECURE STAFF ACCESS</div></div></div><h1>${mfa?'پشتڕاستکردنەوەی 2FA':'Staff Command Center'}</h1><p>${mfa?'کۆدی ٦ ژمارەیی Google Authenticator بنووسە.':'چوونەژوورەوە بۆ سیستەمی کارگێڕی و عملیات.'}</p><form id="loginForm" style="margin-top:16px" novalidate><div id="loginFields" class="${mfa?'hidden':''}"><div class="form-field"><label for="loginEmail">ئیمەیل</label><input class="field" id="loginEmail" name="email" type="email" inputmode="email" dir="ltr" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="next" autocomplete="username" required placeholder="staff@example.com"></div><div class="form-field" style="margin-top:9px"><label for="loginPassword">وشەی نهێنی</label><input class="field" id="loginPassword" name="password" type="password" dir="ltr" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="go" autocomplete="current-password" required placeholder="••••••••"></div></div>${mfa?'<div class="form-field"><label for="mfaCode">کۆدی 2FA</label><input class="field" id="mfaCode" name="mfa_code" type="text" inputmode="numeric" dir="ltr" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="go" maxlength="6" autocomplete="one-time-code" placeholder="000000" style="text-align:center;letter-spacing:6px;font:900 20px var(--mono)"></div>':' '}<div class="login-msg" id="loginMsg">${esc(message)}</div><button class="btn primary" id="loginBtn" type="submit">${mfa?'پشتڕاستکردنەوەی 2FA':'چوونەژوورەوە'}</button></form><div style="margin-top:12px;color:#6f8da8;font-size:9px">GLOBALL CLOUD · AUTH + RLS + EDGE FUNCTIONS</div></section></main>`);
+    renderSurface(`<main class="login"><section class="login-card"><div class="login-title"><div class="brand-logo">GC</div><div><b>Globall Cloud</b><div class="eyebrow">SECURE STAFF ACCESS</div></div></div><h1>${mfa?'پشتڕاستکردنەوەی 2FA':'Staff Command Center'}</h1><p>${mfa?'کۆدی ٦ ژمارەیی Google Authenticator بنووسە.':'چوونەژوورەوە بۆ سیستەمی کارگێڕی و عملیات.'}</p>${mfa?'':'<div class="login-hint">ئیمەیلی نموونەی خانەکە تەنها بۆ ڕێنماییە؛ ئیمەیلی هەژماری چالاکی Staff ـی خۆت بنووسە.</div>'}<form id="loginForm" style="margin-top:16px" novalidate><div id="loginFields" class="${mfa?'hidden':''}"><div class="form-field"><label for="loginEmail">ئیمەیل</label><input class="field" id="loginEmail" name="email" type="email" inputmode="email" dir="ltr" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="next" autocomplete="username" required placeholder="email@example.com"></div><div class="form-field" style="margin-top:9px"><label for="loginPassword">وشەی نهێنی</label><input class="field" id="loginPassword" name="password" type="password" dir="ltr" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="go" autocomplete="current-password" required placeholder="••••••••"></div></div>${mfa?'<div class="form-field"><label for="mfaCode">کۆدی 2FA</label><input class="field" id="mfaCode" name="mfa_code" type="text" inputmode="numeric" dir="ltr" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="go" maxlength="6" autocomplete="one-time-code" placeholder="000000" style="text-align:center;letter-spacing:6px;font:900 20px var(--mono)"></div>':' '}<div class="login-msg" id="loginMsg">${esc(message)}</div><button class="btn primary" id="loginBtn" type="submit">${mfa?'پشتڕاستکردنەوەی 2FA':'چوونەژوورەوە'}</button></form><div style="margin-top:12px;color:#6f8da8;font-size:9px">GLOBALL CLOUD · AUTH + RLS + EDGE FUNCTIONS</div></section></main>`);
     const form = document.getElementById('loginForm');
     if (!form) return;
     form.onsubmit = async (e) => {
       e.preventDefault();
-      state.loginAttempted = true;
       const msg = document.getElementById('loginMsg');
       const btn = document.getElementById('loginBtn');
+      if (!msg || !btn) return;
       msg.textContent = '';
-      btn.disabled = true;
-      try {
-        if (mfa) {
-          const code = text(document.getElementById('mfaCode')?.value);
-          if (!/^\d{6}$/.test(code)) throw new Error('کۆدی ٦ ژمارەیی بنووسە');
-          const factors = await state.client.auth.mfa.listFactors();
-          const factor = factors.data?.totp?.find(x => x.status === 'verified');
-          if (!factor) throw new Error('2FA factor نەدۆزرایەوە');
-          const challenge = await state.client.auth.mfa.challenge({ factorId: factor.id });
-          if (challenge.error) throw challenge.error;
-          const verified = await state.client.auth.mfa.verify({ factorId: factor.id, challengeId: challenge.data.id, code });
-          if (verified.error) throw verified.error;
-          const { data } = await getSessionSafely();
-          state.session = data.session;
-           await identify(state.session);
-           renderApp();
-           await loadTab(requestedStaffTab());
-         } else {
-          await handleLogin(text(document.getElementById('loginEmail').value), document.getElementById('loginPassword').value);
+      if (!mfa) {
+        const emailInput = document.getElementById('loginEmail');
+        const passwordInput = document.getElementById('loginPassword');
+        const email = String(emailInput?.value || '').trim().toLowerCase();
+        const password = String(passwordInput?.value || '');
+        if (!email) { msg.textContent = 'تکایە ئیمەیلی هەژماری ستافەکەت بنووسە.'; emailInput?.focus(); return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = 'فۆرماتی ئیمەیل دروست نییە.'; emailInput?.focus(); return; }
+        if (!password) { msg.textContent = 'تکایە وشەی نهێنی بنووسە.'; passwordInput?.focus(); return; }
+        state.loginAttempted = true;
+        btn.disabled = true;
+        btn.textContent = 'پەیوەندی بە سیستەمەوە…';
+        msg.textContent = 'چوونەژوورەوە پشکنین دەکرێت…';
+        try {
+          await handleLogin(email, password);
+        } catch (err) {
+          if (err?.code !== 'MFA_REQUIRED') {
+            const raw = String(err?.message || '');
+            if (/invalid login credentials/i.test(raw)) msg.textContent = 'ئیمەیل یان وشەی نهێنی هەڵەیە. دڵنیابە لەوەی ئیمەیلی هەژماری Staff ـەکەت بەکاردەهێنیت.';
+            else if (/email not confirmed/i.test(raw)) msg.textContent = 'ئیمەیلی هەژمارەکەت پشتڕاست نەکراوەتەوە؛ پەیوەندی بە بەڕێوەبەری سیستەمەوە بکە.';
+            else if (/too many requests|rate limit/i.test(raw)) msg.textContent = 'هەوڵی زۆر دراوە؛ چەند خولەک چاوەڕێ بکە و دووبارە هەوڵ بدە.';
+            else if (/failed to fetch|network|load failed/i.test(raw)) msg.textContent = 'پەیوەندی ئینتەرنێت یان Supabase کێشەی هەیە. ئینتەرنێتەکەت بپشکنە و دووبارە هەوڵ بدە.';
+            else msg.textContent = raw || 'چوونەژوورەوە سەرکەوتوو نەبوو.';
+          }
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'چوونەژوورەوە';
         }
+        return;
+      }
+
+      state.loginAttempted = true;
+      btn.disabled = true;
+      msg.textContent = 'کۆدی 2FA پشکنین دەکرێت…';
+      try {
+        const code = text(document.getElementById('mfaCode')?.value);
+        if (!/^\d{6}$/.test(code)) throw new Error('کۆدی ٦ ژمارەیی بنووسە');
+        const factors = await state.client.auth.mfa.listFactors();
+        const factor = factors.data?.totp?.find(x => x.status === 'verified');
+        if (!factor) throw new Error('2FA factor نەدۆزرایەوە');
+        const challenge = await state.client.auth.mfa.challenge({ factorId: factor.id });
+        if (challenge.error) throw challenge.error;
+        const verified = await state.client.auth.mfa.verify({ factorId: factor.id, challengeId: challenge.data.id, code });
+        if (verified.error) throw verified.error;
+        const { data } = await getSessionSafely();
+        state.session = data.session;
+        await identify(state.session);
+        renderApp();
+        await loadTab(requestedStaffTab());
       } catch (err) {
-        if (err?.code !== 'MFA_REQUIRED') msg.textContent = err.message || 'Login سەرکەوتوو نەبوو';
+        if (err?.code !== 'MFA_REQUIRED') msg.textContent = String(err?.message || 'پشتڕاستکردنەوەی 2FA سەرکەوتوو نەبوو.');
       } finally { btn.disabled = false; }
     };
   }
