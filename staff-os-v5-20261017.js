@@ -1508,7 +1508,7 @@ async function renderCustomers() {
     locationFilter?.addEventListener('change', draw);
     noticeFilter?.addEventListener('change', draw);
     document.getElementById('newReceipt')?.addEventListener('click', () => newReceiptModal());
-    document.getElementById('scanReceipt')?.addEventListener('click', () => scannerModal('warehouse'));
+    document.getElementById('scanReceipt')?.addEventListener('click', () => { if (typeof window.gcOpenTrackingIntake === 'function') void window.gcOpenTrackingIntake(); else void scannerModal('warehouse'); });
     draw();
   }
   function receiptDetail(id){
