@@ -540,6 +540,8 @@ if (!customerStyleLoader.includes('function ensureHomeDock() { return; }') || cu
 if (!read('gc-customer-workspace-elite-20261014.css').includes('body.gc-customer-app #gcWhatsAppFloat') || !read('gc-customer-workspace-elite-20261014.css').includes('body.gc-customer-app .gc-whatsapp-float')) fail('Floating marketing WhatsApp bubble must not overlap customer app navigation')
 if (!unifiedShell.includes('gc-unified-customer-experience-20261016.js?v=20261017-1') || !unifiedShell.includes('gc-customer-workspace-elite-20261014.css?v=23') || !unifiedShell.includes('gc-customer-experience-signature-20261017.css?v=3') || !unifiedShell.includes('gc-public-customer-style-loader-20261014.js?v=26') || !unifiedShell.includes('gc-csp-scripts/customer-portal-inline-20261017.js?v=20261128-mobile-global-scope-fix1')) fail('Customer-first app shell cache references are stale')
 else ok('Customer-first app shell loads current assets')
+if (!customerStyleLoader.includes('document.head.appendChild(link)') || customerStyleLoader.includes('document.body.appendChild(link)')) fail('Public override stylesheets must remain in document.head for WebKit compatibility')
+else ok('Public and customer override stylesheets stay in document.head for WebKit compatibility')
 const customerGcRegister = read('supabase/functions/customer-gc-register/index.ts')
 const supabaseConfig = read('supabase/config.toml')
 const legacyLoginPage = read('login.html')
