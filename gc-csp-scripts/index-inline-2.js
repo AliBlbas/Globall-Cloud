@@ -737,6 +737,7 @@ function route(id){
 const PBN_GUEST_TAB_FOR_PAGE = {home:'home', services:'shipments', track:'track', portal:'profile'};
 async function updatePortalBottomNavVisibility(pageId){
   const nav = document.getElementById('portalBottomNav');
+  if(!nav) return;
   if(pageId==='admin'){ nav.classList.remove('active'); return; }
   nav.classList.add('active');
   const profile = await getProfile();
@@ -768,7 +769,7 @@ function applyPbnMode(isAuthed){
    with "Profile" opening sign-in/sign-up. */
 function pbnTap(tab){
   const nav = document.getElementById('portalBottomNav');
-  if(nav.dataset.mode === 'auth'){ goPortalTab(tab); return; }
+  if(nav?.dataset.mode === 'auth'){ goPortalTab(tab); return; }
   if(tab==='home') route('home');
   else if(tab==='shipments') route('services');
   else if(tab==='track') route('track');
@@ -778,8 +779,14 @@ function goPortalTab(tab){
   currentPortalTab = tab;
   route('portal');
 }
-function toggleMobileMenu(){ document.getElementById('mobileMenu').classList.toggle('open'); }
-function closeMobileMenu(){ document.getElementById('mobileMenu').classList.remove('open'); }
+function toggleMobileMenu(){
+  const menu = document.getElementById('mobileMenu');
+  if(menu) menu.classList.toggle('open');
+}
+function closeMobileMenu(){
+  const menu = document.getElementById('mobileMenu');
+  if(menu) menu.classList.remove('open');
+}
 
 function goTrack(prefill){
   route('track');
