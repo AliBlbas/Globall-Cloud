@@ -1694,10 +1694,12 @@ function applyI18n(){
   renderLegalDocs();
   renderTestimonials();
   populateRequestSelects();
-  if(document.getElementById('page-services').classList.contains('active')) renderServicesDetail();
-  document.getElementById('yearNow').textContent = new Date().getFullYear();
-  document.getElementById('langKuBtn').classList.toggle('active', currentLang==='ku');
-  document.getElementById('langEnBtn').classList.toggle('active', currentLang==='en');
+  const servicesPage = document.getElementById('page-services');
+  if(servicesPage?.classList.contains('active')) renderServicesDetail();
+  const currentYear = document.getElementById('yearNow');
+  if(currentYear) currentYear.textContent = new Date().getFullYear();
+  document.getElementById('langKuBtn')?.classList.toggle('active', currentLang==='ku');
+  document.getElementById('langEnBtn')?.classList.toggle('active', currentLang==='en');
 }
 
 async function setLang(lang){
