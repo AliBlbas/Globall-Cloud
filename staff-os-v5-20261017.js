@@ -1893,10 +1893,34 @@ async function renderCustomers() {
   window.addEventListener('beforeunload',stopScanner);
 
   async function boot(){
+    const handoff = new URLSearchParams(location.search).get('staff_login') === 'success';
     try {
       await waitForSupabase();
-      // Present usable staff authentication immediately. Session restoration runs afterwards,
-      // so a slow Auth/network response cannot strand the user on the 3/3 splash screen.
+
+      if (handoff) {
+        // The standalone native login has already authenticated and verified the
+        // staff account. Keep the loading surface visible while the same Auth
+        // session is restored; do not flash the legacy empty login form.
+        const restored = await verifyStoredSession();
+        if (restored) {
+          const params = new URLSearchParams(location.search);
+          params.delete('staff_login');
+          const query = params.toString();
+          history.replaceState(null, '', location.pathname + (query ? '?' + query : '') + location.hash);
+          return;
+        }
+
+        // If this browser did not persist the handoff session, return to the
+        // same native login UI instead of presenting a second, stale login form.
+        const params = new URLSearchParams(location.search);
+        params.delete('staff_login');
+        params.set('handoff', 'failed');
+        location.replace('/staff' + (params.toString() ? '?' + params.toString() : ''));
+        return;
+      }
+
+      // Direct visits still show the Staff OS login immediately, then restore
+      // any valid saved session in the background.
       renderLogin(false);
       const restore = verifyStoredSession();
       const result = await Promise.race([
@@ -1911,6 +1935,13 @@ async function renderCustomers() {
         if (msg) msg.textContent = result.error.message || 'پشکنینی Session سەرکەوتوو نەبوو.';
       }
     } catch(e){
+      if (handoff) {
+        const params = new URLSearchParams(location.search);
+        params.delete('staff_login');
+        params.set('handoff', 'failed');
+        location.replace('/staff' + (params.toString() ? '?' + params.toString() : ''));
+        return;
+      }
       const msg = document.getElementById('loginMsg');
       if (msg) msg.textContent = e.message || 'Supabase ئامادە نییە.';
       else renderLogin(false,e.message);
