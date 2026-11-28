@@ -197,7 +197,13 @@
     if (state.loginAttempted) return false;
     if (aal.data?.nextLevel === 'aal2' && aal.data.currentLevel !== 'aal2') { renderLogin(true); return true; }
     renderApp();
-    await loadTab(requestedStaffTab());
+    try {
+      await loadTab(requestedStaffTab());
+    } catch (loadError) {
+      // Authentication is already valid. A dashboard-data failure must never
+      // send a verified staff member back to the login screen.
+      toast('چوونەژوورەوە سەرکەوتوو بوو، بەڵام بارکردنی داتای داشبۆرد سەرکەوتوو نەبوو: ' + errorText(loadError), 'bad');
+    }
     return true;
   }
 
