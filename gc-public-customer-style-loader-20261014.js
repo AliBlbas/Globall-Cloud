@@ -1,7 +1,7 @@
 /* Globall Cloud public + customer style ordering guard · 2026-10-16
    Final presentation layer. The matching HTML also includes direct stylesheet links;
-   this loader moves public-home overrides after legacy theme layers, watches for late
-   stylesheet injection, and restores the public mobile dock if a runtime removes it.
+   managed CSS links stay in <head> so Safari/WebKit applies them consistently. The loader
+   keeps the override group after late theme styles without moving links into <body>.
    No routes, authentication, business data, or backend logic are changed. */
 (() => {
   'use strict';
