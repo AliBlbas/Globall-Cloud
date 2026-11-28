@@ -77,6 +77,11 @@
   // redirect immediately to its legacy login when a stale browser session existed.
   // Keep the isolated login visible until the user explicitly submits credentials.
   waitForSdk()
-    .then(() => show('ئامادەی چوونەژوورەوە. ئیمەیل و وشەی نهێنی بنووسە.'))
+    .then(() => {
+      const handoffFailed = new URLSearchParams(location.search).get('handoff') === 'failed';
+      show(handoffFailed
+        ? 'چوونەژوورەوە پشتڕاست بوو، بەڵام Session بۆ کۆنسۆڵ نەگەیشت. تکایە جارێکی تر بچۆ ژوورەوە.'
+        : 'ئامادەی چوونەژوورەوە. ئیمەیل و وشەی نهێنی بنووسە.');
+    })
     .catch(error => show(error.message || 'Supabase ئامادە نییە.'));
 })();
