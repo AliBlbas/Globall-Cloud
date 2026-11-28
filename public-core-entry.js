@@ -1,7 +1,7 @@
 /* Globall Cloud — deterministic public-core loader */
 (() => {
   'use strict';
-  const CORE = '/gc-csp-scripts/index-inline-2.js?v=20260913-6';
+  const CORE = '/gc-csp-scripts/index-inline-2.js?v=20261128-public-i18n-null-safe1';
   const MARK = 'data-gc-public-core-entry';
   const CORE_PATH = '/gc-csp-scripts/index-inline-2.js';
 
