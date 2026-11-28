@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '20260913-5';
+  const VERSION = '20261128-public-i18n-null-safe1';
   const CORE = `/gc-csp-scripts/index-inline-2.js?recovery=${VERSION}`;
   let coreLoadStarted = false;
 
