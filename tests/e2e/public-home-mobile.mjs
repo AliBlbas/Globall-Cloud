@@ -39,7 +39,7 @@ for(const engine of [{name:'Chromium',type:chromium},{name:'WebKit',type:webkit}
     release();
     const expected=['Air Freight','Sea Freight','Land Freight'];
     const routePass=expected.every(x=>state.tabs.some(t=>t.title===x))&&state.tabs.every(t=>t.titleVisible&&t.descriptionVisible&&parseFloat(t.titleFont)>=10&&parseFloat(t.descriptionFont)>=9);
-    const cardsPass=state.cards.length>=3&&state.cards.every(c=>c.titleVisible&&c.descriptionVisible);
+    const cardsPass=state.cards.length===2&&state.cards.some(c=>c.title==='هەژماری کڕیار')&&state.cards.some(c=>c.title==='کۆنسۆڵی ستاف')&&state.cards.every(c=>c.titleVisible&&c.descriptionVisible);
     const ok=state.language==='ckb'&&state.direction==='rtl'&&state.homepageVisible&&state.guardLoaded&&routePass&&cardsPass&&state.overflow<=2&&!navigationError&&!pageErrors.length&&!assetErrors.length;
     console.log(JSON.stringify({engine:engine.name,ok,supabaseRequestsPaused:paused,state,navigationError,pageErrors,assetErrors},null,2));
     if(!ok){failures.push(engine.name);try{await page.screenshot({path:`public-home-mobile-failure-${engine.name}.png`,fullPage:true})}catch{}}
