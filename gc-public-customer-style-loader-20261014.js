@@ -38,6 +38,7 @@
     if (!paths.length) return;
     if (paths === homeStyles || paths[0] === homeStyles[0]) ensureHomeDock();
 
+    const activeLinks = [];
     paths.forEach((href, index) => {
       const key = 'gc-public-customer-elite-' + index;
       const pathname = href.split('?')[0];
@@ -56,11 +57,31 @@
       if (link.getAttribute('href') !== href) link.href = href;
       link.dataset.gcPublicCustomerElite = key;
       // Put active overrides after all legacy head styles.
-      if (link.parentNode !== document.body || document.body.lastElementChild !== link) {
+      if (link.parentNode !== document.head) {
         link.remove();
-        document.body.appendChild(link);
+        document.head.appendChild(link);
       }
+      activeLinks.push(link);
     });
+
+    // Keep the managed override stylesheets as one final group in <head>.
+    // Only reorder when another stylesheet has been injected after them.
+    const allStylesheets = [...document.head.querySelectorAll('link[rel="stylesheet"]')];
+    const firstManagedIndex = allStylesheets.findIndex((node) => activeLinks.includes(node));
+    if (firstManagedIndex >= 0) {
+      const foreignStylesheetAfter = allStylesheets.some((node, index) =>
+        index > firstManagedIndex && !activeLinks.includes(node)
+      );
+      if (foreignStylesheetAfter) activeLinks.forEach((link) => document.head.appendChild(link));
+    }
+  }
+
+  function hasForeignStylesheet(node) {
+    if (!node || node.nodeType !== 1) return false;
+    const candidates = [];
+    if (typeof node.matches === 'function' && node.matches('link[rel="stylesheet"]')) candidates.push(node);
+    if (typeof node.querySelectorAll === 'function') candidates.push(...node.querySelectorAll('link[rel="stylesheet"]'));
+    return candidates.some((link) => !link.hasAttribute('data-gc-public-customer-elite'));
   }
 
   function watchLateThemeStyles() {
@@ -68,12 +89,7 @@
     let scheduled = false;
     const observer = new MutationObserver((mutations) => {
       const stylesheetChanged = mutations.some((mutation) =>
-        [...mutation.addedNodes, ...mutation.removedNodes].some((node) =>
-          node.nodeType === 1 && (
-            (typeof node.matches === 'function' && node.matches('link[rel="stylesheet"]')) ||
-            (typeof node.querySelector === 'function' && node.querySelector('link[rel="stylesheet"]'))
-          )
-        )
+        [...mutation.addedNodes, ...mutation.removedNodes].some(hasForeignStylesheet)
       );
       if (!stylesheetChanged || scheduled) return;
       scheduled = true;
