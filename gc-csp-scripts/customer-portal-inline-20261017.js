@@ -1,25 +1,28 @@
-const GC_CUSTOMER_SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
-const GC_CUSTOMER_SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
-const GC_CUSTOMER_SELF_ENDPOINT = `${GC_CUSTOMER_SUPABASE_URL}/functions/v1/customer-self`;
+(() => {
+  'use strict';
+
+const SUPABASE_URL = 'https://ahslifnthiwfkmaswjno.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_M4UtzEbCLwMCd9LanFWw5g_5b7-fWda';
+const CUSTOMER_SELF = `${SUPABASE_URL}/functions/v1/customer-self`;
 // Reuse the production bridge's Auth client whenever it is already available.
 // If this page wins the load race, publish one client so the bridge reuses it.
-const gcCustomerSupabaseClient = window.gcSupabase?.auth
+const sb = window.gcSupabase?.auth
   ? window.gcSupabase
   : window.sb?.auth
     ? window.sb
-    : window.supabase.createClient(GC_CUSTOMER_SUPABASE_URL, GC_CUSTOMER_SUPABASE_KEY, {
+    : window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' },
     });
-window.gcSupabase = gcCustomerSupabaseClient;
-window.sb = gcCustomerSupabaseClient;
+window.gcSupabase = sb;
+window.sb = sb;
 
 const customerApi = async ({ method = 'GET', body } = {}) => {
-  const { data: sessionResult } = await gcCustomerSupabaseClient.auth.getSession();
+  const { data: sessionResult } = await sb.auth.getSession();
   const token = sessionResult.session?.access_token;
   if (!token) throw new Error('تکایە سەرەتا login بکە');
-  const response = await fetch(GC_CUSTOMER_SELF_ENDPOINT, {
+  const response = await fetch(CUSTOMER_SELF, {
     method,
-    headers: { Authorization: `Bearer ${token}`, apikey: GC_CUSTOMER_SUPABASE_KEY, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${token}`, apikey: SUPABASE_KEY, 'Content-Type': 'application/json' },
     body: body ? JSON.stringify(body) : undefined,
     cache: 'no-store',
   });
@@ -79,7 +82,7 @@ const scheduleCustomerRealtimeReload = (payload) => {
 };
 const stopCustomerRealtime = async () => {
   if (customerRealtimeChannel) {
-    try { await gcCustomerSupabaseClient.removeChannel(customerRealtimeChannel); } catch (error) { console.warn('[gc-realtime] channel cleanup', error); }
+    try { await sb.removeChannel(customerRealtimeChannel); } catch (error) { console.warn('[gc-realtime] channel cleanup', error); }
     customerRealtimeChannel = null;
   }
 };
@@ -90,7 +93,7 @@ const subscribeCustomerRealtime = async (userId) => {
   const status = realtimeUi();
   status.className = 'gc-realtime-status is-connecting';
   status.textContent = 'ئاگادارکردنەوە زیندوو دەکرێت…';
-  const channel = gcCustomerSupabaseClient.channel(`gc-customer-notifications-${userId}`);
+  const channel = sb.channel(`gc-customer-notifications-${userId}`);
   channel.__gcUserId = userId;
   channel.on('postgres_changes', {
     event: '*', schema: 'public', table: 'customer_notifications', filter: `customer_user_id=eq.${userId}`
@@ -406,7 +409,7 @@ const renderShipmentRelated = (shipment, related = {}) => {
 };
 
 const load = async () => {
-  const { data: sessionResult } = await gcCustomerSupabaseClient.auth.getSession();
+  const { data: sessionResult } = await sb.auth.getSession();
   const session = sessionResult.session;
   if (!session) {
     await stopCustomerRealtime();
@@ -449,7 +452,7 @@ const submitQuote = async (event) => {
   const form = event.currentTarget;
   const submitButton = form.querySelector('button[type="submit"]');
   if (submitButton?.disabled) return;
-  const { data: userResult } = await gcCustomerSupabaseClient.auth.getUser();
+  const { data: userResult } = await sb.auth.getUser();
   const user = userResult.user;
   if (!user) { showMessage('تکایە سەرەتا login بکە', 'error'); return; }
   syncQuoteMeasurements();
@@ -505,17 +508,17 @@ const submitQuote = async (event) => {
 const downloadDocument = async (link) => {
   const documentId = link.dataset.documentId;
   if (!documentId) return;
-  const { data: sessionResult } = await gcCustomerSupabaseClient.auth.getSession();
+  const { data: sessionResult } = await sb.auth.getSession();
   const token = sessionResult.session?.access_token;
   if (!token) return;
-  const response = await fetch(`${GC_CUSTOMER_SUPABASE_URL}/functions/v1/document-access?document_id=${encodeURIComponent(documentId)}`, { headers: { Authorization: `Bearer ${token}` } });
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/document-access?document_id=${encodeURIComponent(documentId)}`, { headers: { Authorization: `Bearer ${token}` } });
   const body = await response.json().catch(() => ({}));
   if (response.ok && body.url) { link.href = body.url; return; }
   throw new Error(body.error || 'Document access failed');
 };
 
 const markNotificationRead = async (notificationId) => {
-  const { data: userResult } = await gcCustomerSupabaseClient.auth.getUser();
+  const { data: userResult } = await sb.auth.getUser();
   if (!userResult.user || !notificationId) return;
   try { await customerApi({ method: 'POST', body: { action: 'mark_notification_read', data: { id: notificationId } } }); }
   catch (error) { showMessage(error.message, 'error'); return; }
@@ -523,7 +526,7 @@ const markNotificationRead = async (notificationId) => {
 };
 
 const acceptQuote = async (quoteId) => {
-  const { data: userResult } = await gcCustomerSupabaseClient.auth.getUser();
+  const { data: userResult } = await sb.auth.getUser();
   if (!userResult.user) return;
   try { await customerApi({ method: 'POST', body: { action: 'accept_quote', data: { id: quoteId } } }); }
   catch (error) { showMessage(error.message, 'error'); return; }
@@ -546,12 +549,12 @@ $('authForm').addEventListener('submit', async (event) => {
   msg.textContent = 'چوونەژوورەوە پشتڕاست دەکرێتەوە…';
   try {
     if (identifier.includes('@')) {
-      const result = await gcCustomerSupabaseClient.auth.signInWithPassword({ email: identifier, password });
+      const result = await sb.auth.signInWithPassword({ email: identifier, password });
       if (result.error) throw result.error;
     } else {
-      const response = await fetch(`${GC_CUSTOMER_SUPABASE_URL}/functions/v1/customer-gc-login`, {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/customer-gc-login`, {
         method: 'POST',
-        headers: { apikey: GC_CUSTOMER_SUPABASE_KEY, 'Content-Type': 'application/json' },
+        headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: identifier, gc_code: identifier, password }),
         cache: 'no-store',
       });
@@ -559,7 +562,7 @@ $('authForm').addEventListener('submit', async (event) => {
       if (!response.ok || !payload.session?.access_token || !payload.session?.refresh_token) {
         throw new Error(payload.error || 'چوونەژوورەوە سەرکەوتوو نەبوو.');
       }
-      const sessionResult = await gcCustomerSupabaseClient.auth.setSession({
+      const sessionResult = await sb.auth.setSession({
         access_token: payload.session.access_token,
         refresh_token: payload.session.refresh_token,
       });
@@ -611,7 +614,7 @@ $('authForm').addEventListener('submit', async (event) => {
   }
 });
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !$('auth').classList.contains('hidden')) $('close').click(); });
-$('logoutBtn').addEventListener('click', async () => { await stopCustomerRealtime(); await gcCustomerSupabaseClient.auth.signOut(); location.replace('/#auth'); });
+$('logoutBtn').addEventListener('click', async () => { await stopCustomerRealtime(); await sb.auth.signOut(); location.replace('/#auth'); });
 $('trackBtn')?.addEventListener('click', () => { location.href = '/#shipmentsSection'; });
 $('quoteBtn')?.addEventListener('click', () => { $('quoteForm')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); $('quoteOrigin')?.focus(); });
 $('quoteMode')?.addEventListener('change', syncQuoteMeasurements);
@@ -621,7 +624,7 @@ $('customerChatForm')?.addEventListener('submit', sendCustomerChat);
 $('closeShipmentDetail')?.addEventListener('click', () => $('shipmentDetail')?.classList.add('hidden'));
 document.addEventListener('click', (event) => { const shipmentCard = event.target.closest('[data-shipment-id]'); if (shipmentCard) { const shipment = (window.__customerShipments || []).find((item) => item.id === shipmentCard.dataset.shipmentId); renderShipmentDetail(shipment, window.__customerEvents || [], window.__customerPods || []); renderShipmentRelated(shipment, window.__customerRelated || {}); } });
 document.addEventListener('click', (event) => { const notificationButton = event.target.closest('[data-read-notification]'); if (notificationButton) { notificationButton.disabled = true; markNotificationRead(notificationButton.dataset.readNotification).catch((error) => { notificationButton.disabled = false; showMessage(error.message, 'error'); }); return; } const documentLink = event.target.closest('[data-document-id]'); if (documentLink) { event.preventDefault(); downloadDocument(documentLink).then(() => window.open(documentLink.href, '_blank', 'noopener,noreferrer')).catch((error) => showMessage(error.message, 'error')); return; } const button = event.target.closest('[data-accept-quote]'); if (button) acceptQuote(button.dataset.acceptQuote).catch((error) => showMessage(error.message, 'error')); });
-gcCustomerSupabaseClient.auth.onAuthStateChange(() => window.setTimeout(() => load().catch((error) => showMessage(error.message, 'error')), 100));
+sb.auth.onAuthStateChange(() => window.setTimeout(() => load().catch((error) => showMessage(error.message, 'error')), 100));
 load().catch((error) => {
   console.error(error);
   if (Number(error?.status) === 403) {
@@ -636,3 +639,5 @@ load().catch((error) => {
   $('portalStatus')?.classList.remove('hidden');
   setHtml('notifications', '<div class="alert">هەڵە لە هێنانی داتا؛ تکایە دواتر هەوڵ بدەرەوە.</div>');
 });
+
+})();
