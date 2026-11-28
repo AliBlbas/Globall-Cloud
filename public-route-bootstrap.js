@@ -53,7 +53,7 @@
   addScript(`/public-live-repair-20260914.js?v=${RELEASE}`, 'data-gc-public-live-repair');
 
   // Primary public runtime.
-  addScript('/public-core-entry.js?v=20261128-public-i18n-null-safe1', 'data-gc-public-core-entry-loader');
+  addScript('/public-core-entry.js?v=20261128-public-i18n-null-safe2', 'data-gc-public-core-entry-loader');
   addScript(`/public-staff-guard-20260909.js?v=${RELEASE}`, 'data-gc-public-staff-guard');
   addScript(`/public-production-safety.js?v=${RELEASE}`, 'data-gc-public-production-safety');
   addScript(`/site-navigation-20260909.js?v=${RELEASE}`, 'data-gc-public-navigation');
